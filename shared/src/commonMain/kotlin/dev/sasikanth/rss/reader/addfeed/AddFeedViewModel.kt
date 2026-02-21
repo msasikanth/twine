@@ -26,12 +26,14 @@ import dev.sasikanth.rss.reader.data.repository.FeedAddResult
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.logging.CrashReporter
-import dev.sasikanth.rss.reader.utils.InAppRating
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
@@ -40,12 +42,14 @@ import me.tatarka.inject.annotations.Inject
 class AddFeedViewModel(
   private val rssRepository: RssRepository,
   private val feedFetcher: FeedFetcher,
-  private val inAppRating: InAppRating,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow(AddFeedState.DEFAULT)
   val state: StateFlow<AddFeedState>
     get() = _state
+
+  private val _effects = MutableSharedFlow<AddFeedEffect>()
+  val effects: SharedFlow<AddFeedEffect> = _effects.asSharedFlow()
 
   fun dispatch(event: AddFeedEvent) {
     when (event) {
@@ -115,7 +119,7 @@ class AddFeedViewModel(
             }
 
             _state.update { it.copy(goBack = true) }
-            inAppRating.request()
+            _effects.emit(AddFeedEffect.RequestInAppRating)
           }
         }
       } catch (e: Exception) {
