@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.HorizontalDivider
@@ -122,15 +121,14 @@ import twine.shared.generated.resources.settingsThemeDark
 import twine.shared.generated.resources.settingsThemeLight
 import twine.shared.generated.resources.settingsUpgradeToPremium
 
-private val settingsItemPadding: PaddingValues
+internal val settingsItemHorizontalPadding: Dp
   @Composable
   @ReadOnlyComposable
   get() {
     val sizeClass = LocalWindowSizeClass.current
     return when {
-      sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) ->
-        PaddingValues(horizontal = 128.dp)
-      else -> PaddingValues(0.dp)
+      sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> 128.dp
+      else -> 0.dp
     }
   }
 
@@ -292,13 +290,9 @@ internal fun SettingsScreen(
         modifier = Modifier.fillMaxSize(),
         contentPadding =
           PaddingValues(
-            start =
-              padding.calculateStartPadding(layoutDirection) +
-                settingsItemPadding.calculateStartPadding(layoutDirection),
+            start = padding.calculateStartPadding(layoutDirection) + settingsItemHorizontalPadding,
             top = padding.calculateTopPadding() + 8.dp,
-            end =
-              padding.calculateEndPadding(layoutDirection) +
-                settingsItemPadding.calculateEndPadding(layoutDirection),
+            end = padding.calculateEndPadding(layoutDirection) + settingsItemHorizontalPadding,
             bottom = padding.calculateBottomPadding() + 80.dp,
           ),
       ) {
