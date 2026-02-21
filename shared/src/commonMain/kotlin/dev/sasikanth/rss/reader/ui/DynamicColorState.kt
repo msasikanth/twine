@@ -20,9 +20,7 @@ import androidx.collection.lruCache
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
@@ -35,13 +33,13 @@ import kotlinx.coroutines.withContext
 internal fun rememberDynamicColorState(
   defaultLightAppColorScheme: AppColorValues,
   defaultDarkAppColorScheme: AppColorValues,
-  useTonalSpotScheme: Boolean = true,
+  scheme: TwineDynamicColors.Scheme = TwineDynamicColors.Scheme.TonalSpot,
 ): DynamicColorState {
-  return remember(defaultLightAppColorScheme, defaultDarkAppColorScheme, useTonalSpotScheme) {
+  return remember(defaultLightAppColorScheme, defaultDarkAppColorScheme, scheme) {
     DynamicColorState(
       defaultLightValues = defaultLightAppColorScheme,
       defaultDarkValues = defaultDarkAppColorScheme,
-      useTonalSpotScheme = useTonalSpotScheme,
+      scheme = scheme,
     )
   }
 }
@@ -50,7 +48,7 @@ internal fun rememberDynamicColorState(
 internal class DynamicColorState(
   private val defaultLightValues: AppColorValues,
   private val defaultDarkValues: AppColorValues,
-  private val useTonalSpotScheme: Boolean,
+  private val scheme: TwineDynamicColors.Scheme,
 ) {
   val lightAppColorScheme = AppColorScheme(defaultLightValues)
   val darkAppColorScheme = AppColorScheme(defaultDarkValues)
@@ -86,8 +84,7 @@ internal class DynamicColorState(
             ?: TwineDynamicColors.calculateColorScheme(
                 seedColor = fromSeedColor ?: defaultLightSeedColor,
                 useDarkTheme = false,
-                useTonalSpotScheme = useTonalSpotScheme,
-                defaultColorScheme = defaultLightValues,
+                scheme = scheme,
               )
               .also { cache.put("light_$fromSeedColor", it) }
 
@@ -96,8 +93,7 @@ internal class DynamicColorState(
             ?: TwineDynamicColors.calculateColorScheme(
                 seedColor = fromSeedColor ?: defaultLightSeedColor,
                 useDarkTheme = true,
-                useTonalSpotScheme = useTonalSpotScheme,
-                defaultColorScheme = defaultDarkValues,
+                scheme = scheme,
               )
               .also { cache.put("dark_$fromSeedColor", it) }
 
@@ -106,8 +102,7 @@ internal class DynamicColorState(
             ?: TwineDynamicColors.calculateColorScheme(
                 seedColor = toSeedColor ?: defaultDarkSeedColor,
                 useDarkTheme = false,
-                useTonalSpotScheme = useTonalSpotScheme,
-                defaultColorScheme = defaultLightValues,
+                scheme = scheme,
               )
               .also { cache.put("light_$toSeedColor", it) }
 
@@ -116,8 +111,7 @@ internal class DynamicColorState(
             ?: TwineDynamicColors.calculateColorScheme(
                 seedColor = toSeedColor ?: defaultDarkSeedColor,
                 useDarkTheme = true,
-                useTonalSpotScheme = useTonalSpotScheme,
-                defaultColorScheme = defaultDarkValues,
+                scheme = scheme,
               )
               .also { cache.put("dark_$toSeedColor", it) }
       }
