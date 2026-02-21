@@ -40,7 +40,6 @@ import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.home.ui.PostListKey
 import dev.sasikanth.rss.reader.posts.AllPostsPager
-import dev.sasikanth.rss.reader.utils.InAppRating
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
@@ -49,6 +48,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -71,7 +71,6 @@ class HomeViewModel(
   private val settingsRepository: SettingsRepository,
   private val allPostsPager: AllPostsPager,
   private val syncCoordinator: SyncCoordinator,
-  private val inAppRating: InAppRating,
   private val observableSelectedPost: ObservableSelectedPost,
 ) : ViewModel() {
 
@@ -79,6 +78,9 @@ class HomeViewModel(
   private val _state = MutableStateFlow(defaultState)
   val state: StateFlow<HomeState>
     get() = _state
+
+  private val _effects = MutableSharedFlow<HomeEffect>()
+  val effects: SharedFlow<HomeEffect> = _effects.asSharedFlow()
 
   private val _openPost = MutableSharedFlow<Pair<Int, ResolvedPost>>()
   val openPost: SharedFlow<Pair<Int, ResolvedPost>>
@@ -335,7 +337,7 @@ class HomeViewModel(
     viewModelScope.launch {
       _state.update { it.copy(unreadSinceLastSync = null) }
       refreshPolicy.updateLastRefreshedAt()
-      inAppRating.request()
+      _effects.emit(HomeEffect.RequestInAppRating)
     }
   }
 

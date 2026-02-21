@@ -151,7 +151,7 @@ internal fun FeedsBottomSheet(
                   .graphicsLayer { alpha = (bottomSheetProgress() * 5f).inverse() },
               pinnedSources = state.pinnedSources,
               activeSource = state.activeSource,
-              isParentThemeDark = isParentThemeDark,
+              bottomSheetBackground = collapsedSheetBackgroundColor,
               canShowUnreadPostsCount = state.canShowUnreadPostsCount,
               onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
               onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },

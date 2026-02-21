@@ -94,20 +94,18 @@ internal fun PostsList(
     contentPadding =
       PaddingValues(top = topContentPadding, bottom = BOTTOM_SHEET_PEEK_HEIGHT + 120.dp),
   ) {
-    if (featuredPosts.isNotEmpty()) {
-      item(key = "featured_items", contentType = "featured_items") {
-        FeaturedSection(
-          paddingValues = paddingValues,
-          featuredPosts = featuredPosts,
-          pagerState = featuredPostsPagerState,
-          markFeaturedPostAsReadOnScroll = markFeaturedPostAsReadOnScroll,
-          onItemClick = { post, _ -> onFeaturedPostClicked(post) },
-          onPostBookmarkClick = onPostBookmarkClick,
-          onPostCommentsClick = onPostCommentsClick,
-          onPostSourceClick = onPostSourceClick,
-          updateReadStatus = updateReadStatus,
-        )
-      }
+    item(key = "featured_items", contentType = "featured_items") {
+      FeaturedSection(
+        paddingValues = paddingValues,
+        featuredPosts = featuredPosts,
+        pagerState = featuredPostsPagerState,
+        markFeaturedPostAsReadOnScroll = markFeaturedPostAsReadOnScroll,
+        onItemClick = { post, _ -> onFeaturedPostClicked(post) },
+        onPostBookmarkClick = onPostBookmarkClick,
+        onPostCommentsClick = onPostCommentsClick,
+        onPostSourceClick = onPostSourceClick,
+        updateReadStatus = updateReadStatus,
+      )
     }
 
     val posts = posts.invoke()

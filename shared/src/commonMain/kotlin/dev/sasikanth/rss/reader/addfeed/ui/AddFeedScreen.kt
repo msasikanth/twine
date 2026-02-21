@@ -77,6 +77,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.sasikanth.rss.reader.addfeed.AddFeedEffect
 import dev.sasikanth.rss.reader.addfeed.AddFeedErrorType
 import dev.sasikanth.rss.reader.addfeed.AddFeedEvent
 import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
@@ -94,6 +95,7 @@ import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.Newsstand
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.LocalInAppRating
 import dev.sasikanth.rss.reader.utils.ignoreHorizontalParentPadding
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
@@ -126,6 +128,15 @@ fun AddFeedScreen(
   val state by viewModel.state.collectAsStateWithLifecycle()
   val snackbarHostState = remember { SnackbarHostState() }
   val (feedLinkFocus, feedTitleFocus) = remember { FocusRequester.createRefs() }
+  val inAppRating = LocalInAppRating.current
+
+  LaunchedEffect(Unit) {
+    viewModel.effects.collect { effect ->
+      when (effect) {
+        AddFeedEffect.RequestInAppRating -> inAppRating.request()
+      }
+    }
+  }
 
   LaunchedEffect(state.error, state.goBack) {
     feedLinkFocus.requestFocus()

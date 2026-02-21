@@ -99,6 +99,7 @@ import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.feeds.ui.sheet.BOTTOM_SHEET_PEEK_HEIGHT
 import dev.sasikanth.rss.reader.feeds.ui.sheet.FeedsBottomSheet
+import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeState
 import dev.sasikanth.rss.reader.home.HomeViewModel
@@ -112,6 +113,7 @@ import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
 import dev.sasikanth.rss.reader.utils.CollectItemTransition
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
+import dev.sasikanth.rss.reader.utils.LocalInAppRating
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.FlowPreview
@@ -148,6 +150,15 @@ internal fun HomeScreen(
   val dynamicColorState = LocalDynamicColorState.current
   val sizeClass = LocalWindowSizeClass.current
   val shouldBlockImage = LocalBlockImage.current
+  val inAppRating = LocalInAppRating.current
+
+  LaunchedEffect(Unit) {
+    viewModel.effects.collect { effect ->
+      when (effect) {
+        HomeEffect.RequestInAppRating -> inAppRating.request()
+      }
+    }
+  }
 
   LaunchedEffect(Unit) { viewModel.openPost.collect { (index, post) -> openPost(index, post) } }
 

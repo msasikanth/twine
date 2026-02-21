@@ -29,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.ThemeVariantIconButton
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
+import dev.sasikanth.rss.reader.settings.ui.settingsItemHorizontalPadding
+import dev.sasikanth.rss.reader.utils.ignoreHorizontalParentPadding
 
 @Composable
 internal fun ThemeVariantSettingItem(
@@ -45,7 +47,7 @@ internal fun ThemeVariantSettingItem(
 
   LazyRow(
     state = themeVariantListState,
-    modifier = modifier.fillMaxWidth(),
+    modifier = modifier.fillMaxWidth().ignoreHorizontalParentPadding(settingsItemHorizontalPadding),
     contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
     horizontalArrangement = Arrangement.spacedBy(16.dp),
     verticalAlignment = Alignment.CenterVertically,
