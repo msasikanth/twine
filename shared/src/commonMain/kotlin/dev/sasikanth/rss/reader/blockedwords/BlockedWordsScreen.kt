@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -151,7 +150,7 @@ fun BlockedWordsScreen(
       }
     }
 
-    LazyColumn(modifier = Modifier.padding(innerPadding).fillMaxSize().imePadding()) {
+    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = innerPadding) {
       item { Spacer(Modifier.requiredHeight(16.dp)) }
 
       item {
