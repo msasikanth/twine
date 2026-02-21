@@ -27,6 +27,7 @@ import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.sync.SyncState
@@ -48,6 +49,7 @@ data class HomeState(
   val postsSortOrder: PostsSortOrder,
   val hasUnreadPosts: Boolean,
   val homeViewMode: HomeViewMode,
+  val themeVariant: ThemeVariant,
   val lastRefreshedAt: LocalDateTime?,
   val unreadSinceLastSync: UnreadSinceLastSync?,
   val prevActiveSource: Source?,
@@ -71,6 +73,7 @@ data class HomeState(
         hasUnreadPosts = false,
         lastRefreshedAt = null,
         homeViewMode = HomeViewMode.Default,
+        themeVariant = ThemeVariant.Dynamic,
         unreadSinceLastSync = null,
         prevActiveSource = null,
         activePostIndex = 0,
