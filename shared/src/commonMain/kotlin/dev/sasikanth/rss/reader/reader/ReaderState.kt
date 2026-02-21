@@ -20,7 +20,7 @@ package dev.sasikanth.rss.reader.reader
 import androidx.compose.runtime.Immutable
 import app.cash.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
-import dev.sasikanth.rss.reader.data.repository.ReaderColorScheme
+import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -32,7 +32,7 @@ data class ReaderState(
   val posts: Flow<PagingData<ResolvedPost>>,
   val showReaderCustomisations: Boolean,
   val selectedReaderFont: ReaderFont,
-  val selectedReaderColorScheme: ReaderColorScheme,
+  val selectedThemeVariant: ThemeVariant,
   val readerFontScaleFactor: Float,
   val readerLineHeightScaleFactor: Float,
   val openPaywall: Boolean,
@@ -48,7 +48,7 @@ data class ReaderState(
         posts = emptyFlow(),
         showReaderCustomisations = false,
         selectedReaderFont = ReaderFont.Golos,
-        selectedReaderColorScheme = ReaderColorScheme.Dynamic,
+        selectedThemeVariant = ThemeVariant.Dynamic,
         readerFontScaleFactor = 1f,
         readerLineHeightScaleFactor = 1f,
         openPaywall = false,

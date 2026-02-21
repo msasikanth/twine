@@ -91,7 +91,7 @@ import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
-import dev.sasikanth.rss.reader.data.repository.ReaderColorScheme
+import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
@@ -112,11 +112,11 @@ import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.ui.LoraFontFamily
 import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
 import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
+import dev.sasikanth.rss.reader.ui.getOverriddenColorScheme
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.ui.typography
 import dev.sasikanth.rss.reader.utils.CollectItemTransition
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
-import dev.sasikanth.rss.reader.utils.LocalDynamicColorEnabled
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
@@ -144,7 +144,6 @@ internal fun ReaderScreen(
   val linkHandler = LocalLinkHandler.current
   val seedColorExtractor = LocalSeedColorExtractor.current
   val appDynamicColorState = LocalDynamicColorState.current
-  val dynamicColorEnabled = LocalDynamicColorEnabled.current
   val shouldBlockImage = LocalBlockImage.current
 
   val defaultLight = remember { appDynamicColorState.lightAppColorScheme }
@@ -167,12 +166,12 @@ internal fun ReaderScreen(
 
   pagerState.CollectItemTransition(
     posts.itemCount,
-    state.selectedReaderColorScheme,
+    state.selectedThemeVariant,
     itemProvider = { index ->
       if (shouldBlockImage || posts.itemCount == 0) null else posts.peek(index)
     },
   ) { fromItem, toItem, offset ->
-    if (dynamicColorEnabled && state.selectedReaderColorScheme == ReaderColorScheme.Dynamic) {
+    if (state.selectedThemeVariant == ThemeVariant.Dynamic) {
       val fromSeedColor = seedColorExtractor.calculateSeedColor(url = fromItem?.imageUrl)
       val toSeedColor = seedColorExtractor.calculateSeedColor(url = toItem?.imageUrl)
 
@@ -202,8 +201,8 @@ internal fun ReaderScreen(
 
   val isParentThemeDark = AppTheme.isDark
   val isDarkTheme =
-    remember(state.selectedReaderColorScheme, isParentThemeDark) {
-      state.selectedReaderColorScheme.isDark(isParentThemeDark)
+    remember(state.selectedThemeVariant, isParentThemeDark) {
+      state.selectedThemeVariant.isDark(isParentThemeDark)
     }
 
   LaunchedEffect(isDarkTheme) {
@@ -235,14 +234,14 @@ internal fun ReaderScreen(
   ) {
     val sourceColorScheme = AppTheme.colorScheme
     val overriddenColorScheme =
-      remember(state.selectedReaderColorScheme, isDarkTheme, sourceColorScheme) {
-        state.selectedReaderColorScheme.getOverriddenColorScheme(isDarkTheme)
+      remember(state.selectedThemeVariant, isDarkTheme, sourceColorScheme) {
+        state.selectedThemeVariant.getOverriddenColorScheme(isDarkTheme)
       }
 
     val darkAppColorScheme = appDynamicColorState.darkAppColorScheme
     val overriddenDarkColorScheme =
-      remember(state.selectedReaderColorScheme, darkAppColorScheme) {
-        state.selectedReaderColorScheme.getOverriddenColorScheme(true)
+      remember(state.selectedThemeVariant, darkAppColorScheme) {
+        state.selectedThemeVariant.getOverriddenColorScheme(true)
       }
 
     AppTheme(
@@ -358,7 +357,7 @@ internal fun ReaderScreen(
               loadFullArticle = showFullArticle,
               showReaderCustomisations = state.showReaderCustomisations,
               selectedFont = state.selectedReaderFont,
-              selectedColorScheme = state.selectedReaderColorScheme,
+              selectedThemeVariant = state.selectedThemeVariant,
               fontScaleFactor = state.readerFontScaleFactor,
               fontLineHeightFactor = state.readerLineHeightScaleFactor,
               isSubscribed = state.isSubscribed,
@@ -369,8 +368,8 @@ internal fun ReaderScreen(
               loadFullArticleClick = { pageViewModel.toggleFullArticle() },
               openReaderViewSettings = { viewModel.dispatch(ReaderEvent.ShowReaderCustomisations) },
               onFontChange = { font -> viewModel.dispatch(ReaderEvent.UpdateReaderFont(font)) },
-              onColorSchemeChange = { colorScheme ->
-                viewModel.dispatch(ReaderEvent.UpdateReaderColorScheme(colorScheme))
+              onThemeVariantChange = { themeVariant ->
+                viewModel.dispatch(ReaderEvent.UpdateThemeVariant(themeVariant))
               },
               onFontScaleFactorChange = { fontScaleFactor ->
                 viewModel.dispatch(ReaderEvent.UpdateFontScaleFactor(fontScaleFactor))
@@ -458,7 +457,7 @@ internal fun ReaderScreen(
                 pagerState = pagerState,
                 markdownComponents = markdownComponents,
                 isDarkTheme = isDarkTheme,
-                readerColorScheme = state.selectedReaderColorScheme,
+                themeVariant = state.selectedThemeVariant,
                 onBookmarkClick = {
                   viewModel.dispatch(
                     ReaderEvent.TogglePostBookmark(
@@ -498,7 +497,7 @@ private fun ReaderActionsPanel(
   loadFullArticle: Boolean,
   showReaderCustomisations: Boolean,
   selectedFont: ReaderFont,
-  selectedColorScheme: ReaderColorScheme,
+  selectedThemeVariant: ThemeVariant,
   fontScaleFactor: Float,
   fontLineHeightFactor: Float,
   isSubscribed: Boolean,
@@ -506,7 +505,7 @@ private fun ReaderActionsPanel(
   loadFullArticleClick: () -> Unit,
   openReaderViewSettings: () -> Unit,
   onFontChange: (ReaderFont) -> Unit,
-  onColorSchemeChange: (ReaderColorScheme) -> Unit,
+  onThemeVariantChange: (ThemeVariant) -> Unit,
   onFontScaleFactorChange: (Float) -> Unit,
   onFontLineHeightFactorChange: (Float) -> Unit,
   modifier: Modifier = Modifier,
@@ -584,13 +583,13 @@ private fun ReaderActionsPanel(
             if (targetState) {
               ReaderCustomizationsContent(
                 selectedFont = selectedFont,
-                selectedColorScheme = selectedColorScheme,
+                selectedThemeVariant = selectedThemeVariant,
                 fontScaleFactor = fontScaleFactor,
                 fontLineHeightFactor = fontLineHeightFactor,
                 isSubscribed = isSubscribed,
                 isParentThemeDark = isParentThemeDark,
                 onFontChange = onFontChange,
-                onColorSchemeChange = onColorSchemeChange,
+                onThemeVariantChange = onThemeVariantChange,
                 onFontScaleFactorChange = onFontScaleFactorChange,
                 onFontLineHeightFactorChange = onFontLineHeightFactorChange,
               )

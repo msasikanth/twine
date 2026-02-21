@@ -36,7 +36,6 @@ import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FormatLineSpacing
@@ -56,7 +55,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.data.repository.ReaderColorScheme
+import dev.sasikanth.rss.reader.components.ThemeVariantIconButton
+import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.ComicNeue
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.Golos
@@ -73,7 +73,6 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
 import dev.sasikanth.rss.reader.ui.GoogleSansFontFamily
-import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.ui.LoraFontFamily
 import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
@@ -81,25 +80,19 @@ import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
 import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
-import twine.shared.generated.resources.readerColorSchemeAmber
-import twine.shared.generated.resources.readerColorSchemeDynamic
-import twine.shared.generated.resources.readerColorSchemeForest
-import twine.shared.generated.resources.readerColorSchemeRaspberry
-import twine.shared.generated.resources.readerColorSchemeSkyline
-import twine.shared.generated.resources.readerColorSchemeSolarized
-import twine.shared.generated.resources.readerCustomisationsColorScheme
 import twine.shared.generated.resources.readerCustomisationsTypeface
+import twine.shared.generated.resources.themeVariantColorScheme
 
 @Composable
 internal fun ReaderCustomizationsContent(
   selectedFont: ReaderFont,
-  selectedColorScheme: ReaderColorScheme,
+  selectedThemeVariant: ThemeVariant,
   fontScaleFactor: Float,
   fontLineHeightFactor: Float,
   isSubscribed: Boolean,
   isParentThemeDark: Boolean,
   onFontChange: (ReaderFont) -> Unit,
-  onColorSchemeChange: (ReaderColorScheme) -> Unit,
+  onThemeVariantChange: (ThemeVariant) -> Unit,
   onFontScaleFactorChange: (Float) -> Unit,
   onFontLineHeightFactorChange: (Float) -> Unit,
 ) {
@@ -109,69 +102,24 @@ internal fun ReaderCustomizationsContent(
   ) {
     ColorSchemeHeader()
 
-    val colorSchemeListState =
+    val themeVariantListState =
       rememberLazyListState(
-        initialFirstVisibleItemIndex = ReaderColorScheme.entries.indexOf(selectedColorScheme)
+        initialFirstVisibleItemIndex = ThemeVariant.entries.indexOf(selectedThemeVariant)
       )
 
     LazyRow(
-      state = colorSchemeListState,
-      contentPadding = PaddingValues(start = 28.dp, top = 8.dp, end = 28.dp, bottom = 16.dp),
-      horizontalArrangement = Arrangement.spacedBy(12.dp),
+      state = themeVariantListState,
+      contentPadding = PaddingValues(horizontal = 28.dp, vertical = 8.dp),
+      horizontalArrangement = Arrangement.spacedBy(16.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      items(ReaderColorScheme.entries) { colorScheme ->
-        val appDynamicColorState = LocalDynamicColorState.current
-        val isDark = colorScheme.isDark(isParentThemeDark)
-        val (backgroundColor, contentColor) =
-          when (colorScheme) {
-            ReaderColorScheme.Dynamic -> {
-              val colorSchemeForDynamic =
-                if (isDark) appDynamicColorState.darkAppColorScheme
-                else appDynamicColorState.lightAppColorScheme
-
-              colorSchemeForDynamic.primaryContainer to colorSchemeForDynamic.onPrimaryContainer
-            }
-            ReaderColorScheme.Solarized -> {
-              val solarizedColorScheme = solarizedColorScheme(isDark)
-              solarizedColorScheme.surface to solarizedColorScheme.onSurface
-            }
-            ReaderColorScheme.Forest -> {
-              val forestColorScheme = forestColorScheme(isDark)
-              forestColorScheme.surface to forestColorScheme.onSurface
-            }
-            ReaderColorScheme.Amber -> {
-              val amberColorScheme = amberColorScheme(isDark)
-              amberColorScheme.surface to amberColorScheme.onSurface
-            }
-            ReaderColorScheme.Raspberry -> {
-              val raspberryColorScheme = raspberryColorScheme(isDark)
-              raspberryColorScheme.surface to raspberryColorScheme.onSurface
-            }
-            ReaderColorScheme.Skyline -> {
-              val skylineColorScheme = skylineColorScheme(isDark)
-              skylineColorScheme.surface to skylineColorScheme.onSurface
-            }
-          }
-
-        val label =
-          when (colorScheme) {
-            ReaderColorScheme.Dynamic -> stringResource(Res.string.readerColorSchemeDynamic)
-            ReaderColorScheme.Solarized -> stringResource(Res.string.readerColorSchemeSolarized)
-            ReaderColorScheme.Forest -> stringResource(Res.string.readerColorSchemeForest)
-            ReaderColorScheme.Amber -> stringResource(Res.string.readerColorSchemeAmber)
-            ReaderColorScheme.Raspberry -> stringResource(Res.string.readerColorSchemeRaspberry)
-            ReaderColorScheme.Skyline -> stringResource(Res.string.readerColorSchemeSkyline)
-          }
-
-        ColorSchemeChip(
-          selected = colorScheme == selectedColorScheme,
-          label = label,
-          backgroundColor = backgroundColor,
-          contentColor = contentColor,
-          isPremium = colorScheme.isPremium,
+      items(ThemeVariant.entries) { themeVariant ->
+        ThemeVariantIconButton(
+          themeVariant = themeVariant,
+          selected = themeVariant == selectedThemeVariant,
           isSubscribed = isSubscribed,
-          onClick = { onColorSchemeChange(colorScheme) },
+          useDarkTheme = isParentThemeDark,
+          onClick = { onThemeVariantChange(themeVariant) },
         )
       }
     }
@@ -257,9 +205,9 @@ private fun FontLineHeightStepper(
         Box(
           modifier =
             Modifier.requiredSize(24.dp)
-              .shadow(elevation = 2.dp, shape = CircleShape)
-              .background(AppTheme.colorScheme.inverseSurface, CircleShape)
-              .border(1.dp, AppTheme.colorScheme.secondary, CircleShape)
+              .shadow(elevation = 2.dp, shape = RoundedCornerShape(50))
+              .background(AppTheme.colorScheme.inverseSurface, RoundedCornerShape(50))
+              .border(1.dp, AppTheme.colorScheme.secondary, RoundedCornerShape(50))
         )
       },
       track = {
@@ -311,9 +259,9 @@ private fun FontScaleStepper(
         Box(
           modifier =
             Modifier.requiredSize(24.dp)
-              .shadow(elevation = 2.dp, shape = CircleShape)
-              .background(AppTheme.colorScheme.inverseSurface, CircleShape)
-              .border(1.dp, AppTheme.colorScheme.secondary, CircleShape)
+              .shadow(elevation = 2.dp, shape = RoundedCornerShape(50))
+              .background(AppTheme.colorScheme.inverseSurface, RoundedCornerShape(50))
+              .border(1.dp, AppTheme.colorScheme.secondary, RoundedCornerShape(50))
         )
       },
       track = {
@@ -420,70 +368,11 @@ private fun ColorSchemeHeader() {
     )
 
     Text(
-      text = stringResource(Res.string.readerCustomisationsColorScheme),
+      text = stringResource(Res.string.themeVariantColorScheme),
       style = MaterialTheme.typography.titleMedium,
       color = AppTheme.colorScheme.onSurface,
       modifier = Modifier.padding(16.dp),
     )
-  }
-}
-
-@Composable
-private fun ColorSchemeChip(
-  selected: Boolean,
-  label: String,
-  backgroundColor: Color,
-  contentColor: Color,
-  isPremium: Boolean,
-  isSubscribed: Boolean,
-  modifier: Modifier = Modifier,
-  onClick: () -> Unit,
-) {
-  val chipOuterPadding by animateDpAsState(if (!selected) 4.dp else 0.dp)
-  val chipPadding by animateDpAsState(if (selected) 4.dp else 0.dp)
-
-  Box(
-    modifier =
-      Modifier.then(modifier)
-        .clip(RoundedCornerShape(50))
-        .clickable { onClick() }
-        .padding(vertical = chipOuterPadding)
-        .background(AppTheme.colorScheme.surface, RoundedCornerShape(50))
-        .border(1.dp, AppTheme.colorScheme.secondary, RoundedCornerShape(50))
-        .padding(chipPadding)
-  ) {
-    Row(
-      modifier =
-        Modifier.background(backgroundColor, RoundedCornerShape(50))
-          .padding(horizontal = 20.dp, vertical = 8.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-      Box(
-        modifier =
-          Modifier.requiredSize(16.dp)
-            .background(backgroundColor, CircleShape)
-            .border(1.dp, contentColor.copy(alpha = 0.4f), CircleShape)
-      ) {
-        Text(
-          text = "A",
-          modifier = Modifier.align(Alignment.Center),
-          style = MaterialTheme.typography.labelSmall,
-          color = contentColor,
-        )
-      }
-
-      Text(text = label, color = contentColor)
-
-      if (isPremium && !isSubscribed) {
-        Icon(
-          modifier = Modifier.requiredSize(16.dp),
-          imageVector = TwineIcons.StarShine,
-          contentDescription = null,
-          tint = contentColor,
-        )
-      }
-    }
   }
 }
 
