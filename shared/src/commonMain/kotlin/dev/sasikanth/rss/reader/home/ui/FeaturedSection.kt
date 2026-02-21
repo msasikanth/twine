@@ -98,11 +98,11 @@ internal fun FeaturedSection(
 
   Box(modifier) {
     val contentPadding =
-      remember(systemBarsHorizontalPadding) {
+      remember(systemBarsHorizontalPadding, featuredPosts.isNotEmpty()) {
         PaddingValues(
           start = systemBarsHorizontalPadding + 16.dp,
           end = systemBarsHorizontalPadding + 16.dp,
-          bottom = 24.dp,
+          bottom = if (featuredPosts.isNotEmpty()) 24.dp else 0.dp,
         )
       }
 
