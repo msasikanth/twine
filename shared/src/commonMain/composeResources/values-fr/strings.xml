@@ -262,6 +262,11 @@
   <string name="discoveryAddFeed">Add</string>
   <string name="discoveryAdded">Added</string>
   <string name="discoveryRefresh">Refresh</string>
+  <string name="accountSelectionTitle">Choose your account</string>
+  <string name="accountSelectionSubtitle">Select where you want to store your feeds and bookmarks.</string>
+  <string name="accountSelectionLocal">Local</string>
+  <string name="accountSelectionLocalAccount">On Device</string>
+  <string name="accountSelectionCloudSync">Cloud Sync</string>
   <!-- Plurals -->
   <plurals name="searchResultsCount">
     <item quantity="one">%1$d result</item>
