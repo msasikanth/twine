@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.utils
 
+import androidx.compose.runtime.staticCompositionLocalOf
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 
@@ -41,3 +42,6 @@ interface InAppRating {
     return true
   }
 }
+
+val LocalInAppRating =
+  staticCompositionLocalOf<InAppRating> { error("CompositionLocal LocalInAppRating not present") }

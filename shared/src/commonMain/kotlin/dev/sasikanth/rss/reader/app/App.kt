@@ -89,8 +89,10 @@ import dev.sasikanth.rss.reader.ui.getOverriddenColorScheme
 import dev.sasikanth.rss.reader.ui.lightAppColorScheme
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.utils.ExternalUriHandler
+import dev.sasikanth.rss.reader.utils.InAppRating
 import dev.sasikanth.rss.reader.utils.LocalAmoledSetting
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
+import dev.sasikanth.rss.reader.utils.LocalInAppRating
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlinx.coroutines.flow.launchIn
@@ -114,6 +116,7 @@ fun App(
   audioPlayer: AudioPlayer,
   shareHandler: ShareHandler,
   linkHandler: LinkHandler,
+  inAppRating: InAppRating,
   imageLoader: ImageLoader,
   seedColorExtractor: SeedColorExtractor,
   appViewModel: () -> AppViewModel,
@@ -157,6 +160,7 @@ fun App(
     LocalWindowSizeClass provides windowInfo.windowSizeClass,
     LocalShareHandler provides shareHandler,
     LocalLinkHandler provides linkHandler,
+    LocalInAppRating provides inAppRating,
     LocalDynamicColorState provides dynamicColorState,
     LocalShowFeedFavIconSetting provides appState.showFeedFavIcon,
     LocalSeedColorExtractor provides seedColorExtractor,
@@ -237,7 +241,7 @@ fun App(
       ExternalUriHandler.uri.collect { uri ->
         if (uri != null) {
           if (uri.startsWith("twine://oauth")) {
-            appViewModel.onOAuthRedirect(uri)
+            appViewModel.onOAuthRedirect(uri, linkHandler)
           } else if (uri == "twine://reader/currently-playing") {
             val playingPostId = audioPlayer.playbackState.value.playingPostId
             if (playingPostId != null) {
