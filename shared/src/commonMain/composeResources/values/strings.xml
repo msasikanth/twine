@@ -53,6 +53,14 @@
   <string name="bookmarks">Bookmarks</string>
   <string name="bookmarksPlaceholder">Bookmarked posts will appear here 🔖</string>
   <string name="settings">Settings</string>
+  <string name="settingsAppearanceAndLayout">Appearance &amp; layout</string>
+  <string name="settingsAppearanceAndLayoutSubtitle">Customize how Twine looks</string>
+  <string name="settingsFeaturesAndBehaviors">Features &amp; behaviors</string>
+  <string name="settingsFeaturesAndBehaviorsSubtitle">Customize how Twine works</string>
+  <string name="settingsServicesAndSync">Services &amp; sync</string>
+  <string name="settingsServicesAndSyncSubtitle">Manage RSS services</string>
+  <string name="settingsYourInsights">Your insights</string>
+  <string name="settingsYourInsightsSubtitle">Manage your reading data</string>
   <string name="moreMenuOptions">More menu options</string>
   <string name="settingsHeaderBehaviour">Behavior</string>
   <string name="settingsHeaderOpml" translatable="false">OPML</string>
