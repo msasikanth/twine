@@ -41,7 +41,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 @Composable
 internal fun SettingsNavigationItem(
   title: String,
-  subtitle: String,
+  subtitle: String?,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
   icon: ImageVector = TwineIcons.RSS,
@@ -69,11 +69,14 @@ internal fun SettingsNavigationItem(
           fontWeight = FontWeight.Medium,
           color = AppTheme.colorScheme.onSurface,
         )
-        Text(
-          subtitle,
-          style = MaterialTheme.typography.bodySmall,
-          color = AppTheme.colorScheme.onSurfaceVariant,
-        )
+
+        if (!(subtitle.isNullOrBlank())) {
+          Text(
+            subtitle,
+            style = MaterialTheme.typography.bodySmall,
+            color = AppTheme.colorScheme.onSurfaceVariant,
+          )
+        }
       }
     }
   }
