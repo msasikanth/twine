@@ -284,7 +284,6 @@ fun NavGraphBuilder.mainScreen(
           openServicesSettings = { navController.navigate(Screen.SettingsServices) },
           openDataSettings = { navController.navigate(Screen.SettingsData) },
           openAbout = { navController.navigate(Screen.About) },
-          openPaywall = { navController.navigate(Screen.Paywall) },
           modifier = screenModifier,
         )
       },

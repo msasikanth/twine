@@ -79,7 +79,6 @@ internal fun SettingsScreen(
   openServicesSettings: () -> Unit,
   openDataSettings: () -> Unit,
   openAbout: () -> Unit,
-  openPaywall: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val coroutineScope = rememberCoroutineScope()
