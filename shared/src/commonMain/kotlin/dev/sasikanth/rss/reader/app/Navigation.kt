@@ -76,6 +76,7 @@ import dev.sasikanth.rss.reader.search.SearchViewModel
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
+import dev.sasikanth.rss.reader.settings.ui.SettingsAppInfoScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsAppearanceScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsBehaviorScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsDataScreen
@@ -277,13 +278,12 @@ fun NavGraphBuilder.mainScreen(
         }
 
         SettingsScreen(
-          viewModel = viewModel,
           goBack = goBack,
           openAppearanceSettings = { navController.navigate(Screen.SettingsAppearance) },
           openBehaviorSettings = { navController.navigate(Screen.SettingsBehavior) },
           openServicesSettings = { navController.navigate(Screen.SettingsServices) },
           openDataSettings = { navController.navigate(Screen.SettingsData) },
-          openAbout = { navController.navigate(Screen.About) },
+          openAppInfoSettings = { navController.navigate(Screen.SettingsAppInfo) },
           modifier = screenModifier,
         )
       },
@@ -360,6 +360,20 @@ fun NavGraphBuilder.settingsDataScreen(
       viewModel = viewModel,
       goBack = { navController.popBackStack() },
       openStatistics = { navController.navigate(Screen.Statistics) },
+    )
+  }
+}
+
+fun NavGraphBuilder.settingsAppInfoScreen(
+  settingsViewModel: () -> SettingsViewModel,
+  navController: NavHostController,
+) {
+  composable<Screen.SettingsAppInfo> {
+    val viewModel = viewModel { settingsViewModel() }
+    SettingsAppInfoScreen(
+      viewModel = viewModel,
+      goBack = { navController.popBackStack() },
+      openAbout = { navController.navigate(Screen.About) },
     )
   }
 }

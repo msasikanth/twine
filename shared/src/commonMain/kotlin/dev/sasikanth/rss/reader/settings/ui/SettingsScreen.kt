@@ -31,40 +31,31 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.components.CircularIconButton
-import dev.sasikanth.rss.reader.components.SubHeader
-import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Account
 import dev.sasikanth.rss.reader.resources.icons.Appearance
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Behaviors
+import dev.sasikanth.rss.reader.resources.icons.Changelog
 import dev.sasikanth.rss.reader.resources.icons.Sync
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.settings.SettingsViewModel
-import dev.sasikanth.rss.reader.settings.ui.items.AboutItem
-import dev.sasikanth.rss.reader.settings.ui.items.ReportIssueSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.SettingsNavigationItem
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.Constants
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.settings
+import twine.shared.generated.resources.settingsAppInfoAndFeedback
 import twine.shared.generated.resources.settingsAppearanceAndLayout
 import twine.shared.generated.resources.settingsAppearanceAndLayoutSubtitle
 import twine.shared.generated.resources.settingsFeaturesAndBehaviors
 import twine.shared.generated.resources.settingsFeaturesAndBehaviorsSubtitle
-import twine.shared.generated.resources.settingsHeaderFeedback
 import twine.shared.generated.resources.settingsServicesAndSync
 import twine.shared.generated.resources.settingsServicesAndSyncSubtitle
 import twine.shared.generated.resources.settingsYourInsights
@@ -72,19 +63,15 @@ import twine.shared.generated.resources.settingsYourInsightsSubtitle
 
 @Composable
 internal fun SettingsScreen(
-  viewModel: SettingsViewModel,
   goBack: () -> Unit,
   openAppearanceSettings: () -> Unit,
   openBehaviorSettings: () -> Unit,
   openServicesSettings: () -> Unit,
   openDataSettings: () -> Unit,
-  openAbout: () -> Unit,
+  openAppInfoSettings: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val coroutineScope = rememberCoroutineScope()
-  val state by viewModel.state.collectAsStateWithLifecycle()
   val layoutDirection = LocalLayoutDirection.current
-  val linkHandler = LocalLinkHandler.current
 
   Scaffold(
     modifier = modifier,
@@ -174,26 +161,14 @@ internal fun SettingsScreen(
           )
         }
 
-        item { SettingsDivider() }
-
-        // region Feedback and about
-        item { SubHeader(text = stringResource(Res.string.settingsHeaderFeedback)) }
-
         item {
-          ReportIssueSettingItem(
-            appInfo = state.appInfo,
-            onClick = {
-              coroutineScope.launch { linkHandler.openLink(Constants.REPORT_ISSUE_LINK) }
-            },
+          SettingsNavigationItem(
+            title = stringResource(Res.string.settingsAppInfoAndFeedback),
+            subtitle = null,
+            icon = TwineIcons.Changelog,
+            onClick = openAppInfoSettings,
           )
         }
-
-        item { SettingsDivider() }
-
-        item { AboutItem { openAbout() } }
-
-        item { SettingsDivider() }
-        // endregion
       }
     },
     containerColor = AppTheme.colorScheme.backdrop,
