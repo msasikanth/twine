@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.resources.icons.RSS
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -64,12 +65,13 @@ internal fun SettingsNavigationItem(
       Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
         Text(
           title,
-          style = MaterialTheme.typography.titleMedium,
+          style = MaterialTheme.typography.titleSmall,
+          fontWeight = FontWeight.Medium,
           color = AppTheme.colorScheme.onSurface,
         )
         Text(
           subtitle,
-          style = MaterialTheme.typography.labelLarge,
+          style = MaterialTheme.typography.bodySmall,
           color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
