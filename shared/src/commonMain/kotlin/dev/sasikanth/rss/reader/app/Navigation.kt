@@ -23,9 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.dialog
 import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
@@ -184,6 +186,9 @@ fun NavGraphBuilder.mainScreen(
     val triggerSync = it.toRoute<Screen.Main>().triggerSync
     val feedsViewModel = viewModel { feedsViewModel() }
 
+    val currentEntry by navController.currentBackStackEntryAsState()
+    val isMainActive = currentEntry?.destination?.hasRoute(Screen.Main::class) ?: false
+
     LaunchedEffect(useDarkTheme) {
       toggleLightStatusBar(!useDarkTheme)
       toggleLightNavBar(!useDarkTheme)
@@ -302,6 +307,7 @@ fun NavGraphBuilder.mainScreen(
       openGroupSelectionSheet = { feedsViewModel.dispatch(FeedsEvent.OnAddToGroupClicked) },
       openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
       openPaywall = { navController.navigate(Screen.Paywall) },
+      canHandleBack = isMainActive,
     )
   }
 }

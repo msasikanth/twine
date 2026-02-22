@@ -121,6 +121,7 @@ internal fun HomeScreen(
   openPost: (Int, ResolvedPost) -> Unit,
   onMenuClicked: (() -> Unit)? = null,
   modifier: Modifier = Modifier,
+  canHandleBack: Boolean = true,
 ) {
   val coroutineScope = rememberCoroutineScope()
   val state by viewModel.state.collectAsStateWithLifecycle()
