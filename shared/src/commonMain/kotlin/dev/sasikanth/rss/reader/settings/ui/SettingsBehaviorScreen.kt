@@ -61,6 +61,7 @@ import dev.sasikanth.rss.reader.settings.ui.items.NotificationsSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.OpmlFeedSelectionSheet
 import dev.sasikanth.rss.reader.settings.ui.items.PostsDeletionPeriodSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.ShowFeedFavIconSettingItem
+import dev.sasikanth.rss.reader.settings.ui.items.ShowPinnedSourcesSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.ShowReaderViewSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.UnreadPostsCountSettingItem
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -212,6 +213,17 @@ internal fun SettingsBehaviorScreen(
             showUnreadCountEnabled = state.showUnreadPostsCount,
             onValueChanged = { newValue ->
               viewModel.dispatch(SettingsEvent.ToggleShowUnreadPostsCount(newValue))
+            },
+          )
+        }
+
+        item { SettingsDivider(24.dp) }
+
+        item {
+          ShowPinnedSourcesSettingItem(
+            showPinnedSources = state.showPinnedSources,
+            onValueChanged = { newValue ->
+              viewModel.dispatch(SettingsEvent.ToggleShowPinnedSources(newValue))
             },
           )
         }

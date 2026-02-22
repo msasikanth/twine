@@ -76,7 +76,11 @@ import dev.sasikanth.rss.reader.search.SearchViewModel
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
+import dev.sasikanth.rss.reader.settings.ui.SettingsAppearanceScreen
+import dev.sasikanth.rss.reader.settings.ui.SettingsBehaviorScreen
+import dev.sasikanth.rss.reader.settings.ui.SettingsDataScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
+import dev.sasikanth.rss.reader.settings.ui.SettingsServicesScreen
 import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
 import dev.sasikanth.rss.reader.statistics.ui.StatisticsScreen
 import kotlin.reflect.typeOf
@@ -275,12 +279,12 @@ fun NavGraphBuilder.mainScreen(
         SettingsScreen(
           viewModel = viewModel,
           goBack = goBack,
+          openAppearanceSettings = { navController.navigate(Screen.SettingsAppearance) },
+          openBehaviorSettings = { navController.navigate(Screen.SettingsBehavior) },
+          openServicesSettings = { navController.navigate(Screen.SettingsServices) },
+          openDataSettings = { navController.navigate(Screen.SettingsData) },
           openAbout = { navController.navigate(Screen.About) },
-          openStatistics = { navController.navigate(Screen.Statistics) },
-          openBlockedWords = { navController.navigate(Screen.BlockedWords) },
           openPaywall = { navController.navigate(Screen.Paywall) },
-          openFreshRssLogin = { navController.navigate(Screen.FreshRssLogin) },
-          openMinifluxLogin = { navController.navigate(Screen.MinifluxLogin) },
           modifier = screenModifier,
         )
       },
@@ -299,6 +303,64 @@ fun NavGraphBuilder.mainScreen(
       openGroupSelectionSheet = { feedsViewModel.dispatch(FeedsEvent.OnAddToGroupClicked) },
       openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
       openPaywall = { navController.navigate(Screen.Paywall) },
+    )
+  }
+}
+
+fun NavGraphBuilder.settingsAppearanceScreen(
+  settingsViewModel: () -> SettingsViewModel,
+  navController: NavHostController,
+) {
+  composable<Screen.SettingsAppearance> {
+    val viewModel = viewModel { settingsViewModel() }
+    SettingsAppearanceScreen(
+      viewModel = viewModel,
+      goBack = { navController.popBackStack() },
+      openPaywall = { navController.navigate(Screen.Paywall) },
+    )
+  }
+}
+
+fun NavGraphBuilder.settingsBehaviorScreen(
+  settingsViewModel: () -> SettingsViewModel,
+  navController: NavHostController,
+) {
+  composable<Screen.SettingsBehavior> {
+    val viewModel = viewModel { settingsViewModel() }
+    SettingsBehaviorScreen(
+      viewModel = viewModel,
+      goBack = { navController.popBackStack() },
+      openBlockedWords = { navController.navigate(Screen.BlockedWords) },
+    )
+  }
+}
+
+fun NavGraphBuilder.settingsServicesScreen(
+  settingsViewModel: () -> SettingsViewModel,
+  navController: NavHostController,
+) {
+  composable<Screen.SettingsServices> {
+    val viewModel = viewModel { settingsViewModel() }
+    SettingsServicesScreen(
+      viewModel = viewModel,
+      goBack = { navController.popBackStack() },
+      openPaywall = { navController.navigate(Screen.Paywall) },
+      openFreshRssLogin = { navController.navigate(Screen.FreshRssLogin) },
+      openMinifluxLogin = { navController.navigate(Screen.MinifluxLogin) },
+    )
+  }
+}
+
+fun NavGraphBuilder.settingsDataScreen(
+  settingsViewModel: () -> SettingsViewModel,
+  navController: NavHostController,
+) {
+  composable<Screen.SettingsData> {
+    val viewModel = viewModel { settingsViewModel() }
+    SettingsDataScreen(
+      viewModel = viewModel,
+      goBack = { navController.popBackStack() },
+      openStatistics = { navController.navigate(Screen.Statistics) },
     )
   }
 }

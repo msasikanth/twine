@@ -381,6 +381,17 @@ fun App(
           navController = navController,
         )
 
+        settingsAppearanceScreen(
+          settingsViewModel = settingsViewModel,
+          navController = navController,
+        )
+
+        settingsBehaviorScreen(settingsViewModel = settingsViewModel, navController = navController)
+
+        settingsServicesScreen(settingsViewModel = settingsViewModel, navController = navController)
+
+        settingsDataScreen(settingsViewModel = settingsViewModel, navController = navController)
+
         feedInfoDialog(feedViewModel = feedViewModel, navController = navController)
 
         groupSelectionDialog(
