@@ -16,24 +16,16 @@
  */
 package dev.sasikanth.rss.reader.settings.ui
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -41,11 +33,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.sasikanth.rss.reader.components.CircularIconButton
+import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
-import dev.sasikanth.rss.reader.resources.icons.ArrowBack
-import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.items.CloudSyncSettingItem
@@ -54,7 +44,6 @@ import dev.sasikanth.rss.reader.settings.ui.items.OpmlFeedSelectionSheet
 import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
-import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.settingsServicesAndSync
 
 @Composable
@@ -91,38 +80,10 @@ internal fun SettingsServicesScreen(
   Scaffold(
     modifier = modifier,
     topBar = {
-      Box {
-        CenterAlignedTopAppBar(
-          title = {
-            Text(
-              stringResource(Res.string.settingsServicesAndSync),
-              color = AppTheme.colorScheme.onSurface,
-              style = MaterialTheme.typography.titleMedium,
-            )
-          },
-          navigationIcon = {
-            CircularIconButton(
-              modifier = Modifier.padding(start = 12.dp),
-              icon = TwineIcons.ArrowBack,
-              label = stringResource(Res.string.buttonGoBack),
-              onClick = goBack,
-            )
-          },
-          contentPadding = PaddingValues(vertical = 8.dp),
-          colors =
-            TopAppBarDefaults.topAppBarColors(
-              containerColor = AppTheme.colorScheme.surface,
-              navigationIconContentColor = AppTheme.colorScheme.onSurface,
-              titleContentColor = AppTheme.colorScheme.onSurface,
-              actionIconContentColor = AppTheme.colorScheme.onSurface,
-            ),
-        )
-
-        HorizontalDivider(
-          modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-          color = AppTheme.colorScheme.outlineVariant,
-        )
-      }
+      SimpleTopAppBar(
+        title = stringResource(Res.string.settingsServicesAndSync),
+        onBackClick = goBack,
+      )
     },
     content = { padding ->
       if (state.opmlFeedsToSelect != null) {

@@ -38,13 +38,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,17 +49,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.components.CircularIconButton
+import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.FeedReadCount
 import dev.sasikanth.rss.reader.core.model.local.ReadingTrend
-import dev.sasikanth.rss.reader.resources.icons.ArrowBack
-import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.formatReadingTrendDate
@@ -76,7 +72,6 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
-import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.statistics
 import twine.shared.generated.resources.statisticsLess
 import twine.shared.generated.resources.statisticsMore
@@ -97,39 +92,10 @@ fun StatisticsScreen(
   Scaffold(
     modifier = modifier,
     topBar = {
-      Box {
-        CenterAlignedTopAppBar(
-          title = {
-            Text(
-              text = stringResource(Res.string.statistics),
-              color = AppTheme.colorScheme.onSurface,
-              style = MaterialTheme.typography.titleMedium,
-            )
-          },
-          navigationIcon = {
-            CircularIconButton(
-              modifier = Modifier.padding(start = 12.dp),
-              icon = TwineIcons.ArrowBack,
-              label = stringResource(Res.string.buttonGoBack),
-              onClick = goBack,
-            )
-          },
-          colors =
-            TopAppBarDefaults.topAppBarColors(
-              containerColor = AppTheme.colorScheme.surface,
-              navigationIconContentColor = AppTheme.colorScheme.onSurface,
-              titleContentColor = AppTheme.colorScheme.onSurface,
-              actionIconContentColor = AppTheme.colorScheme.onSurface,
-            ),
-        )
-
-        HorizontalDivider(
-          modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-          color = AppTheme.colorScheme.outlineVariant,
-        )
-      }
+      SimpleTopAppBar(title = stringResource(Res.string.statistics), onBackClick = goBack)
     },
     containerColor = AppTheme.colorScheme.backdrop,
+    contentColor = Color.Unspecified,
   ) { padding ->
     if (state.isLoading) {
       Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {

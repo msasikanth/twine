@@ -16,31 +16,21 @@
  */
 package dev.sasikanth.rss.reader.settings.ui
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.components.CircularIconButton
+import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.resources.icons.Account
 import dev.sasikanth.rss.reader.resources.icons.Appearance
-import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Behaviors
 import dev.sasikanth.rss.reader.resources.icons.Changelog
 import dev.sasikanth.rss.reader.resources.icons.Sync
@@ -49,7 +39,6 @@ import dev.sasikanth.rss.reader.settings.ui.items.SettingsNavigationItem
 import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
-import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.settings
 import twine.shared.generated.resources.settingsAppInfoAndFeedback
 import twine.shared.generated.resources.settingsAppearanceAndLayout
@@ -75,45 +64,7 @@ internal fun SettingsScreen(
 
   Scaffold(
     modifier = modifier,
-    topBar = {
-      Box {
-        TopAppBar(
-          title = {
-            Text(
-              modifier = Modifier.padding(start = 12.dp),
-              text = stringResource(Res.string.settings),
-              color = AppTheme.colorScheme.onSurface,
-              style = MaterialTheme.typography.titleLarge,
-              fontWeight = FontWeight.SemiBold,
-            )
-          },
-          navigationIcon = {
-            CircularIconButton(
-              modifier = Modifier.padding(start = 12.dp),
-              icon = TwineIcons.ArrowBack,
-              label = stringResource(Res.string.buttonGoBack),
-              backgroundColor = AppTheme.colorScheme.inverseSurface,
-              borderColor = AppTheme.colorScheme.inverseSurface,
-              contentColor = AppTheme.colorScheme.inverseOnSurface,
-              onClick = goBack,
-            )
-          },
-          contentPadding = PaddingValues(vertical = 8.dp),
-          colors =
-            TopAppBarDefaults.topAppBarColors(
-              containerColor = AppTheme.colorScheme.surfaceContainerHigh,
-              navigationIconContentColor = AppTheme.colorScheme.onSurface,
-              titleContentColor = AppTheme.colorScheme.onSurface,
-              actionIconContentColor = AppTheme.colorScheme.onSurface,
-            ),
-        )
-
-        HorizontalDivider(
-          modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-          color = AppTheme.colorScheme.outlineVariant,
-        )
-      }
-    },
+    topBar = { SimpleTopAppBar(title = stringResource(Res.string.settings), onBackClick = goBack) },
     content = { padding ->
       LazyColumn(
         modifier = Modifier.fillMaxSize(),
