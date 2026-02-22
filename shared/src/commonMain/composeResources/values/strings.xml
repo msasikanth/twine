@@ -61,6 +61,7 @@
   <string name="settingsServicesAndSyncSubtitle">Manage RSS services</string>
   <string name="settingsYourInsights">Your insights</string>
   <string name="settingsYourInsightsSubtitle">Manage your reading data</string>
+  <string name="settingsAppInfoAndFeedback">App info &amp; feedback</string>
   <string name="moreMenuOptions">More menu options</string>
   <string name="settingsHeaderBehaviour">Behavior</string>
   <string name="settingsHeaderOpml" translatable="false">OPML</string>
