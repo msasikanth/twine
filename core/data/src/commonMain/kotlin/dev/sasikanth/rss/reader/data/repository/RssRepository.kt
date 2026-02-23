@@ -811,15 +811,27 @@ class RssRepository(
     }
   }
 
-  suspend fun toggleFeedPinStatus(feed: Feed) {
+  suspend fun toggleSourcePinStatus(source: Source) {
     val now =
-      if (feed.pinnedAt == null) {
+      if (source.pinnedAt == null) {
         Clock.System.now()
       } else {
         null
       }
+
     withContext(dispatchersProvider.databaseWrite) {
-      feedQueries.updatePinnedAt(pinnedAt = now, id = feed.id, lastUpdatedAt = Clock.System.now())
+      transactionRunner.invoke {
+        feedQueries.updatePinnedAt(
+          pinnedAt = now,
+          id = source.id,
+          lastUpdatedAt = Clock.System.now(),
+        )
+        feedGroupQueries.updatePinnedAt(
+          pinnedAt = now,
+          id = source.id,
+          updatedAt = Clock.System.now(),
+        )
+      }
     }
   }
 

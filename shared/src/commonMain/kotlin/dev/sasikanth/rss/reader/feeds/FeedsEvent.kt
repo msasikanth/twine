@@ -29,7 +29,7 @@ sealed interface FeedsEvent {
 
   data class OnFeedNameUpdated(val newFeedName: String, val feedId: String) : FeedsEvent
 
-  data class OnFeedPinClicked(val feed: Feed) : FeedsEvent
+  data class OnSourcePinClicked(val source: Source) : FeedsEvent
 
   data class SearchQueryChanged(val searchQuery: TextFieldValue) : FeedsEvent
 
