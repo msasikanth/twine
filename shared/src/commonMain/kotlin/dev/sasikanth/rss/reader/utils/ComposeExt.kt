@@ -40,7 +40,33 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.graphics.shapes.Morph
 import co.touchlab.kermit.Logger
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format.MonthNames
+import kotlinx.datetime.format.Padding
+import kotlinx.datetime.format.char
+import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.month_apr
+import twine.shared.generated.resources.month_aug
+import twine.shared.generated.resources.month_dec
+import twine.shared.generated.resources.month_feb
+import twine.shared.generated.resources.month_jan
+import twine.shared.generated.resources.month_jul
+import twine.shared.generated.resources.month_jun
+import twine.shared.generated.resources.month_mar
+import twine.shared.generated.resources.month_may
+import twine.shared.generated.resources.month_nov
+import twine.shared.generated.resources.month_oct
+import twine.shared.generated.resources.month_sep
+import twine.shared.generated.resources.unit_days
+import twine.shared.generated.resources.unit_hours
+import twine.shared.generated.resources.unit_minutes
+import twine.shared.generated.resources.unit_seconds
 
 expect fun String.toClipEntry(): ClipEntry
 
@@ -49,6 +75,48 @@ fun Modifier.ignoreHorizontalParentPadding(horizontal: Dp): Modifier {
     val updatedMaxWidth = constraints.maxWidth + (2 * horizontal.roundToPx())
     val placeable = measurable.measure(constraints.copy(maxWidth = updatedMaxWidth))
     layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+  }
+}
+
+@Composable
+fun Instant.formatRelativeTime(): String {
+  val now = Clock.System.now()
+  val duration = now - this
+  val seconds = duration.inWholeSeconds
+  val days = duration.inWholeDays
+
+  return when {
+    seconds < 60 -> stringResource(Res.string.unit_seconds, seconds)
+    seconds < 3600 -> stringResource(Res.string.unit_minutes, duration.inWholeMinutes)
+    seconds < 86400 -> stringResource(Res.string.unit_hours, duration.inWholeHours)
+    days < 7 -> stringResource(Res.string.unit_days, days)
+    else -> {
+      val monthNames =
+        listOf(
+          stringResource(Res.string.month_jan),
+          stringResource(Res.string.month_feb),
+          stringResource(Res.string.month_mar),
+          stringResource(Res.string.month_apr),
+          stringResource(Res.string.month_may),
+          stringResource(Res.string.month_jun),
+          stringResource(Res.string.month_jul),
+          stringResource(Res.string.month_aug),
+          stringResource(Res.string.month_sep),
+          stringResource(Res.string.month_oct),
+          stringResource(Res.string.month_nov),
+          stringResource(Res.string.month_dec),
+        )
+      val numericDateFormatter =
+        LocalDateTime.Format {
+          day(Padding.ZERO)
+          char(' ')
+          monthName(MonthNames(monthNames))
+          char(' ')
+          yearTwoDigits(baseYear = 1950)
+        }
+
+      numericDateFormatter.format(this.toLocalDateTime(TimeZone.currentSystemDefault()))
+    }
   }
 }
 

@@ -124,6 +124,7 @@ fun IconButton(
   contentDescription: String?,
   modifier: Modifier = Modifier,
   enabled: Boolean = true,
+  size: IconButtonSize = IconButtonSize.Default,
   blendMode: BlendMode = if (AppTheme.isDark) BlendMode.Screen else BlendMode.Multiply,
   onClick: () -> Unit,
 ) {
@@ -132,7 +133,7 @@ fun IconButton(
   Box(
     modifier =
       Modifier.semantics { role = Role.Button }
-        .requiredSize(40.dp)
+        .requiredSize(size.containerSize)
         .graphicsLayer { this.blendMode = blendMode }
         .clip(MaterialTheme.shapes.small)
         .clickable(
@@ -145,7 +146,7 @@ fun IconButton(
     contentAlignment = Alignment.Center,
   ) {
     Icon(
-      modifier = Modifier.requiredSize(20.dp),
+      modifier = Modifier.requiredSize(size.iconSize),
       imageVector = icon,
       contentDescription = contentDescription,
       tint = AppTheme.colorScheme.secondary,
@@ -189,6 +190,7 @@ fun CircularIconButton(
 }
 
 enum class IconButtonSize(val containerSize: Dp, val iconSize: Dp) {
+  Small(containerSize = 32.dp, iconSize = 20.dp),
   Default(containerSize = 40.dp, iconSize = 20.dp),
   Large(containerSize = 56.dp, iconSize = 24.dp),
 }

@@ -110,7 +110,6 @@ internal fun FeaturedSection(
       state = pagerState,
       verticalAlignment = Alignment.Top,
       contentPadding = contentPadding,
-      pageSpacing = 16.dp,
       key = { page ->
         val post = featuredPosts.getOrNull(page)
         post?.let { PostListKey.from(post.resolvedPost).encode() } ?: page
@@ -171,6 +170,10 @@ internal fun FeaturedSection(
 
           FeaturedPostItem(
             item = postWithMetadata,
+            contentAlphaProvider = {
+              val pageOffset = pagerState.getOffsetFractionForPage(page)
+              calculateAlpha(pageOffset)
+            },
             onClick = { onItemClick(postWithMetadata, page) },
             onBookmarkClick = { onPostBookmarkClick(postWithMetadata) },
             onCommentsClick = { onPostCommentsClick(postWithMetadata.commentsLink!!) },
@@ -178,7 +181,9 @@ internal fun FeaturedSection(
             updateReadStatus = { updatedReadStatus ->
               updateReadStatus(postWithMetadata.id, updatedReadStatus)
             },
-            modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
+            modifier =
+              Modifier.padding(top = paddingValues.calculateTopPadding())
+                .padding(horizontal = 6.dp),
             {
               FeaturedImage(
                 modifier =

@@ -337,11 +337,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   }
 
   private fun mapToReaderFont(pref: String?): ReaderFont {
-    if (pref.isNullOrBlank()) return ReaderFont.Golos
+    if (pref.isNullOrBlank()) return ReaderFont.Outfit
     return try {
       ReaderFont.valueOf(pref)
     } catch (e: Exception) {
-      ReaderFont.Golos
+      ReaderFont.Outfit
     }
   }
 
@@ -402,6 +402,7 @@ enum class ReaderFont(val value: String) {
   GoogleSans("Google Sans"),
   Lora("Lora"),
   Merriweather("Merriweather"),
+  Outfit("Outfit"),
 }
 
 val ReaderFont.isPremium: Boolean

@@ -19,8 +19,6 @@ package dev.sasikanth.rss.reader.util
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 
-expect fun Instant.relativeDurationString(): String
-
 expect fun Instant.readerDateTimestamp(): String
 
 expect fun LocalDateTime.homeAppBarTimestamp(): String
