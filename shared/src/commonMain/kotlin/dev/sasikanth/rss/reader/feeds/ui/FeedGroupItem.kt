@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Badge
@@ -50,6 +51,9 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.resources.icons.Pin
+import dev.sasikanth.rss.reader.resources.icons.PinFilled
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import org.jetbrains.compose.resources.pluralStringResource
@@ -68,6 +72,7 @@ internal fun FeedGroupItem(
   onFeedGroupSelected: (FeedGroup) -> Unit,
   onFeedGroupClick: (FeedGroup) -> Unit,
   onOptionsClick: () -> Unit,
+  onPinClick: ((FeedGroup) -> Unit)? = null,
   modifier: Modifier = Modifier,
   dragHandle: (@Composable () -> Unit)? = null,
   interactionSource: MutableInteractionSource? = null,
@@ -165,6 +170,8 @@ internal fun FeedGroupItem(
             modifier = Modifier.align(Alignment.CenterVertically),
           )
         }
+
+        Spacer(Modifier.width(16.dp))
       }
 
       if (isInMultiSelectMode) {
@@ -172,6 +179,18 @@ internal fun FeedGroupItem(
       }
 
       if (!isInMultiSelectMode) {
+        if (onPinClick != null) {
+          val pinIcon = if (feedGroup.pinnedAt != null) TwineIcons.PinFilled else TwineIcons.Pin
+          IconButton(modifier = Modifier.requiredSize(40.dp), onClick = { onPinClick(feedGroup) }) {
+            Icon(
+              modifier = Modifier.requiredSize(20.dp),
+              imageVector = pinIcon,
+              contentDescription = null,
+              tint = AppTheme.colorScheme.secondary,
+            )
+          }
+        }
+
         dragHandle?.invoke()
       }
 
