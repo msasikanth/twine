@@ -35,7 +35,7 @@ import dev.sasikanth.rss.reader.utils.LocalAmoledSetting
 @Composable
 internal fun AppTheme(
   useDarkTheme: Boolean = false,
-  typography: Typography = typography(GolosFontFamily),
+  typography: Typography = typography(OutfitFontFamily),
   overriddenColorScheme: AppColorScheme? = null,
   content: @Composable () -> Unit,
 ) {
