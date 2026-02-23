@@ -40,7 +40,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
@@ -65,6 +64,7 @@ private val featuredItemPadding: PaddingValues
 @Composable
 internal fun FeaturedPostItem(
   item: ResolvedPost,
+  contentAlphaProvider: () -> Float,
   onClick: () -> Unit,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
@@ -95,45 +95,8 @@ internal fun FeaturedPostItem(
 
     Spacer(modifier = Modifier.requiredHeight(8.dp))
 
-    val isDarkTheme = AppTheme.isDark
-    Text(
-      modifier =
-        Modifier.padding(all = 8.dp).graphicsLayer {
-          blendMode =
-            if (isDarkTheme) {
-              BlendMode.Screen
-            } else {
-              BlendMode.Multiply
-            }
-        },
-      text = item.title.ifBlank { item.description },
-      style = titleTextStyle,
-      fontWeight = FontWeight.Bold,
-      color = AppTheme.colorScheme.secondary,
-      maxLines = titleMaxLines,
-      overflow = TextOverflow.Ellipsis,
-      onTextLayout = { textLayoutResult ->
-        val numberOfLines = textLayoutResult.lineCount
-        if (numberOfLines < titleMaxLines) {
-          val lineHeight = with(density) { titleTextStyle.lineHeight.toDp() }
-          descriptionBottomPadding = lineHeight * (titleMaxLines - numberOfLines)
-        }
-      },
-    )
-
-    Text(
-      modifier = Modifier.padding(horizontal = 8.dp),
-      text = item.description,
-      style = MaterialTheme.typography.bodyMedium,
-      color = AppTheme.colorScheme.outline,
-      minLines = 3,
-      maxLines = 3,
-      overflow = TextOverflow.Ellipsis,
-    )
-
-    Spacer(Modifier.requiredHeight(descriptionBottomPadding + 4.dp))
-
     PostActionBar(
+      modifier = Modifier.graphicsLayer { this.alpha = contentAlphaProvider.invoke() },
       feedName = item.feedName,
       feedIcon = item.feedIcon,
       feedHomepageLink = item.feedHomepageLink,
@@ -155,6 +118,46 @@ internal fun FeaturedPostItem(
       onSourceClick = onSourceClick,
     )
 
-    Spacer(modifier = Modifier.height(8.dp))
+    Spacer(Modifier.height(4.dp))
+
+    val isDarkTheme = AppTheme.isDark
+    Text(
+      modifier =
+        Modifier.graphicsLayer {
+          this.alpha = contentAlphaProvider.invoke()
+          blendMode =
+            if (isDarkTheme) {
+              BlendMode.Screen
+            } else {
+              BlendMode.Multiply
+            }
+        },
+      text = item.title.ifBlank { item.description },
+      style = titleTextStyle,
+      color = AppTheme.colorScheme.secondary,
+      maxLines = titleMaxLines,
+      overflow = TextOverflow.Ellipsis,
+      onTextLayout = { textLayoutResult ->
+        val numberOfLines = textLayoutResult.lineCount
+        if (numberOfLines < titleMaxLines) {
+          val lineHeight = with(density) { titleTextStyle.lineHeight.toDp() }
+          descriptionBottomPadding = lineHeight * (titleMaxLines - numberOfLines)
+        }
+      },
+    )
+
+    Spacer(Modifier.height(4.dp))
+
+    Text(
+      modifier = Modifier.graphicsLayer { this.alpha = contentAlphaProvider.invoke() },
+      text = item.description,
+      style = MaterialTheme.typography.bodyMedium,
+      color = AppTheme.colorScheme.outline,
+      minLines = 3,
+      maxLines = 3,
+      overflow = TextOverflow.Ellipsis,
+    )
+
+    Spacer(Modifier.requiredHeight(descriptionBottomPadding + 16.dp))
   }
 }
