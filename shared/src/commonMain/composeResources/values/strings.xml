@@ -257,7 +257,7 @@
   <string name="onboardingGetStarted">Get started</string>
   <string name="onboardingSubtitle">Build your feed</string>
   <string name="onboardingSubtitle2">No algorithm. No ads.\nJust the content you love.</string>
-  <string name="readingTimeEstimate">%1$dM read</string>
+  <string name="readingTimeEstimate">%1$dm read</string>
   <string name="play">Play</string>
   <string name="pause">Pause</string>
   <string name="seek_forward">Seek forward 30 seconds</string>
