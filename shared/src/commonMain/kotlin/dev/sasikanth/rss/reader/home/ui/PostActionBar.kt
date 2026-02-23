@@ -16,9 +16,8 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -28,9 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
@@ -59,11 +56,13 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.IconButton
+import dev.sasikanth.rss.reader.components.IconButtonSize
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
+import dev.sasikanth.rss.reader.resources.icons.MoreHorizFilled
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.Visibility
@@ -107,11 +106,11 @@ internal fun PostActionBar(
   onSourceClick: () -> Unit,
 ) {
   Row(
-    modifier = Modifier.padding(top = 8.dp, bottom = 8.dp).then(modifier),
+    modifier = Modifier.padding(top = 8.dp).then(modifier),
     verticalAlignment = Alignment.CenterVertically,
   ) {
     PostSourcePill(
-      modifier = Modifier.weight(1f).padding(end = 8.dp).clearAndSetSemantics {},
+      modifier = Modifier.widthIn(max = 120.dp).clearAndSetSemantics {},
       feedName = feedName,
       feedIcon = feedIcon,
       feedHomepageLink = feedHomepageLink,
@@ -121,10 +120,18 @@ internal fun PostActionBar(
     )
 
     Text(
-      modifier = Modifier.clearAndSetSemantics {},
-      style = MaterialTheme.typography.labelSmall,
+      modifier = Modifier.padding(horizontal = 8.dp).clearAndSetSemantics {},
+      style = MaterialTheme.typography.labelMedium,
       maxLines = 1,
-      text = postRelativeTimestamp.uppercase(),
+      text = "\u2022",
+      color = AppTheme.colorScheme.outline,
+    )
+
+    Text(
+      modifier = Modifier.clearAndSetSemantics {},
+      style = MaterialTheme.typography.labelMedium,
+      maxLines = 1,
+      text = postRelativeTimestamp,
       color = AppTheme.colorScheme.outline,
       textAlign = TextAlign.Start,
       overflow = TextOverflow.Ellipsis,
@@ -132,8 +139,8 @@ internal fun PostActionBar(
 
     if (postReadingTimeEstimate > 0) {
       Text(
-        modifier = Modifier.padding(horizontal = 4.dp).clearAndSetSemantics {},
-        style = MaterialTheme.typography.labelSmall,
+        modifier = Modifier.padding(horizontal = 8.dp).clearAndSetSemantics {},
+        style = MaterialTheme.typography.labelMedium,
         maxLines = 1,
         text = "\u2022",
         color = AppTheme.colorScheme.outline,
@@ -141,9 +148,9 @@ internal fun PostActionBar(
 
       Text(
         modifier = Modifier.clearAndSetSemantics {},
-        style = MaterialTheme.typography.labelSmall,
+        style = MaterialTheme.typography.labelMedium,
         maxLines = 1,
-        text = stringResource(Res.string.readingTimeEstimate, postReadingTimeEstimate).uppercase(),
+        text = stringResource(Res.string.readingTimeEstimate, postReadingTimeEstimate),
         color = AppTheme.colorScheme.outline,
         textAlign = TextAlign.Start,
         overflow = TextOverflow.Ellipsis,
@@ -151,6 +158,7 @@ internal fun PostActionBar(
     }
 
     PostActions(
+      modifier = Modifier.weight(1f),
       postLink = postLink,
       postBookmarked = postBookmarked,
       postRead = postRead,
@@ -175,50 +183,38 @@ private fun PostSourcePill(
   onSourceClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  Box(modifier = modifier) {
-    val postSourceTextColor =
-      if (config.enablePostSource) {
-        AppTheme.colorScheme.onSurface
-      } else {
-        AppTheme.colorScheme.onSurfaceVariant
-      }
-
-    Row(
-      modifier =
-        Modifier.background(
-            MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
-            RoundedCornerShape(50),
-          )
-          .border(
-            1.dp,
-            MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
-            RoundedCornerShape(50),
-          )
-          .clip(RoundedCornerShape(50))
-          .clickable(onClick = onSourceClick, enabled = config.enablePostSource)
-          .padding(vertical = 6.dp)
-          .padding(start = 8.dp, end = 12.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      FeedIcon(
-        modifier = Modifier.requiredSize(16.dp),
-        icon = feedIcon,
-        homepageLink = feedHomepageLink,
-        showFeedFavIcon = showFeedFavIcon,
-        shape = MaterialTheme.shapes.extraSmall,
-        contentDescription = null,
-      )
-
-      Spacer(Modifier.requiredWidth(6.dp))
-
-      Text(
-        style = MaterialTheme.typography.labelMedium,
-        maxLines = 1,
-        text = feedName,
-        color = postSourceTextColor,
-        overflow = TextOverflow.Ellipsis,
-      )
+  val postSourceTextColor =
+    if (config.enablePostSource) {
+      AppTheme.colorScheme.onSurface
+    } else {
+      AppTheme.colorScheme.onSurfaceVariant
     }
+
+  Row(
+    modifier =
+      modifier
+        .clip(MaterialTheme.shapes.extraSmall)
+        .clickable(onClick = onSourceClick, enabled = config.enablePostSource),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    FeedIcon(
+      modifier = Modifier.requiredSize(16.dp),
+      icon = feedIcon,
+      homepageLink = feedHomepageLink,
+      showFeedFavIcon = showFeedFavIcon,
+      shape = MaterialTheme.shapes.extraSmall,
+      contentDescription = null,
+    )
+
+    Spacer(Modifier.requiredWidth(4.dp))
+
+    Text(
+      style = MaterialTheme.typography.labelMedium,
+      maxLines = 1,
+      text = feedName,
+      color = postSourceTextColor,
+      overflow = TextOverflow.Ellipsis,
+    )
   }
 }
 
@@ -229,18 +225,23 @@ internal fun PostActions(
   postRead: Boolean,
   config: PostMetadataConfig,
   commentsLink: String?,
+  modifier: Modifier = Modifier,
   showDropdown: Boolean = false,
   onDropdownChange: (Boolean) -> Unit = {},
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
   togglePostReadClick: () -> Unit,
 ) {
-  Row(modifier = Modifier.semantics { isTraversalGroup = true }) {
+  Row(
+    modifier = modifier.semantics { isTraversalGroup = true },
+    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
+  ) {
     if (!commentsLink.isNullOrBlank()) {
       val commentsLabel = stringResource(Res.string.comments)
       IconButton(
         icon = TwineIcons.Comments,
         contentDescription = commentsLabel,
+        size = IconButtonSize.Small,
         onClick = onCommentsClick,
       )
     }
@@ -259,6 +260,7 @@ internal fun PostActions(
           TwineIcons.Bookmark
         },
       contentDescription = bookmarkLabel,
+      size = IconButtonSize.Small,
       onClick = onBookmarkClick,
     )
 
@@ -269,8 +271,9 @@ internal fun PostActions(
       val moreMenuOptionsLabel = stringResource(Res.string.moreMenuOptions)
 
       IconButton(
-        icon = Icons.Filled.MoreVert,
+        icon = TwineIcons.MoreHorizFilled,
         contentDescription = moreMenuOptionsLabel,
+        size = IconButtonSize.Small,
         modifier =
           Modifier.onGloballyPositioned { coordinates ->
             buttonHeight = with(density) { coordinates.size.height.toDp() }

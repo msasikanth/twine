@@ -52,7 +52,7 @@ import dev.sasikanth.rss.reader.resources.icons.StarShine
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.settings.SettingsState
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.util.relativeDurationString
+import dev.sasikanth.rss.reader.utils.formatRelativeTime
 import kotlin.time.Instant
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -152,7 +152,7 @@ internal fun CloudSyncSettingItem(
               lastSyncedAt != null &&
               isSignedIn
           ) {
-            statusString += " \u2022 ${lastSyncedAt.relativeDurationString()}"
+            statusString += " \u2022 ${lastSyncedAt.formatRelativeTime()}"
           }
 
           AnimatedVisibility(
