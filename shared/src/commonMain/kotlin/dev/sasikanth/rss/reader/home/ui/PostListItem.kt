@@ -22,7 +22,6 @@ package dev.sasikanth.rss.reader.home.ui
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -30,10 +29,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -60,8 +62,6 @@ import androidx.window.core.layout.WindowSizeClass
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
-import dev.sasikanth.rss.reader.resources.icons.Platform
-import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.relativeDurationString
 import dev.sasikanth.rss.reader.utils.Constants
@@ -111,7 +111,7 @@ internal fun PostListItem(
     )
   var showDropdown by remember { mutableStateOf(false) }
 
-  Column(
+  Row(
     modifier =
       Modifier.then(modifier)
         .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
@@ -119,71 +119,66 @@ internal fun PostListItem(
         .padding(postListPadding)
         .graphicsLayer { this.alpha = alpha }
         .semantics { contentDescription = item.title.ifBlank { item.description } }
+        .padding(horizontal = 24.dp, vertical = 8.dp)
   ) {
-    Row(
-      modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
-      horizontalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-      Column(
-        modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(top = 4.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+    Column(modifier = Modifier.weight(1f)) {
+      Spacer(Modifier.height(8.dp))
+
+      val showImage = !(item.imageUrl.isNullOrBlank())
+
+      Text(
+        modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
+        style = MaterialTheme.typography.titleMedium,
+        text = item.title.ifBlank { item.description },
+        color = AppTheme.colorScheme.onSurface,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+      )
+
+      PostActionBar(
+        modifier = Modifier.padding(end = if (showImage) 12.dp else 0.dp),
+        feedName = item.feedName,
+        feedIcon = item.feedIcon,
+        feedHomepageLink = item.feedHomepageLink,
+        showFeedFavIcon = item.showFeedFavIcon,
+        postRead = readStatus,
+        postRelativeTimestamp = item.date.relativeDurationString(),
+        postLink = item.link,
+        postBookmarked = item.bookmarked,
+        commentsLink = item.commentsLink,
+        postReadingTimeEstimate = item.feedContentReadingTime ?: 0,
+        onBookmarkClick = onPostBookmarkClick,
+        onCommentsClick = onPostCommentsClick,
+        onTogglePostReadClick = {
+          readStatus = !readStatus
+          updatePostReadStatus(readStatus)
+        },
+        showDropdown = showDropdown,
+        onDropdownChange = { showDropdown = it },
+        config = postMetadataConfig,
+        onSourceClick = onPostSourceClick,
+      )
+    }
+
+    item.imageUrl?.let { url ->
+      Box(
+        modifier =
+          Modifier.requiredSizeIn(
+            minHeight = 64.dp,
+            minWidth = 64.dp,
+            maxHeight = 96.dp,
+            maxWidth = 96.dp,
+          ),
+        contentAlignment = Alignment.Center,
       ) {
-        Text(
-          style = MaterialTheme.typography.titleMedium,
-          text = item.title.ifBlank { item.description },
-          color = AppTheme.colorScheme.onSurface,
-          maxLines = 3,
-          overflow = TextOverflow.Ellipsis,
-        )
-
-        if (platform is Platform.Desktop) {
-          Text(
-            text = item.description,
-            style = MaterialTheme.typography.bodyMedium,
-            color = AppTheme.colorScheme.outline,
-            minLines = 3,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
-          )
-        }
-      }
-
-      item.imageUrl?.let { url ->
         AsyncImage(
           url = url,
-          modifier =
-            Modifier.requiredSize(width = 120.dp, height = 68.dp)
-              .clip(RoundedCornerShape(16.dp))
-              .align(Alignment.CenterVertically),
+          modifier = Modifier.padding(vertical = 8.dp).aspectRatio(1f).clip(RoundedCornerShape(25)),
           contentDescription = null,
           contentScale = ContentScale.Crop,
         )
       }
     }
-
-    PostActionBar(
-      feedName = item.feedName,
-      feedIcon = item.feedIcon,
-      feedHomepageLink = item.feedHomepageLink,
-      showFeedFavIcon = item.showFeedFavIcon,
-      postRead = readStatus,
-      postRelativeTimestamp = item.date.relativeDurationString(),
-      postLink = item.link,
-      postBookmarked = item.bookmarked,
-      commentsLink = item.commentsLink,
-      postReadingTimeEstimate = item.feedContentReadingTime ?: 0,
-      onBookmarkClick = onPostBookmarkClick,
-      onCommentsClick = onPostCommentsClick,
-      onTogglePostReadClick = {
-        readStatus = !readStatus
-        updatePostReadStatus(readStatus)
-      },
-      modifier = Modifier.padding(horizontal = 16.dp),
-      showDropdown = showDropdown,
-      onDropdownChange = { showDropdown = it },
-      config = postMetadataConfig,
-      onSourceClick = onPostSourceClick,
-    )
   }
 }
 
