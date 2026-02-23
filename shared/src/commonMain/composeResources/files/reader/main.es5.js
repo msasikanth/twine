@@ -336,6 +336,34 @@ function parseReaderContent(link, bannerImage, html) {
           }
         });
 
+        turndownService.addRule("image", {
+          filter: "img",
+          replacement: function(content, node) {
+            var alt = node.alt || "";
+            var src = node.getAttribute("src") || node.getAttribute("data-src") || "";
+            if (!src) return "";
+            var title = node.title || "";
+            var titlePart = title ? ' "' + title + '"' : "";
+            var markdown = "![" + alt + "](" + src + titlePart + ")";
+
+            if (node.parentNode && node.parentNode.nodeName !== "A") {
+              return "\n\n" + markdown + "\n\n";
+            }
+            return markdown;
+          }
+        });
+
+        turndownService.addRule("linked-image", {
+          filter: function(node) {
+            return node.nodeName === "A" && node.querySelector("img");
+          },
+          replacement: function(content, node) {
+            var href = node.getAttribute("href");
+            if (!href) return content;
+            return "\n\n[" + content + "](" + href + ")\n\n";
+          }
+        });
+
         if (isXkcdUrl(link)) {
           var markdown = turndownService.turndown(doc.body.innerHTML);
           resolve({ content: getImageCaption(markdown), excerpt: null });
