@@ -63,9 +63,9 @@ import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.util.relativeDurationString
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
+import dev.sasikanth.rss.reader.utils.formatRelativeTime
 
 private val postListPadding: PaddingValues
   @Composable
@@ -142,7 +142,7 @@ internal fun PostListItem(
         feedHomepageLink = item.feedHomepageLink,
         showFeedFavIcon = item.showFeedFavIcon,
         postRead = readStatus,
-        postRelativeTimestamp = item.date.relativeDurationString(),
+        postRelativeTimestamp = item.date.formatRelativeTime(),
         postLink = item.link,
         postBookmarked = item.bookmarked,
         commentsLink = item.commentsLink,
