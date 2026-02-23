@@ -237,7 +237,7 @@
   <string name="onboardingGetStarted">Get started</string>
   <string name="onboardingSubtitle">Build your feed</string>
   <string name="onboardingSubtitle2">No algorithm. No ads.\nJust the content you love.</string>
-  <string name="readingTimeEstimate">%1$dM read</string>
+  <string name="readingTimeEstimate">%1$dm read</string>
   <string name="play">Play</string>
   <string name="pause">Pause</string>
   <string name="seek_forward">Seek forward 30 seconds</string>
@@ -267,6 +267,22 @@
   <string name="accountSelectionLocal">Local</string>
   <string name="accountSelectionLocalAccount">On Device</string>
   <string name="accountSelectionCloudSync">Cloud Sync</string>
+  <string name="unit_seconds">%1$ds</string>
+  <string name="unit_minutes">%1$dm</string>
+  <string name="unit_hours">%1$dh</string>
+  <string name="unit_days">%1$dd</string>
+  <string name="month_jan">Jan</string>
+  <string name="month_feb">Feb</string>
+  <string name="month_mar">Mar</string>
+  <string name="month_apr">Apr</string>
+  <string name="month_may">May</string>
+  <string name="month_jun">Jun</string>
+  <string name="month_jul">Jul</string>
+  <string name="month_aug">Aug</string>
+  <string name="month_sep">Sep</string>
+  <string name="month_oct">Oct</string>
+  <string name="month_nov">Nov</string>
+  <string name="month_dec">Dec</string>
   <!-- Plurals -->
   <plurals name="searchResultsCount">
     <item quantity="other">%1$d 个结果</item>
