@@ -338,6 +338,7 @@ internal fun BottomSheetExpandedContent(
             isInMultiSelectMode = state.isInMultiSelectMode,
             onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
             onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) },
+            onPinClick = { viewModel.dispatch(FeedsEvent.OnSourcePinClicked(it)) },
           )
         } else {
           pinnedSources(
@@ -350,6 +351,7 @@ internal fun BottomSheetExpandedContent(
             onTogglePinnedSection = { viewModel.dispatch(FeedsEvent.TogglePinnedSection) },
             onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
             onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) },
+            onPinClick = { viewModel.dispatch(FeedsEvent.OnSourcePinClicked(it)) },
           )
 
           allSources(
@@ -363,6 +365,7 @@ internal fun BottomSheetExpandedContent(
             onFeedsSortChanged = { viewModel.dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
             onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
             onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) },
+            onPinClick = { viewModel.dispatch(FeedsEvent.OnSourcePinClicked(it)) },
             onAddNewFeedClick = { viewModel.dispatch(FeedsEvent.OnNewFeedClicked) },
           )
         }

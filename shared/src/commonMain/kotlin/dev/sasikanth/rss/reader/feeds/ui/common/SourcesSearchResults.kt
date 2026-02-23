@@ -35,6 +35,7 @@ internal fun LazyListScope.sourcesSearchResults(
   isInMultiSelectMode: Boolean,
   onSourceClick: (Source) -> Unit,
   onToggleSourceSelection: (Source) -> Unit,
+  onPinClick: (Source) -> Unit,
 ) {
   items(
     count = searchResults.itemCount,
@@ -56,6 +57,7 @@ internal fun LazyListScope.sourcesSearchResults(
         onFeedClick = onSourceClick,
         onFeedSelected = onToggleSourceSelection,
         onOptionsClick = { onToggleSourceSelection(feed) },
+        onPinClick = onPinClick,
         modifier =
           Modifier.padding(
             start = startPadding,

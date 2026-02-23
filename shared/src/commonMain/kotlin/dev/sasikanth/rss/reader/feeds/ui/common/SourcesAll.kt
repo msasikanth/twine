@@ -82,6 +82,7 @@ internal fun LazyListScope.allSources(
   onFeedsSortChanged: (FeedsOrderBy) -> Unit,
   onSourceClick: (Source) -> Unit,
   onToggleSourceSelection: (Source) -> Unit,
+  onPinClick: (Source) -> Unit,
   onAddNewFeedClick: () -> Unit,
 ) {
   if (sources.itemCount > 0) {
@@ -138,6 +139,7 @@ internal fun LazyListScope.allSources(
                 onFeedGroupSelected = onToggleSourceSelection,
                 onFeedGroupClick = onSourceClick,
                 onOptionsClick = { onToggleSourceSelection(source) },
+                onPinClick = onPinClick,
                 modifier =
                   Modifier.padding(
                       start = startPadding,
@@ -171,6 +173,7 @@ internal fun LazyListScope.allSources(
                 onFeedClick = onSourceClick,
                 onFeedSelected = onToggleSourceSelection,
                 onOptionsClick = { onToggleSourceSelection(source) },
+                onPinClick = onPinClick,
                 modifier =
                   Modifier.padding(
                       start = startPadding,
