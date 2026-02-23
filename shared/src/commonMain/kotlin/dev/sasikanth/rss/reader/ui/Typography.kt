@@ -42,6 +42,7 @@ import twine.shared.generated.resources.lora_regular
 import twine.shared.generated.resources.merriweather_bold
 import twine.shared.generated.resources.merriweather_medium
 import twine.shared.generated.resources.merriweather_regular
+import twine.shared.generated.resources.outfit
 import twine.shared.generated.resources.robot_serif_bold
 import twine.shared.generated.resources.roboto_serif_medium
 import twine.shared.generated.resources.roboto_serif_regular
@@ -220,6 +221,9 @@ internal val ComicNeueFontFamily: FontFamily
 
 internal val GoogleSansFontFamily: FontFamily
   @Composable get() = FontFamily(Font(Res.font.google_sans))
+
+internal val OutfitFontFamily: FontFamily
+  @Composable get() = FontFamily(Font(Res.font.outfit))
 
 internal val GolosFontFamily: FontFamily
   @Composable
