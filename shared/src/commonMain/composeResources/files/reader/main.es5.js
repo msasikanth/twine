@@ -235,6 +235,54 @@ function normalizeUrl(url, baseURI) {
   }
 }
 
+function getBestSrcFromSrcset(srcset) {
+  if (!srcset) return null;
+  var parts = srcset.split(",");
+  var bestSrc = null;
+  var maxVal = -1;
+
+  for (var i = 0; i < parts.length; i++) {
+    var part = parts[i].trim();
+    if (!part) continue;
+
+    var entry = part.split(/\s+/);
+    var url = entry[0];
+    if (entry.length === 1) {
+      if (!bestSrc) bestSrc = url;
+      continue;
+    }
+
+    var descriptor = entry[1].toLowerCase();
+    var val = parseFloat(descriptor);
+    if (isNaN(val)) {
+      if (!bestSrc) bestSrc = url;
+      continue;
+    }
+
+    if (val > maxVal) {
+      maxVal = val;
+      bestSrc = url;
+    }
+  }
+  return bestSrc;
+}
+
+function getBestSrc(node) {
+  var srcset = node.getAttribute("srcset") || node.getAttribute("data-srcset");
+  if (srcset) {
+    var best = getBestSrcFromSrcset(srcset);
+    if (best) return best;
+  }
+
+  return (
+    node.getAttribute("src") ||
+    node.getAttribute("data-src") ||
+    node.getAttribute("data-runner-src") ||
+    node.getAttribute("data-lazy-src") ||
+    ""
+  );
+}
+
 function removeFirstImageTagByUrl(doc, imageUrl) {
   if (!imageUrl) return;
 
@@ -266,17 +314,9 @@ function deduplicateImages(doc) {
 
   for (var i = 0; i < imgs.length; i++) {
     var img = imgs[i];
-    var src = img.getAttribute("src") ||
-              img.getAttribute("data-src") ||
-              img.getAttribute("data-lazy-src") ||
-              img.getAttribute("srcset");
+    var src = getBestSrc(img);
 
     if (!src) continue;
-
-    // If it's a srcset, take the first URL for comparison
-    if (img.getAttribute("srcset")) {
-      src = src.split(",")[0].trim().split(" ")[0];
-    }
 
     var normalizedUrl = normalizeUrl(src, doc.baseURI);
     if (seenUrls.indexOf(normalizedUrl) !== -1) {
@@ -333,6 +373,34 @@ function parseReaderContent(link, bannerImage, html) {
             if (!src) return "";
             var label = src.includes("youtube.com") ? "YouTube Video" : "Video";
             return "\n\n[" + label + "](" + src + ")\n\n";
+          }
+        });
+
+        turndownService.addRule("image", {
+          filter: "img",
+          replacement: function(content, node) {
+            var alt = node.alt || "";
+            var src = getBestSrc(node);
+            if (!src) return "";
+            var title = node.title || "";
+            var titlePart = title ? ' "' + title + '"' : "";
+            var markdown = "![" + alt + "](" + src + titlePart + ")";
+
+            if (node.parentNode && node.parentNode.nodeName !== "A") {
+              return "\n\n" + markdown + "\n\n";
+            }
+            return markdown;
+          }
+        });
+
+        turndownService.addRule("linked-image", {
+          filter: function(node) {
+            return node.nodeName === "A" && node.querySelector("img");
+          },
+          replacement: function(content, node) {
+            var href = node.getAttribute("href");
+            if (!href) return content;
+            return "\n\n[" + content + "](" + href + ")\n\n";
           }
         });
 
