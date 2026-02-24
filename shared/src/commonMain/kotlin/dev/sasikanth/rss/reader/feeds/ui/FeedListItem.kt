@@ -115,12 +115,12 @@ internal fun FeedListItem(
         contentScale = ContentScale.Crop,
       )
 
-      Spacer(Modifier.requiredWidth(12.dp))
+      Spacer(Modifier.requiredWidth(16.dp))
 
       Text(
         modifier = Modifier.weight(1f),
         text = feed.name,
-        style = MaterialTheme.typography.titleSmall,
+        style = MaterialTheme.typography.bodyMedium,
         color = AppTheme.colorScheme.onSurface,
         maxLines = 1,
         overflow = TextOverflow.Clip,
@@ -132,8 +132,8 @@ internal fun FeedListItem(
       if (canShowUnreadPostsCount && numberOfUnreadPosts > 0 && !isInMultiSelectMode) {
         Badge(
           containerColor = translucentStyle.prominent.background,
-          contentColor = AppTheme.colorScheme.secondary,
-          modifier = Modifier.sizeIn(minWidth = 36.dp, minHeight = 24.dp),
+          contentColor = AppTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.sizeIn(minWidth = 24.dp, minHeight = 24.dp),
         ) {
           Text(
             text = feed.numberOfUnreadPosts.toString(),

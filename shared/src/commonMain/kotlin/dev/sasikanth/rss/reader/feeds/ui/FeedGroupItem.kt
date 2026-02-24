@@ -124,7 +124,7 @@ internal fun FeedGroupItem(
         horizontalArrangement = Arrangement.spacedBy(iconSpacing),
       )
 
-      Spacer(Modifier.requiredWidth(12.dp))
+      Spacer(Modifier.requiredWidth(16.dp))
 
       Column(Modifier.weight(1f)) {
         Text(
@@ -148,7 +148,7 @@ internal fun FeedGroupItem(
 
         Text(
           text = text,
-          style = MaterialTheme.typography.bodyMedium,
+          style = MaterialTheme.typography.bodySmall,
           color = AppTheme.colorScheme.onSurfaceVariant,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
@@ -161,12 +161,12 @@ internal fun FeedGroupItem(
       if (canShowUnreadPostsCount && numberOfUnreadPosts > 0 && !isInMultiSelectMode) {
         Badge(
           containerColor = translucentStyle.prominent.background,
-          contentColor = AppTheme.colorScheme.secondary,
-          modifier = Modifier.sizeIn(minWidth = 36.dp, minHeight = 24.dp),
+          contentColor = AppTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.sizeIn(minWidth = 24.dp, minHeight = 24.dp),
         ) {
           Text(
             text = feedGroup.numberOfUnreadPosts.toString(),
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.align(Alignment.CenterVertically),
           )
         }

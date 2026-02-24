@@ -26,11 +26,12 @@ import app.cash.paging.compose.itemKey
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
-import dev.sasikanth.rss.reader.feeds.ui.sheet.expanded.bottomPaddingOfSourceItem
+import dev.sasikanth.rss.reader.utils.bottomPaddingOfSourceItem
 
 internal fun LazyListScope.sourcesSearchResults(
   searchResults: LazyPagingItems<Feed>,
   selectedSources: Set<Source>,
+  activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
   isInMultiSelectMode: Boolean,
   onSourceClick: (Source) -> Unit,
@@ -53,7 +54,12 @@ internal fun LazyListScope.sourcesSearchResults(
         feed = feed,
         canShowUnreadPostsCount = canShowUnreadPostsCount,
         isInMultiSelectMode = isInMultiSelectMode,
-        isFeedSelected = selectedSources.any { it.id == feed.id },
+        isFeedSelected =
+          if (isInMultiSelectMode) {
+            selectedSources.any { it.id == feed.id }
+          } else {
+            activeSource?.id == feed.id
+          },
         onFeedClick = onSourceClick,
         onFeedSelected = onToggleSourceSelection,
         onOptionsClick = { onToggleSourceSelection(feed) },
