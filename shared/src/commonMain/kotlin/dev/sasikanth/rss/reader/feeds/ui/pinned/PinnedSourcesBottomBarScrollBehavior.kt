@@ -20,11 +20,11 @@ package dev.sasikanth.rss.reader.feeds.ui.pinned
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.DecayAnimationSpec
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateDecay
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.rememberSplineBasedDecay
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.tokens.MotionSchemeKeyTokens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -46,11 +46,18 @@ internal class PinnedSourcesBottomBarState(
   initialHeightOffset: Float,
   initialContentOffset: Float,
 ) {
-  var heightOffsetLimit by mutableFloatStateOf(initialHeightOffsetLimit)
-
-  var heightOffset by mutableFloatStateOf(initialHeightOffset)
+  private var _heightOffsetLimit by mutableFloatStateOf(initialHeightOffsetLimit)
+  var heightOffsetLimit: Float
+    get() = _heightOffsetLimit
     set(value) {
-      field = value.coerceIn(heightOffsetLimit, 0f)
+      _heightOffsetLimit = value
+    }
+
+  private var _heightOffset by mutableFloatStateOf(initialHeightOffset)
+  var heightOffset: Float
+    get() = _heightOffset
+    set(value) {
+      _heightOffset = value.coerceIn(heightOffsetLimit, 0f)
     }
 
   var contentOffset by mutableFloatStateOf(initialContentOffset)
@@ -130,12 +137,11 @@ internal class PinnedSourcesBottomBarScrollBehavior(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun rememberPinnedSourcesBottomBarScrollBehavior(
   state: PinnedSourcesBottomBarState = rememberPinnedSourcesBottomBarState(),
   canScroll: () -> Boolean = { true },
-  snapAnimationSpec: AnimationSpec<Float>? = MotionSchemeKeyTokens.DefaultEffects.value(),
+  snapAnimationSpec: AnimationSpec<Float>? = spring(stiffness = Spring.StiffnessMediumLow),
   flingAnimationSpec: DecayAnimationSpec<Float>? = rememberSplineBasedDecay(),
   reverseLayout: Boolean = false,
 ): PinnedSourcesBottomBarScrollBehavior =
