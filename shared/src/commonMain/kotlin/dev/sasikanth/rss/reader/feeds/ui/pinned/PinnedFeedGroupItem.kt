@@ -1,0 +1,86 @@
+/*
+ * Copyright 2026 Sasikanth Miriyampalli
+ *
+ * Licensed under the GPL, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+package dev.sasikanth.rss.reader.feeds.ui.pinned
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
+import dev.sasikanth.rss.reader.ui.AppTheme
+
+@Composable
+internal fun PinnedFeedGroupItem(
+  feedGroup: FeedGroup,
+  canShowUnreadPostsCount: Boolean,
+  modifier: Modifier = Modifier,
+  onClick: (() -> Unit)? = null,
+  hasActiveSource: Boolean = false,
+  selected: Boolean = false,
+) {
+  Box(
+    modifier = modifier.graphicsLayer { alpha = if (selected || !hasActiveSource) 1f else 0.25f }
+  ) {
+    Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
+      val shape = RoundedCornerShape(16.dp)
+      val clickableModifier =
+        if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
+
+      Box(
+        modifier =
+          Modifier.requiredSize(48.dp)
+            .clip(shape)
+            .then(clickableModifier)
+            .background(AppTheme.colorScheme.secondary.copy(alpha = 0.16f)),
+        contentAlignment = Alignment.Center,
+      ) {
+        val iconSize = 16.dp
+        val iconSpacing = 2.dp
+
+        FeedGroupIconGrid(
+          feedHomepageLinks = feedGroup.feedHomepageLinks,
+          feedIconLinks = feedGroup.feedIconLinks,
+          feedShowFavIconSettings = feedGroup.feedShowFavIconSettings,
+          iconSize = iconSize,
+          verticalArrangement = Arrangement.spacedBy(iconSpacing),
+          horizontalArrangement = Arrangement.spacedBy(iconSpacing),
+        )
+
+        Box(
+          modifier =
+            Modifier.matchParentSize().border(1.dp, AppTheme.colorScheme.outlineVariant, shape)
+        )
+      }
+    }
+
+    val badgeCount = feedGroup.numberOfUnreadPosts
+    if (badgeCount > 0 && canShowUnreadPostsCount) {
+      UnreadCountBadge(badgeCount)
+    }
+  }
+}

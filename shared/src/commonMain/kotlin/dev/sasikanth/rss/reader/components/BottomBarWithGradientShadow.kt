@@ -27,10 +27,10 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 
 @Composable
@@ -47,7 +47,7 @@ internal fun BottomBarWithGradientShadow(
         .fillMaxWidth()
         .heightIn(min = 120.dp)
         .background(
-          color = translucentStyle.default.background.compositeOver(Color.Black),
+          color = translucentStyle.default.background.compositeOver(AppTheme.colorScheme.backdrop),
           shape = shape,
         )
         .pointerInput(Unit) {
