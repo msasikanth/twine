@@ -84,6 +84,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import androidx.paging.LoadState.NotLoading
 import androidx.window.core.layout.WindowSizeClass
 import app.cash.paging.compose.collectAsLazyPagingItems
 import com.mikepenz.markdown.compose.components.markdownComponents
@@ -194,6 +195,12 @@ internal fun ReaderScreen(
 
   LaunchedEffect(exitScreen) {
     if (exitScreen) {
+      onBack()
+    }
+  }
+
+  LaunchedEffect(posts.itemCount, posts.loadState.refresh) {
+    if (posts.itemCount == 0 && posts.loadState.refresh is NotLoading) {
       onBack()
     }
   }
