@@ -204,7 +204,7 @@ internal fun AllFeedsHeader(
   onAddNewFeedClick: (() -> Unit)? = null,
 ) {
   Row(
-    modifier = Modifier.then(modifier).padding(16.dp),
+    modifier = Modifier.then(modifier).padding(horizontal = 24.dp, vertical = 16.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
     var showSortDropdown by remember { mutableStateOf(false) }
