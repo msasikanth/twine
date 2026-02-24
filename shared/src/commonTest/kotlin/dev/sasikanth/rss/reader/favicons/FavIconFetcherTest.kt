@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlinx.io.Buffer
+import kotlinx.io.okio.asKotlinxIoRawSource
 import kotlinx.io.readByteArray
 import okio.Buffer as OkioBuffer
 import okio.Source as OkioSource

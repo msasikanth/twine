@@ -38,6 +38,8 @@ sealed interface SettingsEvent {
 
   data class ToggleShowFeedFavIcon(val value: Boolean) : SettingsEvent
 
+  data class ToggleShowPinnedSources(val value: Boolean) : SettingsEvent
+
   data object ImportOpmlClicked : SettingsEvent
 
   data object ExportOpmlClicked : SettingsEvent

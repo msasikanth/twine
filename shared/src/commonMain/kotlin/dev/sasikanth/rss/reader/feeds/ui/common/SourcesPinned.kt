@@ -45,10 +45,10 @@ import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupItem
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
-import dev.sasikanth.rss.reader.feeds.ui.sheet.expanded.bottomPaddingOfSourceItem
 import dev.sasikanth.rss.reader.resources.icons.DragIndicator
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.bottomPaddingOfSourceItem
 import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
@@ -66,6 +66,7 @@ internal fun LazyListScope.pinnedSources(
   onTogglePinnedSection: () -> Unit,
   onSourceClick: (Source) -> Unit,
   onToggleSourceSelection: (Source) -> Unit,
+  onPinClick: (Source) -> Unit,
 ) {
   if (pinnedSources.isNotEmpty()) {
     stickyHeader(key = "PinnedFeedsHeader") {
@@ -90,7 +91,7 @@ internal fun LazyListScope.pinnedSources(
       ) { index ->
         val source = pinnedSources[index]
         val startPadding = 24.dp
-        val endPadding = 24.dp
+        val endPadding = 16.dp
         val topPadding = 4.dp
         val bottomPadding = bottomPaddingOfSourceItem(index, pinnedSources.size)
         val interactionSource = remember { MutableInteractionSource() }
@@ -106,6 +107,7 @@ internal fun LazyListScope.pinnedSources(
                 onFeedGroupSelected = onToggleSourceSelection,
                 onFeedGroupClick = onSourceClick,
                 onOptionsClick = { onToggleSourceSelection(source) },
+                onPinClick = onPinClick,
                 dragHandle = { DragHandle(this, interactionSource) },
                 interactionSource = interactionSource,
                 modifier =
@@ -127,6 +129,7 @@ internal fun LazyListScope.pinnedSources(
                 onFeedClick = onSourceClick,
                 onFeedSelected = onToggleSourceSelection,
                 onOptionsClick = { onToggleSourceSelection(source) },
+                onPinClick = onPinClick,
                 dragHandle = { DragHandle(this, interactionSource) },
                 interactionSource = interactionSource,
                 modifier =

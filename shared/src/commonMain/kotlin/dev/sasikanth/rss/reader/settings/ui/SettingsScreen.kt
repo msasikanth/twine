@@ -93,6 +93,7 @@ import dev.sasikanth.rss.reader.settings.ui.items.OpmlFeedSelectionSheet
 import dev.sasikanth.rss.reader.settings.ui.items.PostsDeletionPeriodSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.ReportIssueSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.ShowFeedFavIconSettingItem
+import dev.sasikanth.rss.reader.settings.ui.items.ShowPinnedSourcesSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.ShowReaderViewSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.StatisticsItem
 import dev.sasikanth.rss.reader.settings.ui.items.ThemeVariantSettingItem
@@ -488,6 +489,17 @@ internal fun SettingsScreen(
             showUnreadCountEnabled = state.showUnreadPostsCount,
             onValueChanged = { newValue ->
               viewModel.dispatch(SettingsEvent.ToggleShowUnreadPostsCount(newValue))
+            },
+          )
+        }
+
+        item { Divider(24.dp) }
+
+        item {
+          ShowPinnedSourcesSettingItem(
+            showPinnedSources = state.showPinnedSources,
+            onValueChanged = { newValue ->
+              viewModel.dispatch(SettingsEvent.ToggleShowPinnedSources(newValue))
             },
           )
         }

@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -42,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -50,6 +52,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.resources.icons.Pin
+import dev.sasikanth.rss.reader.resources.icons.PinFilled
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 
@@ -63,16 +68,25 @@ internal fun FeedListItem(
   onFeedClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
   onOptionsClick: () -> Unit,
+  onPinClick: ((Feed) -> Unit)? = null,
   modifier: Modifier = Modifier,
   dragHandle: (@Composable () -> Unit)? = null,
   interactionSource: MutableInteractionSource? = null,
 ) {
   val haptic = LocalHapticFeedback.current
-  val backgroundColor =
+  val backgroundModifier =
     if (isFeedSelected) {
-      AppTheme.colorScheme.primaryContainer
+      Modifier.background(
+        brush =
+          Brush.horizontalGradient(
+            0.0f to AppTheme.colorScheme.primaryContainer,
+            0.6f to AppTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+            0.85f to Color.Transparent,
+            1.0f to Color.Transparent,
+          )
+      )
     } else {
-      Color.Transparent
+      Modifier
     }
   val translucentStyle = LocalTranslucentStyles.current
 
@@ -81,7 +95,7 @@ internal fun FeedListItem(
       Modifier.fillMaxWidth()
         .then(modifier)
         .clip(RoundedCornerShape(16.dp))
-        .background(backgroundColor)
+        .then(backgroundModifier)
         .combinedClickable(
           interactionSource = interactionSource ?: remember { MutableInteractionSource() },
           indication = LocalIndication.current,
@@ -99,7 +113,10 @@ internal fun FeedListItem(
           },
         )
   ) {
-    Row(modifier = Modifier.padding(all = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+      modifier = Modifier.padding(start = 12.dp, top = 8.dp, end = 8.dp, bottom = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
       FeedIcon(
         icon = feed.icon,
         homepageLink = feed.homepageLink,
@@ -115,7 +132,7 @@ internal fun FeedListItem(
       Text(
         modifier = Modifier.weight(1f),
         text = feed.name,
-        style = MaterialTheme.typography.titleSmall,
+        style = MaterialTheme.typography.bodyMedium,
         color = AppTheme.colorScheme.onSurface,
         maxLines = 1,
         overflow = TextOverflow.Clip,
@@ -127,8 +144,8 @@ internal fun FeedListItem(
       if (canShowUnreadPostsCount && numberOfUnreadPosts > 0 && !isInMultiSelectMode) {
         Badge(
           containerColor = translucentStyle.prominent.background,
-          contentColor = AppTheme.colorScheme.secondary,
-          modifier = Modifier.sizeIn(minWidth = 36.dp, minHeight = 24.dp),
+          contentColor = AppTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.sizeIn(minWidth = 24.dp, minHeight = 24.dp),
         ) {
           Text(
             text = feed.numberOfUnreadPosts.toString(),
@@ -136,6 +153,8 @@ internal fun FeedListItem(
             modifier = Modifier.align(Alignment.CenterVertically),
           )
         }
+
+        Spacer(Modifier.width(16.dp))
       }
 
       if (isInMultiSelectMode) {
@@ -143,6 +162,18 @@ internal fun FeedListItem(
       }
 
       if (!isInMultiSelectMode) {
+        if (onPinClick != null) {
+          val pinIcon = if (feed.pinnedAt != null) TwineIcons.PinFilled else TwineIcons.Pin
+          IconButton(modifier = Modifier.requiredSize(40.dp), onClick = { onPinClick(feed) }) {
+            Icon(
+              modifier = Modifier.requiredSize(20.dp),
+              imageVector = pinIcon,
+              contentDescription = null,
+              tint = AppTheme.colorScheme.secondary,
+            )
+          }
+        }
+
         dragHandle?.invoke()
       }
 

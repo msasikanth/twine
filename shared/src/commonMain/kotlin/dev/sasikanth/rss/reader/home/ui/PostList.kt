@@ -29,7 +29,7 @@ import app.cash.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
-import dev.sasikanth.rss.reader.feeds.ui.sheet.BOTTOM_SHEET_PEEK_HEIGHT
+import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -92,7 +92,10 @@ internal fun PostsList(
     modifier = modifier,
     state = listState,
     contentPadding =
-      PaddingValues(top = topContentPadding, bottom = BOTTOM_SHEET_PEEK_HEIGHT + 120.dp),
+      PaddingValues(
+        top = topContentPadding,
+        bottom = PINNED_SOURCES_BOTTOM_BAR_HEIGHT + 120.dp + paddingValues.calculateBottomPadding(),
+      ),
   ) {
     item(key = "featured_items", contentType = "featured_items") {
       FeaturedSection(

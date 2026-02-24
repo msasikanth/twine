@@ -60,9 +60,9 @@ import app.cash.paging.compose.itemKey
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.ContextActionItem
 import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
+import dev.sasikanth.rss.reader.feeds.ui.DeleteConfirmationDialog
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
 import dev.sasikanth.rss.reader.feeds.ui.common.AllFeedsHeader
-import dev.sasikanth.rss.reader.feeds.ui.sheet.expanded.DeleteConfirmationDialog
 import dev.sasikanth.rss.reader.group.GroupEvent
 import dev.sasikanth.rss.reader.group.GroupViewModel
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
@@ -92,121 +92,119 @@ fun GroupScreen(
   val state by viewModel.state.collectAsStateWithLifecycle()
   val feeds = state.feeds.collectAsLazyPagingItems()
 
-  AppTheme(useDarkTheme = true) {
-    if (state.showDeleteConfirmation) {
-      DeleteConfirmationDialog(
-        onDelete = { viewModel.dispatch(GroupEvent.DeleteSelectedSources) },
-        dismiss = { viewModel.dispatch(GroupEvent.DismissDeleteConfirmation) },
-      )
-    }
+  if (state.showDeleteConfirmation) {
+    DeleteConfirmationDialog(
+      onDelete = { viewModel.dispatch(GroupEvent.DeleteSelectedSources) },
+      dismiss = { viewModel.dispatch(GroupEvent.DismissDeleteConfirmation) },
+    )
+  }
 
-    Scaffold(
-      modifier = modifier,
-      topBar = {
-        Box {
-          Column {
-            CenterAlignedTopAppBar(
-              modifier = Modifier.padding(horizontal = 4.dp),
-              title = {
-                GroupNameTextField(
-                  value = viewModel.groupName,
-                  onValueChanged = { viewModel.dispatch(GroupEvent.OnGroupNameChanged(it.text)) },
-                  modifier = Modifier.weight(1f),
-                )
-              },
-              navigationIcon = {
-                CircularIconButton(
-                  modifier = Modifier.padding(start = 12.dp),
-                  icon = TwineIcons.ArrowBack,
-                  label = stringResource(Res.string.buttonGoBack),
-                  onClick = { goBack() },
-                )
-              },
-              actions = { Spacer(Modifier.requiredSize(48.dp)) },
-              colors =
-                TopAppBarDefaults.topAppBarColors(
-                  containerColor = AppTheme.colorScheme.bottomSheet,
-                  navigationIconContentColor = AppTheme.colorScheme.onSurface,
-                  titleContentColor = AppTheme.colorScheme.onSurface,
-                  actionIconContentColor = AppTheme.colorScheme.onSurface,
-                ),
-            )
+  Scaffold(
+    modifier = modifier,
+    topBar = {
+      Box {
+        Column {
+          CenterAlignedTopAppBar(
+            modifier = Modifier.padding(horizontal = 4.dp),
+            title = {
+              GroupNameTextField(
+                value = viewModel.groupName,
+                onValueChanged = { viewModel.dispatch(GroupEvent.OnGroupNameChanged(it.text)) },
+                modifier = Modifier.weight(1f),
+              )
+            },
+            navigationIcon = {
+              CircularIconButton(
+                modifier = Modifier.padding(start = 12.dp),
+                icon = TwineIcons.ArrowBack,
+                label = stringResource(Res.string.buttonGoBack),
+                onClick = { goBack() },
+              )
+            },
+            actions = { Spacer(Modifier.requiredSize(48.dp)) },
+            colors =
+              TopAppBarDefaults.topAppBarColors(
+                containerColor = AppTheme.colorScheme.bottomSheet,
+                navigationIconContentColor = AppTheme.colorScheme.onSurface,
+                titleContentColor = AppTheme.colorScheme.onSurface,
+                actionIconContentColor = AppTheme.colorScheme.onSurface,
+              ),
+          )
 
-            AllFeedsHeader(
-              modifier = Modifier.background(AppTheme.colorScheme.surface),
-              feedsCount = feeds.itemCount,
-              feedsSortOrder = state.feedsOrderBy,
-              showAddButton = false,
-              onFeedsSortChanged = { viewModel.dispatch(GroupEvent.OnFeedsSortOrderChanged(it)) },
-            )
-          }
-
-          HorizontalDivider(
-            modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-            color = AppTheme.colorScheme.surfaceContainerLow,
+          AllFeedsHeader(
+            modifier = Modifier.background(AppTheme.colorScheme.surface),
+            feedsCount = feeds.itemCount,
+            feedsSortOrder = state.feedsOrderBy,
+            showAddButton = false,
+            onFeedsSortChanged = { viewModel.dispatch(GroupEvent.OnFeedsSortOrderChanged(it)) },
           )
         }
-      },
-      bottomBar = {
-        if (state.isInMultiSelectMode) {
-          ContextActionsBottomBar(
-            tooltip = null,
-            onCancel = { viewModel.dispatch(GroupEvent.OnCancelSelectionClicked) },
-          ) {
-            ContextActionItem(
-              modifier = Modifier.weight(1f),
-              icon = TwineIcons.NewGroup,
-              label = stringResource(Res.string.actionMoveTo),
-              onClick = { openGroupSelection() },
-            )
 
-            ContextActionItem(
-              modifier = Modifier.weight(1f),
-              icon = TwineIcons.Delete,
-              label = stringResource(Res.string.actionDelete),
-              onClick = { viewModel.dispatch(GroupEvent.OnDeleteSelectedFeedsClicked) },
-            )
+        HorizontalDivider(
+          modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
+          color = AppTheme.colorScheme.surfaceContainerLow,
+        )
+      }
+    },
+    bottomBar = {
+      if (state.isInMultiSelectMode) {
+        ContextActionsBottomBar(
+          tooltip = null,
+          onCancel = { viewModel.dispatch(GroupEvent.OnCancelSelectionClicked) },
+        ) {
+          ContextActionItem(
+            modifier = Modifier.weight(1f),
+            icon = TwineIcons.NewGroup,
+            label = stringResource(Res.string.actionMoveTo),
+            onClick = { openGroupSelection() },
+          )
 
-            ContextActionItem(
-              modifier = Modifier.weight(1f),
-              icon = TwineIcons.UnGroup,
-              label = stringResource(Res.string.actionUngroup),
-              onClick = { viewModel.dispatch(GroupEvent.OnUngroupClicked) },
-            )
-          }
+          ContextActionItem(
+            modifier = Modifier.weight(1f),
+            icon = TwineIcons.Delete,
+            label = stringResource(Res.string.actionDelete),
+            onClick = { viewModel.dispatch(GroupEvent.OnDeleteSelectedFeedsClicked) },
+          )
+
+          ContextActionItem(
+            modifier = Modifier.weight(1f),
+            icon = TwineIcons.UnGroup,
+            label = stringResource(Res.string.actionUngroup),
+            onClick = { viewModel.dispatch(GroupEvent.OnUngroupClicked) },
+          )
         }
-      },
-      containerColor = AppTheme.colorScheme.bottomSheet,
-    ) { innerPadding ->
-      LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding =
-          PaddingValues(
-            start = innerPadding.calculateStartPadding(layoutDirection),
-            top = innerPadding.calculateTopPadding() + 24.dp,
-            end = innerPadding.calculateEndPadding(layoutDirection),
-            bottom = innerPadding.calculateBottomPadding() + 200.dp,
-          ),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-      ) {
-        items(
-          count = feeds.itemCount,
-          key = feeds.itemKey { it.id },
-          contentType = feeds.itemContentType { it.id },
-        ) { index ->
-          val feed = feeds[index]
-          if (feed != null) {
-            FeedListItem(
-              modifier = Modifier.padding(horizontal = 24.dp),
-              feed = feed,
-              canShowUnreadPostsCount = false,
-              isInMultiSelectMode = state.isInMultiSelectMode,
-              isFeedSelected = state.selectedSources.any { it.id == feed.id },
-              onFeedClick = { viewModel.dispatch(GroupEvent.OnFeedClicked(feed)) },
-              onFeedSelected = { viewModel.dispatch(GroupEvent.OnFeedClicked(feed)) },
-              onOptionsClick = { viewModel.dispatch(GroupEvent.OnFeedClicked(feed)) },
-            )
-          }
+      }
+    },
+    containerColor = AppTheme.colorScheme.backdrop,
+  ) { innerPadding ->
+    LazyColumn(
+      modifier = Modifier.fillMaxSize(),
+      contentPadding =
+        PaddingValues(
+          start = innerPadding.calculateStartPadding(layoutDirection),
+          top = innerPadding.calculateTopPadding() + 24.dp,
+          end = innerPadding.calculateEndPadding(layoutDirection),
+          bottom = innerPadding.calculateBottomPadding() + 200.dp,
+        ),
+      verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+      items(
+        count = feeds.itemCount,
+        key = feeds.itemKey { it.id },
+        contentType = feeds.itemContentType { it.id },
+      ) { index ->
+        val feed = feeds[index]
+        if (feed != null) {
+          FeedListItem(
+            modifier = Modifier.padding(horizontal = 24.dp),
+            feed = feed,
+            canShowUnreadPostsCount = false,
+            isInMultiSelectMode = state.isInMultiSelectMode,
+            isFeedSelected = state.selectedSources.any { it.id == feed.id },
+            onFeedClick = { viewModel.dispatch(GroupEvent.OnFeedClicked(feed)) },
+            onFeedSelected = { viewModel.dispatch(GroupEvent.OnFeedClicked(feed)) },
+            onOptionsClick = { viewModel.dispatch(GroupEvent.OnFeedClicked(feed)) },
+          )
         }
       }
     }

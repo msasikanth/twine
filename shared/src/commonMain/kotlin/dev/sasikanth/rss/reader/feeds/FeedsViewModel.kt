@@ -91,7 +91,7 @@ class FeedsViewModel(
       is FeedsEvent.OnDeleteFeed -> onDeleteFeed(event.feed)
       is FeedsEvent.OnToggleFeedSelection -> onToggleSourceSelection(event.source)
       is FeedsEvent.OnFeedNameUpdated -> onFeedNameUpdated(event.newFeedName, event.feedId)
-      is FeedsEvent.OnFeedPinClicked -> onFeedPinClicked(event.feed)
+      is FeedsEvent.OnSourcePinClicked -> onSourcePinClicked(event.source)
       FeedsEvent.ClearSearchQuery -> clearSearchQuery()
       is FeedsEvent.SearchQueryChanged -> onSearchQueryChanged(event.searchQuery)
       is FeedsEvent.OnSourceClick -> onSourceClicked(event.source)
@@ -240,8 +240,8 @@ class FeedsViewModel(
     searchQuery = TextFieldValue()
   }
 
-  private fun onFeedPinClicked(feed: Feed) {
-    viewModelScope.launch { rssRepository.toggleFeedPinStatus(feed) }
+  private fun onSourcePinClicked(source: Source) {
+    viewModelScope.launch { rssRepository.toggleSourcePinStatus(source) }
   }
 
   private fun onFeedNameUpdated(newFeedName: String, feedId: String) {

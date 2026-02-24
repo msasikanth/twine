@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed
+package dev.sasikanth.rss.reader.feeds.ui.pinned
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,7 +29,6 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,7 +39,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants.BADGE_COUNT_TRIM_LIMIT
 
 @Composable
-internal fun FeedBottomBarItem(
+internal fun PinnedFeedItem(
   badgeCount: Long,
   homePageUrl: String,
   feedIconUrl: String,

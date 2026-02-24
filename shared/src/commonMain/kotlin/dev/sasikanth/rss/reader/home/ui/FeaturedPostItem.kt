@@ -56,7 +56,7 @@ private val featuredItemPadding: PaddingValues
     val sizeClass = LocalWindowSizeClass.current
     return when {
       sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) ->
-        PaddingValues(horizontal = 128.dp)
+        PaddingValues(horizontal = 64.dp)
       else -> PaddingValues(0.dp)
     }
   }
@@ -89,11 +89,53 @@ internal fun FeaturedPostItem(
     val density = LocalDensity.current
     val titleTextStyle = MaterialTheme.typography.headlineMedium
     val titleMaxLines = 3
-    var descriptionBottomPadding by remember(item.link) { mutableStateOf(0.dp) }
+    var dynamicTitlePadding by remember(item.link) { mutableStateOf(0.dp) }
 
     featuredImage()
 
-    Spacer(modifier = Modifier.requiredHeight(8.dp))
+    Spacer(Modifier.height(16.dp))
+
+    val isDarkTheme = AppTheme.isDark
+    Text(
+      modifier =
+        Modifier.graphicsLayer {
+          this.alpha = contentAlphaProvider.invoke()
+          blendMode =
+            if (isDarkTheme) {
+              BlendMode.Screen
+            } else {
+              BlendMode.Multiply
+            }
+        },
+      text = item.title.ifBlank { item.description },
+      style = titleTextStyle,
+      color = AppTheme.colorScheme.secondary,
+      maxLines = titleMaxLines,
+      overflow = TextOverflow.Ellipsis,
+      onTextLayout = { textLayoutResult ->
+        val numberOfLines = textLayoutResult.lineCount
+        if (numberOfLines < titleMaxLines) {
+          val lineHeight = with(density) { titleTextStyle.lineHeight.toDp() }
+          dynamicTitlePadding = lineHeight * (titleMaxLines - numberOfLines)
+        }
+      },
+    )
+
+    Spacer(Modifier.height(4.dp))
+
+    Text(
+      modifier = Modifier.graphicsLayer { this.alpha = contentAlphaProvider.invoke() },
+      text = item.description,
+      style = MaterialTheme.typography.bodyMedium,
+      color = AppTheme.colorScheme.outline,
+      minLines = 3,
+      maxLines = 3,
+      overflow = TextOverflow.Ellipsis,
+    )
+
+    Spacer(Modifier.requiredHeight(dynamicTitlePadding))
+
+    Spacer(modifier = Modifier.requiredHeight(4.dp))
 
     PostActionBar(
       modifier = Modifier.graphicsLayer { this.alpha = contentAlphaProvider.invoke() },
@@ -118,46 +160,6 @@ internal fun FeaturedPostItem(
       onSourceClick = onSourceClick,
     )
 
-    Spacer(Modifier.height(4.dp))
-
-    val isDarkTheme = AppTheme.isDark
-    Text(
-      modifier =
-        Modifier.graphicsLayer {
-          this.alpha = contentAlphaProvider.invoke()
-          blendMode =
-            if (isDarkTheme) {
-              BlendMode.Screen
-            } else {
-              BlendMode.Multiply
-            }
-        },
-      text = item.title.ifBlank { item.description },
-      style = titleTextStyle,
-      color = AppTheme.colorScheme.secondary,
-      maxLines = titleMaxLines,
-      overflow = TextOverflow.Ellipsis,
-      onTextLayout = { textLayoutResult ->
-        val numberOfLines = textLayoutResult.lineCount
-        if (numberOfLines < titleMaxLines) {
-          val lineHeight = with(density) { titleTextStyle.lineHeight.toDp() }
-          descriptionBottomPadding = lineHeight * (titleMaxLines - numberOfLines)
-        }
-      },
-    )
-
-    Spacer(Modifier.height(4.dp))
-
-    Text(
-      modifier = Modifier.graphicsLayer { this.alpha = contentAlphaProvider.invoke() },
-      text = item.description,
-      style = MaterialTheme.typography.bodyMedium,
-      color = AppTheme.colorScheme.outline,
-      minLines = 3,
-      maxLines = 3,
-      overflow = TextOverflow.Ellipsis,
-    )
-
-    Spacer(Modifier.requiredHeight(descriptionBottomPadding + 16.dp))
+    Spacer(Modifier.requiredHeight(16.dp))
   }
 }

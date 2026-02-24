@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.feeds.ui.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -58,43 +59,33 @@ import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.feeds.SourceListItem
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupItem
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
-import dev.sasikanth.rss.reader.feeds.ui.sheet.expanded.bottomPaddingOfSourceItem
 import dev.sasikanth.rss.reader.resources.icons.Add
 import dev.sasikanth.rss.reader.resources.icons.Sort
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
+import dev.sasikanth.rss.reader.utils.bottomPaddingOfSourceItem
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.allFeeds
 import twine.shared.generated.resources.feedsSortAlphabetical
 import twine.shared.generated.resources.feedsSortLatest
 import twine.shared.generated.resources.feedsSortOldest
+import twine.shared.generated.resources.sort
+import twine.shared.generated.resources.sourcesCount
 
 internal fun LazyListScope.allSources(
-  numberOfFeeds: Int,
   numberOfFeedGroups: Int,
   sources: LazyPagingItems<SourceListItem>,
   selectedSources: Set<Source>,
-  feedsSortOrder: FeedsOrderBy,
+  activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
   isInMultiSelectMode: Boolean,
-  onFeedsSortChanged: (FeedsOrderBy) -> Unit,
   onSourceClick: (Source) -> Unit,
   onToggleSourceSelection: (Source) -> Unit,
-  onAddNewFeedClick: () -> Unit,
+  onPinClick: (Source) -> Unit,
 ) {
   if (sources.itemCount > 0) {
-    stickyHeader(key = "AllFeedsHeader") {
-      AllFeedsHeader(
-        modifier = Modifier.animateItem(),
-        feedsCount = numberOfFeeds,
-        feedsSortOrder = feedsSortOrder,
-        onFeedsSortChanged = onFeedsSortChanged,
-        onAddNewFeedClick = onAddNewFeedClick,
-      )
-    }
-
     items(
       count = sources.itemCount,
       key =
@@ -125,8 +116,8 @@ internal fun LazyListScope.allSources(
         is SourceListItem.SourceItem -> {
           when (val source = sourceItem.source) {
             is FeedGroup -> {
-              val startPadding = 24.dp
-              val endPadding = 16.dp
+              val startPadding = 8.dp
+              val endPadding = 8.dp
               val topPadding = 4.dp
               val bottomPadding = bottomPaddingOfSourceItem(index, sources.itemCount)
 
@@ -134,10 +125,16 @@ internal fun LazyListScope.allSources(
                 feedGroup = source,
                 canShowUnreadPostsCount = canShowUnreadPostsCount,
                 isInMultiSelectMode = isInMultiSelectMode,
-                selected = selectedSources.any { it.id == source.id },
+                selected =
+                  if (isInMultiSelectMode) {
+                    selectedSources.any { it.id == source.id }
+                  } else {
+                    activeSource?.id == source.id
+                  },
                 onFeedGroupSelected = onToggleSourceSelection,
                 onFeedGroupClick = onSourceClick,
                 onOptionsClick = { onToggleSourceSelection(source) },
+                onPinClick = onPinClick,
                 modifier =
                   Modifier.padding(
                       start = startPadding,
@@ -158,8 +155,8 @@ internal fun LazyListScope.allSources(
                 } else {
                   index
                 }
-              val startPadding = 24.dp
-              val endPadding = 16.dp
+              val startPadding = 8.dp
+              val endPadding = 8.dp
               val topPadding = 4.dp
               val bottomPadding = bottomPaddingOfSourceItem(transformedIndex, sources.itemCount)
 
@@ -167,10 +164,16 @@ internal fun LazyListScope.allSources(
                 feed = source,
                 canShowUnreadPostsCount = canShowUnreadPostsCount,
                 isInMultiSelectMode = isInMultiSelectMode,
-                isFeedSelected = selectedSources.any { it.id == source.id },
+                isFeedSelected =
+                  if (isInMultiSelectMode) {
+                    selectedSources.any { it.id == source.id }
+                  } else {
+                    activeSource?.id == source.id
+                  },
                 onFeedClick = onSourceClick,
                 onFeedSelected = onToggleSourceSelection,
                 onOptionsClick = { onToggleSourceSelection(source) },
+                onPinClick = onPinClick,
                 modifier =
                   Modifier.padding(
                       start = startPadding,
@@ -201,22 +204,18 @@ internal fun AllFeedsHeader(
   onAddNewFeedClick: (() -> Unit)? = null,
 ) {
   Row(
-    modifier =
-      Modifier.then(modifier)
-        .background(AppTheme.colorScheme.bottomSheet)
-        .padding(start = 32.dp, end = 24.dp)
-        .padding(vertical = 12.dp),
+    modifier = Modifier.then(modifier).padding(horizontal = 24.dp, vertical = 16.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
     var showSortDropdown by remember { mutableStateOf(false) }
     val allFeedsLabel = stringResource(Res.string.allFeeds)
 
-    Row(
+    Column(
       modifier =
         Modifier.weight(1f).clearAndSetSemantics {
           contentDescription = "${allFeedsLabel}: ${feedsCount}"
         },
-      verticalAlignment = Alignment.CenterVertically,
+      horizontalAlignment = Alignment.Start,
     ) {
       Text(
         text = allFeedsLabel,
@@ -224,12 +223,10 @@ internal fun AllFeedsHeader(
         color = AppTheme.colorScheme.onSurface,
       )
 
-      Spacer(Modifier.requiredWidth(8.dp))
-
       Text(
-        text = feedsCount.toString(),
-        style = MaterialTheme.typography.titleMedium,
-        color = AppTheme.colorScheme.primary,
+        text = stringResource(Res.string.sourcesCount, feedsCount),
+        style = MaterialTheme.typography.bodySmall,
+        color = AppTheme.colorScheme.onSurfaceVariant,
       )
     }
 
@@ -245,7 +242,7 @@ internal fun AllFeedsHeader(
             buttonHeight = with(density) { coordinates.size.height.toDp() }
           },
         icon = TwineIcons.Sort,
-        label = "",
+        label = stringResource(Res.string.sort),
         onClick = { showSortDropdown = true },
       )
 

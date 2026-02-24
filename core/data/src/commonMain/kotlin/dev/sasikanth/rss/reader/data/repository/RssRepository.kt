@@ -90,6 +90,7 @@ class RssRepository(
 ) {
   private companion object {
     private const val POST_UPSERT_BATCH_SIZE = 200
+    private const val SQLITE_BATCH_SIZE = 990
   }
 
   suspend fun deleteAllLocalData() {
@@ -811,15 +812,27 @@ class RssRepository(
     }
   }
 
-  suspend fun toggleFeedPinStatus(feed: Feed) {
+  suspend fun toggleSourcePinStatus(source: Source) {
     val now =
-      if (feed.pinnedAt == null) {
+      if (source.pinnedAt == null) {
         Clock.System.now()
       } else {
         null
       }
+
     withContext(dispatchersProvider.databaseWrite) {
-      feedQueries.updatePinnedAt(pinnedAt = now, id = feed.id, lastUpdatedAt = Clock.System.now())
+      transactionRunner.invoke {
+        feedQueries.updatePinnedAt(
+          pinnedAt = now,
+          id = source.id,
+          lastUpdatedAt = Clock.System.now(),
+        )
+        feedGroupQueries.updatePinnedAt(
+          pinnedAt = now,
+          id = source.id,
+          updatedAt = Clock.System.now(),
+        )
+      }
     }
   }
 
@@ -864,11 +877,36 @@ class RssRepository(
   }
 
   suspend fun markPostsAsRead(postIds: Set<String>) {
+    updatePostReadStatus(postIds, read = true)
+  }
+
+  suspend fun updatePostReadStatus(postIds: Set<String>, read: Boolean) {
     val postIdsSnapshot = postIds.toList()
+    val now = Clock.System.now()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
-        postIdsSnapshot.forEach { postId ->
-          postQueries.updateReadStatus(read = 1L, id = postId, updatedAt = Clock.System.now())
+        postIdsSnapshot.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
+          postQueries.updatePostsReadStatus(
+            read = if (read) 1L else 0L,
+            updatedAt = now,
+            ids = chunk,
+          )
+        }
+      }
+    }
+  }
+
+  suspend fun updateBookmarkStatus(postIds: Set<String>, bookmarked: Boolean) {
+    val postIdsSnapshot = postIds.toList()
+    val now = Clock.System.now()
+    withContext(dispatchersProvider.databaseWrite) {
+      transactionRunner.invoke {
+        postIdsSnapshot.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
+          postQueries.updatePostsBookmarkStatus(
+            bookmarked = if (bookmarked) 1L else 0L,
+            updatedAt = now,
+            ids = chunk,
+          )
         }
       }
     }
@@ -937,6 +975,28 @@ class RssRepository(
   suspend fun updatePostSyncedAt(postId: String, syncedAt: Instant) {
     withContext(dispatchersProvider.databaseWrite) {
       postQueries.updatePostSyncedAt(syncedAt = syncedAt, id = postId)
+    }
+  }
+
+  suspend fun updatePostSyncedAt(postIds: Set<String>, syncedAt: Instant) {
+    val postIdsSnapshot = postIds.toList()
+    withContext(dispatchersProvider.databaseWrite) {
+      transactionRunner.invoke {
+        postIdsSnapshot.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
+          postQueries.updatePostsSyncedAt(syncedAt = syncedAt, ids = chunk)
+        }
+      }
+    }
+  }
+
+  suspend fun updatePostSyncedAt(posts: List<Post>) {
+    val postIds = posts.map { it.id }
+    withContext(dispatchersProvider.databaseWrite) {
+      transactionRunner.invoke {
+        postIds.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
+          postQueries.updatePostsSyncedAtToUpdatedAt(ids = chunk)
+        }
+      }
     }
   }
 

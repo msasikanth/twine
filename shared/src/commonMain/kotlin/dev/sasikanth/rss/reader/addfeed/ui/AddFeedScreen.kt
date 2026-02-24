@@ -88,7 +88,7 @@ import dev.sasikanth.rss.reader.components.OutlinedButton
 import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.TextField
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
-import dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed.FeedGroupBottomBarItem
+import dev.sasikanth.rss.reader.feeds.ui.pinned.PinnedFeedGroupItem
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Close
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
@@ -403,7 +403,7 @@ private fun GroupItem(group: FeedGroup, onClick: () -> Unit) {
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     Box {
-      FeedGroupBottomBarItem(feedGroup = group, canShowUnreadPostsCount = false)
+      PinnedFeedGroupItem(feedGroup = group, canShowUnreadPostsCount = false)
 
       Box(
         modifier =
