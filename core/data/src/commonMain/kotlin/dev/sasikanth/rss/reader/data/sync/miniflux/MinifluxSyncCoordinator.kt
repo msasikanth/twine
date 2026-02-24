@@ -659,18 +659,27 @@ class MinifluxSyncCoordinator(
 
       if (dirtyPosts.isEmpty()) return
 
-      val toMarkRead = dirtyPosts.filter { it.read }.mapNotNull { it.remoteId?.toLong() }
-      val toMarkUnread = dirtyPosts.filter { !it.read }.mapNotNull { it.remoteId?.toLong() }
+      val toMarkRead = mutableListOf<Long>()
+      val toMarkUnread = mutableListOf<Long>()
+      val toBookmark = mutableListOf<Long>()
+      val toUnbookmark = mutableListOf<Long>()
 
-      // Only push bookmark changes for posts where local state differs from remote state
-      val toBookmark =
-        dirtyPosts
-          .filter { it.bookmarked && it.remoteId !in remoteBookmarkIds }
-          .mapNotNull { it.remoteId?.toLong() }
-      val toUnbookmark =
-        dirtyPosts
-          .filter { !it.bookmarked && it.remoteId in remoteBookmarkIds }
-          .mapNotNull { it.remoteId?.toLong() }
+      dirtyPosts.forEach { post ->
+        val remoteId = post.remoteId?.toLongOrNull() ?: return@forEach
+
+        if (post.read) {
+          toMarkRead.add(remoteId)
+        } else {
+          toMarkUnread.add(remoteId)
+        }
+
+        // Only push bookmark changes for posts where local state differs from remote state
+        if (post.bookmarked && post.remoteId !in remoteBookmarkIds) {
+          toBookmark.add(remoteId)
+        } else if (!post.bookmarked && post.remoteId in remoteBookmarkIds) {
+          toUnbookmark.add(remoteId)
+        }
+      }
 
       toMarkRead.chunked(STATUS_BATCH_SIZE).forEach { ids -> minifluxSource.markEntriesAsRead(ids) }
       toMarkUnread.chunked(STATUS_BATCH_SIZE).forEach { ids ->
