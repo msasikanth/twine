@@ -64,6 +64,8 @@
   <string name="settingsEnableBlurSubtitle">When disabled, displays gradients instead of blurred images. May improve performance.</string>
   <string name="settingsShowUnreadCountTitle">Show unread posts count</string>
   <string name="settingsShowUnreadCountSubtitle">Displays a bubble above feed selections</string>
+  <string name="settingsShowPinnedSourcesTitle">Show pinned sources</string>
+  <string name="settingsShowPinnedSourcesSubtitle">Displays a floating bar with pinned sources at the bottom of the home screen</string>
   <string name="settingsReportIssue">Report an issue</string>
   <string name="settingsVersion">%1$s (%2$s)</string>
   <string name="settingsAboutTitle">About</string>
@@ -105,6 +107,7 @@
   <string name="aboutSocialWebsite">Website</string>
   <string name="feedsSearchHint">Filter</string>
   <string name="allFeeds">Feeds</string>
+  <string name="allFeedsCount">%1$s: %2$d</string>
   <string name="pinnedFeeds">Pinned</string>
   <string name="markAllAsRead">Mark as read</string>
   <string name="openWebsite">Open Website</string>
@@ -278,7 +281,8 @@
   <string name="settingsStatisticsTitle">Statistics</string>
   <string name="settingsStatisticsSubtitle">View your reading habits and insights</string>
 
-  <string name="discoveryTitle">Discovery</string>
+  <string name="sourcesCount">%1$d sources</string>
+  <string name="discoveryTitle">Discover</string>
   <string name="discoverySearchHint">Search for feeds</string>
   <string name="discoveryAddFeed">Add</string>
   <string name="discoveryAdded">Added</string>
@@ -320,7 +324,7 @@
   </plurals>
 
   <plurals name="feedGroupFeeds">
-    <item quantity="one">%1$d feed</item>
-    <item quantity="other">%1$d feeds</item>
+    <item quantity="one">%1$d source</item>
+    <item quantity="other">%1$d sources</item>
   </plurals>
 </resources>
