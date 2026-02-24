@@ -176,7 +176,10 @@ class FreshRSSSyncCoordinator(
     val feeds = rssRepository.allFeedsBlocking()
     val localSources = feeds + feedGroups
 
-    localSources.filter { it.isDeleted }.forEach { rssRepository.deleteSources(setOf(it)) }
+    val toDelete = localSources.filter { it.isDeleted }.toSet()
+    if (toDelete.isNotEmpty()) {
+      rssRepository.deleteSources(toDelete)
+    }
   }
 
   private suspend fun pushFeedChanges(syncStartTime: Instant) {

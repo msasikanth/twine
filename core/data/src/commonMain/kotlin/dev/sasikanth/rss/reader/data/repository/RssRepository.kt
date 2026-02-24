@@ -90,6 +90,7 @@ class RssRepository(
 ) {
   private companion object {
     private const val POST_UPSERT_BATCH_SIZE = 200
+    private const val SQLITE_BATCH_SIZE = 990
   }
 
   suspend fun deleteAllLocalData() {
@@ -884,8 +885,12 @@ class RssRepository(
     val now = Clock.System.now()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
-        postIdsSnapshot.forEach { postId ->
-          postQueries.updateReadStatus(read = if (read) 1L else 0L, id = postId, updatedAt = now)
+        postIdsSnapshot.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
+          postQueries.updatePostsReadStatus(
+            read = if (read) 1L else 0L,
+            updatedAt = now,
+            ids = chunk,
+          )
         }
       }
     }
@@ -896,11 +901,11 @@ class RssRepository(
     val now = Clock.System.now()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
-        postIdsSnapshot.forEach { postId ->
-          postQueries.updateBookmarkStatus(
+        postIdsSnapshot.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
+          postQueries.updatePostsBookmarkStatus(
             bookmarked = if (bookmarked) 1L else 0L,
-            id = postId,
             updatedAt = now,
+            ids = chunk,
           )
         }
       }
@@ -977,19 +982,19 @@ class RssRepository(
     val postIdsSnapshot = postIds.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
-        postIdsSnapshot.forEach { postId ->
-          postQueries.updatePostSyncedAt(syncedAt = syncedAt, id = postId)
+        postIdsSnapshot.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
+          postQueries.updatePostsSyncedAt(syncedAt = syncedAt, ids = chunk)
         }
       }
     }
   }
 
   suspend fun updatePostSyncedAt(posts: List<Post>) {
-    val postsSnapshot = posts.toList()
+    val postIds = posts.map { it.id }
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
-        postsSnapshot.forEach { post ->
-          postQueries.updatePostSyncedAt(syncedAt = post.updatedAt, id = post.id)
+        postIds.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
+          postQueries.updatePostsSyncedAtToUpdatedAt(ids = chunk)
         }
       }
     }

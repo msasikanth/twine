@@ -530,8 +530,14 @@ WHERE
 updateBookmarkStatus:
 UPDATE post SET flags = CASE WHEN :bookmarked = 1 THEN flags | 1 ELSE flags & ~1 END, updatedAt = :updatedAt WHERE id = :id;
 
+updatePostsBookmarkStatus:
+UPDATE post SET flags = CASE WHEN :bookmarked = 1 THEN flags | 1 ELSE flags & ~1 END, updatedAt = :updatedAt WHERE id IN :ids;
+
 updateReadStatus:
 UPDATE post SET flags = CASE WHEN :read = 1 THEN flags | 2 ELSE flags & ~2 END, updatedAt = :updatedAt WHERE id = :id;
+
+updatePostsReadStatus:
+UPDATE post SET flags = CASE WHEN :read = 1 THEN flags | 2 ELSE flags & ~2 END, updatedAt = :updatedAt WHERE id IN :ids;
 
 updateSeedColor:
 UPDATE post SET seedColor = :seedColor WHERE id = :id;
@@ -668,6 +674,12 @@ UPDATE post SET remoteId = :remoteId, updatedAt = :updatedAt, syncedAt = :update
 
 updatePostSyncedAt:
 UPDATE post SET syncedAt = :syncedAt WHERE id = :id;
+
+updatePostsSyncedAt:
+UPDATE post SET syncedAt = :syncedAt WHERE id IN :ids;
+
+updatePostsSyncedAtToUpdatedAt:
+UPDATE post SET syncedAt = updatedAt WHERE id IN :ids;
 
 postsWithRemoteId:
 SELECT * FROM post WHERE remoteId IS NOT NULL;
