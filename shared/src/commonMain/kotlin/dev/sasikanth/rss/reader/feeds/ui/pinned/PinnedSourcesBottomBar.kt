@@ -17,7 +17,6 @@
 
 package dev.sasikanth.rss.reader.feeds.ui.pinned
 
-import androidx.compose.animation.core.animate
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,19 +26,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -49,39 +46,7 @@ import dev.sasikanth.rss.reader.utils.BOTTOM_BAR_CORNER_RADIUS
 import dev.sasikanth.rss.reader.utils.BOTTOM_BAR_MAX_WIDTH
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
 
-@Stable
-internal class PinnedSourcesBottomBarScrollState {
-  var offset by mutableStateOf(0f)
-    internal set
-
-  var height by mutableStateOf(0f)
-    internal set
-
-  val nestedScrollConnection =
-    object : NestedScrollConnection {
-      override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-        val delta = available.y
-        val newOffset = offset - delta
-        offset = newOffset.coerceIn(0f, height)
-        return Offset.Zero
-      }
-    }
-
-  suspend fun animateOffsetTo(target: Float) {
-    animate(initialValue = offset, targetValue = target) { value, _ -> offset = value }
-  }
-
-  suspend fun reset() {
-    animateOffsetTo(0f)
-  }
-}
-
-@Composable
-internal fun rememberPinnedSourcesBottomBarScrollState(): PinnedSourcesBottomBarScrollState {
-  return remember { PinnedSourcesBottomBarScrollState() }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 internal fun PinnedSourcesBottomBar(
   pinnedSources: List<Source>,
@@ -90,11 +55,25 @@ internal fun PinnedSourcesBottomBar(
   onSourceClick: (Source) -> Unit,
   onHomeSelected: () -> Unit,
   modifier: Modifier = Modifier,
+  scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
   val shape = RoundedCornerShape(BOTTOM_BAR_CORNER_RADIUS)
+
+  val onGloballyPositionedModifier =
+    Modifier.onGloballyPositioned { coordinates ->
+      val height = coordinates.size.height.toFloat()
+      if (scrollBehavior != null && scrollBehavior.state.heightOffsetLimit != -height) {
+        scrollBehavior.state.heightOffsetLimit = -height
+      }
+    }
+
+  val translationY = scrollBehavior?.state?.heightOffset ?: 0f
+
   LazyRow(
     modifier =
       modifier
+        .then(onGloballyPositionedModifier)
+        .graphicsLayer { this.translationY = -translationY }
         .widthIn(max = BOTTOM_BAR_MAX_WIDTH)
         .padding(horizontal = 32.dp)
         .shadow(elevation = 4.dp, shape = shape)

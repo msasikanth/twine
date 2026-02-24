@@ -69,7 +69,6 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.coerceAtLeast
@@ -86,7 +85,7 @@ import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.feeds.ui.pinned.PinnedSourcesBottomBar
-import dev.sasikanth.rss.reader.feeds.ui.pinned.rememberPinnedSourcesBottomBarScrollState
+import dev.sasikanth.rss.reader.feeds.ui.pinned.enterAlwaysScrollBehavior
 import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeState
@@ -175,7 +174,7 @@ internal fun HomeScreen(
   val unreadSinceLastSync = state.unreadSinceLastSync
 
   val appBarScrollBehaviour = TopAppBarDefaults.enterAlwaysScrollBehavior()
-  val bottomBarScrollState = rememberPinnedSourcesBottomBarScrollState()
+  val bottomBarScrollState = enterAlwaysScrollBehavior()
 
   LaunchedEffect(triggerSync) {
     if (triggerSync) {
@@ -187,7 +186,7 @@ internal fun HomeScreen(
     if (state.activeSource != state.prevActiveSource) {
       viewModel.dispatch(HomeEvent.UpdatePrevActiveSource(state.activeSource))
       viewModel.dispatch(HomeEvent.UpdateVisibleItemIndex(0))
-      bottomBarScrollState.offset = 0f
+      bottomBarScrollState.state.heightOffset = 0f
       appBarScrollBehaviour.state.heightOffset = 0f
       appBarScrollBehaviour.state.contentOffset = 0f
     }
@@ -242,26 +241,16 @@ internal fun HomeScreen(
           }
 
         AppTheme(useDarkTheme = true) {
-          Box(
-            modifier =
-              Modifier.fillMaxWidth()
-                .graphicsLayer { translationY = bottomBarScrollState.offset }
-                .onGloballyPositioned { bottomBarScrollState.height = it.size.height.toFloat() },
-            contentAlignment = Alignment.BottomCenter,
-          ) {
-            PinnedSourcesBottomBar(
-              modifier = Modifier.navigationBarsPadding().padding(bottom = scaffoldBottomPadding),
-              pinnedSources = feedsState.pinnedSources,
-              activeSource = feedsState.activeSource,
-              canShowUnreadPostsCount = feedsState.canShowUnreadPostsCount,
-              onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
-              onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
-            )
-          }
+          PinnedSourcesBottomBar(
+            modifier = Modifier.navigationBarsPadding().padding(bottom = scaffoldBottomPadding),
+            pinnedSources = feedsState.pinnedSources,
+            activeSource = feedsState.activeSource,
+            canShowUnreadPostsCount = feedsState.canShowUnreadPostsCount,
+            onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
+            onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
+            scrollBehavior = bottomBarScrollState,
+          )
         }
-      } else {
-        bottomBarScrollState.height = 0f
-        bottomBarScrollState.offset = 0f
       }
     },
   ) { scaffoldPadding ->
@@ -422,7 +411,7 @@ internal fun HomeScreen(
             Modifier.fillMaxWidth()
               .requiredHeight(PINNED_SOURCES_BOTTOM_BAR_HEIGHT)
               .align(Alignment.BottomCenter)
-              .graphicsLayer { translationY = bottomBarScrollState.offset }
+              .graphicsLayer { translationY = -bottomBarScrollState.state.heightOffset }
               .drawBehind {
                 drawRect(Brush.verticalGradient(listOf(Color.Transparent, colorScheme.backdrop)))
               }
@@ -435,11 +424,19 @@ internal fun HomeScreen(
         modifier =
           Modifier.padding(scaffoldPadding).graphicsLayer {
             translationY =
-              bottomBarScrollState.offset.coerceAtMost(PINNED_SOURCES_BOTTOM_BAR_HEIGHT.toPx())
+              bottomBarScrollState.state.heightOffset
+                .unaryMinus()
+                .coerceAtMost(PINNED_SOURCES_BOTTOM_BAR_HEIGHT.toPx())
           },
         onLoadNewArticlesClick = {
           coroutineScope.launch {
-            launch { bottomBarScrollState.reset() }
+            launch {
+              animate(initialValue = bottomBarScrollState.state.heightOffset, targetValue = 0f) {
+                value,
+                _ ->
+                bottomBarScrollState.state.heightOffset = value
+              }
+            }
             launch {
               animate(initialValue = appBarScrollBehaviour.state.heightOffset, targetValue = 0f) {
                 value,
@@ -460,7 +457,13 @@ internal fun HomeScreen(
         },
       ) {
         coroutineScope.launch {
-          launch { bottomBarScrollState.reset() }
+          launch {
+            animate(initialValue = bottomBarScrollState.state.heightOffset, targetValue = 0f) {
+              value,
+              _ ->
+              bottomBarScrollState.state.heightOffset = value
+            }
+          }
           launch {
             animate(initialValue = appBarScrollBehaviour.state.heightOffset, targetValue = 0f) {
               value,
