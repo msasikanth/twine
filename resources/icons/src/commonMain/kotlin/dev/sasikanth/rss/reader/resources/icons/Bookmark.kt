@@ -17,60 +17,58 @@
 package dev.sasikanth.rss.reader.resources.icons
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
-import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 val TwineIcons.Bookmark: ImageVector
   get() {
-    if (bookmark != null) {
-      return bookmark!!
+    if (_Bookmarks != null) {
+      return _Bookmarks!!
     }
-    bookmark =
-      Builder(
-          name = "Bookmark",
-          defaultWidth = 24.0.dp,
-          defaultHeight = 24.0.dp,
-          viewportWidth = 24.0f,
-          viewportHeight = 24.0f,
+    _Bookmarks =
+      ImageVector.Builder(
+          name = "Bookmarks",
+          defaultWidth = 20.dp,
+          defaultHeight = 20.dp,
+          viewportWidth = 20f,
+          viewportHeight = 20f,
         )
         .apply {
-          path(
-            fill = SolidColor(Color(0xFF201A18)),
-            stroke = null,
-            strokeLineWidth = 0.0f,
-            strokeLineCap = Butt,
-            strokeLineJoin = Miter,
-            strokeLineMiter = 4.0f,
-            pathFillType = NonZero,
-          ) {
-            moveTo(5.0f, 21.0f)
-            verticalLineTo(5.0f)
-            curveTo(5.0f, 4.45f, 5.196f, 3.979f, 5.588f, 3.588f)
-            curveTo(5.979f, 3.196f, 6.45f, 3.0f, 7.0f, 3.0f)
-            horizontalLineTo(17.0f)
-            curveTo(17.55f, 3.0f, 18.021f, 3.196f, 18.413f, 3.588f)
-            curveTo(18.804f, 3.979f, 19.0f, 4.45f, 19.0f, 5.0f)
-            verticalLineTo(21.0f)
-            lineTo(12.0f, 18.0f)
-            lineTo(5.0f, 21.0f)
+          path(fill = SolidColor(Color(0xFF514347))) {
+            moveTo(4f, 5.5f)
+            curveTo(4f, 4.119f, 5.119f, 3f, 6.5f, 3f)
+            verticalLineTo(4.5f)
+            lineTo(6.397f, 4.505f)
+            curveTo(5.893f, 4.556f, 5.5f, 4.982f, 5.5f, 5.5f)
+            verticalLineTo(16.5f)
+            lineTo(10f, 14.25f)
+            lineTo(14.5f, 16.5f)
+            verticalLineTo(5.5f)
+            curveTo(14.5f, 4.948f, 14.052f, 4.5f, 13.5f, 4.5f)
+            verticalLineTo(3f)
+            curveTo(14.881f, 3f, 16f, 4.119f, 16f, 5.5f)
+            verticalLineTo(16.5f)
+            curveTo(16f, 17.02f, 15.731f, 17.503f, 15.289f, 17.776f)
+            curveTo(14.847f, 18.05f, 14.294f, 18.074f, 13.829f, 17.842f)
+            lineTo(10f, 15.927f)
+            lineTo(6.171f, 17.842f)
+            curveTo(5.706f, 18.074f, 5.153f, 18.05f, 4.711f, 17.776f)
+            curveTo(4.269f, 17.503f, 4f, 17.02f, 4f, 16.5f)
+            verticalLineTo(5.5f)
             close()
-            moveTo(7.0f, 17.95f)
-            lineTo(12.0f, 15.8f)
-            lineTo(17.0f, 17.95f)
-            verticalLineTo(5.0f)
-            horizontalLineTo(7.0f)
-            verticalLineTo(17.95f)
+            moveTo(13.5f, 3f)
+            verticalLineTo(4.5f)
+            horizontalLineTo(6.5f)
+            verticalLineTo(3f)
+            horizontalLineTo(13.5f)
             close()
           }
         }
         .build()
-    return bookmark!!
+
+    return _Bookmarks!!
   }
 
-private var bookmark: ImageVector? = null
+@Suppress("ObjectPropertyName") private var _Bookmarks: ImageVector? = null
