@@ -126,7 +126,7 @@ class FreshRSSSyncCoordinator(
       updateSyncState(SyncState.Complete)
 
       // After finishing feeds, categories and articles, we continue syncing statuses and bookmarks.
-      syncArticles(streamId = FreshRssSource.USER_STATE_STARRED, newerThan = newerThan)
+      syncArticles(streamId = FreshRssSource.USER_STATE_STARRED)
       syncStatuses()
 
       true
