@@ -434,7 +434,8 @@ internal fun HomeScreen(
         canShowScrollToTop = showScrollToTop,
         modifier =
           Modifier.padding(scaffoldPadding).graphicsLayer {
-            translationY = bottomBarScrollState.offset
+            translationY =
+              bottomBarScrollState.offset.coerceAtMost(PINNED_SOURCES_BOTTOM_BAR_HEIGHT.toPx())
           },
         onLoadNewArticlesClick = {
           coroutineScope.launch {
