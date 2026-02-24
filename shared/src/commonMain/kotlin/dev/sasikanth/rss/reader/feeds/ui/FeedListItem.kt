@@ -43,7 +43,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -74,19 +73,11 @@ internal fun FeedListItem(
   interactionSource: MutableInteractionSource? = null,
 ) {
   val haptic = LocalHapticFeedback.current
-  val backgroundModifier =
+  val backgroundColor =
     if (isFeedSelected) {
-      Modifier.background(
-        brush =
-          Brush.horizontalGradient(
-            0.0f to AppTheme.colorScheme.primaryContainer,
-            0.6f to AppTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-            0.85f to Color.Transparent,
-            1.0f to Color.Transparent,
-          )
-      )
+      AppTheme.colorScheme.primaryContainer
     } else {
-      Modifier
+      Color.Transparent
     }
   val translucentStyle = LocalTranslucentStyles.current
 
@@ -95,7 +86,7 @@ internal fun FeedListItem(
       Modifier.fillMaxWidth()
         .then(modifier)
         .clip(RoundedCornerShape(16.dp))
-        .then(backgroundModifier)
+        .background(backgroundColor)
         .combinedClickable(
           interactionSource = interactionSource ?: remember { MutableInteractionSource() },
           indication = LocalIndication.current,
