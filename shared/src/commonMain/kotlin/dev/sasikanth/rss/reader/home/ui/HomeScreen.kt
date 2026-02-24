@@ -239,16 +239,18 @@ internal fun HomeScreen(
             0.dp
           }
 
-        AppTheme(useDarkTheme = true) {
-          PinnedSourcesBottomBar(
-            modifier = Modifier.padding(bottom = scaffoldBottomPadding),
-            pinnedSources = feedsState.pinnedSources,
-            activeSource = feedsState.activeSource,
-            canShowUnreadPostsCount = feedsState.canShowUnreadPostsCount,
-            onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
-            onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
-            scrollBehavior = bottomBarScrollState,
-          )
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+          AppTheme(useDarkTheme = true) {
+            PinnedSourcesBottomBar(
+              modifier = Modifier.padding(bottom = scaffoldBottomPadding),
+              pinnedSources = feedsState.pinnedSources,
+              activeSource = feedsState.activeSource,
+              canShowUnreadPostsCount = feedsState.canShowUnreadPostsCount,
+              onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
+              onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
+              scrollBehavior = bottomBarScrollState,
+            )
+          }
         }
       }
     },
