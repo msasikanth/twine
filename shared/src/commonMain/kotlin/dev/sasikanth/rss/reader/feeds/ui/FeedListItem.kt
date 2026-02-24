@@ -104,7 +104,10 @@ internal fun FeedListItem(
           },
         )
   ) {
-    Row(modifier = Modifier.padding(all = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+      modifier = Modifier.padding(start = 12.dp, top = 8.dp, end = 8.dp, bottom = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
       FeedIcon(
         icon = feed.icon,
         homepageLink = feed.homepageLink,
@@ -115,7 +118,7 @@ internal fun FeedListItem(
         contentScale = ContentScale.Crop,
       )
 
-      Spacer(Modifier.requiredWidth(16.dp))
+      Spacer(Modifier.requiredWidth(12.dp))
 
       Text(
         modifier = Modifier.weight(1f),
