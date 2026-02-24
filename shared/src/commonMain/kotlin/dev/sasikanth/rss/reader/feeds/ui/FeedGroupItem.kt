@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.feeds.ui
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -41,11 +42,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -79,20 +80,14 @@ internal fun FeedGroupItem(
   interactionSource: MutableInteractionSource? = null,
 ) {
   val haptic = LocalHapticFeedback.current
-  val backgroundModifier =
-    if (selected) {
-      Modifier.background(
-        brush =
-          Brush.horizontalGradient(
-            0.0f to AppTheme.colorScheme.primaryContainer,
-            0.6f to AppTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-            0.85f to Color.Transparent,
-            1.0f to Color.Transparent,
-          )
-      )
-    } else {
-      Modifier
-    }
+  val backgroundColor by
+    animateColorAsState(
+      if (selected) {
+        AppTheme.colorScheme.primaryContainer
+      } else {
+        Color.Transparent
+      }
+    )
   val translucentStyle = LocalTranslucentStyles.current
 
   Box(
@@ -100,7 +95,7 @@ internal fun FeedGroupItem(
       Modifier.fillMaxWidth()
         .then(modifier)
         .clip(MaterialTheme.shapes.large)
-        .then(backgroundModifier)
+        .background(backgroundColor)
         .combinedClickable(
           interactionSource = interactionSource ?: remember { MutableInteractionSource() },
           indication = LocalIndication.current,

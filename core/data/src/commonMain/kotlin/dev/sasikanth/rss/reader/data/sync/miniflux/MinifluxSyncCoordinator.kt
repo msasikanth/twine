@@ -132,7 +132,7 @@ class MinifluxSyncCoordinator(
       updateSyncState(SyncState.Complete)
 
       // After finishing feeds, categories and articles, we continue syncing statuses and bookmarks.
-      syncArticles(starred = true, after = after)
+      syncArticles(starred = true)
       syncStatuses()
 
       true

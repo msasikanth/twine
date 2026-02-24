@@ -124,7 +124,7 @@ fun GroupScreen(
             actions = { Spacer(Modifier.requiredSize(48.dp)) },
             colors =
               TopAppBarDefaults.topAppBarColors(
-                containerColor = AppTheme.colorScheme.bottomSheet,
+                containerColor = AppTheme.colorScheme.backdrop,
                 navigationIconContentColor = AppTheme.colorScheme.onSurface,
                 titleContentColor = AppTheme.colorScheme.onSurface,
                 actionIconContentColor = AppTheme.colorScheme.onSurface,
@@ -132,7 +132,7 @@ fun GroupScreen(
           )
 
           AllFeedsHeader(
-            modifier = Modifier.background(AppTheme.colorScheme.surface),
+            modifier = Modifier.background(AppTheme.colorScheme.backdrop),
             feedsCount = feeds.itemCount,
             feedsSortOrder = state.feedsOrderBy,
             showAddButton = false,
@@ -196,7 +196,7 @@ fun GroupScreen(
         val feed = feeds[index]
         if (feed != null) {
           FeedListItem(
-            modifier = Modifier.padding(horizontal = 24.dp),
+            modifier = Modifier.padding(horizontal = 16.dp),
             feed = feed,
             canShowUnreadPostsCount = false,
             isInMultiSelectMode = state.isInMultiSelectMode,
