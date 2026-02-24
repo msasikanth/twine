@@ -85,7 +85,7 @@ import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.feeds.ui.pinned.PinnedSourcesBottomBar
-import dev.sasikanth.rss.reader.feeds.ui.pinned.enterAlwaysScrollBehavior
+import dev.sasikanth.rss.reader.feeds.ui.pinned.rememberPinnedSourcesBottomBarScrollBehavior
 import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeState
@@ -174,7 +174,7 @@ internal fun HomeScreen(
   val unreadSinceLastSync = state.unreadSinceLastSync
 
   val appBarScrollBehaviour = TopAppBarDefaults.enterAlwaysScrollBehavior()
-  val bottomBarScrollState = enterAlwaysScrollBehavior()
+  val bottomBarScrollState = rememberPinnedSourcesBottomBarScrollBehavior()
 
   LaunchedEffect(triggerSync) {
     if (triggerSync) {

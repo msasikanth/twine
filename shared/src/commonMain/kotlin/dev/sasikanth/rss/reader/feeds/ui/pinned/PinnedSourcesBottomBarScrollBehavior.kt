@@ -24,42 +24,78 @@ import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateDecay
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.TopAppBarState
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.tokens.MotionSchemeKeyTokens
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
 import kotlin.math.abs
 
-@OptIn(ExperimentalMaterial3Api::class)
-private class EnterAlwaysScrollBehavior(
-  override val state: TopAppBarState,
-  override val snapAnimationSpec: AnimationSpec<Float>?,
-  override val flingAnimationSpec: DecayAnimationSpec<Float>?,
+@Stable
+internal class PinnedSourcesBottomBarState(
+  initialHeightOffsetLimit: Float,
+  initialHeightOffset: Float,
+  initialContentOffset: Float,
+) {
+  var heightOffsetLimit by mutableFloatStateOf(initialHeightOffsetLimit)
+
+  var heightOffset by mutableFloatStateOf(initialHeightOffset)
+    set(value) {
+      field = value.coerceIn(heightOffsetLimit, 0f)
+    }
+
+  var contentOffset by mutableFloatStateOf(initialContentOffset)
+
+  companion object {
+    val Saver: Saver<PinnedSourcesBottomBarState, *> =
+      listSaver(
+        save = { listOf(it.heightOffsetLimit, it.heightOffset, it.contentOffset) },
+        restore = {
+          PinnedSourcesBottomBarState(
+            initialHeightOffsetLimit = it[0],
+            initialHeightOffset = it[1],
+            initialContentOffset = it[2],
+          )
+        },
+      )
+  }
+}
+
+@Composable
+internal fun rememberPinnedSourcesBottomBarState(
+  initialHeightOffsetLimit: Float = -Float.MAX_VALUE,
+  initialHeightOffset: Float = 0f,
+  initialContentOffset: Float = 0f,
+): PinnedSourcesBottomBarState {
+  return rememberSaveable(saver = PinnedSourcesBottomBarState.Saver) {
+    PinnedSourcesBottomBarState(initialHeightOffsetLimit, initialHeightOffset, initialContentOffset)
+  }
+}
+
+@Stable
+internal class PinnedSourcesBottomBarScrollBehavior(
+  val state: PinnedSourcesBottomBarState,
+  val snapAnimationSpec: AnimationSpec<Float>?,
+  val flingAnimationSpec: DecayAnimationSpec<Float>?,
   val canScroll: () -> Boolean = { true },
   val reverseLayout: Boolean = false,
-) : TopAppBarScrollBehavior {
-  override val isPinned: Boolean = false
-  override var nestedScrollConnection =
+) {
+  val nestedScrollConnection =
     object : NestedScrollConnection {
       override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
         if (!canScroll()) return Offset.Zero
         val prevHeightOffset = state.heightOffset
         state.heightOffset += available.y
-        // The state's heightOffset is coerce in a minimum value of heightOffsetLimit and a
-        // maximum value 0f, so we check if its value was actually changed after the
-        // available.y was added to it in order to tell if the top app bar is currently
-        // collapsing or expanding.
-        // Note that when the content was set with a revered layout, we always return a
-        // zero offset.
         return if (!reverseLayout && prevHeightOffset != state.heightOffset) {
-          // We're in the middle of top app bar collapse or expand.
-          // Consume only the scroll on the Y axis.
           available.copy(x = 0f)
         } else {
           Offset.Zero
@@ -82,28 +118,29 @@ private class EnterAlwaysScrollBehavior(
           available.y > 0f &&
             (state.heightOffset == 0f || state.heightOffset == state.heightOffsetLimit)
         ) {
-          // Reset the total content offset to zero when scrolling all the way down.
-          // This will eliminate some float precision inaccuracies.
           state.contentOffset = 0f
         }
-        val superConsumed = Velocity.Zero
-        return superConsumed +
-          settleAppBar(state, available.y, flingAnimationSpec, snapAnimationSpec)
+        return settlePinnedSourcesBottomBar(
+          state,
+          available.y,
+          flingAnimationSpec,
+          snapAnimationSpec,
+        )
       }
     }
 }
 
-@ExperimentalMaterial3Api
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun enterAlwaysScrollBehavior(
-  state: TopAppBarState = rememberTopAppBarState(),
+internal fun rememberPinnedSourcesBottomBarScrollBehavior(
+  state: PinnedSourcesBottomBarState = rememberPinnedSourcesBottomBarState(),
   canScroll: () -> Boolean = { true },
   snapAnimationSpec: AnimationSpec<Float>? = MotionSchemeKeyTokens.DefaultEffects.value(),
   flingAnimationSpec: DecayAnimationSpec<Float>? = rememberSplineBasedDecay(),
   reverseLayout: Boolean = false,
-): TopAppBarScrollBehavior =
+): PinnedSourcesBottomBarScrollBehavior =
   remember(state, canScroll, snapAnimationSpec, flingAnimationSpec, reverseLayout) {
-    EnterAlwaysScrollBehavior(
+    PinnedSourcesBottomBarScrollBehavior(
       state = state,
       snapAnimationSpec = snapAnimationSpec,
       flingAnimationSpec = flingAnimationSpec,
@@ -112,19 +149,16 @@ fun enterAlwaysScrollBehavior(
     )
   }
 
-@OptIn(ExperimentalMaterial3Api::class)
-private suspend fun settleAppBar(
-  state: TopAppBarState,
+private suspend fun settlePinnedSourcesBottomBar(
+  state: PinnedSourcesBottomBarState,
   velocity: Float,
   flingAnimationSpec: DecayAnimationSpec<Float>?,
   snapAnimationSpec: AnimationSpec<Float>?,
 ): Velocity {
-  // Check if the app bar is already at its limits.
   if (state.heightOffset == 0f || state.heightOffset == state.heightOffsetLimit) {
     return Velocity.Zero
   }
   var remainingVelocity = velocity
-  // If there is a fling spec, try to fling the app bar.
   if (flingAnimationSpec != null && abs(velocity) > 1f) {
     var lastValue = state.heightOffset
     AnimationState(initialValue = state.heightOffset, initialVelocity = velocity).animateDecay(
@@ -140,7 +174,6 @@ private suspend fun settleAppBar(
       }
     }
   }
-  // If there is a snap spec, snap the app bar to its closest limit.
   if (snapAnimationSpec != null) {
     if (state.heightOffset != 0f && state.heightOffset != state.heightOffsetLimit) {
       val target =

@@ -26,8 +26,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -46,7 +44,7 @@ import dev.sasikanth.rss.reader.utils.BOTTOM_BAR_CORNER_RADIUS
 import dev.sasikanth.rss.reader.utils.BOTTOM_BAR_MAX_WIDTH
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun PinnedSourcesBottomBar(
   pinnedSources: List<Source>,
@@ -55,7 +53,7 @@ internal fun PinnedSourcesBottomBar(
   onSourceClick: (Source) -> Unit,
   onHomeSelected: () -> Unit,
   modifier: Modifier = Modifier,
-  scrollBehavior: TopAppBarScrollBehavior? = null,
+  scrollBehavior: PinnedSourcesBottomBarScrollBehavior? = null,
 ) {
   val shape = RoundedCornerShape(BOTTOM_BAR_CORNER_RADIUS)
 
