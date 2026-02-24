@@ -276,7 +276,19 @@ private fun ExpandedDrawerContent(
             }
 
           NavigationDrawerItem(
-            label = { Text(stringResource(destination.label)) },
+            label = {
+              val style =
+                if (selected) {
+                  MaterialTheme.typography.titleSmall
+                } else {
+                  MaterialTheme.typography.bodyMedium
+                }
+              Text(
+                text = stringResource(destination.label),
+                style = style,
+                color = AppTheme.colorScheme.onSurface,
+              )
+            },
             selected = selected,
             modifier =
               Modifier.then(
@@ -310,7 +322,7 @@ private fun ExpandedDrawerContent(
             icon = {
               val icon = if (selected) destination.selectedIcon else destination.icon
               Icon(
-                modifier = Modifier.sizeIn(20.dp),
+                modifier = Modifier.sizeIn(20.dp).padding(start = 4.dp),
                 imageVector = icon,
                 contentDescription = stringResource(destination.label),
               )
