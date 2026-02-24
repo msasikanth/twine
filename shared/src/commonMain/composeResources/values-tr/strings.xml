@@ -62,6 +62,8 @@
   <string name="settingsEnableBlurSubtitle">Devre dışı bırakıldığında, bulanık görüntüler yerine degrade gösterir. Performansı artırabilir.</string>
   <string name="settingsShowUnreadCountTitle">Okunmamış gönderi sayısını göster</string>
   <string name="settingsShowUnreadCountSubtitle">Akışların üzerinde bir baloncuk gösterir</string>
+  <string name="settingsShowPinnedSourcesTitle">Show pinned sources</string>
+  <string name="settingsShowPinnedSourcesSubtitle">Displays a floating bar with pinned sources at the bottom of the home screen</string>
   <string name="settingsReportIssue">Bir sorun bildir</string>
   <string name="settingsVersion">%1$s (%2$s)</string>
   <string name="settingsAboutTitle">Hakkında</string>
@@ -100,6 +102,7 @@
   <string name="aboutSocialWebsite">Web sitesi</string>
   <string name="feedsSearchHint">Filtrele</string>
   <string name="allFeeds">Akışlar</string>
+  <string name="allFeedsCount">%1$s: %2$d</string>
   <string name="pinnedFeeds">Sabitlenenler</string>
   <string name="markAllAsRead">Tümünü okundu olarak işaretle</string>
   <string name="openWebsite">Web sitesini aç</string>
@@ -257,6 +260,7 @@
   <string name="statisticsMore">More</string>
   <string name="settingsStatisticsTitle">Statistics</string>
   <string name="settingsStatisticsSubtitle">View your reading habits and insights</string>
+  <string name="sourcesCount">%1$d sources</string>
   <string name="discoveryTitle">Discovery</string>
   <string name="discoverySearchHint">Search for feeds</string>
   <string name="discoveryAddFeed">Add</string>
