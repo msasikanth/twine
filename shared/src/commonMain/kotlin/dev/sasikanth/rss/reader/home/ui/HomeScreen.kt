@@ -66,13 +66,10 @@ import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -104,7 +101,6 @@ import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalInAppRating
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
-import kotlin.math.absoluteValue
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.flowOf
@@ -180,6 +176,7 @@ internal fun HomeScreen(
   val appBarScrollBehaviour = TopAppBarDefaults.enterAlwaysScrollBehavior()
   val bottomBarScrollState =
     rememberPinnedSourcesBottomBarScrollBehavior(canScroll = { canShowBottomBar })
+  val homeScrollBehavior = rememberHomeScrollBehavior(appBarScrollBehaviour, bottomBarScrollState)
 
   LaunchedEffect(triggerSync) {
     if (triggerSync) {
@@ -262,78 +259,9 @@ internal fun HomeScreen(
   ) { scaffoldPadding ->
     Box(modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.backdrop)) {
       val hasFeeds = state.hasFeeds
-      val nestedScrollConnection =
-        remember(appBarScrollBehaviour, bottomBarScrollState) {
-          object : NestedScrollConnection {
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-              val appBarConsumed =
-                appBarScrollBehaviour.nestedScrollConnection.onPreScroll(available, source)
-              val bottomBarConsumed =
-                bottomBarScrollState.nestedScrollConnection.onPreScroll(available, source)
-
-              return if (appBarConsumed.y.absoluteValue > bottomBarConsumed.y.absoluteValue) {
-                appBarConsumed
-              } else {
-                bottomBarConsumed
-              }
-            }
-
-            override fun onPostScroll(
-              consumed: Offset,
-              available: Offset,
-              source: NestedScrollSource,
-            ): Offset {
-              val appBarConsumed =
-                appBarScrollBehaviour.nestedScrollConnection.onPostScroll(
-                  consumed,
-                  available,
-                  source,
-                )
-              val bottomBarConsumed =
-                bottomBarScrollState.nestedScrollConnection.onPostScroll(
-                  consumed,
-                  available,
-                  source,
-                )
-
-              return if (appBarConsumed.y.absoluteValue > bottomBarConsumed.y.absoluteValue) {
-                appBarConsumed
-              } else {
-                bottomBarConsumed
-              }
-            }
-
-            override suspend fun onPreFling(available: Velocity): Velocity {
-              val appBarConsumed =
-                appBarScrollBehaviour.nestedScrollConnection.onPreFling(available)
-              val bottomBarConsumed =
-                bottomBarScrollState.nestedScrollConnection.onPreFling(available)
-
-              return if (appBarConsumed.y.absoluteValue > bottomBarConsumed.y.absoluteValue) {
-                appBarConsumed
-              } else {
-                bottomBarConsumed
-              }
-            }
-
-            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-              val appBarConsumed =
-                appBarScrollBehaviour.nestedScrollConnection.onPostFling(consumed, available)
-              val bottomBarConsumed =
-                bottomBarScrollState.nestedScrollConnection.onPostFling(consumed, available)
-
-              return if (appBarConsumed.y.absoluteValue > bottomBarConsumed.y.absoluteValue) {
-                appBarConsumed
-              } else {
-                bottomBarConsumed
-              }
-            }
-          }
-        }
-
       val nestedScrollModifier =
         if (platform !is Platform.Desktop) {
-          Modifier.nestedScroll(nestedScrollConnection)
+          Modifier.nestedScroll(homeScrollBehavior.nestedScrollConnection)
         } else {
           Modifier
         }
