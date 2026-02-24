@@ -57,21 +57,19 @@ internal fun PinnedSourcesBottomBar(
 ) {
   val shape = RoundedCornerShape(BOTTOM_BAR_CORNER_RADIUS)
 
-  val onGloballyPositionedModifier =
-    Modifier.onGloballyPositioned { coordinates ->
-      val height = coordinates.size.height.toFloat()
-      if (scrollBehavior != null && scrollBehavior.state.heightOffsetLimit != -height) {
-        scrollBehavior.state.heightOffsetLimit = -height
-      }
-    }
-
   val translationY = scrollBehavior?.state?.heightOffset ?: 0f
 
   LazyRow(
     modifier =
-      modifier
-        .then(onGloballyPositionedModifier)
+      Modifier.onGloballyPositioned { coordinates ->
+          val height = coordinates.size.height.toFloat()
+          if (scrollBehavior != null && scrollBehavior.state.heightOffsetLimit != -height) {
+            scrollBehavior.state.heightOffsetLimit = -height
+          }
+        }
         .graphicsLayer { this.translationY = -translationY }
+        .then(modifier)
+        .navigationBarsPadding()
         .widthIn(max = BOTTOM_BAR_MAX_WIDTH)
         .padding(horizontal = 32.dp)
         .shadow(elevation = 4.dp, shape = shape)

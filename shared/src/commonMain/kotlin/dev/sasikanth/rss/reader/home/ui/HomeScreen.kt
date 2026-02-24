@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -242,7 +241,7 @@ internal fun HomeScreen(
 
         AppTheme(useDarkTheme = true) {
           PinnedSourcesBottomBar(
-            modifier = Modifier.navigationBarsPadding().padding(bottom = scaffoldBottomPadding),
+            modifier = Modifier.padding(bottom = scaffoldBottomPadding),
             pinnedSources = feedsState.pinnedSources,
             activeSource = feedsState.activeSource,
             canShowUnreadPostsCount = feedsState.canShowUnreadPostsCount,
