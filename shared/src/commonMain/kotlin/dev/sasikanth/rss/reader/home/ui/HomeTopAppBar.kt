@@ -132,25 +132,27 @@ internal fun HomeTopAppBar(
 
           PostTypePill(postsType = postsType, onClick = onShowPostsSortFilter)
 
-          Spacer(Modifier.width(12.dp))
-
           AnimatedVisibility(
             visible = it,
             enter = fadeIn() + scaleIn(),
             exit = fadeOut() + scaleOut(),
           ) {
-            CircularIconButton(
-              icon = TwineIcons.MarkAllAsRead,
-              label = stringResource(Res.string.markAllAsRead),
-              enabled = it,
-              backgroundColor = AppTheme.colorScheme.inverseSurface,
-              contentColor = AppTheme.colorScheme.inverseOnSurface,
-              borderColor = Color.Transparent,
-              onClick = {
-                hasUnreadPosts = false
-                onMarkPostsAsRead(source)
-              },
-            )
+            Row {
+              Spacer(Modifier.width(12.dp))
+
+              CircularIconButton(
+                icon = TwineIcons.MarkAllAsRead,
+                label = stringResource(Res.string.markAllAsRead),
+                enabled = it,
+                backgroundColor = AppTheme.colorScheme.inverseSurface,
+                contentColor = AppTheme.colorScheme.inverseOnSurface,
+                borderColor = Color.Transparent,
+                onClick = {
+                  hasUnreadPosts = false
+                  onMarkPostsAsRead(source)
+                },
+              )
+            }
           }
         }
       }
