@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.feeds.ui
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -41,6 +42,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,12 +80,14 @@ internal fun FeedGroupItem(
   interactionSource: MutableInteractionSource? = null,
 ) {
   val haptic = LocalHapticFeedback.current
-  val backgroundColor =
-    if (selected) {
-      AppTheme.colorScheme.primaryContainer
-    } else {
-      Color.Transparent
-    }
+  val backgroundColor by
+    animateColorAsState(
+      if (selected) {
+        AppTheme.colorScheme.primaryContainer
+      } else {
+        Color.Transparent
+      }
+    )
   val translucentStyle = LocalTranslucentStyles.current
 
   Box(
