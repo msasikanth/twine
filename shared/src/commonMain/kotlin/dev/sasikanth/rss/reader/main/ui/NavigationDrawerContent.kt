@@ -74,7 +74,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalFocusManager
@@ -274,6 +273,14 @@ private fun ExpandedDrawerContent(
             } else {
               selectedDestination == destination
             }
+          val backgroundColor by
+            animateColorAsState(
+              if (selected) {
+                AppTheme.colorScheme.primaryContainer
+              } else {
+                Color.Transparent
+              }
+            )
 
           NavigationDrawerItem(
             label = {
@@ -283,29 +290,15 @@ private fun ExpandedDrawerContent(
                 } else {
                   MaterialTheme.typography.bodyMedium
                 }
-              Text(
-                text = stringResource(destination.label),
-                style = style,
-                color = AppTheme.colorScheme.onSurface,
-              )
+              Text(text = stringResource(destination.label), style = style)
             },
             selected = selected,
             modifier =
-              Modifier.then(
-                if (selected) {
-                  Modifier.background(
-                    brush =
-                      Brush.horizontalGradient(
-                        0.0f to AppTheme.colorScheme.primaryContainer,
-                        0.6f to AppTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                        0.85f to Color.Transparent,
-                        1.0f to Color.Transparent,
-                      )
-                  )
-                } else {
-                  Modifier
-                }
-              ),
+              Modifier.padding(end = 16.dp)
+                .background(
+                  backgroundColor,
+                  RoundedCornerShape(topEndPercent = 50, bottomEndPercent = 50),
+                ),
             onClick = {
               if (
                 destination == MainDestination.Home && selectedDestination == MainDestination.Home
