@@ -160,6 +160,9 @@ fun CircularIconButton(
   label: String,
   modifier: Modifier = Modifier,
   enabled: Boolean = true,
+  backgroundColor: Color? = null,
+  borderColor: Color? = null,
+  contentColor: Color? = null,
   onClick: () -> Unit,
 ) {
   val animatedAlpha by animateFloatAsState(if (enabled) 1.0f else 0.12f)
@@ -171,8 +174,12 @@ fun CircularIconButton(
         .requiredSize(40.dp)
         .clip(CircleShape)
         .clickable(enabled = enabled) { onClick() }
-        .background(translucentStyle.default.background, CircleShape)
-        .border(width = 1.dp, color = translucentStyle.default.outline, shape = CircleShape)
+        .background(backgroundColor ?: translucentStyle.default.background, CircleShape)
+        .border(
+          width = 1.dp,
+          color = borderColor ?: translucentStyle.default.outline,
+          shape = CircleShape,
+        )
         .semantics {
           contentDescription = label
           role = Role.Button
@@ -184,7 +191,7 @@ fun CircularIconButton(
       modifier = Modifier.requiredSize(20.dp),
       imageVector = icon,
       contentDescription = null,
-      tint = AppTheme.colorScheme.onSurface,
+      tint = contentColor ?: AppTheme.colorScheme.onSurface,
     )
   }
 }
