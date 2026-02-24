@@ -597,21 +597,42 @@ class MinifluxSyncCoordinator(
           limit = LOCAL_POSTS_PAGE_SIZE.toLong(),
           offset = localOffset,
         )
+
+      val toMarkRead = mutableSetOf<String>()
+      val toMarkUnread = mutableSetOf<String>()
+      val toBookmark = mutableSetOf<String>()
+      val toUnbookmark = mutableSetOf<String>()
+      val toUpdateSyncedAt = mutableSetOf<String>()
+
       localPosts.forEach { post ->
         val remoteRead = post.remoteId !in unreadIds
         val remoteBookmarked = post.remoteId in bookmarkIds
 
         if (post.syncedAt >= post.updatedAt) {
+          var changed = false
           if (post.read != remoteRead) {
-            rssRepository.updatePostReadStatus(read = remoteRead, id = post.id)
-            rssRepository.updatePostSyncedAt(post.id, Clock.System.now())
+            if (remoteRead) toMarkRead.add(post.id) else toMarkUnread.add(post.id)
+            changed = true
           }
           if (post.bookmarked != remoteBookmarked) {
-            rssRepository.updateBookmarkStatus(bookmarked = remoteBookmarked, id = post.id)
-            rssRepository.updatePostSyncedAt(post.id, Clock.System.now())
+            if (remoteBookmarked) toBookmark.add(post.id) else toUnbookmark.add(post.id)
+            changed = true
+          }
+
+          if (changed) {
+            toUpdateSyncedAt.add(post.id)
           }
         }
       }
+
+      if (toMarkRead.isNotEmpty()) rssRepository.updatePostReadStatus(toMarkRead, read = true)
+      if (toMarkUnread.isNotEmpty()) rssRepository.updatePostReadStatus(toMarkUnread, read = false)
+      if (toBookmark.isNotEmpty()) rssRepository.updateBookmarkStatus(toBookmark, bookmarked = true)
+      if (toUnbookmark.isNotEmpty())
+        rssRepository.updateBookmarkStatus(toUnbookmark, bookmarked = false)
+      if (toUpdateSyncedAt.isNotEmpty())
+        rssRepository.updatePostSyncedAt(toUpdateSyncedAt, Clock.System.now())
+
       localOffset += localPosts.size
     } while (localPosts.size >= LOCAL_POSTS_PAGE_SIZE)
   }
@@ -658,7 +679,7 @@ class MinifluxSyncCoordinator(
       toBookmark.chunked(STATUS_BATCH_SIZE).forEach { ids -> minifluxSource.addBookmarks(ids) }
       toUnbookmark.chunked(STATUS_BATCH_SIZE).forEach { ids -> minifluxSource.removeBookmarks(ids) }
 
-      dirtyPosts.forEach { post -> rssRepository.updatePostSyncedAt(post.id, post.updatedAt) }
+      rssRepository.updatePostSyncedAt(dirtyPosts)
     }
   }
 

@@ -876,11 +876,32 @@ class RssRepository(
   }
 
   suspend fun markPostsAsRead(postIds: Set<String>) {
+    updatePostReadStatus(postIds, read = true)
+  }
+
+  suspend fun updatePostReadStatus(postIds: Set<String>, read: Boolean) {
     val postIdsSnapshot = postIds.toList()
+    val now = Clock.System.now()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
         postIdsSnapshot.forEach { postId ->
-          postQueries.updateReadStatus(read = 1L, id = postId, updatedAt = Clock.System.now())
+          postQueries.updateReadStatus(read = if (read) 1L else 0L, id = postId, updatedAt = now)
+        }
+      }
+    }
+  }
+
+  suspend fun updateBookmarkStatus(postIds: Set<String>, bookmarked: Boolean) {
+    val postIdsSnapshot = postIds.toList()
+    val now = Clock.System.now()
+    withContext(dispatchersProvider.databaseWrite) {
+      transactionRunner.invoke {
+        postIdsSnapshot.forEach { postId ->
+          postQueries.updateBookmarkStatus(
+            bookmarked = if (bookmarked) 1L else 0L,
+            id = postId,
+            updatedAt = now,
+          )
         }
       }
     }
@@ -949,6 +970,28 @@ class RssRepository(
   suspend fun updatePostSyncedAt(postId: String, syncedAt: Instant) {
     withContext(dispatchersProvider.databaseWrite) {
       postQueries.updatePostSyncedAt(syncedAt = syncedAt, id = postId)
+    }
+  }
+
+  suspend fun updatePostSyncedAt(postIds: Set<String>, syncedAt: Instant) {
+    val postIdsSnapshot = postIds.toList()
+    withContext(dispatchersProvider.databaseWrite) {
+      transactionRunner.invoke {
+        postIdsSnapshot.forEach { postId ->
+          postQueries.updatePostSyncedAt(syncedAt = syncedAt, id = postId)
+        }
+      }
+    }
+  }
+
+  suspend fun updatePostSyncedAt(posts: List<Post>) {
+    val postsSnapshot = posts.toList()
+    withContext(dispatchersProvider.databaseWrite) {
+      transactionRunner.invoke {
+        postsSnapshot.forEach { post ->
+          postQueries.updatePostSyncedAt(syncedAt = post.updatedAt, id = post.id)
+        }
+      }
     }
   }
 
