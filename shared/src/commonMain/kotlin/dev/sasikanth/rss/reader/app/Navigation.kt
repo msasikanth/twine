@@ -17,7 +17,6 @@
 
 package dev.sasikanth.rss.reader.app
 
-import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -74,7 +73,6 @@ import dev.sasikanth.rss.reader.reader.ReaderViewModel
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
 import dev.sasikanth.rss.reader.reader.ui.ReaderScreen
 import dev.sasikanth.rss.reader.search.SearchViewModel
-import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
@@ -178,6 +176,7 @@ fun NavGraphBuilder.mainScreen(
 ) {
   composable<Screen.Main> {
     val triggerSync = it.toRoute<Screen.Main>().triggerSync
+    val feedsViewModel = viewModel { feedsViewModel() }
 
     LaunchedEffect(useDarkTheme) {
       toggleLightStatusBar(!useDarkTheme)
@@ -185,9 +184,9 @@ fun NavGraphBuilder.mainScreen(
     }
 
     MainScreen(
+      feedsViewModel = feedsViewModel,
       homeContent = { openDrawer ->
         val viewModel = viewModel { homeViewModel() }
-        val feedsViewModel = viewModel { feedsViewModel() }
 
         LaunchedEffect(Unit) {
           it.savedStateHandle
@@ -218,35 +217,7 @@ fun NavGraphBuilder.mainScreen(
           feedsViewModel = feedsViewModel,
           triggerSync = triggerSync,
           openPost = { index, post -> openPost(index, post, FromScreen.Home) },
-          openGroupSelectionSheet = { feedsViewModel.dispatch(FeedsEvent.OnAddToGroupClicked) },
-          openFeedInfoSheet = { feedId -> navController.navigate(Modals.FeedInfo(feedId)) },
-          openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
-          openGroupScreen = { groupId -> navController.navigate(Screen.FeedGroup(groupId)) },
-          openPaywall = { navController.navigate(Screen.Paywall) },
           onMenuClicked = openDrawer,
-          onBottomSheetStateChanged = { sheetValue ->
-            val showDarkSystemBars =
-              if (sheetValue == SheetValue.Expanded) {
-                true
-              } else {
-                useDarkTheme
-              }
-
-            toggleLightStatusBar(!showDarkSystemBars)
-            toggleLightNavBar(!showDarkSystemBars)
-          },
-          modifier = screenModifier,
-        )
-      },
-      searchContent = { goBack ->
-        val viewModel = viewModel { searchViewModel() }
-
-        SearchScreen(
-          searchViewModel = viewModel,
-          goBack = goBack,
-          openPost = { searchQuery, sortOrder, index, post ->
-            openPost(index, post, FromScreen.Search(searchQuery, sortOrder))
-          },
           modifier = screenModifier,
         )
       },
@@ -310,6 +281,11 @@ fun NavGraphBuilder.mainScreen(
           modifier = screenModifier,
         )
       },
+      openFeedInfoSheet = { feedId -> navController.navigate(Modals.FeedInfo(feedId)) },
+      openGroupScreen = { groupId -> navController.navigate(Screen.FeedGroup(groupId)) },
+      openGroupSelectionSheet = { feedsViewModel.dispatch(FeedsEvent.OnAddToGroupClicked) },
+      openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
+      openPaywall = { navController.navigate(Screen.Paywall) },
     )
   }
 }
