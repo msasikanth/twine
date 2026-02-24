@@ -595,10 +595,26 @@ class FreshRSSSyncCoordinator(
 
       if (dirtyPosts.isEmpty()) return
 
-      val toMarkRead = dirtyPosts.filter { it.read }.mapNotNull { it.remoteId }
-      val toMarkUnread = dirtyPosts.filter { !it.read }.mapNotNull { it.remoteId }
-      val toBookmark = dirtyPosts.filter { it.bookmarked }.mapNotNull { it.remoteId }
-      val toUnbookmark = dirtyPosts.filter { !it.bookmarked }.mapNotNull { it.remoteId }
+      val toMarkRead = mutableListOf<String>()
+      val toMarkUnread = mutableListOf<String>()
+      val toBookmark = mutableListOf<String>()
+      val toUnbookmark = mutableListOf<String>()
+
+      dirtyPosts.forEach { post ->
+        val remoteId = post.remoteId ?: return@forEach
+
+        if (post.read) {
+          toMarkRead.add(remoteId)
+        } else {
+          toMarkUnread.add(remoteId)
+        }
+
+        if (post.bookmarked) {
+          toBookmark.add(remoteId)
+        } else {
+          toUnbookmark.add(remoteId)
+        }
+      }
 
       toMarkRead.chunked(STATUS_BATCH_SIZE).forEach { ids ->
         freshRssSource.markArticlesAsRead(ids)
