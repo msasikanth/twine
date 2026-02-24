@@ -92,7 +92,10 @@ internal fun PostsList(
     modifier = modifier,
     state = listState,
     contentPadding =
-      PaddingValues(top = topContentPadding, bottom = PINNED_SOURCES_BOTTOM_BAR_HEIGHT + 120.dp),
+      PaddingValues(
+        top = topContentPadding,
+        bottom = PINNED_SOURCES_BOTTOM_BAR_HEIGHT + 120.dp + paddingValues.calculateBottomPadding(),
+      ),
   ) {
     item(key = "featured_items", contentType = "featured_items") {
       FeaturedSection(
