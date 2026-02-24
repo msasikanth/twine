@@ -89,15 +89,17 @@ class SettingsViewModel(
             settingsRepository.themeVariant,
             settingsRepository.showFeedFavIcon,
             settingsRepository.appIcon,
-            ::Triple,
+            settingsRepository.showPinnedSources,
+            ::SettingsGroup2,
           ),
-        ) { (appThemeMode, useAmoled), (themeVariant, showFeedFavIcon, appIcon) ->
-          SettingsGroup2(
+        ) { (appThemeMode, useAmoled), group2 ->
+          SettingsGroupCombined(
             appThemeMode = appThemeMode,
             useAmoled = useAmoled,
-            themeVariant = themeVariant,
-            showFeedFavIcon = showFeedFavIcon,
-            appIcon = appIcon,
+            themeVariant = group2.themeVariant,
+            showFeedFavIcon = group2.showFeedFavIcon,
+            appIcon = group2.appIcon,
+            showPinnedSources = group2.showPinnedSources,
           )
         },
         combine(
@@ -113,17 +115,18 @@ class SettingsViewModel(
           userRepository.user(),
           ::SettingsGroup4,
         ),
-      ) { group1, group2, group3, group4 ->
+      ) { group1, combinedGroup, group3, group4 ->
         Settings(
           browserType = group1.browserType,
           showUnreadPostsCount = group1.showUnreadPostsCount,
           postsDeletionPeriod = group1.postsDeletionPeriod,
           showReaderView = group1.showReaderView,
-          appThemeMode = group2.appThemeMode,
-          themeVariant = group2.themeVariant,
-          useAmoled = group2.useAmoled,
+          appThemeMode = combinedGroup.appThemeMode,
+          themeVariant = combinedGroup.themeVariant,
+          useAmoled = combinedGroup.useAmoled,
           enableAutoSync = group3.enableAutoSync,
-          showFeedFavIcon = group2.showFeedFavIcon,
+          showFeedFavIcon = combinedGroup.showFeedFavIcon,
+          showPinnedSources = combinedGroup.showPinnedSources,
           markAsReadOn = group1.markAsReadOn,
           homeViewMode = group3.homeViewMode,
           blockImages = group3.blockImages,
@@ -138,7 +141,7 @@ class SettingsViewModel(
               else -> SettingsState.SyncProgress.Idle
             },
           hasCloudServiceSignedIn = group4.user != null,
-          appIcon = group2.appIcon,
+          appIcon = combinedGroup.appIcon,
         )
       }
       .onEach { settings ->
@@ -153,6 +156,7 @@ class SettingsViewModel(
             useAmoled = settings.useAmoled,
             enableAutoSync = settings.enableAutoSync,
             showFeedFavIcon = settings.showFeedFavIcon,
+            showPinnedSources = settings.showPinnedSources,
             markAsReadOn = settings.markAsReadOn,
             homeViewMode = settings.homeViewMode,
             blockImages = settings.blockImages,
@@ -189,6 +193,7 @@ class SettingsViewModel(
       is SettingsEvent.ToggleShowReaderView -> toggleShowReaderView(event.value)
       is SettingsEvent.ToggleAutoSync -> toggleAutoSync(event.value)
       is SettingsEvent.ToggleShowFeedFavIcon -> toggleShowFeedFavIcon(event.value)
+      is SettingsEvent.ToggleShowPinnedSources -> toggleShowPinnedSources(event.value)
       SettingsEvent.ImportOpmlClicked -> importOpmlClicked()
       SettingsEvent.ExportOpmlClicked -> exportOpmlClicked()
       SettingsEvent.CancelOpmlImportOrExport -> cancelOpmlImportOrExport()
@@ -322,6 +327,10 @@ class SettingsViewModel(
     viewModelScope.launch { settingsRepository.toggleShowFeedFavIcon(value) }
   }
 
+  private fun toggleShowPinnedSources(value: Boolean) {
+    viewModelScope.launch { settingsRepository.toggleShowPinnedSources(value) }
+  }
+
   private fun toggleAutoSync(value: Boolean) {
     viewModelScope.launch { settingsRepository.toggleAutoSync(value) }
   }
@@ -421,6 +430,7 @@ private data class Settings(
   val useAmoled: Boolean,
   val enableAutoSync: Boolean,
   val showFeedFavIcon: Boolean,
+  val showPinnedSources: Boolean,
   val markAsReadOn: MarkAsReadOn,
   val homeViewMode: HomeViewMode,
   val blockImages: Boolean,
@@ -441,11 +451,19 @@ private data class SettingsGroup1(
 )
 
 private data class SettingsGroup2(
+  val themeVariant: ThemeVariant,
+  val showFeedFavIcon: Boolean,
+  val appIcon: AppIcon,
+  val showPinnedSources: Boolean,
+)
+
+private data class SettingsGroupCombined(
   val appThemeMode: AppThemeMode,
   val useAmoled: Boolean,
   val themeVariant: ThemeVariant,
   val showFeedFavIcon: Boolean,
   val appIcon: AppIcon,
+  val showPinnedSources: Boolean,
 )
 
 private data class SettingsGroup3(

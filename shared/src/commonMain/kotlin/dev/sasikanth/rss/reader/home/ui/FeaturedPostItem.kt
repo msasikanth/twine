@@ -56,7 +56,7 @@ private val featuredItemPadding: PaddingValues
     val sizeClass = LocalWindowSizeClass.current
     return when {
       sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) ->
-        PaddingValues(horizontal = 128.dp)
+        PaddingValues(horizontal = 64.dp)
       else -> PaddingValues(0.dp)
     }
   }

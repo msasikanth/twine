@@ -66,6 +66,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val isOnboardingDoneKey = booleanPreferencesKey("is_onboarding_done")
   private val discoveryFeedsLastFetchTimeKey = longPreferencesKey("discovery_feeds_last_fetch_time")
   private val discoveryFeedsCacheKey = stringPreferencesKey("discovery_feeds_cache")
+  private val showPinnedSourcesKey = booleanPreferencesKey("show_pinned_sources")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -112,6 +113,9 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   val showFeedFavIcon: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[showFeedFavIconKey] ?: true }
+
+  val showPinnedSources: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[showPinnedSourcesKey] ?: true }
 
   val markAsReadOn: Flow<MarkAsReadOn> =
     dataStore.data.map { preferences -> mapToMarkAsReadOnType(preferences[markPostsAsReadOnKey]) }
@@ -222,6 +226,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   suspend fun toggleShowFeedFavIcon(value: Boolean) {
     dataStore.edit { preferences -> preferences[showFeedFavIconKey] = value }
+  }
+
+  suspend fun toggleShowPinnedSources(value: Boolean) {
+    dataStore.edit { preferences -> preferences[showPinnedSourcesKey] = value }
   }
 
   suspend fun updateMarkAsReadOn(value: MarkAsReadOn) {

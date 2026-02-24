@@ -55,6 +55,7 @@ data class HomeState(
   val prevActiveSource: Source?,
   val activePostIndex: Int,
   val showPostsSortFilter: Boolean,
+  val showPinnedSources: Boolean,
 ) {
 
   companion object {
@@ -78,6 +79,7 @@ data class HomeState(
         prevActiveSource = null,
         activePostIndex = 0,
         showPostsSortFilter = false,
+        showPinnedSources = true,
       )
   }
 

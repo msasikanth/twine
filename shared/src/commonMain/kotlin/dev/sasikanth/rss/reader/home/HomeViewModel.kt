@@ -299,13 +299,23 @@ class HomeViewModel(
 
     combine(
         combine(
-          activeSourceFlow,
-          postsTypeFlow,
-          settingsRepository.postsSortOrder,
-          settingsRepository.homeViewMode,
-          settingsRepository.themeVariant,
-          ::HomeSelectionFilters,
-        ),
+          combine(activeSourceFlow, postsTypeFlow, settingsRepository.postsSortOrder, ::Triple),
+          combine(
+            settingsRepository.homeViewMode,
+            settingsRepository.themeVariant,
+            settingsRepository.showPinnedSources,
+            ::Triple,
+          ),
+        ) { group1, group2 ->
+          HomeSelectionFilters(
+            activeSource = group1.first,
+            postsType = group1.second,
+            postsSortOrder = group1.third,
+            homeViewMode = group2.first,
+            themeVariant = group2.second,
+            showPinnedSources = group2.third,
+          )
+        },
         combine(
           allPostsPager.hasUnreadPosts,
           allPostsPager.unreadSinceLastSync,
@@ -320,6 +330,7 @@ class HomeViewModel(
             postsSortOrder = selectionFilters.postsSortOrder,
             homeViewMode = selectionFilters.homeViewMode,
             themeVariant = selectionFilters.themeVariant,
+            showPinnedSources = selectionFilters.showPinnedSources,
             hasUnreadPosts = unreadStatus.hasUnreadPosts,
             unreadSinceLastSync = unreadStatus.unreadSinceLastSync,
             lastRefreshedAt = unreadStatus.lastRefreshedAt,
@@ -449,6 +460,7 @@ private data class HomeSelectionFilters(
   val postsSortOrder: PostsSortOrder,
   val homeViewMode: HomeViewMode,
   val themeVariant: ThemeVariant,
+  val showPinnedSources: Boolean,
 )
 
 private data class HomeUnreadStatus(

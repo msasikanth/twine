@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed
+package dev.sasikanth.rss.reader.feeds.ui.pinned
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,7 +35,7 @@ import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
-internal fun FeedGroupBottomBarItem(
+internal fun PinnedFeedGroupItem(
   feedGroup: FeedGroup,
   canShowUnreadPostsCount: Boolean,
   modifier: Modifier = Modifier,
