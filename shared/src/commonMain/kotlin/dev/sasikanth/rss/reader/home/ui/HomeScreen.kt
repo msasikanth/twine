@@ -172,8 +172,10 @@ internal fun HomeScreen(
   val showScrollToTop by remember { derivedStateOf { postsListState.firstVisibleItemIndex > 0 } }
   val unreadSinceLastSync = state.unreadSinceLastSync
 
+  val canShowBottomBar = state.showPinnedSources && feedsState.pinnedSources.isNotEmpty()
   val appBarScrollBehaviour = TopAppBarDefaults.enterAlwaysScrollBehavior()
-  val bottomBarScrollState = rememberPinnedSourcesBottomBarScrollBehavior()
+  val bottomBarScrollState =
+    rememberPinnedSourcesBottomBarScrollBehavior(canScroll = { canShowBottomBar })
 
   LaunchedEffect(triggerSync) {
     if (triggerSync) {
@@ -230,7 +232,6 @@ internal fun HomeScreen(
         }
       },
     bottomBar = {
-      val canShowBottomBar = state.showPinnedSources && feedsState.pinnedSources.isNotEmpty()
       if (canShowBottomBar) {
         val scaffoldBottomPadding =
           if (platform == Platform.Desktop) {
@@ -267,6 +268,7 @@ internal fun HomeScreen(
 
       HomeScreenContentScaffold(
         modifier = Modifier.then(nestedScrollModifier),
+        bottomPadding = scaffoldPadding.calculateBottomPadding(),
         homeTopAppBar = {
           val scrollBehavior =
             if (platform !is Platform.Desktop) {
@@ -404,7 +406,6 @@ internal fun HomeScreen(
         },
       )
 
-      val canShowBottomBar = state.showPinnedSources && feedsState.pinnedSources.isNotEmpty()
       if (canShowBottomBar) {
         val colorScheme = AppTheme.colorScheme
         Box(
