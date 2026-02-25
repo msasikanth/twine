@@ -62,6 +62,7 @@ import kotlinx.coroutines.launch
 internal fun MainScreen(
   feedsViewModel: FeedsViewModel,
   homeContent: @Composable (openDrawer: () -> Unit) -> Unit,
+  searchContent: @Composable (openDrawer: () -> Unit) -> Unit,
   bookmarksContent: @Composable (openDrawer: () -> Unit) -> Unit,
   settingsContent: @Composable (openDrawer: () -> Unit) -> Unit,
   discoveryContent: @Composable (openDrawer: () -> Unit) -> Unit,
@@ -199,6 +200,7 @@ internal fun MainScreen(
         MainScreenContent(
           selectedDestination = selectedDestination,
           homeContent = { homeContent(openDrawer) },
+          searchContent = { searchContent(goBackToHome) },
           bookmarksContent = { bookmarksContent(goBackToHome) },
           settingsContent = { settingsContent(goBackToHome) },
           discoveryContent = { discoveryContent(goBackToHome) },
@@ -220,6 +222,7 @@ internal fun MainScreen(
           MainScreenContent(
             selectedDestination = selectedDestination,
             homeContent = { homeContent(openDrawer) },
+            searchContent = { searchContent(goBackToHome) },
             bookmarksContent = { bookmarksContent(goBackToHome) },
             settingsContent = { settingsContent(goBackToHome) },
             discoveryContent = { discoveryContent(goBackToHome) },
@@ -247,6 +250,7 @@ internal fun MainScreen(
         MainScreenContent(
           selectedDestination = selectedDestination,
           homeContent = { homeContent(openDrawer) },
+          searchContent = { searchContent(goBackToHome) },
           bookmarksContent = { bookmarksContent(goBackToHome) },
           settingsContent = { settingsContent(goBackToHome) },
           discoveryContent = { discoveryContent(goBackToHome) },
@@ -260,12 +264,14 @@ internal fun MainScreen(
 private fun MainScreenContent(
   selectedDestination: MainDestination,
   homeContent: @Composable () -> Unit,
+  searchContent: @Composable () -> Unit,
   bookmarksContent: @Composable () -> Unit,
   settingsContent: @Composable () -> Unit,
   discoveryContent: @Composable () -> Unit,
 ) {
   when (selectedDestination) {
     MainDestination.Home -> homeContent()
+    MainDestination.Search -> searchContent()
     MainDestination.Bookmarks -> bookmarksContent()
     MainDestination.Settings -> settingsContent()
     MainDestination.Discovery -> discoveryContent()
