@@ -58,7 +58,7 @@ internal fun FeedIcon(
   val shouldBlockImage = LocalBlockImage.current
 
   Box(
-    modifier = Modifier.clip(shape).then(modifier).background(Color.White, shape),
+    modifier = Modifier.then(modifier).background(Color.White, shape),
     contentAlignment = Alignment.Center,
   ) {
     if (shouldBlockImage) {
@@ -92,7 +92,7 @@ internal fun FeedIcon(
       coil3.compose.AsyncImage(
         model = imageRequest,
         contentDescription = contentDescription,
-        modifier = Modifier.matchParentSize(),
+        modifier = Modifier.matchParentSize().clip(shape),
         contentScale = contentScale,
         imageLoader = imageLoader,
         onLoading = { isSuccess = false },
