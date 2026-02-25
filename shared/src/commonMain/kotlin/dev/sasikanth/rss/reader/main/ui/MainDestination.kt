@@ -22,6 +22,7 @@ import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.BookmarkFilled
 import dev.sasikanth.rss.reader.resources.icons.Home
 import dev.sasikanth.rss.reader.resources.icons.HomeFilled
+import dev.sasikanth.rss.reader.resources.icons.Newsstand
 import dev.sasikanth.rss.reader.resources.icons.Search
 import dev.sasikanth.rss.reader.resources.icons.Settings
 import dev.sasikanth.rss.reader.resources.icons.SettingsFilled
@@ -30,6 +31,7 @@ import org.jetbrains.compose.resources.StringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmarks
 import twine.shared.generated.resources.discoveryTitle
+import twine.shared.generated.resources.postsSearchHint
 import twine.shared.generated.resources.screenHome
 import twine.shared.generated.resources.settings
 
@@ -39,9 +41,14 @@ internal enum class MainDestination(
   val label: StringResource,
 ) {
   Home(icon = TwineIcons.Home, selectedIcon = TwineIcons.HomeFilled, label = Res.string.screenHome),
-  Discovery(
+  Search(
     icon = TwineIcons.Search,
     selectedIcon = TwineIcons.Search,
+    label = Res.string.postsSearchHint,
+  ),
+  Discovery(
+    icon = TwineIcons.Newsstand,
+    selectedIcon = TwineIcons.Newsstand,
     label = Res.string.discoveryTitle,
   ),
   Bookmarks(
