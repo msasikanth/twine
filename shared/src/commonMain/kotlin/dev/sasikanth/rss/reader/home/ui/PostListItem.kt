@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.requiredWidth
@@ -110,8 +111,9 @@ internal fun PostListItem(
       else Constants.ITEM_UNREAD_ALPHA
     )
   var showDropdown by remember { mutableStateOf(false) }
+  val showImage = !(item.imageUrl.isNullOrBlank())
 
-  Row(
+  Column(
     modifier =
       Modifier.then(modifier)
         .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
@@ -121,64 +123,78 @@ internal fun PostListItem(
         .semantics { contentDescription = item.title.ifBlank { item.description } }
         .padding(horizontal = 24.dp, vertical = 8.dp)
   ) {
-    Column(modifier = Modifier.weight(1f)) {
-      Spacer(Modifier.height(8.dp))
+    Row {
+      Column(modifier = Modifier.weight(1f)) {
+        Spacer(Modifier.height(8.dp))
 
-      val showImage = !(item.imageUrl.isNullOrBlank())
-
-      Text(
-        modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
-        style = MaterialTheme.typography.titleMedium,
-        text = item.title.ifBlank { item.description },
-        color = AppTheme.colorScheme.onSurface,
-        maxLines = 2,
-        overflow = TextOverflow.Ellipsis,
-      )
-
-      PostActionBar(
-        modifier = Modifier.padding(end = if (showImage) 12.dp else 0.dp),
-        feedName = item.feedName,
-        feedIcon = item.feedIcon,
-        feedHomepageLink = item.feedHomepageLink,
-        showFeedFavIcon = item.showFeedFavIcon,
-        postRead = readStatus,
-        postRelativeTimestamp = item.date.formatRelativeTime(),
-        postLink = item.link,
-        postBookmarked = item.bookmarked,
-        commentsLink = item.commentsLink,
-        postReadingTimeEstimate = item.feedContentReadingTime ?: 0,
-        onBookmarkClick = onPostBookmarkClick,
-        onCommentsClick = onPostCommentsClick,
-        onTogglePostReadClick = {
-          readStatus = !readStatus
-          updatePostReadStatus(readStatus)
-        },
-        showDropdown = showDropdown,
-        onDropdownChange = { showDropdown = it },
-        config = postMetadataConfig,
-        onSourceClick = onPostSourceClick,
-      )
-    }
-
-    item.imageUrl?.let { url ->
-      Box(
-        modifier =
-          Modifier.requiredSizeIn(
-            minHeight = 64.dp,
-            minWidth = 64.dp,
-            maxHeight = 96.dp,
-            maxWidth = 96.dp,
-          ),
-        contentAlignment = Alignment.Center,
-      ) {
-        AsyncImage(
-          url = url,
-          modifier = Modifier.padding(vertical = 8.dp).aspectRatio(1f).clip(RoundedCornerShape(25)),
-          contentDescription = null,
-          contentScale = ContentScale.Crop,
+        Text(
+          modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
+          style = MaterialTheme.typography.titleMedium,
+          text = item.title.ifBlank { item.description },
+          color = AppTheme.colorScheme.onSurface,
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis,
         )
+
+        if (item.description.isNotBlank()) {
+          Spacer(Modifier.requiredHeight(4.dp))
+
+          Text(
+            modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
+            style = MaterialTheme.typography.bodySmall,
+            text = item.description,
+            color = AppTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
+      }
+
+      item.imageUrl?.let { url ->
+        Box(
+          modifier =
+            Modifier.requiredSizeIn(
+              minHeight = 64.dp,
+              minWidth = 64.dp,
+              maxHeight = 96.dp,
+              maxWidth = 96.dp,
+            ),
+          contentAlignment = Alignment.Center,
+        ) {
+          AsyncImage(
+            url = url,
+            modifier =
+              Modifier.padding(vertical = 8.dp).aspectRatio(1f).clip(RoundedCornerShape(25)),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+          )
+        }
       }
     }
+
+    PostActionBar(
+      modifier = Modifier.padding(end = if (showImage) 12.dp else 0.dp),
+      feedName = item.feedName,
+      feedIcon = item.feedIcon,
+      feedHomepageLink = item.feedHomepageLink,
+      showFeedFavIcon = item.showFeedFavIcon,
+      postRead = readStatus,
+      postRelativeTimestamp = item.date.formatRelativeTime(),
+      postLink = item.link,
+      postBookmarked = item.bookmarked,
+      commentsLink = item.commentsLink,
+      postReadingTimeEstimate = item.feedContentReadingTime ?: 0,
+      onBookmarkClick = onPostBookmarkClick,
+      onCommentsClick = onPostCommentsClick,
+      onTogglePostReadClick = {
+        readStatus = !readStatus
+        updatePostReadStatus(readStatus)
+      },
+      showDropdown = showDropdown,
+      onDropdownChange = { showDropdown = it },
+      config = postMetadataConfig,
+      onSourceClick = onPostSourceClick,
+    )
   }
 }
 
