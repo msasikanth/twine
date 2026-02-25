@@ -73,6 +73,7 @@ import dev.sasikanth.rss.reader.reader.ReaderViewModel
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
 import dev.sasikanth.rss.reader.reader.ui.ReaderScreen
 import dev.sasikanth.rss.reader.search.SearchViewModel
+import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
@@ -218,6 +219,18 @@ fun NavGraphBuilder.mainScreen(
           triggerSync = triggerSync,
           openPost = { index, post -> openPost(index, post, FromScreen.Home) },
           onMenuClicked = openDrawer,
+          modifier = screenModifier,
+        )
+      },
+      searchContent = { goBack ->
+        val viewModel = viewModel { searchViewModel() }
+
+        SearchScreen(
+          searchViewModel = viewModel,
+          goBack = goBack,
+          openPost = { searchQuery, sortOrder, index, post ->
+            openPost(index, post, FromScreen.Search(searchQuery, sortOrder))
+          },
           modifier = screenModifier,
         )
       },
