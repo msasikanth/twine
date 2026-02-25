@@ -18,85 +18,97 @@
 package dev.sasikanth.rss.reader.feeds.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.FeedIcon
-import dev.sasikanth.rss.reader.resources.icons.Cards
-import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 
 @Composable
 internal fun FeedGroupIconGrid(
   feedHomepageLinks: List<String>,
   feedIconLinks: List<String>,
   feedShowFavIconSettings: List<Boolean>,
-  iconSize: Dp = 16.dp,
-  iconShape: Shape = RoundedCornerShape(6.dp),
-  horizontalArrangement: Arrangement.Horizontal = Arrangement.spacedBy(2.dp),
-  verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(2.dp),
+  iconSize: Dp = 14.dp,
+  iconShape: Shape = RoundedCornerShape(4.dp),
   modifier: Modifier = Modifier,
 ) {
-  val iconsCount = maxOf(feedHomepageLinks.size, feedIconLinks.size)
+  val containerSize = iconSize * 2
+  val translucentStyle = LocalTranslucentStyles.current.default
 
-  if (iconsCount > 0) {
-    Column(modifier = modifier, verticalArrangement = verticalArrangement) {
-      Row(horizontalArrangement = horizontalArrangement) {
-        FeedIcon(
-          index = 0,
-          feedHomepageLinks = feedHomepageLinks,
-          feedIconLinks = feedIconLinks,
-          feedShowFavIconSettings = feedShowFavIconSettings,
-          iconSize = iconSize,
-          iconShape = iconShape,
-        )
-        FeedIcon(
-          index = 2,
-          feedHomepageLinks = feedHomepageLinks,
-          feedIconLinks = feedIconLinks,
-          feedShowFavIconSettings = feedShowFavIconSettings,
-          iconSize = iconSize,
-          iconShape = iconShape,
-        )
-      }
+  Box(
+    modifier =
+      modifier
+        .requiredSize(containerSize)
+        .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+  ) {
+    val placeholderColor = translucentStyle.background.compositeOver(AppTheme.colorScheme.backdrop)
 
-      Row(horizontalArrangement = horizontalArrangement) {
-        FeedIcon(
-          index = 3,
-          feedHomepageLinks = feedHomepageLinks,
-          feedIconLinks = feedIconLinks,
-          feedShowFavIconSettings = feedShowFavIconSettings,
-          iconSize = iconSize,
-          iconShape = iconShape,
-        )
-        FeedIcon(
-          index = 1,
-          feedHomepageLinks = feedHomepageLinks,
-          feedIconLinks = feedIconLinks,
-          feedShowFavIconSettings = feedShowFavIconSettings,
-          iconSize = iconSize,
-          iconShape = iconShape,
-        )
-      }
+    // Top-right
+    FeedIcon(
+      index = 2,
+      feedHomepageLinks = feedHomepageLinks,
+      feedIconLinks = feedIconLinks,
+      feedShowFavIconSettings = feedShowFavIconSettings,
+      iconShape = iconShape,
+      placeholderColor = placeholderColor,
+      modifier = Modifier.requiredSize(iconSize).align(Alignment.TopEnd),
+    )
+
+    // Middle
+    Box(
+      modifier = Modifier.requiredSize(iconSize + 1.dp).align(Alignment.Center),
+      contentAlignment = Alignment.Center,
+    ) {
+      FeedIcon(
+        index = 1,
+        feedHomepageLinks = feedHomepageLinks,
+        feedIconLinks = feedIconLinks,
+        feedShowFavIconSettings = feedShowFavIconSettings,
+        iconShape = iconShape,
+        placeholderColor = placeholderColor,
+        modifier =
+          Modifier.dropShadow(iconShape) {
+              color = Color.Black
+              spread = 1.dp.toPx()
+              blendMode = BlendMode.DstOut
+            }
+            .requiredSize(iconSize),
+      )
     }
-  } else {
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-      Icon(
-        imageVector = TwineIcons.Cards,
-        contentDescription = null,
-        tint = AppTheme.colorScheme.onSurface,
-        modifier = Modifier.requiredSize(36.dp),
+
+    // Bottom-left
+    Box(
+      modifier = Modifier.requiredSize(iconSize + 1.dp).align(Alignment.BottomStart),
+      contentAlignment = Alignment.Center,
+    ) {
+      FeedIcon(
+        index = 0,
+        feedHomepageLinks = feedHomepageLinks,
+        feedIconLinks = feedIconLinks,
+        feedShowFavIconSettings = feedShowFavIconSettings,
+        iconShape = iconShape,
+        placeholderColor = placeholderColor,
+        modifier =
+          Modifier.dropShadow(iconShape) {
+              color = Color.Black
+              spread = 1.dp.toPx()
+              blendMode = BlendMode.DstOut
+            }
+            .requiredSize(iconSize),
       )
     }
   }
@@ -108,8 +120,8 @@ private fun FeedIcon(
   feedHomepageLinks: List<String>,
   feedIconLinks: List<String>,
   feedShowFavIconSettings: List<Boolean>,
-  iconSize: Dp,
   iconShape: Shape,
+  placeholderColor: Color,
   modifier: Modifier = Modifier,
 ) {
   val homepageLink = feedHomepageLinks.getOrNull(index)
@@ -123,9 +135,9 @@ private fun FeedIcon(
       showFeedFavIcon = showFavIconSetting,
       contentDescription = null,
       shape = iconShape,
-      modifier = Modifier.requiredSize(iconSize).background(Color.White).then(modifier),
+      modifier = modifier,
     )
   } else {
-    Box(Modifier.requiredSize(iconSize))
+    Box(modifier.background(placeholderColor, iconShape))
   }
 }

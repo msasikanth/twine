@@ -19,7 +19,6 @@ package dev.sasikanth.rss.reader.feeds.ui.pinned
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -59,16 +58,10 @@ internal fun PinnedFeedGroupItem(
             .background(AppTheme.colorScheme.secondary.copy(alpha = 0.16f)),
         contentAlignment = Alignment.Center,
       ) {
-        val iconSize = 16.dp
-        val iconSpacing = 2.dp
-
         FeedGroupIconGrid(
           feedHomepageLinks = feedGroup.feedHomepageLinks,
           feedIconLinks = feedGroup.feedIconLinks,
           feedShowFavIconSettings = feedGroup.feedShowFavIconSettings,
-          iconSize = iconSize,
-          verticalArrangement = Arrangement.spacedBy(iconSpacing),
-          horizontalArrangement = Arrangement.spacedBy(iconSpacing),
         )
 
         Box(

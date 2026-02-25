@@ -23,7 +23,6 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -124,8 +123,6 @@ internal fun FeedGroupItem(
         feedIconLinks = feedGroup.feedIconLinks,
         feedShowFavIconSettings = feedGroup.feedShowFavIconSettings,
         iconSize = iconSize,
-        verticalArrangement = Arrangement.spacedBy(iconSpacing),
-        horizontalArrangement = Arrangement.spacedBy(iconSpacing),
       )
 
       Spacer(Modifier.requiredWidth(16.dp))

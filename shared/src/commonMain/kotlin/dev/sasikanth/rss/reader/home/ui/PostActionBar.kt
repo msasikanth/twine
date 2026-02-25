@@ -28,8 +28,6 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -109,35 +107,17 @@ internal fun PostActionBar(
     modifier = Modifier.padding(top = 8.dp).then(modifier),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    PostSourcePill(
-      modifier = Modifier.widthIn(max = 120.dp).clearAndSetSemantics {},
-      feedName = feedName,
-      feedIcon = feedIcon,
-      feedHomepageLink = feedHomepageLink,
-      showFeedFavIcon = showFeedFavIcon,
-      config = config,
-      onSourceClick = onSourceClick,
-    )
+    Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+      SourceInfo(
+        modifier = Modifier.weight(1f, fill = false).widthIn(max = 120.dp).clearAndSetSemantics {},
+        feedName = feedName,
+        feedIcon = feedIcon,
+        feedHomepageLink = feedHomepageLink,
+        showFeedFavIcon = showFeedFavIcon,
+        config = config,
+        onSourceClick = onSourceClick,
+      )
 
-    Text(
-      modifier = Modifier.padding(horizontal = 8.dp).clearAndSetSemantics {},
-      style = MaterialTheme.typography.labelMedium,
-      maxLines = 1,
-      text = "\u2022",
-      color = AppTheme.colorScheme.outline,
-    )
-
-    Text(
-      modifier = Modifier.clearAndSetSemantics {},
-      style = MaterialTheme.typography.labelMedium,
-      maxLines = 1,
-      text = postRelativeTimestamp,
-      color = AppTheme.colorScheme.outline,
-      textAlign = TextAlign.Start,
-      overflow = TextOverflow.Ellipsis,
-    )
-
-    if (postReadingTimeEstimate > 0) {
       Text(
         modifier = Modifier.padding(horizontal = 8.dp).clearAndSetSemantics {},
         style = MaterialTheme.typography.labelMedium,
@@ -150,15 +130,34 @@ internal fun PostActionBar(
         modifier = Modifier.clearAndSetSemantics {},
         style = MaterialTheme.typography.labelMedium,
         maxLines = 1,
-        text = stringResource(Res.string.readingTimeEstimate, postReadingTimeEstimate),
+        text = postRelativeTimestamp,
         color = AppTheme.colorScheme.outline,
         textAlign = TextAlign.Start,
         overflow = TextOverflow.Ellipsis,
       )
+
+      if (postReadingTimeEstimate > 0) {
+        Text(
+          modifier = Modifier.padding(horizontal = 8.dp).clearAndSetSemantics {},
+          style = MaterialTheme.typography.labelMedium,
+          maxLines = 1,
+          text = "\u2022",
+          color = AppTheme.colorScheme.outline,
+        )
+
+        Text(
+          modifier = Modifier.clearAndSetSemantics {},
+          style = MaterialTheme.typography.labelMedium,
+          maxLines = 1,
+          text = stringResource(Res.string.readingTimeEstimate, postReadingTimeEstimate),
+          color = AppTheme.colorScheme.outline,
+          textAlign = TextAlign.Start,
+          overflow = TextOverflow.Ellipsis,
+        )
+      }
     }
 
     PostActions(
-      modifier = Modifier.weight(1f),
       postLink = postLink,
       postBookmarked = postBookmarked,
       postRead = postRead,
@@ -174,7 +173,7 @@ internal fun PostActionBar(
 }
 
 @Composable
-private fun PostSourcePill(
+private fun SourceInfo(
   feedIcon: String,
   feedHomepageLink: String,
   showFeedFavIcon: Boolean,
