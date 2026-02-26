@@ -52,6 +52,15 @@
   <string name="bookmarks">Yer imleri</string>
   <string name="bookmarksPlaceholder">Kaydedilen gönderiler burada görünecek 🔖</string>
   <string name="settings">Ayarlar</string>
+  <string name="settingsAppearanceAndLayout">Appearance &amp; layout</string>
+  <string name="settingsAppearanceAndLayoutSubtitle">Customize how Twine looks</string>
+  <string name="settingsFeaturesAndBehaviors">Features &amp; behaviors</string>
+  <string name="settingsFeaturesAndBehaviorsSubtitle">Customize how Twine works</string>
+  <string name="settingsServicesAndSync">Services &amp; sync</string>
+  <string name="settingsServicesAndSyncSubtitle">Manage RSS services</string>
+  <string name="settingsYourInsights">Your insights</string>
+  <string name="settingsYourInsightsSubtitle">Manage your reading data</string>
+  <string name="settingsAppInfoAndFeedback">App info &amp; feedback</string>
   <string name="moreMenuOptions">Daha fazla seçenek</string>
   <string name="settingsHeaderBehaviour">Davranış</string>
   <string name="settingsHeaderFeedback">Geri bildirim ve hata raporları</string>
