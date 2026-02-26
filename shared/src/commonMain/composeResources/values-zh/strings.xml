@@ -52,6 +52,15 @@
   <string name="bookmarks">书签</string>
   <string name="bookmarksPlaceholder">已添加书签的文章会出现在这里 🔖</string>
   <string name="settings">设置</string>
+  <string name="settingsAppearanceAndLayout">Appearance &amp; layout</string>
+  <string name="settingsAppearanceAndLayoutSubtitle">Customize how Twine looks</string>
+  <string name="settingsFeaturesAndBehaviors">Features &amp; behaviors</string>
+  <string name="settingsFeaturesAndBehaviorsSubtitle">Customize how Twine works</string>
+  <string name="settingsServicesAndSync">Services &amp; sync</string>
+  <string name="settingsServicesAndSyncSubtitle">Manage RSS services</string>
+  <string name="settingsYourInsights">Your insights</string>
+  <string name="settingsYourInsightsSubtitle">Manage your reading data</string>
+  <string name="settingsAppInfoAndFeedback">App info &amp; feedback</string>
   <string name="moreMenuOptions">更多菜单选项</string>
   <string name="settingsHeaderBehaviour">行为</string>
   <string name="settingsHeaderFeedback">反馈 &amp; 问题报告</string>
