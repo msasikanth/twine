@@ -72,6 +72,7 @@ internal fun MainScreen(
   openAddFeedScreen: () -> Unit,
   openPaywall: () -> Unit,
   modifier: Modifier = Modifier,
+  canHandleBack: Boolean = true,
 ) {
   val sizeClass = LocalWindowSizeClass.current
   val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -84,11 +85,12 @@ internal fun MainScreen(
   NavigationEventHandler(
     state = rememberNavigationEventState(NavigationEventInfo.None),
     isBackEnabled =
-      selectedDestination != MainDestination.Home ||
-        (sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) &&
-          isSideNavigationExpanded &&
-          !sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)) ||
-        (drawerState.isOpen),
+      canHandleBack &&
+        (selectedDestination != MainDestination.Home ||
+          (sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) &&
+            isSideNavigationExpanded &&
+            !sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)) ||
+          (drawerState.isOpen)),
   ) {
     when {
       drawerState.isOpen -> {

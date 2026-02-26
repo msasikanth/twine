@@ -48,6 +48,16 @@ sealed interface Screen {
 
   @Serializable data object Settings : Screen
 
+  @Serializable data object SettingsAppearance : Screen
+
+  @Serializable data object SettingsBehavior : Screen
+
+  @Serializable data object SettingsServices : Screen
+
+  @Serializable data object SettingsData : Screen
+
+  @Serializable data object SettingsAppInfo : Screen
+
   @Serializable data object AccountSelection : Screen
 
   @Serializable data class Discovery(val isFromOnboarding: Boolean = false) : Screen

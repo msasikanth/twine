@@ -35,13 +35,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -56,9 +54,8 @@ import androidx.compose.ui.util.fastForEach
 import coil3.compose.AsyncImage
 import dev.sasikanth.rss.reader.about.Person
 import dev.sasikanth.rss.reader.about.Social
-import dev.sasikanth.rss.reader.components.CircularIconButton
+import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
-import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.GitHub
 import dev.sasikanth.rss.reader.resources.icons.Threads
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -76,7 +73,6 @@ import twine.shared.generated.resources.aboutSocialGitHub
 import twine.shared.generated.resources.aboutSocialThreads
 import twine.shared.generated.resources.aboutSocialTwitter
 import twine.shared.generated.resources.aboutSocialWebsite
-import twine.shared.generated.resources.buttonGoBack
 
 @Composable
 fun AboutScreen(goBack: () -> Unit, modifier: Modifier = Modifier) {
@@ -141,39 +137,7 @@ fun AboutScreen(goBack: () -> Unit, modifier: Modifier = Modifier) {
 
   Scaffold(
     modifier = modifier,
-    topBar = {
-      Box {
-        CenterAlignedTopAppBar(
-          title = {
-            Text(
-              text = stringResource(Res.string.about),
-              color = AppTheme.colorScheme.onSurface,
-              style = MaterialTheme.typography.titleMedium,
-            )
-          },
-          navigationIcon = {
-            CircularIconButton(
-              modifier = Modifier.padding(start = 12.dp),
-              icon = TwineIcons.ArrowBack,
-              label = stringResource(Res.string.buttonGoBack),
-              onClick = { goBack() },
-            )
-          },
-          colors =
-            TopAppBarDefaults.topAppBarColors(
-              containerColor = AppTheme.colorScheme.surface,
-              navigationIconContentColor = AppTheme.colorScheme.onSurface,
-              titleContentColor = AppTheme.colorScheme.onSurface,
-              actionIconContentColor = AppTheme.colorScheme.onSurface,
-            ),
-        )
-
-        HorizontalDivider(
-          modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-          color = AppTheme.colorScheme.outlineVariant,
-        )
-      }
-    },
+    topBar = { SimpleTopAppBar(title = stringResource(Res.string.about), onBackClick = goBack) },
     content = { padding ->
       Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(

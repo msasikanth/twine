@@ -278,7 +278,13 @@ private fun ExpandedDrawerContent(
               }
             )
 
+          val navigationItemShape = RoundedCornerShape(topEndPercent = 50, bottomEndPercent = 50)
+
           NavigationDrawerItem(
+            modifier =
+              Modifier.requiredHeight(44.dp)
+                .padding(end = 16.dp)
+                .background(backgroundColor, navigationItemShape),
             label = {
               val style =
                 if (selected) {
@@ -288,13 +294,6 @@ private fun ExpandedDrawerContent(
                 }
               Text(text = stringResource(destination.label), style = style)
             },
-            selected = selected,
-            modifier =
-              Modifier.padding(end = 16.dp)
-                .background(
-                  backgroundColor,
-                  RoundedCornerShape(topEndPercent = 50, bottomEndPercent = 50),
-                ),
             onClick = {
               if (
                 destination == MainDestination.Home && selectedDestination == MainDestination.Home
@@ -316,6 +315,8 @@ private fun ExpandedDrawerContent(
                 contentDescription = stringResource(destination.label),
               )
             },
+            selected = selected,
+            shape = navigationItemShape,
             colors =
               NavigationDrawerItemDefaults.colors(
                 selectedIconColor = AppTheme.colorScheme.primary,

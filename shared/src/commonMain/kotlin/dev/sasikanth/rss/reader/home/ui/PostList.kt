@@ -145,7 +145,6 @@ internal fun PostsList(
         HomeViewMode.Compact -> {
           CompactPostListItem(
             item = post,
-            showDivider = index != posts.itemCount - 1,
             onClick = { onPostClicked(post, index) },
             onPostBookmarkClick = { onPostBookmarkClick(post) },
             onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
