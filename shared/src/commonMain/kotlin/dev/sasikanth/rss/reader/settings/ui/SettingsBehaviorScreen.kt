@@ -150,6 +150,17 @@ internal fun SettingsBehaviorScreen(
           ),
       ) {
         item {
+          ShowPinnedSourcesSettingItem(
+            showPinnedSources = state.showPinnedSources,
+            onValueChanged = { newValue ->
+              viewModel.dispatch(SettingsEvent.ToggleShowPinnedSources(newValue))
+            },
+          )
+        }
+
+        item { SettingsDivider(24.dp) }
+
+        item {
           ShowReaderViewSettingItem(
             showReaderView = state.showReaderView,
             onValueChanged = { newValue ->
@@ -176,17 +187,6 @@ internal fun SettingsBehaviorScreen(
             showUnreadCountEnabled = state.showUnreadPostsCount,
             onValueChanged = { newValue ->
               viewModel.dispatch(SettingsEvent.ToggleShowUnreadPostsCount(newValue))
-            },
-          )
-        }
-
-        item { SettingsDivider(24.dp) }
-
-        item {
-          ShowPinnedSourcesSettingItem(
-            showPinnedSources = state.showPinnedSources,
-            onValueChanged = { newValue ->
-              viewModel.dispatch(SettingsEvent.ToggleShowPinnedSources(newValue))
             },
           )
         }
