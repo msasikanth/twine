@@ -27,6 +27,7 @@ import coil3.PlatformContext
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import com.materialkolor.ktx.themeColorOrNull
+import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.toComposeImageBitmap
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +40,7 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @Stable
+@AppScope
 class SeedColorExtractor(
   dispatchersProvider: DispatchersProvider,
   private val imageLoader: Lazy<ImageLoader>,
