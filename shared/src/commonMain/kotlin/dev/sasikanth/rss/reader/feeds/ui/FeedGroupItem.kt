@@ -168,7 +168,8 @@ internal fun FeedGroupItem(
           Text(
             text = feedGroup.numberOfUnreadPosts.toString(),
             style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.align(Alignment.CenterVertically),
+            modifier =
+              Modifier.align(Alignment.CenterVertically).padding(horizontal = 8.dp, vertical = 4.dp),
           )
         }
 
