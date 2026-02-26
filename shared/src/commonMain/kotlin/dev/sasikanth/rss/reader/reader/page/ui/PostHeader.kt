@@ -110,7 +110,7 @@ internal fun PostHeader(
           imageUrl = postImage,
           unlockAspectRatio = UrlUtils.isUnconstrainedMedia(postImage),
           alignment =
-            remember(pagerState) {
+            remember(pagerState.pageCount) {
               ParallaxAlignment(
                 horizontalBias = { pagerState.getOffsetFractionForPage(page) },
                 multiplier = 2f,

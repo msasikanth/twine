@@ -195,7 +195,7 @@ internal fun FeaturedSection(
                   },
                 imageUrl = postWithMetadata.imageUrl,
                 alignment =
-                  remember(pagerState) {
+                  remember(pagerState.pageCount) {
                     ParallaxAlignment(
                       horizontalBias = { pagerState.getOffsetFractionForPage(page) },
                       multiplier = 2f,
