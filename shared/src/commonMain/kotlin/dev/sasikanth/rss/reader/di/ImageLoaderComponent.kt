@@ -23,6 +23,7 @@ import coil3.disk.DiskCache
 import coil3.memory.MemoryCache
 import coil3.svg.SvgDecoder
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Provides
 import okio.Path.Companion.toPath
 
@@ -33,6 +34,7 @@ interface ImageLoaderComponent : ImageLoaderPlatformComponent {
   val imageLoader: ImageLoader
 
   @Provides
+  @AppScope
   fun imageLoader(platformContext: PlatformContext, appInfo: AppInfo): ImageLoader {
     return ImageLoader.Builder(platformContext)
       .components { add(SvgDecoder.Factory()) }
