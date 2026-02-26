@@ -85,8 +85,8 @@ private val compactPostListPadding: PaddingValues
     val sizeClass = LocalWindowSizeClass.current
     return when {
       sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) ->
-        PaddingValues(horizontal = 128.dp)
-      else -> PaddingValues(24.dp)
+        PaddingValues(horizontal = 128.dp, vertical = 12.dp)
+      else -> PaddingValues(horizontal = 24.dp, vertical = 12.dp)
     }
   }
 
@@ -220,7 +220,6 @@ internal fun CompactPostListItem(
     modifier =
       Modifier.then(modifier)
         .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
-        .padding(vertical = 12.dp)
         .padding(compactPostListPadding)
         .graphicsLayer { this.alpha = alpha },
   ) {
@@ -230,7 +229,7 @@ internal fun CompactPostListItem(
       showFeedFavIcon = item.showFeedFavIcon,
       contentDescription = null,
       shape = MaterialTheme.shapes.extraSmall,
-      modifier = Modifier.requiredSize(16.dp),
+      modifier = Modifier.requiredSize(20.dp),
     )
 
     Spacer(Modifier.requiredWidth(16.dp))
