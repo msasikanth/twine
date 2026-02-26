@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -41,7 +40,6 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -201,7 +199,6 @@ internal fun PostListItem(
 @Composable
 internal fun CompactPostListItem(
   item: ResolvedPost,
-  showDivider: Boolean,
   onClick: () -> Unit,
   onPostBookmarkClick: () -> Unit,
   onPostCommentsClick: () -> Unit,
@@ -218,59 +215,50 @@ internal fun CompactPostListItem(
     )
   var showDropdown by remember { mutableStateOf(false) }
 
-  Box {
-    Row(
-      verticalAlignment = Alignment.CenterVertically,
-      modifier =
-        Modifier.then(modifier)
-          .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
-          .padding(vertical = 12.dp)
-          .padding(compactPostListPadding)
-          .graphicsLayer { this.alpha = alpha },
+  Row(
+    verticalAlignment = Alignment.CenterVertically,
+    modifier =
+      Modifier.then(modifier)
+        .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
+        .padding(vertical = 12.dp)
+        .padding(compactPostListPadding)
+        .graphicsLayer { this.alpha = alpha },
+  ) {
+    FeedIcon(
+      icon = item.feedIcon,
+      homepageLink = item.feedHomepageLink,
+      showFeedFavIcon = item.showFeedFavIcon,
+      contentDescription = null,
+      shape = MaterialTheme.shapes.extraSmall,
+      modifier = Modifier.requiredSize(16.dp),
+    )
+
+    Spacer(Modifier.requiredWidth(16.dp))
+
+    Text(
+      text = item.title.ifBlank { item.description },
+      style = MaterialTheme.typography.titleSmall,
+      color = AppTheme.colorScheme.onSurface,
+      maxLines = 2,
+      overflow = TextOverflow.Ellipsis,
+      modifier = Modifier.weight(1f),
+    )
+
+    Spacer(Modifier.requiredWidth(16.dp))
+
+    PostActions(
+      postLink = item.link,
+      postBookmarked = item.bookmarked,
+      postRead = readStatus,
+      config = postMetadataConfig,
+      commentsLink = item.commentsLink,
+      showDropdown = showDropdown,
+      onDropdownChange = { showDropdown = it },
+      onBookmarkClick = onPostBookmarkClick,
+      onCommentsClick = onPostCommentsClick,
     ) {
-      FeedIcon(
-        icon = item.feedIcon,
-        homepageLink = item.feedHomepageLink,
-        showFeedFavIcon = item.showFeedFavIcon,
-        contentDescription = null,
-        shape = MaterialTheme.shapes.extraSmall,
-        modifier = Modifier.requiredSize(16.dp),
-      )
-
-      Spacer(Modifier.requiredWidth(16.dp))
-
-      Text(
-        text = item.title.ifBlank { item.description },
-        style = MaterialTheme.typography.titleSmall,
-        color = AppTheme.colorScheme.onSurface,
-        maxLines = 2,
-        overflow = TextOverflow.Ellipsis,
-        modifier = Modifier.weight(1f),
-      )
-
-      Spacer(Modifier.requiredWidth(16.dp))
-
-      PostActions(
-        postLink = item.link,
-        postBookmarked = item.bookmarked,
-        postRead = readStatus,
-        config = postMetadataConfig,
-        commentsLink = item.commentsLink,
-        showDropdown = showDropdown,
-        onDropdownChange = { showDropdown = it },
-        onBookmarkClick = onPostBookmarkClick,
-        onCommentsClick = onPostCommentsClick,
-      ) {
-        readStatus = !readStatus
-        updatePostReadStatus(readStatus)
-      }
-    }
-
-    if (showDivider) {
-      HorizontalDivider(
-        modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart).padding(postListPadding),
-        color = AppTheme.colorScheme.outlineVariant,
-      )
+      readStatus = !readStatus
+      updatePostReadStatus(readStatus)
     }
   }
 }
