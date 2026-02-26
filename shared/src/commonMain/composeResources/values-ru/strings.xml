@@ -52,6 +52,15 @@
   <string name="bookmarks">Закладки</string>
   <string name="bookmarksPlaceholder">Здесь будут появляться посты, добавленные в закладки 🔖</string>
   <string name="settings">Настройки</string>
+  <string name="settingsAppearanceAndLayout">Appearance &amp; layout</string>
+  <string name="settingsAppearanceAndLayoutSubtitle">Customize how Twine looks</string>
+  <string name="settingsFeaturesAndBehaviors">Features &amp; behaviors</string>
+  <string name="settingsFeaturesAndBehaviorsSubtitle">Customize how Twine works</string>
+  <string name="settingsServicesAndSync">Services &amp; sync</string>
+  <string name="settingsServicesAndSyncSubtitle">Manage RSS services</string>
+  <string name="settingsYourInsights">Your insights</string>
+  <string name="settingsYourInsightsSubtitle">Manage your reading data</string>
+  <string name="settingsAppInfoAndFeedback">App info &amp; feedback</string>
   <string name="moreMenuOptions">Дополнительные опции меню</string>
   <string name="settingsHeaderBehaviour">Настройки приложения</string>
   <string name="settingsHeaderFeedback">Обратная связь и сообщения об ошибках</string>
