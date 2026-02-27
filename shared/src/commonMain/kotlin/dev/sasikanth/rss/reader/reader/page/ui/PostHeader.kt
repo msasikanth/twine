@@ -97,6 +97,7 @@ internal fun PostHeader(
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
+  onImageClick: (String) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Column(modifier = Modifier.fillMaxWidth().then(modifier)) {
@@ -105,7 +106,12 @@ internal fun PostHeader(
     val postImage = readerPost.imageUrl
 
     if (!postImage.isNullOrBlank()) {
-      Box(modifier = Modifier.padding(horizontal = 24.dp).align(Alignment.CenterHorizontally)) {
+      Box(
+        modifier =
+          Modifier.padding(horizontal = 24.dp).align(Alignment.CenterHorizontally).clickable {
+            onImageClick(postImage)
+          }
+      ) {
         FeaturedImage(
           imageUrl = postImage,
           unlockAspectRatio = UrlUtils.isUnconstrainedMedia(postImage),

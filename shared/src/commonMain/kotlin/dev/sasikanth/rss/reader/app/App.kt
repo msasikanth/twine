@@ -381,6 +381,12 @@ fun App(
           navController = navController,
         )
 
+        imageViewerScreen(
+          navController = navController,
+          toggleLightStatusBar = toggleLightStatusBar,
+          toggleLightNavBar = toggleLightNavBar,
+        )
+
         settingsAppearanceScreen(
           settingsViewModel = settingsViewModel,
           navController = navController,

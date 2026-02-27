@@ -82,5 +82,7 @@ sealed interface Screen {
 
   @Serializable data object Paywall : Screen
 
+  @Serializable data class ImageViewer(val imageUrl: String) : Screen
+
   data object None : Screen
 }

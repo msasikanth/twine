@@ -138,6 +138,7 @@ internal fun ReaderScreen(
   pageViewModelFactory: @Composable (ResolvedPost) -> ReaderPageViewModel,
   onBack: () -> Unit,
   openPaywall: () -> Unit,
+  onImageClick: (String) -> Unit,
   toggleLightStatusBar: (Boolean) -> Unit,
   toggleLightNavBar: (Boolean) -> Unit,
   modifier: Modifier = Modifier,
@@ -483,6 +484,7 @@ internal fun ReaderScreen(
                 onMarkAsUnread = {
                   viewModel.dispatch(ReaderEvent.OnMarkAsUnread(postId = readerPost.id))
                 },
+                onImageClick = onImageClick,
               )
             }
           }

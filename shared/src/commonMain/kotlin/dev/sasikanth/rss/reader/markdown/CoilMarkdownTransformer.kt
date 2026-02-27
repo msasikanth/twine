@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.markdown
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -39,11 +40,13 @@ import coil3.request.ImageRequest
 import com.mikepenz.markdown.model.ImageData
 import com.mikepenz.markdown.model.ImageTransformer
 import com.mikepenz.markdown.model.PlaceholderConfig
+import dev.sasikanth.rss.reader.reader.ui.LocalOnImageClick
 
 object CoilMarkdownTransformer : ImageTransformer {
 
   @Composable
   override fun transform(link: String): ImageData? {
+    val onImageClick = LocalOnImageClick.current
     return rememberAsyncImagePainter(
         model =
           ImageRequest.Builder(LocalPlatformContext.current)
@@ -54,7 +57,10 @@ object CoilMarkdownTransformer : ImageTransformer {
       .let {
         ImageData(
           painter = it,
-          modifier = Modifier.padding(vertical = 8.dp).clip(MaterialTheme.shapes.large),
+          modifier =
+            Modifier.padding(vertical = 8.dp).clip(MaterialTheme.shapes.large).clickable {
+              onImageClick(link)
+            },
           alignment = Alignment.Center,
         )
       }
