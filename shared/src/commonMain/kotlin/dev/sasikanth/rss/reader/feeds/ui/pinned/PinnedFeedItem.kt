@@ -49,6 +49,7 @@ internal fun PinnedFeedItem(
   modifier: Modifier = Modifier,
   hasActiveSource: Boolean = false,
   selected: Boolean = false,
+  isDragging: Boolean = false,
 ) {
   Box(
     modifier =
@@ -66,7 +67,10 @@ internal fun PinnedFeedItem(
       showFeedFavIcon = showFeedFavIcon,
       contentDescription = null,
       shape = feedIconShape,
-      modifier = Modifier.requiredSize(48.dp).clip(feedIconShape).clickable(onClick = onClick),
+      modifier =
+        Modifier.requiredSize(48.dp)
+          .clip(feedIconShape)
+          .clickable(enabled = !isDragging, onClick = onClick),
     )
 
     Box(
@@ -74,7 +78,7 @@ internal fun PinnedFeedItem(
         Modifier.requiredSize(48.dp).border(1.dp, AppTheme.colorScheme.outlineVariant, shape)
     )
 
-    if (badgeCount > 0 && canShowUnreadPostsCount) {
+    if (!isDragging && badgeCount > 0 && canShowUnreadPostsCount) {
       UnreadCountBadge(badgeCount)
     }
   }
