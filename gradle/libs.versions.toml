@@ -51,6 +51,7 @@ filekit = "0.8.8"
 leakcanary = "2.14"
 markdown = "0.39.2"
 revenuecat = "2.5.1+17.33.1"
+landscapist = "2.9.5"
 viewmodel = "2.9.6"
 navigation = "2.9.2"
 navigation-event = "1.0.1"
@@ -112,6 +113,9 @@ androidx_datastore_okio = { module = "androidx.datastore:datastore-core-okio", v
 androidx_datastore_preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "androidx_datastore" }
 androidx_browser = { module = "androidx.browser:browser", version.ref = "androidx_browser" }
 androidx_annotation= { module = "androidx.annotation:annotation", version.ref = "androidx_annotation" }
+landscapist-coil3 = { module = "com.github.skydoves:landscapist-coil3", version.ref = "landscapist" }
+landscapist-image = { module = "com.github.skydoves:landscapist-image", version.ref = "landscapist" }
+landscapist-zoomable = { module = "com.github.skydoves:landscapist-zoomable", version.ref = "landscapist" }
 coil_compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil_network = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 coil_svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil" }
