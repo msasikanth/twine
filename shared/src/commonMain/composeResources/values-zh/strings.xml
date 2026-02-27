@@ -71,7 +71,7 @@
   <string name="settingsEnableBlurSubtitle">关闭时，图片将使用渐变而不是模糊效果。可能会改善性能表现。</string>
   <string name="settingsShowUnreadCountTitle">显示未读文章计数</string>
   <string name="settingsShowUnreadCountSubtitle">在选中的订阅源上方显示未读气泡</string>
-  <string name="settingsShowPinnedSourcesTitle">Show pinned sources</string>
+  <string name="settingsShowPinnedSourcesTitle">Show floating pinned sources</string>
   <string name="settingsShowPinnedSourcesSubtitle">Displays a floating bar with pinned sources at the bottom of the home screen</string>
   <string name="settingsReportIssue">报告问题</string>
   <string name="settingsVersion">%1$s（%2$s）</string>
