@@ -43,6 +43,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -59,6 +60,7 @@ import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,7 +72,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
@@ -109,7 +114,6 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.KeyboardState
-import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -562,6 +566,41 @@ private fun CollapsedDrawerContent(
       )
     }
 
+    if (state.pinnedSources.isNotEmpty()) {
+      item {
+        Spacer(Modifier.requiredHeight(16.dp))
+
+        HorizontalDivider(
+          modifier = Modifier.padding(horizontal = 16.dp),
+          color = AppTheme.colorScheme.outlineVariant,
+        )
+
+        Spacer(Modifier.requiredHeight(16.dp))
+      }
+
+      items(state.pinnedSources) { source ->
+        val selected = state.activeSource?.id == source.id
+        Box(modifier = Modifier.padding(bottom = 8.dp)) {
+          PinnedSourceIcon(
+            source = source,
+            selected = selected,
+            hasActiveSource = state.activeSource != null,
+            onClick = {
+              if (selected) {
+                feedsViewModel.dispatch(FeedsEvent.OnHomeSelected)
+              } else {
+                feedsViewModel.dispatch(FeedsEvent.OnSourceClick(source))
+              }
+
+              if (dismissOnSelection) {
+                closeDrawer()
+              }
+            },
+          )
+        }
+      }
+    }
+
     if (sources.itemCount > 0) {
       item {
         Spacer(Modifier.requiredHeight(16.dp))
@@ -604,13 +643,94 @@ private fun CollapsedDrawerContent(
 }
 
 @Composable
+private fun PinnedSourceIcon(
+  source: Source,
+  selected: Boolean,
+  hasActiveSource: Boolean,
+  onClick: () -> Unit,
+) {
+  val iconSize = 32.dp
+
+  Box(
+    modifier =
+      Modifier.requiredSize(iconSize + 8.dp)
+        .graphicsLayer(
+          compositingStrategy = CompositingStrategy.Offscreen,
+          alpha = if (selected || !hasActiveSource) 1f else 0.25f,
+        ),
+    contentAlignment = Alignment.Center,
+  ) {
+    val selectedColor by
+      animateColorAsState(
+        if (selected) {
+          AppTheme.colorScheme.primaryContainer
+        } else {
+          Color.Transparent
+        }
+      )
+
+    Box(modifier = Modifier.matchParentSize().background(selectedColor, RoundedCornerShape(12.dp)))
+
+    val shape = RoundedCornerShape(8.dp)
+    val clickableModifier = Modifier.requiredSize(iconSize).clip(shape).clickable { onClick() }
+
+    when (source) {
+      is Feed -> {
+        FeedIcon(
+          icon = source.icon,
+          homepageLink = source.homepageLink,
+          showFeedFavIcon = source.showFeedFavIcon,
+          contentDescription = null,
+          shape = shape,
+          modifier = clickableModifier,
+        )
+      }
+      is FeedGroup -> {
+        Box(
+          modifier =
+            Modifier.clip(shape)
+              .then(clickableModifier)
+              .background(AppTheme.colorScheme.secondary.copy(alpha = 0.16f)),
+          contentAlignment = Alignment.Center,
+        ) {
+          FeedGroupIconGrid(
+            feedHomepageLinks = source.feedHomepageLinks,
+            feedIconLinks = source.feedIconLinks,
+            feedShowFavIconSettings = source.feedShowFavIconSettings,
+            iconSize = 14.dp,
+            iconShape = RoundedCornerShape(4.dp),
+          )
+        }
+      }
+    }
+
+    Surface(
+      modifier =
+        Modifier.align(Alignment.TopEnd).requiredSize(14.dp).dropShadow(CircleShape) {
+          spread = 1.dp.toPx()
+          color = Color.Black
+          blendMode = BlendMode.DstOut
+        },
+      shape = CircleShape,
+      color = AppTheme.colorScheme.inverseSurface,
+      contentColor = AppTheme.colorScheme.inverseOnSurface,
+    ) {
+      Icon(
+        imageVector = TwineIcons.Pin,
+        contentDescription = null,
+        modifier = Modifier.padding(2.dp),
+      )
+    }
+  }
+}
+
+@Composable
 private fun SourceIcon(
   source: Source,
   selected: Boolean,
   hasActiveSource: Boolean,
   onClick: () -> Unit,
 ) {
-  val showFeedFavIcon = LocalShowFeedFavIconSetting.current
   val iconSize = 32.dp
 
   Box(
@@ -638,7 +758,7 @@ private fun SourceIcon(
         FeedIcon(
           icon = source.icon,
           homepageLink = source.homepageLink,
-          showFeedFavIcon = showFeedFavIcon,
+          showFeedFavIcon = source.showFeedFavIcon,
           contentDescription = null,
           shape = RoundedCornerShape(8.dp),
           modifier = clickableModifier,

@@ -50,8 +50,9 @@ WHEN (
   SELECT 1
   FROM blockedWord
   WHERE
-    new.title LIKE '%' || blockedWord.content || '%' OR
-    new.description LIKE '%' || blockedWord.content || '%'
+    (new.title LIKE '%' || blockedWord.content || '%' OR
+    new.description LIKE '%' || blockedWord.content || '%') AND
+    blockedWord.isDeleted = 0
 ) IS NOT NULL
 BEGIN
   UPDATE post SET flags = flags | 4 WHERE id = new.id;
@@ -66,7 +67,8 @@ WHEN (
   WHERE
     (new.title LIKE '%' || blockedWord.content || '%' OR
     new.description LIKE '%' || blockedWord.content || '%') AND
-    (new.flags & 4) == 0
+    (new.flags & 4) == 0 AND
+    blockedWord.isDeleted = 0
 ) IS NOT NULL
 BEGIN
   UPDATE post SET flags = flags | 4 WHERE id = new.id;
@@ -80,7 +82,8 @@ WHEN (
   FROM blockedWord
   WHERE
     (new.title LIKE '%' || blockedWord.content || '%' OR
-    new.description LIKE '%' || blockedWord.content || '%')
+    new.description LIKE '%' || blockedWord.content || '%') AND
+    blockedWord.isDeleted = 0
 ) IS NULL AND (old.flags & 4) != 0
 BEGIN
   UPDATE post SET flags = flags & ~4 WHERE id = new.id;
