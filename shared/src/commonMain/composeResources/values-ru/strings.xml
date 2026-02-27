@@ -71,7 +71,7 @@
   <string name="settingsEnableBlurSubtitle">Если функция отключена, вместо размытых изображений будут отображаться градиенты. Это может повысить производительность.</string>
   <string name="settingsShowUnreadCountTitle">Показывать количество непрочитанных сообщений</string>
   <string name="settingsShowUnreadCountSubtitle">Отображать всплывающее окно над выбранными лентами</string>
-  <string name="settingsShowPinnedSourcesTitle">Show pinned sources</string>
+  <string name="settingsShowPinnedSourcesTitle">Show floating pinned sources</string>
   <string name="settingsShowPinnedSourcesSubtitle">Displays a floating bar with pinned sources at the bottom of the home screen</string>
   <string name="settingsReportIssue">Сообщить о проблеме</string>
   <string name="settingsVersion">%1$s (%2$s)</string>
