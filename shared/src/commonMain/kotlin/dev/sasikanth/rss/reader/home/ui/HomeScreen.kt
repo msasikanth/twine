@@ -249,12 +249,19 @@ internal fun HomeScreen(
               modifier =
                 Modifier.padding(bottom = scaffoldBottomPadding).pointerInput(onMenuClicked) {
                   var verticalDragThresholdTriggered = false
+                  var accumulatedDrag = 0f
+                  val threshold = with(density) { 40.dp.toPx() }
+
                   detectVerticalDragGestures(
-                    onDragStart = { verticalDragThresholdTriggered = false },
+                    onDragStart = {
+                      verticalDragThresholdTriggered = false
+                      accumulatedDrag = 0f
+                    },
                     onDragEnd = { verticalDragThresholdTriggered = false },
                     onDragCancel = { verticalDragThresholdTriggered = false },
                     onVerticalDrag = { _, dragAmount ->
-                      if (!verticalDragThresholdTriggered && dragAmount < 0) {
+                      accumulatedDrag += dragAmount
+                      if (!verticalDragThresholdTriggered && accumulatedDrag < -threshold) {
                         onMenuClicked?.invoke()
                         verticalDragThresholdTriggered = true
                       }
