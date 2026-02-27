@@ -118,7 +118,7 @@ internal fun FeedListItem(
         showFeedFavIcon = feed.showFeedFavIcon,
         contentDescription = null,
         shape = MaterialTheme.shapes.medium,
-        modifier = Modifier.requiredSize(36.dp),
+        modifier = Modifier.requiredSize(24.dp),
         contentScale = ContentScale.Crop,
       )
 
