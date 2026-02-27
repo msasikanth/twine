@@ -109,7 +109,6 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.KeyboardState
-import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -610,7 +609,6 @@ private fun SourceIcon(
   hasActiveSource: Boolean,
   onClick: () -> Unit,
 ) {
-  val showFeedFavIcon = LocalShowFeedFavIconSetting.current
   val iconSize = 32.dp
 
   Box(
@@ -638,7 +636,7 @@ private fun SourceIcon(
         FeedIcon(
           icon = source.icon,
           homepageLink = source.homepageLink,
-          showFeedFavIcon = showFeedFavIcon,
+          showFeedFavIcon = source.showFeedFavIcon,
           contentDescription = null,
           shape = RoundedCornerShape(8.dp),
           modifier = clickableModifier,
