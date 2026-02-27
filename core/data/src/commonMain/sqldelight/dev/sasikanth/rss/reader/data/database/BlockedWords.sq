@@ -41,7 +41,7 @@ WHEN (new.isDeleted = 1 AND old.isDeleted = 0)
 BEGIN
   UPDATE OR IGNORE post
   SET flags = flags & ~4
-  WHERE EXISTS (
+  WHERE NOT EXISTS (
     SELECT 1
     FROM blockedWord
     WHERE (post.title LIKE '%' || blockedWord.content || '%' OR
@@ -56,7 +56,7 @@ AFTER DELETE ON blockedWord
 BEGIN
   UPDATE OR IGNORE post
   SET flags = flags & ~4
-  WHERE EXISTS (
+  WHERE NOT EXISTS (
     SELECT 1
     FROM blockedWord
     WHERE (post.title LIKE '%' || blockedWord.content || '%' OR
