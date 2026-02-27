@@ -71,6 +71,7 @@ import dev.sasikanth.rss.reader.media.PlaybackState
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
 import dev.sasikanth.rss.reader.reader.page.ReaderProcessingProgress
+import dev.sasikanth.rss.reader.reader.ui.LocalOnImageClick
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
@@ -89,6 +90,7 @@ internal fun ReaderPage(
   themeVariant: ThemeVariant,
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
+  onImageClick: (String) -> Unit,
   modifier: Modifier = Modifier,
   contentPaddingValues: PaddingValues = PaddingValues(),
 ) {
@@ -114,6 +116,7 @@ internal fun ReaderPage(
     SelectionContainer {
       Box(modifier = modifier) {
         CompositionLocalProvider(
+          LocalOnImageClick provides onImageClick,
           LocalReferenceLinkHandler provides ReferenceLinkHandlerImpl(),
           LocalMarkdownPadding provides markdownPadding(block = 12.dp),
           LocalMarkdownDimens provides markdownDimens(),
@@ -177,6 +180,7 @@ internal fun ReaderPage(
                 onShareClick = { sharedHandler.share(readerPost.link) },
                 onBookmarkClick = onBookmarkClick,
                 onMarkAsUnread = onMarkAsUnread,
+                onImageClick = onImageClick,
               )
             }
 
