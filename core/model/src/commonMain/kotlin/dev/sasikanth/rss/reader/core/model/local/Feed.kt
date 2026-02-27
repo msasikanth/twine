@@ -24,7 +24,7 @@ import kotlin.time.Instant
 @Immutable
 data class Feed(
   override val id: String,
-  val name: String,
+  override val name: String,
   val icon: String,
   val description: String,
   val link: String,
