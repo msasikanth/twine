@@ -71,7 +71,7 @@
   <string name="settingsEnableBlurSubtitle">Devre dışı bırakıldığında, bulanık görüntüler yerine degrade gösterir. Performansı artırabilir.</string>
   <string name="settingsShowUnreadCountTitle">Okunmamış gönderi sayısını göster</string>
   <string name="settingsShowUnreadCountSubtitle">Akışların üzerinde bir baloncuk gösterir</string>
-  <string name="settingsShowPinnedSourcesTitle">Show pinned sources</string>
+  <string name="settingsShowPinnedSourcesTitle">Show floating pinned sources</string>
   <string name="settingsShowPinnedSourcesSubtitle">Displays a floating bar with pinned sources at the bottom of the home screen</string>
   <string name="settingsReportIssue">Bir sorun bildir</string>
   <string name="settingsVersion">%1$s (%2$s)</string>
