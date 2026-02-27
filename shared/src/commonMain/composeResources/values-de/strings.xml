@@ -71,7 +71,7 @@
   <string name="settingsEnableBlurSubtitle">Wenn deaktiviert, werden Farbverläufe statt unscharfer Bilder angezeigt. Kann die Leistung verbessern.</string>
   <string name="settingsShowUnreadCountTitle">Anzahl ungelesener Beiträge anzeigen</string>
   <string name="settingsShowUnreadCountSubtitle">Zeigt eine Blase über der Feed-Auswahl an</string>
-  <string name="settingsShowPinnedSourcesTitle">Show pinned sources</string>
+  <string name="settingsShowPinnedSourcesTitle">Show floating pinned sources</string>
   <string name="settingsShowPinnedSourcesSubtitle">Displays a floating bar with pinned sources at the bottom of the home screen</string>
   <string name="settingsReportIssue">Ein Problem melden</string>
   <string name="settingsVersion">%1$s (%2$s)</string>
