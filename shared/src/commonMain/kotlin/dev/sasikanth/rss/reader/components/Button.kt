@@ -167,13 +167,21 @@ fun CircularIconButton(
 ) {
   val animatedAlpha by animateFloatAsState(if (enabled) 1.0f else 0.12f)
   val translucentStyle = LocalTranslucentStyles.current
+  val primaryColor = AppTheme.colorScheme.primary
+  val interactionSource = remember { MutableInteractionSource() }
 
   Box(
     modifier =
       modifier
         .requiredSize(40.dp)
         .clip(CircleShape)
-        .clickable(enabled = enabled) { onClick() }
+        .clickable(
+          enabled = enabled,
+          indication = ripple(color = { contentColor ?: primaryColor }),
+          interactionSource = interactionSource,
+        ) {
+          onClick()
+        }
         .background(backgroundColor ?: translucentStyle.default.background, CircleShape)
         .border(
           width = 1.dp,

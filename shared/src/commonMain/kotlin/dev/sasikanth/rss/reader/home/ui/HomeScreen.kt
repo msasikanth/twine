@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.home.ui
 import androidx.compose.animation.core.animate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -245,12 +246,29 @@ internal fun HomeScreen(
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
           AppTheme(useDarkTheme = true) {
             PinnedSourcesBottomBar(
-              modifier = Modifier.padding(bottom = scaffoldBottomPadding),
+              modifier =
+                Modifier.padding(bottom = scaffoldBottomPadding).pointerInput(onMenuClicked) {
+                  var verticalDragThresholdTriggered = false
+                  detectVerticalDragGestures(
+                    onDragStart = { verticalDragThresholdTriggered = false },
+                    onDragEnd = { verticalDragThresholdTriggered = false },
+                    onDragCancel = { verticalDragThresholdTriggered = false },
+                    onVerticalDrag = { _, dragAmount ->
+                      if (!verticalDragThresholdTriggered && dragAmount < 0) {
+                        onMenuClicked?.invoke()
+                        verticalDragThresholdTriggered = true
+                      }
+                    },
+                  )
+                },
               pinnedSources = feedsState.pinnedSources,
               activeSource = feedsState.activeSource,
               canShowUnreadPostsCount = feedsState.canShowUnreadPostsCount,
               onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
               onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
+              onPinnedSourceOrderChanged = { newPinnedSources ->
+                feedsViewModel.dispatch(FeedsEvent.OnPinnedSourcePositionChanged(newPinnedSources))
+              },
               scrollBehavior = bottomBarScrollState,
             )
           }

@@ -97,6 +97,7 @@ import dev.sasikanth.rss.reader.feeds.ui.DeleteConfirmationDialog
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
 import dev.sasikanth.rss.reader.feeds.ui.common.AllFeedsHeader
 import dev.sasikanth.rss.reader.feeds.ui.common.allSources
+import dev.sasikanth.rss.reader.feeds.ui.common.pinnedSources
 import dev.sasikanth.rss.reader.feeds.ui.common.sourcesSearchResults
 import dev.sasikanth.rss.reader.resources.icons.Add
 import dev.sasikanth.rss.reader.resources.icons.Close
@@ -337,6 +338,15 @@ private fun ExpandedDrawerContent(
             onAddNewFeedClick = { feedsViewModel.dispatch(FeedsEvent.OnNewFeedClicked) },
           )
         }
+
+        pinnedSources(
+          pinnedSources = state.pinnedSources,
+          onSourceClick = { feedsViewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
+          onPinClick = { feedsViewModel.dispatch(FeedsEvent.OnSourcePinClicked(it)) },
+          onPinnedSourceOrderChanged = {
+            feedsViewModel.dispatch(FeedsEvent.OnPinnedSourcePositionChanged(it))
+          },
+        )
 
         item {
           SearchBar(

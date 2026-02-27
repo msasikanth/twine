@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,7 +36,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -44,6 +47,8 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.BOTTOM_BAR_CORNER_RADIUS
 import dev.sasikanth.rss.reader.utils.BOTTOM_BAR_MAX_WIDTH
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -53,14 +58,26 @@ internal fun PinnedSourcesBottomBar(
   canShowUnreadPostsCount: Boolean,
   onSourceClick: (Source) -> Unit,
   onHomeSelected: () -> Unit,
+  onPinnedSourceOrderChanged: (List<Source>) -> Unit,
   modifier: Modifier = Modifier,
   scrollBehavior: PinnedSourcesBottomBarScrollBehavior? = null,
 ) {
   val shape = RoundedCornerShape(BOTTOM_BAR_CORNER_RADIUS)
 
   val translationY = scrollBehavior?.state?.heightOffset ?: 0f
+  val lazyListState = rememberLazyListState()
+  val reorderableLazyRowState =
+    rememberReorderableLazyListState(
+      lazyListState = lazyListState,
+      onMove = { from, to ->
+        onPinnedSourceOrderChanged(
+          pinnedSources.toMutableList().apply { add(to.index, removeAt(from.index)) }
+        )
+      },
+    )
 
   LazyRow(
+    state = lazyListState,
     modifier =
       Modifier.onGloballyPositioned { coordinates ->
           val height = coordinates.size.height.toFloat()
@@ -81,14 +98,24 @@ internal fun PinnedSourcesBottomBar(
     verticalAlignment = Alignment.CenterVertically,
     contentPadding = PaddingValues(start = 8.dp, end = 8.dp),
   ) {
-    items(pinnedSources.size) { index ->
-      SourceItem(
-        source = pinnedSources[index],
-        activeSource = activeSource,
-        canShowUnreadPostsCount = canShowUnreadPostsCount,
-        onHomeSelected = onHomeSelected,
-        onSourceClick = onSourceClick,
-      )
+    items(count = pinnedSources.size, key = { pinnedSources[it].id }) { index ->
+      val source = pinnedSources[index]
+      ReorderableItem(state = reorderableLazyRowState, key = source.id) { isDragging ->
+        val haptic = LocalHapticFeedback.current
+
+        SourceItem(
+          source = source,
+          activeSource = activeSource,
+          canShowUnreadPostsCount = canShowUnreadPostsCount,
+          onHomeSelected = onHomeSelected,
+          onSourceClick = onSourceClick,
+          isDragging = isDragging,
+          modifier =
+            Modifier.longPressDraggableHandle(
+              onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
+            ),
+        )
+      }
     }
   }
 }
@@ -100,6 +127,8 @@ private fun SourceItem(
   canShowUnreadPostsCount: Boolean,
   onHomeSelected: () -> Unit,
   onSourceClick: (Source) -> Unit,
+  isDragging: Boolean,
+  modifier: Modifier = Modifier,
 ) {
   when (val source = source) {
     is FeedGroup -> {
@@ -108,6 +137,8 @@ private fun SourceItem(
         canShowUnreadPostsCount = canShowUnreadPostsCount,
         hasActiveSource = activeSource != null,
         selected = activeSource?.id == source.id,
+        isDragging = isDragging,
+        modifier = modifier,
         onClick = {
           if (activeSource?.id == source.id) {
             onHomeSelected()
@@ -126,6 +157,8 @@ private fun SourceItem(
         canShowUnreadPostsCount = canShowUnreadPostsCount,
         hasActiveSource = activeSource != null,
         selected = activeSource?.id == source.id,
+        isDragging = isDragging,
+        modifier = modifier,
         onClick = {
           if (activeSource?.id == source.id) {
             onHomeSelected()

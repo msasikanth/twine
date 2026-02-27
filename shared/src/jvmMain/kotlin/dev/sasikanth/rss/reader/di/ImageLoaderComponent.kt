@@ -12,8 +12,9 @@
 package dev.sasikanth.rss.reader.di
 
 import coil3.PlatformContext
+import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Provides
 
 actual interface ImageLoaderPlatformComponent {
-  @Provides fun providesPlatformContext(): PlatformContext = PlatformContext.INSTANCE
+  @Provides @AppScope fun providesPlatformContext(): PlatformContext = PlatformContext.INSTANCE
 }

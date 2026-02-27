@@ -50,7 +50,6 @@ import app.cash.paging.compose.itemKey
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
-import dev.sasikanth.rss.reader.components.FilledIconButton
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
@@ -68,6 +67,7 @@ import dev.sasikanth.rss.reader.utils.bottomPaddingOfSourceItem
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.allFeeds
+import twine.shared.generated.resources.buttonAddFeed
 import twine.shared.generated.resources.feedsSortAlphabetical
 import twine.shared.generated.resources.feedsSortLatest
 import twine.shared.generated.resources.feedsSortOldest
@@ -297,11 +297,12 @@ internal fun AllFeedsHeader(
     if (showAddButton) {
       Spacer(Modifier.width(12.dp))
 
-      FilledIconButton(
+      CircularIconButton(
         icon = TwineIcons.Add,
-        contentDescription = null,
-        containerColor = AppTheme.colorScheme.inverseSurface,
-        iconTint = AppTheme.colorScheme.inverseOnSurface,
+        label = stringResource(Res.string.buttonAddFeed),
+        backgroundColor = AppTheme.colorScheme.inverseSurface,
+        contentColor = AppTheme.colorScheme.inverseOnSurface,
+        borderColor = Color.Transparent,
         onClick = { onAddNewFeedClick?.invoke() },
       )
     }
