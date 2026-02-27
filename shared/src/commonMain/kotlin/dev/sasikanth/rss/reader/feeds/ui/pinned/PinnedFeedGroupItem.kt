@@ -41,6 +41,7 @@ internal fun PinnedFeedGroupItem(
   onClick: (() -> Unit)? = null,
   hasActiveSource: Boolean = false,
   selected: Boolean = false,
+  isDragging: Boolean = false,
 ) {
   Box(
     modifier = modifier.graphicsLayer { alpha = if (selected || !hasActiveSource) 1f else 0.25f }
@@ -48,7 +49,8 @@ internal fun PinnedFeedGroupItem(
     Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
       val shape = RoundedCornerShape(16.dp)
       val clickableModifier =
-        if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
+        if (onClick != null) Modifier.clickable(enabled = !isDragging, onClick = onClick)
+        else Modifier
 
       Box(
         modifier =
@@ -72,7 +74,7 @@ internal fun PinnedFeedGroupItem(
     }
 
     val badgeCount = feedGroup.numberOfUnreadPosts
-    if (badgeCount > 0 && canShowUnreadPostsCount) {
+    if (!isDragging && badgeCount > 0 && canShowUnreadPostsCount) {
       UnreadCountBadge(badgeCount)
     }
   }

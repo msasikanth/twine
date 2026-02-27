@@ -266,6 +266,9 @@ internal fun HomeScreen(
               canShowUnreadPostsCount = feedsState.canShowUnreadPostsCount,
               onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
               onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
+              onPinnedSourceOrderChanged = { newPinnedSources ->
+                feedsViewModel.dispatch(FeedsEvent.OnPinnedSourcePositionChanged(newPinnedSources))
+              },
               scrollBehavior = bottomBarScrollState,
             )
           }
