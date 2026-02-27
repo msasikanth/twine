@@ -73,6 +73,7 @@ import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen
 import dev.sasikanth.rss.reader.reader.ReaderViewModel
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
+import dev.sasikanth.rss.reader.reader.ui.ImageViewerScreen
 import dev.sasikanth.rss.reader.reader.ui.ReaderScreen
 import dev.sasikanth.rss.reader.search.SearchViewModel
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
@@ -447,6 +448,7 @@ fun NavGraphBuilder.readerScreen(
       pageViewModelFactory = { post -> viewModel(key = post.id) { readerPageViewModel(post) } },
       onBack = { navController.popBackStack() },
       openPaywall = { navController.navigate(Screen.Paywall) },
+      onImageClick = { imageUrl -> navController.navigate(Screen.ImageViewer(imageUrl)) },
       toggleLightStatusBar = toggleLightStatusBar,
       toggleLightNavBar = toggleLightNavBar,
       modifier = modifier,
@@ -599,6 +601,22 @@ fun NavGraphBuilder.paywallScreen(
       modifier = modifier,
       hasPremium = hasPremium,
       goBack = { navController.popBackStack() },
+    )
+  }
+}
+
+fun NavGraphBuilder.imageViewerScreen(
+  navController: NavHostController,
+  toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
+  toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
+) {
+  composable<Screen.ImageViewer> {
+    val imageUrl = it.toRoute<Screen.ImageViewer>().imageUrl
+    ImageViewerScreen(
+      imageUrl = imageUrl,
+      onBack = { navController.popBackStack() },
+      toggleLightStatusBar = toggleLightStatusBar,
+      toggleLightNavBar = toggleLightNavBar,
     )
   }
 }
