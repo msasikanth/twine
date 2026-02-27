@@ -71,7 +71,7 @@
   <string name="settingsEnableBlurSubtitle">When disabled, displays gradients instead of blurred images. May improve performance.</string>
   <string name="settingsShowUnreadCountTitle">Show unread posts count</string>
   <string name="settingsShowUnreadCountSubtitle">Displays a bubble above feed selections</string>
-  <string name="settingsShowPinnedSourcesTitle">Show pinned sources</string>
+  <string name="settingsShowPinnedSourcesTitle">Show floating pinned sources</string>
   <string name="settingsShowPinnedSourcesSubtitle">Displays a floating bar with pinned sources at the bottom of the home screen</string>
   <string name="settingsReportIssue">Report an issue</string>
   <string name="settingsVersion">%1$s (%2$s)</string>
