@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -121,10 +120,8 @@ internal fun PostListItem(
         .semantics { contentDescription = item.title.ifBlank { item.description } }
         .padding(horizontal = 24.dp, vertical = 8.dp)
   ) {
-    Row {
+    Row(modifier = Modifier.padding(top = 8.dp)) {
       Column(modifier = Modifier.weight(1f)) {
-        Spacer(Modifier.height(8.dp))
-
         Text(
           modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
           style = MaterialTheme.typography.titleSmall,
@@ -161,8 +158,7 @@ internal fun PostListItem(
         ) {
           AsyncImage(
             url = url,
-            modifier =
-              Modifier.padding(vertical = 8.dp).aspectRatio(1f).clip(RoundedCornerShape(25)),
+            modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(25)),
             contentDescription = null,
             contentScale = ContentScale.Crop,
           )
@@ -171,7 +167,6 @@ internal fun PostListItem(
     }
 
     PostActionBar(
-      modifier = Modifier.padding(end = if (showImage) 12.dp else 0.dp),
       feedName = item.feedName,
       feedIcon = item.feedIcon,
       feedHomepageLink = item.feedHomepageLink,
