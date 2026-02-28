@@ -52,6 +52,15 @@
   <string name="bookmarks">Bookmarks</string>
   <string name="bookmarksPlaceholder">Bookmarked posts will appear here 🔖</string>
   <string name="settings">Settings</string>
+  <string name="settingsAppearanceAndLayout">Appearance &amp; layout</string>
+  <string name="settingsAppearanceAndLayoutSubtitle">Customize how Twine looks</string>
+  <string name="settingsFeaturesAndBehaviors">Features &amp; behaviors</string>
+  <string name="settingsFeaturesAndBehaviorsSubtitle">Customize how Twine works</string>
+  <string name="settingsServicesAndSync">Services &amp; sync</string>
+  <string name="settingsServicesAndSyncSubtitle">Manage RSS services</string>
+  <string name="settingsYourInsights">Your insights</string>
+  <string name="settingsYourInsightsSubtitle">Manage your reading data</string>
+  <string name="settingsAppInfoAndFeedback">App info &amp; feedback</string>
   <string name="moreMenuOptions">More menu options</string>
   <string name="settingsHeaderBehaviour">Behavior</string>
   <string name="settingsHeaderFeedback">Feedback &amp; bug reports</string>
@@ -62,6 +71,8 @@
   <string name="settingsEnableBlurSubtitle">When disabled, displays gradients instead of blurred images. May improve performance.</string>
   <string name="settingsShowUnreadCountTitle">Show unread posts count</string>
   <string name="settingsShowUnreadCountSubtitle">Displays a bubble above feed selections</string>
+  <string name="settingsShowPinnedSourcesTitle">Show floating pinned sources</string>
+  <string name="settingsShowPinnedSourcesSubtitle">Displays a floating bar with pinned sources at the bottom of the home screen</string>
   <string name="settingsReportIssue">Report an issue</string>
   <string name="settingsVersion">%1$s (%2$s)</string>
   <string name="settingsAboutTitle">About</string>
@@ -100,6 +111,7 @@
   <string name="aboutSocialWebsite">Website</string>
   <string name="feedsSearchHint">Filter</string>
   <string name="allFeeds">Feeds</string>
+  <string name="allFeedsCount">%1$s: %2$d</string>
   <string name="pinnedFeeds">Pinned</string>
   <string name="markAllAsRead">Mark as read</string>
   <string name="openWebsite">Open Website</string>
@@ -257,6 +269,7 @@
   <string name="statisticsMore">More</string>
   <string name="settingsStatisticsTitle">Statistics</string>
   <string name="settingsStatisticsSubtitle">View your reading habits and insights</string>
+  <string name="sourcesCount">%1$d sources</string>
   <string name="discoveryTitle">Discovery</string>
   <string name="discoverySearchHint">Search for feeds</string>
   <string name="discoveryAddFeed">Add</string>
