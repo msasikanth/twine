@@ -135,7 +135,7 @@ fun IconButton(
       Modifier.semantics { role = Role.Button }
         .requiredSize(size.containerSize)
         .graphicsLayer { this.blendMode = blendMode }
-        .clip(MaterialTheme.shapes.small)
+        .clip(CircleShape)
         .clickable(
           interactionSource = interactionSource,
           indication = ripple(color = AppTheme.colorScheme.secondary),
