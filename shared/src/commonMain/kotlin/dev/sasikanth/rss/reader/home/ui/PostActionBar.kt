@@ -16,13 +16,16 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
@@ -104,10 +107,13 @@ internal fun PostActionBar(
   onSourceClick: () -> Unit,
 ) {
   Row(
-    modifier = Modifier.padding(top = 8.dp).then(modifier),
+    modifier = Modifier.height(IntrinsicSize.Min).padding(top = 8.dp).then(modifier),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+      modifier = Modifier.fillMaxHeight().weight(1f),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
       SourceInfo(
         modifier = Modifier.weight(1f, fill = false).widthIn(max = 120.dp).clearAndSetSemantics {},
         feedName = feedName,
@@ -192,20 +198,26 @@ private fun SourceInfo(
   Row(
     modifier =
       modifier
+        .fillMaxHeight()
         .clip(MaterialTheme.shapes.extraSmall)
         .clickable(onClick = onSourceClick, enabled = config.enablePostSource),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    FeedIcon(
-      modifier = Modifier.requiredSize(16.dp),
-      icon = feedIcon,
-      homepageLink = feedHomepageLink,
-      showFeedFavIcon = showFeedFavIcon,
-      shape = MaterialTheme.shapes.extraSmall,
-      contentDescription = null,
-    )
+    Box(modifier = Modifier.requiredSize(18.dp)) {
+      FeedIcon(
+        modifier =
+          Modifier.requiredSize(16.dp)
+            .border(1.dp, AppTheme.colorScheme.outlineVariant, MaterialTheme.shapes.extraSmall)
+            .align(Alignment.Center),
+        icon = feedIcon,
+        homepageLink = feedHomepageLink,
+        showFeedFavIcon = showFeedFavIcon,
+        shape = MaterialTheme.shapes.extraSmall,
+        contentDescription = null,
+      )
+    }
 
-    Spacer(Modifier.requiredWidth(4.dp))
+    Spacer(Modifier.requiredWidth(2.dp))
 
     Text(
       style = MaterialTheme.typography.labelMedium,
