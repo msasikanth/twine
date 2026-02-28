@@ -205,7 +205,7 @@ fun CircularIconButton(
 }
 
 enum class IconButtonSize(val containerSize: Dp, val iconSize: Dp) {
-  Small(containerSize = 32.dp, iconSize = 20.dp),
+  Small(containerSize = 32.dp, iconSize = 16.dp),
   Default(containerSize = 40.dp, iconSize = 20.dp),
   Large(containerSize = 56.dp, iconSize = 24.dp),
 }
