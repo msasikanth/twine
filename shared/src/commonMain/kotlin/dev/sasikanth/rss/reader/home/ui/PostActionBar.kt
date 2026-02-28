@@ -16,18 +16,23 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -41,6 +46,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -104,10 +114,13 @@ internal fun PostActionBar(
   onSourceClick: () -> Unit,
 ) {
   Row(
-    modifier = Modifier.padding(top = 8.dp).then(modifier),
+    modifier = Modifier.height(IntrinsicSize.Min).padding(top = 8.dp).then(modifier),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+      modifier = Modifier.fillMaxHeight().weight(1f),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
       SourceInfo(
         modifier = Modifier.weight(1f, fill = false).widthIn(max = 120.dp).clearAndSetSemantics {},
         feedName = feedName,
@@ -115,6 +128,7 @@ internal fun PostActionBar(
         feedHomepageLink = feedHomepageLink,
         showFeedFavIcon = showFeedFavIcon,
         config = config,
+        postRead = postRead,
         onSourceClick = onSourceClick,
       )
 
@@ -178,6 +192,7 @@ private fun SourceInfo(
   feedHomepageLink: String,
   showFeedFavIcon: Boolean,
   feedName: String,
+  postRead: Boolean,
   config: PostMetadataConfig,
   onSourceClick: () -> Unit,
   modifier: Modifier = Modifier,
@@ -192,20 +207,44 @@ private fun SourceInfo(
   Row(
     modifier =
       modifier
+        .fillMaxHeight()
         .clip(MaterialTheme.shapes.extraSmall)
         .clickable(onClick = onSourceClick, enabled = config.enablePostSource),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    FeedIcon(
-      modifier = Modifier.requiredSize(16.dp),
-      icon = feedIcon,
-      homepageLink = feedHomepageLink,
-      showFeedFavIcon = showFeedFavIcon,
-      shape = MaterialTheme.shapes.extraSmall,
-      contentDescription = null,
-    )
+    Box(
+      modifier =
+        Modifier.requiredSize(18.dp)
+          .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+    ) {
+      FeedIcon(
+        modifier =
+          Modifier.requiredSize(16.dp)
+            .border(1.dp, AppTheme.colorScheme.outlineVariant, MaterialTheme.shapes.extraSmall)
+            .align(Alignment.Center),
+        icon = feedIcon,
+        homepageLink = feedHomepageLink,
+        showFeedFavIcon = showFeedFavIcon,
+        shape = MaterialTheme.shapes.extraSmall,
+        contentDescription = null,
+      )
 
-    Spacer(Modifier.requiredWidth(4.dp))
+      if (!postRead) {
+        Box(
+          modifier =
+            Modifier.align(Alignment.TopEnd)
+              .requiredSize(6.dp)
+              .dropShadow(CircleShape) {
+                color = Color.Black
+                spread = 1.dp.toPx()
+                blendMode = BlendMode.DstOut
+              }
+              .background(MaterialTheme.colorScheme.error, CircleShape)
+        )
+      }
+    }
+
+    Spacer(Modifier.requiredWidth(2.dp))
 
     Text(
       style = MaterialTheme.typography.labelMedium,

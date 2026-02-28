@@ -82,7 +82,7 @@ fun FeaturedImage(
   }
 }
 
-private val widthBiasedScale =
+internal val widthBiasedScale =
   object : ContentScale {
     override fun computeScaleFactor(srcSize: Size, dstSize: Size): ScaleFactor {
       val heightScale = dstSize.height / srcSize.height

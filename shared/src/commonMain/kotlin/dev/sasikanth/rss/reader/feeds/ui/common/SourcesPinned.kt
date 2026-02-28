@@ -23,10 +23,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -36,7 +38,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -49,6 +53,7 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
@@ -116,71 +121,82 @@ private fun PinnedSourceItem(
   isDragging: Boolean,
   modifier: Modifier = Modifier,
 ) {
-  Box(
-    modifier =
-      modifier
-        .requiredSize(64.dp)
-        .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen),
-    contentAlignment = Alignment.Center,
-  ) {
-    val shape = RoundedCornerShape(16.dp)
-    val borderColor = AppTheme.colorScheme.outlineVariant
-
+  Column(horizontalAlignment = Alignment.CenterHorizontally) {
     Box(
       modifier =
-        Modifier.clip(shape)
-          .background(AppTheme.colorScheme.backdrop)
-          .border(1.dp, borderColor, shape)
-          .clickable(enabled = !isDragging) { onSourceClick(source) },
+        modifier
+          .requiredSize(64.dp)
+          .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen),
       contentAlignment = Alignment.Center,
     ) {
-      when (source) {
-        is Feed -> {
-          FeedIcon(
-            icon = source.icon,
-            homepageLink = source.homepageLink,
-            showFeedFavIcon = source.showFeedFavIcon,
-            contentDescription = null,
-            modifier = Modifier.requiredSize(48.dp),
-            shape = shape,
-          )
+      val shape = RoundedCornerShape(16.dp)
+      val borderColor = AppTheme.colorScheme.outlineVariant
+
+      Box(
+        modifier =
+          Modifier.clip(shape)
+            .background(AppTheme.colorScheme.backdrop)
+            .border(1.dp, borderColor, shape)
+            .clickable(enabled = !isDragging) { onSourceClick(source) },
+        contentAlignment = Alignment.Center,
+      ) {
+        when (source) {
+          is Feed -> {
+            FeedIcon(
+              icon = source.icon,
+              homepageLink = source.homepageLink,
+              showFeedFavIcon = source.showFeedFavIcon,
+              contentDescription = null,
+              modifier = Modifier.requiredSize(48.dp),
+              shape = shape,
+            )
+          }
+          is FeedGroup -> {
+            FeedGroupIconGrid(
+              feedHomepageLinks = source.feedHomepageLinks,
+              feedIconLinks = source.feedIconLinks,
+              feedShowFavIconSettings = source.feedShowFavIconSettings,
+              modifier = Modifier.requiredSize(48.dp),
+            )
+          }
         }
-        is FeedGroup -> {
-          FeedGroupIconGrid(
-            feedHomepageLinks = source.feedHomepageLinks,
-            feedIconLinks = source.feedIconLinks,
-            feedShowFavIconSettings = source.feedShowFavIconSettings,
-            modifier = Modifier.requiredSize(48.dp),
+      }
+
+      if (!isDragging) {
+        Surface(
+          modifier =
+            Modifier.align(Alignment.TopEnd)
+              .requiredSize(20.dp)
+              .dropShadow(shape) {
+                spread = 1.dp.toPx()
+                color = Color.Black
+                blendMode = BlendMode.DstOut
+              }
+              .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = { onRemoveClick(source) },
+              ),
+          shape = CircleShape,
+          color = AppTheme.colorScheme.inverseSurface,
+          contentColor = AppTheme.colorScheme.inverseOnSurface,
+        ) {
+          Icon(
+            imageVector = Icons.Rounded.Remove,
+            contentDescription = null,
+            modifier = Modifier.padding(4.dp),
           )
         }
       }
     }
 
-    if (!isDragging) {
-      Surface(
-        modifier =
-          Modifier.align(Alignment.TopEnd)
-            .requiredSize(20.dp)
-            .dropShadow(shape) {
-              spread = 1.dp.toPx()
-              color = Color.Black
-              blendMode = BlendMode.DstOut
-            }
-            .clickable(
-              interactionSource = remember { MutableInteractionSource() },
-              indication = null,
-              onClick = { onRemoveClick(source) },
-            ),
-        shape = CircleShape,
-        color = AppTheme.colorScheme.inverseSurface,
-        contentColor = AppTheme.colorScheme.inverseOnSurface,
-      ) {
-        Icon(
-          imageVector = Icons.Rounded.Remove,
-          contentDescription = null,
-          modifier = Modifier.padding(4.dp),
-        )
-      }
-    }
+    Text(
+      modifier = Modifier.widthIn(max = 64.dp),
+      text = source.name,
+      style = MaterialTheme.typography.labelMedium,
+      color = AppTheme.colorScheme.onSurfaceVariant,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+    )
   }
 }
