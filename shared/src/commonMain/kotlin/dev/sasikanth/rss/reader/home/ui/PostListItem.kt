@@ -127,7 +127,7 @@ internal fun PostListItem(
 
         Text(
           modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
-          style = MaterialTheme.typography.titleMedium,
+          style = MaterialTheme.typography.titleSmall,
           text = item.title.ifBlank { item.description },
           color = AppTheme.colorScheme.onSurface,
           maxLines = 2,
