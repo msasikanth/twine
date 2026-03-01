@@ -109,7 +109,7 @@ internal fun FeaturedPostItem(
         },
       text = item.title.ifBlank { item.description },
       style = titleTextStyle,
-      color = AppTheme.colorScheme.onSurface,
+      color = AppTheme.colorScheme.onSurfaceVariant,
       maxLines = titleMaxLines,
       overflow = TextOverflow.Ellipsis,
       onTextLayout = { textLayoutResult ->
