@@ -281,16 +281,7 @@ class SettingsViewModel(
   }
 
   private fun triggerSync() {
-    viewModelScope.launch {
-      _state.update { it.copy(syncProgress = SettingsState.SyncProgress.Syncing) }
-      val result = syncCoordinator.pull()
-      _state.update {
-        it.copy(
-          syncProgress =
-            if (result) SettingsState.SyncProgress.Success else SettingsState.SyncProgress.Failure
-        )
-      }
-    }
+    viewModelScope.launch { syncCoordinator.pull() }
   }
 
   private fun signOutClicked() {
@@ -300,7 +291,6 @@ class SettingsViewModel(
           it.signOut()
         }
       }
-      _state.update { it.copy(syncProgress = SettingsState.SyncProgress.Idle) }
     }
   }
 
