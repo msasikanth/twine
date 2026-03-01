@@ -681,7 +681,6 @@ private fun PinnedSourceIcon(
           homepageLink = source.homepageLink,
           showFeedFavIcon = source.showFeedFavIcon,
           contentDescription = null,
-          shape = shape,
           modifier = clickableModifier,
         )
       }
@@ -697,8 +696,6 @@ private fun PinnedSourceIcon(
             feedHomepageLinks = source.feedHomepageLinks,
             feedIconLinks = source.feedIconLinks,
             feedShowFavIconSettings = source.feedShowFavIconSettings,
-            iconSize = 14.dp,
-            iconShape = RoundedCornerShape(4.dp),
           )
         }
       }
@@ -760,7 +757,6 @@ private fun SourceIcon(
           homepageLink = source.homepageLink,
           showFeedFavIcon = source.showFeedFavIcon,
           contentDescription = null,
-          shape = RoundedCornerShape(8.dp),
           modifier = clickableModifier,
         )
       }
@@ -776,8 +772,6 @@ private fun SourceIcon(
             feedHomepageLinks = source.feedHomepageLinks,
             feedIconLinks = source.feedIconLinks,
             feedShowFavIconSettings = source.feedShowFavIconSettings,
-            iconSize = 14.dp,
-            iconShape = RoundedCornerShape(4.dp),
           )
         }
       }

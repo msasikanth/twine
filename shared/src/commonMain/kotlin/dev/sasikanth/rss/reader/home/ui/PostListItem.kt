@@ -315,7 +315,6 @@ internal fun CompactPostListItem(
       homepageLink = item.feedHomepageLink,
       showFeedFavIcon = item.showFeedFavIcon,
       contentDescription = null,
-      shape = MaterialTheme.shapes.extraSmall,
       modifier = Modifier.requiredSize(20.dp),
     )
 

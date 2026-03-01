@@ -218,15 +218,14 @@ private fun SourceInfo(
           .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
     ) {
       FeedIcon(
+        icon = feedIcon,
+        homepageLink = feedHomepageLink,
+        showFeedFavIcon = showFeedFavIcon,
+        contentDescription = null,
         modifier =
           Modifier.requiredSize(16.dp)
             .border(1.dp, AppTheme.colorScheme.outlineVariant, MaterialTheme.shapes.extraSmall)
             .align(Alignment.Center),
-        icon = feedIcon,
-        homepageLink = feedHomepageLink,
-        showFeedFavIcon = showFeedFavIcon,
-        shape = MaterialTheme.shapes.extraSmall,
-        contentDescription = null,
       )
 
       if (!postRead) {

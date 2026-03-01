@@ -268,12 +268,11 @@ private fun DiscoveryFeedItem(
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     FeedIcon(
-      modifier = Modifier.requiredSize(48.dp),
       icon = feed.icon,
       homepageLink = feed.homepageLink,
       showFeedFavIcon = !(feed.useFeedIcon),
       contentDescription = null,
-      shape = MaterialTheme.shapes.small,
+      modifier = Modifier.requiredSize(48.dp),
     )
 
     Spacer(Modifier.requiredHeight(8.dp))

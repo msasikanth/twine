@@ -59,14 +59,13 @@ internal fun PinnedFeedItem(
     contentAlignment = Alignment.Center,
   ) {
     val shape = MaterialTheme.shapes.large
-    val feedIconShape = RoundedCornerShape(17.dp)
+    val feedIconShape = RoundedCornerShape(25)
 
     FeedIcon(
       icon = feedIconUrl,
       homepageLink = homePageUrl,
       showFeedFavIcon = showFeedFavIcon,
       contentDescription = null,
-      shape = feedIconShape,
       modifier =
         Modifier.requiredSize(48.dp)
           .clip(feedIconShape)

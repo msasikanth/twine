@@ -118,11 +118,11 @@ internal fun FeedGroupItem(
       val iconSpacing = 2.dp
 
       FeedGroupIconGrid(
-        modifier = Modifier.requiredSize(36.dp),
         feedHomepageLinks = feedGroup.feedHomepageLinks,
         feedIconLinks = feedGroup.feedIconLinks,
         feedShowFavIconSettings = feedGroup.feedShowFavIconSettings,
         iconSize = iconSize,
+        modifier = Modifier.requiredSize(36.dp),
       )
 
       Spacer(Modifier.requiredWidth(16.dp))
