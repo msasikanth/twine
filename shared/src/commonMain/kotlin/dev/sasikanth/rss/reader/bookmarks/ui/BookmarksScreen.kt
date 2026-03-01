@@ -22,19 +22,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -49,13 +46,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.bookmarks.BookmarksEvent
 import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
-import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
+import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
-import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.BookmarkStacks
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -64,7 +60,6 @@ import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmarks
 import twine.shared.generated.resources.bookmarksPlaceholder
-import twine.shared.generated.resources.buttonGoBack
 
 @Composable
 internal fun BookmarksScreen(
@@ -84,38 +79,7 @@ internal fun BookmarksScreen(
   Scaffold(
     modifier = modifier,
     topBar = {
-      Box {
-        CenterAlignedTopAppBar(
-          title = {
-            Text(
-              text = stringResource(Res.string.bookmarks),
-              color = AppTheme.colorScheme.onSurface,
-              style = MaterialTheme.typography.titleMedium,
-            )
-          },
-          navigationIcon = {
-            CircularIconButton(
-              modifier = Modifier.padding(start = 12.dp),
-              icon = TwineIcons.ArrowBack,
-              label = stringResource(Res.string.buttonGoBack),
-              onClick = goBack,
-            )
-          },
-          contentPadding = PaddingValues(vertical = 8.dp),
-          colors =
-            TopAppBarDefaults.topAppBarColors(
-              containerColor = AppTheme.colorScheme.surface,
-              navigationIconContentColor = AppTheme.colorScheme.onSurface,
-              titleContentColor = AppTheme.colorScheme.onSurface,
-              actionIconContentColor = AppTheme.colorScheme.onSurface,
-            ),
-        )
-
-        HorizontalDivider(
-          modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-          color = AppTheme.colorScheme.outlineVariant,
-        )
-      }
+      SimpleTopAppBar(title = stringResource(Res.string.bookmarks), onBackClick = goBack)
     },
     content = { padding ->
       if (bookmarks.itemCount > 0) {
