@@ -241,6 +241,7 @@ private fun ExpandedDrawerContent(
 
       val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
       val lazyListState = rememberLazyListState()
+      val translucentStyle = LocalTranslucentStyles.current
 
       LazyColumn(
         modifier =
@@ -277,7 +278,7 @@ private fun ExpandedDrawerContent(
           val backgroundColor by
             animateColorAsState(
               if (selected) {
-                AppTheme.colorScheme.primaryContainer
+                translucentStyle.default.background
               } else {
                 Color.Transparent
               }
@@ -324,10 +325,10 @@ private fun ExpandedDrawerContent(
             shape = navigationItemShape,
             colors =
               NavigationDrawerItemDefaults.colors(
-                selectedIconColor = AppTheme.colorScheme.primary,
-                unselectedIconColor = AppTheme.colorScheme.onSurfaceVariant,
-                selectedTextColor = AppTheme.colorScheme.primary,
-                unselectedTextColor = AppTheme.colorScheme.onSurfaceVariant,
+                selectedIconColor = AppTheme.colorScheme.onSurface,
+                unselectedIconColor = AppTheme.colorScheme.onSurface,
+                selectedTextColor = AppTheme.colorScheme.onSurface,
+                unselectedTextColor = AppTheme.colorScheme.onSurface,
                 selectedContainerColor = Color.Transparent,
                 unselectedContainerColor = Color.Transparent,
               ),
