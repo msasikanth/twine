@@ -20,6 +20,7 @@ import androidx.compose.runtime.Immutable
 import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.SubscriptionResult
+import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.opml.OpmlFeed
 import dev.sasikanth.rss.reader.data.opml.OpmlResult
@@ -44,6 +45,7 @@ data class SettingsState(
   val useAmoled: Boolean,
   val enableAutoSync: Boolean,
   val showFeedFavIcon: Boolean,
+  val showFeaturedSection: Boolean,
   val showPinnedSources: Boolean,
   val markAsReadOn: MarkAsReadOn,
   val subscriptionResult: SubscriptionResult?,
@@ -55,6 +57,7 @@ data class SettingsState(
   val syncProgress: SyncProgress,
   val lastSyncedAt: Instant?,
   val hasCloudServiceSignedIn: Boolean,
+  val signedInService: ServiceType?,
   val authUrlToOpen: String?,
   val appIcon: AppIcon,
   val showAppIconSelectionSheet: Boolean,
@@ -89,6 +92,7 @@ data class SettingsState(
         useAmoled = false,
         enableAutoSync = true,
         showFeedFavIcon = true,
+        showFeaturedSection = true,
         showPinnedSources = true,
         markAsReadOn = MarkAsReadOn.Open,
         subscriptionResult = null,
@@ -100,10 +104,11 @@ data class SettingsState(
         syncProgress = SyncProgress.Idle,
         lastSyncedAt = null,
         hasCloudServiceSignedIn = false,
+        signedInService = null,
         authUrlToOpen = null,
         appIcon = AppIcon.DarkJade,
         showAppIconSelectionSheet = false,
-        canSubscribe = true,
+        canSubscribe = false,
         opmlFeedsToSelect = null,
         showFreeFeedLimitWarning = false,
       )

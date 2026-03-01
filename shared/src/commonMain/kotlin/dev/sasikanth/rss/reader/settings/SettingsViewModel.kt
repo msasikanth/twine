@@ -88,6 +88,7 @@ class SettingsViewModel(
           combine(
             settingsRepository.themeVariant,
             settingsRepository.showFeedFavIcon,
+            settingsRepository.showFeaturedSection,
             settingsRepository.appIcon,
             settingsRepository.showPinnedSources,
             ::SettingsGroup2,
@@ -98,6 +99,7 @@ class SettingsViewModel(
             useAmoled = useAmoled,
             themeVariant = group2.themeVariant,
             showFeedFavIcon = group2.showFeedFavIcon,
+            showFeaturedSection = group2.showFeaturedSection,
             appIcon = group2.appIcon,
             showPinnedSources = group2.showPinnedSources,
           )
@@ -126,6 +128,7 @@ class SettingsViewModel(
           useAmoled = combinedGroup.useAmoled,
           enableAutoSync = group3.enableAutoSync,
           showFeedFavIcon = combinedGroup.showFeedFavIcon,
+          showFeaturedSection = combinedGroup.showFeaturedSection,
           showPinnedSources = combinedGroup.showPinnedSources,
           markAsReadOn = group1.markAsReadOn,
           homeViewMode = group3.homeViewMode,
@@ -141,6 +144,7 @@ class SettingsViewModel(
               else -> SettingsState.SyncProgress.Idle
             },
           hasCloudServiceSignedIn = group4.user != null,
+          signedInService = group4.user?.serviceType,
           appIcon = combinedGroup.appIcon,
         )
       }
@@ -156,6 +160,7 @@ class SettingsViewModel(
             useAmoled = settings.useAmoled,
             enableAutoSync = settings.enableAutoSync,
             showFeedFavIcon = settings.showFeedFavIcon,
+            showFeaturedSection = settings.showFeaturedSection,
             showPinnedSources = settings.showPinnedSources,
             markAsReadOn = settings.markAsReadOn,
             homeViewMode = settings.homeViewMode,
@@ -164,6 +169,7 @@ class SettingsViewModel(
             downloadFullContent = settings.downloadFullContent,
             lastSyncedAt = settings.lastSyncedAt,
             hasCloudServiceSignedIn = settings.hasCloudServiceSignedIn,
+            signedInService = settings.signedInService,
             appIcon = settings.appIcon,
             syncProgress =
               if (it.syncProgress == SettingsState.SyncProgress.Syncing) {
@@ -193,6 +199,7 @@ class SettingsViewModel(
       is SettingsEvent.ToggleShowReaderView -> toggleShowReaderView(event.value)
       is SettingsEvent.ToggleAutoSync -> toggleAutoSync(event.value)
       is SettingsEvent.ToggleShowFeedFavIcon -> toggleShowFeedFavIcon(event.value)
+      is SettingsEvent.ToggleShowFeaturedSection -> toggleShowFeaturedSection(event.value)
       is SettingsEvent.ToggleShowPinnedSources -> toggleShowPinnedSources(event.value)
       SettingsEvent.ImportOpmlClicked -> importOpmlClicked()
       SettingsEvent.ExportOpmlClicked -> exportOpmlClicked()
@@ -327,6 +334,10 @@ class SettingsViewModel(
     viewModelScope.launch { settingsRepository.toggleShowFeedFavIcon(value) }
   }
 
+  private fun toggleShowFeaturedSection(value: Boolean) {
+    viewModelScope.launch { settingsRepository.toggleShowFeaturedSection(value) }
+  }
+
   private fun toggleShowPinnedSources(value: Boolean) {
     viewModelScope.launch { settingsRepository.toggleShowPinnedSources(value) }
   }
@@ -430,6 +441,7 @@ private data class Settings(
   val useAmoled: Boolean,
   val enableAutoSync: Boolean,
   val showFeedFavIcon: Boolean,
+  val showFeaturedSection: Boolean,
   val showPinnedSources: Boolean,
   val markAsReadOn: MarkAsReadOn,
   val homeViewMode: HomeViewMode,
@@ -439,6 +451,7 @@ private data class Settings(
   val lastSyncedAt: Instant?,
   val lastSyncStatus: SettingsState.SyncProgress,
   val hasCloudServiceSignedIn: Boolean,
+  val signedInService: dev.sasikanth.rss.reader.core.model.local.ServiceType?,
   val appIcon: AppIcon,
 )
 
@@ -453,6 +466,7 @@ private data class SettingsGroup1(
 private data class SettingsGroup2(
   val themeVariant: ThemeVariant,
   val showFeedFavIcon: Boolean,
+  val showFeaturedSection: Boolean,
   val appIcon: AppIcon,
   val showPinnedSources: Boolean,
 )
@@ -462,6 +476,7 @@ private data class SettingsGroupCombined(
   val useAmoled: Boolean,
   val themeVariant: ThemeVariant,
   val showFeedFavIcon: Boolean,
+  val showFeaturedSection: Boolean,
   val appIcon: AppIcon,
   val showPinnedSources: Boolean,
 )
