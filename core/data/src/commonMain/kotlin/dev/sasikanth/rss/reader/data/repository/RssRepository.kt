@@ -46,6 +46,7 @@ import dev.sasikanth.rss.reader.data.database.FeedSearchFTSQueries
 import dev.sasikanth.rss.reader.data.database.PostContentQueries
 import dev.sasikanth.rss.reader.data.database.PostQueries
 import dev.sasikanth.rss.reader.data.database.PostSearchFTSQueries
+import dev.sasikanth.rss.reader.data.database.ReadingHistoryQueries
 import dev.sasikanth.rss.reader.data.database.SourceQueries
 import dev.sasikanth.rss.reader.data.database.TransactionRunner
 import dev.sasikanth.rss.reader.data.sync.ReadPostSyncEntity
@@ -85,6 +86,7 @@ class RssRepository(
   private val blockedWordsQueries: BlockedWordsQueries,
   private val appConfigQueries: AppConfigQueries,
   private val sourceQueries: SourceQueries,
+  private val readingHistoryQueries: ReadingHistoryQueries,
   private val readingTimeCalculator: ReadingTimeCalculator,
   private val dispatchersProvider: DispatchersProvider,
 ) {
@@ -102,6 +104,7 @@ class RssRepository(
         feedQueries.deleteAll()
         feedGroupQueries.deleteAll()
         blockedWordsQueries.deleteAll()
+        readingHistoryQueries.deleteAll()
         appConfigQueries.deleteAll()
       }
     }
@@ -507,11 +510,16 @@ class RssRepository(
 
   suspend fun updatePostReadStatus(read: Boolean, id: String) {
     withContext(dispatchersProvider.databaseWrite) {
-      postQueries.updateReadStatus(
-        read = if (read) 1L else 0L,
-        id = id,
-        updatedAt = Clock.System.now(),
-      )
+      transactionRunner.invoke {
+        val now = Clock.System.now()
+        postQueries.updateReadStatus(read = if (read) 1L else 0L, id = id, updatedAt = now)
+
+        if (read) {
+          readingHistoryQueries.insertReadingHistoryForPosts(readAt = now, postIds = listOf(id))
+        } else {
+          readingHistoryQueries.deleteReadingHistory(postId = id)
+        }
+      }
     }
   }
 
@@ -868,11 +876,14 @@ class RssRepository(
 
   suspend fun markPostsAsRead(postsAfter: Instant = Instant.DISTANT_PAST) {
     withContext(dispatchersProvider.databaseWrite) {
-      postQueries.markPostsAsRead(
-        sourceId = null,
-        after = postsAfter,
-        updatedAt = Clock.System.now(),
-      )
+      transactionRunner.invoke {
+        val now = Clock.System.now()
+        val postIds = postQueries.unreadPostIds(sourceId = null, after = postsAfter).executeAsList()
+        postQueries.markPostsAsRead(sourceId = null, after = postsAfter, updatedAt = now)
+        postIds.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
+          readingHistoryQueries.insertReadingHistoryForPosts(readAt = now, postIds = chunk)
+        }
+      }
     }
   }
 
@@ -891,6 +902,12 @@ class RssRepository(
             updatedAt = now,
             ids = chunk,
           )
+
+          if (read) {
+            readingHistoryQueries.insertReadingHistoryForPosts(readAt = now, postIds = chunk)
+          } else {
+            readingHistoryQueries.deleteReadingHistoryForPosts(postIds = chunk)
+          }
         }
       }
     }
@@ -919,12 +936,14 @@ class RssRepository(
     val feedIdsSnapshot = feedIds.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
+        val now = Clock.System.now()
         feedIdsSnapshot.forEach { feedId ->
-          postQueries.markPostsAsRead(
-            sourceId = feedId,
-            after = postsAfter,
-            updatedAt = Clock.System.now(),
-          )
+          val postIds =
+            postQueries.unreadPostIds(sourceId = feedId, after = postsAfter).executeAsList()
+          postQueries.markPostsAsRead(sourceId = feedId, after = postsAfter, updatedAt = now)
+          postIds.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
+            readingHistoryQueries.insertReadingHistoryForPosts(readAt = now, postIds = chunk)
+          }
         }
       }
     }
@@ -1522,10 +1541,19 @@ class RssRepository(
 
   suspend fun getReadingStatistics(startDate: Instant): Flow<ReadingStatistics> {
     return withContext(dispatchersProvider.databaseRead) {
-      val totalReadCount = postQueries.totalReadPostsCount().executeAsOne()
+      val totalReadCount = readingHistoryQueries.totalReadPostsCount().executeAsOne()
+      val firstReadingDate =
+        readingHistoryQueries.firstReadingDate().executeAsOneOrNull()?.firstReadingDate
+      val dailyAverage =
+        if (firstReadingDate != null) {
+          val daysSinceFirstReading = (Clock.System.now() - firstReadingDate).inWholeDays + 1
+          (totalReadCount / daysSinceFirstReading).toInt()
+        } else {
+          0
+        }
 
       val topFeeds =
-        postQueries.readPostsByFeed().executeAsList().map {
+        readingHistoryQueries.readPostsByFeed().executeAsList().map {
           FeedReadCount(
             feedId = it.feedId,
             feedName = it.feedName,
@@ -1536,13 +1564,14 @@ class RssRepository(
         }
 
       val readingTrends =
-        postQueries.readPostsOverTime(startDate).executeAsList().map {
+        readingHistoryQueries.readPostsOverTime(startDate).executeAsList().map {
           ReadingTrend(date = it.date, count = it.count)
         }
 
       flowOf(
         ReadingStatistics(
           totalReadCount = totalReadCount,
+          dailyAverage = dailyAverage,
           topFeeds = topFeeds.toImmutableList(),
           readingTrends = readingTrends.toImmutableList(),
         )
