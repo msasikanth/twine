@@ -128,9 +128,21 @@ internal fun PostsList(
       val post = posts[index] ?: return@items
 
       when (homeViewMode) {
-        HomeViewMode.Default,
-        HomeViewMode.Simple -> {
+        HomeViewMode.Default -> {
           PostListItem(
+            item = post,
+            onClick = { onPostClicked(post, index) },
+            onPostBookmarkClick = { onPostBookmarkClick(post) },
+            onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
+            onPostSourceClick = { onPostSourceClick(post.sourceId) },
+            updatePostReadStatus = { updatedReadStatus ->
+              updateReadStatus(post.id, updatedReadStatus)
+            },
+            reduceReadItemAlpha = true,
+          )
+        }
+        HomeViewMode.Simple -> {
+          SimplePostListItem(
             item = post,
             onClick = { onPostClicked(post, index) },
             onPostBookmarkClick = { onPostBookmarkClick(post) },

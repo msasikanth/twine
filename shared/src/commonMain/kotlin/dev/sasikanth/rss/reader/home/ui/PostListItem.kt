@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -165,6 +166,90 @@ internal fun PostListItem(
         }
       }
     }
+
+    Spacer(Modifier.height(4.dp))
+
+    PostActionBar(
+      feedName = item.feedName,
+      feedIcon = item.feedIcon,
+      feedHomepageLink = item.feedHomepageLink,
+      showFeedFavIcon = item.showFeedFavIcon,
+      postRead = readStatus,
+      postRelativeTimestamp = item.date.formatRelativeTime(),
+      postLink = item.link,
+      postBookmarked = item.bookmarked,
+      commentsLink = item.commentsLink,
+      postReadingTimeEstimate = item.feedContentReadingTime ?: 0,
+      onBookmarkClick = onPostBookmarkClick,
+      onCommentsClick = onPostCommentsClick,
+      onTogglePostReadClick = {
+        readStatus = !readStatus
+        updatePostReadStatus(readStatus)
+      },
+      showDropdown = showDropdown,
+      onDropdownChange = { showDropdown = it },
+      config = postMetadataConfig,
+      onSourceClick = onPostSourceClick,
+    )
+  }
+}
+
+@Composable
+internal fun SimplePostListItem(
+  item: ResolvedPost,
+  onClick: () -> Unit,
+  onPostBookmarkClick: () -> Unit,
+  onPostCommentsClick: () -> Unit,
+  onPostSourceClick: () -> Unit,
+  updatePostReadStatus: (updatedReadStatus: Boolean) -> Unit,
+  modifier: Modifier = Modifier,
+  reduceReadItemAlpha: Boolean = false,
+  postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
+) {
+  var readStatus by remember(item.read) { mutableStateOf(item.read) }
+  val alpha by
+    animateFloatAsState(
+      if (readStatus && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
+      else Constants.ITEM_UNREAD_ALPHA
+    )
+  var showDropdown by remember { mutableStateOf(false) }
+  val showImage = !(item.imageUrl.isNullOrBlank())
+
+  Column(
+    modifier =
+      Modifier.then(modifier)
+        .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
+        .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+        .padding(postListPadding)
+        .graphicsLayer { this.alpha = alpha }
+        .semantics { contentDescription = item.title.ifBlank { item.description } }
+        .padding(horizontal = 24.dp, vertical = 4.dp)
+  ) {
+    Row(modifier = Modifier.padding(top = 8.dp)) {
+      Column(modifier = Modifier.padding(vertical = 4.dp).weight(1f)) {
+        Text(
+          modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
+          style = MaterialTheme.typography.titleSmall,
+          text = item.title.ifBlank { item.description },
+          color = AppTheme.colorScheme.onSurface,
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis,
+        )
+      }
+
+      item.imageUrl?.let { url ->
+        Box(modifier = Modifier.requiredSize(48.dp), contentAlignment = Alignment.Center) {
+          AsyncImage(
+            url = url,
+            modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(25)),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+          )
+        }
+      }
+    }
+
+    Spacer(Modifier.height(4.dp))
 
     PostActionBar(
       feedName = item.feedName,

@@ -114,7 +114,7 @@ internal fun PostActionBar(
   onSourceClick: () -> Unit,
 ) {
   Row(
-    modifier = Modifier.height(IntrinsicSize.Min).padding(top = 8.dp).then(modifier),
+    modifier = Modifier.height(IntrinsicSize.Min).then(modifier),
     verticalAlignment = Alignment.CenterVertically,
   ) {
     Row(
