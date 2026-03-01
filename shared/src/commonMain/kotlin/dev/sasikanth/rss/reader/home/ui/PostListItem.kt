@@ -63,6 +63,7 @@ import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
+import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.formatRelativeTime
 
@@ -110,6 +111,7 @@ internal fun PostListItem(
     )
   var showDropdown by remember { mutableStateOf(false) }
   val showImage = !(item.imageUrl.isNullOrBlank())
+  val shouldBlockImage = LocalBlockImage.current
 
   Column(
     modifier =
@@ -146,23 +148,25 @@ internal fun PostListItem(
         }
       }
 
-      item.imageUrl?.let { url ->
-        Box(
-          modifier =
-            Modifier.requiredSizeIn(
-              minHeight = 64.dp,
-              minWidth = 64.dp,
-              maxHeight = 96.dp,
-              maxWidth = 96.dp,
-            ),
-          contentAlignment = Alignment.Center,
-        ) {
-          AsyncImage(
-            url = url,
-            modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(25)),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-          )
+      if (!shouldBlockImage) {
+        item.imageUrl?.let { url ->
+          Box(
+            modifier =
+              Modifier.requiredSizeIn(
+                minHeight = 64.dp,
+                minWidth = 64.dp,
+                maxHeight = 96.dp,
+                maxWidth = 96.dp,
+              ),
+            contentAlignment = Alignment.Center,
+          ) {
+            AsyncImage(
+              url = url,
+              modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(25)),
+              contentDescription = null,
+              contentScale = ContentScale.Crop,
+            )
+          }
         }
       }
     }
@@ -214,6 +218,7 @@ internal fun SimplePostListItem(
     )
   var showDropdown by remember { mutableStateOf(false) }
   val showImage = !(item.imageUrl.isNullOrBlank())
+  val shouldBlockImage = LocalBlockImage.current
 
   Column(
     modifier =
@@ -237,14 +242,16 @@ internal fun SimplePostListItem(
         )
       }
 
-      item.imageUrl?.let { url ->
-        Box(modifier = Modifier.requiredSize(48.dp), contentAlignment = Alignment.Center) {
-          AsyncImage(
-            url = url,
-            modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(25)),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-          )
+      if (!shouldBlockImage) {
+        item.imageUrl?.let { url ->
+          Box(modifier = Modifier.requiredSize(48.dp), contentAlignment = Alignment.Center) {
+            AsyncImage(
+              url = url,
+              modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(25)),
+              contentDescription = null,
+              contentScale = ContentScale.Crop,
+            )
+          }
         }
       }
     }
