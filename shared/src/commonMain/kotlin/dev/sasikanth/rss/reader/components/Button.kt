@@ -57,8 +57,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.mikepenz.markdown.compose.components.CurrentComponentsBridge.text
-import com.mikepenz.markdown.utils.MarkdownLogger.enabled
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 
@@ -93,7 +91,8 @@ fun Button(
 fun TranslucentButton(
   text: String,
   modifier: Modifier = Modifier,
-  icon: ImageVector? = null,
+  leadingIcon: ImageVector? = null,
+  trailingIcon: ImageVector? = null,
   onClick: () -> Unit,
 ) {
   val translucentStyle = LocalTranslucentStyles.current
@@ -105,10 +104,24 @@ fun TranslucentButton(
     contentColor = AppTheme.colorScheme.onSurface,
     onClick = onClick,
   ) {
+    val startPadding = if (leadingIcon == null) 20.dp else 16.dp
+    val endPadding = if (trailingIcon == null) 16.dp else 20.dp
+
     Row(
-      modifier = Modifier.padding(start = 20.dp, end = 16.dp),
+      modifier = Modifier.padding(start = startPadding, end = endPadding),
       verticalAlignment = Alignment.CenterVertically,
     ) {
+      if (leadingIcon != null) {
+        Icon(
+          modifier = Modifier.requiredSize(20.dp),
+          imageVector = leadingIcon,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.onSurface,
+        )
+
+        Spacer(Modifier.width(8.dp))
+      }
+
       Text(
         text = text,
         style = MaterialTheme.typography.labelLarge,
@@ -116,10 +129,15 @@ fun TranslucentButton(
         overflow = TextOverflow.MiddleEllipsis,
       )
 
-      if (icon != null) {
+      if (trailingIcon != null) {
         Spacer(Modifier.width(8.dp))
 
-        Icon(imageVector = icon, contentDescription = null, tint = AppTheme.colorScheme.onSurface)
+        Icon(
+          modifier = Modifier.requiredSize(20.dp),
+          imageVector = trailingIcon,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.onSurface,
+        )
       }
     }
   }
@@ -154,6 +172,7 @@ fun InverseButton(
         Spacer(Modifier.width(8.dp))
 
         Icon(
+          modifier = Modifier.requiredSize(20.dp),
           imageVector = icon,
           contentDescription = null,
           tint = AppTheme.colorScheme.inverseOnSurface,
