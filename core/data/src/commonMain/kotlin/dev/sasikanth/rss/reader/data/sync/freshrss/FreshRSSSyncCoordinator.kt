@@ -103,6 +103,7 @@ class FreshRSSSyncCoordinator(
   private suspend fun pullInternal(): Boolean {
     return try {
       val syncStartTime = Clock.System.now()
+      val isInitialSync = refreshPolicy.fetchLastSyncedAt() == null
       updateSyncState(SyncState.InProgress(0f))
 
       // 1. Push local changes
@@ -127,7 +128,7 @@ class FreshRSSSyncCoordinator(
 
       // After finishing feeds, categories and articles, we continue syncing statuses and bookmarks.
       syncArticles(streamId = FreshRssSource.USER_STATE_STARRED)
-      syncStatuses()
+      syncStatuses(isInitialSync = isInitialSync)
 
       true
     } catch (e: Exception) {
@@ -528,7 +529,7 @@ class FreshRSSSyncCoordinator(
     }
   }
 
-  private suspend fun syncStatuses() {
+  private suspend fun syncStatuses(isInitialSync: Boolean = false) {
     val unreadIds = freshRssSource.unreadIds().toSet()
     val bookmarkIds = freshRssSource.bookmarkIds().toSet()
     var offset = 0L
@@ -568,8 +569,16 @@ class FreshRSSSyncCoordinator(
         }
       }
 
-      if (toMarkRead.isNotEmpty()) rssRepository.updatePostReadStatus(toMarkRead, read = true)
-      if (toMarkUnread.isNotEmpty()) rssRepository.updatePostReadStatus(toMarkUnread, read = false)
+      if (toMarkRead.isNotEmpty()) {
+        rssRepository.updatePostReadStatus(toMarkRead, read = true, recordHistory = !isInitialSync)
+      }
+      if (toMarkUnread.isNotEmpty()) {
+        rssRepository.updatePostReadStatus(
+          toMarkUnread,
+          read = false,
+          recordHistory = !isInitialSync,
+        )
+      }
       if (toBookmark.isNotEmpty()) rssRepository.updateBookmarkStatus(toBookmark, bookmarked = true)
       if (toUnbookmark.isNotEmpty())
         rssRepository.updateBookmarkStatus(toUnbookmark, bookmarked = false)
