@@ -21,6 +21,8 @@ package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +41,7 @@ import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -51,6 +54,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy.Companion.Offscreen
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
@@ -310,13 +317,32 @@ internal fun CompactPostListItem(
         .padding(compactPostListPadding)
         .graphicsLayer { this.alpha = alpha },
   ) {
-    FeedIcon(
-      icon = item.feedIcon,
-      homepageLink = item.feedHomepageLink,
-      showFeedFavIcon = item.showFeedFavIcon,
-      contentDescription = null,
-      modifier = Modifier.requiredSize(20.dp),
-    )
+    Box(modifier = Modifier.requiredSize(24.dp).graphicsLayer(compositingStrategy = Offscreen)) {
+      FeedIcon(
+        icon = item.feedIcon,
+        homepageLink = item.feedHomepageLink,
+        showFeedFavIcon = item.showFeedFavIcon,
+        contentDescription = null,
+        modifier =
+          Modifier.requiredSize(20.dp)
+            .border(1.dp, AppTheme.colorScheme.outlineVariant, RoundedCornerShape(25))
+            .align(Alignment.Center),
+      )
+
+      if (!item.read) {
+        Box(
+          modifier =
+            Modifier.align(Alignment.TopEnd)
+              .requiredSize(8.dp)
+              .dropShadow(CircleShape) {
+                color = Color.Black
+                spread = 1.dp.toPx()
+                blendMode = BlendMode.DstOut
+              }
+              .background(MaterialTheme.colorScheme.error, CircleShape)
+        )
+      }
+    }
 
     Spacer(Modifier.requiredWidth(16.dp))
 
