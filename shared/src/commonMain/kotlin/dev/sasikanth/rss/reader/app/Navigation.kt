@@ -365,7 +365,6 @@ fun NavGraphBuilder.settingsDataScreen(
     val settingsViewModel = viewModel { settingsViewModel() }
     val statisticsViewModel = viewModel { statisticsViewModel() }
     SettingsDataScreen(
-      settingsViewModel = settingsViewModel,
       statisticsViewModel = statisticsViewModel,
       goBack = { navController.popBackStack() },
     )

@@ -60,7 +60,6 @@ import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.FeedReadCount
 import dev.sasikanth.rss.reader.core.model.local.ReadingTrend
-import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
@@ -86,7 +85,6 @@ import twine.shared.generated.resources.statisticsYourTopFeeds
 
 @Composable
 internal fun SettingsDataScreen(
-  settingsViewModel: SettingsViewModel,
   statisticsViewModel: StatisticsViewModel,
   goBack: () -> Unit,
   modifier: Modifier = Modifier,
