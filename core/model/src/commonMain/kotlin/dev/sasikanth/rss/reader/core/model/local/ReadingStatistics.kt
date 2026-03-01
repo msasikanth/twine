@@ -34,6 +34,7 @@ data class FeedReadCount(
 @Immutable
 data class ReadingStatistics(
   val totalReadCount: Long,
+  val dailyAverage: Int,
   val topFeeds: ImmutableList<FeedReadCount>,
   val readingTrends: ImmutableList<ReadingTrend>,
 )

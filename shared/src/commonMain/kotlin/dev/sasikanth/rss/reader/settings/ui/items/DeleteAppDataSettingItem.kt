@@ -40,10 +40,11 @@ import twine.shared.generated.resources.settingsDeleteAppDataSubtitle
 import twine.shared.generated.resources.settingsDeleteAppDataTitle
 
 @Composable
-internal fun DeleteAppDataSettingItem(onClick: () -> Unit) {
+internal fun DeleteAppDataSettingItem(modifier: Modifier = Modifier, onClick: () -> Unit) {
   Row(
     modifier =
-      Modifier.clickable(onClick = onClick)
+      modifier
+        .clickable(onClick = onClick)
         .padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {

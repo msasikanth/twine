@@ -64,17 +64,18 @@
   <string name="settingsAppInfoAndFeedback">App info &amp; feedback</string>
   <string name="moreMenuOptions">More menu options</string>
   <string name="settingsHeaderBehaviour">Behavior</string>
+  <string name="settingsHeaderReadingAndBrowsing">Reading &amp; browsing</string>
   <string name="settingsHeaderOpml" translatable="false">OPML</string>
   <string name="settingsHeaderFeedback">Feedback &amp; bug reports</string>
   <string name="settingsHeaderTheme">Theme</string>
   <string name="settingsBrowserTypeTitle">Use in-app browser</string>
-  <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser</string>
+  <string name="settingsBrowserTypeSubtitle">Links will open inside of Twine instead of your device’s default browser.</string>
   <string name="settingsEnableBlurTitle">Enable blur in homepage</string>
   <string name="settingsEnableBlurSubtitle">When disabled, displays gradients instead of blurred images. May improve performance.</string>
-  <string name="settingsShowUnreadCountTitle">Show unread posts count</string>
-  <string name="settingsShowUnreadCountSubtitle">Displays a bubble above feed selections</string>
-  <string name="settingsShowPinnedSourcesTitle">Show floating pinned sources</string>
-  <string name="settingsShowPinnedSourcesSubtitle">Displays a floating bar with pinned sources at the bottom of the home screen</string>
+  <string name="settingsShowUnreadCountTitle">Show unread count</string>
+  <string name="settingsShowUnreadCountSubtitle">Displays a count on feed list items</string>
+  <string name="settingsShowPinnedSourcesTitle">Show pinned feeds on the homepage</string>
+  <string name="settingsShowPinnedSourcesSubtitle">Displays a bottom bar with all pinned feeds</string>
   <string name="settingsReportIssue">Report an issue</string>
   <string name="settingsVersion">%1$s (%2$s)</string>
   <string name="settingsAboutTitle">About</string>
@@ -88,7 +89,7 @@
   <string name="settingsOpmlSelectionSubtitle">You can select up to %1$d feeds under the free plan.</string>
   <string name="settingsFreeFeedLimitReached">You have reached the maximum number of free feeds.</string>
   <string name="settingsUpgradeToPremium">Go Premium</string>
-  <string name="settingsPostsDeletionPeriodTitle">Delete read posts older than</string>
+  <string name="settingsPostsDeletionPeriodTitle">Delete posts older than</string>
   <string name="settingsPostsDeletionPeriodOneWeek">1 week</string>
   <string name="settingsPostsDeletionPeriodOneMonth">1 month</string>
   <string name="settingsPostsDeletionPeriodThreeMonths">3 months</string>
@@ -96,14 +97,14 @@
   <string name="settingsPostsDeletionPeriodOneYear">1 year</string>
   <string name="settingsPostsDeletionPeriodNever">Never</string>
   <string name="settingsShowReaderViewTitle">Enable reader view</string>
-  <string name="settingsShowReaderViewSubtitle">Articles will be shown in a simplified, easy-to-read view</string>
+  <string name="settingsShowReaderViewSubtitle">Articles will be displayed in a simplified format</string>
   <string name="settingsThemeAuto">Auto</string>
   <string name="settingsThemeLight">Light</string>
   <string name="settingsThemeDark">Dark</string>
-  <string name="settingsAmoledTitle">Amoled mode</string>
-  <string name="settingsAmoledSubtitle">Use pure black backgrounds</string>
-  <string name="settingsBlockImagesTitle">Block images</string>
-  <string name="settingsBlockImagesSubtitle">When turned-on, images will not be downloaded or shown. This may improve performance and save data.</string>
+  <string name="settingsAmoledTitle">AMOLED theme</string>
+  <string name="settingsAmoledSubtitle">Changes the background to pure black.</string>
+  <string name="settingsBlockImagesTitle">Disable all images</string>
+  <string name="settingsBlockImagesSubtitle">Twine will not load or display any images</string>
   <string name="feeds">Feeds</string>
   <string name="editFeeds">Edit feeds</string>
   <string name="comments">Comments</string>
@@ -140,8 +141,8 @@
   <string name="tagSaveButton">Save</string>
   <string name="deleteTagTitle">Delete tag?</string>
   <string name="deleteTagDesc">Tag will be deleted and removed from all the assigned feeds. Your feeds won't be deleted</string>
-  <string name="settingsHeaderData">Data</string>
-  <string name="settingsDeleteAppDataTitle">Delete app data</string>
+  <string name="settingsHeaderData">Data usage</string>
+  <string name="settingsDeleteAppDataTitle">Reset app data</string>
   <string name="settingsDeleteAppDataSubtitle">Clear all your feeds, settings and image cache. You will be logged out as well.</string>
   <string name="settingsDeleteAppDataDialogTitle">Delete app data?</string>
   <string name="settingsDeleteAppDataDialogDesc">This action will clear all your feeds, settings, and image cache. This action cannot be undone.</string>
@@ -178,10 +179,12 @@
   <string name="databaseMaintainenceTitle">Please wait...</string>
   <string name="databaseMaintainenceSubtitle">Performing database maintainence, don't close the app</string>
   <string name="cdLoadFullArticle">Load full article</string>
-  <string name="enableAutoSyncTitle">Enable auto sync</string>
-  <string name="enableAutoSyncDesc">When turned-on, feeds will be updated in the background</string>
+  <string name="enableAutoSyncTitle">Enable background sync</string>
+  <string name="enableAutoSyncDesc">Articles will be fetched in the background</string>
   <string name="showFeedFavIconTitle">Show website fav icon</string>
   <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
+  <string name="settingsShowFeaturedSectionTitle">Show featured section</string>
+  <string name="settingsShowFeaturedSectionSubtitle">Displays a carousel with the most recent articles</string>
   <string name="hidePostsFromHome">Hide from "Home"</string>
   <string name="blockedWords">Blocked words</string>
   <string name="blockedWordsHint">Enter a word</string>
@@ -197,7 +200,7 @@
   <string name="readerSettings">Reader screen settings</string>
   <string name="comingSoon">Coming soon</string>
   <string name="homeViewMode">Layout</string>
-  <string name="homeViewModeDefault">Default</string>
+  <string name="homeViewModeDefault">Detailed</string>
   <string name="homeViewModeSimple">Simple</string>
   <string name="homeViewModeCompact">Compact</string>
   <string name="twinePremium">Twine premium subscription</string>
@@ -223,13 +226,13 @@
   <string name="postsSortOldest">Oldest</string>
   <string name="buttonApply">Apply</string>
   <string name="screenHome">Home</string>
-  <string name="settingsEnableNotificationsTitle">Enable notifications</string>
-  <string name="settingsEnableNotificationsSubtitle">When turned on, you will receive notifications when new articles are found during background sync</string>
+  <string name="settingsEnableNotificationsTitle">Enable article notifications</string>
+  <string name="settingsEnableNotificationsSubtitle">Get notified when new articles are fetched</string>
   <string name="settingsDownloadFullContentTitle">Download full articles</string>
   <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync</string>
   <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience</string>
   <string name="sort">Sort</string>
-  <string name="settingsHeaderSync">Cloud sync (Alpha ⚠)</string>
+  <string name="settingsHeaderSync">Services (Alpha)</string>
   <string name="settingsSyncDropbox" translatable="false">Dropbox</string>
   <string name="settingsSyncFreshRSS" translatable="false">FreshRSS (GReader)</string>
   <string name="settingsSyncDropboxDesc">Consistent cross-platform sync</string>
@@ -237,6 +240,7 @@
   <string name="settingsSyncStatusSyncing">Syncing...</string>
   <string name="settingsSyncStatusSuccess">Last sync: Success</string>
   <string name="settingsSyncStatusFailure">Last sync: Failed</string>
+  <string name="settingSyncLabel">Sync</string>
   <string name="settingsSyncSignIn">Sign in</string>
   <string name="settingsSyncSignOut">Sign out</string>
   <string name="settingsCustomisations">Customisations</string>
@@ -248,9 +252,9 @@
   <string name="freshRssUsername">Username</string>
   <string name="freshRssPassword">Password</string>
   <string name="freshRssLoginButton">Login</string>
-  <string name="freshRssClearDataTitle">Clear local data?</string>
-  <string name="freshRssClearDataDesc">Logging into FreshRSS will clear all your current local feeds and posts to ensure a clean sync. Do you want to proceed?</string>
-  <string name="freshRssClearDataPositive">Clear and Login</string>
+  <string name="freshRssClearDataTitle">Sign in with FreshRSS?</string>
+  <string name="freshRssClearDataDesc">Twine will remove all data before proceeding. This includes all feeds, articles and bookmarks.</string>
+  <string name="freshRssClearDataPositive">Proceed</string>
   <string name="freshRssErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
   <string name="freshRssErrorUnknown">An unknown error occurred</string>
   <string name="settingsSyncMiniflux" translatable="false">Miniflux</string>
@@ -259,12 +263,14 @@
   <string name="minifluxApiKey">API Key</string>
   <string name="minifluxLoginButton">Login</string>
   <string name="minifluxUrlPlaceholder" translatable="false">https://miniflux.example.com</string>
-  <string name="minifluxClearDataTitle">Clear local data?</string>
-  <string name="minifluxClearDataDesc">Logging into Miniflux will clear all your current local feeds and posts to ensure a clean sync. Do you want to proceed?</string>
-  <string name="minifluxClearDataPositive">Clear and Login</string>
+  <string name="minifluxClearDataTitle">Sign in with Miniflux?</string>
+  <string name="minifluxClearDataDesc">Twine will remove all data before proceeding. This includes all feeds, articles and bookmarks.</string>
+  <string name="minifluxClearDataPositive">Proceed</string>
   <string name="minifluxErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
   <string name="minifluxErrorUnknown">An unknown error occurred</string>
   <string name="minifluxAPIKeyHint" translatable="false">Miniflux settings > API Keys > Create a new API key</string>
+  <string name="switchServiceTitle">Sign in with %1$s?</string>
+  <string name="switchServiceDescription">Twine will remove all %1$s data before proceeding. This includes all articles and bookmarks associated with %1$s.</string>
   <string name="settingsNotificationWarningAndroid">Having notification issues? Your device may be closing the app in background. Tap here to find out how to fix it.</string>
   <string name="onboardingGetStarted">Get started</string>
   <string name="onboardingSubtitle">Build your feed</string>
@@ -282,13 +288,18 @@
   <string name="readerPageCount">%1$d of %2$d</string>
   <string name="statistics">Statistics</string>
   <string name="statisticsNoData">No reading data available yet</string>
-  <string name="statisticsTotalRead">Total Articles Read</string>
-  <string name="statisticsTopFeeds">Top 10 Feeds</string>
+  <string name="statisticsOverview">Overview</string>
+  <string name="statisticsTotalRead">Total articles read</string>
+  <string name="statisticsDailyAverage">Daily average</string>
+  <string name="statisticsTopFeeds">Top feeds</string>
+  <string name="statisticsYourTopFeeds">Your top feeds</string>
+  <string name="statisticsFirstPlace">1st place</string>
   <string name="statisticsReadingTrends">Reading Trends</string>
   <string name="statisticsLess">Less</string>
   <string name="statisticsMore">More</string>
   <string name="settingsStatisticsTitle">Statistics</string>
   <string name="settingsStatisticsSubtitle">View your reading habits and insights</string>
+  <string name="settingsDangerZone">Danger zone</string>
 
   <string name="sourcesCount">%1$d sources</string>
   <string name="discoveryTitle">Discover</string>
@@ -321,6 +332,8 @@
   <string name="month_nov">Nov</string>
   <string name="month_dec">Dec</string>
 
+  <string name="other">Other</string>
+
   <!-- Plurals -->
   <plurals name="searchResultsCount">
     <item quantity="one">%1$d result</item>
@@ -335,5 +348,10 @@
   <plurals name="feedGroupFeeds">
     <item quantity="one">%1$d source</item>
     <item quantity="other">%1$d sources</item>
+  </plurals>
+
+  <plurals name="blockedWordsCount">
+    <item quantity="one">%1$d word blocked</item>
+    <item quantity="other">%1$d words blocked</item>
   </plurals>
 </resources>

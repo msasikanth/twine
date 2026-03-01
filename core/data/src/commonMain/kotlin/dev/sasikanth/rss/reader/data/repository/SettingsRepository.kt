@@ -67,6 +67,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val discoveryFeedsLastFetchTimeKey = longPreferencesKey("discovery_feeds_last_fetch_time")
   private val discoveryFeedsCacheKey = stringPreferencesKey("discovery_feeds_cache")
   private val showPinnedSourcesKey = booleanPreferencesKey("show_pinned_sources")
+  private val showFeaturedSectionKey = booleanPreferencesKey("show_featured_section")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -116,6 +117,9 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   val showPinnedSources: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[showPinnedSourcesKey] ?: true }
+
+  val showFeaturedSection: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[showFeaturedSectionKey] ?: true }
 
   val markAsReadOn: Flow<MarkAsReadOn> =
     dataStore.data.map { preferences -> mapToMarkAsReadOnType(preferences[markPostsAsReadOnKey]) }
@@ -230,6 +234,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   suspend fun toggleShowPinnedSources(value: Boolean) {
     dataStore.edit { preferences -> preferences[showPinnedSourcesKey] = value }
+  }
+
+  suspend fun toggleShowFeaturedSection(value: Boolean) {
+    dataStore.edit { preferences -> preferences[showFeaturedSectionKey] = value }
   }
 
   suspend fun updateMarkAsReadOn(value: MarkAsReadOn) {
@@ -373,9 +381,9 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 }
 
 enum class AppThemeMode {
+  Auto,
   Light,
   Dark,
-  Auto,
 }
 
 enum class BrowserType {

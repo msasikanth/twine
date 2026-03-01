@@ -23,14 +23,21 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,6 +54,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -77,6 +85,101 @@ fun Button(
     elevation = elevation,
     content = content,
   )
+}
+
+@Composable
+fun TranslucentButton(
+  text: String,
+  modifier: Modifier = Modifier,
+  leadingIcon: ImageVector? = null,
+  trailingIcon: ImageVector? = null,
+  onClick: () -> Unit,
+) {
+  val translucentStyle = LocalTranslucentStyles.current
+
+  Surface(
+    modifier = modifier.requiredHeightIn(min = 40.dp),
+    shape = CircleShape,
+    color = translucentStyle.default.background,
+    contentColor = AppTheme.colorScheme.onSurface,
+    onClick = onClick,
+  ) {
+    val startPadding = if (leadingIcon == null) 20.dp else 16.dp
+    val endPadding = if (trailingIcon == null) 16.dp else 20.dp
+
+    Row(
+      modifier = Modifier.padding(start = startPadding, end = endPadding),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      if (leadingIcon != null) {
+        Icon(
+          modifier = Modifier.requiredSize(20.dp),
+          imageVector = leadingIcon,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.onSurface,
+        )
+
+        Spacer(Modifier.width(8.dp))
+      }
+
+      Text(
+        text = text,
+        style = MaterialTheme.typography.labelLarge,
+        maxLines = 1,
+        overflow = TextOverflow.MiddleEllipsis,
+      )
+
+      if (trailingIcon != null) {
+        Spacer(Modifier.width(8.dp))
+
+        Icon(
+          modifier = Modifier.requiredSize(20.dp),
+          imageVector = trailingIcon,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.onSurface,
+        )
+      }
+    }
+  }
+}
+
+@Composable
+fun InverseButton(
+  text: String,
+  modifier: Modifier = Modifier,
+  icon: ImageVector? = null,
+  onClick: () -> Unit,
+) {
+  Surface(
+    modifier = modifier.requiredHeightIn(min = 40.dp),
+    shape = CircleShape,
+    color = AppTheme.colorScheme.inverseSurface,
+    contentColor = AppTheme.colorScheme.inverseOnSurface,
+    onClick = onClick,
+  ) {
+    Row(
+      modifier = Modifier.padding(start = 20.dp, end = 16.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Text(
+        text = text,
+        style = MaterialTheme.typography.labelLarge,
+        maxLines = 1,
+        overflow = TextOverflow.MiddleEllipsis,
+      )
+
+      if (icon != null) {
+        Spacer(Modifier.width(8.dp))
+
+        Icon(
+          modifier = Modifier.requiredSize(20.dp),
+          imageVector = icon,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.inverseOnSurface,
+        )
+      }
+    }
+  }
 }
 
 @Composable
@@ -183,10 +286,12 @@ fun CircularIconButton(
           onClick()
         }
         .background(backgroundColor ?: translucentStyle.default.background, CircleShape)
-        .border(
-          width = 1.dp,
-          color = borderColor ?: translucentStyle.default.outline,
-          shape = CircleShape,
+        .then(
+          if (borderColor == null) {
+            Modifier
+          } else {
+            Modifier.border(width = 1.dp, color = borderColor, shape = CircleShape)
+          }
         )
         .semantics {
           contentDescription = label
