@@ -227,7 +227,7 @@ private fun PostTypePill(postsType: PostsType, onClick: () -> Unit, modifier: Mo
     }
 
     Icon(
-      modifier = Modifier.requiredSize(16.dp),
+      modifier = Modifier.requiredSize(20.dp),
       imageVector = Icons.Rounded.KeyboardArrowDown,
       contentDescription = null,
       tint = AppTheme.colorScheme.onSurface,
