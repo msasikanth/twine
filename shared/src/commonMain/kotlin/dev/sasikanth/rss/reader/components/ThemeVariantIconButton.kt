@@ -25,9 +25,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.NightsStay
-import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +35,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
+import dev.sasikanth.rss.reader.resources.icons.DarkMode
+import dev.sasikanth.rss.reader.resources.icons.LightAndDarkMode
+import dev.sasikanth.rss.reader.resources.icons.LightMode
 import dev.sasikanth.rss.reader.resources.icons.StarShine
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -110,22 +110,20 @@ fun ThemeVariantIconButton(
           .clickable { onClick() },
       contentAlignment = Alignment.Center,
     ) {
-      val icon = if (isDark) Icons.Rounded.NightsStay else Icons.Rounded.WbSunny
+      val icon =
+        when {
+          themeVariant.isPremium && !isSubscribed -> TwineIcons.StarShine
+          themeVariant.isDarkModeOnly -> TwineIcons.DarkMode
+          themeVariant.isLightModeOnly -> TwineIcons.LightMode
+          else -> TwineIcons.LightAndDarkMode
+        }
+
       Icon(
         imageVector = icon,
         contentDescription = null,
         tint = contentColor,
         modifier = Modifier.requiredSize(24.dp),
       )
-
-      if (themeVariant.isPremium && !isSubscribed) {
-        Icon(
-          modifier = Modifier.requiredSize(16.dp).align(Alignment.TopEnd).padding(4.dp),
-          imageVector = TwineIcons.StarShine,
-          contentDescription = null,
-          tint = contentColor,
-        )
-      }
     }
   }
 }
