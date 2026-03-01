@@ -109,6 +109,7 @@ class MinifluxSyncCoordinator(
   private suspend fun pullInternal(): Boolean {
     return try {
       val syncStartTime = Clock.System.now()
+      val isInitialSync = refreshPolicy.fetchLastSyncedAt() == null
       updateSyncState(SyncState.InProgress(0f))
 
       // 1. Push local changes
@@ -133,7 +134,7 @@ class MinifluxSyncCoordinator(
 
       // After finishing feeds, categories and articles, we continue syncing statuses and bookmarks.
       syncArticles(starred = true)
-      syncStatuses()
+      syncStatuses(isInitialSync = isInitialSync)
 
       true
     } catch (e: Exception) {
@@ -575,7 +576,7 @@ class MinifluxSyncCoordinator(
     return bookmarkIds
   }
 
-  private suspend fun syncStatuses() {
+  private suspend fun syncStatuses(isInitialSync: Boolean = false) {
     // Paginate through unread entries to get IDs
     val unreadIds = mutableSetOf<String>()
     var unreadOffset = 0
@@ -628,8 +629,16 @@ class MinifluxSyncCoordinator(
         }
       }
 
-      if (toMarkRead.isNotEmpty()) rssRepository.updatePostReadStatus(toMarkRead, read = true)
-      if (toMarkUnread.isNotEmpty()) rssRepository.updatePostReadStatus(toMarkUnread, read = false)
+      if (toMarkRead.isNotEmpty()) {
+        rssRepository.updatePostReadStatus(toMarkRead, read = true, recordHistory = !isInitialSync)
+      }
+      if (toMarkUnread.isNotEmpty()) {
+        rssRepository.updatePostReadStatus(
+          toMarkUnread,
+          read = false,
+          recordHistory = !isInitialSync,
+        )
+      }
       if (toBookmark.isNotEmpty()) rssRepository.updateBookmarkStatus(toBookmark, bookmarked = true)
       if (toUnbookmark.isNotEmpty())
         rssRepository.updateBookmarkStatus(toUnbookmark, bookmarked = false)
