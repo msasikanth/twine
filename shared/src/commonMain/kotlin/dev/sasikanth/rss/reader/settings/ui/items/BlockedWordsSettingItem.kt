@@ -18,30 +18,52 @@
 package dev.sasikanth.rss.reader.settings.ui.items
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.TranslucentButton
+import dev.sasikanth.rss.reader.resources.icons.Edit
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.blockedWords
+import twine.shared.generated.resources.blockedWordsCount
+import twine.shared.generated.resources.edit
 
 @Composable
-internal fun BlockedWordsSettingItem(onClick: () -> Unit) {
+internal fun BlockedWordsSettingItem(blockedWordsCount: Int, onClick: () -> Unit) {
   Row(
     modifier = Modifier.clickable { onClick() }.padding(horizontal = 24.dp, vertical = 12.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    Text(
-      modifier = Modifier.weight(1f),
-      text = stringResource(Res.string.blockedWords),
-      style = MaterialTheme.typography.titleMedium,
-      color = AppTheme.colorScheme.onSurface,
+    Column(modifier = Modifier.weight(1f)) {
+      Text(
+        text = stringResource(Res.string.blockedWords),
+        style = MaterialTheme.typography.titleMedium,
+        color = AppTheme.colorScheme.onSurface,
+      )
+
+      Text(
+        text =
+          pluralStringResource(Res.plurals.blockedWordsCount, blockedWordsCount, blockedWordsCount),
+        style = MaterialTheme.typography.labelLarge,
+        color = AppTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+
+    TranslucentButton(
+      text = stringResource(Res.string.edit),
+      leadingIcon = TwineIcons.Edit,
+      onClick = onClick,
     )
   }
 }

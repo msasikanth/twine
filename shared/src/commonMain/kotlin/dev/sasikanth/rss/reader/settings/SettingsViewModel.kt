@@ -29,6 +29,7 @@ import dev.sasikanth.rss.reader.data.opml.OpmlFeedGroup
 import dev.sasikanth.rss.reader.data.opml.OpmlManager
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
+import dev.sasikanth.rss.reader.data.repository.BlockedWordsRepository
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
@@ -66,6 +67,7 @@ class SettingsViewModel(
   private val appIconManager: AppIconManager,
   private val refreshPolicy: RefreshPolicy,
   private val imageLoader: ImageLoader,
+  private val blockedWordsRepository: BlockedWordsRepository,
   val availableProviders: Set<CloudServiceProvider>,
 ) : ViewModel() {
 
@@ -185,6 +187,11 @@ class SettingsViewModel(
     rssRepository
       .hasFeeds()
       .onEach { hasFeeds -> _state.update { it.copy(hasFeeds = hasFeeds) } }
+      .launchIn(viewModelScope)
+
+    blockedWordsRepository
+      .words()
+      .onEach { words -> _state.update { it.copy(blockedWordsCount = words.size) } }
       .launchIn(viewModelScope)
 
     opmlManager.result

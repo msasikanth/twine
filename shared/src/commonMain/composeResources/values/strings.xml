@@ -349,4 +349,9 @@
     <item quantity="one">%1$d source</item>
     <item quantity="other">%1$d sources</item>
   </plurals>
+
+  <plurals name="blockedWordsCount">
+    <item quantity="one">%1$d word blocked</item>
+    <item quantity="other">%1$d words blocked</item>
+  </plurals>
 </resources>

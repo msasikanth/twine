@@ -197,7 +197,11 @@ internal fun SettingsBehaviorScreen(
           )
         }
 
-        item { BlockedWordsSettingItem { openBlockedWords() } }
+        item {
+          BlockedWordsSettingItem(blockedWordsCount = state.blockedWordsCount) {
+            openBlockedWords()
+          }
+        }
       }
     },
   )

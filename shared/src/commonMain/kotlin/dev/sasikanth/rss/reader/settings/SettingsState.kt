@@ -64,6 +64,7 @@ data class SettingsState(
   val canSubscribe: Boolean,
   val opmlFeedsToSelect: List<OpmlFeed>?,
   val showFreeFeedLimitWarning: Boolean,
+  val blockedWordsCount: Int,
 ) {
 
   val isSubscribed: Boolean
@@ -111,6 +112,7 @@ data class SettingsState(
         canSubscribe = false,
         opmlFeedsToSelect = null,
         showFreeFeedLimitWarning = false,
+        blockedWordsCount = 0,
       )
   }
 }
