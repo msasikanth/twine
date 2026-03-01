@@ -128,7 +128,7 @@ private fun PinnedSourceItem(
           .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen),
       contentAlignment = Alignment.Center,
     ) {
-      val shape = RoundedCornerShape(16.dp)
+      val shape = RoundedCornerShape(25)
       val borderColor = AppTheme.colorScheme.outlineVariant
 
       Box(

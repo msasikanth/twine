@@ -58,7 +58,6 @@ internal fun PinnedFeedItem(
       },
     contentAlignment = Alignment.Center,
   ) {
-    val shape = MaterialTheme.shapes.large
     val feedIconShape = RoundedCornerShape(25)
 
     FeedIcon(
@@ -74,7 +73,8 @@ internal fun PinnedFeedItem(
 
     Box(
       modifier =
-        Modifier.requiredSize(48.dp).border(1.dp, AppTheme.colorScheme.outlineVariant, shape)
+        Modifier.requiredSize(48.dp)
+          .border(1.dp, AppTheme.colorScheme.outlineVariant, feedIconShape)
     )
 
     if (!isDragging && badgeCount > 0 && canShowUnreadPostsCount) {

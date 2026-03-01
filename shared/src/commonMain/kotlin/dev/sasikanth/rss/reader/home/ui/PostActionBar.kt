@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -224,7 +225,7 @@ private fun SourceInfo(
         contentDescription = null,
         modifier =
           Modifier.requiredSize(16.dp)
-            .border(1.dp, AppTheme.colorScheme.outlineVariant, MaterialTheme.shapes.extraSmall)
+            .border(1.dp, AppTheme.colorScheme.outlineVariant, RoundedCornerShape(25))
             .align(Alignment.Center),
       )
 
