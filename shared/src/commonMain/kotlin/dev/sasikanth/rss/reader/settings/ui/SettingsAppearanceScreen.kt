@@ -85,7 +85,6 @@ import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.items.AppIconSelectionSheet
 import dev.sasikanth.rss.reader.settings.ui.items.AppIconSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.ThemeVariantSettingItem
-import dev.sasikanth.rss.reader.settings.ui.items.TwinePremiumBanner
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import kotlinx.datetime.LocalDate
@@ -173,26 +172,6 @@ internal fun SettingsAppearanceScreen(
             bottom = padding.calculateBottomPadding() + 80.dp,
           ),
       ) {
-        // region Twine Premium banner
-        item {
-          AnimatedVisibility(
-            visible = !state.appInfo.isFoss && state.subscriptionResult != null,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically(),
-          ) {
-            Column {
-              TwinePremiumBanner(
-                modifier = Modifier.animateItem(),
-                subscriptionResult = state.subscriptionResult,
-                onClick = { openPaywall() },
-              )
-
-              SettingsDivider()
-            }
-          }
-        }
-        // endregion
-
         item { SubHeader(text = stringResource(Res.string.settingsHeaderTheme)) }
 
         item {
