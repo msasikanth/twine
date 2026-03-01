@@ -31,6 +31,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -68,9 +72,10 @@ internal fun AboutItem(onClick: () -> Unit) {
 
 @Composable
 private fun AboutProfileImages() {
-  Box(contentAlignment = Alignment.Center) {
-    val backgroundColor = AppTheme.colorScheme.backdrop
-
+  Box(
+    modifier = Modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen),
+    contentAlignment = Alignment.Center,
+  ) {
     AsyncImage(
       model = Constants.ABOUT_ED_PIC,
       contentDescription = null,
@@ -78,7 +83,9 @@ private fun AboutProfileImages() {
       modifier =
         Modifier.padding(start = 72.dp)
           .requiredSize(62.dp)
-          .drawWithCache { onDrawBehind { drawCircle(color = backgroundColor) } }
+          .drawWithCache {
+            onDrawBehind { drawCircle(color = Color.Black, blendMode = BlendMode.DstOut) }
+          }
           .padding(6.dp)
           .clip(CircleShape),
     )
@@ -89,7 +96,9 @@ private fun AboutProfileImages() {
       contentScale = ContentScale.Crop,
       modifier =
         Modifier.requiredSize(62.dp)
-          .drawWithCache { onDrawBehind { drawCircle(color = backgroundColor) } }
+          .drawWithCache {
+            onDrawBehind { drawCircle(color = Color.Black, blendMode = BlendMode.DstOut) }
+          }
           .padding(6.dp)
           .clip(CircleShape),
     )

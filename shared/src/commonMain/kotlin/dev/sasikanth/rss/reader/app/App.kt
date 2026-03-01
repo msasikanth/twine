@@ -357,12 +357,6 @@ fun App(
 
         aboutScreen(modifier = roundedCornerScreenModifier, navController = navController)
 
-        statisticsScreen(
-          modifier = roundedCornerScreenModifier,
-          statisticsViewModel = statisticsViewModel,
-          navController = navController,
-        )
-
         feedGroupScreen(
           modifier = roundedCornerScreenModifier,
           groupViewModel = groupViewModel,
@@ -396,7 +390,11 @@ fun App(
 
         settingsServicesScreen(settingsViewModel = settingsViewModel, navController = navController)
 
-        settingsDataScreen(settingsViewModel = settingsViewModel, navController = navController)
+        settingsDataScreen(
+          settingsViewModel = settingsViewModel,
+          statisticsViewModel = statisticsViewModel,
+          navController = navController,
+        )
 
         settingsAppInfoScreen(settingsViewModel = settingsViewModel, navController = navController)
 
