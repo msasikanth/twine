@@ -22,12 +22,16 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -49,13 +53,9 @@ fun ToggleableButtonGroup(
     modifier =
       Modifier.then(modifier)
         .requiredHeightIn(min = 56.dp)
-        .border(
-          width = 1.dp,
-          color = AppTheme.colorScheme.outlineVariant,
-          shape = MaterialTheme.shapes.large,
-        )
+        .border(width = 1.dp, color = AppTheme.colorScheme.outline, shape = CircleShape)
   ) {
-    val backgroundColor = AppTheme.colorScheme.primary
+    val backgroundColor = AppTheme.colorScheme.inverseSurface
     val selectedItemIndex by
       animateFloatAsState(items.indexOfFirst { it.isSelected }.toFloat(), label = "selected_index")
 
@@ -73,28 +73,41 @@ fun ToggleableButtonGroup(
                 y = 0f,
               ),
             size = Size(width = itemWidth, height = size.height),
-            cornerRadius = CornerRadius(12.dp.toPx()),
+            cornerRadius = CornerRadius(size.height / 2),
           )
         },
       verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(4.dp),
+      horizontalArrangement = Arrangement.spacedBy(1.dp),
     ) {
-      items.forEach { toggleableButtonItem ->
-        TextButton(
-          modifier = Modifier.weight(1f).requiredHeightIn(min = 48.dp),
-          content = { Text(toggleableButtonItem.label) },
-          shape = MaterialTheme.shapes.medium,
-          colors =
-            ButtonDefaults.textButtonColors(
-              contentColor =
-                if (toggleableButtonItem.isSelected) {
-                  AppTheme.colorScheme.surfaceContainerLow
-                } else {
-                  AppTheme.colorScheme.primary
-                }
-            ),
-          onClick = { onItemSelected(toggleableButtonItem) },
-        )
+      items.forEachIndexed { index, toggleableButtonItem ->
+        Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+          val isBeforeItemSelected = items.getOrNull(index - 1)?.isSelected
+
+          if (!(toggleableButtonItem.isSelected) && isBeforeItemSelected == false) {
+            VerticalDivider(
+              modifier = Modifier.height(20.dp),
+              color = AppTheme.colorScheme.outlineVariant,
+            )
+          }
+
+          TextButton(
+            modifier = Modifier.fillMaxWidth().requiredHeightIn(min = 40.dp),
+            content = {
+              Text(toggleableButtonItem.label, style = MaterialTheme.typography.labelLarge)
+            },
+            shape = CircleShape,
+            colors =
+              ButtonDefaults.textButtonColors(
+                contentColor =
+                  if (toggleableButtonItem.isSelected) {
+                    AppTheme.colorScheme.inverseOnSurface
+                  } else {
+                    AppTheme.colorScheme.onSurfaceVariant
+                  }
+              ),
+            onClick = { onItemSelected(toggleableButtonItem) },
+          )
+        }
       }
     }
   }

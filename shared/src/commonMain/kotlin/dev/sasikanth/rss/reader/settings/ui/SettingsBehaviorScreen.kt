@@ -41,29 +41,28 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
+import dev.sasikanth.rss.reader.components.SubHeader
+import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
-import dev.sasikanth.rss.reader.settings.ui.items.AutoSyncSettingItem
-import dev.sasikanth.rss.reader.settings.ui.items.BlockImagesSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.BlockedWordsSettingItem
-import dev.sasikanth.rss.reader.settings.ui.items.BrowserTypeSettingItem
-import dev.sasikanth.rss.reader.settings.ui.items.DownloadFullContentSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.MarkAsReadOnSettingItem
-import dev.sasikanth.rss.reader.settings.ui.items.NotificationsSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.OpmlFeedSelectionSheet
 import dev.sasikanth.rss.reader.settings.ui.items.PostsDeletionPeriodSettingItem
-import dev.sasikanth.rss.reader.settings.ui.items.ShowFeedFavIconSettingItem
-import dev.sasikanth.rss.reader.settings.ui.items.ShowPinnedSourcesSettingItem
-import dev.sasikanth.rss.reader.settings.ui.items.ShowReaderViewSettingItem
-import dev.sasikanth.rss.reader.settings.ui.items.UnreadPostsCountSettingItem
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.settingsBrowserTypeSubtitle
+import twine.shared.generated.resources.settingsBrowserTypeTitle
 import twine.shared.generated.resources.settingsFeaturesAndBehaviors
 import twine.shared.generated.resources.settingsFreeFeedLimitReached
+import twine.shared.generated.resources.settingsHeaderBehaviour
+import twine.shared.generated.resources.settingsHeaderReadingAndBrowsing
+import twine.shared.generated.resources.settingsShowReaderViewSubtitle
+import twine.shared.generated.resources.settingsShowReaderViewTitle
 import twine.shared.generated.resources.settingsUpgradeToPremium
 
 @Composable
@@ -130,6 +129,8 @@ internal fun SettingsBehaviorScreen(
         )
       }
     },
+    containerColor = AppTheme.colorScheme.backdrop,
+    contentColor = Color.Unspecified,
     content = { padding ->
       if (state.opmlFeedsToSelect != null) {
         OpmlFeedSelectionSheet(
@@ -149,116 +150,43 @@ internal fun SettingsBehaviorScreen(
             bottom = padding.calculateBottomPadding() + 80.dp,
           ),
       ) {
-        item {
-          ShowPinnedSourcesSettingItem(
-            showPinnedSources = state.showPinnedSources,
-            onValueChanged = { newValue ->
-              viewModel.dispatch(SettingsEvent.ToggleShowPinnedSources(newValue))
-            },
-          )
-        }
-
-        item { SettingsDivider(24.dp) }
+        item { SubHeader(text = stringResource(Res.string.settingsHeaderReadingAndBrowsing)) }
 
         item {
-          ShowReaderViewSettingItem(
-            showReaderView = state.showReaderView,
+          SettingsSwitchItem(
+            title = stringResource(Res.string.settingsShowReaderViewTitle),
+            subtitle = stringResource(Res.string.settingsShowReaderViewSubtitle),
+            checked = state.showReaderView,
             onValueChanged = { newValue ->
               viewModel.dispatch(SettingsEvent.ToggleShowReaderView(newValue))
             },
           )
         }
 
-        item { SettingsDivider(24.dp) }
-
         item {
-          BrowserTypeSettingItem(
-            browserType = state.browserType,
-            onBrowserTypeChanged = { newBrowserType ->
+          SettingsSwitchItem(
+            title = stringResource(Res.string.settingsBrowserTypeTitle),
+            subtitle = stringResource(Res.string.settingsBrowserTypeSubtitle),
+            checked = state.browserType == BrowserType.InApp,
+            onValueChanged = { useInAppBrowser ->
+              val newBrowserType =
+                if (useInAppBrowser) {
+                  BrowserType.InApp
+                } else {
+                  BrowserType.Default
+                }
               viewModel.dispatch(SettingsEvent.UpdateBrowserType(newBrowserType))
             },
           )
         }
 
-        item { SettingsDivider(24.dp) }
-
-        item {
-          UnreadPostsCountSettingItem(
-            showUnreadCountEnabled = state.showUnreadPostsCount,
-            onValueChanged = { newValue ->
-              viewModel.dispatch(SettingsEvent.ToggleShowUnreadPostsCount(newValue))
-            },
-          )
-        }
-
-        item { SettingsDivider(24.dp) }
-
-        item {
-          AutoSyncSettingItem(
-            enableAutoSync = state.enableAutoSync,
-            onValueChanged = { newValue ->
-              viewModel.dispatch(SettingsEvent.ToggleAutoSync(newValue))
-            },
-          )
-        }
-
-        item { SettingsDivider(24.dp) }
-
-        item {
-          ShowFeedFavIconSettingItem(
-            showFeedFavIcon = state.showFeedFavIcon,
-            onValueChanged = { newValue ->
-              viewModel.dispatch(SettingsEvent.ToggleShowFeedFavIcon(newValue))
-            },
-          )
-        }
-
-        item { SettingsDivider(24.dp) }
-
-        item {
-          BlockImagesSettingItem(
-            blockImages = state.blockImages,
-            onValueChanged = { newValue ->
-              viewModel.dispatch(SettingsEvent.ToggleBlockImages(newValue))
-            },
-          )
-        }
-
-        item { SettingsDivider(24.dp) }
-
-        item {
-          NotificationsSettingItem(
-            enableNotifications = state.enableNotifications,
-            onValueChanged = { newValue ->
-              viewModel.dispatch(SettingsEvent.ToggleNotifications(newValue))
-            },
-          )
-        }
-
-        item { SettingsDivider(24.dp) }
-
-        item {
-          DownloadFullContentSettingItem(
-            downloadFullContent = state.downloadFullContent,
-            onValueChanged = { newValue ->
-              viewModel.dispatch(SettingsEvent.ToggleDownloadFullContent(newValue))
-            },
-          )
-        }
-
-        item { SettingsDivider(24.dp) }
-
-        item { BlockedWordsSettingItem { openBlockedWords() } }
-
-        item { SettingsDivider(24.dp) }
+        item { SubHeader(text = stringResource(Res.string.settingsHeaderBehaviour)) }
 
         item {
           MarkAsReadOnSettingItem(articleMarkAsReadOn = state.markAsReadOn) {
             viewModel.dispatch(SettingsEvent.MarkAsReadOnChanged(it))
           }
         }
-
-        item { SettingsDivider(24.dp) }
 
         item {
           PostsDeletionPeriodSettingItem(
@@ -268,9 +196,13 @@ internal fun SettingsBehaviorScreen(
             },
           )
         }
+
+        item {
+          BlockedWordsSettingItem(blockedWordsCount = state.blockedWordsCount) {
+            openBlockedWords()
+          }
+        }
       }
     },
-    containerColor = AppTheme.colorScheme.backdrop,
-    contentColor = Color.Unspecified,
   )
 }

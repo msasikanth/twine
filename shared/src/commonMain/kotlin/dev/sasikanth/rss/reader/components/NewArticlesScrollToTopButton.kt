@@ -201,7 +201,6 @@ private fun OverlappedFeedIcons(
               homepageLink = homepageLink.orEmpty(),
               showFeedFavIcon = showFeedFavIcon,
               contentDescription = null,
-              shape = MaterialTheme.shapes.extraSmall,
               modifier = Modifier.requiredSize(20.dp),
             )
           }

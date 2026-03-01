@@ -86,7 +86,6 @@ import dev.sasikanth.rss.reader.settings.ui.SettingsDataScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsServicesScreen
 import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
-import dev.sasikanth.rss.reader.statistics.ui.StatisticsScreen
 import kotlin.reflect.typeOf
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
@@ -359,14 +358,16 @@ fun NavGraphBuilder.settingsServicesScreen(
 
 fun NavGraphBuilder.settingsDataScreen(
   settingsViewModel: () -> SettingsViewModel,
+  statisticsViewModel: () -> StatisticsViewModel,
   navController: NavHostController,
 ) {
   composable<Screen.SettingsData> {
-    val viewModel = viewModel { settingsViewModel() }
+    val settingsViewModel = viewModel { settingsViewModel() }
+    val statisticsViewModel = viewModel { statisticsViewModel() }
     SettingsDataScreen(
-      viewModel = viewModel,
+      settingsViewModel = settingsViewModel,
+      statisticsViewModel = statisticsViewModel,
       goBack = { navController.popBackStack() },
-      openStatistics = { navController.navigate(Screen.Statistics) },
     )
   }
 }
@@ -525,21 +526,6 @@ fun NavGraphBuilder.discoveryScreen(
 fun NavGraphBuilder.aboutScreen(modifier: Modifier = Modifier, navController: NavHostController) {
   composable<Screen.About> {
     AboutScreen(modifier = modifier, goBack = { navController.popBackStack() })
-  }
-}
-
-fun NavGraphBuilder.statisticsScreen(
-  modifier: Modifier = Modifier,
-  statisticsViewModel: () -> StatisticsViewModel,
-  navController: NavHostController,
-) {
-  composable<Screen.Statistics> {
-    val viewModel = viewModel { statisticsViewModel() }
-    StatisticsScreen(
-      modifier = modifier,
-      viewModel = viewModel,
-      goBack = { navController.popBackStack() },
-    )
   }
 }
 

@@ -25,6 +25,7 @@ import dev.sasikanth.rss.reader.data.database.FeedGroup
 import dev.sasikanth.rss.reader.data.database.Post
 import dev.sasikanth.rss.reader.data.database.PostContent
 import dev.sasikanth.rss.reader.data.database.ReaderDatabase
+import dev.sasikanth.rss.reader.data.database.ReadingHistory
 import dev.sasikanth.rss.reader.data.database.User
 import dev.sasikanth.rss.reader.data.database.adapter.DateAdapter
 import dev.sasikanth.rss.reader.data.database.adapter.PostFlagsAdapter
@@ -84,6 +85,8 @@ interface DataComponent :
       postContentAdapter = PostContent.Adapter(createdAtAdapter = DateAdapter),
       blockedWordAdapter = BlockedWord.Adapter(updatedAtAdapter = DateAdapter),
       userAdapter = User.Adapter(serviceTypeAdapter = EnumColumnAdapter()),
+      readingHistoryAdapter =
+        ReadingHistory.Adapter(readAtAdapter = DateAdapter, postDateAdapter = DateAdapter),
     )
   }
 
@@ -115,6 +118,9 @@ interface DataComponent :
 
   @Provides
   fun providesFeedGroupFeedQueries(database: ReaderDatabase) = database.feedGroupFeedQueries
+
+  @Provides
+  fun providesReadingHistoryQueries(database: ReaderDatabase) = database.readingHistoryQueries
 
   @Provides fun providesUserQueries(database: ReaderDatabase) = database.userQueries
 

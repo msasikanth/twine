@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.settings.ui.items
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -51,8 +52,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.Button
+import dev.sasikanth.rss.reader.components.InverseButton
 import dev.sasikanth.rss.reader.components.OutlinedButton
-import dev.sasikanth.rss.reader.components.SubHeader
+import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.data.opml.OpmlFeed
 import dev.sasikanth.rss.reader.data.opml.OpmlResult
 import dev.sasikanth.rss.reader.feeds.ui.SelectedCheckIndicator
@@ -73,36 +75,25 @@ import twine.shared.generated.resources.settingsOpmlSelectionTitle
 @Composable
 internal fun OPMLSettingItem(
   opmlResult: OpmlResult?,
-  hasFeeds: Boolean,
   onImportClicked: () -> Unit,
   onExportClicked: () -> Unit,
   onCancelClicked: () -> Unit,
 ) {
-  Column {
-    SubHeader(text = stringResource(Res.string.settingsHeaderOpml))
+  Row(
+    modifier = Modifier.padding(vertical = 16.dp).padding(start = 16.dp, end = 24.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Text(
+      modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+      text = stringResource(Res.string.settingsHeaderOpml),
+      style = MaterialTheme.typography.titleSmall,
+    )
 
-    when (opmlResult) {
-      is OpmlResult.InProgress.Importing,
-      is OpmlResult.InProgress.Exporting -> {
-        Row(
-          modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-          horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-          OutlinedButton(
-            modifier = Modifier.weight(1f),
-            onClick = {
-              // no-op
-            },
-            enabled = false,
-            colors =
-              ButtonDefaults.outlinedButtonColors(
-                containerColor = AppTheme.colorScheme.surfaceContainerLow,
-                disabledContainerColor = AppTheme.colorScheme.surfaceContainerLow,
-                contentColor = AppTheme.colorScheme.primary,
-                disabledContentColor = AppTheme.colorScheme.primary,
-              ),
-            border = null,
-          ) {
+    AnimatedContent(opmlResult) {
+      when (opmlResult) {
+        is OpmlResult.InProgress.Importing,
+        is OpmlResult.InProgress.Exporting -> {
+          Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             val string =
               when (opmlResult) {
                 is OpmlResult.InProgress.Importing -> {
@@ -114,47 +105,40 @@ internal fun OPMLSettingItem(
                 }
               }
 
-            Text(text = string, maxLines = 1, overflow = TextOverflow.MiddleEllipsis)
-          }
+            TranslucentButton(
+              text = string,
+              onClick = {
+                // no-op
+              },
+            )
 
-          OutlinedButton(
-            modifier = Modifier.weight(1f),
-            onClick = onCancelClicked,
-            colors =
-              ButtonDefaults.outlinedButtonColors(
-                containerColor = Color.Unspecified,
-                contentColor = AppTheme.colorScheme.primary,
-              ),
-          ) {
-            Text(stringResource(Res.string.settingsOpmlCancel))
+            InverseButton(
+              text = stringResource(Res.string.settingsOpmlCancel),
+              onClick = onCancelClicked,
+            )
           }
         }
-      }
 
-      // TODO: Handle error states
-      OpmlResult.Idle,
-      OpmlResult.Error.NoContentInOpmlFile,
-      is OpmlResult.Error.UnknownFailure -> {
-        Row(
-          modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-          horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-          OutlinedButton(modifier = Modifier.weight(1f), onClick = onImportClicked) {
-            Text(stringResource(Res.string.settingsOpmlImport))
-          }
+        // TODO: Handle error states
+        OpmlResult.Idle,
+        OpmlResult.Error.NoContentInOpmlFile,
+        is OpmlResult.Error.UnknownFailure -> {
+          Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            TranslucentButton(
+              text = stringResource(Res.string.settingsOpmlImport),
+              onClick = onImportClicked,
+            )
 
-          OutlinedButton(
-            modifier = Modifier.weight(1f),
-            enabled = hasFeeds,
-            onClick = onExportClicked,
-          ) {
-            Text(stringResource(Res.string.settingsOpmlExport))
+            TranslucentButton(
+              text = stringResource(Res.string.settingsOpmlExport),
+              onClick = onExportClicked,
+            )
           }
         }
-      }
 
-      null -> {
-        Box(Modifier.requiredHeight(64.dp))
+        null -> {
+          Box(Modifier.requiredHeight(40.dp))
+        }
       }
     }
   }

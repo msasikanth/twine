@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.components.image
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.RssFeed
 import androidx.compose.material3.Icon
@@ -30,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import coil3.SingletonImageLoader
 import coil3.compose.LocalPlatformContext
@@ -48,7 +48,6 @@ internal fun FeedIcon(
   homepageLink: String,
   showFeedFavIcon: Boolean,
   contentDescription: String?,
-  shape: Shape,
   modifier: Modifier = Modifier,
   contentScale: ContentScale = ContentScale.Fit,
   size: Size = Size(Dimension.Undefined, 500),
@@ -56,9 +55,10 @@ internal fun FeedIcon(
   val globalShowFeedFavIcon = LocalShowFeedFavIconSetting.current
   val useFavIcon = showFeedFavIcon && globalShowFeedFavIcon
   val shouldBlockImage = LocalBlockImage.current
+  val iconShape = RoundedCornerShape(25)
 
   Box(
-    modifier = Modifier.then(modifier).background(Color.White, shape),
+    modifier = Modifier.then(modifier).background(Color.White, iconShape),
     contentAlignment = Alignment.Center,
   ) {
     if (shouldBlockImage) {
@@ -92,7 +92,7 @@ internal fun FeedIcon(
       coil3.compose.AsyncImage(
         model = imageRequest,
         contentDescription = contentDescription,
-        modifier = Modifier.matchParentSize().clip(shape),
+        modifier = Modifier.matchParentSize().clip(iconShape),
         contentScale = contentScale,
         imageLoader = imageLoader,
         onLoading = { isSuccess = false },

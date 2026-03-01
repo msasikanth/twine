@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +38,6 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -57,6 +55,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.sasikanth.rss.reader.components.AlertDialog
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.TextField
@@ -110,46 +109,12 @@ fun FreshRssLoginScreen(
 
   if (state.showConfirmationDialog) {
     AlertDialog(
-      onDismissRequest = { viewModel.onEvent(FreshRssLoginEvent.OnConfirmationDismissed) },
-      title = {
-        Text(
-          text = stringResource(Res.string.freshRssClearDataTitle),
-          color = AppTheme.colorScheme.onSurface,
-        )
-      },
-      text = {
-        Text(
-          text = stringResource(Res.string.freshRssClearDataDesc),
-          color = AppTheme.colorScheme.onSurfaceVariant,
-        )
-      },
-      confirmButton = {
-        TextButton(
-          onClick = { viewModel.onEvent(FreshRssLoginEvent.OnConfirmClearDataClicked) },
-          shape = MaterialTheme.shapes.large,
-        ) {
-          Text(
-            text = stringResource(Res.string.freshRssClearDataPositive),
-            style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.primary,
-          )
-        }
-      },
-      dismissButton = {
-        TextButton(
-          onClick = { viewModel.onEvent(FreshRssLoginEvent.OnConfirmationDismissed) },
-          shape = MaterialTheme.shapes.large,
-        ) {
-          Text(
-            text = stringResource(Res.string.buttonCancel),
-            style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.onSurfaceVariant,
-          )
-        }
-      },
-      containerColor = AppTheme.colorScheme.surfaceContainerLow,
-      titleContentColor = AppTheme.colorScheme.onSurface,
-      textContentColor = AppTheme.colorScheme.onSurface,
+      title = stringResource(Res.string.freshRssClearDataTitle),
+      text = stringResource(Res.string.freshRssClearDataDesc),
+      confirmText = stringResource(Res.string.freshRssClearDataPositive),
+      dismissText = stringResource(Res.string.buttonCancel),
+      onConfirm = { viewModel.onEvent(FreshRssLoginEvent.OnConfirmClearDataClicked) },
+      onDismiss = { viewModel.onEvent(FreshRssLoginEvent.OnConfirmationDismissed) },
     )
   }
 

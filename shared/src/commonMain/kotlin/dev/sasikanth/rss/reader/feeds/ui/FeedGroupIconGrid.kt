@@ -43,7 +43,6 @@ internal fun FeedGroupIconGrid(
   feedIconLinks: List<String>,
   feedShowFavIconSettings: List<Boolean>,
   iconSize: Dp = 14.dp,
-  iconShape: Shape = RoundedCornerShape(4.dp),
   modifier: Modifier = Modifier,
 ) {
   val containerSize = iconSize * 2
@@ -56,6 +55,7 @@ internal fun FeedGroupIconGrid(
         .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
   ) {
     val placeholderColor = translucentStyle.background.compositeOver(AppTheme.colorScheme.backdrop)
+    val iconShape = RoundedCornerShape(25)
 
     // Top-right
     FeedIcon(
@@ -134,7 +134,6 @@ private fun FeedIcon(
       homepageLink = homepageLink.orEmpty(),
       showFeedFavIcon = showFavIconSetting,
       contentDescription = null,
-      shape = iconShape,
       modifier = modifier,
     )
   } else {

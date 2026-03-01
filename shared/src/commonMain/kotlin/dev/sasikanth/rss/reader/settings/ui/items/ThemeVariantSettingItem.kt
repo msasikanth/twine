@@ -48,8 +48,8 @@ internal fun ThemeVariantSettingItem(
   LazyRow(
     state = themeVariantListState,
     modifier = modifier.fillMaxWidth().ignoreHorizontalParentPadding(settingsItemHorizontalPadding),
-    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-    horizontalArrangement = Arrangement.spacedBy(16.dp),
+    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
     items(ThemeVariant.entries) { themeVariant ->

@@ -1,0 +1,28 @@
+import kotlin.time.Instant;
+
+CREATE TABLE readingHistory (
+  postId TEXT NOT NULL PRIMARY KEY,
+  feedId TEXT NOT NULL,
+  feedName TEXT NOT NULL,
+  feedIcon TEXT NOT NULL,
+  feedHomepageLink TEXT NOT NULL,
+  readAt INTEGER AS Instant NOT NULL,
+  postDate INTEGER AS Instant NOT NULL
+);
+
+CREATE INDEX reading_history_feedId_index ON readingHistory(feedId);
+CREATE INDEX reading_history_readAt_index ON readingHistory(readAt);
+
+-- Populate from existing read posts
+INSERT OR IGNORE INTO readingHistory(postId, feedId, feedName, feedIcon, feedHomepageLink, readAt, postDate)
+SELECT
+  post.id,
+  feed.id,
+  feed.name,
+  feed.icon,
+  feed.homepageLink,
+  post.updatedAt, -- Using updatedAt as proxy for readAt
+  post.postDate
+FROM post
+INNER JOIN feed ON post.sourceId = feed.id
+WHERE (post.flags & 2) != 0 AND feed.isDeleted = 0;

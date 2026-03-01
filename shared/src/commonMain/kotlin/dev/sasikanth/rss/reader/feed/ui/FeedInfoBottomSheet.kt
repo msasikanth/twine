@@ -287,7 +287,6 @@ private fun FeedLabelInput(
       homepageLink = feed.homepageLink,
       showFeedFavIcon = feed.showFeedFavIcon,
       contentDescription = feed.name,
-      shape = MaterialTheme.shapes.large,
       modifier = Modifier.requiredSize(56.dp),
     )
 

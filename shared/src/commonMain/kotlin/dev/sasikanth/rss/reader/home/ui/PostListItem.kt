@@ -63,6 +63,7 @@ import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
+import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.formatRelativeTime
 
@@ -110,6 +111,7 @@ internal fun PostListItem(
     )
   var showDropdown by remember { mutableStateOf(false) }
   val showImage = !(item.imageUrl.isNullOrBlank())
+  val shouldBlockImage = LocalBlockImage.current
 
   Column(
     modifier =
@@ -121,13 +123,11 @@ internal fun PostListItem(
         .semantics { contentDescription = item.title.ifBlank { item.description } }
         .padding(horizontal = 24.dp, vertical = 8.dp)
   ) {
-    Row {
+    Row(modifier = Modifier.padding(top = 8.dp)) {
       Column(modifier = Modifier.weight(1f)) {
-        Spacer(Modifier.height(8.dp))
-
         Text(
           modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
-          style = MaterialTheme.typography.titleMedium,
+          style = MaterialTheme.typography.titleSmall,
           text = item.title.ifBlank { item.description },
           color = AppTheme.colorScheme.onSurface,
           maxLines = 2,
@@ -148,30 +148,117 @@ internal fun PostListItem(
         }
       }
 
-      item.imageUrl?.let { url ->
-        Box(
-          modifier =
-            Modifier.requiredSizeIn(
-              minHeight = 64.dp,
-              minWidth = 64.dp,
-              maxHeight = 96.dp,
-              maxWidth = 96.dp,
-            ),
-          contentAlignment = Alignment.Center,
-        ) {
-          AsyncImage(
-            url = url,
+      if (!shouldBlockImage) {
+        item.imageUrl?.let { url ->
+          Box(
             modifier =
-              Modifier.padding(vertical = 8.dp).aspectRatio(1f).clip(RoundedCornerShape(25)),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-          )
+              Modifier.requiredSizeIn(
+                minHeight = 64.dp,
+                minWidth = 64.dp,
+                maxHeight = 96.dp,
+                maxWidth = 96.dp,
+              ),
+            contentAlignment = Alignment.Center,
+          ) {
+            AsyncImage(
+              url = url,
+              modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(25)),
+              contentDescription = null,
+              contentScale = ContentScale.Crop,
+            )
+          }
         }
       }
     }
 
+    Spacer(Modifier.height(4.dp))
+
     PostActionBar(
-      modifier = Modifier.padding(end = if (showImage) 12.dp else 0.dp),
+      feedName = item.feedName,
+      feedIcon = item.feedIcon,
+      feedHomepageLink = item.feedHomepageLink,
+      showFeedFavIcon = item.showFeedFavIcon,
+      postRead = readStatus,
+      postRelativeTimestamp = item.date.formatRelativeTime(),
+      postLink = item.link,
+      postBookmarked = item.bookmarked,
+      commentsLink = item.commentsLink,
+      postReadingTimeEstimate = item.feedContentReadingTime ?: 0,
+      onBookmarkClick = onPostBookmarkClick,
+      onCommentsClick = onPostCommentsClick,
+      onTogglePostReadClick = {
+        readStatus = !readStatus
+        updatePostReadStatus(readStatus)
+      },
+      showDropdown = showDropdown,
+      onDropdownChange = { showDropdown = it },
+      config = postMetadataConfig,
+      onSourceClick = onPostSourceClick,
+    )
+  }
+}
+
+@Composable
+internal fun SimplePostListItem(
+  item: ResolvedPost,
+  onClick: () -> Unit,
+  onPostBookmarkClick: () -> Unit,
+  onPostCommentsClick: () -> Unit,
+  onPostSourceClick: () -> Unit,
+  updatePostReadStatus: (updatedReadStatus: Boolean) -> Unit,
+  modifier: Modifier = Modifier,
+  reduceReadItemAlpha: Boolean = false,
+  postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
+) {
+  var readStatus by remember(item.read) { mutableStateOf(item.read) }
+  val alpha by
+    animateFloatAsState(
+      if (readStatus && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
+      else Constants.ITEM_UNREAD_ALPHA
+    )
+  var showDropdown by remember { mutableStateOf(false) }
+  val showImage = !(item.imageUrl.isNullOrBlank())
+  val shouldBlockImage = LocalBlockImage.current
+
+  Column(
+    modifier =
+      Modifier.then(modifier)
+        .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
+        .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+        .padding(postListPadding)
+        .graphicsLayer { this.alpha = alpha }
+        .semantics { contentDescription = item.title.ifBlank { item.description } }
+        .padding(horizontal = 24.dp, vertical = 4.dp)
+  ) {
+    Row(modifier = Modifier.padding(top = 8.dp)) {
+      Column(modifier = Modifier.padding(vertical = 4.dp).weight(1f)) {
+        Text(
+          modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
+          style = MaterialTheme.typography.titleSmall,
+          text = item.title.ifBlank { item.description },
+          color = AppTheme.colorScheme.onSurface,
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis,
+        )
+      }
+
+      if (!shouldBlockImage) {
+        item.imageUrl?.let { url ->
+          Box(modifier = Modifier.requiredSize(48.dp), contentAlignment = Alignment.Center) {
+            AsyncImage(
+              url = url,
+              modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(25)),
+              contentDescription = null,
+              contentScale = ContentScale.Crop,
+            )
+          }
+        }
+      }
+    }
+
+    Spacer(Modifier.height(4.dp))
+
+    PostActionBar(
       feedName = item.feedName,
       feedIcon = item.feedIcon,
       feedHomepageLink = item.feedHomepageLink,
@@ -228,7 +315,6 @@ internal fun CompactPostListItem(
       homepageLink = item.feedHomepageLink,
       showFeedFavIcon = item.showFeedFavIcon,
       contentDescription = null,
-      shape = MaterialTheme.shapes.extraSmall,
       modifier = Modifier.requiredSize(20.dp),
     )
 

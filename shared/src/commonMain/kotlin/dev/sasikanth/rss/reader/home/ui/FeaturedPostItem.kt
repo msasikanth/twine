@@ -121,7 +121,7 @@ internal fun FeaturedPostItem(
       },
     )
 
-    Spacer(Modifier.height(4.dp))
+    Spacer(Modifier.height(8.dp))
 
     Text(
       modifier = Modifier.graphicsLayer { this.alpha = contentAlphaProvider.invoke() },

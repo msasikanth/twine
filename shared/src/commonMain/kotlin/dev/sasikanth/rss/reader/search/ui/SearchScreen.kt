@@ -458,14 +458,13 @@ private fun SourceIcon(source: Source, modifier: Modifier = Modifier) {
         contentDescription = null,
         modifier = modifier,
         contentScale = ContentScale.Crop,
-        shape = RoundedCornerShape(8.dp),
       )
     }
     is FeedGroup -> {
       FeedGroupIconGrid(
+        feedHomepageLinks = source.feedHomepageLinks,
         feedIconLinks = source.feedIconLinks,
         feedShowFavIconSettings = source.feedShowFavIconSettings,
-        feedHomepageLinks = source.feedHomepageLinks,
         modifier = modifier,
       )
     }

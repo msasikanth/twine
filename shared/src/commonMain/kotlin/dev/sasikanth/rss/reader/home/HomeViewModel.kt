@@ -256,10 +256,10 @@ class HomeViewModel(
     val feedPostsPagingData = allPostsPager.nonFeaturedPostsPagingData.cachedIn(viewModelScope)
 
     val featuredPosts =
-      combine(allPostsPager.featuredPosts, settingsRepository.homeViewMode) {
+      combine(allPostsPager.featuredPosts, settingsRepository.showFeaturedSection) {
         featuredPosts,
-        homeViewMode ->
-        if (homeViewMode == HomeViewMode.Default) {
+        showFeaturedSection ->
+        if (showFeaturedSection) {
           featuredPosts
         } else {
           persistentListOf()
@@ -302,18 +302,20 @@ class HomeViewModel(
           combine(activeSourceFlow, postsTypeFlow, settingsRepository.postsSortOrder, ::Triple),
           combine(
             settingsRepository.homeViewMode,
+            settingsRepository.showFeaturedSection,
             settingsRepository.themeVariant,
             settingsRepository.showPinnedSources,
-            ::Triple,
+            ::HomeSelectionFiltersCombined,
           ),
-        ) { group1, group2 ->
+        ) { group1, combined ->
           HomeSelectionFilters(
             activeSource = group1.first,
             postsType = group1.second,
             postsSortOrder = group1.third,
-            homeViewMode = group2.first,
-            themeVariant = group2.second,
-            showPinnedSources = group2.third,
+            homeViewMode = combined.homeViewMode,
+            showFeaturedSection = combined.showFeaturedSection,
+            themeVariant = combined.themeVariant,
+            showPinnedSources = combined.showPinnedSources,
           )
         },
         combine(
@@ -329,6 +331,7 @@ class HomeViewModel(
             postsType = selectionFilters.postsType,
             postsSortOrder = selectionFilters.postsSortOrder,
             homeViewMode = selectionFilters.homeViewMode,
+            showFeaturedSection = selectionFilters.showFeaturedSection,
             themeVariant = selectionFilters.themeVariant,
             showPinnedSources = selectionFilters.showPinnedSources,
             hasUnreadPosts = unreadStatus.hasUnreadPosts,
@@ -454,11 +457,19 @@ class HomeViewModel(
   }
 }
 
+private data class HomeSelectionFiltersCombined(
+  val homeViewMode: HomeViewMode,
+  val showFeaturedSection: Boolean,
+  val themeVariant: ThemeVariant,
+  val showPinnedSources: Boolean,
+)
+
 private data class HomeSelectionFilters(
   val activeSource: Source?,
   val postsType: PostsType,
   val postsSortOrder: PostsSortOrder,
   val homeViewMode: HomeViewMode,
+  val showFeaturedSection: Boolean,
   val themeVariant: ThemeVariant,
   val showPinnedSources: Boolean,
 )

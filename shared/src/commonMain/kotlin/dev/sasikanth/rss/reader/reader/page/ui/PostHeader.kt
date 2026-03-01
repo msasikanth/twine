@@ -268,12 +268,11 @@ internal fun PostSourcePill(
       verticalAlignment = Alignment.CenterVertically,
     ) {
       FeedIcon(
-        modifier = Modifier.requiredSize(16.dp),
         icon = feedIcon,
         homepageLink = feedHomepageLink,
         showFeedFavIcon = showFeedFavIcon,
-        shape = MaterialTheme.shapes.extraSmall,
         contentDescription = null,
+        modifier = Modifier.requiredSize(16.dp),
       )
 
       Spacer(Modifier.requiredWidth(6.dp))

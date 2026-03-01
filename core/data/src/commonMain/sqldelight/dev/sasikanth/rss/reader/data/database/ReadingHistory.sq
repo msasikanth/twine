@@ -1,0 +1,67 @@
+import kotlin.time.Instant;
+
+CREATE TABLE readingHistory (
+  postId TEXT NOT NULL PRIMARY KEY,
+  feedId TEXT NOT NULL,
+  feedName TEXT NOT NULL,
+  feedIcon TEXT NOT NULL,
+  feedHomepageLink TEXT NOT NULL,
+  readAt INTEGER AS Instant NOT NULL,
+  postDate INTEGER AS Instant NOT NULL
+);
+
+CREATE INDEX reading_history_feedId_index ON readingHistory(feedId);
+CREATE INDEX reading_history_readAt_index ON readingHistory(readAt);
+
+insertReadingHistory:
+INSERT OR REPLACE INTO readingHistory(postId, feedId, feedName, feedIcon, feedHomepageLink, readAt, postDate)
+VALUES (:postId, :feedId, :feedName, :feedIcon, :feedHomepageLink, :readAt, :postDate);
+
+deleteReadingHistory:
+DELETE FROM readingHistory WHERE postId = :postId;
+
+deleteReadingHistoryForPosts:
+DELETE FROM readingHistory WHERE postId IN :postIds;
+
+insertReadingHistoryForPosts:
+INSERT OR IGNORE INTO readingHistory(postId, feedId, feedName, feedIcon, feedHomepageLink, readAt, postDate)
+SELECT
+  post.id,
+  feed.id,
+  feed.name,
+  feed.icon,
+  feed.homepageLink,
+  :readAt,
+  post.postDate
+FROM post
+INNER JOIN feed ON post.sourceId = feed.id
+WHERE post.id IN :postIds AND feed.isDeleted = 0;
+
+totalReadPostsCount:
+SELECT COUNT(*) FROM readingHistory;
+
+firstReadingDate:
+SELECT MIN(readAt) AS firstReadingDate FROM readingHistory;
+
+readPostsByFeed:
+SELECT
+  feedId,
+  feedName,
+  feedIcon,
+  feedHomepageLink,
+  COUNT(postId) AS readCount
+FROM readingHistory
+GROUP BY feedId, feedName, feedIcon, feedHomepageLink
+ORDER BY readCount DESC;
+
+readPostsOverTime:
+SELECT
+  DATE(readAt / 1000, 'unixepoch') AS date,
+  COUNT(*) AS count
+FROM readingHistory
+WHERE readAt >= :startDate
+GROUP BY date
+ORDER BY date DESC;
+
+deleteAll:
+DELETE FROM readingHistory;
