@@ -62,9 +62,6 @@ fun SimpleTopAppBar(
           modifier = Modifier.padding(start = 12.dp),
           icon = TwineIcons.ArrowBack,
           label = stringResource(Res.string.buttonGoBack),
-          backgroundColor = AppTheme.colorScheme.inverseSurface,
-          borderColor = AppTheme.colorScheme.inverseSurface,
-          contentColor = AppTheme.colorScheme.inverseOnSurface,
           onClick = onBackClick,
         )
       },
@@ -72,7 +69,7 @@ fun SimpleTopAppBar(
       contentPadding = PaddingValues(vertical = 8.dp),
       colors =
         TopAppBarDefaults.topAppBarColors(
-          containerColor = AppTheme.colorScheme.surfaceContainerHigh,
+          containerColor = AppTheme.colorScheme.backdrop,
           navigationIconContentColor = AppTheme.colorScheme.onSurface,
           titleContentColor = AppTheme.colorScheme.onSurface,
           actionIconContentColor = AppTheme.colorScheme.onSurface,

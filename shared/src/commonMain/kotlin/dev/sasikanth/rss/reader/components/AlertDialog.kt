@@ -17,20 +17,32 @@
 
 package dev.sasikanth.rss.reader.components
 
-import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
-internal fun SubHeader(text: String, modifier: Modifier = Modifier) {
-  Text(
-    text = text,
-    style = MaterialTheme.typography.titleSmall,
-    color = AppTheme.colorScheme.onSurfaceVariant,
-    modifier = modifier.padding(horizontal = 24.dp).padding(top = 24.dp, bottom = 12.dp),
+fun AlertDialog(
+  title: String,
+  text: String,
+  confirmText: String,
+  dismissText: String,
+  onConfirm: () -> Unit,
+  onDismiss: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  AlertDialog(
+    modifier = modifier,
+    onDismissRequest = onDismiss,
+    title = { Text(text = title, style = MaterialTheme.typography.headlineSmall) },
+    text = { Text(text = text, style = MaterialTheme.typography.bodyMedium) },
+    confirmButton = { TranslucentButton(text = confirmText, onClick = onConfirm) },
+    dismissButton = { InverseButton(text = dismissText, onClick = onDismiss) },
+    containerColor = AppTheme.colorScheme.surfaceContainerHigh,
+    titleContentColor = AppTheme.colorScheme.onSurface,
+    textContentColor = AppTheme.colorScheme.onSurfaceVariant,
   )
 }

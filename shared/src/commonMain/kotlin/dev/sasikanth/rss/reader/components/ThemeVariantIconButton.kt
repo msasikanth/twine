@@ -17,22 +17,20 @@
 
 package dev.sasikanth.rss.reader.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.NightsStay
+import androidx.compose.material.icons.rounded.WbSunny
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -49,15 +47,8 @@ import dev.sasikanth.rss.reader.ui.forestColorScheme
 import dev.sasikanth.rss.reader.ui.raspberryColorScheme
 import dev.sasikanth.rss.reader.ui.skylineColorScheme
 import dev.sasikanth.rss.reader.ui.solarizedColorScheme
-import org.jetbrains.compose.resources.stringResource
-import twine.shared.generated.resources.Res
-import twine.shared.generated.resources.themeVariantAmber
-import twine.shared.generated.resources.themeVariantDynamic
-import twine.shared.generated.resources.themeVariantForest
-import twine.shared.generated.resources.themeVariantRaspberry
-import twine.shared.generated.resources.themeVariantSkyline
-import twine.shared.generated.resources.themeVariantSolarized
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ThemeVariantIconButton(
   themeVariant: ThemeVariant,
@@ -82,68 +73,59 @@ fun ThemeVariantIconButton(
       ThemeVariant.Skyline -> skylineColorScheme(isDark)
     }
 
-  val backgroundColor = colorScheme.surface
-  val onSurfaceColor = colorScheme.onSurface
-  val primaryColor = colorScheme.primary
+  val backgroundColor = colorScheme.primary
+  val contentColor = colorScheme.onPrimary
 
-  val label =
-    when (themeVariant) {
-      ThemeVariant.Dynamic -> stringResource(Res.string.themeVariantDynamic)
-      ThemeVariant.Solarized -> stringResource(Res.string.themeVariantSolarized)
-      ThemeVariant.Forest -> stringResource(Res.string.themeVariantForest)
-      ThemeVariant.Amber -> stringResource(Res.string.themeVariantAmber)
-      ThemeVariant.Raspberry -> stringResource(Res.string.themeVariantRaspberry)
-      ThemeVariant.Skyline -> stringResource(Res.string.themeVariantSkyline)
-    }
-
-  val borderWidth by animateDpAsState(if (selected) 4.dp else 1.dp)
-  val borderColor =
-    if (selected) {
-      AppTheme.colorScheme.primary
-    } else {
-      AppTheme.colorScheme.outlineVariant
-    }
+  val borderWidth by animateDpAsState(if (selected) 2.dp else 1.dp)
+  val borderColor by
+    animateColorAsState(
+      if (selected) AppTheme.colorScheme.outline else AppTheme.colorScheme.outlineVariant
+    )
 
   Box(
     modifier =
-      modifier
-        .requiredWidth(160.dp)
-        .heightIn(min = 100.dp)
-        .clip(MaterialTheme.shapes.large)
-        .background(backgroundColor)
-        .border(borderWidth, borderColor, MaterialTheme.shapes.large)
-        .clickable { onClick() }
-        .padding(12.dp)
-  ) {
-    Column {
-      Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-          text = label,
-          style = MaterialTheme.typography.titleSmall,
-          color = primaryColor,
-          maxLines = 1,
-          modifier = Modifier.weight(1f),
-        )
-
-        if (themeVariant.isPremium && !isSubscribed) {
-          Icon(
-            modifier = Modifier.requiredSize(16.dp),
-            imageVector = TwineIcons.StarShine,
-            contentDescription = null,
-            tint = primaryColor,
-          )
+      Modifier.then(
+        if (selected) {
+          Modifier.border(borderWidth, borderColor, MaterialTheme.shapes.largeIncreased)
+        } else {
+          Modifier
         }
-      }
-
-      Spacer(Modifier.height(8.dp))
-
-      val previewText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-      Text(
-        text = previewText,
-        color = AppTheme.colorScheme.onSurface,
-        style = MaterialTheme.typography.bodySmall,
-        maxLines = 5,
+      ),
+    contentAlignment = Alignment.Center,
+  ) {
+    Box(
+      modifier =
+        modifier
+          .requiredSize(width = 64.dp, height = 96.dp)
+          .padding(4.dp)
+          .clip(MaterialTheme.shapes.large)
+          .background(backgroundColor)
+          .then(
+            if (!selected) {
+              Modifier.border(borderWidth, borderColor, MaterialTheme.shapes.large)
+            } else {
+              Modifier
+            }
+          )
+          .clickable { onClick() },
+      contentAlignment = Alignment.Center,
+    ) {
+      val icon = if (isDark) Icons.Rounded.NightsStay else Icons.Rounded.WbSunny
+      Icon(
+        imageVector = icon,
+        contentDescription = null,
+        tint = contentColor,
+        modifier = Modifier.requiredSize(24.dp),
       )
+
+      if (themeVariant.isPremium && !isSubscribed) {
+        Icon(
+          modifier = Modifier.requiredSize(16.dp).align(Alignment.TopEnd).padding(4.dp),
+          imageVector = TwineIcons.StarShine,
+          contentDescription = null,
+          tint = contentColor,
+        )
+      }
     }
   }
 }
