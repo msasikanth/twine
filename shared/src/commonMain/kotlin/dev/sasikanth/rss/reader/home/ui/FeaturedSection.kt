@@ -152,7 +152,7 @@ internal fun FeaturedSection(
                   val pageOffset = pagerState.getOffsetFractionForPage(page)
 
                   translationX = size.width * pageOffset
-                  alpha = calculateAlpha(pageOffset)
+                  alpha = calculateBackgroundAlpha(pageOffset)
                   renderEffect = blurEffect
                 },
             )
@@ -162,7 +162,7 @@ internal fun FeaturedSection(
             item = postWithMetadata,
             contentAlphaProvider = {
               val pageOffset = pagerState.getOffsetFractionForPage(page)
-              calculateAlpha(pageOffset)
+              calculateContentAlpha(pageOffset)
             },
             onClick = { onItemClick(postWithMetadata, page) },
             onBookmarkClick = { onPostBookmarkClick(postWithMetadata) },
@@ -259,7 +259,15 @@ private fun FeaturedSectionBackground(
   )
 }
 
-private fun calculateAlpha(pageOffset: Float): Float {
+private fun calculateBackgroundAlpha(pageOffset: Float): Float {
+  return if (pageOffset >= 0f) {
+    1f
+  } else {
+    calculateContentAlpha(pageOffset)
+  }
+}
+
+private fun calculateContentAlpha(pageOffset: Float): Float {
   val offsetAbsolute = minOf(1f, pageOffset.absoluteValue)
   return EaseInSine.transform(offsetAbsolute.inverse())
 }
