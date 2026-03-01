@@ -87,6 +87,7 @@ internal fun OPMLSettingItem(
       modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
       text = stringResource(Res.string.settingsHeaderOpml),
       style = MaterialTheme.typography.titleSmall,
+      color = AppTheme.colorScheme.onSurface,
     )
 
     AnimatedContent(opmlResult) {

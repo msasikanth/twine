@@ -16,7 +16,7 @@
  */
 package dev.sasikanth.rss.reader.app
 
-import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -271,20 +271,28 @@ fun App(
         navController = navController,
         startDestination = Screen.Placeholder,
         popEnterTransition = {
-          fadeIn(
-            animationSpec =
-              spring(
-                dampingRatio = 1.0f, // reflects material3 motionScheme.defaultEffectsSpec()
-                stiffness = 1600.0f, // reflects material3 motionScheme.defaultEffectsSpec()
-              )
-          )
+          if (platform == Platform.Apple) {
+            slideIntoContainer(
+              towards = SlideDirection.End,
+              animationSpec = tween(durationMillis = 200, easing = LinearEasing),
+              initialOffset = { fullOffset -> (fullOffset * 0.4f).toInt() },
+            )
+          } else {
+            fadeIn(
+              animationSpec =
+                spring(
+                  dampingRatio = 1.0f, // reflects material3 motionScheme.defaultEffectsSpec()
+                  stiffness = 1600.0f, // reflects material3 motionScheme.defaultEffectsSpec()
+                )
+            )
+          }
         },
         popExitTransition = {
           if (platform == Platform.Apple) {
             slideOutOfContainer(
-              towards = AnimatedContentTransitionScope.SlideDirection.End,
+              towards = SlideDirection.End,
               animationSpec = tween(durationMillis = 200, easing = LinearEasing),
-              targetOffset = { fullOffset -> (fullOffset * 0.3f).toInt() },
+              targetOffset = { fullOffset -> fullOffset },
             )
           } else {
             scaleOut(

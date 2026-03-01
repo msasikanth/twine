@@ -20,7 +20,6 @@ package dev.sasikanth.rss.reader.settings.ui.items
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
@@ -30,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.billing.SubscriptionResult
 import dev.sasikanth.rss.reader.resources.icons.StarShine
@@ -47,11 +47,11 @@ internal fun TwinePremiumBanner(
   modifier: Modifier = Modifier,
   onClick: () -> Unit,
 ) {
-  Row(
+  Column(
     modifier =
       modifier.fillMaxWidth().clickable { onClick() }.padding(horizontal = 24.dp, vertical = 16.dp),
-    horizontalArrangement = Arrangement.spacedBy(16.dp),
-    verticalAlignment = Alignment.CenterVertically,
+    verticalArrangement = Arrangement.spacedBy(16.dp),
+    horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     Icon(
       modifier = Modifier.requiredSize(32.dp),
@@ -60,12 +60,16 @@ internal fun TwinePremiumBanner(
       tint = AppTheme.colorScheme.primary,
     )
 
-    Column {
+    Column(
+      verticalArrangement = Arrangement.spacedBy(4.dp),
+      horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
       if (subscriptionResult != SubscriptionResult.Subscribed) {
         Text(
           text = stringResource(Res.string.twinePremium),
           style = MaterialTheme.typography.titleMedium,
           color = AppTheme.colorScheme.onSurface,
+          textAlign = TextAlign.Center,
         )
       }
 
@@ -77,8 +81,9 @@ internal fun TwinePremiumBanner(
         }
       Text(
         text = stringResource(subscriptionDescRes),
-        style = MaterialTheme.typography.labelLarge,
+        style = MaterialTheme.typography.bodyMedium,
         color = AppTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
       )
     }
   }

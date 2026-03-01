@@ -283,12 +283,14 @@ fun NavGraphBuilder.mainScreen(
         }
 
         SettingsScreen(
+          viewModel = viewModel,
           goBack = goBack,
           openAppearanceSettings = { navController.navigate(Screen.SettingsAppearance) },
           openBehaviorSettings = { navController.navigate(Screen.SettingsBehavior) },
           openServicesSettings = { navController.navigate(Screen.SettingsServices) },
           openDataSettings = { navController.navigate(Screen.SettingsData) },
           openAppInfoSettings = { navController.navigate(Screen.SettingsAppInfo) },
+          openPaywall = { navController.navigate(Screen.Paywall) },
           modifier = screenModifier,
         )
       },

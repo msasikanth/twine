@@ -16,6 +16,11 @@
  */
 package dev.sasikanth.rss.reader.settings.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -24,10 +29,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.resources.icons.Account
 import dev.sasikanth.rss.reader.resources.icons.Appearance
@@ -35,7 +45,10 @@ import dev.sasikanth.rss.reader.resources.icons.Behaviors
 import dev.sasikanth.rss.reader.resources.icons.Changelog
 import dev.sasikanth.rss.reader.resources.icons.Sync
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.settings.SettingsEvent
+import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.items.SettingsNavigationItem
+import dev.sasikanth.rss.reader.settings.ui.items.TwinePremiumBanner
 import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -52,15 +65,29 @@ import twine.shared.generated.resources.settingsYourInsightsSubtitle
 
 @Composable
 internal fun SettingsScreen(
+  viewModel: SettingsViewModel,
   goBack: () -> Unit,
   openAppearanceSettings: () -> Unit,
   openBehaviorSettings: () -> Unit,
   openServicesSettings: () -> Unit,
   openDataSettings: () -> Unit,
   openAppInfoSettings: () -> Unit,
+  openPaywall: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
+  val state by viewModel.state.collectAsStateWithLifecycle()
   val layoutDirection = LocalLayoutDirection.current
+
+  LaunchedEffect(state.openPaywall) {
+    if (state.openPaywall) {
+      openPaywall()
+      viewModel.dispatch(SettingsEvent.MarkOpenPaywallAsDone)
+    }
+  }
+
+  LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+    viewModel.dispatch(SettingsEvent.LoadSubscriptionStatus)
+  }
 
   Scaffold(
     modifier = modifier,
@@ -76,6 +103,26 @@ internal fun SettingsScreen(
             bottom = padding.calculateBottomPadding() + 80.dp,
           ),
       ) {
+        item {
+          AnimatedVisibility(
+            visible = !state.appInfo.isFoss && state.subscriptionResult != null,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically(),
+          ) {
+            TwinePremiumBanner(
+              modifier = Modifier.animateItem(),
+              subscriptionResult = state.subscriptionResult,
+              onClick = { openPaywall() },
+            )
+          }
+        }
+
+        item {
+          if (!state.appInfo.isFoss && state.subscriptionResult != null) {
+            SettingsDivider(horizontalInsets = 24.dp)
+          }
+        }
+
         item {
           SettingsNavigationItem(
             title = stringResource(Res.string.settingsAppearanceAndLayout),

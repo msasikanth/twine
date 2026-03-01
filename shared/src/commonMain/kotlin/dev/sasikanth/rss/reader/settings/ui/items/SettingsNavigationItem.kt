@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.resources.icons.RSS
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 
 @Composable
 internal fun SettingsNavigationItem(
@@ -48,10 +49,11 @@ internal fun SettingsNavigationItem(
 ) {
   Box(modifier = modifier.clickable(onClick = onClick)) {
     Row(modifier = Modifier.padding(all = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+      val translucentStyle = LocalTranslucentStyles.current
+
       Box(
         modifier =
-          Modifier.size(40.dp)
-            .background(AppTheme.colorScheme.onSurface.copy(alpha = 0.08f), shape = CircleShape),
+          Modifier.size(40.dp).background(translucentStyle.default.background, shape = CircleShape),
         contentAlignment = Alignment.Center,
       ) {
         Icon(

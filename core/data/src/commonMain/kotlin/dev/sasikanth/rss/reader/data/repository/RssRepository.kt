@@ -508,16 +508,18 @@ class RssRepository(
     }
   }
 
-  suspend fun updatePostReadStatus(read: Boolean, id: String) {
+  suspend fun updatePostReadStatus(read: Boolean, id: String, recordHistory: Boolean = true) {
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
         val now = Clock.System.now()
         postQueries.updateReadStatus(read = if (read) 1L else 0L, id = id, updatedAt = now)
 
-        if (read) {
-          readingHistoryQueries.insertReadingHistoryForPosts(readAt = now, postIds = listOf(id))
-        } else {
-          readingHistoryQueries.deleteReadingHistory(postId = id)
+        if (recordHistory) {
+          if (read) {
+            readingHistoryQueries.insertReadingHistoryForPosts(readAt = now, postIds = listOf(id))
+          } else {
+            readingHistoryQueries.deleteReadingHistory(postId = id)
+          }
         }
       }
     }
@@ -891,7 +893,11 @@ class RssRepository(
     updatePostReadStatus(postIds, read = true)
   }
 
-  suspend fun updatePostReadStatus(postIds: Set<String>, read: Boolean) {
+  suspend fun updatePostReadStatus(
+    postIds: Set<String>,
+    read: Boolean,
+    recordHistory: Boolean = true,
+  ) {
     val postIdsSnapshot = postIds.toList()
     val now = Clock.System.now()
     withContext(dispatchersProvider.databaseWrite) {
@@ -903,10 +909,12 @@ class RssRepository(
             ids = chunk,
           )
 
-          if (read) {
-            readingHistoryQueries.insertReadingHistoryForPosts(readAt = now, postIds = chunk)
-          } else {
-            readingHistoryQueries.deleteReadingHistoryForPosts(postIds = chunk)
+          if (recordHistory) {
+            if (read) {
+              readingHistoryQueries.insertReadingHistoryForPosts(readAt = now, postIds = chunk)
+            } else {
+              readingHistoryQueries.deleteReadingHistoryForPosts(postIds = chunk)
+            }
           }
         }
       }

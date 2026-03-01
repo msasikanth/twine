@@ -72,6 +72,7 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.VisibilityOff
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
@@ -250,15 +251,13 @@ internal fun PostSourcePill(
         AppTheme.colorScheme.onSurfaceVariant
       }
 
+    val translucentStyle = LocalTranslucentStyles.current
     Row(
       modifier =
-        Modifier.background(
-            MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
-            RoundedCornerShape(50),
-          )
+        Modifier.background(translucentStyle.default.background, RoundedCornerShape(50))
           .border(
             1.dp,
-            MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
+            translucentStyle.default.outline,
             androidx.compose.foundation.shape.RoundedCornerShape(50),
           )
           .clip(androidx.compose.foundation.shape.RoundedCornerShape(50))

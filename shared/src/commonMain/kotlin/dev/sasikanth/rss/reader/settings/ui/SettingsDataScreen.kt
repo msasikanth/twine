@@ -62,6 +62,7 @@ import dev.sasikanth.rss.reader.core.model.local.FeedReadCount
 import dev.sasikanth.rss.reader.core.model.local.ReadingTrend
 import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.formatReadingTrendDate
 import kotlin.time.Clock
@@ -380,9 +381,9 @@ private fun FeedReadCountItem(
 
     Spacer(modifier = Modifier.width(16.dp))
 
+    val translucentStyle = LocalTranslucentStyles.current
     val badgeColor =
-      if (isFirstPlace) AppTheme.colorScheme.primary
-      else AppTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+      if (isFirstPlace) AppTheme.colorScheme.primary else translucentStyle.default.background
     val badgeContentColor =
       if (isFirstPlace) AppTheme.colorScheme.onPrimary else AppTheme.colorScheme.onSurface
 

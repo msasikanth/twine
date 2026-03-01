@@ -46,10 +46,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationEventHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import androidx.window.core.layout.WindowSizeClass
+import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.resources.icons.Home
@@ -77,7 +85,21 @@ internal fun MainScreen(
   val sizeClass = LocalWindowSizeClass.current
   val drawerState = rememberDrawerState(DrawerValue.Closed)
   val scope = rememberCoroutineScope()
-  var selectedDestination by rememberSaveable { mutableStateOf(MainDestination.Home) }
+
+  val navController = rememberNavController()
+  val navBackStackEntry by navController.currentBackStackEntryAsState()
+  val currentDestination = navBackStackEntry?.destination
+
+  val selectedDestination =
+    when {
+      currentDestination?.hasRoute(Screen.MainHome::class) == true -> MainDestination.Home
+      currentDestination?.hasRoute(Screen.MainSearch::class) == true -> MainDestination.Search
+      currentDestination?.hasRoute(Screen.MainBookmarks::class) == true -> MainDestination.Bookmarks
+      currentDestination?.hasRoute(Screen.MainSettings::class) == true -> MainDestination.Settings
+      currentDestination?.hasRoute(Screen.MainDiscovery::class) == true -> MainDestination.Discovery
+      else -> MainDestination.Home
+    }
+
   var isSideNavigationExpanded by rememberSaveable {
     mutableStateOf(sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND))
   }
@@ -101,7 +123,7 @@ internal fun MainScreen(
         isSideNavigationExpanded = false
       }
       else -> {
-        selectedDestination = MainDestination.Home
+        navController.popBackStack<Screen.MainHome>(inclusive = false)
       }
     }
   }
@@ -141,7 +163,11 @@ internal fun MainScreen(
     Unit
   }
 
-  val goBackToHome = { selectedDestination = MainDestination.Home }
+  val goBackToHome = {
+    if (selectedDestination != MainDestination.Home) {
+      navController.popBackStack<Screen.MainHome>(inclusive = false)
+    }
+  }
 
   val drawerContent =
     @Composable { isExpanded: Boolean ->
@@ -157,7 +183,20 @@ internal fun MainScreen(
           if (it == MainDestination.Home && selectedDestination == MainDestination.Home) {
             feedsViewModel.dispatch(FeedsEvent.OnHomeSelected)
           } else {
-            selectedDestination = it
+            val route =
+              when (it) {
+                MainDestination.Home -> Screen.MainHome
+                MainDestination.Search -> Screen.MainSearch
+                MainDestination.Bookmarks -> Screen.MainBookmarks
+                MainDestination.Settings -> Screen.MainSettings
+                MainDestination.Discovery -> Screen.MainDiscovery
+              }
+
+            navController.navigate(route) {
+              popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+              launchSingleTop = true
+              restoreState = true
+            }
           }
 
           if (drawerState.isOpen) {
@@ -200,7 +239,7 @@ internal fun MainScreen(
         },
       ) {
         MainScreenContent(
-          selectedDestination = selectedDestination,
+          navController = navController,
           homeContent = { homeContent(openDrawer) },
           searchContent = { searchContent(goBackToHome) },
           bookmarksContent = { bookmarksContent(goBackToHome) },
@@ -211,10 +250,7 @@ internal fun MainScreen(
     }
     sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> {
       Row(modifier = modifier.fillMaxSize()) {
-        val sideNavigationWidth by
-          androidx.compose.animation.core.animateDpAsState(
-            if (isSideNavigationExpanded) 360.dp else 80.dp
-          )
+        val sideNavigationWidth by animateDpAsState(if (isSideNavigationExpanded) 360.dp else 80.dp)
 
         Box(modifier = Modifier.requiredWidth(sideNavigationWidth)) {
           drawerContent(isSideNavigationExpanded)
@@ -222,7 +258,7 @@ internal fun MainScreen(
 
         Box(modifier = Modifier.weight(1f)) {
           MainScreenContent(
-            selectedDestination = selectedDestination,
+            navController = navController,
             homeContent = { homeContent(openDrawer) },
             searchContent = { searchContent(goBackToHome) },
             bookmarksContent = { bookmarksContent(goBackToHome) },
@@ -250,7 +286,7 @@ internal fun MainScreen(
         },
       ) {
         MainScreenContent(
-          selectedDestination = selectedDestination,
+          navController = navController,
           homeContent = { homeContent(openDrawer) },
           searchContent = { searchContent(goBackToHome) },
           bookmarksContent = { bookmarksContent(goBackToHome) },
@@ -264,18 +300,18 @@ internal fun MainScreen(
 
 @Composable
 private fun MainScreenContent(
-  selectedDestination: MainDestination,
+  navController: NavHostController,
   homeContent: @Composable () -> Unit,
   searchContent: @Composable () -> Unit,
   bookmarksContent: @Composable () -> Unit,
   settingsContent: @Composable () -> Unit,
   discoveryContent: @Composable () -> Unit,
 ) {
-  when (selectedDestination) {
-    MainDestination.Home -> homeContent()
-    MainDestination.Search -> searchContent()
-    MainDestination.Bookmarks -> bookmarksContent()
-    MainDestination.Settings -> settingsContent()
-    MainDestination.Discovery -> discoveryContent()
+  NavHost(navController = navController, startDestination = Screen.MainHome) {
+    composable<Screen.MainHome> { homeContent() }
+    composable<Screen.MainSearch> { searchContent() }
+    composable<Screen.MainBookmarks> { bookmarksContent() }
+    composable<Screen.MainSettings> { settingsContent() }
+    composable<Screen.MainDiscovery> { discoveryContent() }
   }
 }

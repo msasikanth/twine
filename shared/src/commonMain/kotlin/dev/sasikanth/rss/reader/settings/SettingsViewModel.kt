@@ -39,6 +39,7 @@ import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.UserRepository
 import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
+import dev.sasikanth.rss.reader.data.sync.SyncState
 import dev.sasikanth.rss.reader.data.sync.auth.OAuthManager
 import dev.sasikanth.rss.reader.notifications.Notifier
 import dev.sasikanth.rss.reader.utils.Constants
@@ -138,13 +139,6 @@ class SettingsViewModel(
           enableNotifications = group4.enableNotifications,
           downloadFullContent = group3.downloadFullContent,
           lastSyncedAt = group4.lastSyncedAt,
-          lastSyncStatus =
-            when (group4.user?.lastSyncStatus) {
-              "SUCCESS" -> SettingsState.SyncProgress.Success
-              "FAILURE" -> SettingsState.SyncProgress.Failure
-              "SYNCING" -> SettingsState.SyncProgress.Syncing
-              else -> SettingsState.SyncProgress.Idle
-            },
           hasCloudServiceSignedIn = group4.user != null,
           signedInService = group4.user?.serviceType,
           appIcon = combinedGroup.appIcon,
@@ -173,12 +167,22 @@ class SettingsViewModel(
             hasCloudServiceSignedIn = settings.hasCloudServiceSignedIn,
             signedInService = settings.signedInService,
             appIcon = settings.appIcon,
+          )
+        }
+      }
+      .launchIn(viewModelScope)
+
+    syncCoordinator.syncState
+      .onEach { syncState ->
+        _state.update {
+          it.copy(
             syncProgress =
-              if (it.syncProgress == SettingsState.SyncProgress.Syncing) {
-                SettingsState.SyncProgress.Syncing
-              } else {
-                settings.lastSyncStatus
-              },
+              when (syncState) {
+                SyncState.Idle -> SettingsState.SyncProgress.Idle
+                is SyncState.InProgress -> SettingsState.SyncProgress.Syncing
+                SyncState.Complete -> SettingsState.SyncProgress.Success
+                is SyncState.Error -> SettingsState.SyncProgress.Failure
+              }
           )
         }
       }
@@ -277,16 +281,7 @@ class SettingsViewModel(
   }
 
   private fun triggerSync() {
-    viewModelScope.launch {
-      _state.update { it.copy(syncProgress = SettingsState.SyncProgress.Syncing) }
-      val result = syncCoordinator.pull()
-      _state.update {
-        it.copy(
-          syncProgress =
-            if (result) SettingsState.SyncProgress.Success else SettingsState.SyncProgress.Failure
-        )
-      }
-    }
+    viewModelScope.launch { syncCoordinator.pull() }
   }
 
   private fun signOutClicked() {
@@ -296,7 +291,6 @@ class SettingsViewModel(
           it.signOut()
         }
       }
-      _state.update { it.copy(syncProgress = SettingsState.SyncProgress.Idle) }
     }
   }
 
@@ -456,7 +450,6 @@ private data class Settings(
   val enableNotifications: Boolean,
   val downloadFullContent: Boolean,
   val lastSyncedAt: Instant?,
-  val lastSyncStatus: SettingsState.SyncProgress,
   val hasCloudServiceSignedIn: Boolean,
   val signedInService: dev.sasikanth.rss.reader.core.model.local.ServiceType?,
   val appIcon: AppIcon,

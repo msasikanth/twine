@@ -87,8 +87,6 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.ContextActionItem
 import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
-import dev.sasikanth.rss.reader.components.FilledIconButton
-import dev.sasikanth.rss.reader.components.IconButtonSize
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -104,7 +102,6 @@ import dev.sasikanth.rss.reader.feeds.ui.common.AllFeedsHeader
 import dev.sasikanth.rss.reader.feeds.ui.common.allSources
 import dev.sasikanth.rss.reader.feeds.ui.common.pinnedSources
 import dev.sasikanth.rss.reader.feeds.ui.common.sourcesSearchResults
-import dev.sasikanth.rss.reader.resources.icons.Add
 import dev.sasikanth.rss.reader.resources.icons.Close
 import dev.sasikanth.rss.reader.resources.icons.Delete
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
@@ -122,7 +119,6 @@ import twine.shared.generated.resources.actionDelete
 import twine.shared.generated.resources.actionGroupsTooltip
 import twine.shared.generated.resources.actionPin
 import twine.shared.generated.resources.actionUnpin
-import twine.shared.generated.resources.buttonAddFeed
 import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.edit
 import twine.shared.generated.resources.feedsLetsStart
@@ -241,6 +237,7 @@ private fun ExpandedDrawerContent(
 
       val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
       val lazyListState = rememberLazyListState()
+      val translucentStyle = LocalTranslucentStyles.current
 
       LazyColumn(
         modifier =
@@ -277,7 +274,7 @@ private fun ExpandedDrawerContent(
           val backgroundColor by
             animateColorAsState(
               if (selected) {
-                AppTheme.colorScheme.primaryContainer
+                translucentStyle.default.background
               } else {
                 Color.Transparent
               }
@@ -324,10 +321,10 @@ private fun ExpandedDrawerContent(
             shape = navigationItemShape,
             colors =
               NavigationDrawerItemDefaults.colors(
-                selectedIconColor = AppTheme.colorScheme.primary,
-                unselectedIconColor = AppTheme.colorScheme.onSurfaceVariant,
-                selectedTextColor = AppTheme.colorScheme.primary,
-                unselectedTextColor = AppTheme.colorScheme.onSurfaceVariant,
+                selectedIconColor = AppTheme.colorScheme.onSurface,
+                unselectedIconColor = AppTheme.colorScheme.onSurface,
+                selectedTextColor = AppTheme.colorScheme.onSurface,
+                unselectedTextColor = AppTheme.colorScheme.onSurface,
                 selectedContainerColor = Color.Transparent,
                 unselectedContainerColor = Color.Transparent,
               ),
@@ -361,9 +358,7 @@ private fun ExpandedDrawerContent(
         }
 
         if (state.numberOfFeeds == 0 && state.numberOfFeedGroups == 0 && !isInSearchMode) {
-          item {
-            NoFeeds(onAddNewFeedClick = { feedsViewModel.dispatch(FeedsEvent.OnNewFeedClicked) })
-          }
+          item { NoFeeds() }
         } else {
           if (isInSearchMode) {
             sourcesSearchResults(
@@ -838,26 +833,15 @@ private fun SearchBar(
 }
 
 @Composable
-private fun NoFeeds(onAddNewFeedClick: () -> Unit) {
+private fun NoFeeds() {
   Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
       Text(
-        modifier = Modifier.padding(horizontal = 32.dp),
+        modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp),
         text = stringResource(Res.string.feedsLetsStart),
         style = MaterialTheme.typography.labelLarge,
         color = AppTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
-      )
-
-      Spacer(Modifier.requiredHeight(48.dp))
-
-      FilledIconButton(
-        icon = TwineIcons.Add,
-        contentDescription = stringResource(Res.string.buttonAddFeed),
-        containerColor = AppTheme.colorScheme.inverseSurface,
-        iconTint = AppTheme.colorScheme.inverseOnSurface,
-        size = IconButtonSize.Large,
-        onClick = onAddNewFeedClick,
       )
     }
   }

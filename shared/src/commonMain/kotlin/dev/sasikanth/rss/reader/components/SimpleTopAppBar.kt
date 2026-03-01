@@ -27,10 +27,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -44,6 +44,7 @@ fun SimpleTopAppBar(
   title: String,
   onBackClick: () -> Unit,
   modifier: Modifier = Modifier,
+  behavior: TopAppBarScrollBehavior? = null,
   actions: @Composable RowScope.() -> Unit = {},
 ) {
   Box(modifier = modifier) {
@@ -54,7 +55,6 @@ fun SimpleTopAppBar(
           text = title,
           color = AppTheme.colorScheme.onSurface,
           style = MaterialTheme.typography.titleLarge,
-          fontWeight = FontWeight.SemiBold,
         )
       },
       navigationIcon = {
@@ -67,9 +67,11 @@ fun SimpleTopAppBar(
       },
       actions = actions,
       contentPadding = PaddingValues(vertical = 8.dp),
+      scrollBehavior = behavior,
       colors =
         TopAppBarDefaults.topAppBarColors(
           containerColor = AppTheme.colorScheme.backdrop,
+          scrolledContainerColor = AppTheme.colorScheme.backdrop,
           navigationIconContentColor = AppTheme.colorScheme.onSurface,
           titleContentColor = AppTheme.colorScheme.onSurface,
           actionIconContentColor = AppTheme.colorScheme.onSurface,

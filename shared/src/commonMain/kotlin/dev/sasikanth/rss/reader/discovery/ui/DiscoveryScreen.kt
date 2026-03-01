@@ -37,9 +37,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -61,13 +61,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.CircularIconButton
+import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.TextField
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.DiscoveryFeed
 import dev.sasikanth.rss.reader.core.model.DiscoveryGroup
 import dev.sasikanth.rss.reader.discovery.DiscoveryEvent
 import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
-import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Check
 import dev.sasikanth.rss.reader.resources.icons.Close
 import dev.sasikanth.rss.reader.resources.icons.Refresh
@@ -76,7 +76,6 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonChange
-import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.discoveryAddFeed
 import twine.shared.generated.resources.discoveryAdded
 import twine.shared.generated.resources.discoveryRefresh
@@ -98,69 +97,44 @@ fun DiscoveryScreen(
   Scaffold(
     modifier = modifier,
     topBar = {
-      Column(modifier = Modifier.background(AppTheme.colorScheme.surface)) {
-        CenterAlignedTopAppBar(
-          navigationIcon = {
-            if (!showDoneButton) {
-              CircularIconButton(
-                modifier = Modifier.padding(start = 12.dp),
-                icon = TwineIcons.ArrowBack,
-                label = stringResource(Res.string.buttonGoBack),
-                onClick = goBack,
-              )
-            }
-          },
-          title = {
-            Text(
-              text = stringResource(Res.string.discoveryTitle),
-              style = MaterialTheme.typography.titleMedium,
-              color = AppTheme.colorScheme.onSurface,
-            )
-          },
-          actions = {
-            val refreshButtonPaddingEnd = if (showDoneButton) 0.dp else 12.dp
+      Column {
+        SimpleTopAppBar(
+          title = stringResource(Res.string.discoveryTitle),
+          behavior = appBarBehavior,
+          onBackClick = goBack,
+        ) {
+          val refreshButtonPaddingEnd = if (showDoneButton) 0.dp else 12.dp
+          CircularIconButton(
+            modifier = Modifier.padding(end = refreshButtonPaddingEnd),
+            icon = TwineIcons.Refresh,
+            label = stringResource(Res.string.discoveryRefresh),
+            onClick = { viewModel.dispatch(DiscoveryEvent.Refresh) },
+          )
+
+          if (showDoneButton) {
+            Spacer(Modifier.width(8.dp))
+
             CircularIconButton(
-              modifier = Modifier.padding(end = refreshButtonPaddingEnd),
-              icon = TwineIcons.Refresh,
-              label = stringResource(Res.string.discoveryRefresh),
-              onClick = { viewModel.dispatch(DiscoveryEvent.Refresh) },
+              modifier = Modifier.padding(end = 12.dp),
+              icon = TwineIcons.Check,
+              label = stringResource(Res.string.buttonChange),
+              onClick = onDone,
             )
-
-            if (showDoneButton) {
-              Spacer(Modifier.width(8.dp))
-
-              CircularIconButton(
-                modifier = Modifier.padding(end = 12.dp),
-                icon = TwineIcons.Check,
-                label = stringResource(Res.string.buttonChange),
-                onClick = onDone,
-              )
-            }
-          },
-          contentPadding = PaddingValues(top = 8.dp, bottom = 4.dp),
-          scrollBehavior = appBarBehavior,
-          colors =
-            TopAppBarDefaults.topAppBarColors(
-              containerColor = AppTheme.colorScheme.surface,
-              navigationIconContentColor = AppTheme.colorScheme.onSurface,
-              titleContentColor = AppTheme.colorScheme.onSurface,
-              actionIconContentColor = AppTheme.colorScheme.onSurface,
-              scrolledContainerColor = AppTheme.colorScheme.surface,
-            ),
-        )
+          }
+        }
 
         TextField(
           modifier =
             Modifier.fillMaxWidth()
-              .padding(horizontal = 16.dp)
-              .padding(top = 4.dp, bottom = 12.dp)
+              .background(AppTheme.colorScheme.backdrop)
+              .padding(16.dp)
               .focusRequester(focusRequester),
           value = state.searchQuery,
           onValueChange = { viewModel.dispatch(DiscoveryEvent.SearchQueryChanged(it)) },
           hint = stringResource(Res.string.discoverySearchHint),
           trailingIcon = {
             if (state.searchQuery.text.isNotBlank()) {
-              androidx.compose.material3.IconButton(
+              IconButton(
                 onClick = {
                   viewModel.dispatch(DiscoveryEvent.SearchQueryChanged(TextFieldValue()))
                 }

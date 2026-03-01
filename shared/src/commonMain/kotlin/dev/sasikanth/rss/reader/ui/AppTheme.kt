@@ -66,20 +66,19 @@ internal fun AppTheme(
 
       SideEffect { colorScheme.updateFrom(sourceColorValues, amoled = useDarkTheme && useAmoled) }
 
-      val secondary = colorScheme.secondary
       val onSurface = colorScheme.onSurface
       val localTranslucentStyles =
         TranslucentStyles(
           default =
             TranslucentStyle(
-              background = secondary.copy(alpha = 0.08f),
-              outline = secondary.copy(alpha = 0.16f),
+              background = onSurface.copy(alpha = 0.08f),
+              outline = onSurface.copy(alpha = 0.16f),
               foreground = onSurface,
             ),
           prominent =
             TranslucentStyle(
-              background = secondary.copy(alpha = 0.16f),
-              outline = secondary.copy(alpha = 0.16f),
+              background = onSurface.copy(alpha = 0.16f),
+              outline = onSurface.copy(alpha = 0.16f),
               foreground = onSurface,
             ),
         )

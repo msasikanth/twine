@@ -22,14 +22,12 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -40,12 +38,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -57,10 +53,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -71,6 +70,7 @@ import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.components.ToggleableButtonGroup
 import dev.sasikanth.rss.reader.components.ToggleableButtonItem
+import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
@@ -85,7 +85,6 @@ import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.items.AppIconSelectionSheet
 import dev.sasikanth.rss.reader.settings.ui.items.AppIconSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.ThemeVariantSettingItem
-import dev.sasikanth.rss.reader.settings.ui.items.TwinePremiumBanner
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import kotlinx.datetime.LocalDate
@@ -173,26 +172,6 @@ internal fun SettingsAppearanceScreen(
             bottom = padding.calculateBottomPadding() + 80.dp,
           ),
       ) {
-        // region Twine Premium banner
-        item {
-          AnimatedVisibility(
-            visible = !state.appInfo.isFoss && state.subscriptionResult != null,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically(),
-          ) {
-            Column {
-              TwinePremiumBanner(
-                modifier = Modifier.animateItem(),
-                subscriptionResult = state.subscriptionResult,
-                onClick = { openPaywall() },
-              )
-
-              SettingsDivider()
-            }
-          }
-        }
-        // endregion
-
         item { SubHeader(text = stringResource(Res.string.settingsHeaderTheme)) }
 
         item {
@@ -327,43 +306,35 @@ private fun ThemeModeSelector(
   appThemeMode: AppThemeMode,
   onAppThemeModeChanged: (AppThemeMode) -> Unit,
 ) {
+  val density = LocalDensity.current
   var showDropdown by remember { mutableStateOf(false) }
+  var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
 
   Box {
-    Row(
+    TranslucentButton(
       modifier =
-        Modifier.height(40.dp)
-          .clip(CircleShape)
-          .background(AppTheme.colorScheme.inverseSurface)
-          .clickable { showDropdown = true }
-          .padding(horizontal = 16.dp, vertical = 8.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Text(
-        modifier = Modifier.padding(start = 4.dp),
-        text = appThemeMode.displayName(),
-        style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.inverseOnSurface,
-      )
-
-      Spacer(Modifier.width(8.dp))
-
-      Icon(
-        imageVector = TwineIcons.ArrowDown,
-        contentDescription = null,
-        tint = AppTheme.colorScheme.inverseOnSurface,
-        modifier = Modifier.requiredSize(20.dp),
-      )
-    }
+        Modifier.onGloballyPositioned { coordinates ->
+          buttonHeight = with(density) { coordinates.size.height.toDp() }
+        },
+      text = appThemeMode.displayName(),
+      trailingIcon = TwineIcons.ArrowDown,
+      onClick = { showDropdown = true },
+    )
 
     DropdownMenu(
+      offset = DpOffset(0.dp, buttonHeight.unaryMinus()),
       expanded = showDropdown,
       onDismissRequest = { showDropdown = false },
-      modifier = Modifier.width(IntrinsicSize.Min),
+      modifier = Modifier.widthIn(min = 96.dp),
     ) {
       AppThemeMode.entries.forEach { mode ->
         DropdownMenuItem(
-          text = { Text(mode.displayName()) },
+          text = {
+            val textColor =
+              if (mode == appThemeMode) AppTheme.colorScheme.primary
+              else AppTheme.colorScheme.onSurface
+            Text(mode.displayName(), color = textColor)
+          },
           onClick = {
             onAppThemeModeChanged(mode)
             showDropdown = false

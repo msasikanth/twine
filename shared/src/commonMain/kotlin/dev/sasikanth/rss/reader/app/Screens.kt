@@ -82,5 +82,15 @@ sealed interface Screen {
 
   @Serializable data class ImageViewer(val imageUrl: String) : Screen
 
-  data object None : Screen
+  @Serializable data object None : Screen
+
+  @Serializable data object MainHome : Screen
+
+  @Serializable data object MainSearch : Screen
+
+  @Serializable data object MainBookmarks : Screen
+
+  @Serializable data object MainSettings : Screen
+
+  @Serializable data object MainDiscovery : Screen
 }
