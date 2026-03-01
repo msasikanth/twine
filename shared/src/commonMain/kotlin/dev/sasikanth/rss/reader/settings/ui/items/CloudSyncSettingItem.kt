@@ -19,29 +19,27 @@ package dev.sasikanth.rss.reader.settings.ui.items
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.sasikanth.rss.reader.components.CircularIconButton
+import dev.sasikanth.rss.reader.components.InverseButton
+import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.data.sync.APIServiceProvider
 import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
@@ -49,16 +47,20 @@ import dev.sasikanth.rss.reader.resources.icons.Dropbox
 import dev.sasikanth.rss.reader.resources.icons.Freshrss
 import dev.sasikanth.rss.reader.resources.icons.Miniflux
 import dev.sasikanth.rss.reader.resources.icons.StarShine
+import dev.sasikanth.rss.reader.resources.icons.Sync
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.settings.SettingsState
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.formatRelativeTime
 import kotlin.time.Instant
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.settingSyncLabel
 import twine.shared.generated.resources.settingsSyncDropbox
 import twine.shared.generated.resources.settingsSyncFreshRSS
 import twine.shared.generated.resources.settingsSyncMiniflux
+import twine.shared.generated.resources.settingsSyncSignIn
 import twine.shared.generated.resources.settingsSyncSignOut
 import twine.shared.generated.resources.settingsSyncStatusFailure
 import twine.shared.generated.resources.settingsSyncStatusIdle
@@ -69,7 +71,6 @@ import twine.shared.generated.resources.settingsSyncStatusSyncing
 internal fun CloudSyncSettingItem(
   syncProgress: SettingsState.SyncProgress,
   lastSyncedAt: Instant?,
-  hasCloudServiceSignedIn: Boolean,
   availableProviders: Set<CloudServiceProvider>,
   isSubscribed: Boolean,
   onSyncClicked: (CloudServiceProvider) -> Unit,
@@ -84,26 +85,16 @@ internal fun CloudSyncSettingItem(
         ServiceType.MINIFLUX -> stringResource(Res.string.settingsSyncMiniflux)
       }
     val isSignedIn by provider.isSignedIn().collectAsStateWithLifecycle(false)
-    val canInteract = !hasCloudServiceSignedIn || isSignedIn
-    val verticalPadding by animateDpAsState(if (isSignedIn) 12.dp else 4.dp)
+    val verticalPadding by animateDpAsState(if (isSignedIn) 16.dp else 12.dp)
+    val translucentStyle = LocalTranslucentStyles.current
 
     Box(
       modifier =
-        Modifier.clickable(enabled = canInteract) {
-            if (provider is APIServiceProvider && !isSignedIn) {
-              onAPIServiceClicked(provider)
-            } else {
-              onSyncClicked(provider)
-            }
-          }
-          .fillMaxWidth()
-          .padding(horizontal = 24.dp, vertical = verticalPadding)
-          .alpha(if (canInteract) 1f else 0.38f)
+        Modifier.fillMaxWidth()
+          .padding(vertical = verticalPadding)
+          .padding(start = 16.dp, end = 24.dp)
     ) {
-      Row(
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
+      Row(verticalAlignment = Alignment.CenterVertically) {
         val icon =
           when (provider.cloudService) {
             ServiceType.FRESH_RSS -> TwineIcons.Freshrss
@@ -111,9 +102,18 @@ internal fun CloudSyncSettingItem(
             ServiceType.DROPBOX -> TwineIcons.Dropbox
           }
 
-        Icon(imageVector = icon, contentDescription = null, tint = AppTheme.colorScheme.onSurface)
+        Box(modifier = Modifier.size(40.dp), contentAlignment = Alignment.Center) {
+          Icon(
+            modifier = Modifier.size(20.dp),
+            imageVector = icon,
+            contentDescription = null,
+            tint = AppTheme.colorScheme.onSurface,
+          )
+        }
 
-        Column(modifier = Modifier.weight(1f)) {
+        Spacer(Modifier.width(8.dp))
+
+        Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
           Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
               text = label,
@@ -132,6 +132,8 @@ internal fun CloudSyncSettingItem(
               )
             }
           }
+
+          Spacer(Modifier.height(4.dp))
 
           var statusString =
             when (syncProgress) {
@@ -166,19 +168,34 @@ internal fun CloudSyncSettingItem(
           }
         }
 
-        if (isSignedIn) {
-          val actionLabel = stringResource(Res.string.settingsSyncSignOut)
+        Spacer(Modifier.width(8.dp))
 
-          TextButton(enabled = canInteract, onClick = { onSignOutClicked() }) {
-            Text(
-              text = actionLabel,
-              style = MaterialTheme.typography.bodyMedium,
-              fontWeight = FontWeight.SemiBold,
-              color = AppTheme.colorScheme.primary,
-            )
-          }
+        if (isSignedIn) {
+          CircularIconButton(
+            icon = TwineIcons.Sync,
+            label = stringResource(Res.string.settingSyncLabel),
+            onClick = { onSyncClicked(provider) },
+          )
+
+          Spacer(modifier = Modifier.width(12.dp))
+        }
+
+        if (isSignedIn) {
+          TranslucentButton(
+            text = stringResource(Res.string.settingsSyncSignOut),
+            onClick = { onSignOutClicked() },
+          )
         } else {
-          Box(Modifier.minimumInteractiveComponentSize())
+          InverseButton(
+            text = stringResource(Res.string.settingsSyncSignIn),
+            onClick = {
+              if (provider is APIServiceProvider && !isSignedIn) {
+                onAPIServiceClicked(provider)
+              } else {
+                onSyncClicked(provider)
+              }
+            },
+          )
         }
       }
     }
