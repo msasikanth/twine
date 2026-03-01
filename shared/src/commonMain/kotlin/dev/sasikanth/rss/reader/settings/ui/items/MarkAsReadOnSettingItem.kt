@@ -20,7 +20,6 @@ package dev.sasikanth.rss.reader.settings.ui.items
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -83,7 +82,7 @@ internal fun MarkAsReadOnSettingItem(
             buttonHeight = with(density) { coordinates.size.height.toDp() }
           },
         text = markAsReadOnLabel,
-        icon = TwineIcons.ArrowDown,
+        trailingIcon = TwineIcons.ArrowDown,
         onClick = { showDropdown = true },
       )
 
