@@ -26,12 +26,27 @@ interface SyncCoordinator {
   suspend fun pull(): Boolean
 
   /**
+   * Triggers a sync from the remote source and updates the local database. This is a non-suspending
+   * call and the sync will happen in the background.
+   */
+  fun triggerPull() {}
+
+  /**
    * Fetches the latest posts for a list of specific feeds from the remote source and updates the
    * local database.
    *
    * @param feedIds A list of unique identifiers of the feeds to be updated.
    */
   suspend fun pull(feedIds: List<String>): Boolean
+
+  /**
+   * Triggers a fetch of the latest posts for a list of specific feeds from the remote source and
+   * updates the local database. This is a non-suspending call and the sync will happen in the
+   * background.
+   *
+   * @param feedIds A list of unique identifiers of the feeds to be updated.
+   */
+  fun triggerPull(feedIds: List<String>) {}
 
   /**
    * Fetches the latest posts for a specific feed from the remote source and updates the local
@@ -41,8 +56,22 @@ interface SyncCoordinator {
    */
   suspend fun pull(feedId: String): Boolean
 
+  /**
+   * Triggers a fetch of the latest posts for a specific feed from the remote source and updates the
+   * local database. This is a non-suspending call and the sync will happen in the background.
+   *
+   * @param feedId The unique identifier of the feed to be updated.
+   */
+  fun triggerPull(feedId: String) {}
+
   /** Pushes the local changes to the remote source. */
   suspend fun push(): Boolean
+
+  /**
+   * Triggers a push of local changes to the remote source. This is a non-suspending call and the
+   * push will happen in the background.
+   */
+  fun triggerPush() {}
 }
 
 sealed interface SyncState {
