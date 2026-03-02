@@ -8,19 +8,12 @@
  *     https://www.gnu.org/licenses/gpl-3.0.en.html
  *
  */
+package dev.sasikanth.rss.reader
 
-package dev.sasikanth.rss.reader.logging
+import android.app.Application
 
-actual object CrashReporter {
-  actual fun log(exception: Throwable) {
-    // no-op
-  }
-
-  actual fun setCustomValue(section: String, key: String, value: String?) {
-    // no-op
-  }
-
-  actual fun leaveBreadcrumb(message: String) {
+object BugsnagInitializer {
+  fun start(application: Application) {
     // no-op
   }
 }

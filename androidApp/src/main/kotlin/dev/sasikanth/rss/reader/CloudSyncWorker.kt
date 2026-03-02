@@ -23,9 +23,8 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
-import co.touchlab.crashkios.bugsnag.BugsnagKotlin
-import com.bugsnag.android.Bugsnag
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
+import dev.sasikanth.rss.reader.logging.CrashReporter
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
 
@@ -59,8 +58,8 @@ class CloudSyncWorker(
     } catch (e: CancellationException) {
       Result.failure()
     } catch (e: Exception) {
-      Bugsnag.leaveBreadcrumb("Background Worker")
-      BugsnagKotlin.sendFatalException(e)
+      CrashReporter.leaveBreadcrumb("Background Worker")
+      CrashReporter.log(e)
       Result.failure()
     }
   }

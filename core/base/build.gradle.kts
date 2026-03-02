@@ -21,6 +21,10 @@ plugins {
 }
 
 kotlin {
+  val isFoss =
+    project.findProperty("twine.isFoss")?.toString()?.toBoolean()
+      ?: gradle.startParameter.taskNames.any { it.contains("Foss", ignoreCase = true) }
+
   jvmToolchain(21)
 
   jvm()
@@ -48,11 +52,20 @@ kotlin {
 
     commonTest.dependencies { implementation(libs.kotlin.test) }
 
-    androidMain.dependencies {
-      implementation(libs.androidx.annotation)
-      api(libs.androidx.activity.compose)
-      api(libs.androidx.core)
-      implementation(libs.crashkios.bugsnag)
+    androidMain {
+      if (isFoss) {
+        kotlin.srcDir("src/androidFoss/kotlin")
+      } else {
+        kotlin.srcDir("src/androidFull/kotlin")
+      }
+      dependencies {
+        implementation(libs.androidx.annotation)
+        api(libs.androidx.activity.compose)
+        api(libs.androidx.core)
+        if (!isFoss) {
+          implementation(libs.crashkios.bugsnag)
+        }
+      }
     }
 
     iosMain.dependencies { implementation(libs.crashkios.bugsnag) }

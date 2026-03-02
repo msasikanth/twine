@@ -15,4 +15,6 @@ expect object CrashReporter {
   fun log(exception: Throwable)
 
   fun setCustomValue(section: String, key: String, value: String?)
+
+  fun leaveBreadcrumb(message: String)
 }

@@ -27,8 +27,6 @@ import androidx.work.ListenableWorker
 import androidx.work.WorkManager
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
-import co.touchlab.crashkios.bugsnag.enableBugsnag
-import com.bugsnag.android.Bugsnag
 import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.create
 import dev.sasikanth.rss.reader.media.AudioCacheProvider
@@ -94,10 +92,7 @@ class ReaderApplication : Application(), Configuration.Provider {
   override fun onCreate() {
     super.onCreate()
 
-    if (!BuildConfig.DEBUG) {
-      Bugsnag.start(this)
-      enableBugsnag()
-    }
+    BugsnagInitializer.start(this)
 
     enqueuePeriodicFeedsRefresh()
     enqueuePeriodicPostsCleanUp()
