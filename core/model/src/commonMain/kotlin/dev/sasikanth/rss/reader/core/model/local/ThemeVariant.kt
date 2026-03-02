@@ -26,6 +26,7 @@ enum class ThemeVariant(
   Solarized(isPremium = false),
   Forest(isPremium = false),
   Amber(isPremium = true),
+  Coral(isPremium = true),
   Raspberry(isPremium = true),
   Skyline(isPremium = true),
   Parchment(isPremium = true);

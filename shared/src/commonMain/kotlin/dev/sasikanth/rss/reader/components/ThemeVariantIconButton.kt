@@ -43,6 +43,7 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.amberColorScheme
+import dev.sasikanth.rss.reader.ui.coralColorScheme
 import dev.sasikanth.rss.reader.ui.forestColorScheme
 import dev.sasikanth.rss.reader.ui.parchmentColorScheme
 import dev.sasikanth.rss.reader.ui.raspberryColorScheme
@@ -70,6 +71,7 @@ fun ThemeVariantIconButton(
       ThemeVariant.Solarized -> solarizedColorScheme(isDark)
       ThemeVariant.Forest -> forestColorScheme(isDark)
       ThemeVariant.Amber -> amberColorScheme(isDark)
+      ThemeVariant.Coral -> coralColorScheme(isDark)
       ThemeVariant.Raspberry -> raspberryColorScheme(isDark)
       ThemeVariant.Skyline -> skylineColorScheme(isDark)
       ThemeVariant.Parchment -> parchmentColorScheme(isDark)
@@ -87,6 +89,7 @@ fun ThemeVariantIconButton(
 
       ThemeVariant.Forest,
       ThemeVariant.Amber,
+      ThemeVariant.Coral,
       ThemeVariant.Raspberry,
       ThemeVariant.Skyline -> {
         Pair(colorScheme.primary, colorScheme.onPrimary)
