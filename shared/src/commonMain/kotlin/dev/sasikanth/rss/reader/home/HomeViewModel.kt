@@ -447,12 +447,10 @@ class HomeViewModel(
   }
 
   private fun refreshContent() {
-    viewModelScope.launch {
-      when (val selectedSource = _state.value.activeSource) {
-        is FeedGroup -> syncCoordinator.pull(selectedSource.feedIds)
-        is Feed -> syncCoordinator.pull(selectedSource.id)
-        else -> syncCoordinator.pull()
-      }
+    when (val selectedSource = _state.value.activeSource) {
+      is FeedGroup -> syncCoordinator.triggerPull(selectedSource.feedIds)
+      is Feed -> syncCoordinator.triggerPull(selectedSource.id)
+      else -> syncCoordinator.triggerPull()
     }
   }
 }
