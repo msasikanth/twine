@@ -68,6 +68,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val discoveryFeedsCacheKey = stringPreferencesKey("discovery_feeds_cache")
   private val showPinnedSourcesKey = booleanPreferencesKey("show_pinned_sources")
   private val showFeaturedSectionKey = booleanPreferencesKey("show_featured_section")
+  private val lastSeenChangelogVersionKey = stringPreferencesKey("last_seen_changelog_version")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -171,6 +172,9 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
       val cache = preferences[discoveryFeedsCacheKey]
       lastFetchTime to cache
     }
+
+  val lastSeenChangelogVersion: Flow<String?> =
+    dataStore.data.map { preferences -> preferences[lastSeenChangelogVersionKey] }
 
   suspend fun enableAutoSyncImmediate(): Boolean {
     return enableAutoSync.first()
@@ -298,6 +302,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
       preferences[discoveryFeedsCacheKey] = cache
       preferences[discoveryFeedsLastFetchTimeKey] = lastFetchTime.toEpochMilliseconds()
     }
+  }
+
+  suspend fun updateLastSeenChangelogVersion(versionName: String) {
+    dataStore.edit { preferences -> preferences[lastSeenChangelogVersionKey] = versionName }
   }
 
   suspend fun clear() {
