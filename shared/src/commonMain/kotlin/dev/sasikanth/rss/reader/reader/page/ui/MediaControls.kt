@@ -57,7 +57,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -82,6 +81,8 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.Morph
+import com.mikepenz.markdown.compose.components.CurrentComponentsBridge.text
+import dev.sasikanth.rss.reader.components.IconButton
 import dev.sasikanth.rss.reader.media.PlaybackState
 import dev.sasikanth.rss.reader.media.SleepTimerOption
 import dev.sasikanth.rss.reader.resources.icons.Forward30
@@ -252,17 +253,13 @@ internal fun MediaControls(
             ),
       ) {
         IconButton(
+          icon = TwineIcons.Replay30,
+          contentDescription = stringResource(Res.string.seek_backward),
           onClick = {
             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
             onSeekBackward()
-          }
-        ) {
-          Icon(
-            imageVector = TwineIcons.Replay30,
-            contentDescription = stringResource(Res.string.seek_backward),
-            tint = AppTheme.colorScheme.onSurfaceVariant,
-          )
-        }
+          },
+        )
       }
 
       val progress by animateFloatAsState(if (isPlaying) 1f else 0f)
@@ -353,17 +350,13 @@ internal fun MediaControls(
             ),
       ) {
         IconButton(
+          icon = TwineIcons.Forward30,
+          contentDescription = stringResource(Res.string.seek_forward),
           onClick = {
             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
             onSeekForward()
-          }
-        ) {
-          Icon(
-            imageVector = TwineIcons.Forward30,
-            contentDescription = stringResource(Res.string.seek_forward),
-            tint = AppTheme.colorScheme.onSurfaceVariant,
-          )
-        }
+          },
+        )
       }
 
       AnimatedVisibility(
@@ -383,28 +376,24 @@ internal fun MediaControls(
               clip = false,
             ),
       ) {
+        val sleepTimerRemaining = playbackState.sleepTimerRemaining
+        val text =
+          if (sleepTimerRemaining != null && sleepTimerRemaining > 0) {
+            formatDuration(sleepTimerRemaining)
+          } else if (sleepTimerRemaining == -1L) {
+            stringResource(Res.string.sleep_timer_end_of_track)
+          } else {
+            stringResource(Res.string.sleep_timer)
+          }
+
         IconButton(
+          icon = TwineIcons.Timer,
+          contentDescription = text,
           onClick = {
             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
             onSleepTimerClick()
-          }
-        ) {
-          val sleepTimerRemaining = playbackState.sleepTimerRemaining
-          val text =
-            if (sleepTimerRemaining != null && sleepTimerRemaining > 0) {
-              formatDuration(sleepTimerRemaining)
-            } else if (sleepTimerRemaining == -1L) {
-              stringResource(Res.string.sleep_timer_end_of_track)
-            } else {
-              stringResource(Res.string.sleep_timer)
-            }
-
-          Icon(
-            imageVector = TwineIcons.Timer,
-            contentDescription = text,
-            tint = AppTheme.colorScheme.onSurfaceVariant,
-          )
-        }
+          },
+        )
       }
     }
   }

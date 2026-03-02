@@ -40,11 +40,8 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -68,8 +65,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.sasikanth.rss.reader.components.IconButton
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.core.model.local.BlockedWord
+import dev.sasikanth.rss.reader.resources.icons.Check
 import dev.sasikanth.rss.reader.resources.icons.DeleteOutline
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -168,19 +167,15 @@ fun BlockedWordsScreen(
               exit = fadeOut() + shrinkHorizontally(shrinkTowards = Alignment.Start),
             ) {
               IconButton(
+                icon = TwineIcons.Check,
+                contentDescription = stringResource(Res.string.buttonAdd),
                 onClick = {
                   viewModel.dispatch(
                     BlockedWordsEvent.AddBlockedWord(newBlockedWord.text.toString())
                   )
                   newBlockedWord.clearText()
-                }
-              ) {
-                Icon(
-                  imageVector = Icons.Rounded.Check,
-                  contentDescription = stringResource(Res.string.buttonAdd),
-                  tint = AppTheme.colorScheme.primary,
-                )
-              }
+                },
+              )
             }
           },
         )
@@ -293,12 +288,10 @@ private fun BlockedWordItem(
       color = AppTheme.colorScheme.onSurface,
     )
 
-    IconButton(onClick = removeClicked) {
-      Icon(
-        imageVector = TwineIcons.DeleteOutline,
-        contentDescription = stringResource(Res.string.delete),
-        tint = AppTheme.colorScheme.onSurface,
-      )
-    }
+    IconButton(
+      icon = TwineIcons.DeleteOutline,
+      contentDescription = stringResource(Res.string.delete),
+      onClick = removeClicked,
+    )
   }
 }

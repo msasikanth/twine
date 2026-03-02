@@ -93,6 +93,7 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
+import dev.sasikanth.rss.reader.components.IconButton
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.components.image.FeedIcon
@@ -687,7 +688,5 @@ private fun SortDropdownMenu(
 
 @Composable
 private fun ClearSearchQueryButton(onClearClick: () -> Unit) {
-  IconButton(onClick = onClearClick) {
-    Icon(TwineIcons.Close, contentDescription = null, tint = AppTheme.colorScheme.onSurface)
-  }
+  IconButton(icon = TwineIcons.Close, contentDescription = null, onClick = onClearClick)
 }
