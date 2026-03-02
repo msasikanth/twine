@@ -266,14 +266,12 @@ internal fun SettingsAppearanceScreen(
           )
         }
 
-        if (state.canSubscribe) {
-          item {
-            AppIconSettingItem(
-              appIcon = state.appIcon,
-              isSubscribed = state.isSubscribed,
-              onClick = { viewModel.dispatch(SettingsEvent.AppIconClicked) },
-            )
-          }
+        item {
+          AppIconSettingItem(
+            appIcon = state.appIcon,
+            isSubscribed = state.isSubscribed,
+            onClick = { viewModel.dispatch(SettingsEvent.AppIconClicked) },
+          )
         }
       }
     },
