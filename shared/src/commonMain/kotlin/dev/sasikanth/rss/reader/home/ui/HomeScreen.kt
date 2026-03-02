@@ -533,7 +533,7 @@ private fun PullToRefreshContent(
           modifier =
             Modifier.align(Alignment.TopCenter).padding(top = paddingValues.calculateTopPadding()),
           isRefreshing = state.isSyncing,
-          containerColor = AppTheme.colorScheme.primaryContainer,
+          containerColor = AppTheme.colorScheme.surfaceContainerHigh,
           color = AppTheme.colorScheme.primary,
           state = pullToRefreshState,
         )
