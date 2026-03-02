@@ -19,24 +19,18 @@ package dev.sasikanth.rss.reader.feeds.ui.pinned
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Badge
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.UnreadBadge
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.Constants.BADGE_COUNT_TRIM_LIMIT
 
 @Composable
 internal fun PinnedFeedItem(
@@ -78,34 +72,7 @@ internal fun PinnedFeedItem(
     )
 
     if (!isDragging && badgeCount > 0 && canShowUnreadPostsCount) {
-      UnreadCountBadge(badgeCount)
+      UnreadBadge(badgeCount, modifier = Modifier.align(Alignment.TopEnd))
     }
-  }
-}
-
-@Composable
-internal fun BoxScope.UnreadCountBadge(badgeCount: Long, modifier: Modifier = Modifier) {
-  Badge(
-    containerColor = AppTheme.colorScheme.onSurface,
-    contentColor = AppTheme.colorScheme.surface,
-    modifier =
-      modifier
-        .sizeIn(minWidth = 31.dp, minHeight = 24.dp)
-        .align(Alignment.TopEnd)
-        .border(2.dp, AppTheme.colorScheme.bottomSheet, RoundedCornerShape(50))
-        .padding(1.dp),
-  ) {
-    val badgeText =
-      if (badgeCount > BADGE_COUNT_TRIM_LIMIT) {
-        "+$BADGE_COUNT_TRIM_LIMIT"
-      } else {
-        badgeCount.toString()
-      }
-
-    Text(
-      text = badgeText,
-      style = MaterialTheme.typography.labelMedium,
-      modifier = Modifier.align(Alignment.CenterVertically),
-    )
   }
 }
