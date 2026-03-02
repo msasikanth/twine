@@ -33,6 +33,7 @@ import coil3.fetch.SourceFetchResult
 import coil3.getExtra
 import coil3.network.CacheStrategy
 import coil3.network.ConnectivityChecker
+import coil3.network.DeDupeConcurrentRequestStrategy
 import coil3.network.HttpException
 import coil3.network.NetworkClient
 import coil3.network.NetworkFetcher
@@ -316,7 +317,8 @@ class FavIconFetcher(
             networkClient = networkClientLazy,
             diskCache = diskCacheLazy,
             cacheStrategy = cacheStrategyLazy,
-            connectivityChecker = ConnectivityChecker.ONLINE,
+            connectivityChecker = lazy { ConnectivityChecker.ONLINE },
+            concurrentRequestStrategy = lazy { DeDupeConcurrentRequestStrategy() },
           )
         },
       )
