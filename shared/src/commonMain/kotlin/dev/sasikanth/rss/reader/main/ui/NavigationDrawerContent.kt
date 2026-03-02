@@ -37,7 +37,7 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -312,7 +312,7 @@ private fun ExpandedDrawerContent(
             icon = {
               val icon = if (selected) destination.selectedIcon else destination.icon
               Icon(
-                modifier = Modifier.sizeIn(20.dp).padding(start = 4.dp),
+                modifier = Modifier.padding(start = 4.dp).requiredSize(20.dp),
                 imageVector = icon,
                 contentDescription = stringResource(destination.label),
               )
