@@ -109,7 +109,7 @@ internal fun PostHeader(
     if (!postImage.isNullOrBlank()) {
       Box(
         modifier =
-          Modifier.padding(horizontal = 24.dp).align(Alignment.CenterHorizontally).clickable {
+          Modifier.padding(horizontal = 16.dp).align(Alignment.CenterHorizontally).clickable {
             onImageClick(postImage)
           }
       ) {
@@ -129,7 +129,7 @@ internal fun PostHeader(
       Spacer(modifier = Modifier.requiredHeight(8.dp))
     }
 
-    Column(modifier = Modifier.padding(horizontal = 32.dp)) {
+    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
       DisableSelection {
         Row(
           modifier = Modifier.padding(top = 20.dp),
