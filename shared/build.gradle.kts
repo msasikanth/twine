@@ -148,8 +148,10 @@ kotlin {
         api(libs.androidx.core)
         api(libs.androidx.browser)
         implementation(libs.ktor.client.okhttp)
-        api(libs.crashkios.bugsnag)
-        implementation(libs.kermit.bugsnag)
+        if (!isFoss) {
+          api(libs.crashkios.bugsnag)
+          implementation(libs.kermit.bugsnag)
+        }
         if (!isFoss) {
           implementation(libs.purchases.core)
           implementation(libs.purchases.ui)

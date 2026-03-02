@@ -24,10 +24,9 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
-import co.touchlab.crashkios.bugsnag.BugsnagKotlin
-import com.bugsnag.android.Bugsnag
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.logging.CrashReporter
 import dev.sasikanth.rss.reader.utils.calculateInstantBeforePeriod
 import java.time.Duration
 import kotlin.coroutines.cancellation.CancellationException
@@ -69,8 +68,8 @@ class PostsCleanUpWorker(
     } catch (e: CancellationException) {
       // no-op
     } catch (e: Exception) {
-      Bugsnag.leaveBreadcrumb("Background Worker")
-      BugsnagKotlin.sendFatalException(e)
+      CrashReporter.leaveBreadcrumb("Background Worker")
+      CrashReporter.log(e)
     }
 
     return Result.failure()

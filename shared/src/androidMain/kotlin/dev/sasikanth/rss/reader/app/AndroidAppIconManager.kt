@@ -25,13 +25,17 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class AndroidAppIconManager(private val context: Context) : AppIconManager {
 
+  companion object {
+    private const val BASE_PACKAGE_NAME = "dev.sasikanth.rss.reader"
+  }
+
   override fun setIcon(icon: AppIcon) {
     val packageManager = context.packageManager
     val packageName = context.packageName
 
     AppIcon.entries.forEach { appIcon ->
       val componentName =
-        ComponentName(packageName, "dev.sasikanth.rss.reader.MainActivity${appIcon.name}")
+        ComponentName(packageName, "$BASE_PACKAGE_NAME.MainActivity${appIcon.name}")
       val newState =
         if (appIcon == icon) {
           PackageManager.COMPONENT_ENABLED_STATE_ENABLED

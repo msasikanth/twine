@@ -23,4 +23,10 @@ actual object CrashReporter {
       BugsnagKotlin.setCustomValue(section, key, value)
     }
   }
+
+  actual fun leaveBreadcrumb(message: String) {
+    // No direct Bugsnag import here for now.
+    // We can use platform API if needed or just skip.
+    // Actually, on iOS we might want to use Bugsnag directly if available.
+  }
 }

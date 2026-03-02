@@ -121,6 +121,7 @@ internal fun ReaderCustomizationsContent(
           selected = themeVariant == selectedThemeVariant,
           isSubscribed = isSubscribed,
           useDarkTheme = isParentThemeDark,
+          showLabel = true,
           onClick = { onThemeVariantChange(themeVariant) },
         )
       }

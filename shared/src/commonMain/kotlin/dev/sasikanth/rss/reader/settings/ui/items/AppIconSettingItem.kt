@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -141,7 +140,7 @@ internal fun AppIconSelectionSheet(
               .padding(8.dp),
         ) {
           Box(contentAlignment = Alignment.Center) {
-            val shape = RoundedCornerShape(28.dp)
+            val shape = RoundedCornerShape(25)
 
             AppIconPreview(appIcon = appIcon, shape = shape, modifier = Modifier.size(64.dp))
 
@@ -180,7 +179,7 @@ internal fun AppIconSelectionSheet(
 private fun AppIconPreview(
   appIcon: AppIcon,
   modifier: Modifier = Modifier,
-  shape: Shape = CircleShape,
+  shape: Shape = RoundedCornerShape(25),
 ) {
   val backgroundColor =
     when (appIcon) {

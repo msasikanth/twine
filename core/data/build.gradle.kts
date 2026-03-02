@@ -23,6 +23,10 @@ plugins {
 }
 
 kotlin {
+  val isFoss =
+    project.findProperty("twine.isFoss")?.toString()?.toBoolean()
+      ?: gradle.startParameter.taskNames.any { it.contains("Foss", ignoreCase = true) }
+
   jvmToolchain(21)
 
   compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
@@ -75,7 +79,9 @@ kotlin {
       implementation(libs.androidx.annotation)
       implementation(libs.sqldelight.driver.android)
       api(libs.sqliteAndroid)
-      implementation(libs.crashkios.bugsnag)
+      if (!isFoss) {
+        implementation(libs.crashkios.bugsnag)
+      }
     }
 
     iosMain.dependencies {

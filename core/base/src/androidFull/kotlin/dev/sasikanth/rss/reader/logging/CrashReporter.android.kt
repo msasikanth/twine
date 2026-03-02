@@ -11,16 +11,21 @@
 
 package dev.sasikanth.rss.reader.logging
 
+import co.touchlab.crashkios.bugsnag.BugsnagKotlin
+import com.bugsnag.android.Bugsnag
+
 actual object CrashReporter {
   actual fun log(exception: Throwable) {
-    // no-op
+    BugsnagKotlin.sendHandledException(exception)
   }
 
   actual fun setCustomValue(section: String, key: String, value: String?) {
-    // no-op
+    if (value != null) {
+      BugsnagKotlin.setCustomValue(section, key, value)
+    }
   }
 
   actual fun leaveBreadcrumb(message: String) {
-    // no-op
+    Bugsnag.leaveBreadcrumb(message)
   }
 }
