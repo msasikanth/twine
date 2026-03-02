@@ -43,7 +43,9 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.amberColorScheme
+import dev.sasikanth.rss.reader.ui.coralColorScheme
 import dev.sasikanth.rss.reader.ui.forestColorScheme
+import dev.sasikanth.rss.reader.ui.parchmentColorScheme
 import dev.sasikanth.rss.reader.ui.raspberryColorScheme
 import dev.sasikanth.rss.reader.ui.skylineColorScheme
 import dev.sasikanth.rss.reader.ui.solarizedColorScheme
@@ -69,12 +71,34 @@ fun ThemeVariantIconButton(
       ThemeVariant.Solarized -> solarizedColorScheme(isDark)
       ThemeVariant.Forest -> forestColorScheme(isDark)
       ThemeVariant.Amber -> amberColorScheme(isDark)
+      ThemeVariant.Coral -> coralColorScheme(isDark)
       ThemeVariant.Raspberry -> raspberryColorScheme(isDark)
       ThemeVariant.Skyline -> skylineColorScheme(isDark)
+      ThemeVariant.Parchment -> parchmentColorScheme(isDark)
     }
 
-  val backgroundColor = colorScheme.primary
-  val contentColor = colorScheme.onPrimary
+  val (backgroundColor, contentColor) =
+    when (themeVariant) {
+      ThemeVariant.Dynamic -> {
+        Pair(colorScheme.primary, colorScheme.onPrimary)
+      }
+
+      ThemeVariant.Solarized -> {
+        Pair(colorScheme.surfaceContainerHighest, colorScheme.onSurface)
+      }
+
+      ThemeVariant.Forest,
+      ThemeVariant.Amber,
+      ThemeVariant.Coral,
+      ThemeVariant.Raspberry,
+      ThemeVariant.Skyline -> {
+        Pair(colorScheme.primary, colorScheme.onPrimary)
+      }
+
+      ThemeVariant.Parchment -> {
+        Pair(colorScheme.surface, colorScheme.onSurface)
+      }
+    }
 
   val borderWidth by animateDpAsState(if (selected) 2.dp else 1.dp)
   val borderColor by

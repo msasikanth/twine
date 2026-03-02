@@ -216,6 +216,7 @@
   <string name="themeVariantSlate" translatable="false">Slate</string>
   <string name="themeVariantForest" translatable="false">Forest</string>
   <string name="themeVariantAmber" translatable="false">Amber</string>
+  <string name="themeVariantCoral" translatable="false">Coral</string>
   <string name="themeVariantRaspberry" translatable="false">Raspberry</string>
   <string name="themeVariantSkyline" translatable="false">Skyline</string>
   <string name="postsFilter">Posts filter</string>

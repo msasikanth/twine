@@ -113,8 +113,10 @@ import twine.shared.generated.resources.settingsThemeLight
 import twine.shared.generated.resources.showFeedFavIconDesc
 import twine.shared.generated.resources.showFeedFavIconTitle
 import twine.shared.generated.resources.themeVariantAmber
+import twine.shared.generated.resources.themeVariantCoral
 import twine.shared.generated.resources.themeVariantDynamic
 import twine.shared.generated.resources.themeVariantForest
+import twine.shared.generated.resources.themeVariantParchment
 import twine.shared.generated.resources.themeVariantRaspberry
 import twine.shared.generated.resources.themeVariantSkyline
 import twine.shared.generated.resources.themeVariantSolarized
@@ -468,8 +470,10 @@ private fun ThemeVariant.displayName(): String {
     ThemeVariant.Solarized -> stringResource(Res.string.themeVariantSolarized)
     ThemeVariant.Forest -> stringResource(Res.string.themeVariantForest)
     ThemeVariant.Amber -> stringResource(Res.string.themeVariantAmber)
+    ThemeVariant.Coral -> stringResource(Res.string.themeVariantCoral)
     ThemeVariant.Raspberry -> stringResource(Res.string.themeVariantRaspberry)
     ThemeVariant.Skyline -> stringResource(Res.string.themeVariantSkyline)
+    ThemeVariant.Parchment -> stringResource(Res.string.themeVariantParchment)
   }
 }
 

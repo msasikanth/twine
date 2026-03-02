@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.UnreadBadge
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -75,7 +76,7 @@ internal fun PinnedFeedGroupItem(
 
     val badgeCount = feedGroup.numberOfUnreadPosts
     if (!isDragging && badgeCount > 0 && canShowUnreadPostsCount) {
-      UnreadCountBadge(badgeCount)
+      UnreadBadge(badgeCount, modifier = Modifier.align(Alignment.TopEnd))
     }
   }
 }

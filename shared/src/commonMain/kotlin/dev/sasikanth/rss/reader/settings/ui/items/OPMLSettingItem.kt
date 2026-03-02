@@ -17,7 +17,6 @@
 
 package dev.sasikanth.rss.reader.settings.ui.items
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -90,56 +89,54 @@ internal fun OPMLSettingItem(
       color = AppTheme.colorScheme.onSurface,
     )
 
-    AnimatedContent(opmlResult) {
-      when (opmlResult) {
-        is OpmlResult.InProgress.Importing,
-        is OpmlResult.InProgress.Exporting -> {
-          Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            val string =
-              when (opmlResult) {
-                is OpmlResult.InProgress.Importing -> {
-                  stringResource(Res.string.settingsOpmlImporting, opmlResult.progress)
-                }
-
-                is OpmlResult.InProgress.Exporting -> {
-                  stringResource(Res.string.settingsOpmlExporting, opmlResult.progress)
-                }
+    when (opmlResult) {
+      is OpmlResult.InProgress.Importing,
+      is OpmlResult.InProgress.Exporting -> {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+          val string =
+            when (opmlResult) {
+              is OpmlResult.InProgress.Importing -> {
+                stringResource(Res.string.settingsOpmlImporting, opmlResult.progress)
               }
 
-            TranslucentButton(
-              text = string,
-              onClick = {
-                // no-op
-              },
-            )
+              is OpmlResult.InProgress.Exporting -> {
+                stringResource(Res.string.settingsOpmlExporting, opmlResult.progress)
+              }
+            }
 
-            InverseButton(
-              text = stringResource(Res.string.settingsOpmlCancel),
-              onClick = onCancelClicked,
-            )
-          }
+          TranslucentButton(
+            text = string,
+            onClick = {
+              // no-op
+            },
+          )
+
+          InverseButton(
+            text = stringResource(Res.string.settingsOpmlCancel),
+            onClick = onCancelClicked,
+          )
         }
+      }
 
-        // TODO: Handle error states
-        OpmlResult.Idle,
-        OpmlResult.Error.NoContentInOpmlFile,
-        is OpmlResult.Error.UnknownFailure -> {
-          Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            TranslucentButton(
-              text = stringResource(Res.string.settingsOpmlImport),
-              onClick = onImportClicked,
-            )
+      // TODO: Handle error states
+      OpmlResult.Idle,
+      OpmlResult.Error.NoContentInOpmlFile,
+      is OpmlResult.Error.UnknownFailure -> {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+          TranslucentButton(
+            text = stringResource(Res.string.settingsOpmlImport),
+            onClick = onImportClicked,
+          )
 
-            TranslucentButton(
-              text = stringResource(Res.string.settingsOpmlExport),
-              onClick = onExportClicked,
-            )
-          }
+          TranslucentButton(
+            text = stringResource(Res.string.settingsOpmlExport),
+            onClick = onExportClicked,
+          )
         }
+      }
 
-        null -> {
-          Box(Modifier.requiredHeight(40.dp))
-        }
+      null -> {
+        Box(Modifier.requiredHeight(40.dp))
       }
     }
   }

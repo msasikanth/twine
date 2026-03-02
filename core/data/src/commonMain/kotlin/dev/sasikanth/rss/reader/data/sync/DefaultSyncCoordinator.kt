@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -76,6 +77,10 @@ class DefaultSyncCoordinator(
     }
   }
 
+  override fun triggerPull() {
+    scope.launch { pull() }
+  }
+
   override suspend fun pull(feedIds: List<String>): Boolean {
     return when {
       freshRssSyncProvider.isSignedInImmediate() -> freshRSSSyncCoordinator.pull(feedIds)
@@ -83,6 +88,10 @@ class DefaultSyncCoordinator(
       dropboxSyncProvider.isSignedInImmediate() -> dropboxSyncCoordinator.pull(feedIds)
       else -> localSyncCoordinator.pull(feedIds)
     }
+  }
+
+  override fun triggerPull(feedIds: List<String>) {
+    scope.launch { pull(feedIds) }
   }
 
   override suspend fun pull(feedId: String): Boolean {
@@ -94,6 +103,10 @@ class DefaultSyncCoordinator(
     }
   }
 
+  override fun triggerPull(feedId: String) {
+    scope.launch { pull(feedId) }
+  }
+
   override suspend fun push(): Boolean {
     return when {
       freshRssSyncProvider.isSignedInImmediate() -> freshRSSSyncCoordinator.push()
@@ -101,5 +114,9 @@ class DefaultSyncCoordinator(
       dropboxSyncProvider.isSignedInImmediate() -> dropboxSyncCoordinator.push()
       else -> localSyncCoordinator.push()
     }
+  }
+
+  override fun triggerPush() {
+    scope.launch { push() }
   }
 }

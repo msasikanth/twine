@@ -211,7 +211,7 @@ class AppViewModel(
     viewModelScope.launch {
       val signInSucceeded = oAuthManager.handleRedirect(uri)
       if (signInSucceeded) {
-        syncCoordinator.push()
+        syncCoordinator.triggerPush()
       }
       linkHandler.close()
     }
@@ -220,7 +220,7 @@ class AppViewModel(
   private fun refreshFeedsIfExpired() {
     viewModelScope.launch {
       if (refreshPolicy.hasExpired()) {
-        syncCoordinator.pull()
+        syncCoordinator.triggerPull()
       }
     }
   }

@@ -26,6 +26,7 @@ import com.materialkolor.ktx.getColor
 import com.materialkolor.scheme.DynamicScheme
 import com.materialkolor.scheme.SchemeContent
 import com.materialkolor.scheme.SchemeExpressive
+import com.materialkolor.scheme.SchemeMonochrome
 import com.materialkolor.scheme.SchemeTonalSpot
 import com.materialkolor.scheme.SchemeVibrant
 
@@ -88,6 +89,12 @@ internal object TwineDynamicColors {
           )
         Scheme.Vibrant ->
           SchemeVibrant(sourceColorHct = sourceColorHct, isDark = useDarkTheme, contrastLevel = 0.0)
+        Scheme.Monochrome ->
+          SchemeMonochrome(
+            sourceColorHct = sourceColorHct,
+            isDark = useDarkTheme,
+            contrastLevel = 0.0,
+          )
       }
 
     return AppColorValues(
@@ -122,5 +129,6 @@ internal object TwineDynamicColors {
     TonalSpot,
     Expressive,
     Vibrant,
+    Monochrome,
   }
 }

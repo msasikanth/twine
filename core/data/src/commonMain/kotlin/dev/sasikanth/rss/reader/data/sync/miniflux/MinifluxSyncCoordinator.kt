@@ -130,12 +130,12 @@ class MinifluxSyncCoordinator(
       // when fetching articles handles cases where articles might be added to
       // the server with older timestamps.
       refreshPolicy.updateLastSyncedAt()
-      updateSyncState(SyncState.Complete)
 
       // After finishing feeds, categories and articles, we continue syncing statuses and bookmarks.
       syncArticles(starred = true)
       syncStatuses(isInitialSync = isInitialSync)
 
+      updateSyncState(SyncState.Complete)
       true
     } catch (e: Exception) {
       Logger.e(e) { "Miniflux pull failed: $e" }

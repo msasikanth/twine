@@ -271,7 +271,7 @@ class SettingsViewModel(
     viewModelScope.launch {
       val isSignedIn = provider.isSignedIn().first()
       if (isSignedIn) {
-        triggerSync()
+        syncCoordinator.triggerPull()
       } else {
         oAuthManager.setPendingProvider(provider.cloudService)
         val authUrl = oAuthManager.getAuthUrl(provider.cloudService)
@@ -281,7 +281,7 @@ class SettingsViewModel(
   }
 
   private fun triggerSync() {
-    viewModelScope.launch { syncCoordinator.pull() }
+    syncCoordinator.triggerPull()
   }
 
   private fun signOutClicked() {

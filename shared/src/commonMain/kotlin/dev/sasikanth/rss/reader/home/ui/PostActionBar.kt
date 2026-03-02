@@ -311,11 +311,11 @@ internal fun PostActions(
       IconButton(
         icon = TwineIcons.MoreHorizFilled,
         contentDescription = moreMenuOptionsLabel,
-        size = IconButtonSize.Small,
         modifier =
           Modifier.onGloballyPositioned { coordinates ->
             buttonHeight = with(density) { coordinates.size.height.toDp() }
           },
+        size = IconButtonSize.Small,
       ) {
         onDropdownChange(true)
       }

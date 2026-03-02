@@ -39,7 +39,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -61,6 +60,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.CircularIconButton
+import dev.sasikanth.rss.reader.components.IconButton
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.TextField
 import dev.sasikanth.rss.reader.components.image.FeedIcon
@@ -134,16 +134,8 @@ fun DiscoveryScreen(
           hint = stringResource(Res.string.discoverySearchHint),
           trailingIcon = {
             if (state.searchQuery.text.isNotBlank()) {
-              IconButton(
-                onClick = {
-                  viewModel.dispatch(DiscoveryEvent.SearchQueryChanged(TextFieldValue()))
-                }
-              ) {
-                Icon(
-                  imageVector = TwineIcons.Close,
-                  contentDescription = null,
-                  tint = AppTheme.colorScheme.onSurfaceVariant,
-                )
+              IconButton(icon = TwineIcons.Close, contentDescription = null) {
+                viewModel.dispatch(DiscoveryEvent.SearchQueryChanged(TextFieldValue()))
               }
             }
           },

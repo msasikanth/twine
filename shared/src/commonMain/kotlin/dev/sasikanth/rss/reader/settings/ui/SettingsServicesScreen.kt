@@ -208,17 +208,15 @@ internal fun SettingsServicesScreen(
           )
         }
 
-        if (state.hasFeeds) {
-          item { SettingsDivider(24.dp) }
+        item { SettingsDivider(24.dp) }
 
-          item {
-            OPMLSettingItem(
-              opmlResult = state.opmlResult,
-              onImportClicked = { viewModel.dispatch(SettingsEvent.ImportOpmlClicked) },
-              onExportClicked = { viewModel.dispatch(SettingsEvent.ExportOpmlClicked) },
-              onCancelClicked = { viewModel.dispatch(SettingsEvent.CancelOpmlImportOrExport) },
-            )
-          }
+        item {
+          OPMLSettingItem(
+            opmlResult = state.opmlResult,
+            onImportClicked = { viewModel.dispatch(SettingsEvent.ImportOpmlClicked) },
+            onExportClicked = { viewModel.dispatch(SettingsEvent.ExportOpmlClicked) },
+            onCancelClicked = { viewModel.dispatch(SettingsEvent.CancelOpmlImportOrExport) },
+          )
         }
 
         item { SubHeader(text = stringResource(Res.string.settingsHeaderData)) }

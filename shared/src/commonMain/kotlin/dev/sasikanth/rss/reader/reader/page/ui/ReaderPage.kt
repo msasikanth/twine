@@ -222,7 +222,7 @@ internal fun ReaderPage(
 
             item(key = "divider") {
               HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 32.dp, vertical = 24.dp),
+                modifier = Modifier.padding(24.dp),
                 color = AppTheme.colorScheme.outlineVariant,
               )
             }
@@ -234,7 +234,7 @@ internal fun ReaderPage(
             when (val state = markdownContentState) {
               is State.Success -> {
                 items(items = state.node.children) { node ->
-                  Box(modifier = Modifier.padding(horizontal = 32.dp)) {
+                  Box(modifier = Modifier.padding(horizontal = 24.dp)) {
                     MarkdownElement(
                       node = node,
                       components = markdownComponents,

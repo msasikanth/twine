@@ -29,14 +29,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.Badge
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,6 +47,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.IconButton
+import dev.sasikanth.rss.reader.components.UnreadBadge
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.resources.icons.Pin
@@ -136,18 +134,7 @@ internal fun FeedListItem(
 
       val numberOfUnreadPosts = feed.numberOfUnreadPosts
       if (canShowUnreadPostsCount && numberOfUnreadPosts > 0 && !isInMultiSelectMode) {
-        Badge(
-          containerColor = translucentStyle.prominent.background,
-          contentColor = AppTheme.colorScheme.onSurfaceVariant,
-          modifier = Modifier.sizeIn(minWidth = 24.dp, minHeight = 24.dp),
-        ) {
-          Text(
-            text = feed.numberOfUnreadPosts.toString(),
-            style = MaterialTheme.typography.labelMedium,
-            modifier =
-              Modifier.align(Alignment.CenterVertically).padding(horizontal = 8.dp, vertical = 4.dp),
-          )
-        }
+        UnreadBadge(numberOfUnreadPosts)
 
         Spacer(Modifier.width(16.dp))
       }
@@ -159,28 +146,19 @@ internal fun FeedListItem(
       if (!isInMultiSelectMode) {
         if (onPinClick != null) {
           val pinIcon = if (feed.pinnedAt != null) TwineIcons.PinFilled else TwineIcons.Pin
-          IconButton(modifier = Modifier.requiredSize(40.dp), onClick = { onPinClick(feed) }) {
-            Icon(
-              modifier = Modifier.requiredSize(20.dp),
-              imageVector = pinIcon,
-              contentDescription = null,
-              tint = AppTheme.colorScheme.secondary,
-            )
-          }
+
+          IconButton(icon = pinIcon, contentDescription = null) { onPinClick(feed) }
         }
 
         dragHandle?.invoke()
       }
 
       if (!isInMultiSelectMode && dragHandle == null) {
-        IconButton(modifier = Modifier.requiredSize(40.dp), onClick = onOptionsClick) {
-          Icon(
-            modifier = Modifier.requiredSize(20.dp),
-            imageVector = Icons.Filled.MoreVert,
-            contentDescription = null,
-            tint = AppTheme.colorScheme.secondary,
-          )
-        }
+        IconButton(
+          icon = Icons.Filled.MoreVert,
+          contentDescription = null,
+          onClick = onOptionsClick,
+        )
       }
     }
   }

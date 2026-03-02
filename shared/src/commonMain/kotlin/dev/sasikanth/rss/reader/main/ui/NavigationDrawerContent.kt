@@ -37,7 +37,6 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -49,10 +48,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
@@ -87,6 +84,7 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.ContextActionItem
 import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
+import dev.sasikanth.rss.reader.components.IconButton
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -312,7 +310,7 @@ private fun ExpandedDrawerContent(
             icon = {
               val icon = if (selected) destination.selectedIcon else destination.icon
               Icon(
-                modifier = Modifier.sizeIn(20.dp).padding(start = 4.dp),
+                modifier = Modifier.padding(start = 4.dp).requiredSize(20.dp),
                 imageVector = icon,
                 contentDescription = stringResource(destination.label),
               )
@@ -807,13 +805,7 @@ private fun SearchBar(
     },
     trailingIcon = {
       if (query.text.isNotBlank()) {
-        IconButton(onClick = onClearClick) {
-          Icon(
-            Icons.Rounded.Close,
-            contentDescription = null,
-            tint = AppTheme.colorScheme.onSurfaceVariant,
-          )
-        }
+        IconButton(icon = TwineIcons.Close, contentDescription = null, onClick = onClearClick)
       }
     },
     shape = RoundedCornerShape(50),

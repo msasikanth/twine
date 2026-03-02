@@ -53,9 +53,7 @@ import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
 import dev.sasikanth.rss.reader.blockedwords.BlockedWordsViewModel
 import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
-import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
-import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
 import dev.sasikanth.rss.reader.feed.FeedViewModel
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
@@ -210,17 +208,6 @@ fun App(
     val roundedCornerScreenModifier = screenModifier.clip(RoundedCornerShape(screenCornerRadius))
 
     LaunchedEffect(useDarkTheme) { onThemeChange(useDarkTheme) }
-
-    LaunchedEffect(appState.homeViewMode, appState.themeVariant) {
-      if (
-        appState.homeViewMode == HomeViewMode.Default &&
-          appState.themeVariant == ThemeVariant.Dynamic
-      ) {
-        dynamicColorState.refresh()
-      } else {
-        dynamicColorState.reset()
-      }
-    }
 
     LaunchedEffect(Unit) {
       appViewModel.navigateToReader
