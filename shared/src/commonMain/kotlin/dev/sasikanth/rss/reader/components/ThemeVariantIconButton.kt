@@ -23,11 +23,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -59,6 +63,7 @@ fun ThemeVariantIconButton(
   useDarkTheme: Boolean,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
+  showLabel: Boolean = false,
 ) {
   val appDynamicColorState = LocalDynamicColorState.current
   val isDark = themeVariant.isDark(useDarkTheme)
@@ -106,47 +111,59 @@ fun ThemeVariantIconButton(
       if (selected) AppTheme.colorScheme.outline else AppTheme.colorScheme.outlineVariant
     )
 
-  Box(
-    modifier =
-      Modifier.then(
-        if (selected) {
-          Modifier.border(borderWidth, borderColor, MaterialTheme.shapes.largeIncreased)
-        } else {
-          Modifier
-        }
-      ),
-    contentAlignment = Alignment.Center,
-  ) {
+  Column(horizontalAlignment = Alignment.CenterHorizontally) {
     Box(
       modifier =
-        modifier
-          .requiredSize(width = 64.dp, height = 96.dp)
-          .padding(4.dp)
-          .clip(MaterialTheme.shapes.large)
-          .background(backgroundColor)
-          .then(
-            if (!selected) {
-              Modifier.border(borderWidth, borderColor, MaterialTheme.shapes.large)
-            } else {
-              Modifier
-            }
-          )
-          .clickable { onClick() },
+        Modifier.then(
+          if (selected) {
+            Modifier.border(borderWidth, borderColor, MaterialTheme.shapes.largeIncreased)
+          } else {
+            Modifier
+          }
+        ),
       contentAlignment = Alignment.Center,
     ) {
-      val icon =
-        when {
-          themeVariant.isPremium && !isSubscribed -> TwineIcons.StarShine
-          themeVariant.isDarkModeOnly -> TwineIcons.DarkMode
-          themeVariant.isLightModeOnly -> TwineIcons.LightMode
-          else -> TwineIcons.LightAndDarkMode
-        }
+      Box(
+        modifier =
+          modifier
+            .requiredSize(width = 64.dp, height = 96.dp)
+            .padding(4.dp)
+            .clip(MaterialTheme.shapes.large)
+            .background(backgroundColor)
+            .then(
+              if (!selected) {
+                Modifier.border(borderWidth, borderColor, MaterialTheme.shapes.large)
+              } else {
+                Modifier
+              }
+            )
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center,
+      ) {
+        val icon =
+          when {
+            themeVariant.isPremium && !isSubscribed -> TwineIcons.StarShine
+            themeVariant.isDarkModeOnly -> TwineIcons.DarkMode
+            themeVariant.isLightModeOnly -> TwineIcons.LightMode
+            else -> TwineIcons.LightAndDarkMode
+          }
 
-      Icon(
-        imageVector = icon,
-        contentDescription = null,
-        tint = contentColor,
-        modifier = Modifier.requiredSize(24.dp),
+        Icon(
+          imageVector = icon,
+          contentDescription = null,
+          tint = contentColor,
+          modifier = Modifier.requiredSize(24.dp),
+        )
+      }
+    }
+
+    if (showLabel) {
+      Spacer(Modifier.height(8.dp))
+
+      Text(
+        text = themeVariant.name,
+        style = MaterialTheme.typography.bodySmall,
+        color = AppTheme.colorScheme.onSurfaceVariant,
       )
     }
   }
