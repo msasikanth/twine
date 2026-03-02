@@ -73,8 +73,23 @@ fun ThemeVariantIconButton(
       ThemeVariant.Skyline -> skylineColorScheme(isDark)
     }
 
-  val backgroundColor = colorScheme.primary
-  val contentColor = colorScheme.onPrimary
+  val (backgroundColor, contentColor) =
+    when (themeVariant) {
+      ThemeVariant.Dynamic -> {
+        Pair(colorScheme.primary, colorScheme.onPrimary)
+      }
+
+      ThemeVariant.Solarized -> {
+        Pair(colorScheme.surfaceContainerHighest, colorScheme.onSurface)
+      }
+
+      ThemeVariant.Forest,
+      ThemeVariant.Amber,
+      ThemeVariant.Raspberry,
+      ThemeVariant.Skyline -> {
+        Pair(colorScheme.primary, colorScheme.onPrimary)
+      }
+    }
 
   val borderWidth by animateDpAsState(if (selected) 2.dp else 1.dp)
   val borderColor by
