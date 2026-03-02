@@ -28,7 +28,18 @@ internal fun ThemeVariant.getOverriddenColorScheme(isDark: Boolean): AppColorSch
     ThemeVariant.Amber -> amberColorScheme(isDark)
     ThemeVariant.Raspberry -> raspberryColorScheme(isDark)
     ThemeVariant.Skyline -> skylineColorScheme(isDark)
+    ThemeVariant.Parchment -> parchmentColorScheme(isDark)
   }
+}
+
+internal fun parchmentColorScheme(isDark: Boolean): AppColorScheme {
+  return AppColorScheme(
+    TwineDynamicColors.calculateColorScheme(
+      seedColor = if (isDark) Color.White else Color.Black,
+      useDarkTheme = isDark,
+      scheme = TwineDynamicColors.Scheme.Monochrome,
+    )
+  )
 }
 
 internal fun solarizedColorScheme(isDark: Boolean): AppColorScheme {

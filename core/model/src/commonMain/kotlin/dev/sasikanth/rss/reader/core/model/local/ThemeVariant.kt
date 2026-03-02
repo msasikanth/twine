@@ -27,7 +27,8 @@ enum class ThemeVariant(
   Forest(isPremium = false),
   Amber(isPremium = true),
   Raspberry(isPremium = true),
-  Skyline(isPremium = true);
+  Skyline(isPremium = true),
+  Parchment(isPremium = true);
 
   fun isDark(isSystemDark: Boolean): Boolean {
     if (isDarkModeOnly) return true

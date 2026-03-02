@@ -44,6 +44,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.amberColorScheme
 import dev.sasikanth.rss.reader.ui.forestColorScheme
+import dev.sasikanth.rss.reader.ui.parchmentColorScheme
 import dev.sasikanth.rss.reader.ui.raspberryColorScheme
 import dev.sasikanth.rss.reader.ui.skylineColorScheme
 import dev.sasikanth.rss.reader.ui.solarizedColorScheme
@@ -71,6 +72,7 @@ fun ThemeVariantIconButton(
       ThemeVariant.Amber -> amberColorScheme(isDark)
       ThemeVariant.Raspberry -> raspberryColorScheme(isDark)
       ThemeVariant.Skyline -> skylineColorScheme(isDark)
+      ThemeVariant.Parchment -> parchmentColorScheme(isDark)
     }
 
   val (backgroundColor, contentColor) =
@@ -88,6 +90,10 @@ fun ThemeVariantIconButton(
       ThemeVariant.Raspberry,
       ThemeVariant.Skyline -> {
         Pair(colorScheme.primary, colorScheme.onPrimary)
+      }
+
+      ThemeVariant.Parchment -> {
+        Pair(colorScheme.surface, colorScheme.onSurface)
       }
     }
 
