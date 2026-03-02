@@ -302,7 +302,7 @@
   <string name="settingsStatisticsSubtitle">View your reading habits and insights</string>
   <string name="settingsDangerZone">Danger zone</string>
 
-  <string name="changelogTitle">What\'s new</string>
+  <string name="changelogTitle">What's new</string>
   <string name="changelogVersion">version: %1$s</string>
 
   <string name="sourcesCount">%1$d sources</string>
