@@ -64,6 +64,7 @@ kotlin {
         api(libs.androidx.core)
         if (!isFoss) {
           implementation(libs.crashkios.bugsnag)
+          implementation(libs.bugsnag)
         }
       }
     }

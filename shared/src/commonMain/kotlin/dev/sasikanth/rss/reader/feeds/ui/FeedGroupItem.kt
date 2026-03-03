@@ -77,15 +77,15 @@ internal fun FeedGroupItem(
   interactionSource: MutableInteractionSource? = null,
 ) {
   val haptic = LocalHapticFeedback.current
+  val translucentStyle = LocalTranslucentStyles.current
   val backgroundColor by
     animateColorAsState(
       if (selected) {
-        AppTheme.colorScheme.primaryContainer
+        translucentStyle.default.background
       } else {
         Color.Transparent
       }
     )
-  val translucentStyle = LocalTranslucentStyles.current
 
   Box(
     modifier =

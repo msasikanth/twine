@@ -73,15 +73,15 @@ internal fun FeedListItem(
   interactionSource: MutableInteractionSource? = null,
 ) {
   val haptic = LocalHapticFeedback.current
+  val translucentStyle = LocalTranslucentStyles.current
   val backgroundColor by
     animateColorAsState(
       if (isFeedSelected) {
-        AppTheme.colorScheme.primaryContainer
+        translucentStyle.default.background
       } else {
         Color.Transparent
       }
     )
-  val translucentStyle = LocalTranslucentStyles.current
 
   Box(
     modifier =
