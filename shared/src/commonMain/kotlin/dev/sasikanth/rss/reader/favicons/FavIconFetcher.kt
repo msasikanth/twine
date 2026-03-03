@@ -162,9 +162,11 @@ class FavIconFetcher(
   }
 
   private fun fallbackFaviconUrl(url: String): String {
+    val domain =
+      url.removePrefix("https://").removePrefix("http://").removePrefix("www.").substringBefore("/")
     // Setting size as 180px, since that's the most commonly used apple touch icon size in the HTML,
     // if a icon is not found, it will fallback to default fav icon
-    return "https://www.google.com/s2/favicons?domain=${url}&sz=180"
+    return "https://www.google.com/s2/favicons?domain=${domain}&sz=180"
   }
 
   /** From Unfurl https://github.com/saket/unfurl */
