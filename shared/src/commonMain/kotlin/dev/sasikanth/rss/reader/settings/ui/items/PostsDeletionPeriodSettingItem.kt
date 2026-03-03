@@ -68,7 +68,7 @@ internal fun PostsDeletionPeriodSettingItem(
     Text(
       modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
       text = stringResource(Res.string.settingsPostsDeletionPeriodTitle),
-      style = MaterialTheme.typography.titleMedium,
+      style = MaterialTheme.typography.titleSmall,
       color = AppTheme.colorScheme.onSurface,
     )
 

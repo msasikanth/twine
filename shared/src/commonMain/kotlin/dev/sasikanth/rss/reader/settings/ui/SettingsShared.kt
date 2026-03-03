@@ -76,7 +76,7 @@ internal fun SettingsSwitchItem(
         if (subtitle != null) {
           Text(
             text = subtitle,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.bodySmall,
             color = AppTheme.colorScheme.onSurfaceVariant,
           )
         }

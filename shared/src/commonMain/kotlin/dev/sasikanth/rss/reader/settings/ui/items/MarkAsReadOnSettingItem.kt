@@ -63,7 +63,7 @@ internal fun MarkAsReadOnSettingItem(
     Text(
       modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
       text = stringResource(Res.string.markArticleAsRead),
-      style = MaterialTheme.typography.titleMedium,
+      style = MaterialTheme.typography.titleSmall,
       color = AppTheme.colorScheme.onSurface,
     )
 

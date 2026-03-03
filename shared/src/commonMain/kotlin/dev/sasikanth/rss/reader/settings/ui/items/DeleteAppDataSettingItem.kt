@@ -51,12 +51,12 @@ internal fun DeleteAppDataSettingItem(modifier: Modifier = Modifier, onClick: ()
     Column(modifier = Modifier.weight(1f)) {
       Text(
         stringResource(Res.string.settingsDeleteAppDataTitle),
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.titleSmall,
         color = AppTheme.colorScheme.error,
       )
       Text(
         stringResource(Res.string.settingsDeleteAppDataSubtitle),
-        style = MaterialTheme.typography.labelLarge,
+        style = MaterialTheme.typography.bodySmall,
         color = AppTheme.colorScheme.onSurfaceVariant,
       )
     }

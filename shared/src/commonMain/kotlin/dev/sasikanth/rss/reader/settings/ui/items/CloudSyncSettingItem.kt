@@ -162,7 +162,7 @@ internal fun CloudSyncSettingItem(
           ) {
             Text(
               text = statusString,
-              style = MaterialTheme.typography.bodyMedium,
+              style = MaterialTheme.typography.bodySmall,
               color = AppTheme.colorScheme.onSurfaceVariant,
             )
           }
