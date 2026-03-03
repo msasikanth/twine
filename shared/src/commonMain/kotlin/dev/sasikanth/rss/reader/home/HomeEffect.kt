@@ -19,4 +19,6 @@ package dev.sasikanth.rss.reader.home
 
 sealed interface HomeEffect {
   data object RequestInAppRating : HomeEffect
+
+  data object ScrollToTop : HomeEffect
 }
