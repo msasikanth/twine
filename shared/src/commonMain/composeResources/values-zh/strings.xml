@@ -118,10 +118,10 @@
   <string name="openWebsite">打开网站</string>
   <string name="noNewPosts">没有新内容</string>
   <string name="noNewPostsSubtitle">请稍候再试或下拉立即检查新内容</string>
-  <string name="postsAll">所有文章</string>
+  <string name="postsAll">All</string>
   <string name="postsUnread">未读</string>
   <string name="postsToday">今天</string>
-  <string name="postsLast24Hours">过去 24 小时</string>
+  <string name="postsLast24Hours">24H</string>
   <string name="markAsRead">标记为已读</string>
   <string name="markAsUnRead">标记为未读</string>
   <string name="removeFeed">移除来源</string>
