@@ -200,7 +200,7 @@
   <string name="homeViewModeCompact">Kompakt</string>
   <string name="twinePremium">Twine premium aboneliği</string>
   <string name="twinePremiumDesc">Premium'a Geç: Her şeyin kilidini aç ve gelecekteki gelişimi destekle.</string>
-  <string name="twinePremiumSubscribedDesc">Twine premium'a abonesiniz. Desteklediğiniz için teşekkürler ❤️</string>
+  <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium.\nThanks for supporting ❤️</string>
   <string name="readerCustomisationsTypeface">Yazı Tipi</string>
   <string name="themeVariantColorScheme">Color scheme</string>
   <string name="themeVariantDynamic">Dynamic</string>
