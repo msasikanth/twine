@@ -200,7 +200,7 @@
   <string name="homeViewModeCompact">紧凑</string>
   <string name="twinePremium">Twine 高级版订阅</string>
   <string name="twinePremiumDesc">订阅高级版：解锁全部功能并助力后续开发。</string>
-  <string name="twinePremiumSubscribedDesc">你已订阅 Twine 高级版。感谢支持 ❤️</string>
+  <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium.\nThanks for supporting ❤️</string>
   <string name="readerCustomisationsTypeface">排版</string>
   <string name="themeVariantColorScheme">Color scheme</string>
   <string name="themeVariantDynamic">Dynamic</string>
