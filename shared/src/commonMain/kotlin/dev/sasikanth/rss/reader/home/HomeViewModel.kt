@@ -37,6 +37,7 @@ import dev.sasikanth.rss.reader.data.repository.ObservableSelectedPost
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
+import dev.sasikanth.rss.reader.data.sync.SyncState
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.home.ui.PostListKey
 import dev.sasikanth.rss.reader.posts.AllPostsPager
@@ -87,6 +88,7 @@ class HomeViewModel(
     get() = _openPost
 
   private var previousVisibleItems = emptyMap<String, Int>()
+  private var isSwipeToRefreshTriggered = false
 
   init {
     init()
@@ -288,7 +290,18 @@ class HomeViewModel(
       .launchIn(viewModelScope)
 
     syncCoordinator.syncState
-      .onEach { syncState -> _state.update { it.copy(syncState = syncState) } }
+      .onEach { syncState ->
+        if (syncState is SyncState.Complete && isSwipeToRefreshTriggered) {
+          isSwipeToRefreshTriggered = false
+          loadNewArticles()
+        }
+
+        if (syncState is SyncState.Error) {
+          isSwipeToRefreshTriggered = false
+        }
+
+        _state.update { it.copy(syncState = syncState) }
+      }
       .launchIn(viewModelScope)
 
     rssRepository
@@ -351,6 +364,7 @@ class HomeViewModel(
     viewModelScope.launch {
       _state.update { it.copy(unreadSinceLastSync = null) }
       refreshPolicy.updateLastRefreshedAt()
+      _effects.emit(HomeEffect.ScrollToTop)
       _effects.emit(HomeEffect.RequestInAppRating)
     }
   }
@@ -447,6 +461,7 @@ class HomeViewModel(
   }
 
   private fun refreshContent() {
+    isSwipeToRefreshTriggered = true
     when (val selectedSource = _state.value.activeSource) {
       is FeedGroup -> syncCoordinator.triggerPull(selectedSource.feedIds)
       is Feed -> syncCoordinator.triggerPull(selectedSource.id)
