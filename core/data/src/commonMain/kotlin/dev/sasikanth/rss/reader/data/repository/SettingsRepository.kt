@@ -25,6 +25,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.sasikanth.rss.reader.app.AppIcon
+import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
@@ -37,7 +38,10 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-class SettingsRepository(private val dataStore: DataStore<Preferences>) {
+class SettingsRepository(
+  private val dataStore: DataStore<Preferences>,
+  private val appInfo: AppInfo,
+) {
 
   private val browserTypeKey = stringPreferencesKey("pref_browser_type")
   private val showUnreadPostsCountKey = booleanPreferencesKey("show_unread_posts_count")
@@ -225,7 +229,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   }
 
   suspend fun completeOnboarding() {
-    dataStore.edit { preferences -> preferences[isOnboardingDoneKey] = true }
+    dataStore.edit { preferences ->
+      preferences[isOnboardingDoneKey] = true
+      preferences[lastSeenChangelogVersionKey] = appInfo.versionName
+    }
   }
 
   suspend fun toggleAutoSync(value: Boolean) {
