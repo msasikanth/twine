@@ -165,7 +165,7 @@ private fun PinnedSourceItem(
           modifier =
             Modifier.align(Alignment.TopEnd)
               .requiredSize(20.dp)
-              .dropShadow(shape) {
+              .dropShadow(CircleShape) {
                 spread = 1.dp.toPx()
                 color = Color.Black
                 blendMode = BlendMode.DstOut
