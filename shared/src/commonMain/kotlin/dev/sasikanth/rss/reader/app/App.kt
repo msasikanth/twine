@@ -52,6 +52,7 @@ import dev.sasikanth.rss.reader.accountselection.AccountSelectionViewModel
 import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
 import dev.sasikanth.rss.reader.blockedwords.BlockedWordsViewModel
 import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
+import dev.sasikanth.rss.reader.changelog.ui.ChangelogSheet
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
@@ -398,6 +399,13 @@ fun App(
         groupSelectionDialog(
           groupSelectionViewModel = groupSelectionViewModel,
           navController = navController,
+        )
+      }
+
+      if (appState.showChangelog) {
+        ChangelogSheet(
+          versionName = appState.versionName,
+          onDismiss = appViewModel::onChangelogDismissed,
         )
       }
     }

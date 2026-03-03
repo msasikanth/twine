@@ -25,6 +25,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.sasikanth.rss.reader.app.AppIcon
+import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
@@ -37,7 +38,10 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-class SettingsRepository(private val dataStore: DataStore<Preferences>) {
+class SettingsRepository(
+  private val dataStore: DataStore<Preferences>,
+  private val appInfo: AppInfo,
+) {
 
   private val browserTypeKey = stringPreferencesKey("pref_browser_type")
   private val showUnreadPostsCountKey = booleanPreferencesKey("show_unread_posts_count")
@@ -68,6 +72,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val discoveryFeedsCacheKey = stringPreferencesKey("discovery_feeds_cache")
   private val showPinnedSourcesKey = booleanPreferencesKey("show_pinned_sources")
   private val showFeaturedSectionKey = booleanPreferencesKey("show_featured_section")
+  private val lastSeenChangelogVersionKey = stringPreferencesKey("last_seen_changelog_version")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -172,6 +177,9 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
       lastFetchTime to cache
     }
 
+  val lastSeenChangelogVersion: Flow<String?> =
+    dataStore.data.map { preferences -> preferences[lastSeenChangelogVersionKey] }
+
   suspend fun enableAutoSyncImmediate(): Boolean {
     return enableAutoSync.first()
   }
@@ -221,7 +229,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   }
 
   suspend fun completeOnboarding() {
-    dataStore.edit { preferences -> preferences[isOnboardingDoneKey] = true }
+    dataStore.edit { preferences ->
+      preferences[isOnboardingDoneKey] = true
+      preferences[lastSeenChangelogVersionKey] = appInfo.versionName
+    }
   }
 
   suspend fun toggleAutoSync(value: Boolean) {
@@ -298,6 +309,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
       preferences[discoveryFeedsCacheKey] = cache
       preferences[discoveryFeedsLastFetchTimeKey] = lastFetchTime.toEpochMilliseconds()
     }
+  }
+
+  suspend fun updateLastSeenChangelogVersion(versionName: String) {
+    dataStore.edit { preferences -> preferences[lastSeenChangelogVersionKey] = versionName }
   }
 
   suspend fun clear() {
