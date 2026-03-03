@@ -110,6 +110,41 @@ internal fun PostsPreferencesSheet(
           .padding(bottom = 32.dp)
           .navigationBarsPadding()
     ) {
+      SectionHeader(text = stringResource(Res.string.filter), icon = TwineIcons.FilterList)
+
+      ToggleableButtonGroup(
+        modifier = Modifier.fillMaxWidth(),
+        items =
+          listOf(
+            ToggleableButtonItem(
+              label = stringResource(Res.string.postsAll),
+              isSelected = selectedPostsType == PostsType.ALL,
+              identifier = PostsType.ALL,
+            ),
+            ToggleableButtonItem(
+              label = stringResource(Res.string.postsToday),
+              isSelected = selectedPostsType == PostsType.TODAY,
+              identifier = PostsType.TODAY,
+            ),
+            ToggleableButtonItem(
+              label = stringResource(Res.string.postsLast24Hours),
+              isSelected = selectedPostsType == PostsType.LAST_24_HOURS,
+              identifier = PostsType.LAST_24_HOURS,
+            ),
+            ToggleableButtonItem(
+              label = stringResource(Res.string.postsUnread),
+              isSelected = selectedPostsType == PostsType.UNREAD,
+              identifier = PostsType.UNREAD,
+            ),
+          ),
+        onItemSelected = {
+          selectedPostsType = it.identifier as PostsType
+          val postsSortOrder = getSortedPostsOrder(selectedSortBy, selectedSortDirection)
+
+          onApply(selectedPostsType, postsSortOrder)
+        },
+      )
+
       SectionHeader(text = stringResource(Res.string.postsSortBy), icon = TwineIcons.CalendarClock)
 
       ToggleableButtonGroup(
@@ -154,41 +189,6 @@ internal fun PostsPreferencesSheet(
           ),
         onItemSelected = {
           selectedSortDirection = it.identifier as SortDirection
-          val postsSortOrder = getSortedPostsOrder(selectedSortBy, selectedSortDirection)
-
-          onApply(selectedPostsType, postsSortOrder)
-        },
-      )
-
-      SectionHeader(text = stringResource(Res.string.filter), icon = TwineIcons.FilterList)
-
-      ToggleableButtonGroup(
-        modifier = Modifier.fillMaxWidth(),
-        items =
-          listOf(
-            ToggleableButtonItem(
-              label = stringResource(Res.string.postsAll),
-              isSelected = selectedPostsType == PostsType.ALL,
-              identifier = PostsType.ALL,
-            ),
-            ToggleableButtonItem(
-              label = stringResource(Res.string.postsToday),
-              isSelected = selectedPostsType == PostsType.TODAY,
-              identifier = PostsType.TODAY,
-            ),
-            ToggleableButtonItem(
-              label = stringResource(Res.string.postsLast24Hours),
-              isSelected = selectedPostsType == PostsType.LAST_24_HOURS,
-              identifier = PostsType.LAST_24_HOURS,
-            ),
-            ToggleableButtonItem(
-              label = stringResource(Res.string.postsUnread),
-              isSelected = selectedPostsType == PostsType.UNREAD,
-              identifier = PostsType.UNREAD,
-            ),
-          ),
-        onItemSelected = {
-          selectedPostsType = it.identifier as PostsType
           val postsSortOrder = getSortedPostsOrder(selectedSortBy, selectedSortDirection)
 
           onApply(selectedPostsType, postsSortOrder)
