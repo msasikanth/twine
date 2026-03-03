@@ -62,9 +62,10 @@ class AppViewModel(
   private val observableActiveSource: ObservableActiveSource,
   private val syncCoordinator: SyncCoordinator,
   private val oAuthManager: OAuthManager,
+  private val appInfo: AppInfo,
 ) : ViewModel() {
 
-  private val _state = MutableStateFlow(AppState.DEFAULT)
+  private val _state = MutableStateFlow(AppState.DEFAULT.copy(versionName = appInfo.versionName))
   val state: StateFlow<AppState>
     get() = _state
 
@@ -74,6 +75,14 @@ class AppViewModel(
   init {
     refreshFeedsIfExpired()
     setupSessionTracking()
+
+    viewModelScope.launch {
+      val isOnboardingDone = settingsRepository.isOnboardingDone.first()
+      val lastSeenChangelogVersion = settingsRepository.lastSeenChangelogVersion.first()
+      if (isOnboardingDone && lastSeenChangelogVersion != appInfo.versionName) {
+        _state.update { it.copy(showChangelog = true) }
+      }
+    }
 
     combine(
         combine(
@@ -124,6 +133,13 @@ class AppViewModel(
 
   fun markPostAsRead(id: String) {
     viewModelScope.launch { rssRepository.updatePostReadStatus(read = true, id = id) }
+  }
+
+  fun onChangelogDismissed() {
+    viewModelScope.launch {
+      settingsRepository.updateLastSeenChangelogVersion(appInfo.versionName)
+      _state.update { it.copy(showChangelog = false) }
+    }
   }
 
   fun onCurrentlyPlayingDeepLink(playingPostId: String) {

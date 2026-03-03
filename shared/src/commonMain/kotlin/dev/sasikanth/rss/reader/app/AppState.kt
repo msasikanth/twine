@@ -33,6 +33,8 @@ data class AppState(
   val blockImages: Boolean,
   val activeSource: Source?,
   val postsType: PostsType,
+  val showChangelog: Boolean,
+  val versionName: String,
 ) {
 
   companion object {
@@ -47,6 +49,8 @@ data class AppState(
         blockImages = false,
         activeSource = null,
         postsType = PostsType.ALL,
+        showChangelog = false,
+        versionName = "",
       )
   }
 }
