@@ -32,8 +32,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.IconButton
 import dev.sasikanth.rss.reader.components.UnreadBadge
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.resources.icons.MoreVert
 import dev.sasikanth.rss.reader.resources.icons.Pin
 import dev.sasikanth.rss.reader.resources.icons.PinFilled
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -176,11 +175,7 @@ internal fun FeedGroupItem(
       }
 
       if (!isInMultiSelectMode && dragHandle == null) {
-        IconButton(
-          icon = Icons.Filled.MoreVert,
-          contentDescription = null,
-          onClick = onOptionsClick,
-        )
+        IconButton(icon = TwineIcons.MoreVert, contentDescription = null, onClick = onOptionsClick)
       }
     }
   }

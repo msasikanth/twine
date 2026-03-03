@@ -19,8 +19,6 @@ package dev.sasikanth.rss.reader.components.image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.RssFeed
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,6 +36,8 @@ import coil3.request.ImageRequest
 import coil3.size.Dimension
 import coil3.size.Size
 import dev.sasikanth.rss.reader.favicons.FavIconImageLoader
+import dev.sasikanth.rss.reader.resources.icons.RSS
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
@@ -109,9 +109,5 @@ internal fun FeedIcon(
 
 @Composable
 private fun PlaceHolderIcon() {
-  Icon(
-    imageVector = Icons.Rounded.RssFeed,
-    contentDescription = null,
-    tint = AppTheme.colorScheme.primary,
-  )
+  Icon(imageVector = TwineIcons.RSS, contentDescription = null, tint = AppTheme.colorScheme.primary)
 }

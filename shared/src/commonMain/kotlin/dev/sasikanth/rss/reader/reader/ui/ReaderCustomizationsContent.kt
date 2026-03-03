@@ -37,9 +37,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FormatLineSpacing
-import androidx.compose.material.icons.rounded.FormatSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -67,6 +64,8 @@ import dev.sasikanth.rss.reader.data.repository.ReaderFont.Outfit
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.RobotoSerif
 import dev.sasikanth.rss.reader.data.repository.isPremium
 import dev.sasikanth.rss.reader.resources.icons.CustomTypography
+import dev.sasikanth.rss.reader.resources.icons.FormatLineSpacing
+import dev.sasikanth.rss.reader.resources.icons.FormatSize
 import dev.sasikanth.rss.reader.resources.icons.Palette
 import dev.sasikanth.rss.reader.resources.icons.StarShine
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -188,7 +187,7 @@ private fun FontLineHeightStepper(
   ) {
     Icon(
       modifier = Modifier.requiredSize(20.dp),
-      imageVector = Icons.Rounded.FormatLineSpacing,
+      imageVector = TwineIcons.FormatLineSpacing,
       contentDescription = null,
       tint = AppTheme.colorScheme.onSurface,
     )
@@ -242,7 +241,7 @@ private fun FontScaleStepper(
   ) {
     Icon(
       modifier = Modifier.requiredSize(20.dp),
-      imageVector = Icons.Rounded.FormatSize,
+      imageVector = TwineIcons.FormatSize,
       contentDescription = null,
       tint = AppTheme.colorScheme.onSurface,
     )

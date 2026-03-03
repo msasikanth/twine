@@ -34,8 +34,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -54,6 +52,7 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.app.AppIcon
+import dev.sasikanth.rss.reader.resources.icons.CheckCircle
 import dev.sasikanth.rss.reader.resources.icons.StarShine
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -150,7 +149,7 @@ internal fun AppIconSelectionSheet(
                 contentAlignment = Alignment.Center,
               ) {
                 Icon(
-                  imageVector = Icons.Default.CheckCircle,
+                  imageVector = TwineIcons.CheckCircle,
                   contentDescription = null,
                   tint = Color.White,
                   modifier = Modifier.size(24.dp),

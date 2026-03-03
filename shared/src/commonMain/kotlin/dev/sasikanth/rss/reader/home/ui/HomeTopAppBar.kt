@@ -44,9 +44,6 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -69,7 +66,9 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.resources.icons.ArrowDown
 import dev.sasikanth.rss.reader.resources.icons.MarkAllAsRead
+import dev.sasikanth.rss.reader.resources.icons.Menu
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
@@ -119,7 +118,7 @@ internal fun HomeTopAppBar(
       if (onMenuClicked != null) {
         CircularIconButton(
           modifier = Modifier.padding(start = 12.dp),
-          icon = Icons.Rounded.Menu,
+          icon = TwineIcons.Menu,
           label = stringResource(Res.string.moreMenuOptions),
           onClick = onMenuClicked,
         )
@@ -228,7 +227,7 @@ private fun PostTypePill(postsType: PostsType, onClick: () -> Unit, modifier: Mo
 
     Icon(
       modifier = Modifier.requiredSize(20.dp),
-      imageVector = Icons.Rounded.KeyboardArrowDown,
+      imageVector = TwineIcons.ArrowDown,
       contentDescription = null,
       tint = AppTheme.colorScheme.onSurface,
     )
