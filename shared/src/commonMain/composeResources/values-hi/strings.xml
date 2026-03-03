@@ -200,7 +200,7 @@
   <string name="homeViewModeCompact">Compact</string>
   <string name="twinePremium">Twine premium subscription</string>
   <string name="twinePremiumDesc">Go Premium: Unlock everything and fuel future development.</string>
-  <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium. Thanks for supporting ❤️</string>
+  <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium.\nThanks for supporting ❤️</string>
   <string name="readerCustomisationsTypeface">Typeface</string>
   <string name="themeVariantColorScheme">Color scheme</string>
   <string name="themeVariantDynamic">Dynamic</string>
