@@ -103,6 +103,7 @@ import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -123,7 +124,7 @@ internal fun HomeScreen(
   modifier: Modifier = Modifier,
   canHandleBack: Boolean = true,
 ) {
-  val coroutineScope = rememberCoroutineScope()
+  val scope = rememberCoroutineScope()
   val state by viewModel.state.collectAsStateWithLifecycle()
   val feedsState by feedsViewModel.state.collectAsStateWithLifecycle()
   val linkHandler = LocalLinkHandler.current
@@ -132,16 +133,6 @@ internal fun HomeScreen(
   val sizeClass = LocalWindowSizeClass.current
   val shouldBlockImage = LocalBlockImage.current
   val inAppRating = LocalInAppRating.current
-
-  LaunchedEffect(Unit) {
-    viewModel.effects.collect { effect ->
-      when (effect) {
-        HomeEffect.RequestInAppRating -> inAppRating.request()
-      }
-    }
-  }
-
-  LaunchedEffect(Unit) { viewModel.openPost.collect { (index, post) -> openPost(index, post) } }
 
   val posts =
     remember(state.homeViewMode, state.allPosts, state.feedPosts, shouldBlockImage, sizeClass) {
@@ -168,15 +159,61 @@ internal fun HomeScreen(
         }
       }
       .collectAsStateWithLifecycle(initialValue = persistentListOf())
+
   val postsListState = rememberLazyListState()
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
-  val showScrollToTop by remember { derivedStateOf { postsListState.firstVisibleItemIndex > 0 } }
-  val unreadSinceLastSync = state.unreadSinceLastSync
 
   val canShowBottomBar = state.showPinnedSources && feedsState.pinnedSources.isNotEmpty()
   val appBarScrollBehaviour = TopAppBarDefaults.enterAlwaysScrollBehavior()
   val bottomBarScrollState =
     rememberPinnedSourcesBottomBarScrollBehavior(canScroll = { canShowBottomBar })
+
+  val scrollToTop =
+    remember<suspend () -> Unit>(bottomBarScrollState, appBarScrollBehaviour, postsListState) {
+      {
+        coroutineScope {
+          launch {
+            animate(initialValue = bottomBarScrollState.state.heightOffset, targetValue = 0f) {
+              value,
+              _ ->
+              bottomBarScrollState.state.heightOffset = value
+            }
+          }
+          launch {
+            animate(initialValue = appBarScrollBehaviour.state.heightOffset, targetValue = 0f) {
+              value,
+              _ ->
+              appBarScrollBehaviour.state.heightOffset = value
+            }
+          }
+          launch {
+            animate(initialValue = appBarScrollBehaviour.state.contentOffset, targetValue = 0f) {
+              value,
+              _ ->
+              appBarScrollBehaviour.state.contentOffset = value
+            }
+          }
+          postsListState.animateScrollToItem(0)
+        }
+      }
+    }
+
+  LaunchedEffect(Unit) {
+    viewModel.effects.collect { effect ->
+      when (effect) {
+        HomeEffect.RequestInAppRating -> inAppRating.request()
+        HomeEffect.ScrollToTop -> {
+          scrollToTop()
+        }
+      }
+    }
+  }
+
+  LaunchedEffect(Unit) { viewModel.openPost.collect { (index, post) -> openPost(index, post) } }
+
+  val showScrollToTop by remember { derivedStateOf { postsListState.firstVisibleItemIndex > 0 } }
+  val unreadSinceLastSync = state.unreadSinceLastSync
+
   val homeScrollBehavior = rememberHomeScrollBehavior(appBarScrollBehaviour, bottomBarScrollState)
 
   LaunchedEffect(triggerSync) {
@@ -415,7 +452,7 @@ internal fun HomeScreen(
                   },
                   onPostBookmarkClick = { viewModel.dispatch(HomeEvent.OnPostBookmarkClick(it)) },
                   onPostCommentsClick = { commentsLink ->
-                    coroutineScope.launch { linkHandler.openLink(commentsLink) }
+                    scope.launch { linkHandler.openLink(commentsLink) }
                   },
                   onPostSourceClick = { feedId ->
                     viewModel.dispatch(HomeEvent.OnPostSourceClicked(feedId))
@@ -455,58 +492,9 @@ internal fun HomeScreen(
                 .unaryMinus()
                 .coerceAtMost(PINNED_SOURCES_BOTTOM_BAR_HEIGHT.toPx())
           },
-        onLoadNewArticlesClick = {
-          coroutineScope.launch {
-            launch {
-              animate(initialValue = bottomBarScrollState.state.heightOffset, targetValue = 0f) {
-                value,
-                _ ->
-                bottomBarScrollState.state.heightOffset = value
-              }
-            }
-            launch {
-              animate(initialValue = appBarScrollBehaviour.state.heightOffset, targetValue = 0f) {
-                value,
-                _ ->
-                appBarScrollBehaviour.state.heightOffset = value
-              }
-            }
-            launch {
-              animate(initialValue = appBarScrollBehaviour.state.contentOffset, targetValue = 0f) {
-                value,
-                _ ->
-                appBarScrollBehaviour.state.contentOffset = value
-              }
-            }
-            postsListState.animateScrollToItem(0)
-          }
-          viewModel.dispatch(HomeEvent.LoadNewArticlesClick)
-        },
+        onLoadNewArticlesClick = { viewModel.dispatch(HomeEvent.LoadNewArticlesClick) },
       ) {
-        coroutineScope.launch {
-          launch {
-            animate(initialValue = bottomBarScrollState.state.heightOffset, targetValue = 0f) {
-              value,
-              _ ->
-              bottomBarScrollState.state.heightOffset = value
-            }
-          }
-          launch {
-            animate(initialValue = appBarScrollBehaviour.state.heightOffset, targetValue = 0f) {
-              value,
-              _ ->
-              appBarScrollBehaviour.state.heightOffset = value
-            }
-          }
-          launch {
-            animate(initialValue = appBarScrollBehaviour.state.contentOffset, targetValue = 0f) {
-              value,
-              _ ->
-              appBarScrollBehaviour.state.contentOffset = value
-            }
-          }
-          postsListState.animateScrollToItem(0)
-        }
+        scrollToTop()
       }
     }
   }
