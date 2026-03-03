@@ -118,10 +118,10 @@
   <string name="openWebsite">Web sitesini aç</string>
   <string name="noNewPosts">Yeni içerik yok</string>
   <string name="noNewPostsSubtitle">Daha sonra tekrar kontrol edin veya şimdi yeni içerik için aşağı çekin</string>
-  <string name="postsAll">Tüm gönderiler</string>
+  <string name="postsAll">All</string>
   <string name="postsUnread">Okunmamış</string>
   <string name="postsToday">Bugün</string>
-  <string name="postsLast24Hours">Son 24 saat</string>
+  <string name="postsLast24Hours">24H</string>
   <string name="markAsRead">Okundu olarak işaretle</string>
   <string name="markAsUnRead">Okunmadı olarak işaretle</string>
   <string name="removeFeed">Akışı kaldır</string>
