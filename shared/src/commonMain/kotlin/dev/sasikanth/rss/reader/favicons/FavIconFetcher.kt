@@ -177,8 +177,8 @@ class FavIconFetcher(
       // Some websites have multiple icons for different sizes. Find the largest one.
       val sizes = element.attr("sizes")
       if (sizes.contains("x")) {
-        val size = sizes.split("x")[0].toInt()
-        if (size > largestSize) {
+        val size = sizes.split("x")[0].toIntOrNull()
+        if (size != null && size > largestSize) {
           largestSize = size
           largestSizeUrl = element.attr("abs:href")
         }
