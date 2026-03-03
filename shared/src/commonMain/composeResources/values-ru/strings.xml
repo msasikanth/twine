@@ -200,7 +200,7 @@
   <string name="homeViewModeCompact">Компактный</string>
   <string name="twinePremium">Подписка на Twine премиум</string>
   <string name="twinePremiumDesc">Переходите на премиум: открывайте все возможности приложения и стимулируйте его дальнейшее развитие.</string>
-  <string name="twinePremiumSubscribedDesc">Вы подписаны на Twine премиум. Спасибо за поддержку ❤️</string>
+  <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium.\nThanks for supporting ❤️</string>
   <string name="readerCustomisationsTypeface">Шрифт</string>
   <string name="themeVariantColorScheme">Color scheme</string>
   <string name="themeVariantDynamic">Dynamic</string>
