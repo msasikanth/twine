@@ -197,6 +197,9 @@ class FavIconFetcher(
 
   private fun newRequest(url: String? = null): NetworkRequest {
     val headers = options.httpHeaders.newBuilder()
+    headers["User-Agent"] =
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+
     val diskRead = options.diskCachePolicy.readEnabled
     val networkRead = options.networkCachePolicy.readEnabled
     when {
