@@ -118,10 +118,10 @@
   <string name="openWebsite">Open Website</string>
   <string name="noNewPosts">No new content</string>
   <string name="noNewPostsSubtitle">Check back later or pull down to check for new content now</string>
-  <string name="postsAll">All articles</string>
+  <string name="postsAll">All</string>
   <string name="postsUnread">Unread</string>
   <string name="postsToday">Today</string>
-  <string name="postsLast24Hours">Last 24 hours</string>
+  <string name="postsLast24Hours">24H</string>
   <string name="markAsRead">Mark as read</string>
   <string name="markAsUnRead">Mark as unread</string>
   <string name="removeFeed">Remove feed</string>
