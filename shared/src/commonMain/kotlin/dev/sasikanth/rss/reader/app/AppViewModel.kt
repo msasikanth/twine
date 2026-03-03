@@ -77,8 +77,9 @@ class AppViewModel(
     setupSessionTracking()
 
     viewModelScope.launch {
+      val isOnboardingDone = settingsRepository.isOnboardingDone.first()
       val lastSeenChangelogVersion = settingsRepository.lastSeenChangelogVersion.first()
-      if (lastSeenChangelogVersion != appInfo.versionName) {
+      if (isOnboardingDone && lastSeenChangelogVersion != appInfo.versionName) {
         _state.update { it.copy(showChangelog = true) }
       }
     }
