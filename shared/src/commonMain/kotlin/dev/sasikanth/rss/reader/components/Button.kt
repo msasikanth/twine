@@ -105,7 +105,7 @@ fun TranslucentButton(
     onClick = onClick,
   ) {
     val startPadding = if (leadingIcon == null) 20.dp else 16.dp
-    val endPadding = if (trailingIcon == null) 16.dp else 20.dp
+    val endPadding = if (trailingIcon == null) 20.dp else 16.dp
 
     Row(
       modifier = Modifier.padding(start = startPadding, end = endPadding),
