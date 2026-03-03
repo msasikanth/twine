@@ -17,16 +17,13 @@
 
 package dev.sasikanth.rss.reader.resources.icons
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.automirrored.rounded.ArrowBackIos
 import androidx.compose.ui.graphics.vector.ImageVector
 
 val TwineIcons.ArrowBack: ImageVector
   get() {
     return if (platform is Platform.Apple) {
-      Icons.AutoMirrored.Rounded.ArrowBackIos
+      TwineIcons.ArrowBackIos
     } else {
-      Icons.AutoMirrored.Rounded.ArrowBack
+      TwineIcons.ArrowBackDefault
     }
   }

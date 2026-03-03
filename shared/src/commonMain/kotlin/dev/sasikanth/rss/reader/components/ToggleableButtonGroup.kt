@@ -40,6 +40,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.ui.AppTheme
 
@@ -132,7 +133,13 @@ private fun ToggleableButton(
         }
 
       Box(contentAlignment = Alignment.Center) {
-        Text(item.label, style = MaterialTheme.typography.labelLarge, color = contentColor)
+        Text(
+          item.label,
+          style = MaterialTheme.typography.labelLarge,
+          color = contentColor,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
       }
     }
   }

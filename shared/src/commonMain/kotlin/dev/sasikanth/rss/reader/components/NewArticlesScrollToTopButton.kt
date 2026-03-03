@@ -38,8 +38,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -57,6 +55,8 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
+import dev.sasikanth.rss.reader.resources.icons.ArrowUp
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -155,7 +155,7 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
                 },
             ) {
               IconButton(
-                icon = Icons.Rounded.KeyboardArrowUp,
+                icon = TwineIcons.ArrowUp,
                 contentDescription = stringResource(Res.string.scrollToTop),
                 onClick = { coroutineScope.launch { onScrollToTopClick() } },
               )

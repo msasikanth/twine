@@ -43,8 +43,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -84,6 +82,7 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feed.FeedEvent
 import dev.sasikanth.rss.reader.feed.FeedViewModel
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.resources.icons.Check
 import dev.sasikanth.rss.reader.resources.icons.CopyLink
 import dev.sasikanth.rss.reader.resources.icons.DeleteOutline
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -255,7 +254,7 @@ private fun FeedUnreadCount(
     ) {
       Icon(
         modifier = Modifier.requiredSize(18.dp),
-        imageVector = Icons.Rounded.Check,
+        imageVector = TwineIcons.Check,
         contentDescription = null,
       )
 

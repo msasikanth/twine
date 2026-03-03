@@ -37,7 +37,6 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -157,16 +156,7 @@ internal fun PostListItem(
 
       if (!shouldBlockImage) {
         item.imageUrl?.let { url ->
-          Box(
-            modifier =
-              Modifier.requiredSizeIn(
-                minHeight = 64.dp,
-                minWidth = 64.dp,
-                maxHeight = 96.dp,
-                maxWidth = 96.dp,
-              ),
-            contentAlignment = Alignment.Center,
-          ) {
+          Box(modifier = Modifier.requiredSize(64.dp), contentAlignment = Alignment.Center) {
             AsyncImage(
               url = url,
               modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(25)),

@@ -34,8 +34,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -59,6 +57,8 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
+import dev.sasikanth.rss.reader.resources.icons.Remove
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -180,7 +180,7 @@ private fun PinnedSourceItem(
           contentColor = AppTheme.colorScheme.inverseOnSurface,
         ) {
           Icon(
-            imageVector = Icons.Rounded.Remove,
+            imageVector = TwineIcons.Remove,
             contentDescription = null,
             modifier = Modifier.padding(4.dp),
           )

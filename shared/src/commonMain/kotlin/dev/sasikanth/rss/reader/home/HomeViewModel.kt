@@ -245,7 +245,6 @@ class HomeViewModel(
     viewModelScope.launch {
       settingsRepository.updatePostsType(event.postsType)
       settingsRepository.updatePostsSortOrder(event.postsSortOrder)
-      _state.update { it.copy(showPostsSortFilter = false) }
     }
   }
 

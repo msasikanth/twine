@@ -45,9 +45,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -102,8 +99,10 @@ import dev.sasikanth.rss.reader.feeds.ui.common.pinnedSources
 import dev.sasikanth.rss.reader.feeds.ui.common.sourcesSearchResults
 import dev.sasikanth.rss.reader.resources.icons.Close
 import dev.sasikanth.rss.reader.resources.icons.Delete
+import dev.sasikanth.rss.reader.resources.icons.Edit
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.Pin
+import dev.sasikanth.rss.reader.resources.icons.Tune
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
@@ -466,9 +465,9 @@ private fun ExpandedDrawerContent(
             if (state.selectedSources.size == 1) {
               val editIcon =
                 if (state.selectedSources.first().sourceType == SourceType.FeedGroup) {
-                  Icons.Filled.Edit
+                  TwineIcons.Edit
                 } else {
-                  Icons.Filled.Tune
+                  TwineIcons.Tune
                 }
               val editLabel = stringResource(Res.string.edit)
 

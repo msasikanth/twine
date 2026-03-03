@@ -34,8 +34,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -91,6 +89,7 @@ import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeState
 import dev.sasikanth.rss.reader.home.HomeViewModel
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.resources.icons.ArrowUp
 import dev.sasikanth.rss.reader.resources.icons.Newsstand
 import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -578,7 +577,7 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
     Spacer(Modifier.requiredHeight(12.dp))
 
     Icon(
-      imageVector = Icons.Rounded.KeyboardArrowUp,
+      imageVector = TwineIcons.ArrowUp,
       contentDescription = null,
       tint = AppTheme.colorScheme.primary,
     )

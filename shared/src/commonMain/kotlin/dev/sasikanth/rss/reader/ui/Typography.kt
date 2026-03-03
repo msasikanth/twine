@@ -18,16 +18,13 @@ package dev.sasikanth.rss.reader.ui
 
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextDirection
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.sasikanth.rss.reader.utils.toSp
 import org.jetbrains.compose.resources.Font
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.comic_neue_bold
@@ -108,7 +105,7 @@ internal fun typography(
         fontWeight = FontWeight.Bold,
         fontSize = headlineLargeFontSize,
         lineHeight = 40.sp * lineHeightScalingFactor,
-        letterSpacing = headlineLargeFontSize * 0.02, // applying 2% letter spacing,
+        letterSpacing = -(headlineLargeFontSize * 0.02), // applying 2% letter spacing,
         lineHeightStyle = figmaLineHeightStyle,
       ),
     headlineMedium =
@@ -117,7 +114,7 @@ internal fun typography(
         fontWeight = FontWeight.Bold,
         fontSize = headlineMediumFontSize,
         lineHeight = 32.sp * lineHeightScalingFactor,
-        letterSpacing = headlineMediumFontSize * 0.02, // applying 2% letter spacing,
+        letterSpacing = -(headlineMediumFontSize * 0.02), // applying 2% letter spacing,
         lineHeightStyle = figmaLineHeightStyle,
       ),
     headlineSmall =
@@ -126,7 +123,7 @@ internal fun typography(
         fontWeight = FontWeight.Bold,
         fontSize = headlineSmallFontSize,
         lineHeight = 32.sp * lineHeightScalingFactor,
-        letterSpacing = headlineSmallFontSize * 0.02, // applying 2% letter spacing,
+        letterSpacing = -(headlineSmallFontSize * 0.02), // applying 2% letter spacing,
         lineHeightStyle = figmaLineHeightStyle,
       ),
     titleLarge =
@@ -206,11 +203,6 @@ internal fun typography(
       ),
   )
 }
-
-internal val Typography.bottomSheetItemLabel
-  @Composable
-  @ReadOnlyComposable
-  get() = labelSmall.copy(fontSize = 10.dp.toSp(), lineHeight = 24.dp.toSp())
 
 internal val ComicNeueFontFamily: FontFamily
   @Composable
