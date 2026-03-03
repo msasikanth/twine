@@ -118,10 +118,10 @@
   <string name="openWebsite">Website öffnen</string>
   <string name="noNewPosts">Keine neuen Beiträge</string>
   <string name="noNewPostsSubtitle">Schauen Sie später wieder vorbei oder ziehen Sie nach unten, um jetzt nach neuen Inhalten zu suchen</string>
-  <string name="postsAll">Alle Beiträge</string>
+  <string name="postsAll">All</string>
   <string name="postsUnread">Ungelesen</string>
   <string name="postsToday">Heute</string>
-  <string name="postsLast24Hours">Letzte 24 Stunden</string>
+  <string name="postsLast24Hours">24H</string>
   <string name="markAsRead">Als gelesen markieren</string>
   <string name="markAsUnRead">Als ungelesen markieren</string>
   <string name="removeFeed">Feed entfernen</string>
