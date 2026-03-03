@@ -118,10 +118,10 @@
   <string name="openWebsite">Открыть веб-сайт</string>
   <string name="noNewPosts">Свежих новостей нет</string>
   <string name="noNewPostsSubtitle">Зайдите позже или потяните вниз, чтобы проверить наличие свежих новостей</string>
-  <string name="postsAll">Все статьи</string>
+  <string name="postsAll">All</string>
   <string name="postsUnread">Непрочитанные</string>
   <string name="postsToday">За сегодня</string>
-  <string name="postsLast24Hours">За последние 24 часа</string>
+  <string name="postsLast24Hours">24H</string>
   <string name="markAsRead">Отметить как прочитанное</string>
   <string name="markAsUnRead">Отметить как непрочитанное</string>
   <string name="removeFeed">Удалить новостную ленту</string>
