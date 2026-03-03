@@ -17,7 +17,6 @@
 
 package dev.sasikanth.rss.reader.feeds.ui.common
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -62,7 +61,6 @@ import dev.sasikanth.rss.reader.resources.icons.Add
 import dev.sasikanth.rss.reader.resources.icons.Sort
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.bottomPaddingOfSourceItem
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -252,8 +250,6 @@ internal fun AllFeedsHeader(
         offset = DpOffset(0.dp, buttonHeight.unaryMinus()),
         onDismissRequest = { showSortDropdown = false },
       ) {
-        val translucentStyle = LocalTranslucentStyles.current
-
         FeedsOrderBy.entries
           .filter { it != FeedsOrderBy.Pinned }
           .forEach { sortOrder ->
@@ -269,26 +265,13 @@ internal fun AllFeedsHeader(
                 }
               }
 
-            val color =
-              if (feedsSortOrder == sortOrder) {
-                translucentStyle.default.background
-              } else {
-                Color.Unspecified
-              }
-            val labelColor =
-              if (feedsSortOrder == sortOrder) {
-                AppTheme.colorScheme.secondary
-              } else {
-                AppTheme.colorScheme.onSurface
-              }
-
             DropdownMenuItem(
-              modifier = Modifier.background(color),
+              selected = feedsSortOrder == sortOrder,
+              text = label,
               onClick = {
                 onFeedsSortChanged(sortOrder)
                 showSortDropdown = false
               },
-              text = { Text(label, color = labelColor) },
             )
           }
       }

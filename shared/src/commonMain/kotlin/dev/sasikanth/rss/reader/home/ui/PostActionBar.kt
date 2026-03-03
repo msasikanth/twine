@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -336,24 +335,14 @@ internal fun PostActions(
 
           DropdownMenuItem(
             modifier = Modifier.fillMaxWidth(),
+            leadingIcon =
+              if (postRead) {
+                TwineIcons.VisibilityOff
+              } else {
+                TwineIcons.Visibility
+              },
+            text = markAsReadLabel,
             contentDescription = markAsReadLabel,
-            text = {
-              Text(
-                text = markAsReadLabel,
-                color = AppTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Start,
-              )
-            },
-            leadingIcon = {
-              val icon =
-                if (postRead) {
-                  TwineIcons.VisibilityOff
-                } else {
-                  TwineIcons.Visibility
-                }
-
-              Icon(icon, contentDescription = null, tint = AppTheme.colorScheme.onSurface)
-            },
             onClick = {
               coroutineScope.launch {
                 onDropdownChange(false)
@@ -368,22 +357,9 @@ internal fun PostActions(
 
         DropdownMenuItem(
           modifier = Modifier.fillMaxWidth(),
+          leadingIcon = TwineIcons.Website,
+          text = openWebsiteLabel,
           contentDescription = openWebsiteLabel,
-          text = {
-            Text(
-              text = openWebsiteLabel,
-              color = AppTheme.colorScheme.onSurface,
-              textAlign = TextAlign.Start,
-            )
-          },
-          leadingIcon = {
-            Icon(
-              modifier = Modifier.requiredSize(24.dp),
-              imageVector = TwineIcons.Website,
-              contentDescription = null,
-              tint = AppTheme.colorScheme.onSurface,
-            )
-          },
           onClick = {
             coroutineScope.launch {
               onDropdownChange(false)
@@ -398,17 +374,9 @@ internal fun PostActions(
 
         DropdownMenuItem(
           modifier = Modifier.fillMaxWidth(),
+          leadingIcon = TwineIcons.Share,
+          text = shareLabel,
           contentDescription = shareLabel,
-          text = {
-            Text(
-              text = shareLabel,
-              color = AppTheme.colorScheme.onSurface,
-              textAlign = TextAlign.Start,
-            )
-          },
-          leadingIcon = {
-            Icon(TwineIcons.Share, contentDescription = null, tint = AppTheme.colorScheme.onSurface)
-          },
           onClick = {
             coroutineScope.launch {
               onDropdownChange(false)

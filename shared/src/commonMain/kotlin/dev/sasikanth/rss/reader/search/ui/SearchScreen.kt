@@ -671,18 +671,15 @@ private fun SortDropdownMenu(
   offset: DpOffset = DpOffset.Zero,
 ) {
   DropdownMenu(expanded = isDropdownExpanded, offset = offset, onDismissRequest = onDismiss) {
-    DropdownMenuItem(onClick = { onSortOrderChanged(Newest) }) {
-      Text(
-        text = stringResource(Res.string.searchSortNewestFirst),
-        style = MaterialTheme.typography.bodyLarge,
-      )
-    }
-    DropdownMenuItem(onClick = { onSortOrderChanged(Oldest) }) {
-      Text(
-        text = stringResource(Res.string.searchSortOldestFirst),
-        style = MaterialTheme.typography.bodyLarge,
-      )
-    }
+    DropdownMenuItem(
+      text = stringResource(Res.string.searchSortNewestFirst),
+      onClick = { onSortOrderChanged(Newest) },
+    )
+
+    DropdownMenuItem(
+      text = stringResource(Res.string.searchSortOldestFirst),
+      onClick = { onSortOrderChanged(Oldest) },
+    )
   }
 }
 

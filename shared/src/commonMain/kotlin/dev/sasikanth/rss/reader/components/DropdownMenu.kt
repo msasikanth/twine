@@ -24,17 +24,22 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -58,12 +63,13 @@ internal fun DropdownMenu(
 
 @Composable
 internal fun DropdownMenuItem(
+  text: String,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
-  leadingIcon: (@Composable () -> Unit)? = null,
+  leadingIcon: ImageVector? = null,
   contentDescription: String? = null,
   enabled: Boolean = true,
-  text: @Composable () -> Unit,
+  selected: Boolean = false,
 ) {
   Row(
     modifier =
@@ -72,29 +78,30 @@ internal fun DropdownMenuItem(
         .padding(vertical = 12.dp, horizontal = 20.dp)
         .fillMaxWidth()
   ) {
+    val translucentStyle = LocalTranslucentStyles.current
     val contentColor =
-      if (enabled) {
-        AppTheme.colorScheme.onSurface
-      } else {
-        AppTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+      when {
+        !enabled -> translucentStyle.default.outline
+        selected -> AppTheme.colorScheme.primary
+        else -> AppTheme.colorScheme.onSurface
       }
     val iconColor =
       if (enabled) {
         AppTheme.colorScheme.onSurfaceVariant
       } else {
-        AppTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+        translucentStyle.default.outline
       }
 
     CompositionLocalProvider(LocalContentColor provides iconColor) {
       if (leadingIcon != null) {
-        leadingIcon()
-        Spacer(Modifier.width(16.dp))
-      } else {
-        Spacer(Modifier.width(4.dp))
+        Icon(modifier = Modifier.size(20.dp), imageVector = leadingIcon, contentDescription = null)
+        Spacer(Modifier.width(12.dp))
       }
     }
 
-    CompositionLocalProvider(LocalContentColor provides contentColor) { text() }
+    CompositionLocalProvider(LocalContentColor provides contentColor) {
+      Text(text = text, style = MaterialTheme.typography.bodyMedium)
+    }
   }
 }
 

@@ -329,12 +329,8 @@ private fun ThemeModeSelector(
     ) {
       AppThemeMode.entries.forEach { mode ->
         DropdownMenuItem(
-          text = {
-            val textColor =
-              if (mode == appThemeMode) AppTheme.colorScheme.primary
-              else AppTheme.colorScheme.onSurface
-            Text(mode.displayName(), color = textColor)
-          },
+          text = mode.displayName(),
+          selected = mode == appThemeMode,
           onClick = {
             onAppThemeModeChanged(mode)
             showDropdown = false
