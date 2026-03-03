@@ -348,10 +348,6 @@ private fun ThemeModeSelector(
 @Composable
 private fun LayoutSelection(homeViewMode: HomeViewMode, onLayoutChanged: (HomeViewMode) -> Unit) {
   Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp)) {
-    LayoutPreview(homeViewMode = homeViewMode)
-
-    Spacer(Modifier.requiredHeight(16.dp))
-
     ToggleableButtonGroup(
       items =
         listOf(
@@ -373,6 +369,10 @@ private fun LayoutSelection(homeViewMode: HomeViewMode, onLayoutChanged: (HomeVi
         ),
       onItemSelected = { onLayoutChanged(it.identifier as HomeViewMode) },
     )
+
+    Spacer(Modifier.requiredHeight(16.dp))
+
+    LayoutPreview(homeViewMode = homeViewMode)
   }
 }
 
