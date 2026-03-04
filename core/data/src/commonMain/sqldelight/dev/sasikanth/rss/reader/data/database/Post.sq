@@ -90,15 +90,16 @@ BEGIN
 END;
 
 upsert:
-INSERT INTO post(id, sourceId, title, description, imageUrl, audioUrl, postDate, createdAt, updatedAt, syncedAt, link, commentsLink)
-VALUES (:id,  :sourceId, :title, :description, :imageUrl, :audioUrl, :postDate,  :createdAt, :updatedAt, :syncedAt, :link, :commentsLink)
+INSERT INTO post(id, sourceId, title, description, imageUrl, audioUrl, postDate, createdAt, updatedAt, syncedAt, link, commentsLink, remoteId)
+VALUES (:id,  :sourceId, :title, :description, :imageUrl, :audioUrl, :postDate,  :createdAt, :updatedAt, :syncedAt, :link, :commentsLink, :remoteId)
 ON CONFLICT(id, sourceId) DO
 UPDATE SET
     title = excluded.title,
     description = excluded.description,
     imageUrl = excluded.imageUrl,
     audioUrl = excluded.audioUrl,
-    postDate = CASE WHEN :isDateParsedCorrectly == 1 AND postDate < excluded.postDate THEN excluded.postDate ELSE postDate END;
+    postDate = CASE WHEN :isDateParsedCorrectly == 1 AND postDate < excluded.postDate THEN excluded.postDate ELSE postDate END,
+    remoteId = COALESCE(post.remoteId, excluded.remoteId);
 
 featuredPosts:
 SELECT
@@ -635,9 +636,17 @@ postByRemoteId:
 SELECT * FROM post
 WHERE remoteId = :remoteId;
 
+postsByRemoteIds:
+SELECT * FROM post
+WHERE remoteId IN :remoteIds;
+
 postByLink:
 SELECT * FROM post
 WHERE link = :link;
+
+postsByLinks:
+SELECT * FROM post
+WHERE link IN :links;
 
 postPosition:
 SELECT COUNT(*) FROM post

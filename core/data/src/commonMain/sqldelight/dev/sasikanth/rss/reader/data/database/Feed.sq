@@ -152,6 +152,9 @@ UPDATE feed SET remoteId = :remoteId, lastUpdatedAt = :lastUpdatedAt WHERE id = 
 feedByRemoteId:
 SELECT * FROM feed WHERE remoteId = :remoteId AND isDeleted = 0;
 
+feedsByRemoteIds:
+SELECT * FROM feed WHERE remoteId IN :remoteIds AND isDeleted = 0;
+
 allFeedsBlocking:
 SELECT * FROM feed;
 

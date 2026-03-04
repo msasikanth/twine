@@ -192,6 +192,7 @@ class RssRepository(
           link = postPayload.link,
           commentsLink = postPayload.commentsLink,
           isDateParsedCorrectly = if (postPayload.isDateParsedCorrectly) 1 else 0,
+          remoteId = postPayload.remoteId,
         )
 
         postContentQueries.upsert(
@@ -1122,6 +1123,12 @@ class RssRepository(
     }
   }
 
+  suspend fun postsByRemoteIds(remoteIds: Set<String>): List<Post> {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.postsByRemoteIds(remoteIds, ::Post).executeAsList()
+    }
+  }
+
   suspend fun postsWithImagesAndNoSeedColor(limit: Long): List<ResolvedPost> {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries
@@ -1136,8 +1143,18 @@ class RssRepository(
     }
   }
 
+  suspend fun postsByLinks(links: Set<String>): List<Post> {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.postsByLinks(links, ::Post).executeAsList()
+    }
+  }
+
   fun feedByRemoteId(remoteId: String): Feed? {
     return feedQueries.feedByRemoteId(remoteId, mapper = ::mapToFeed).executeAsOneOrNull()
+  }
+
+  fun feedsByRemoteIds(remoteIds: Set<String>): List<Feed> {
+    return feedQueries.feedsByRemoteIds(remoteIds, mapper = ::mapToFeed).executeAsList()
   }
 
   suspend fun upsertPosts(posts: List<Post>) {
