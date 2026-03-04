@@ -155,6 +155,7 @@
   <string name="feedsBottomBarNewFeed">Новый канал</string>
   <string name="actionPin">Закрепить</string>
   <string name="actionUnpin">Открепить</string>
+  <string name="actionSelect">Select</string>
   <string name="actionDelete">Удалить</string>
   <string name="actionAddTo">Добавить к</string>
   <string name="actionMoveTo">Перейти к</string>
