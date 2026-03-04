@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.feed
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -42,6 +43,7 @@ import kotlinx.datetime.toInstant
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
+@Stable
 @Inject
 class FeedViewModel(
   private val dispatchersProvider: DispatchersProvider,
