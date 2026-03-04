@@ -30,6 +30,7 @@ data class GroupState(
   val feeds: Flow<PagingData<Feed>>,
   val selectedSources: Set<Source>,
   val feedsOrderBy: FeedsOrderBy,
+  val feedAction: Feed? = null,
   val showDeleteConfirmation: Boolean,
 ) {
 
@@ -44,6 +45,7 @@ data class GroupState(
         feeds = emptyFlow(),
         selectedSources = emptySet(),
         feedsOrderBy = FeedsOrderBy.Latest,
+        feedAction = null,
         showDeleteConfirmation = false,
       )
   }

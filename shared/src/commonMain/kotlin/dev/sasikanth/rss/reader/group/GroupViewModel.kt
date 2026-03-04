@@ -72,6 +72,7 @@ class GroupViewModel(
       is GroupEvent.OnFeedsSortOrderChanged -> onFeedsSortOrderChanged(event.feedsOrderBy)
       GroupEvent.OnCancelSelectionClicked -> onCancelSelectionClicked()
       is GroupEvent.OnFeedClicked -> onFeedClicked(event.feed)
+      is GroupEvent.OnFeedSelected -> onFeedSelected(event.feed)
       GroupEvent.OnDeleteSelectedFeedsClicked -> onDeleteSelectedFeedsClicked()
       GroupEvent.DeleteSelectedSources -> deleteSelectedSources()
       GroupEvent.DismissDeleteConfirmation -> dismissDeleteConfirmation()
@@ -82,11 +83,18 @@ class GroupViewModel(
     viewModelScope
       .launch {
         try {
+          val sourcesToDelete =
+            if (_state.value.feedAction != null) {
+              setOf(_state.value.feedAction!!)
+            } else {
+              _state.value.selectedSources
+            }
+
           rssRepository.removeFeedIdsFromGroups(
             groupIds = setOf(groupId),
-            feedIds = _state.value.selectedSources.map { it.id },
+            feedIds = sourcesToDelete.map { it.id },
           )
-          rssRepository.markSourcesAsDeleted(_state.value.selectedSources)
+          rssRepository.markSourcesAsDeleted(sourcesToDelete)
         } catch (e: Exception) {
           Logger.e("Failed to delete feeds from group: $e")
         }
@@ -94,11 +102,12 @@ class GroupViewModel(
       .invokeOnCompletion {
         observableActiveSource.clearSelection()
         dispatch(GroupEvent.OnCancelSelectionClicked)
+        _state.update { it.copy(feedAction = null) }
       }
   }
 
   private fun dismissDeleteConfirmation() {
-    _state.update { it.copy(showDeleteConfirmation = false) }
+    _state.update { it.copy(showDeleteConfirmation = false, feedAction = null) }
   }
 
   private fun onDeleteSelectedFeedsClicked() {
@@ -142,6 +151,10 @@ class GroupViewModel(
     }
   }
 
+  private fun onFeedSelected(feed: Feed) {
+    _state.update { it.copy(feedAction = feed) }
+  }
+
   private fun onCancelSelectionClicked() {
     _state.update { it.copy(selectedSources = emptySet()) }
   }
@@ -152,28 +165,39 @@ class GroupViewModel(
 
   private fun onUngroupClicked() {
     viewModelScope.launch {
+      val feedsToUngroup =
+        if (_state.value.feedAction != null) {
+          setOf(_state.value.feedAction!!)
+        } else {
+          _state.value.selectedSources
+        }
+
       rssRepository.removeFeedIdsFromGroups(
         groupIds = setOf(groupId),
-        feedIds = _state.value.selectedSources.map { it.id },
+        feedIds = feedsToUngroup.map { it.id },
       )
 
-      _state.update { it.copy(selectedSources = emptySet()) }
+      _state.update { it.copy(selectedSources = emptySet(), feedAction = null) }
     }
   }
 
   private fun onGroupsSelected(groupIds: Set<String>) {
     viewModelScope.launch {
+      val feedsToMove =
+        if (_state.value.feedAction != null) {
+          setOf(_state.value.feedAction!!)
+        } else {
+          _state.value.selectedSources
+        }
+
       rssRepository.removeFeedIdsFromGroups(
         groupIds = setOf(groupId),
-        feedIds = _state.value.selectedSources.map { it.id },
+        feedIds = feedsToMove.map { it.id },
       )
 
-      rssRepository.addFeedIdsToGroups(
-        groupIds = groupIds,
-        feedIds = _state.value.selectedSources.map { it.id },
-      )
+      rssRepository.addFeedIdsToGroups(groupIds = groupIds, feedIds = feedsToMove.map { it.id })
 
-      _state.update { it.copy(selectedSources = emptySet()) }
+      _state.update { it.copy(selectedSources = emptySet(), feedAction = null) }
     }
   }
 
