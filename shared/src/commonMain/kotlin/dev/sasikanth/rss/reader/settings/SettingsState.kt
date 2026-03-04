@@ -70,11 +70,14 @@ data class SettingsState(
   val isSubscribed: Boolean
     get() = subscriptionResult == SubscriptionResult.Subscribed
 
-  enum class SyncProgress {
-    Idle,
-    Syncing,
-    Success,
-    Failure,
+  sealed interface SyncProgress {
+    data object Idle : SyncProgress
+
+    data object Syncing : SyncProgress
+
+    data object Success : SyncProgress
+
+    data class Failure(val exception: Exception) : SyncProgress
   }
 
   companion object {
