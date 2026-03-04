@@ -43,19 +43,23 @@ import dev.sasikanth.rss.reader.settings.ui.items.AboutItem
 import dev.sasikanth.rss.reader.settings.ui.items.DeleteAppDataConfirmationDialog
 import dev.sasikanth.rss.reader.settings.ui.items.DeleteAppDataSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.ReportIssueSettingItem
+import dev.sasikanth.rss.reader.settings.ui.items.SettingItem
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.changelogTitle
 import twine.shared.generated.resources.settingsAppInfoAndFeedback
 import twine.shared.generated.resources.settingsDangerZone
+import twine.shared.generated.resources.settingsVersion
 
 @Composable
 internal fun SettingsAppInfoScreen(
   viewModel: SettingsViewModel,
   goBack: () -> Unit,
   openAbout: () -> Unit,
+  openChangelog: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val coroutineScope = rememberCoroutineScope()
@@ -93,6 +97,19 @@ internal fun SettingsAppInfoScreen(
             bottom = padding.calculateBottomPadding() + 80.dp,
           ),
       ) {
+        item {
+          SettingItem(
+            title = stringResource(Res.string.changelogTitle),
+            subtitle =
+              stringResource(
+                Res.string.settingsVersion,
+                state.appInfo.versionName,
+                state.appInfo.versionCode,
+              ),
+            onClick = openChangelog,
+          )
+        }
+
         item {
           ReportIssueSettingItem(
             appInfo = state.appInfo,

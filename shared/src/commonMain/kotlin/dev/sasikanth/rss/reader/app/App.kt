@@ -392,7 +392,11 @@ fun App(
           navController = navController,
         )
 
-        settingsAppInfoScreen(settingsViewModel = settingsViewModel, navController = navController)
+        settingsAppInfoScreen(
+          settingsViewModel = settingsViewModel,
+          openChangelog = { appViewModel.openChangelog() },
+          navController = navController,
+        )
 
         feedInfoDialog(feedViewModel = feedViewModel, navController = navController)
 

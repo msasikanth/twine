@@ -375,6 +375,7 @@ fun NavGraphBuilder.settingsDataScreen(
 
 fun NavGraphBuilder.settingsAppInfoScreen(
   settingsViewModel: () -> SettingsViewModel,
+  openChangelog: () -> Unit,
   navController: NavHostController,
 ) {
   composable<Screen.SettingsAppInfo> {
@@ -383,6 +384,7 @@ fun NavGraphBuilder.settingsAppInfoScreen(
       viewModel = viewModel,
       goBack = { navController.popBackStack() },
       openAbout = { navController.navigate(Screen.About) },
+      openChangelog = openChangelog,
     )
   }
 }
