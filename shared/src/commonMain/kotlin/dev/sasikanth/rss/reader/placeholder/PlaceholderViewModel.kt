@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.placeholder
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sasikanth.rss.reader.data.repository.RssRepository
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
+@Stable
 @Inject
 class PlaceholderViewModel(
   private val rssRepository: RssRepository,
