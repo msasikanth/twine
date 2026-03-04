@@ -18,7 +18,7 @@ package dev.sasikanth.rss.reader.utils
 
 import dev.sasikanth.rss.reader.data.utils.Constants
 
-internal object Constants {
+object Constants {
   const val EPSILON = 1e-6f
   const val REPORT_ISSUE_LINK = "https://github.com/msasikanth/twine/issues"
 
@@ -52,4 +52,6 @@ internal object Constants {
   const val MAX_FREE_FEEDS = 30
 
   internal const val ENTITLEMENT_PREMIUM = "Premium"
+
+  const val BULLET_POINT = "\u2022"
 }

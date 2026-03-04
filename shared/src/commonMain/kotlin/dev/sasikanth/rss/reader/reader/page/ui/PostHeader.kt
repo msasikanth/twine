@@ -74,6 +74,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
+import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import org.jetbrains.compose.resources.stringResource
@@ -152,7 +153,7 @@ internal fun PostHeader(
               modifier = Modifier.padding(horizontal = 4.dp).clearAndSetSemantics {},
               style = MaterialTheme.typography.bodyMedium,
               maxLines = 1,
-              text = "\u2022",
+              text = Constants.BULLET_POINT,
               color = AppTheme.colorScheme.outline,
             )
 
