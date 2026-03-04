@@ -17,7 +17,6 @@
 
 package dev.sasikanth.rss.reader.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,7 +28,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
@@ -40,7 +38,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -72,21 +69,11 @@ internal fun ContextActionsBottomBar(
 
       Spacer(Modifier.requiredHeight(4.dp))
 
-      OutlinedButton(
+      InverseButton(
         modifier = Modifier.fillMaxWidth(),
-        colors =
-          ButtonDefaults.outlinedButtonColors(
-            containerColor = Color.Unspecified,
-            contentColor = AppTheme.colorScheme.onSurface,
-          ),
-        border = BorderStroke(1.dp, AppTheme.colorScheme.outline),
+        text = stringResource(Res.string.buttonCancel),
         onClick = onCancel,
-      ) {
-        Text(
-          text = stringResource(Res.string.buttonCancel),
-          style = MaterialTheme.typography.labelLarge,
-        )
-      }
+      )
     }
   }
 }
