@@ -65,7 +65,7 @@ internal fun ChangelogSheet(
   ModalBottomSheet(
     modifier = modifier,
     onDismissRequest = onDismiss,
-    containerColor = AppTheme.colorScheme.surfaceContainerLowest,
+    containerColor = AppTheme.colorScheme.surfaceContainerHighest,
     contentColor = AppTheme.colorScheme.onSurface,
     sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
   ) {
