@@ -29,10 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
@@ -71,8 +67,6 @@ internal fun PostsDeletionPeriodSettingItem(
     )
 
     Box {
-      val density = LocalDensity.current
-      var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
       val period =
         when (postsDeletionPeriod) {
           Period.ONE_WEEK -> stringResource(Res.string.settingsPostsDeletionPeriodOneWeek)
@@ -85,20 +79,12 @@ internal fun PostsDeletionPeriodSettingItem(
         }
 
       TranslucentButton(
-        modifier =
-          Modifier.onGloballyPositioned { coordinates ->
-            buttonHeight = with(density) { coordinates.size.height.toDp() }
-          },
         text = period,
         trailingIcon = TwineIcons.ArrowDown,
         onClick = { showDropdown = true },
       )
 
-      DropdownMenu(
-        offset = DpOffset(0.dp, buttonHeight.unaryMinus()),
-        expanded = showDropdown,
-        onDismissRequest = { showDropdown = false },
-      ) {
+      DropdownMenu(expanded = showDropdown, onDismissRequest = { showDropdown = false }) {
         Period.entries.forEach { period ->
           val periodString =
             when (period) {
