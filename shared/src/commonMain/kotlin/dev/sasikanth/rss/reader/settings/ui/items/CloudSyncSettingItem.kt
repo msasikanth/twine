@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.settings.ui.items
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.components.CircularIconButton
@@ -76,6 +78,7 @@ internal fun CloudSyncSettingItem(
   onSyncClicked: (CloudServiceProvider) -> Unit,
   onAPIServiceClicked: (APIServiceProvider) -> Unit,
   onSignOutClicked: () -> Unit,
+  onSyncErrorClicked: (Exception) -> Unit,
 ) {
   availableProviders.forEach { provider ->
     val label =
@@ -93,6 +96,14 @@ internal fun CloudSyncSettingItem(
         Modifier.fillMaxWidth()
           .padding(vertical = verticalPadding)
           .padding(start = 16.dp, end = 24.dp)
+          .clip(MaterialTheme.shapes.medium)
+          .then(
+            if (syncProgress is SettingsState.SyncProgress.Failure && isSignedIn) {
+              Modifier.clickable { onSyncErrorClicked(syncProgress.exception) }
+            } else {
+              Modifier
+            }
+          )
     ) {
       Row(verticalAlignment = Alignment.CenterVertically) {
         val icon =
@@ -144,13 +155,13 @@ internal fun CloudSyncSettingItem(
               SettingsState.SyncProgress.Success ->
                 stringResource(Res.string.settingsSyncStatusSuccess)
 
-              SettingsState.SyncProgress.Failure ->
+              is SettingsState.SyncProgress.Failure ->
                 stringResource(Res.string.settingsSyncStatusFailure)
             }
 
           if (
-            syncProgress != SettingsState.SyncProgress.Idle &&
-              syncProgress != SettingsState.SyncProgress.Syncing &&
+            syncProgress !is SettingsState.SyncProgress.Idle &&
+              syncProgress !is SettingsState.SyncProgress.Syncing &&
               lastSyncedAt != null &&
               isSignedIn
           ) {
@@ -158,7 +169,7 @@ internal fun CloudSyncSettingItem(
           }
 
           AnimatedVisibility(
-            visible = syncProgress != SettingsState.SyncProgress.Idle && isSignedIn
+            visible = syncProgress !is SettingsState.SyncProgress.Idle && isSignedIn
           ) {
             Text(
               text = statusString,

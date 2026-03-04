@@ -54,6 +54,7 @@ import twine.shared.generated.resources.buttonCancel
 import twine.shared.generated.resources.enableAutoSyncDesc
 import twine.shared.generated.resources.enableAutoSyncTitle
 import twine.shared.generated.resources.freshRssClearDataPositive
+import twine.shared.generated.resources.freshRssErrorUnknown
 import twine.shared.generated.resources.settingsBlockImagesSubtitle
 import twine.shared.generated.resources.settingsBlockImagesTitle
 import twine.shared.generated.resources.settingsDownloadFullContentSubtitle
@@ -66,6 +67,7 @@ import twine.shared.generated.resources.settingsServicesAndSync
 import twine.shared.generated.resources.settingsSyncDropbox
 import twine.shared.generated.resources.settingsSyncFreshRSS
 import twine.shared.generated.resources.settingsSyncMiniflux
+import twine.shared.generated.resources.settingsSyncStatusFailure
 import twine.shared.generated.resources.switchServiceDescription
 import twine.shared.generated.resources.switchServiceTitle
 
@@ -83,6 +85,17 @@ internal fun SettingsServicesScreen(
   val linkHandler = LocalLinkHandler.current
 
   var showSwitchServiceDialog by remember { mutableStateOf<CloudServiceProvider?>(null) }
+  var showSyncErrorDialog by remember { mutableStateOf<Exception?>(null) }
+
+  if (showSyncErrorDialog != null) {
+    AlertDialog(
+      title = stringResource(Res.string.settingsSyncStatusFailure),
+      text = showSyncErrorDialog!!.message ?: stringResource(Res.string.freshRssErrorUnknown),
+      confirmText = stringResource(Res.string.buttonCancel),
+      onConfirm = { showSyncErrorDialog = null },
+      onDismiss = { showSyncErrorDialog = null },
+    )
+  }
 
   if (showSwitchServiceDialog != null) {
     val toProvider = showSwitchServiceDialog!!
@@ -205,6 +218,7 @@ internal fun SettingsServicesScreen(
               }
             },
             onSignOutClicked = { viewModel.dispatch(SettingsEvent.SignOutClicked) },
+            onSyncErrorClicked = { showSyncErrorDialog = it },
           )
         }
 
