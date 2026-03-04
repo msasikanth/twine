@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
@@ -56,7 +57,9 @@ internal fun DropdownMenu(
     offset = offset,
     shape = MaterialTheme.shapes.largeIncreased,
     modifier =
-      modifier.background(color = AppTheme.colorScheme.surface, shape = MaterialTheme.shapes.large),
+      modifier
+        .sizeIn(minWidth = 216.dp)
+        .background(color = AppTheme.colorScheme.surface, shape = MaterialTheme.shapes.large),
     content = content,
   )
 }
