@@ -22,7 +22,6 @@ import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxCategory
-import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxEntry
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.core.network.miniflux.MinifluxSource
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
@@ -328,6 +327,7 @@ class MinifluxSyncCoordinator(
     val serverUrl = userRepository.currentUser()?.serverUrl?.removeSuffix("/")
     val remoteFeeds = minifluxSource.feeds()
     val localFeeds = rssRepository.allFeedsBlocking()
+    val localGroups = rssRepository.allFeedGroupsBlocking()
     var hasNewSubscriptions = false
 
     // 1. Handle remote deletions
@@ -348,7 +348,6 @@ class MinifluxSyncCoordinator(
     // 2. Handle remote group deletions
     val remoteCategories = minifluxSource.categories()
     val remoteCategoryIds = remoteCategories.map { it.id.toString() }.toSet()
-    val localGroups = rssRepository.allFeedGroupsBlocking()
 
     localGroups.forEach { localGroup ->
       if (
@@ -361,6 +360,13 @@ class MinifluxSyncCoordinator(
     }
 
     // 3. Handle new/updated subscriptions from remote
+    val localFeedsByLink = localFeeds.associateBy { it.link }
+    val localFeedsByRemoteId =
+      localFeeds.filter { it.remoteId != null }.associateBy { it.remoteId!! }
+    val localGroupsByRemoteId =
+      localGroups.filter { it.remoteId != null }.associateBy { it.remoteId!! }
+    val localGroupsByName = localGroups.associateBy { it.name }
+
     remoteFeeds.forEach { remoteFeed ->
       val iconUrl =
         if (remoteFeed.icon.externalIconId.isNotBlank() && serverUrl != null) {
@@ -370,7 +376,8 @@ class MinifluxSyncCoordinator(
         }
 
       val localFeed =
-        localFeeds.find { it.link == remoteFeed.feedUrl || it.remoteId == remoteFeed.id.toString() }
+        localFeedsByRemoteId[remoteFeed.id.toString()] ?: localFeedsByLink[remoteFeed.feedUrl]
+
       val feedId =
         if (localFeed != null) {
           if (
@@ -417,8 +424,7 @@ class MinifluxSyncCoordinator(
       val category = remoteFeed.category
 
       val localGroup =
-        rssRepository.feedGroupByRemoteId(category.id.toString())
-          ?: rssRepository.allFeedGroupsBlocking().find { it.name == category.title }
+        localGroupsByRemoteId[category.id.toString()] ?: localGroupsByName[category.title]
 
       val groupId =
         if (localGroup != null) {
@@ -442,13 +448,13 @@ class MinifluxSyncCoordinator(
             isDeleted = false,
             remoteId = category.id.toString(),
           )
+          // Since we just upserted, we can't rely on localGroupsByRemoteId map
           rssRepository.feedGroupByRemoteId(category.id.toString())!!.id
         }
 
       // Remove feed from all groups except the target group
-      val allGroups = rssRepository.allFeedGroupsBlocking()
       val groupsContainingFeed =
-        allGroups.filter { it.feedIds.contains(feedId) && it.id != groupId }
+        localGroups.filter { it.feedIds.contains(feedId) && it.id != groupId }
       if (groupsContainingFeed.isNotEmpty()) {
         rssRepository.removeFeedIdsFromGroups(
           groupIds = groupsContainingFeed.map { it.id }.toSet(),
@@ -457,8 +463,10 @@ class MinifluxSyncCoordinator(
       }
 
       // Add feed to the correct group
-      val isFeedInGroup =
-        rssRepository.feedGroupBlocking(groupId)?.feedIds?.contains(feedId) ?: false
+      // We can't easily use the pre-fetched localGroups for feedIds check if it changed in this
+      // loop,
+      // but we can check if it's already in the target group.
+      val isFeedInGroup = localGroups.find { it.id == groupId }?.feedIds?.contains(feedId) ?: false
       if (!isFeedInGroup) {
         rssRepository.addFeedIdsToGroups(setOf(groupId), listOf(feedId))
       }
@@ -489,58 +497,64 @@ class MinifluxSyncCoordinator(
           feedId = feedId,
         )
       val entries = entriesPayload.entries
+      if (entries.isEmpty()) break
+
+      val remoteIds = entries.map { it.id.toString() }.toSet()
+      val urls = entries.map { it.url }.toSet()
+      val feedRemoteIds = entries.map { it.feedId.toString() }.toSet()
+
+      val existingPostsByRemoteId =
+        rssRepository.postsByRemoteIds(remoteIds).associateBy { it.remoteId }
+      val existingPostsByLink = rssRepository.postsByLinks(urls).associateBy { it.link }
+      val existingFeeds = rssRepository.feedsByRemoteIds(feedRemoteIds).associateBy { it.remoteId }
+
+      val postsToUpsertByFeed = mutableMapOf<String, MutableList<PostPayload>>()
+
       entries.forEach { entry ->
-        if (feedId == null || entry.feedId == feedId) {
-          val isNewArticle = upsertArticle(entry, downloadFullContent)
-          if (isNewArticle) {
+        val remoteId = entry.id.toString()
+        val localPost = existingPostsByRemoteId[remoteId] ?: existingPostsByLink[entry.url]
+
+        if (localPost != null) {
+          if (localPost.remoteId != remoteId) {
+            rssRepository.updatePostRemoteId(remoteId, localPost.id)
+          }
+        } else {
+          val feed = existingFeeds[entry.feedId.toString()]
+          if (feed != null) {
+            val htmlContent = articleHtmlParser.parse(entry.content)
+            val fullContent =
+              if (downloadFullContent && entry.url.isNotBlank()) {
+                fullArticleFetcher.fetch(entry.url, remoteId).getOrNull()
+              } else {
+                null
+              }
+            val postPubDateInMillis = entry.publishedAt.dateStringToEpochMillis()
+            val audioUrl =
+              entry.enclosures.firstOrNull { it.mimeType.startsWith("audio/") }?.url
+                ?: htmlContent?.audioUrl
+            val postPayload =
+              PostPayload(
+                title = entry.title,
+                link = entry.url,
+                description = htmlContent?.textContent ?: "",
+                rawContent = htmlContent?.cleanedHtml ?: entry.content,
+                imageUrl = htmlContent?.heroImage,
+                audioUrl = audioUrl,
+                date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
+                commentsLink = entry.commentsUrl,
+                fullContent = fullContent,
+                isDateParsedCorrectly = postPubDateInMillis != null,
+                remoteId = remoteId,
+              )
+
+            postsToUpsertByFeed.getOrPut(feed.id) { mutableListOf() }.add(postPayload)
             hasNewArticles = true
           }
         }
       }
 
-      offset += limit
-    } while (entries.size >= limit)
-
-    return hasNewArticles
-  }
-
-  private suspend fun upsertArticle(entry: MinifluxEntry, downloadFullContent: Boolean): Boolean {
-    val remoteId = entry.id.toString()
-    val localPost = rssRepository.postByRemoteId(remoteId) ?: rssRepository.postByLink(entry.url)
-
-    if (localPost != null) {
-      if (localPost.remoteId != remoteId) {
-        rssRepository.updatePostRemoteId(remoteId, localPost.id)
-      }
-      return false
-    } else {
-      val feed = rssRepository.feedByRemoteId(entry.feedId.toString())
-      if (feed != null) {
-        val htmlContent = articleHtmlParser.parse(entry.content)
-        val fullContent =
-          if (downloadFullContent && entry.url.isNotBlank()) {
-            fullArticleFetcher.fetch(entry.url, remoteId).getOrNull()
-          } else {
-            null
-          }
-        val postPubDateInMillis = entry.publishedAt.dateStringToEpochMillis()
-        val audioUrl =
-          entry.enclosures.firstOrNull { it.mimeType.startsWith("audio/") }?.url
-            ?: htmlContent?.audioUrl
-        val postPayload =
-          PostPayload(
-            title = entry.title,
-            link = entry.url,
-            description = htmlContent?.textContent ?: "",
-            rawContent = htmlContent?.cleanedHtml ?: entry.content,
-            imageUrl = htmlContent?.heroImage,
-            audioUrl = audioUrl,
-            date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
-            commentsLink = entry.commentsUrl,
-            fullContent = fullContent,
-            isDateParsedCorrectly = postPubDateInMillis != null,
-          )
-
+      postsToUpsertByFeed.forEach { (feedId, posts) ->
+        val feed = existingFeeds.values.find { it.id == feedId }!!
         rssRepository.upsertFeedWithPosts(
           feedPayload =
             FeedPayload(
@@ -549,19 +563,17 @@ class MinifluxSyncCoordinator(
               description = feed.description,
               homepageLink = feed.homepageLink,
               link = feed.link,
-              posts = flowOf(postPayload),
+              posts = flowOf(*posts.toTypedArray()),
             ),
           feedId = feed.id,
           updateFeed = false,
         )
-
-        rssRepository.postByLink(postPayload.link)?.let {
-          rssRepository.updatePostRemoteId(remoteId, it.id)
-        }
-        return true
       }
-      return false
-    }
+
+      offset += limit
+    } while (entries.size >= limit)
+
+    return hasNewArticles
   }
 
   private suspend fun fetchStarredEntryIds(): Set<String> {
