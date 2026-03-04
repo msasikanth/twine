@@ -155,6 +155,7 @@
   <string name="feedsBottomBarNewFeed">Yeni akış</string>
   <string name="actionPin">Sabitle</string>
   <string name="actionUnpin">Sabitlemeyi kaldır</string>
+  <string name="actionSelect">Select</string>
   <string name="actionDelete">Sil</string>
   <string name="actionAddTo">Ekle</string>
   <string name="actionMoveTo">Taşı</string>
