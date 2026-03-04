@@ -48,6 +48,7 @@ import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.itemKey
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.DropdownMenu
+import dev.sasikanth.rss.reader.components.DropdownMenuDivider
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -58,14 +59,22 @@ import dev.sasikanth.rss.reader.feeds.SourceListItem
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupItem
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
 import dev.sasikanth.rss.reader.resources.icons.Add
+import dev.sasikanth.rss.reader.resources.icons.Check
+import dev.sasikanth.rss.reader.resources.icons.Edit
+import dev.sasikanth.rss.reader.resources.icons.NewGroup
+import dev.sasikanth.rss.reader.resources.icons.RemoveFeed
 import dev.sasikanth.rss.reader.resources.icons.Sort
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.bottomPaddingOfSourceItem
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.actionAddTo
+import twine.shared.generated.resources.actionSelect
 import twine.shared.generated.resources.allFeeds
 import twine.shared.generated.resources.buttonAddFeed
+import twine.shared.generated.resources.edit
+import twine.shared.generated.resources.feedOptionRemove
 import twine.shared.generated.resources.feedsSortAlphabetical
 import twine.shared.generated.resources.feedsSortLatest
 import twine.shared.generated.resources.feedsSortOldest
@@ -82,6 +91,9 @@ internal fun LazyListScope.allSources(
   onSourceClick: (Source) -> Unit,
   onToggleSourceSelection: (Source) -> Unit,
   onPinClick: (Source) -> Unit,
+  onSourceEditClick: (Source) -> Unit,
+  onAddToGroupClick: (Source) -> Unit,
+  onRemoveSourceClick: (Source) -> Unit,
 ) {
   if (sources.itemCount > 0) {
     items(
@@ -131,7 +143,6 @@ internal fun LazyListScope.allSources(
                   },
                 onFeedGroupSelected = onToggleSourceSelection,
                 onFeedGroupClick = onSourceClick,
-                onOptionsClick = { onToggleSourceSelection(source) },
                 onPinClick = onPinClick,
                 modifier =
                   Modifier.padding(
@@ -141,6 +152,36 @@ internal fun LazyListScope.allSources(
                       bottom = bottomPadding,
                     )
                     .animateItem(),
+                dropdownMenuContent = { onDismiss ->
+                  DropdownMenuItem(
+                    text = stringResource(Res.string.edit),
+                    leadingIcon = TwineIcons.Edit,
+                    onClick = {
+                      onSourceEditClick(source)
+                      onDismiss()
+                    },
+                  )
+
+                  DropdownMenuItem(
+                    text = stringResource(Res.string.actionSelect),
+                    leadingIcon = TwineIcons.Check,
+                    onClick = {
+                      onToggleSourceSelection(source)
+                      onDismiss()
+                    },
+                  )
+
+                  DropdownMenuDivider()
+
+                  DropdownMenuItem(
+                    text = stringResource(Res.string.feedOptionRemove),
+                    leadingIcon = TwineIcons.RemoveFeed,
+                    onClick = {
+                      onRemoveSourceClick(source)
+                      onDismiss()
+                    },
+                  )
+                },
               )
             }
             is Feed -> {
@@ -170,7 +211,6 @@ internal fun LazyListScope.allSources(
                   },
                 onFeedClick = onSourceClick,
                 onFeedSelected = onToggleSourceSelection,
-                onOptionsClick = { onToggleSourceSelection(source) },
                 onPinClick = onPinClick,
                 modifier =
                   Modifier.padding(
@@ -180,6 +220,45 @@ internal fun LazyListScope.allSources(
                       bottom = bottomPadding,
                     )
                     .animateItem(),
+                dropdownMenuContent = { onDismiss ->
+                  DropdownMenuItem(
+                    text = stringResource(Res.string.actionAddTo),
+                    leadingIcon = TwineIcons.NewGroup,
+                    onClick = {
+                      onAddToGroupClick(source)
+                      onDismiss()
+                    },
+                  )
+
+                  DropdownMenuItem(
+                    text = stringResource(Res.string.edit),
+                    leadingIcon = TwineIcons.Edit,
+                    onClick = {
+                      onSourceEditClick(source)
+                      onDismiss()
+                    },
+                  )
+
+                  DropdownMenuItem(
+                    text = stringResource(Res.string.actionSelect),
+                    leadingIcon = TwineIcons.Check,
+                    onClick = {
+                      onToggleSourceSelection(source)
+                      onDismiss()
+                    },
+                  )
+
+                  DropdownMenuDivider()
+
+                  DropdownMenuItem(
+                    text = stringResource(Res.string.feedOptionRemove),
+                    leadingIcon = TwineIcons.RemoveFeed,
+                    onClick = {
+                      onRemoveSourceClick(source)
+                      onDismiss()
+                    },
+                  )
+                },
               )
             }
           }

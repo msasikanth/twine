@@ -60,6 +60,8 @@ import app.cash.paging.compose.itemKey
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.ContextActionItem
 import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
+import dev.sasikanth.rss.reader.components.DropdownMenuDivider
+import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.feeds.ui.DeleteConfirmationDialog
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
 import dev.sasikanth.rss.reader.feeds.ui.common.AllFeedsHeader
@@ -68,6 +70,7 @@ import dev.sasikanth.rss.reader.group.GroupViewModel
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Delete
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
+import dev.sasikanth.rss.reader.resources.icons.RemoveFeed
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.UnGroup
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -79,6 +82,7 @@ import twine.shared.generated.resources.actionDelete
 import twine.shared.generated.resources.actionMoveTo
 import twine.shared.generated.resources.actionUngroup
 import twine.shared.generated.resources.buttonGoBack
+import twine.shared.generated.resources.feedOptionRemove
 import twine.shared.generated.resources.groupNameHint
 
 @Composable
@@ -203,7 +207,39 @@ fun GroupScreen(
             isFeedSelected = state.selectedSources.any { it.id == feed.id },
             onFeedClick = { viewModel.dispatch(GroupEvent.OnFeedClicked(feed)) },
             onFeedSelected = { viewModel.dispatch(GroupEvent.OnFeedClicked(feed)) },
-            onOptionsClick = { viewModel.dispatch(GroupEvent.OnFeedClicked(feed)) },
+            dropdownMenuContent = { onDismiss ->
+              DropdownMenuItem(
+                text = stringResource(Res.string.actionMoveTo),
+                leadingIcon = TwineIcons.NewGroup,
+                onClick = {
+                  viewModel.dispatch(GroupEvent.OnFeedSelected(feed))
+                  openGroupSelection()
+                  onDismiss()
+                },
+              )
+
+              DropdownMenuItem(
+                text = stringResource(Res.string.actionUngroup),
+                leadingIcon = TwineIcons.UnGroup,
+                onClick = {
+                  viewModel.dispatch(GroupEvent.OnFeedSelected(feed))
+                  viewModel.dispatch(GroupEvent.OnUngroupClicked)
+                  onDismiss()
+                },
+              )
+
+              DropdownMenuDivider()
+
+              DropdownMenuItem(
+                text = stringResource(Res.string.feedOptionRemove),
+                leadingIcon = TwineIcons.RemoveFeed,
+                onClick = {
+                  viewModel.dispatch(GroupEvent.OnFeedSelected(feed))
+                  viewModel.dispatch(GroupEvent.OnDeleteSelectedFeedsClicked)
+                  onDismiss()
+                },
+              )
+            },
           )
         }
       }
