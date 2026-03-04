@@ -156,9 +156,6 @@ fun GroupSelectionSheet(
               onFeedGroupClick = {
                 // no-op
               },
-              onOptionsClick = {
-                // no-op
-              },
             )
           }
         }

@@ -23,6 +23,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,7 +36,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,6 +48,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.IconButton
 import dev.sasikanth.rss.reader.components.UnreadBadge
 import dev.sasikanth.rss.reader.components.image.FeedIcon
@@ -65,11 +69,10 @@ internal fun FeedListItem(
   isFeedSelected: Boolean,
   onFeedClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
-  onOptionsClick: () -> Unit,
   onPinClick: ((Feed) -> Unit)? = null,
   modifier: Modifier = Modifier,
-  dragHandle: (@Composable () -> Unit)? = null,
   interactionSource: MutableInteractionSource? = null,
+  dropdownMenuContent: (@Composable ColumnScope.(onDismiss: () -> Unit) -> Unit)? = null,
 ) {
   val haptic = LocalHapticFeedback.current
   val translucentStyle = LocalTranslucentStyles.current
@@ -148,12 +151,25 @@ internal fun FeedListItem(
 
           IconButton(icon = pinIcon, contentDescription = null) { onPinClick(feed) }
         }
-
-        dragHandle?.invoke()
       }
 
-      if (!isInMultiSelectMode && dragHandle == null) {
-        IconButton(icon = TwineIcons.MoreVert, contentDescription = null, onClick = onOptionsClick)
+      if (!isInMultiSelectMode && dropdownMenuContent != null) {
+        Box {
+          var showDropdownMenu by remember { mutableStateOf(false) }
+
+          IconButton(
+            icon = TwineIcons.MoreVert,
+            contentDescription = null,
+            onClick = { showDropdownMenu = true },
+          )
+
+          DropdownMenu(
+            expanded = showDropdownMenu,
+            onDismissRequest = { showDropdownMenu = false },
+          ) {
+            dropdownMenuContent { showDropdownMenu = false }
+          }
+        }
       }
     }
   }
