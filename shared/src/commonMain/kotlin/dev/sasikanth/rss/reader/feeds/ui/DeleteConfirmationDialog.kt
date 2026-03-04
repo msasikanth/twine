@@ -17,13 +17,9 @@
 
 package dev.sasikanth.rss.reader.feeds.ui
 
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.components.AlertDialog
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonCancel
@@ -39,45 +35,14 @@ fun DeleteConfirmationDialog(
 ) {
   AlertDialog(
     modifier = modifier,
-    onDismissRequest = dismiss,
-    confirmButton = {
-      TextButton(
-        onClick = {
-          onDelete()
-          dismiss()
-        },
-        shape = MaterialTheme.shapes.large,
-      ) {
-        Text(
-          text = stringResource(Res.string.delete),
-          style = MaterialTheme.typography.labelLarge,
-          color = MaterialTheme.colorScheme.error,
-        )
-      }
+    title = stringResource(Res.string.removeSources),
+    text = stringResource(Res.string.removeSourcesDesc),
+    confirmText = stringResource(Res.string.delete),
+    dismissText = stringResource(Res.string.buttonCancel),
+    onConfirm = {
+      onDelete()
+      dismiss()
     },
-    dismissButton = {
-      TextButton(onClick = dismiss, shape = MaterialTheme.shapes.large) {
-        Text(
-          text = stringResource(Res.string.buttonCancel),
-          style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.onSurfaceVariant,
-        )
-      }
-    },
-    title = {
-      Text(
-        text = stringResource(Res.string.removeSources),
-        color = AppTheme.colorScheme.onSurfaceVariant,
-      )
-    },
-    text = {
-      Text(
-        text = stringResource(Res.string.removeSourcesDesc),
-        color = AppTheme.colorScheme.onSurfaceVariant,
-      )
-    },
-    containerColor = AppTheme.colorScheme.surfaceContainerLow,
-    titleContentColor = AppTheme.colorScheme.onSurface,
-    textContentColor = AppTheme.colorScheme.onSurface,
+    onDismiss = dismiss,
   )
 }
