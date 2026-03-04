@@ -21,7 +21,6 @@ import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
-import dev.sasikanth.rss.reader.core.model.remote.freshrss.ArticlePayload
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.core.network.freshrss.FreshRssSource
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
@@ -307,6 +306,7 @@ class FreshRSSSyncCoordinator(
   private suspend fun syncSubscriptions(syncStartTime: Instant): Boolean {
     val subscriptions = freshRssSource.subscriptions().subscriptions
     val localFeeds = rssRepository.allFeedsBlocking()
+    val localGroups = rssRepository.allFeedGroupsBlocking()
     var hasNewSubscriptions = false
 
     // 1. Handle remote deletions
@@ -326,7 +326,6 @@ class FreshRSSSyncCoordinator(
 
     // 2. Handle remote group deletions
     val remoteTagIds = freshRssSource.tags().tags.map { it.id }.toSet()
-    val localGroups = rssRepository.allFeedGroupsBlocking()
 
     localGroups.forEach { localGroup ->
       if (
@@ -337,9 +336,16 @@ class FreshRSSSyncCoordinator(
     }
 
     // 3. Handle new/updated subscriptions from remote
+    val localFeedsByLink = localFeeds.associateBy { it.link }
+    val localFeedsByRemoteId =
+      localFeeds.filter { it.remoteId != null }.associateBy { it.remoteId!! }
+    val localGroupsByRemoteId =
+      localGroups.filter { it.remoteId != null }.associateBy { it.remoteId!! }
+    val localGroupsByName = localGroups.associateBy { it.name }
+
     subscriptions.forEach { subscription ->
-      val localFeed =
-        localFeeds.find { it.link == subscription.url || it.remoteId == subscription.id }
+      val localFeed = localFeedsByRemoteId[subscription.id] ?: localFeedsByLink[subscription.url]
+
       val feedId =
         if (localFeed != null) {
           if (
@@ -384,9 +390,7 @@ class FreshRSSSyncCoordinator(
       subscription.categories.forEach { category ->
         if (category.id.startsWith("user/-/label/")) {
           val tagName = category.id.replace("user/-/label/", "")
-          val localGroup =
-            rssRepository.feedGroupByRemoteId(category.id)
-              ?: rssRepository.allFeedGroupsBlocking().find { it.name == tagName }
+          val localGroup = localGroupsByRemoteId[category.id] ?: localGroupsByName[tagName]
 
           val groupId =
             if (localGroup != null) {
@@ -414,9 +418,8 @@ class FreshRSSSyncCoordinator(
             }
 
           // Remove feed from all groups except the target group
-          val allGroups = rssRepository.allFeedGroupsBlocking()
           val groupsContainingFeed =
-            allGroups.filter { it.feedIds.contains(feedId) && it.id != groupId }
+            localGroups.filter { it.feedIds.contains(feedId) && it.id != groupId }
           if (groupsContainingFeed.isNotEmpty()) {
             rssRepository.removeFeedIdsFromGroups(
               groupIds = groupsContainingFeed.map { it.id }.toSet(),
@@ -426,7 +429,7 @@ class FreshRSSSyncCoordinator(
 
           // Add feed to the correct group
           val isFeedInGroup =
-            rssRepository.feedGroupBlocking(groupId)?.feedIds?.contains(feedId) ?: false
+            localGroups.find { it.id == groupId }?.feedIds?.contains(feedId) ?: false
           if (!isFeedInGroup) {
             rssRepository.addFeedIdsToGroups(setOf(groupId), listOf(feedId))
           }
@@ -455,57 +458,70 @@ class FreshRSSSyncCoordinator(
           continuation = continuation,
         )
       val items = articlesPayload.items
+      if (items.isEmpty()) break
+
+      val remoteIds = items.map { it.id }.toSet()
+      val urls =
+        items
+          .map { item ->
+            item.canonical.firstOrNull()?.href ?: item.alternate.firstOrNull()?.href ?: item.id
+          }
+          .toSet()
+      val feedRemoteIds = items.map { it.origin.streamId }.toSet()
+
+      val existingPostsByRemoteId =
+        rssRepository.postsByRemoteIds(remoteIds).associateBy { it.remoteId }
+      val existingPostsByLink = rssRepository.postsByLinks(urls).associateBy { it.link }
+      val existingFeeds = rssRepository.feedsByRemoteIds(feedRemoteIds).associateBy { it.remoteId }
+
+      val postsToUpsertByFeed = mutableMapOf<String, MutableList<PostPayload>>()
+
       items.asReversed().forEach { item ->
-        val isNewArticle = upsertArticle(item, downloadFullContent)
-        if (isNewArticle) {
-          hasNewArticles = true
+        val remoteId = item.id
+        val postLink =
+          item.canonical.firstOrNull()?.href ?: item.alternate.firstOrNull()?.href ?: item.id
+        val localPost = existingPostsByRemoteId[remoteId] ?: existingPostsByLink[postLink]
+
+        if (localPost != null) {
+          if (localPost.remoteId != remoteId) {
+            rssRepository.updatePostRemoteId(remoteId, localPost.id)
+          }
+        } else {
+          // Insert new post
+          val feedRemoteId = item.origin.streamId
+          val feed = existingFeeds[feedRemoteId]
+
+          if (feed != null) {
+            val htmlContent = articleHtmlParser.parse(item.summary.content)
+            val fullContent =
+              if (downloadFullContent && postLink.isNotBlank()) {
+                fullArticleFetcher.fetch(postLink).getOrNull()
+              } else {
+                null
+              }
+            val postPayload =
+              PostPayload(
+                title = item.title,
+                link = postLink,
+                description = htmlContent?.textContent ?: "",
+                rawContent = htmlContent?.cleanedHtml ?: item.summary.content,
+                imageUrl = htmlContent?.heroImage,
+                audioUrl = item.enclosure.firstOrNull()?.href ?: htmlContent?.audioUrl,
+                date = item.published * 1000, // FreshRSS uses seconds, we use millis
+                commentsLink = null,
+                fullContent = fullContent,
+                isDateParsedCorrectly = true,
+                remoteId = remoteId,
+              )
+
+            postsToUpsertByFeed.getOrPut(feed.id) { mutableListOf() }.add(postPayload)
+            hasNewArticles = true
+          }
         }
       }
 
-      continuation = articlesPayload.continuation
-    } while (continuation != null && articlesPayload.items.isNotEmpty())
-
-    return hasNewArticles
-  }
-
-  private suspend fun upsertArticle(item: ArticlePayload, downloadFullContent: Boolean): Boolean {
-    val remoteId = item.id
-    val postLink =
-      item.canonical.firstOrNull()?.href ?: item.alternate.firstOrNull()?.href ?: item.id
-    val localPost = rssRepository.postByRemoteId(remoteId) ?: rssRepository.postByLink(postLink)
-
-    if (localPost != null) {
-      if (localPost.remoteId != remoteId) {
-        rssRepository.updatePostRemoteId(remoteId, localPost.id)
-      }
-      return false
-    } else {
-      // Insert new post
-      val feedRemoteId = item.origin.streamId
-      val feed = rssRepository.feedByRemoteId(feedRemoteId)
-
-      if (feed != null) {
-        val htmlContent = articleHtmlParser.parse(item.summary.content)
-        val fullContent =
-          if (downloadFullContent && postLink.isNotBlank()) {
-            fullArticleFetcher.fetch(postLink).getOrNull()
-          } else {
-            null
-          }
-        val postPayload =
-          PostPayload(
-            title = item.title,
-            link = postLink,
-            description = htmlContent?.textContent ?: "",
-            rawContent = htmlContent?.cleanedHtml ?: item.summary.content,
-            imageUrl = htmlContent?.heroImage,
-            audioUrl = item.enclosure.firstOrNull()?.href ?: htmlContent?.audioUrl,
-            date = item.published * 1000, // FreshRSS uses seconds, we use millis
-            commentsLink = null,
-            fullContent = fullContent,
-            isDateParsedCorrectly = true,
-          )
-
+      postsToUpsertByFeed.forEach { (feedId, posts) ->
+        val feed = existingFeeds.values.find { it.id == feedId }!!
         rssRepository.upsertFeedWithPosts(
           feedPayload =
             FeedPayload(
@@ -514,20 +530,17 @@ class FreshRSSSyncCoordinator(
               description = feed.description,
               homepageLink = feed.homepageLink,
               link = feed.link,
-              posts = flowOf(postPayload),
+              posts = flowOf(*posts.toTypedArray()),
             ),
           feedId = feed.id,
           updateFeed = false,
         )
-
-        // Link the newly created post with remoteId
-        rssRepository.postByLink(postPayload.link)?.let {
-          rssRepository.updatePostRemoteId(remoteId, it.id)
-        }
-        return true
       }
-      return false
-    }
+
+      continuation = articlesPayload.continuation
+    } while (continuation != null && articlesPayload.items.isNotEmpty())
+
+    return hasNewArticles
   }
 
   private suspend fun syncStatuses(isInitialSync: Boolean = false) {
