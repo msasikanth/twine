@@ -155,6 +155,7 @@
   <string name="feedsBottomBarNewFeed">新增来源</string>
   <string name="actionPin">钉选</string>
   <string name="actionUnpin">取消钉选</string>
+  <string name="actionSelect">Select</string>
   <string name="actionDelete">删除</string>
   <string name="actionAddTo">添加至</string>
   <string name="actionMoveTo">移动至</string>
