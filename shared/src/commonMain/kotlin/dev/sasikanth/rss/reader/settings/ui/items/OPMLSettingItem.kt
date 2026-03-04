@@ -17,7 +17,6 @@
 
 package dev.sasikanth.rss.reader.settings.ui.items
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,7 +32,6 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -47,12 +45,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.InverseButton
-import dev.sasikanth.rss.reader.components.OutlinedButton
 import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.data.opml.OpmlFeed
 import dev.sasikanth.rss.reader.data.opml.OpmlResult
@@ -61,7 +56,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
-import twine.shared.generated.resources.buttonGoBack
+import twine.shared.generated.resources.buttonCancel
 import twine.shared.generated.resources.settingsHeaderOpml
 import twine.shared.generated.resources.settingsOpmlCancel
 import twine.shared.generated.resources.settingsOpmlExport
@@ -208,33 +203,19 @@ internal fun OpmlFeedSelectionSheet(
         modifier =
           Modifier.fillMaxWidth().padding(start = 24.dp, top = 40.dp, end = 24.dp, bottom = 24.dp)
       ) {
-        OutlinedButton(
+        InverseButton(
           modifier = Modifier.weight(1f),
-          colors =
-            ButtonDefaults.outlinedButtonColors(
-              containerColor = Color.Transparent,
-              contentColor = AppTheme.colorScheme.primary,
-            ),
-          border = BorderStroke(1.dp, AppTheme.colorScheme.primary),
+          text = stringResource(Res.string.buttonCancel),
           onClick = onDismiss,
-        ) {
-          Text(text = stringResource(Res.string.buttonGoBack))
-        }
+        )
 
         Spacer(Modifier.requiredWidth(16.dp))
 
-        Button(
+        TranslucentButton(
           modifier = Modifier.weight(1f),
-          enabled = selectedFeeds.isNotEmpty(),
-          colors =
-            ButtonDefaults.buttonColors(
-              containerColor = AppTheme.colorScheme.primary,
-              contentColor = AppTheme.colorScheme.onPrimary,
-            ),
+          text = stringResource(Res.string.settingsOpmlImport),
           onClick = { onFeedsSelected(selectedFeeds.toList()) },
-        ) {
-          Text(text = stringResource(Res.string.settingsOpmlImport))
-        }
+        )
       }
     }
   }

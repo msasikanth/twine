@@ -36,10 +36,23 @@ import dev.sasikanth.rss.reader.utils.Constants.BADGE_COUNT_TRIM_LIMIT
 @Composable
 fun UnreadBadge(unreadCount: Long, modifier: Modifier = Modifier) {
   val translucentStyles = LocalTranslucentStyles.current
+  val backgroundColor =
+    if (AppTheme.isDark) {
+      AppTheme.colorScheme.inverseSurface
+    } else {
+      translucentStyles.default.background
+    }
+  val contentColor =
+    if (AppTheme.isDark) {
+      AppTheme.colorScheme.inverseOnSurface
+    } else {
+      AppTheme.colorScheme.onSurface
+    }
+
   if (unreadCount < 10) {
     Badge(
-      containerColor = translucentStyles.default.background,
-      contentColor = AppTheme.colorScheme.onSurface,
+      containerColor = backgroundColor,
+      contentColor = contentColor,
       modifier = modifier.size(24.dp),
     ) {
       val badgeText = unreadCount.toString()
@@ -52,8 +65,8 @@ fun UnreadBadge(unreadCount: Long, modifier: Modifier = Modifier) {
     }
   } else {
     Surface(
-      color = translucentStyles.default.background,
-      contentColor = AppTheme.colorScheme.onSurface,
+      color = backgroundColor,
+      contentColor = contentColor,
       shape = CircleShape,
       modifier = modifier,
     ) {

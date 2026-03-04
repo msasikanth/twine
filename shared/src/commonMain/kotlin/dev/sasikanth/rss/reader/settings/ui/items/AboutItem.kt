@@ -55,12 +55,12 @@ internal fun AboutItem(onClick: () -> Unit) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
           stringResource(Res.string.settingsAboutTitle),
-          style = MaterialTheme.typography.titleMedium,
+          style = MaterialTheme.typography.titleSmall,
           color = AppTheme.colorScheme.onSurface,
         )
         Text(
           stringResource(Res.string.settingsAboutSubtitle),
-          style = MaterialTheme.typography.labelLarge,
+          style = MaterialTheme.typography.bodySmall,
           color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }

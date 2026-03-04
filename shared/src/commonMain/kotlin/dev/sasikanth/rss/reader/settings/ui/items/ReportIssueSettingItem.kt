@@ -45,12 +45,12 @@ internal fun ReportIssueSettingItem(appInfo: AppInfo, onClick: () -> Unit) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
           stringResource(Res.string.settingsReportIssue),
-          style = MaterialTheme.typography.titleMedium,
+          style = MaterialTheme.typography.titleSmall,
           color = AppTheme.colorScheme.onSurface,
         )
         Text(
           stringResource(Res.string.settingsVersion, appInfo.versionName, appInfo.versionCode),
-          style = MaterialTheme.typography.labelLarge,
+          style = MaterialTheme.typography.bodySmall,
           color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }

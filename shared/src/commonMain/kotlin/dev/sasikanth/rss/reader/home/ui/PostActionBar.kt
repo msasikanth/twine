@@ -34,14 +34,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -52,15 +49,11 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
@@ -304,17 +297,11 @@ internal fun PostActions(
 
     Box {
       val coroutineScope = rememberCoroutineScope()
-      val density = LocalDensity.current
-      var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
       val moreMenuOptionsLabel = stringResource(Res.string.moreMenuOptions)
 
       IconButton(
         icon = TwineIcons.MoreHorizFilled,
         contentDescription = moreMenuOptionsLabel,
-        modifier =
-          Modifier.onGloballyPositioned { coordinates ->
-            buttonHeight = with(density) { coordinates.size.height.toDp() }
-          },
         size = IconButtonSize.Small,
       ) {
         onDropdownChange(true)
@@ -324,7 +311,6 @@ internal fun PostActions(
         modifier = Modifier.width(IntrinsicSize.Min),
         expanded = showDropdown,
         onDismissRequest = { onDropdownChange(false) },
-        offset = DpOffset(x = 0.dp, y = buttonHeight.unaryMinus()),
       ) {
         if (config.showToggleReadUnreadOption) {
           val markAsReadLabel =
@@ -336,24 +322,14 @@ internal fun PostActions(
 
           DropdownMenuItem(
             modifier = Modifier.fillMaxWidth(),
+            leadingIcon =
+              if (postRead) {
+                TwineIcons.VisibilityOff
+              } else {
+                TwineIcons.Visibility
+              },
+            text = markAsReadLabel,
             contentDescription = markAsReadLabel,
-            text = {
-              Text(
-                text = markAsReadLabel,
-                color = AppTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Start,
-              )
-            },
-            leadingIcon = {
-              val icon =
-                if (postRead) {
-                  TwineIcons.VisibilityOff
-                } else {
-                  TwineIcons.Visibility
-                }
-
-              Icon(icon, contentDescription = null, tint = AppTheme.colorScheme.onSurface)
-            },
             onClick = {
               coroutineScope.launch {
                 onDropdownChange(false)
@@ -368,22 +344,9 @@ internal fun PostActions(
 
         DropdownMenuItem(
           modifier = Modifier.fillMaxWidth(),
+          leadingIcon = TwineIcons.Website,
+          text = openWebsiteLabel,
           contentDescription = openWebsiteLabel,
-          text = {
-            Text(
-              text = openWebsiteLabel,
-              color = AppTheme.colorScheme.onSurface,
-              textAlign = TextAlign.Start,
-            )
-          },
-          leadingIcon = {
-            Icon(
-              modifier = Modifier.requiredSize(24.dp),
-              imageVector = TwineIcons.Website,
-              contentDescription = null,
-              tint = AppTheme.colorScheme.onSurface,
-            )
-          },
           onClick = {
             coroutineScope.launch {
               onDropdownChange(false)
@@ -398,17 +361,9 @@ internal fun PostActions(
 
         DropdownMenuItem(
           modifier = Modifier.fillMaxWidth(),
+          leadingIcon = TwineIcons.Share,
+          text = shareLabel,
           contentDescription = shareLabel,
-          text = {
-            Text(
-              text = shareLabel,
-              color = AppTheme.colorScheme.onSurface,
-              textAlign = TextAlign.Start,
-            )
-          },
-          leadingIcon = {
-            Icon(TwineIcons.Share, contentDescription = null, tint = AppTheme.colorScheme.onSurface)
-          },
           onClick = {
             coroutineScope.launch {
               onDropdownChange(false)

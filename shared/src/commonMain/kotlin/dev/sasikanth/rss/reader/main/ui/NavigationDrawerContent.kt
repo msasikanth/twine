@@ -380,6 +380,18 @@ private fun ExpandedDrawerContent(
                 feedsViewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it))
               },
               onPinClick = { feedsViewModel.dispatch(FeedsEvent.OnSourcePinClicked(it)) },
+              onSourceEditClick = {
+                when (it.sourceType) {
+                  SourceType.Feed -> openFeedInfoSheet(it.id)
+                  SourceType.FeedGroup -> openGroupScreen(it.id)
+                }
+              },
+              onAddToGroupClick = {
+                feedsViewModel.dispatch(FeedsEvent.OnSourceAddToGroupClicked(it))
+              },
+              onRemoveSourceClick = {
+                feedsViewModel.dispatch(FeedsEvent.OnDeleteSourceClicked(it))
+              },
             )
           } else {
             allSources(
@@ -405,6 +417,18 @@ private fun ExpandedDrawerContent(
                 feedsViewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it))
               },
               onPinClick = { feedsViewModel.dispatch(FeedsEvent.OnSourcePinClicked(it)) },
+              onSourceEditClick = {
+                when (it.sourceType) {
+                  SourceType.Feed -> openFeedInfoSheet(it.id)
+                  SourceType.FeedGroup -> openGroupScreen(it.id)
+                }
+              },
+              onAddToGroupClick = {
+                feedsViewModel.dispatch(FeedsEvent.OnSourceAddToGroupClicked(it))
+              },
+              onRemoveSourceClick = {
+                feedsViewModel.dispatch(FeedsEvent.OnDeleteSourceClicked(it))
+              },
             )
           }
         }

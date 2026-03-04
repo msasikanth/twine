@@ -208,6 +208,7 @@ private fun PostTypePill(postsType: PostsType, onClick: () -> Unit, modifier: Mo
   ) {
     AnimatedContent(
       targetState = postsType,
+      contentAlignment = Alignment.Center,
       transitionSpec = {
         (fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
             slideInVertically(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { -it })

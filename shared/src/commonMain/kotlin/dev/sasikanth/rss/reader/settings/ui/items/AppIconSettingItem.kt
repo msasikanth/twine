@@ -83,7 +83,7 @@ internal fun AppIconSettingItem(
       Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
           text = stringResource(Res.string.settingsAppIconTitle),
-          style = MaterialTheme.typography.titleMedium,
+          style = MaterialTheme.typography.titleSmall,
           color = AppTheme.colorScheme.onSurface,
         )
 
@@ -101,7 +101,7 @@ internal fun AppIconSettingItem(
 
       Text(
         text = stringResource(Res.string.settingsAppIconSubtitle),
-        style = MaterialTheme.typography.labelLarge,
+        style = MaterialTheme.typography.bodySmall,
         color = AppTheme.colorScheme.onSurfaceVariant,
       )
     }

@@ -17,7 +17,6 @@
 
 package dev.sasikanth.rss.reader.groupselection.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,7 +35,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -55,8 +53,8 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paging.compose.collectAsLazyPagingItems
-import dev.sasikanth.rss.reader.components.Button
-import dev.sasikanth.rss.reader.components.OutlinedButton
+import dev.sasikanth.rss.reader.components.InverseButton
+import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.feeds.ui.CreateGroupDialog
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupItem
 import dev.sasikanth.rss.reader.groupselection.GroupSelectionEvent
@@ -67,8 +65,8 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.buttonCancel
 import twine.shared.generated.resources.buttonConfirm
-import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.groupAddNew
 
 const val SELECTED_GROUPS_KEY = "dev.sasikanth.twine.SELECTED_GROUPS"
@@ -156,9 +154,6 @@ fun GroupSelectionSheet(
               onFeedGroupClick = {
                 // no-op
               },
-              onOptionsClick = {
-                // no-op
-              },
             )
           }
         }
@@ -168,28 +163,19 @@ fun GroupSelectionSheet(
         modifier =
           Modifier.fillMaxWidth().padding(start = 24.dp, top = 40.dp, end = 24.dp, bottom = 24.dp)
       ) {
-        OutlinedButton(
+        InverseButton(
           modifier = Modifier.weight(1f),
-          colors =
-            ButtonDefaults.outlinedButtonColors(
-              containerColor = Color.Transparent,
-              contentColor = AppTheme.colorScheme.primary,
-            ),
-          border = BorderStroke(1.dp, AppTheme.colorScheme.outline),
+          text = stringResource(Res.string.buttonCancel),
           onClick = { dismiss() },
-        ) {
-          Text(text = stringResource(Res.string.buttonGoBack))
-        }
+        )
 
         Spacer(Modifier.requiredWidth(16.dp))
 
-        Button(
+        TranslucentButton(
           modifier = Modifier.weight(1f),
-          enabled = state.areGroupsSelected,
+          text = stringResource(Res.string.buttonConfirm),
           onClick = { onGroupsSelected(state.selectedGroups) },
-        ) {
-          Text(text = stringResource(Res.string.buttonConfirm))
-        }
+        )
       }
     }
   }

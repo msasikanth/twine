@@ -27,11 +27,13 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 
 @Composable
 internal fun BottomBarWithGradientShadow(
@@ -39,17 +41,21 @@ internal fun BottomBarWithGradientShadow(
   content: @Composable () -> Unit,
 ) {
   val shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-  val translucentStyle = LocalTranslucentStyles.current
 
   Box(
     modifier =
       modifier
         .fillMaxWidth()
         .heightIn(min = 120.dp)
-        .background(
-          color = translucentStyle.default.background.compositeOver(AppTheme.colorScheme.backdrop),
-          shape = shape,
-        )
+        .dropShadow(shape = shape) {
+          radius = 4.dp.toPx()
+          brush =
+            Brush.verticalGradient(
+              colorStops = arrayOf(0f to Color.Transparent, 0.8f to Color.Black, 1f to Color.Black)
+            )
+          offset = Offset(0f, -4.dp.toPx())
+        }
+        .background(color = AppTheme.colorScheme.backdrop, shape = shape)
         .pointerInput(Unit) {
           // Consume bottom bar taps
         }

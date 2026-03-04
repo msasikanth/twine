@@ -33,14 +33,12 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -84,9 +82,9 @@ import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
 import dev.sasikanth.rss.reader.addfeed.FeedFetchingState
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.CircularIconButton
-import dev.sasikanth.rss.reader.components.OutlinedButton
 import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.TextField
+import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.feeds.ui.pinned.PinnedFeedGroupItem
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
@@ -173,25 +171,11 @@ fun AddFeedScreen(
           )
         },
         actions = {
-          OutlinedButton(
-            modifier = Modifier.padding(end = 12.dp),
+          TranslucentButton(
+            leadingIcon = TwineIcons.Newsstand,
+            text = stringResource(Res.string.discoveryTitle),
             onClick = openDiscovery,
-            shape = RoundedCornerShape(50),
-          ) {
-            Icon(
-              imageVector = TwineIcons.Newsstand,
-              contentDescription = null,
-              tint = AppTheme.colorScheme.onSurfaceVariant,
-            )
-
-            Spacer(Modifier.requiredWidth(8.dp))
-
-            Text(
-              text = stringResource(Res.string.discoveryTitle),
-              style = MaterialTheme.typography.labelLarge,
-              color = AppTheme.colorScheme.onSurfaceVariant,
-            )
-          }
+          )
         },
         colors =
           TopAppBarDefaults.topAppBarColors(
@@ -337,26 +321,11 @@ fun AddFeedScreen(
         }
 
         item(span = { GridItemSpan(maxLineSpan) }) {
-          val shape = RoundedCornerShape(50)
-          OutlinedButton(
-            modifier = Modifier.padding(horizontal = 12.dp),
-            shape = shape,
+          TranslucentButton(
+            text = stringResource(Res.string.addToGroup),
+            leadingIcon = TwineIcons.NewGroup,
             onClick = { openGroupSelection(state.selectedFeedGroups.map { it.id }.toSet()) },
-          ) {
-            Icon(
-              imageVector = TwineIcons.NewGroup,
-              contentDescription = null,
-              tint = AppTheme.colorScheme.onSurfaceVariant,
-            )
-
-            Spacer(Modifier.requiredWidth(12.dp))
-
-            Text(
-              text = stringResource(Res.string.addToGroup),
-              style = MaterialTheme.typography.titleSmall,
-              color = AppTheme.colorScheme.onSurfaceVariant,
-            )
-          }
+          )
         }
 
         items(state.selectedFeedGroups.toList()) { group ->

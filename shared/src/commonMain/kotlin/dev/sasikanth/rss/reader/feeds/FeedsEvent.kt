@@ -27,6 +27,10 @@ sealed interface FeedsEvent {
 
   data class OnToggleFeedSelection(val source: Source) : FeedsEvent
 
+  data class OnSourceAddToGroupClicked(val source: Source) : FeedsEvent
+
+  data class OnDeleteSourceClicked(val source: Source) : FeedsEvent
+
   data class OnFeedNameUpdated(val newFeedName: String, val feedId: String) : FeedsEvent
 
   data class OnSourcePinClicked(val source: Source) : FeedsEvent

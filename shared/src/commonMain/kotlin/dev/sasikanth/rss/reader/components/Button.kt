@@ -36,7 +36,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -97,15 +96,17 @@ fun TranslucentButton(
 ) {
   val translucentStyle = LocalTranslucentStyles.current
 
-  Surface(
-    modifier = modifier.requiredHeightIn(min = 40.dp),
-    shape = CircleShape,
-    color = translucentStyle.default.background,
-    contentColor = AppTheme.colorScheme.onSurface,
-    onClick = onClick,
+  Box(
+    modifier =
+      modifier
+        .requiredHeightIn(min = 40.dp)
+        .clip(CircleShape)
+        .background(translucentStyle.default.background, CircleShape)
+        .clickable { onClick() },
+    contentAlignment = Alignment.Center,
   ) {
     val startPadding = if (leadingIcon == null) 20.dp else 16.dp
-    val endPadding = if (trailingIcon == null) 16.dp else 20.dp
+    val endPadding = if (trailingIcon == null) 20.dp else 16.dp
 
     Row(
       modifier = Modifier.padding(start = startPadding, end = endPadding),
@@ -127,6 +128,7 @@ fun TranslucentButton(
         style = MaterialTheme.typography.labelLarge,
         maxLines = 1,
         overflow = TextOverflow.MiddleEllipsis,
+        color = AppTheme.colorScheme.onSurface,
       )
 
       if (trailingIcon != null) {
@@ -150,12 +152,14 @@ fun InverseButton(
   icon: ImageVector? = null,
   onClick: () -> Unit,
 ) {
-  Surface(
-    modifier = modifier.requiredHeightIn(min = 40.dp),
-    shape = CircleShape,
-    color = AppTheme.colorScheme.inverseSurface,
-    contentColor = AppTheme.colorScheme.inverseOnSurface,
-    onClick = onClick,
+  Box(
+    modifier =
+      modifier
+        .requiredHeightIn(min = 40.dp)
+        .clip(CircleShape)
+        .background(AppTheme.colorScheme.inverseSurface, CircleShape)
+        .clickable { onClick() },
+    contentAlignment = Alignment.Center,
   ) {
     Row(
       modifier = Modifier.padding(start = 20.dp, end = 16.dp),
@@ -166,6 +170,7 @@ fun InverseButton(
         style = MaterialTheme.typography.labelLarge,
         maxLines = 1,
         overflow = TextOverflow.MiddleEllipsis,
+        color = AppTheme.colorScheme.inverseOnSurface,
       )
 
       if (icon != null) {

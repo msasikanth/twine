@@ -67,7 +67,7 @@ internal fun TwinePremiumBanner(
       if (subscriptionResult != SubscriptionResult.Subscribed) {
         Text(
           text = stringResource(Res.string.twinePremium),
-          style = MaterialTheme.typography.titleMedium,
+          style = MaterialTheme.typography.titleSmall,
           color = AppTheme.colorScheme.onSurface,
           textAlign = TextAlign.Center,
         )
@@ -81,7 +81,7 @@ internal fun TwinePremiumBanner(
         }
       Text(
         text = stringResource(subscriptionDescRes),
-        style = MaterialTheme.typography.bodyMedium,
+        style = MaterialTheme.typography.bodySmall,
         color = AppTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
       )

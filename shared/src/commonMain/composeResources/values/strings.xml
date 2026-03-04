@@ -160,6 +160,7 @@
   <string name="feedsBottomBarNewFeed">New feed</string>
   <string name="actionPin">Pin</string>
   <string name="actionUnpin">Unpin</string>
+  <string name="actionSelect">Select</string>
   <string name="actionDelete">Delete</string>
   <string name="actionAddTo">Add to</string>
   <string name="actionMoveTo">Move to</string>
@@ -205,7 +206,7 @@
   <string name="homeViewModeCompact">Compact</string>
   <string name="twinePremium">Twine premium subscription</string>
   <string name="twinePremiumDesc">Go Premium: Unlock everything and fuel future development.</string>
-  <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium. Thanks for supporting ❤️</string>
+  <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium.\nThanks for supporting ❤️</string>
   <string name="readerCustomisationsTypeface">Typeface</string>
   <string name="themeVariantColorScheme">Color scheme</string>
   <string name="themeVariantDynamic">Dynamic</string>

@@ -90,6 +90,8 @@ class FeedsViewModel(
     when (event) {
       is FeedsEvent.OnDeleteFeed -> onDeleteFeed(event.feed)
       is FeedsEvent.OnToggleFeedSelection -> onToggleSourceSelection(event.source)
+      is FeedsEvent.OnSourceAddToGroupClicked -> onSourceAddToGroupClicked(event.source)
+      is FeedsEvent.OnDeleteSourceClicked -> onDeleteSourceClicked(event.source)
       is FeedsEvent.OnFeedNameUpdated -> onFeedNameUpdated(event.newFeedName, event.feedId)
       is FeedsEvent.OnSourcePinClicked -> onSourcePinClicked(event.source)
       FeedsEvent.ClearSearchQuery -> clearSearchQuery()
@@ -135,16 +137,29 @@ class FeedsViewModel(
 
   private fun onAddToGroupClicked() {
     viewModelScope.launch {
+      val sourceToAddToGroup = _state.value.sourceToAddToGroup
       val selectedSources = _state.value.selectedSources
+
       val groupIds =
-        if (selectedSources.size == 1) {
-          rssRepository.groupIdsForFeed(selectedSources.first().id).toSet()
-        } else {
-          emptySet()
+        when {
+          sourceToAddToGroup != null -> {
+            rssRepository.groupIdsForFeed(sourceToAddToGroup.id).toSet()
+          }
+          selectedSources.size == 1 -> {
+            rssRepository.groupIdsForFeed(selectedSources.first().id).toSet()
+          }
+          else -> {
+            emptySet()
+          }
         }
 
       _state.update { it.copy(openGroupSelection = groupIds) }
     }
+  }
+
+  private fun onSourceAddToGroupClicked(source: Source) {
+    _state.update { it.copy(sourceToAddToGroup = source) }
+    onAddToGroupClicked()
   }
 
   private fun init() {
@@ -162,26 +177,38 @@ class FeedsViewModel(
   }
 
   private fun dismissDeleteConfirmation() {
-    _state.update { it.copy(showDeleteConfirmation = false) }
+    _state.update { it.copy(showDeleteConfirmation = false, sourceToDelete = null) }
   }
 
   private fun deleteSelectedSources() {
     viewModelScope
-      .launch { rssRepository.markSourcesAsDeleted(_state.value.selectedSources) }
-      .invokeOnCompletion {
-        if (_state.value.selectedSources.any { it.id == _state.value.activeSource?.id }) {
+      .launch {
+        val sourcesToDelete =
+          if (_state.value.sourceToDelete != null) {
+            setOf(_state.value.sourceToDelete!!)
+          } else {
+            _state.value.selectedSources
+          }
+
+        rssRepository.markSourcesAsDeleted(sourcesToDelete)
+
+        if (sourcesToDelete.any { it.id == _state.value.activeSource?.id }) {
           observableActiveSource.clearSelection()
         }
-        dispatch(FeedsEvent.CancelSourcesSelection)
       }
+      .invokeOnCompletion { dispatch(FeedsEvent.CancelSourcesSelection) }
   }
 
   private fun onGroupsSelected(groupIds: Set<String>) {
     viewModelScope.launch {
-      rssRepository.addFeedIdsToGroups(
-        groupIds = groupIds,
-        feedIds = _state.value.selectedSources.map { it.id },
-      )
+      val sourcesToAdd =
+        if (_state.value.sourceToAddToGroup != null) {
+          setOf(_state.value.sourceToAddToGroup!!)
+        } else {
+          _state.value.selectedSources
+        }
+
+      rssRepository.addFeedIdsToGroups(groupIds = groupIds, feedIds = sourcesToAdd.map { it.id })
       dispatch(FeedsEvent.CancelSourcesSelection)
     }
   }
@@ -214,8 +241,12 @@ class FeedsViewModel(
     _state.update { it.copy(showDeleteConfirmation = true) }
   }
 
+  private fun onDeleteSourceClicked(source: Source) {
+    _state.update { it.copy(sourceToDelete = source, showDeleteConfirmation = true) }
+  }
+
   private fun onCancelSourcesSelection() {
-    _state.update { it.copy(selectedSources = emptySet()) }
+    _state.update { it.copy(selectedSources = emptySet(), sourceToAddToGroup = null) }
   }
 
   private fun onHomeSelected() {
