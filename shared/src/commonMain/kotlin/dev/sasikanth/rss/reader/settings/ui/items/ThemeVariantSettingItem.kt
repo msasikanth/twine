@@ -58,6 +58,7 @@ internal fun ThemeVariantSettingItem(
         selected = themeVariant == selectedThemeVariant,
         isSubscribed = isSubscribed,
         useDarkTheme = useDarkTheme,
+        showLabel = true,
         onClick = { onThemeVariantChanged(themeVariant) },
       )
     }
