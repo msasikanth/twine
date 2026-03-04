@@ -233,6 +233,10 @@ class AppViewModel(
     }
   }
 
+  fun openChangelog() {
+    viewModelScope.launch { _state.update { it.copy(showChangelog = true) } }
+  }
+
   private fun refreshFeedsIfExpired() {
     viewModelScope.launch {
       if (refreshPolicy.hasExpired()) {
