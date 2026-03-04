@@ -155,6 +155,7 @@
   <string name="feedsBottomBarNewFeed">New feed</string>
   <string name="actionPin">Pin</string>
   <string name="actionUnpin">Unpin</string>
+  <string name="actionSelect">Select</string>
   <string name="actionDelete">Delete</string>
   <string name="actionAddTo">Add to</string>
   <string name="actionMoveTo">Move to</string>
