@@ -27,6 +27,7 @@ data class PostPayload(
   val date: Long,
   val commentsLink: String?,
   val isDateParsedCorrectly: Boolean,
+  val remoteId: String? = null,
 ) {
   companion object
 }

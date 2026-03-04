@@ -33,6 +33,7 @@ import dev.sasikanth.rss.reader.core.model.local.ReadingTrend
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
@@ -191,6 +192,7 @@ class RssRepository(
           link = postPayload.link,
           commentsLink = postPayload.commentsLink,
           isDateParsedCorrectly = if (postPayload.isDateParsedCorrectly) 1 else 0,
+          remoteId = postPayload.remoteId,
         )
 
         postContentQueries.upsert(
@@ -1121,6 +1123,12 @@ class RssRepository(
     }
   }
 
+  suspend fun postsByRemoteIds(remoteIds: Set<String>): List<Post> {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.postsByRemoteIds(remoteIds, ::Post).executeAsList()
+    }
+  }
+
   suspend fun postsWithImagesAndNoSeedColor(limit: Long): List<ResolvedPost> {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries
@@ -1135,8 +1143,18 @@ class RssRepository(
     }
   }
 
+  suspend fun postsByLinks(links: Set<String>): List<Post> {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.postsByLinks(links, ::Post).executeAsList()
+    }
+  }
+
   fun feedByRemoteId(remoteId: String): Feed? {
     return feedQueries.feedByRemoteId(remoteId, mapper = ::mapToFeed).executeAsOneOrNull()
+  }
+
+  fun feedsByRemoteIds(remoteIds: Set<String>): List<Feed> {
+    return feedQueries.feedsByRemoteIds(remoteIds, mapper = ::mapToFeed).executeAsList()
   }
 
   suspend fun upsertPosts(posts: List<Post>) {
@@ -1374,11 +1392,19 @@ class RssRepository(
     val sourcesSnapshot = sources.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
-        val now = Clock.System.now()
         sourcesSnapshot.forEach { source ->
-          feedQueries.remove(id = source.id)
-          postQueries.deletePostsForFeed(source.id)
-          feedGroupQueries.remove(id = source.id)
+          when (source.sourceType) {
+            SourceType.Feed -> {
+              postQueries.deletePostsForFeed(source.id)
+              val postsCount = postQueries.countPostsForFeed(source.id).executeAsOne()
+              if (postsCount == 0L) {
+                feedQueries.remove(id = source.id)
+              }
+            }
+            SourceType.FeedGroup -> {
+              feedGroupQueries.remove(id = source.id)
+            }
+          }
         }
       }
     }
