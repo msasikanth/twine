@@ -54,6 +54,7 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.settings.SettingsState
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
+import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.formatRelativeTime
 import kotlin.time.Instant
 import org.jetbrains.compose.resources.stringResource
@@ -165,7 +166,7 @@ internal fun CloudSyncSettingItem(
               lastSyncedAt != null &&
               isSignedIn
           ) {
-            statusString += " \u2022 ${lastSyncedAt.formatRelativeTime()}"
+            statusString += " ${Constants.BULLET_POINT} ${lastSyncedAt.formatRelativeTime()}"
           }
 
           AnimatedVisibility(

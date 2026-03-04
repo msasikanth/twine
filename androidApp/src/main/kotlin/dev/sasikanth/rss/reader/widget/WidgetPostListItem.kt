@@ -57,6 +57,7 @@ import coil3.request.SuccessResult
 import coil3.toBitmap
 import dev.sasikanth.rss.reader.R
 import dev.sasikanth.rss.reader.core.model.local.WidgetPost
+import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.formatRelativeTime
 
 @Composable
@@ -137,7 +138,10 @@ fun WidgetPostListItem(
 
         Text(
           modifier = GlanceModifier.defaultWeight(),
-          text = post.feedName.orEmpty() + " \u2022 " + post.postedOn.formatRelativeTime(),
+          text =
+            post.feedName.orEmpty() +
+              " ${Constants.BULLET_POINT} " +
+              post.postedOn.formatRelativeTime(),
           maxLines = 1,
           style = TextStyle(fontSize = 12.sp, color = GlanceTheme.colors.onSurfaceVariant),
         )

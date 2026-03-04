@@ -72,6 +72,7 @@ import dev.sasikanth.rss.reader.resources.icons.VisibilityOff
 import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.Constants
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -130,7 +131,7 @@ internal fun PostActionBar(
         modifier = Modifier.padding(horizontal = 8.dp).clearAndSetSemantics {},
         style = MaterialTheme.typography.labelMedium,
         maxLines = 1,
-        text = "\u2022",
+        text = Constants.BULLET_POINT,
         color = AppTheme.colorScheme.outline,
       )
 
@@ -149,7 +150,7 @@ internal fun PostActionBar(
           modifier = Modifier.padding(horizontal = 8.dp).clearAndSetSemantics {},
           style = MaterialTheme.typography.labelMedium,
           maxLines = 1,
-          text = "\u2022",
+          text = Constants.BULLET_POINT,
           color = AppTheme.colorScheme.outline,
         )
 
