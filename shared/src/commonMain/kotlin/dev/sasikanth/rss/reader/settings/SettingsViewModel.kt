@@ -16,6 +16,7 @@
  */
 package dev.sasikanth.rss.reader.settings
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil3.ImageLoader
@@ -54,6 +55,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
+@Stable
 @Inject
 class SettingsViewModel(
   private val rssRepository: RssRepository,

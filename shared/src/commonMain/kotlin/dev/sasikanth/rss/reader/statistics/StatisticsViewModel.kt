@@ -31,8 +31,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
-@Inject
 @Stable
+@Inject
 class StatisticsViewModel(private val rssRepository: RssRepository) : ViewModel() {
 
   private val _state = MutableStateFlow(StatisticsState())
