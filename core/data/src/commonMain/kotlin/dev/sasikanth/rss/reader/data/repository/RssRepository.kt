@@ -33,6 +33,7 @@ import dev.sasikanth.rss.reader.core.model.local.ReadingTrend
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
@@ -1374,11 +1375,19 @@ class RssRepository(
     val sourcesSnapshot = sources.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
-        val now = Clock.System.now()
         sourcesSnapshot.forEach { source ->
-          feedQueries.remove(id = source.id)
-          postQueries.deletePostsForFeed(source.id)
-          feedGroupQueries.remove(id = source.id)
+          when (source.sourceType) {
+            SourceType.Feed -> {
+              postQueries.deletePostsForFeed(source.id)
+              val postsCount = postQueries.countPostsForFeed(source.id).executeAsOne()
+              if (postsCount == 0L) {
+                feedQueries.remove(id = source.id)
+              }
+            }
+            SourceType.FeedGroup -> {
+              feedGroupQueries.remove(id = source.id)
+            }
+          }
         }
       }
     }
