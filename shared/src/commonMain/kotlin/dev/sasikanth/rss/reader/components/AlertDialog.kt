@@ -29,10 +29,10 @@ fun AlertDialog(
   title: String,
   text: String,
   confirmText: String,
-  dismissText: String,
   onConfirm: () -> Unit,
   onDismiss: () -> Unit,
   modifier: Modifier = Modifier,
+  dismissText: String? = null,
 ) {
   AlertDialog(
     modifier = modifier,
@@ -40,7 +40,11 @@ fun AlertDialog(
     title = { Text(text = title, style = MaterialTheme.typography.headlineSmall) },
     text = { Text(text = text, style = MaterialTheme.typography.bodyMedium) },
     confirmButton = { TranslucentButton(text = confirmText, onClick = onConfirm) },
-    dismissButton = { InverseButton(text = dismissText, onClick = onDismiss) },
+    dismissButton = {
+      if (dismissText != null) {
+        InverseButton(text = dismissText, onClick = onDismiss)
+      }
+    },
     containerColor = AppTheme.colorScheme.surfaceContainerHigh,
     titleContentColor = AppTheme.colorScheme.onSurface,
     textContentColor = AppTheme.colorScheme.onSurfaceVariant,

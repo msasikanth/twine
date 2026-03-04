@@ -181,7 +181,7 @@ class SettingsViewModel(
                 SyncState.Idle -> SettingsState.SyncProgress.Idle
                 is SyncState.InProgress -> SettingsState.SyncProgress.Syncing
                 SyncState.Complete -> SettingsState.SyncProgress.Success
-                is SyncState.Error -> SettingsState.SyncProgress.Failure
+                is SyncState.Error -> SettingsState.SyncProgress.Failure(syncState.exception)
               }
           )
         }
