@@ -16,6 +16,7 @@
  */
 package dev.sasikanth.rss.reader.app
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sasikanth.rss.reader.core.model.local.Feed
@@ -53,6 +54,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Inject
 
+@Stable
 @Inject
 @ActivityScope
 class AppViewModel(

@@ -95,9 +95,6 @@ internal fun CloudSyncSettingItem(
     Box(
       modifier =
         Modifier.fillMaxWidth()
-          .padding(vertical = verticalPadding)
-          .padding(start = 16.dp, end = 24.dp)
-          .clip(MaterialTheme.shapes.medium)
           .then(
             if (syncProgress is SettingsState.SyncProgress.Failure && isSignedIn) {
               Modifier.clickable { onSyncErrorClicked(syncProgress.exception) }
@@ -105,6 +102,9 @@ internal fun CloudSyncSettingItem(
               Modifier
             }
           )
+          .padding(vertical = verticalPadding)
+          .padding(start = 16.dp, end = 24.dp)
+          .clip(MaterialTheme.shapes.medium)
     ) {
       Row(verticalAlignment = Alignment.CenterVertically) {
         val icon =

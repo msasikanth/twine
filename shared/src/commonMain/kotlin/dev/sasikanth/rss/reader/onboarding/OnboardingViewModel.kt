@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.onboarding
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
+@Stable
 @Inject
 class OnboardingViewModel(
   private val settingsRepository: SettingsRepository,

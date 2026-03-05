@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.premium
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sasikanth.rss.reader.billing.BillingHandler
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import me.tatarka.inject.annotations.Inject
 
+@Stable
 @Inject
 class PremiumPaywallViewModel(private val billingHandler: BillingHandler) : ViewModel() {
 

@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.groupselection
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -35,6 +36,7 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
+@Stable
 @Inject
 class GroupSelectionViewModel(
   @Assisted savedStateHandle: SavedStateHandle,

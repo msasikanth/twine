@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.group
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -45,6 +46,7 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
+@Stable
 @Inject
 class GroupViewModel(
   private val rssRepository: RssRepository,

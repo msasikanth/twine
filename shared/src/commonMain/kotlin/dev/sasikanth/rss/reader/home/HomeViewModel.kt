@@ -18,6 +18,7 @@
 package dev.sasikanth.rss.reader.home
 
 import androidx.compose.material3.SheetValue
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
@@ -63,6 +64,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import me.tatarka.inject.annotations.Inject
 
+@Stable
 @Inject
 class HomeViewModel(
   private val rssRepository: RssRepository,

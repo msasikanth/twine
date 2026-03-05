@@ -16,6 +16,7 @@
  */
 package dev.sasikanth.rss.reader.bookmarks
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.cash.paging.cachedIn
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
+@Stable
 @Inject
 class BookmarksViewModel(private val rssRepository: RssRepository) : ViewModel() {
 

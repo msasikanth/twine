@@ -16,6 +16,7 @@
  */
 package dev.sasikanth.rss.reader.search
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -46,6 +47,7 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
 @OptIn(FlowPreview::class)
+@Stable
 @Inject
 class SearchViewModel(private val rssRepository: RssRepository) : ViewModel() {
 

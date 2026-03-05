@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.reader.page
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mikepenz.markdown.model.State
@@ -47,6 +48,7 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
+@Stable
 @Inject
 class ReaderPageViewModel(
   dispatchersProvider: DispatchersProvider,

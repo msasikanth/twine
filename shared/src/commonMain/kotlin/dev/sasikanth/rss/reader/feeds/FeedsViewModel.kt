@@ -16,6 +16,7 @@
  */
 package dev.sasikanth.rss.reader.feeds
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -65,6 +66,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import me.tatarka.inject.annotations.Inject
 
+@Stable
 @Inject
 class FeedsViewModel(
   private val dispatchersProvider: DispatchersProvider,

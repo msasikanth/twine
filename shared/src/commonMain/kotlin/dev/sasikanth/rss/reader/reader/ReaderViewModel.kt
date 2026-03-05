@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.reader
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
@@ -56,6 +57,7 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
+@Stable
 @Inject
 class ReaderViewModel(
   dispatchersProvider: DispatchersProvider,

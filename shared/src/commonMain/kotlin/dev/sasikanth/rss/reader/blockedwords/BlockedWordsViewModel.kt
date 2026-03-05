@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.blockedwords
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.benasher44.uuid.Uuid
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
+@Stable
 @Inject
 class BlockedWordsViewModel(private val blockedWordsRepository: BlockedWordsRepository) :
   ViewModel() {

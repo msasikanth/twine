@@ -21,7 +21,9 @@ import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.SyncState
 import dev.sasikanth.rss.reader.data.sync.local.LocalSyncCoordinator
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -32,23 +34,36 @@ class DropboxSyncCoordinator(
   private val localSyncCoordinator: LocalSyncCoordinator,
 ) : SyncCoordinator {
 
-  override val syncState: StateFlow<SyncState> = localSyncCoordinator.syncState
+  private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
+  override val syncState: StateFlow<SyncState> = _syncState.asStateFlow()
 
   override suspend fun pull(): Boolean {
+    _syncState.value = SyncState.InProgress(0f)
     val syncResult = fileCloudSyncService.sync(dropboxSyncProvider)
+    _syncState.value = SyncState.InProgress(0.5f)
     localSyncCoordinator.pull()
+    _syncState.value = SyncState.Complete
     return syncResult
   }
 
   override suspend fun pull(feedIds: List<String>): Boolean {
-    return localSyncCoordinator.pull(feedIds)
+    _syncState.value = SyncState.InProgress(0f)
+    val result = localSyncCoordinator.pull(feedIds)
+    _syncState.value = SyncState.Complete
+    return result
   }
 
   override suspend fun pull(feedId: String): Boolean {
-    return localSyncCoordinator.pull(feedId)
+    _syncState.value = SyncState.InProgress(0f)
+    val result = localSyncCoordinator.pull(feedId)
+    _syncState.value = SyncState.Complete
+    return result
   }
 
   override suspend fun push(): Boolean {
-    return fileCloudSyncService.sync(dropboxSyncProvider)
+    _syncState.value = SyncState.InProgress(0f)
+    val result = fileCloudSyncService.sync(dropboxSyncProvider)
+    _syncState.value = SyncState.Complete
+    return result
   }
 }
