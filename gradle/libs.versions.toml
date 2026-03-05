@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.3.10"
-android_gradle_plugin = "9.0.1"
+android_gradle_plugin = "9.1.0"
 compose = "1.11.0-alpha03"
 compose_material3_adaptive = "1.3.0-alpha05"
 
