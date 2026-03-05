@@ -238,7 +238,7 @@ private fun SourceInfo(
       }
     }
 
-    Spacer(Modifier.requiredWidth(2.dp))
+    Spacer(Modifier.requiredWidth(4.dp))
 
     Text(
       style = MaterialTheme.typography.labelMedium,
