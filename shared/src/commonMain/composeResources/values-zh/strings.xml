@@ -286,6 +286,7 @@
   <string name="sourcesCount">%1$d sources</string>
   <string name="discoveryTitle">Discovery</string>
   <string name="discoverySearchHint">Search for feeds</string>
+  <string name="discoveryOnboardingHint">Please select at least 3 feeds to continue.</string>
   <string name="discoveryAddFeed">Add</string>
   <string name="discoveryAdded">Added</string>
   <string name="discoveryRefresh">Refresh</string>
