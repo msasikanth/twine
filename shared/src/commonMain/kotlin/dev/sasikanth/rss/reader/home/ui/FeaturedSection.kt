@@ -105,6 +105,7 @@ internal fun FeaturedSection(
       state = pagerState,
       verticalAlignment = Alignment.Top,
       contentPadding = contentPadding,
+      beyondViewportPageCount = 2,
       key = { page ->
         val post = featuredPosts.getOrNull(page)
         post?.let { PostListKey.from(post.resolvedPost).encode() } ?: page
