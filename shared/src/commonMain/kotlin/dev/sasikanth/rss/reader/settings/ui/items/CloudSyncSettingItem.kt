@@ -18,7 +18,13 @@
 package dev.sasikanth.rss.reader.settings.ui.items
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.components.CircularIconButton
@@ -183,10 +190,30 @@ internal fun CloudSyncSettingItem(
         Spacer(Modifier.width(8.dp))
 
         if (isSignedIn) {
+          val isSyncing = syncProgress is SettingsState.SyncProgress.Syncing
+          var syncRotation = 0f
+          if (isSyncing) {
+            val infiniteTransition = rememberInfiniteTransition()
+            syncRotation =
+              infiniteTransition
+                .animateFloat(
+                  initialValue = 0f,
+                  targetValue = 360f,
+                  animationSpec =
+                    infiniteRepeatable(
+                      animation = tween(1000, easing = LinearEasing),
+                      repeatMode = RepeatMode.Restart,
+                    ),
+                )
+                .value
+          }
+
           CircularIconButton(
+            modifier = Modifier.rotate(syncRotation),
             icon = TwineIcons.Sync,
             label = stringResource(Res.string.settingSyncLabel),
             onClick = { onSyncClicked(provider) },
+            enabled = !isSyncing,
           )
 
           Spacer(modifier = Modifier.width(12.dp))
