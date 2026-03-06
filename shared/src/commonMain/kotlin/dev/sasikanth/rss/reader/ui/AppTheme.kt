@@ -20,6 +20,7 @@ import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RippleConfiguration
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -29,37 +30,18 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
-import androidx.window.core.layout.WindowSizeClass
 import dev.sasikanth.rss.reader.utils.LocalAmoledSetting
-import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 
 @Composable
 internal fun AppTheme(
   useDarkTheme: Boolean = false,
-  fontFamily: FontFamily = OutfitFontFamily,
-  fontScalingFactor: Float = 1f,
-  lineHeightScalingFactor: Float = 1f,
+  typography: Typography = typography(OutfitFontFamily),
   overriddenColorScheme: AppColorScheme? = null,
   content: @Composable () -> Unit,
 ) {
   val useAmoled = LocalAmoledSetting.current
-  val windowSizeClass = LocalWindowSizeClass.current
-  val baseFontScaleFactor = windowSizeClass.calculateFontScale()
 
-  CompositionLocalProvider(
-    LocalIsDarkTheme provides useDarkTheme,
-    LocalAppFontScaleFactor provides baseFontScaleFactor,
-  ) {
-    val typography =
-      remember(fontFamily, fontScalingFactor, lineHeightScalingFactor, baseFontScaleFactor) {
-        typography(
-          fontFamily = fontFamily,
-          fontScalingFactor = fontScalingFactor * baseFontScaleFactor,
-          lineHeightScalingFactor = lineHeightScalingFactor * baseFontScaleFactor,
-        )
-      }
-
+  CompositionLocalProvider(LocalIsDarkTheme provides useDarkTheme) {
     MaterialTheme(
       colorScheme = if (useDarkTheme) darkColorScheme() else lightColorScheme(),
       typography = typography,
@@ -113,19 +95,6 @@ internal fun AppTheme(
   }
 }
 
-@Composable
-fun WindowSizeClass.calculateFontScale(): Float {
-  return when {
-    // Large/Extra Large
-    isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND) -> 1.2f
-
-    // Expanded
-    isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> 1.15f
-
-    else -> 1.0f
-  }
-}
-
 internal object AppTheme {
 
   val colorScheme: AppColorScheme
@@ -146,5 +115,3 @@ internal val DefaultRippleAlpha =
 internal val SYSTEM_SCRIM = Color.Black.copy(alpha = 0.8f)
 
 internal val LocalIsDarkTheme = staticCompositionLocalOf { false }
-
-internal val LocalAppFontScaleFactor = staticCompositionLocalOf { 1f }
