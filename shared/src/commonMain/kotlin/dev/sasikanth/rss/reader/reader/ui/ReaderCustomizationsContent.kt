@@ -73,7 +73,6 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
 import dev.sasikanth.rss.reader.ui.GoogleSansFontFamily
-import dev.sasikanth.rss.reader.ui.LocalAppFontScaleFactor
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.ui.LoraFontFamily
 import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
@@ -225,7 +224,7 @@ private fun FontLineHeightStepper(
       maxLines = 1,
       textAlign = TextAlign.End,
       style = MaterialTheme.typography.labelLarge,
-      color = AppTheme.colorScheme.onSurface,
+      color = AppTheme.colorScheme.onSurfaceVariant,
     )
   }
 }
@@ -273,14 +272,13 @@ private fun FontScaleStepper(
       },
     )
 
-    val baseScaleFactor = LocalAppFontScaleFactor.current
     Text(
       modifier = Modifier.requiredWidthIn(min = 40.dp),
-      text = "${(defaultValue * baseScaleFactor * 100).roundToInt()}%",
+      text = "${(defaultValue * 100).roundToInt()}%",
       maxLines = 1,
       textAlign = TextAlign.End,
       style = MaterialTheme.typography.labelLarge,
-      color = AppTheme.colorScheme.onSurface,
+      color = AppTheme.colorScheme.onSurfaceVariant,
     )
   }
 }
