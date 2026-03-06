@@ -236,6 +236,12 @@ internal fun ReaderScreen(
       ReaderFont.RobotoSerif -> RobotoSerifFontFamily
       ReaderFont.Outfit -> OutfitFontFamily
     }
+  val typography =
+    typography(
+      fontFamily = fontFamily,
+      fontScalingFactor = state.readerFontScaleFactor,
+      lineHeightScalingFactor = state.readerLineHeightScaleFactor,
+    )
 
   CompositionLocalProvider(
     LocalDynamicColorState provides articleDynamicColorState,
@@ -255,9 +261,7 @@ internal fun ReaderScreen(
 
     AppTheme(
       useDarkTheme = isDarkTheme,
-      fontFamily = fontFamily,
-      fontScalingFactor = state.readerFontScaleFactor,
-      lineHeightScalingFactor = state.readerLineHeightScaleFactor,
+      typography = typography,
       overriddenColorScheme = overriddenColorScheme,
     ) {
       val nestedScrollModifier =
