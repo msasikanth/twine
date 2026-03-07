@@ -44,7 +44,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -54,12 +53,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.FeedReadCount
+import dev.sasikanth.rss.reader.core.model.local.ReadingStatistics
 import dev.sasikanth.rss.reader.core.model.local.ReadingTrend
+import dev.sasikanth.rss.reader.statistics.StatisticsState
 import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
@@ -67,6 +70,7 @@ import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.formatReadingTrendDate
 import kotlin.time.Clock
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -90,7 +94,17 @@ internal fun SettingsDataScreen(
   goBack: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val state by statisticsViewModel.state.collectAsState()
+  val state by statisticsViewModel.state.collectAsStateWithLifecycle()
+
+  SettingsDataContent(state = state, goBack = goBack, modifier = modifier)
+}
+
+@Composable
+private fun SettingsDataContent(
+  state: StatisticsState,
+  goBack: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
   val layoutDirection = LocalLayoutDirection.current
 
   Scaffold(
@@ -425,6 +439,79 @@ private fun ReadingTrendItem(trend: ReadingTrend, modifier: Modifier = Modifier)
       style = MaterialTheme.typography.bodyMedium,
       fontWeight = FontWeight.Medium,
       color = AppTheme.colorScheme.onSurface,
+    )
+  }
+}
+
+@Preview(locale = "en")
+@Composable
+private fun SettingsDataPreview() {
+  val mockStatistics =
+    ReadingStatistics(
+      totalReadCount = 1250,
+      dailyAverage = 15,
+      topFeeds =
+        persistentListOf(
+          FeedReadCount(
+            feedId = "1",
+            feedName = "The Verge",
+            feedIcon =
+              "https://platform.theverge.com/wp-content/uploads/sites/2/2025/01/verge-rss-large_80b47e.png?w=150&h=150&crop=1",
+            homepageLink = "https://www.theverge.com",
+            readCount = 450,
+          ),
+          FeedReadCount(
+            feedId = "2",
+            feedName = "TechCrunch",
+            feedIcon =
+              "https://techcrunch.com/wp-content/uploads/2015/02/cropped-cropped-favicon-gradient.png?w=32",
+            homepageLink = "https://techcrunch.com/",
+            readCount = 320,
+          ),
+          FeedReadCount(
+            feedId = "3",
+            feedName = "WIRED",
+            feedIcon = "https://icon.horse/icon/www.wired.com",
+            homepageLink = "https://www.wired.com",
+            readCount = 280,
+          ),
+          FeedReadCount(
+            feedId = "4",
+            feedName = "9to5Google",
+            feedIcon =
+              "https://9to5google.com/wp-content/uploads/sites/4/2017/03/favicon-bg-none-face-white.png?w=32",
+            homepageLink = "https://9to5google.com/",
+            readCount = 150,
+          ),
+          FeedReadCount(
+            feedId = "5",
+            feedName = "Android Authority",
+            feedIcon = "https://icon.horse/icon/www.androidauthority.com",
+            homepageLink = "https://www.androidauthority.com/",
+            readCount = 120,
+          ),
+        ),
+      readingTrends =
+        persistentListOf(
+          ReadingTrend(date = "2026-03-01", count = 12),
+          ReadingTrend(date = "2026-03-02", count = 18),
+          ReadingTrend(date = "2026-03-03", count = 15),
+          ReadingTrend(date = "2026-03-04", count = 25),
+          ReadingTrend(date = "2026-03-05", count = 10),
+          ReadingTrend(date = "2026-03-06", count = 22),
+          ReadingTrend(date = "2026-03-07", count = 14),
+          ReadingTrend(date = "2026-02-28", count = 8),
+          ReadingTrend(date = "2026-02-27", count = 30),
+          ReadingTrend(date = "2026-02-26", count = 5),
+          ReadingTrend(date = "2026-02-25", count = 12),
+          ReadingTrend(date = "2026-02-24", count = 15),
+        ),
+    )
+
+  AppTheme {
+    SettingsDataContent(
+      state = StatisticsState(statistics = mockStatistics, isLoading = false),
+      goBack = {},
     )
   }
 }

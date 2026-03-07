@@ -34,10 +34,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.resources.icons.Account
 import dev.sasikanth.rss.reader.resources.icons.Appearance
@@ -46,6 +48,7 @@ import dev.sasikanth.rss.reader.resources.icons.Changelog
 import dev.sasikanth.rss.reader.resources.icons.Sync
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.settings.SettingsEvent
+import dev.sasikanth.rss.reader.settings.SettingsState
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.items.SettingsNavigationItem
 import dev.sasikanth.rss.reader.settings.ui.items.TwinePremiumBanner
@@ -76,7 +79,6 @@ internal fun SettingsScreen(
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
-  val layoutDirection = LocalLayoutDirection.current
 
   LaunchedEffect(state.openPaywall) {
     if (state.openPaywall) {
@@ -89,6 +91,32 @@ internal fun SettingsScreen(
     viewModel.dispatch(SettingsEvent.LoadSubscriptionStatus)
   }
 
+  SettingsContent(
+    state = state,
+    goBack = goBack,
+    openAppearanceSettings = openAppearanceSettings,
+    openBehaviorSettings = openBehaviorSettings,
+    openServicesSettings = openServicesSettings,
+    openDataSettings = openDataSettings,
+    openAppInfoSettings = openAppInfoSettings,
+    openPaywall = openPaywall,
+    modifier = modifier,
+  )
+}
+
+@Composable
+private fun SettingsContent(
+  state: SettingsState,
+  goBack: () -> Unit,
+  openAppearanceSettings: () -> Unit,
+  openBehaviorSettings: () -> Unit,
+  openServicesSettings: () -> Unit,
+  openDataSettings: () -> Unit,
+  openAppInfoSettings: () -> Unit,
+  openPaywall: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val layoutDirection = LocalLayoutDirection.current
   Scaffold(
     modifier = modifier,
     topBar = { SimpleTopAppBar(title = stringResource(Res.string.settings), onBackClick = goBack) },
@@ -172,4 +200,31 @@ internal fun SettingsScreen(
     containerColor = AppTheme.colorScheme.backdrop,
     contentColor = Color.Unspecified,
   )
+}
+
+@Preview(locale = "en")
+@Composable
+private fun SettingsPreview() {
+  AppTheme {
+    SettingsContent(
+      state =
+        SettingsState.default(
+          appInfo =
+            AppInfo(
+              versionCode = 1,
+              versionName = "1.0.0",
+              isDebugBuild = true,
+              isFoss = false,
+              cachePath = { "" },
+            )
+        ),
+      goBack = {},
+      openAppearanceSettings = {},
+      openBehaviorSettings = {},
+      openServicesSettings = {},
+      openDataSettings = {},
+      openAppInfoSettings = {},
+      openPaywall = {},
+    )
+  }
 }

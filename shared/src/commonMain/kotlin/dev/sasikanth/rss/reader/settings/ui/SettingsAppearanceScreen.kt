@@ -55,10 +55,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
@@ -76,6 +78,7 @@ import dev.sasikanth.rss.reader.home.ui.SimplePostListItem
 import dev.sasikanth.rss.reader.resources.icons.ArrowDown
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.settings.SettingsEvent
+import dev.sasikanth.rss.reader.settings.SettingsState
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.items.AppIconSelectionSheet
 import dev.sasikanth.rss.reader.settings.ui.items.AppIconSettingItem
@@ -124,7 +127,6 @@ internal fun SettingsAppearanceScreen(
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
-  val layoutDirection = LocalLayoutDirection.current
 
   LaunchedEffect(state.openPaywall) {
     if (state.openPaywall) {
@@ -136,6 +138,25 @@ internal fun SettingsAppearanceScreen(
   LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
     viewModel.dispatch(SettingsEvent.LoadSubscriptionStatus)
   }
+
+  SettingsAppearanceContent(
+    state = state,
+    dispatch = viewModel::dispatch,
+    goBack = goBack,
+    openPaywall = openPaywall,
+    modifier = modifier,
+  )
+}
+
+@Composable
+private fun SettingsAppearanceContent(
+  state: SettingsState,
+  dispatch: (SettingsEvent) -> Unit,
+  goBack: () -> Unit,
+  openPaywall: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val layoutDirection = LocalLayoutDirection.current
 
   Scaffold(
     modifier = modifier,
@@ -152,10 +173,10 @@ internal fun SettingsAppearanceScreen(
         AppIconSelectionSheet(
           currentAppIcon = state.appIcon,
           onAppIconChange = {
-            viewModel.dispatch(SettingsEvent.OnAppIconChanged(it))
-            viewModel.dispatch(SettingsEvent.CloseAppIconSelectionSheet)
+            dispatch(SettingsEvent.OnAppIconChanged(it))
+            dispatch(SettingsEvent.CloseAppIconSelectionSheet)
           },
-          onDismiss = { viewModel.dispatch(SettingsEvent.CloseAppIconSelectionSheet) },
+          onDismiss = { dispatch(SettingsEvent.CloseAppIconSelectionSheet) },
         )
       }
 
@@ -175,7 +196,7 @@ internal fun SettingsAppearanceScreen(
           ThemeModeSelection(
             selectedThemeVariant = state.themeVariant,
             appThemeMode = state.appThemeMode,
-            onAppThemeModeChanged = { viewModel.dispatch(SettingsEvent.OnAppThemeModeChanged(it)) },
+            onAppThemeModeChanged = { dispatch(SettingsEvent.OnAppThemeModeChanged(it)) },
           )
         }
 
@@ -188,7 +209,7 @@ internal fun SettingsAppearanceScreen(
               if (it.isPremium && !state.isSubscribed) {
                 openPaywall()
               } else {
-                viewModel.dispatch(SettingsEvent.OnThemeVariantChanged(it))
+                dispatch(SettingsEvent.OnThemeVariantChanged(it))
               }
             },
           )
@@ -207,9 +228,7 @@ internal fun SettingsAppearanceScreen(
               title = stringResource(Res.string.settingsAmoledTitle),
               subtitle = stringResource(Res.string.settingsAmoledSubtitle),
               checked = state.useAmoled,
-              onValueChanged = { newValue ->
-                viewModel.dispatch(SettingsEvent.ToggleAmoled(newValue))
-              },
+              onValueChanged = { newValue -> dispatch(SettingsEvent.ToggleAmoled(newValue)) },
             )
           }
         }
@@ -219,7 +238,7 @@ internal fun SettingsAppearanceScreen(
         item {
           LayoutSelection(
             homeViewMode = state.homeViewMode,
-            onLayoutChanged = { viewModel.dispatch(SettingsEvent.ChangeHomeViewMode(it)) },
+            onLayoutChanged = { dispatch(SettingsEvent.ChangeHomeViewMode(it)) },
           )
         }
 
@@ -230,7 +249,7 @@ internal fun SettingsAppearanceScreen(
             title = stringResource(Res.string.settingsShowFeaturedSectionTitle),
             subtitle = stringResource(Res.string.settingsShowFeaturedSectionSubtitle),
             checked = state.showFeaturedSection,
-            onValueChanged = { viewModel.dispatch(SettingsEvent.ToggleShowFeaturedSection(it)) },
+            onValueChanged = { dispatch(SettingsEvent.ToggleShowFeaturedSection(it)) },
           )
         }
 
@@ -239,7 +258,7 @@ internal fun SettingsAppearanceScreen(
             title = stringResource(Res.string.settingsShowPinnedSourcesTitle),
             subtitle = stringResource(Res.string.settingsShowPinnedSourcesSubtitle),
             checked = state.showPinnedSources,
-            onValueChanged = { viewModel.dispatch(SettingsEvent.ToggleShowPinnedSources(it)) },
+            onValueChanged = { dispatch(SettingsEvent.ToggleShowPinnedSources(it)) },
           )
         }
 
@@ -248,7 +267,7 @@ internal fun SettingsAppearanceScreen(
             title = stringResource(Res.string.settingsShowUnreadCountTitle),
             subtitle = stringResource(Res.string.settingsShowUnreadCountSubtitle),
             checked = state.showUnreadPostsCount,
-            onValueChanged = { viewModel.dispatch(SettingsEvent.ToggleShowUnreadPostsCount(it)) },
+            onValueChanged = { dispatch(SettingsEvent.ToggleShowUnreadPostsCount(it)) },
           )
         }
 
@@ -257,7 +276,7 @@ internal fun SettingsAppearanceScreen(
             title = stringResource(Res.string.showFeedFavIconTitle),
             subtitle = stringResource(Res.string.showFeedFavIconDesc),
             checked = state.showFeedFavIcon,
-            onValueChanged = { viewModel.dispatch(SettingsEvent.ToggleShowFeedFavIcon(it)) },
+            onValueChanged = { dispatch(SettingsEvent.ToggleShowFeedFavIcon(it)) },
           )
         }
 
@@ -265,7 +284,7 @@ internal fun SettingsAppearanceScreen(
           AppIconSettingItem(
             appIcon = state.appIcon,
             isSubscribed = state.isSubscribed,
-            onClick = { viewModel.dispatch(SettingsEvent.AppIconClicked) },
+            onClick = { dispatch(SettingsEvent.AppIconClicked) },
           )
         }
       }
@@ -465,5 +484,28 @@ private fun AppThemeMode.displayName(): String {
     AppThemeMode.Auto -> stringResource(Res.string.settingsThemeAuto)
     AppThemeMode.Light -> stringResource(Res.string.settingsThemeLight)
     AppThemeMode.Dark -> stringResource(Res.string.settingsThemeDark)
+  }
+}
+
+@Preview(locale = "en")
+@Composable
+private fun SettingsAppearancePreview() {
+  AppTheme {
+    SettingsAppearanceContent(
+      state =
+        SettingsState.default(
+          appInfo =
+            AppInfo(
+              versionCode = 1,
+              versionName = "1.0.0",
+              isDebugBuild = true,
+              isFoss = false,
+              cachePath = { "" },
+            )
+        ),
+      dispatch = {},
+      goBack = {},
+      openPaywall = {},
+    )
   }
 }
