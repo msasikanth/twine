@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -36,7 +37,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.resources.icons.DarkMode
@@ -53,6 +58,7 @@ import dev.sasikanth.rss.reader.ui.parchmentColorScheme
 import dev.sasikanth.rss.reader.ui.raspberryColorScheme
 import dev.sasikanth.rss.reader.ui.skylineColorScheme
 import dev.sasikanth.rss.reader.ui.solarizedColorScheme
+import dev.sasikanth.rss.reader.util.canBlurImage
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -85,7 +91,7 @@ fun ThemeVariantIconButton(
   val (backgroundColor, contentColor) =
     when (themeVariant) {
       ThemeVariant.Dynamic -> {
-        Pair(colorScheme.primary, colorScheme.onPrimary)
+        Pair(Color.Transparent, colorScheme.onSurface)
       }
 
       ThemeVariant.Solarized -> {
@@ -140,6 +146,56 @@ fun ThemeVariantIconButton(
             .clickable { onClick() },
         contentAlignment = Alignment.Center,
       ) {
+        if (themeVariant == ThemeVariant.Dynamic) {
+          val coralColor = coralColorScheme(isDark = true).primary
+          val forestColor = forestColorScheme(isDark = true).primary
+          val raspberryColor = raspberryColorScheme(isDark = true).primary
+          val skylineColor = skylineColorScheme(isDark = true).primary
+
+          Canvas(
+            modifier =
+              Modifier.matchParentSize().then(if (canBlurImage) Modifier.blur(24.dp) else Modifier)
+          ) {
+            drawRect(colorScheme.surfaceContainerHighest)
+
+            drawRect(
+              brush =
+                Brush.radialGradient(
+                  colors = listOf(coralColor, Color.Transparent),
+                  center = Offset(0f, 0f),
+                  radius = size.width,
+                )
+            )
+
+            drawRect(
+              brush =
+                Brush.radialGradient(
+                  colors = listOf(forestColor, Color.Transparent),
+                  center = Offset(size.width, size.height),
+                  radius = size.width,
+                )
+            )
+
+            drawRect(
+              brush =
+                Brush.radialGradient(
+                  colors = listOf(raspberryColor, Color.Transparent),
+                  center = Offset(0f, size.height),
+                  radius = size.width,
+                )
+            )
+
+            drawRect(
+              brush =
+                Brush.radialGradient(
+                  colors = listOf(skylineColor, Color.Transparent),
+                  center = Offset(size.width, 0f),
+                  radius = size.width,
+                )
+            )
+          }
+        }
+
         val icon =
           when {
             themeVariant.isPremium && !isSubscribed -> TwineIcons.StarShine
