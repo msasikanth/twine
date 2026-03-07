@@ -75,6 +75,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paging.compose.collectAsLazyPagingItems
@@ -88,6 +89,7 @@ import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
+import dev.sasikanth.rss.reader.feeds.FeedsState
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.feeds.SourceListItem
 import dev.sasikanth.rss.reader.feeds.ui.CreateGroupDialog
@@ -137,6 +139,7 @@ internal fun NavigationDrawerContent(
   showCloseIcon: Boolean = true,
   dismissOnSelection: Boolean = true,
 ) {
+  val state by feedsViewModel.state.collectAsStateWithLifecycle()
   val focusManager = LocalFocusManager.current
   val closeDrawerWithFocusClear = {
     focusManager.clearFocus()
@@ -144,52 +147,6 @@ internal fun NavigationDrawerContent(
   }
 
   LaunchedEffect(expanded) { focusManager.clearFocus() }
-
-  Crossfade(targetState = expanded, modifier = modifier) { isExpanded ->
-    if (isExpanded) {
-      ExpandedDrawerContent(
-        feedsViewModel = feedsViewModel,
-        selectedDestination = selectedDestination,
-        onDestinationSelected = onDestinationSelected,
-        openFeedInfoSheet = openFeedInfoSheet,
-        openGroupScreen = openGroupScreen,
-        openGroupSelectionSheet = openGroupSelectionSheet,
-        openAddFeedScreen = openAddFeedScreen,
-        openPaywall = openPaywall,
-        closeDrawer = closeDrawerWithFocusClear,
-        showCloseIcon = showCloseIcon,
-        dismissOnSelection = dismissOnSelection,
-      )
-    } else {
-      CollapsedDrawerContent(
-        feedsViewModel = feedsViewModel,
-        selectedDestination = selectedDestination,
-        onDestinationSelected = onDestinationSelected,
-        closeDrawer = closeDrawerWithFocusClear,
-        dismissOnSelection = dismissOnSelection,
-      )
-    }
-  }
-}
-
-@Composable
-private fun ExpandedDrawerContent(
-  feedsViewModel: FeedsViewModel,
-  selectedDestination: MainDestination,
-  onDestinationSelected: (MainDestination) -> Unit,
-  openFeedInfoSheet: (id: String) -> Unit,
-  openGroupScreen: (id: String) -> Unit,
-  openGroupSelectionSheet: () -> Unit,
-  openAddFeedScreen: () -> Unit,
-  openPaywall: () -> Unit,
-  closeDrawer: () -> Unit,
-  showCloseIcon: Boolean,
-  dismissOnSelection: Boolean,
-) {
-  val state by feedsViewModel.state.collectAsStateWithLifecycle()
-  val searchQuery = feedsViewModel.searchQuery
-
-  var showNewGroupDialog by remember { mutableStateOf(false) }
 
   LaunchedEffect(state.openPaywall, state.openAddFeedScreen) {
     when {
@@ -204,16 +161,93 @@ private fun ExpandedDrawerContent(
     }
   }
 
+  NavigationDrawerContent(
+    state = state,
+    searchQuery = feedsViewModel.searchQuery,
+    selectedDestination = selectedDestination,
+    onDestinationSelected = onDestinationSelected,
+    dispatch = feedsViewModel::dispatch,
+    openFeedInfoSheet = openFeedInfoSheet,
+    openGroupScreen = openGroupScreen,
+    openGroupSelectionSheet = openGroupSelectionSheet,
+    closeDrawer = closeDrawerWithFocusClear,
+    modifier = modifier,
+    expanded = expanded,
+    showCloseIcon = showCloseIcon,
+    dismissOnSelection = dismissOnSelection,
+  )
+}
+
+@Composable
+internal fun NavigationDrawerContent(
+  state: FeedsState,
+  searchQuery: TextFieldValue,
+  selectedDestination: MainDestination,
+  onDestinationSelected: (MainDestination) -> Unit,
+  dispatch: (FeedsEvent) -> Unit,
+  openFeedInfoSheet: (id: String) -> Unit,
+  openGroupScreen: (id: String) -> Unit,
+  openGroupSelectionSheet: () -> Unit,
+  closeDrawer: () -> Unit,
+  modifier: Modifier = Modifier,
+  expanded: Boolean = true,
+  showCloseIcon: Boolean = true,
+  dismissOnSelection: Boolean = true,
+) {
+  Crossfade(targetState = expanded, modifier = modifier) { isExpanded ->
+    if (isExpanded) {
+      ExpandedDrawerContent(
+        state = state,
+        searchQuery = searchQuery,
+        selectedDestination = selectedDestination,
+        onDestinationSelected = onDestinationSelected,
+        dispatch = dispatch,
+        openFeedInfoSheet = openFeedInfoSheet,
+        openGroupScreen = openGroupScreen,
+        openGroupSelectionSheet = openGroupSelectionSheet,
+        closeDrawer = closeDrawer,
+        showCloseIcon = showCloseIcon,
+        dismissOnSelection = dismissOnSelection,
+      )
+    } else {
+      CollapsedDrawerContent(
+        state = state,
+        selectedDestination = selectedDestination,
+        onDestinationSelected = onDestinationSelected,
+        dispatch = dispatch,
+        closeDrawer = closeDrawer,
+        dismissOnSelection = dismissOnSelection,
+      )
+    }
+  }
+}
+
+@Composable
+private fun ExpandedDrawerContent(
+  state: FeedsState,
+  searchQuery: TextFieldValue,
+  selectedDestination: MainDestination,
+  onDestinationSelected: (MainDestination) -> Unit,
+  dispatch: (FeedsEvent) -> Unit,
+  openFeedInfoSheet: (id: String) -> Unit,
+  openGroupScreen: (id: String) -> Unit,
+  openGroupSelectionSheet: () -> Unit,
+  closeDrawer: () -> Unit,
+  showCloseIcon: Boolean,
+  dismissOnSelection: Boolean,
+) {
+  var showNewGroupDialog by remember { mutableStateOf(false) }
+
   if (state.showDeleteConfirmation) {
     DeleteConfirmationDialog(
-      onDelete = { feedsViewModel.dispatch(FeedsEvent.DeleteSelectedSources) },
-      dismiss = { feedsViewModel.dispatch(FeedsEvent.DismissDeleteConfirmation) },
+      onDelete = { dispatch(FeedsEvent.DeleteSelectedSources) },
+      dismiss = { dispatch(FeedsEvent.DismissDeleteConfirmation) },
     )
   }
 
   if (showNewGroupDialog) {
     CreateGroupDialog(
-      onCreateGroup = { feedsViewModel.dispatch(FeedsEvent.OnCreateGroup(it)) },
+      onCreateGroup = { dispatch(FeedsEvent.OnCreateGroup(it)) },
       onDismiss = { showNewGroupDialog = false },
     )
   }
@@ -297,7 +331,7 @@ private fun ExpandedDrawerContent(
               if (
                 destination == MainDestination.Home && selectedDestination == MainDestination.Home
               ) {
-                feedsViewModel.dispatch(FeedsEvent.OnHomeSelected)
+                dispatch(FeedsEvent.OnHomeSelected)
               } else {
                 onDestinationSelected(destination)
               }
@@ -332,25 +366,23 @@ private fun ExpandedDrawerContent(
           AllFeedsHeader(
             feedsCount = state.numberOfFeeds,
             feedsSortOrder = state.feedsSortOrder,
-            onFeedsSortChanged = { feedsViewModel.dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
-            onAddNewFeedClick = { feedsViewModel.dispatch(FeedsEvent.OnNewFeedClicked) },
+            onFeedsSortChanged = { dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
+            onAddNewFeedClick = { dispatch(FeedsEvent.OnNewFeedClicked) },
           )
         }
 
         pinnedSources(
           pinnedSources = state.pinnedSources,
-          onSourceClick = { feedsViewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
-          onPinClick = { feedsViewModel.dispatch(FeedsEvent.OnSourcePinClicked(it)) },
-          onPinnedSourceOrderChanged = {
-            feedsViewModel.dispatch(FeedsEvent.OnPinnedSourcePositionChanged(it))
-          },
+          onSourceClick = { dispatch(FeedsEvent.OnSourceClick(it)) },
+          onPinClick = { dispatch(FeedsEvent.OnSourcePinClicked(it)) },
+          onPinnedSourceOrderChanged = { dispatch(FeedsEvent.OnPinnedSourcePositionChanged(it)) },
         )
 
         item {
           SearchBar(
             query = searchQuery,
-            onQueryChange = { feedsViewModel.dispatch(FeedsEvent.SearchQueryChanged(it)) },
-            onClearClick = { feedsViewModel.dispatch(FeedsEvent.ClearSearchQuery) },
+            onQueryChange = { dispatch(FeedsEvent.SearchQueryChanged(it)) },
+            onClearClick = { dispatch(FeedsEvent.ClearSearchQuery) },
           )
         }
 
@@ -367,31 +399,25 @@ private fun ExpandedDrawerContent(
               onSourceClick = {
                 val isSourceActive = state.activeSource?.id == it.id
                 if (isSourceActive) {
-                  feedsViewModel.dispatch(FeedsEvent.OnHomeSelected)
+                  dispatch(FeedsEvent.OnHomeSelected)
                 } else {
-                  feedsViewModel.dispatch(FeedsEvent.OnSourceClick(it))
+                  dispatch(FeedsEvent.OnSourceClick(it))
                 }
 
                 if (dismissOnSelection) {
                   closeDrawer()
                 }
               },
-              onToggleSourceSelection = {
-                feedsViewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it))
-              },
-              onPinClick = { feedsViewModel.dispatch(FeedsEvent.OnSourcePinClicked(it)) },
+              onToggleSourceSelection = { dispatch(FeedsEvent.OnToggleFeedSelection(it)) },
+              onPinClick = { dispatch(FeedsEvent.OnSourcePinClicked(it)) },
               onSourceEditClick = {
                 when (it.sourceType) {
                   SourceType.Feed -> openFeedInfoSheet(it.id)
                   SourceType.FeedGroup -> openGroupScreen(it.id)
                 }
               },
-              onAddToGroupClick = {
-                feedsViewModel.dispatch(FeedsEvent.OnSourceAddToGroupClicked(it))
-              },
-              onRemoveSourceClick = {
-                feedsViewModel.dispatch(FeedsEvent.OnDeleteSourceClicked(it))
-              },
+              onAddToGroupClick = { dispatch(FeedsEvent.OnSourceAddToGroupClicked(it)) },
+              onRemoveSourceClick = { dispatch(FeedsEvent.OnDeleteSourceClicked(it)) },
             )
           } else {
             allSources(
@@ -404,31 +430,25 @@ private fun ExpandedDrawerContent(
               onSourceClick = {
                 val isSourceActive = state.activeSource?.id == it.id
                 if (isSourceActive) {
-                  feedsViewModel.dispatch(FeedsEvent.OnHomeSelected)
+                  dispatch(FeedsEvent.OnHomeSelected)
                 } else {
-                  feedsViewModel.dispatch(FeedsEvent.OnSourceClick(it))
+                  dispatch(FeedsEvent.OnSourceClick(it))
                 }
 
                 if (dismissOnSelection) {
                   closeDrawer()
                 }
               },
-              onToggleSourceSelection = {
-                feedsViewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it))
-              },
-              onPinClick = { feedsViewModel.dispatch(FeedsEvent.OnSourcePinClicked(it)) },
+              onToggleSourceSelection = { dispatch(FeedsEvent.OnToggleFeedSelection(it)) },
+              onPinClick = { dispatch(FeedsEvent.OnSourcePinClicked(it)) },
               onSourceEditClick = {
                 when (it.sourceType) {
                   SourceType.Feed -> openFeedInfoSheet(it.id)
                   SourceType.FeedGroup -> openGroupScreen(it.id)
                 }
               },
-              onAddToGroupClick = {
-                feedsViewModel.dispatch(FeedsEvent.OnSourceAddToGroupClicked(it))
-              },
-              onRemoveSourceClick = {
-                feedsViewModel.dispatch(FeedsEvent.OnDeleteSourceClicked(it))
-              },
+              onAddToGroupClick = { dispatch(FeedsEvent.OnSourceAddToGroupClicked(it)) },
+              onRemoveSourceClick = { dispatch(FeedsEvent.OnDeleteSourceClicked(it)) },
             )
           }
         }
@@ -450,7 +470,7 @@ private fun ExpandedDrawerContent(
 
           ContextActionsBottomBar(
             tooltip = tooltip,
-            onCancel = { feedsViewModel.dispatch(FeedsEvent.CancelSourcesSelection) },
+            onCancel = { dispatch(FeedsEvent.CancelSourcesSelection) },
           ) {
             val areSelectedFeedsPinned = state.selectedSources.all { it.pinnedAt != null }
 
@@ -464,9 +484,9 @@ private fun ExpandedDrawerContent(
               label = pinActionLabel,
               onClick = {
                 if (areSelectedFeedsPinned) {
-                  feedsViewModel.dispatch(FeedsEvent.UnPinSelectedSources)
+                  dispatch(FeedsEvent.UnPinSelectedSources)
                 } else {
-                  feedsViewModel.dispatch(FeedsEvent.PinSelectedSources)
+                  dispatch(FeedsEvent.PinSelectedSources)
                 }
               },
             )
@@ -483,7 +503,7 @@ private fun ExpandedDrawerContent(
               modifier = Modifier.weight(1f),
               icon = TwineIcons.Delete,
               label = stringResource(Res.string.actionDelete),
-              onClick = { feedsViewModel.dispatch(FeedsEvent.DeleteSelectedSourcesClicked) },
+              onClick = { dispatch(FeedsEvent.DeleteSelectedSourcesClicked) },
             )
 
             if (state.selectedSources.size == 1) {
@@ -510,7 +530,7 @@ private fun ExpandedDrawerContent(
                     }
                   }
 
-                  feedsViewModel.dispatch(FeedsEvent.CancelSourcesSelection)
+                  dispatch(FeedsEvent.CancelSourcesSelection)
                 },
               )
             }
@@ -523,13 +543,13 @@ private fun ExpandedDrawerContent(
 
 @Composable
 private fun CollapsedDrawerContent(
-  feedsViewModel: FeedsViewModel,
+  state: FeedsState,
   selectedDestination: MainDestination,
   onDestinationSelected: (MainDestination) -> Unit,
+  dispatch: (FeedsEvent) -> Unit,
   closeDrawer: () -> Unit,
   dismissOnSelection: Boolean,
 ) {
-  val state by feedsViewModel.state.collectAsStateWithLifecycle()
   val sources = state.sources.collectAsLazyPagingItems()
 
   val navigationRailItemColors =
@@ -560,7 +580,7 @@ private fun CollapsedDrawerContent(
         selected = selected,
         onClick = {
           if (destination == MainDestination.Home && selectedDestination == MainDestination.Home) {
-            feedsViewModel.dispatch(FeedsEvent.OnHomeSelected)
+            dispatch(FeedsEvent.OnHomeSelected)
           } else {
             onDestinationSelected(destination)
           }
@@ -603,9 +623,9 @@ private fun CollapsedDrawerContent(
             hasActiveSource = state.activeSource != null,
             onClick = {
               if (selected) {
-                feedsViewModel.dispatch(FeedsEvent.OnHomeSelected)
+                dispatch(FeedsEvent.OnHomeSelected)
               } else {
-                feedsViewModel.dispatch(FeedsEvent.OnSourceClick(source))
+                dispatch(FeedsEvent.OnSourceClick(source))
               }
 
               if (dismissOnSelection) {
@@ -641,9 +661,9 @@ private fun CollapsedDrawerContent(
               hasActiveSource = state.activeSource != null,
               onClick = {
                 if (selected) {
-                  feedsViewModel.dispatch(FeedsEvent.OnHomeSelected)
+                  dispatch(FeedsEvent.OnHomeSelected)
                 } else {
-                  feedsViewModel.dispatch(FeedsEvent.OnSourceClick(source))
+                  dispatch(FeedsEvent.OnSourceClick(source))
                 }
 
                 if (dismissOnSelection) {
@@ -859,5 +879,23 @@ private fun NoFeeds() {
         textAlign = TextAlign.Center,
       )
     }
+  }
+}
+
+@Preview(locale = "en")
+@Composable
+private fun NavigationDrawerPreview() {
+  AppTheme {
+    NavigationDrawerContent(
+      state = FeedsState.DEFAULT,
+      searchQuery = TextFieldValue(),
+      selectedDestination = MainDestination.Home,
+      onDestinationSelected = {},
+      dispatch = {},
+      openFeedInfoSheet = {},
+      openGroupScreen = {},
+      openGroupSelectionSheet = {},
+      closeDrawer = {},
+    )
   }
 }
