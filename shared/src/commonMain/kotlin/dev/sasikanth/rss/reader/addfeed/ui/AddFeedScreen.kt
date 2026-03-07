@@ -49,6 +49,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -73,16 +74,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.addfeed.AddFeedEffect
 import dev.sasikanth.rss.reader.addfeed.AddFeedErrorType
 import dev.sasikanth.rss.reader.addfeed.AddFeedEvent
+import dev.sasikanth.rss.reader.addfeed.AddFeedState
 import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
 import dev.sasikanth.rss.reader.addfeed.FeedFetchingState
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.CircularIconButton
-import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.TextField
 import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -125,7 +127,6 @@ fun AddFeedScreen(
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
   val snackbarHostState = remember { SnackbarHostState() }
-  val (feedLinkFocus, feedTitleFocus) = remember { FocusRequester.createRefs() }
   val inAppRating = LocalInAppRating.current
 
   LaunchedEffect(Unit) {
@@ -137,8 +138,6 @@ fun AddFeedScreen(
   }
 
   LaunchedEffect(state.error, state.goBack) {
-    feedLinkFocus.requestFocus()
-
     when {
       state.goBack -> {
         goBack()
@@ -154,8 +153,32 @@ fun AddFeedScreen(
     }
   }
 
+  AddFeedContent(
+    state = state,
+    dispatch = viewModel::dispatch,
+    goBack = goBack,
+    openGroupSelection = openGroupSelection,
+    openDiscovery = openDiscovery,
+    snackbarHostState = snackbarHostState,
+    modifier = modifier,
+  )
+}
+
+@Composable
+private fun AddFeedContent(
+  state: AddFeedState,
+  dispatch: (AddFeedEvent) -> Unit,
+  goBack: () -> Unit,
+  openGroupSelection: (Set<String>) -> Unit,
+  openDiscovery: () -> Unit,
+  snackbarHostState: SnackbarHostState,
+  modifier: Modifier = Modifier,
+) {
+  val (feedLinkFocus, feedTitleFocus) = remember { FocusRequester.createRefs() }
   var feedLink by remember { mutableStateOf(TextFieldValue()) }
   var feedTitle by remember { mutableStateOf(TextFieldValue()) }
+
+  LaunchedEffect(Unit) { feedLinkFocus.requestFocus() }
 
   Scaffold(
     modifier = modifier,
@@ -220,9 +243,7 @@ fun AddFeedScreen(
           feedLink.text.isNotBlank() && state.feedFetchingState != FeedFetchingState.Loading,
         shape = MaterialTheme.shapes.extraLarge,
         onClick = {
-          viewModel.dispatch(
-            AddFeedEvent.AddFeedClicked(feedLink = feedLink.text, name = feedTitle.text)
-          )
+          dispatch(AddFeedEvent.AddFeedClicked(feedLink = feedLink.text, name = feedTitle.text))
         },
       ) {
         if (state.feedFetchingState == FeedFetchingState.Loading) {
@@ -298,7 +319,7 @@ fun AddFeedScreen(
               title = stringResource(Res.string.alwaysFetchSourceArticle),
               checked = state.alwaysFetchSourceArticle,
               onValueChanged = { newValue ->
-                viewModel.dispatch(AddFeedEvent.OnAlwaysFetchSourceArticleChanged(newValue))
+                dispatch(AddFeedEvent.OnAlwaysFetchSourceArticleChanged(newValue))
               },
             )
 
@@ -309,7 +330,7 @@ fun AddFeedScreen(
               title = stringResource(Res.string.showFeedFavIconTitle),
               checked = state.showFeedFavIcon,
               onValueChanged = { newValue ->
-                viewModel.dispatch(AddFeedEvent.OnShowFeedFavIconChanged(newValue))
+                dispatch(AddFeedEvent.OnShowFeedFavIconChanged(newValue))
               },
             )
 
@@ -329,7 +350,7 @@ fun AddFeedScreen(
         }
 
         items(state.selectedFeedGroups.toList()) { group ->
-          GroupItem(group) { viewModel.dispatch(AddFeedEvent.OnRemoveGroupClicked(group)) }
+          GroupItem(group) { dispatch(AddFeedEvent.OnRemoveGroupClicked(group)) }
         }
       }
     },
@@ -417,5 +438,20 @@ private suspend fun errorMessageForErrorType(errorType: AddFeedErrorType): Strin
       getString(Res.string.errorUnAuthorized, errorType.statusCode.value)
     is AddFeedErrorType.UnknownHttpStatusError ->
       getString(Res.string.errorUnknownHttpStatus, errorType.statusCode.value)
+  }
+}
+
+@Preview(locale = "en")
+@Composable
+private fun AddFeedPreview() {
+  AppTheme {
+    AddFeedContent(
+      state = AddFeedState.DEFAULT,
+      dispatch = {},
+      goBack = {},
+      openGroupSelection = {},
+      openDiscovery = {},
+      snackbarHostState = remember { SnackbarHostState() },
+    )
   }
 }
