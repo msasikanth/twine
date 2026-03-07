@@ -93,7 +93,13 @@ private fun BookmarksContent(
 ) {
   val listState = rememberLazyListState()
   val coroutineScope = rememberCoroutineScope()
-  val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+  val showScrollToTop by
+    remember(bookmarks) {
+      derivedStateOf {
+        val hasContent = bookmarks.itemCount > 0
+        hasContent && listState.firstVisibleItemIndex > 0
+      }
+    }
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
 
