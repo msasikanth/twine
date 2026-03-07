@@ -53,6 +53,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.components.AlertDialog
@@ -61,6 +62,7 @@ import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.TextField
 import dev.sasikanth.rss.reader.freshrss.FreshRssLoginError
 import dev.sasikanth.rss.reader.freshrss.FreshRssLoginEvent
+import dev.sasikanth.rss.reader.freshrss.FreshRssLoginState
 import dev.sasikanth.rss.reader.freshrss.FreshRssLoginViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.getString
@@ -88,8 +90,6 @@ fun FreshRssLoginScreen(
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
-  val snackbarHostState = remember { SnackbarHostState() }
-  val (urlFocus, usernameFocus, passwordFocus) = remember { FocusRequester.createRefs() }
 
   LaunchedEffect(state.loginSuccess, state.error) {
     if (state.loginSuccess) {
@@ -99,6 +99,37 @@ fun FreshRssLoginScreen(
     if (state.error != null) {
       val errorMessage =
         when (val error = state.error!!) {
+          FreshRssLoginError.LoginFailed -> getString(Res.string.freshRssErrorLoginFailed)
+          is FreshRssLoginError.Unknown ->
+            error.message.ifBlank { getString(Res.string.freshRssErrorUnknown) }
+        }
+      // Note: snackbarHostState handling is now inside FreshRssLoginContent
+    }
+  }
+
+  FreshRssLoginContent(
+    state = state,
+    onEvent = viewModel::onEvent,
+    goBack = goBack,
+    modifier = modifier,
+  )
+}
+
+@Composable
+private fun FreshRssLoginContent(
+  state: FreshRssLoginState,
+  onEvent: (FreshRssLoginEvent) -> Unit,
+  goBack: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val snackbarHostState = remember { SnackbarHostState() }
+  val (urlFocus, usernameFocus, passwordFocus) = remember { FocusRequester.createRefs() }
+
+  LaunchedEffect(state.error) {
+    val error = state.error
+    if (error != null) {
+      val errorMessage =
+        when (error) {
           FreshRssLoginError.LoginFailed -> getString(Res.string.freshRssErrorLoginFailed)
           is FreshRssLoginError.Unknown ->
             error.message.ifBlank { getString(Res.string.freshRssErrorUnknown) }
@@ -113,8 +144,8 @@ fun FreshRssLoginScreen(
       text = stringResource(Res.string.freshRssClearDataDesc),
       confirmText = stringResource(Res.string.freshRssClearDataPositive),
       dismissText = stringResource(Res.string.buttonCancel),
-      onConfirm = { viewModel.onEvent(FreshRssLoginEvent.OnConfirmClearDataClicked) },
-      onDismiss = { viewModel.onEvent(FreshRssLoginEvent.OnConfirmationDismissed) },
+      onConfirm = { onEvent(FreshRssLoginEvent.OnConfirmClearDataClicked) },
+      onDismiss = { onEvent(FreshRssLoginEvent.OnConfirmationDismissed) },
     )
   }
 
@@ -159,7 +190,7 @@ fun FreshRssLoginScreen(
             state.username.isNotBlank() &&
             state.password.isNotBlank(),
         shape = MaterialTheme.shapes.extraLarge,
-        onClick = { viewModel.onEvent(FreshRssLoginEvent.OnLoginClicked) },
+        onClick = { onEvent(FreshRssLoginEvent.OnLoginClicked) },
       ) {
         if (state.isLoading) {
           CircularProgressIndicator(
@@ -189,7 +220,7 @@ fun FreshRssLoginScreen(
       item {
         TextField(
           value = state.url,
-          onValueChange = { viewModel.onEvent(FreshRssLoginEvent.OnUrlChanged(it)) },
+          onValueChange = { onEvent(FreshRssLoginEvent.OnUrlChanged(it)) },
           hint = stringResource(Res.string.freshRssServerUrl),
           modifier =
             Modifier.fillMaxWidth().focusRequester(urlFocus).focusProperties {
@@ -208,7 +239,7 @@ fun FreshRssLoginScreen(
       item {
         TextField(
           value = state.username,
-          onValueChange = { viewModel.onEvent(FreshRssLoginEvent.OnUsernameChanged(it)) },
+          onValueChange = { onEvent(FreshRssLoginEvent.OnUsernameChanged(it)) },
           hint = stringResource(Res.string.freshRssUsername),
           modifier =
             Modifier.fillMaxWidth().focusRequester(usernameFocus).focusProperties {
@@ -228,7 +259,7 @@ fun FreshRssLoginScreen(
       item {
         TextField(
           value = state.password,
-          onValueChange = { viewModel.onEvent(FreshRssLoginEvent.OnPasswordChanged(it)) },
+          onValueChange = { onEvent(FreshRssLoginEvent.OnPasswordChanged(it)) },
           hint = stringResource(Res.string.freshRssPassword),
           modifier =
             Modifier.fillMaxWidth().focusRequester(passwordFocus).focusProperties {
@@ -242,10 +273,15 @@ fun FreshRssLoginScreen(
               keyboardType = KeyboardType.Password,
               imeAction = ImeAction.Done,
             ),
-          keyboardActions =
-            KeyboardActions(onDone = { viewModel.onEvent(FreshRssLoginEvent.OnLoginClicked) }),
+          keyboardActions = KeyboardActions(onDone = { onEvent(FreshRssLoginEvent.OnLoginClicked) }),
         )
       }
     }
   }
+}
+
+@Preview(locale = "en")
+@Composable
+private fun FreshRssLoginPreview() {
+  AppTheme { FreshRssLoginContent(state = FreshRssLoginState.DEFAULT, onEvent = {}, goBack = {}) }
 }
