@@ -181,7 +181,13 @@ private fun SearchContent(
 ) {
   val listState = rememberLazyListState()
   val coroutineScope = rememberCoroutineScope()
-  val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+  val showScrollToTop by
+    remember(searchResults) {
+      derivedStateOf {
+        val hasContent = searchResults.itemCount > 0
+        hasContent && listState.firstVisibleItemIndex > 0
+      }
+    }
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
 
