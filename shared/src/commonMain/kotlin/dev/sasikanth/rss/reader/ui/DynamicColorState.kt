@@ -174,5 +174,9 @@ internal class DynamicColorState(
 
 internal val LocalDynamicColorState =
   staticCompositionLocalOf<DynamicColorState> {
-    throw NullPointerException("Please provide a dynamic color state")
+    DynamicColorState(
+      defaultLightValues = lightAppColorScheme(),
+      defaultDarkValues = darkAppColorScheme(),
+      scheme = TwineDynamicColors.Scheme.TonalSpot,
+    )
   }

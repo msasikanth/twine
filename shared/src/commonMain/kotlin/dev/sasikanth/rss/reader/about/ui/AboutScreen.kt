@@ -49,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import coil3.compose.AsyncImage
@@ -76,7 +77,6 @@ import twine.shared.generated.resources.aboutSocialWebsite
 
 @Composable
 fun AboutScreen(goBack: () -> Unit, modifier: Modifier = Modifier) {
-  val layoutDirection = LocalLayoutDirection.current
   val aboutRoleDeveloper = stringResource(Res.string.aboutRoleDeveloper)
   val aboutRoleDesigner = stringResource(Res.string.aboutRoleDesigner)
   val aboutSocialThreads = stringResource(Res.string.aboutSocialThreads)
@@ -135,6 +135,12 @@ fun AboutScreen(goBack: () -> Unit, modifier: Modifier = Modifier) {
     )
   }
 
+  AboutContent(persons = persons, goBack = goBack, modifier = modifier)
+}
+
+@Composable
+private fun AboutContent(persons: List<Person>, goBack: () -> Unit, modifier: Modifier = Modifier) {
+  val layoutDirection = LocalLayoutDirection.current
   Scaffold(
     modifier = modifier,
     topBar = { SimpleTopAppBar(title = stringResource(Res.string.about), onBackClick = goBack) },
@@ -224,6 +230,20 @@ private fun SocialButton(social: Social, modifier: Modifier = Modifier, onClick:
       social.service,
       style = MaterialTheme.typography.labelMedium,
       color = AppTheme.colorScheme.primary,
+    )
+  }
+}
+
+@Preview(locale = "en")
+@Composable
+private fun AboutPreview() {
+  AppTheme {
+    AboutContent(
+      persons =
+        listOf(
+          Person(name = "Sasikanth", role = "Developer", profilePicture = "", socials = emptyList())
+        ),
+      goBack = {},
     )
   }
 }

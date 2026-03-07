@@ -20,4 +20,4 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.window.core.layout.WindowSizeClass
 
 internal val LocalWindowSizeClass =
-  staticCompositionLocalOf<WindowSizeClass> { error("No WindowSizeClass found") }
+  staticCompositionLocalOf<WindowSizeClass> { WindowSizeClass(widthDp = 412f, heightDp = 892f) }

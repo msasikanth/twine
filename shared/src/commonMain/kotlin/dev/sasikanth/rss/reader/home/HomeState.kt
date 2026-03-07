@@ -30,6 +30,7 @@ import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
+import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.sync.SyncState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
@@ -51,6 +52,7 @@ data class HomeState(
   val homeViewMode: HomeViewMode,
   val showFeaturedSection: Boolean,
   val themeVariant: ThemeVariant,
+  val markAsReadOn: MarkAsReadOn,
   val lastRefreshedAt: LocalDateTime?,
   val unreadSinceLastSync: UnreadSinceLastSync?,
   val prevActiveSource: Source?,
@@ -77,6 +79,7 @@ data class HomeState(
         lastRefreshedAt = null,
         homeViewMode = HomeViewMode.Default,
         themeVariant = ThemeVariant.Dynamic,
+        markAsReadOn = MarkAsReadOn.Open,
         unreadSinceLastSync = null,
         prevActiveSource = null,
         activePostIndex = 0,

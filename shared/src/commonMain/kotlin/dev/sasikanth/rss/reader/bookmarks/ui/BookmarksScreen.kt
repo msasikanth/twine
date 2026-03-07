@@ -41,10 +41,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.bookmarks.BookmarksEvent
+import dev.sasikanth.rss.reader.bookmarks.BookmarksState
 import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
@@ -70,6 +73,24 @@ internal fun BookmarksScreen(
 ) {
   val state by bookmarksViewModel.state.collectAsStateWithLifecycle()
   val bookmarks = state.bookmarks.collectAsLazyPagingItems()
+
+  BookmarksContent(
+    bookmarks = bookmarks,
+    dispatch = bookmarksViewModel::dispatch,
+    goBack = goBack,
+    openPost = openPost,
+    modifier = modifier,
+  )
+}
+
+@Composable
+private fun BookmarksContent(
+  bookmarks: LazyPagingItems<ResolvedPost>,
+  dispatch: (BookmarksEvent) -> Unit,
+  goBack: () -> Unit,
+  openPost: (postIndex: Int, post: ResolvedPost) -> Unit,
+  modifier: Modifier = Modifier,
+) {
   val listState = rememberLazyListState()
   val coroutineScope = rememberCoroutineScope()
   val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
@@ -98,9 +119,7 @@ internal fun BookmarksScreen(
                 PostListItem(
                   item = post,
                   onClick = { openPost(index, post) },
-                  onPostBookmarkClick = {
-                    bookmarksViewModel.dispatch(BookmarksEvent.OnPostBookmarkClick(post))
-                  },
+                  onPostBookmarkClick = { dispatch(BookmarksEvent.OnPostBookmarkClick(post)) },
                   onPostCommentsClick = {
                     post.commentsLink?.let { coroutineScope.launch { linkHandler.openLink(it) } }
                   },
@@ -108,9 +127,7 @@ internal fun BookmarksScreen(
                     // no-op
                   },
                   updatePostReadStatus = { updatedReadStatus ->
-                    bookmarksViewModel.dispatch(
-                      BookmarksEvent.UpdatePostReadStatus(post.id, updatedReadStatus)
-                    )
+                    dispatch(BookmarksEvent.UpdatePostReadStatus(post.id, updatedReadStatus))
                   },
                   postMetadataConfig =
                     PostMetadataConfig.DEFAULT.copy(
@@ -166,4 +183,17 @@ internal fun BookmarksScreen(
     containerColor = AppTheme.colorScheme.backdrop,
     contentColor = Color.Unspecified,
   )
+}
+
+@Preview(locale = "en")
+@Composable
+private fun BookmarksPreview() {
+  AppTheme {
+    BookmarksContent(
+      bookmarks = BookmarksState.DEFAULT.bookmarks.collectAsLazyPagingItems(),
+      dispatch = {},
+      goBack = {},
+      openPost = { _, _ -> },
+    )
+  }
 }

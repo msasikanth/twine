@@ -38,12 +38,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.settings.SettingsEvent
+import dev.sasikanth.rss.reader.settings.SettingsState
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.items.BlockedWordsSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.MarkAsReadOnSettingItem
@@ -73,8 +76,6 @@ internal fun SettingsBehaviorScreen(
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
-  val layoutDirection = LocalLayoutDirection.current
-
   val snackbarHostState = remember { SnackbarHostState() }
   val freeFeedLimitReachedString = stringResource(Res.string.settingsFreeFeedLimitReached)
   val upgradeToPremiumString = stringResource(Res.string.settingsUpgradeToPremium)
@@ -92,6 +93,27 @@ internal fun SettingsBehaviorScreen(
       )
     }
   }
+
+  SettingsBehaviorContent(
+    state = state,
+    dispatch = viewModel::dispatch,
+    snackbarHostState = snackbarHostState,
+    goBack = goBack,
+    openBlockedWords = openBlockedWords,
+    modifier = modifier,
+  )
+}
+
+@Composable
+private fun SettingsBehaviorContent(
+  state: SettingsState,
+  dispatch: (SettingsEvent) -> Unit,
+  snackbarHostState: SnackbarHostState,
+  goBack: () -> Unit,
+  openBlockedWords: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val layoutDirection = LocalLayoutDirection.current
 
   Scaffold(
     modifier = modifier,
@@ -134,9 +156,9 @@ internal fun SettingsBehaviorScreen(
     content = { padding ->
       if (state.opmlFeedsToSelect != null) {
         OpmlFeedSelectionSheet(
-          feeds = state.opmlFeedsToSelect!!,
-          onFeedsSelected = { viewModel.dispatch(SettingsEvent.OnOpmlFeedsSelected(it)) },
-          onDismiss = { viewModel.dispatch(SettingsEvent.ClearOpmlFeedsToSelect) },
+          feeds = state.opmlFeedsToSelect,
+          onFeedsSelected = { dispatch(SettingsEvent.OnOpmlFeedsSelected(it)) },
+          onDismiss = { dispatch(SettingsEvent.ClearOpmlFeedsToSelect) },
         )
       }
 
@@ -157,9 +179,7 @@ internal fun SettingsBehaviorScreen(
             title = stringResource(Res.string.settingsShowReaderViewTitle),
             subtitle = stringResource(Res.string.settingsShowReaderViewSubtitle),
             checked = state.showReaderView,
-            onValueChanged = { newValue ->
-              viewModel.dispatch(SettingsEvent.ToggleShowReaderView(newValue))
-            },
+            onValueChanged = { newValue -> dispatch(SettingsEvent.ToggleShowReaderView(newValue)) },
           )
         }
 
@@ -175,7 +195,7 @@ internal fun SettingsBehaviorScreen(
                 } else {
                   BrowserType.Default
                 }
-              viewModel.dispatch(SettingsEvent.UpdateBrowserType(newBrowserType))
+              dispatch(SettingsEvent.UpdateBrowserType(newBrowserType))
             },
           )
         }
@@ -184,7 +204,7 @@ internal fun SettingsBehaviorScreen(
 
         item {
           MarkAsReadOnSettingItem(articleMarkAsReadOn = state.markAsReadOn) {
-            viewModel.dispatch(SettingsEvent.MarkAsReadOnChanged(it))
+            dispatch(SettingsEvent.MarkAsReadOnChanged(it))
           }
         }
 
@@ -192,7 +212,7 @@ internal fun SettingsBehaviorScreen(
           PostsDeletionPeriodSettingItem(
             postsDeletionPeriod = state.postsDeletionPeriod,
             onValueChanged = { newValue ->
-              viewModel.dispatch(SettingsEvent.PostsDeletionPeriodChanged(newValue))
+              dispatch(SettingsEvent.PostsDeletionPeriodChanged(newValue))
             },
           )
         }
@@ -205,4 +225,28 @@ internal fun SettingsBehaviorScreen(
       }
     },
   )
+}
+
+@Preview(locale = "en")
+@Composable
+private fun SettingsBehaviorPreview() {
+  AppTheme {
+    SettingsBehaviorContent(
+      state =
+        SettingsState.default(
+          appInfo =
+            AppInfo(
+              versionCode = 1,
+              versionName = "1.0.0",
+              isDebugBuild = true,
+              isFoss = false,
+              cachePath = { "" },
+            )
+        ),
+      dispatch = {},
+      snackbarHostState = remember { SnackbarHostState() },
+      goBack = {},
+      openBlockedWords = {},
+    )
+  }
 }

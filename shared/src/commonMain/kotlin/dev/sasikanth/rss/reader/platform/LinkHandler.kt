@@ -25,5 +25,10 @@ interface LinkHandler {
   suspend fun close()
 }
 
-val LocalLinkHandler =
-  staticCompositionLocalOf<LinkHandler> { error("CompositionLocal LocalLinkHandler not present") }
+val LocalLinkHandler = staticCompositionLocalOf<LinkHandler> { NoopLinkHandler }
+
+private object NoopLinkHandler : LinkHandler {
+  override suspend fun openLink(link: String?, useInAppBrowser: Boolean) {}
+
+  override suspend fun close() {}
+}

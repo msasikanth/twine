@@ -69,18 +69,22 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowSizeClass
+import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
+import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
+import dev.sasikanth.rss.reader.feeds.FeedsState
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.feeds.ui.pinned.PinnedSourcesBottomBar
 import dev.sasikanth.rss.reader.feeds.ui.pinned.rememberPinnedSourcesBottomBarScrollBehavior
@@ -101,6 +105,7 @@ import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalInAppRating
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.flowOf
@@ -123,12 +128,8 @@ internal fun HomeScreen(
   modifier: Modifier = Modifier,
   canHandleBack: Boolean = true,
 ) {
-  val coroutineScope = rememberCoroutineScope()
   val state by viewModel.state.collectAsStateWithLifecycle()
   val feedsState by feedsViewModel.state.collectAsStateWithLifecycle()
-  val linkHandler = LocalLinkHandler.current
-  val density = LocalDensity.current
-  val dynamicColorState = LocalDynamicColorState.current
   val sizeClass = LocalWindowSizeClass.current
   val shouldBlockImage = LocalBlockImage.current
   val inAppRating = LocalInAppRating.current
@@ -156,6 +157,7 @@ internal fun HomeScreen(
         }
       }
       ?.collectAsLazyPagingItems()
+
   val featuredPosts by
     remember(state.featuredPosts, state.themeVariant, sizeClass, shouldBlockImage) {
         if (
@@ -168,6 +170,48 @@ internal fun HomeScreen(
         }
       }
       .collectAsStateWithLifecycle(initialValue = persistentListOf())
+
+  LaunchedEffect(triggerSync) {
+    if (triggerSync) {
+      viewModel.dispatch(HomeEvent.OnSwipeToRefresh)
+    }
+  }
+
+  LaunchedEffect(state.activeSource) {
+    if (state.activeSource != state.prevActiveSource) {
+      viewModel.dispatch(HomeEvent.UpdatePrevActiveSource(state.activeSource))
+      viewModel.dispatch(HomeEvent.UpdateVisibleItemIndex(0))
+    }
+  }
+
+  HomeContent(
+    state = state,
+    feedsState = feedsState,
+    posts = posts,
+    featuredPosts = featuredPosts,
+    dispatch = viewModel::dispatch,
+    feedsDispatch = feedsViewModel::dispatch,
+    onMenuClicked = onMenuClicked,
+    modifier = modifier,
+  )
+}
+
+@OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
+@Composable
+private fun HomeContent(
+  state: HomeState,
+  feedsState: FeedsState,
+  posts: LazyPagingItems<ResolvedPost>?,
+  featuredPosts: ImmutableList<FeaturedPostItem>,
+  dispatch: (HomeEvent) -> Unit,
+  feedsDispatch: (FeedsEvent) -> Unit,
+  onMenuClicked: (() -> Unit)?,
+  modifier: Modifier = Modifier,
+) {
+  val linkHandler = LocalLinkHandler.current
+  val coroutineScope = rememberCoroutineScope()
+  val density = LocalDensity.current
+  val dynamicColorState = LocalDynamicColorState.current
   val postsListState = rememberLazyListState()
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
   val showScrollToTop by remember { derivedStateOf { postsListState.firstVisibleItemIndex > 0 } }
@@ -184,16 +228,8 @@ internal fun HomeScreen(
     rememberPinnedSourcesBottomBarScrollBehavior(canScroll = { canShowBottomBar })
   val homeScrollBehavior = rememberHomeScrollBehavior(appBarScrollBehaviour, bottomBarScrollState)
 
-  LaunchedEffect(triggerSync) {
-    if (triggerSync) {
-      viewModel.dispatch(HomeEvent.OnSwipeToRefresh)
-    }
-  }
-
   LaunchedEffect(state.activeSource) {
     if (state.activeSource != state.prevActiveSource) {
-      viewModel.dispatch(HomeEvent.UpdatePrevActiveSource(state.activeSource))
-      viewModel.dispatch(HomeEvent.UpdateVisibleItemIndex(0))
       bottomBarScrollState.state.heightOffset = 0f
       appBarScrollBehaviour.state.heightOffset = 0f
       appBarScrollBehaviour.state.contentOffset = 0f
@@ -205,9 +241,9 @@ internal fun HomeScreen(
       postsType = state.postsType,
       postsSortOrder = state.postsSortOrder,
       onApply = { postsType, postsSortOrder ->
-        viewModel.dispatch(HomeEvent.OnPostsSortFilterApplied(postsType, postsSortOrder))
+        dispatch(HomeEvent.OnPostsSortFilterApplied(postsType, postsSortOrder))
       },
-      onDismiss = { viewModel.dispatch(HomeEvent.ShowPostsSortFilter(show = false)) },
+      onDismiss = { dispatch(HomeEvent.ShowPostsSortFilter(show = false)) },
     )
   }
 
@@ -232,7 +268,7 @@ internal fun HomeScreen(
       modifier.onPreviewKeyEvent { event ->
         when {
           event.isMetaPressed && event.key == Key.R && event.type == KeyEventType.KeyUp -> {
-            viewModel.dispatch(HomeEvent.OnSwipeToRefresh)
+            dispatch(HomeEvent.OnSwipeToRefresh)
             true
           }
           else -> false
@@ -275,10 +311,10 @@ internal fun HomeScreen(
               pinnedSources = feedsState.pinnedSources,
               activeSource = feedsState.activeSource,
               canShowUnreadPostsCount = feedsState.canShowUnreadPostsCount,
-              onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
-              onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
+              onSourceClick = { feed -> feedsDispatch(FeedsEvent.OnSourceClick(feed)) },
+              onHomeSelected = { feedsDispatch(FeedsEvent.OnHomeSelected) },
               onPinnedSourceOrderChanged = { newPinnedSources ->
-                feedsViewModel.dispatch(FeedsEvent.OnPinnedSourcePositionChanged(newPinnedSources))
+                feedsDispatch(FeedsEvent.OnPinnedSourcePositionChanged(newPinnedSources))
               },
               scrollBehavior = bottomBarScrollState,
             )
@@ -314,8 +350,8 @@ internal fun HomeScreen(
             hasUnreadPosts = state.hasUnreadPosts,
             scrollBehavior = scrollBehavior,
             onMenuClicked = onMenuClicked,
-            onShowPostsSortFilter = { viewModel.dispatch(HomeEvent.ShowPostsSortFilter(true)) },
-            onMarkPostsAsRead = { viewModel.dispatch(HomeEvent.MarkPostsAsRead(it)) },
+            onShowPostsSortFilter = { dispatch(HomeEvent.ShowPostsSortFilter(true)) },
+            onMarkPostsAsRead = { dispatch(HomeEvent.MarkPostsAsRead(it)) },
           )
         },
         body = { paddingValues ->
@@ -357,7 +393,7 @@ internal fun HomeScreen(
               val firstVisibleItemKey = firstVisibleItemInfoAfterOffset?.key as? String
               val settledPage = featuredPostsPagerState.settledPage
 
-              viewModel.dispatch(
+              dispatch(
                 HomeEvent.OnScreenStopped(
                   firstVisibleItemIndex = firstVisibleItemIndexAfterOffset,
                   firstVisibleItemKey = firstVisibleItemKey,
@@ -384,7 +420,7 @@ internal fun HomeScreen(
                 pullToRefreshState = pullToRefreshState,
                 state = state,
                 paddingValues = paddingValues,
-                onRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) },
+                onRefresh = { dispatch(HomeEvent.OnSwipeToRefresh) },
               ) {
                 NoNewPosts()
               }
@@ -394,7 +430,7 @@ internal fun HomeScreen(
                 pullToRefreshState = pullToRefreshState,
                 state = state,
                 paddingValues = paddingValues,
-                onRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) },
+                onRefresh = { dispatch(HomeEvent.OnSwipeToRefresh) },
               ) {
                 PostsList(
                   paddingValues = paddingValues,
@@ -402,31 +438,29 @@ internal fun HomeScreen(
                   listState = postsListState,
                   featuredPostsPagerState = featuredPostsPagerState,
                   homeViewMode = state.homeViewMode,
+                  postsType = state.postsType,
+                  markAsReadOn = state.markAsReadOn,
                   posts = { posts },
                   markFeaturedPostAsReadOnScroll = {
-                    viewModel.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
+                    dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
                   },
                   onVisiblePostsChanged = { visiblePosts, firstVisibleItemIndex ->
-                    viewModel.dispatch(
+                    dispatch(
                       HomeEvent.OnVisiblePostsChanged(
                         visiblePosts = visiblePosts,
                         firstVisibleItemIndex = firstVisibleItemIndex,
                       )
                     )
                   },
-                  onPostClicked = { post, _ -> viewModel.dispatch(HomeEvent.OnPostClicked(post)) },
-                  onFeaturedPostClicked = { post ->
-                    viewModel.dispatch(HomeEvent.OnPostClicked(post))
-                  },
-                  onPostBookmarkClick = { viewModel.dispatch(HomeEvent.OnPostBookmarkClick(it)) },
+                  onPostClicked = { post, _ -> dispatch(HomeEvent.OnPostClicked(post)) },
+                  onFeaturedPostClicked = { post -> dispatch(HomeEvent.OnPostClicked(post)) },
+                  onPostBookmarkClick = { dispatch(HomeEvent.OnPostBookmarkClick(it)) },
                   onPostCommentsClick = { commentsLink ->
                     coroutineScope.launch { linkHandler.openLink(commentsLink) }
                   },
-                  onPostSourceClick = { feedId ->
-                    viewModel.dispatch(HomeEvent.OnPostSourceClicked(feedId))
-                  },
+                  onPostSourceClick = { feedId -> dispatch(HomeEvent.OnPostSourceClicked(feedId)) },
                   updateReadStatus = { postId, updatedReadStatus ->
-                    viewModel.dispatch(HomeEvent.UpdatePostReadStatus(postId, updatedReadStatus))
+                    dispatch(HomeEvent.UpdatePostReadStatus(postId, updatedReadStatus))
                   },
                   modifier = Modifier.fillMaxSize(),
                 )
@@ -485,7 +519,7 @@ internal fun HomeScreen(
             }
             postsListState.animateScrollToItem(0)
           }
-          viewModel.dispatch(HomeEvent.LoadNewArticlesClick)
+          dispatch(HomeEvent.LoadNewArticlesClick)
         },
       ) {
         coroutineScope.launch {
@@ -620,6 +654,22 @@ private fun NoNewPosts() {
       style = MaterialTheme.typography.labelLarge,
       color = AppTheme.colorScheme.onSurfaceVariant,
       textAlign = TextAlign.Center,
+    )
+  }
+}
+
+@Preview(locale = "en")
+@Composable
+private fun HomePreview() {
+  AppTheme {
+    HomeContent(
+      state = HomeState.default(),
+      feedsState = FeedsState.DEFAULT,
+      posts = null,
+      featuredPosts = persistentListOf(),
+      dispatch = {},
+      feedsDispatch = {},
+      onMenuClicked = {},
     )
   }
 }

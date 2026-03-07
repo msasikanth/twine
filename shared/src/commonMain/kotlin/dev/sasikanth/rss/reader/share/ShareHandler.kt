@@ -23,7 +23,8 @@ interface ShareHandler {
   fun share(content: String?)
 }
 
-val LocalShareHandler =
-  staticCompositionLocalOf<ShareHandler> {
-    throw NullPointerException("Please provide a share handler")
-  }
+val LocalShareHandler = staticCompositionLocalOf<ShareHandler> { NoopShareHandler }
+
+private object NoopShareHandler : ShareHandler {
+  override fun share(content: String?) {}
+}

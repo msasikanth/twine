@@ -27,8 +27,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
+import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
+import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.FlowPreview
@@ -44,6 +46,8 @@ internal fun PostsList(
   listState: LazyListState,
   featuredPostsPagerState: PagerState,
   homeViewMode: HomeViewMode,
+  postsType: PostsType,
+  markAsReadOn: MarkAsReadOn,
   posts: () -> LazyPagingItems<ResolvedPost>,
   markFeaturedPostAsReadOnScroll: (String) -> Unit,
   onVisiblePostsChanged: (visiblePosts: Map<String, Int>, firstVisibleItemIndex: Int) -> Unit,
@@ -102,6 +106,8 @@ internal fun PostsList(
         paddingValues = paddingValues,
         featuredPosts = featuredPosts,
         pagerState = featuredPostsPagerState,
+        postsType = postsType,
+        markAsReadOn = markAsReadOn,
         markFeaturedPostAsReadOnScroll = markFeaturedPostAsReadOnScroll,
         onItemClick = { post, _ -> onFeaturedPostClicked(post) },
         onPostBookmarkClick = onPostBookmarkClick,

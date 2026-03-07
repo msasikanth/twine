@@ -46,6 +46,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
@@ -82,8 +83,10 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.PagingData
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CircularIconButton
@@ -114,11 +117,13 @@ import dev.sasikanth.rss.reader.resources.icons.RadioUnselected
 import dev.sasikanth.rss.reader.resources.icons.Sort
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.search.SearchEvent
+import dev.sasikanth.rss.reader.search.SearchState
 import dev.sasikanth.rss.reader.search.SearchViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -145,10 +150,38 @@ internal fun SearchScreen(
   modifier: Modifier = Modifier,
 ) {
   val state by searchViewModel.state.collectAsStateWithLifecycle()
+  val searchResults = state.searchResults.collectAsLazyPagingItems()
+  val sources = searchViewModel.sources.collectAsLazyPagingItems()
+
+  SearchContent(
+    state = state,
+    searchResults = searchResults,
+    sources = sources,
+    searchQuery = searchViewModel.searchQuery,
+    searchSortOrder = searchViewModel.searchSortOrder,
+    dispatch = searchViewModel::dispatch,
+    goBack = goBack,
+    openPost = openPost,
+    modifier = modifier,
+  )
+}
+
+@Composable
+private fun SearchContent(
+  state: SearchState,
+  searchResults: LazyPagingItems<ResolvedPost>,
+  sources: LazyPagingItems<Source>,
+  searchQuery: TextFieldValue,
+  searchSortOrder: SearchSortOrder,
+  dispatch: (SearchEvent) -> Unit,
+  goBack: () -> Unit,
+  openPost:
+    (searchQuery: String, sortOrder: SearchSortOrder, postIndex: Int, post: ResolvedPost) -> Unit,
+  modifier: Modifier = Modifier,
+) {
   val listState = rememberLazyListState()
   val coroutineScope = rememberCoroutineScope()
   val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
-  val searchResults = state.searchResults.collectAsLazyPagingItems()
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
 
@@ -166,17 +199,16 @@ internal fun SearchScreen(
         Spacer(Modifier.requiredHeight(12.dp))
 
         SearchBar(
-          query = searchViewModel.searchQuery,
-          sortOrder = searchViewModel.searchSortOrder,
-          onQueryChange = { searchViewModel.dispatch(SearchEvent.SearchQueryChanged(it)) },
+          query = searchQuery,
+          sortOrder = searchSortOrder,
+          onQueryChange = { dispatch(SearchEvent.SearchQueryChanged(it)) },
           onBackClick = goBack,
-          onClearClick = { searchViewModel.dispatch(SearchEvent.ClearSearchQuery) },
-          onSortOrderChanged = { searchViewModel.dispatch(SearchEvent.SearchSortOrderChanged(it)) },
+          onClearClick = { dispatch(SearchEvent.ClearSearchQuery) },
+          onSortOrderChanged = { dispatch(SearchEvent.SearchSortOrderChanged(it)) },
         )
 
         AnimatedVisibility(
-          visible =
-            searchViewModel.searchQuery.text.length >= Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS,
+          visible = searchQuery.text.length >= Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS,
           enter = fadeIn() + expandVertically(),
           exit = shrinkVertically() + fadeOut(),
         ) {
@@ -185,11 +217,9 @@ internal fun SearchScreen(
             onlyBookmarked = state.onlyBookmarked,
             onlyUnread = state.onlyUnread,
             onSourceClick = { showSourcePicker = true },
-            onClearSourceClick = { searchViewModel.dispatch(SearchEvent.OnSourceChanged(null)) },
-            onOnlyBookmarkedChanged = {
-              searchViewModel.dispatch(SearchEvent.OnOnlyBookmarkedChanged(it))
-            },
-            onOnlyUnreadChanged = { searchViewModel.dispatch(SearchEvent.OnOnlyUnreadChanged(it)) },
+            onClearSourceClick = { dispatch(SearchEvent.OnSourceChanged(null)) },
+            onOnlyBookmarkedChanged = { dispatch(SearchEvent.OnOnlyBookmarkedChanged(it)) },
+            onOnlyUnreadChanged = { dispatch(SearchEvent.OnOnlyUnreadChanged(it)) },
           )
         }
 
@@ -203,9 +233,7 @@ internal fun SearchScreen(
     },
     content = { padding ->
       Box(modifier = Modifier.fillMaxSize()) {
-        LaunchedEffect(searchViewModel.searchSortOrder, state.selectedSource) {
-          listState.animateScrollToItem(0)
-        }
+        LaunchedEffect(searchSortOrder, state.selectedSource) { listState.animateScrollToItem(0) }
 
         LazyColumn(
           contentPadding =
@@ -245,17 +273,8 @@ internal fun SearchScreen(
               PostListItem(
                 modifier = Modifier.animateItem(),
                 item = post,
-                onClick = {
-                  openPost(
-                    searchViewModel.searchQuery.text,
-                    searchViewModel.searchSortOrder,
-                    index,
-                    post,
-                  )
-                },
-                onPostBookmarkClick = {
-                  searchViewModel.dispatch(SearchEvent.OnPostBookmarkClick(post))
-                },
+                onClick = { openPost(searchQuery.text, searchSortOrder, index, post) },
+                onPostBookmarkClick = { dispatch(SearchEvent.OnPostBookmarkClick(post)) },
                 onPostCommentsClick = {
                   post.commentsLink?.let { coroutineScope.launch { linkHandler.openLink(it) } }
                 },
@@ -263,9 +282,7 @@ internal fun SearchScreen(
                   // no-op
                 },
                 updatePostReadStatus = { updatedReadStatus ->
-                  searchViewModel.dispatch(
-                    SearchEvent.UpdatePostReadStatus(post.id, updatedReadStatus)
-                  )
+                  dispatch(SearchEvent.UpdatePostReadStatus(post.id, updatedReadStatus))
                 },
                 reduceReadItemAlpha = true,
                 postMetadataConfig = PostMetadataConfig.DEFAULT.copy(enablePostSource = false),
@@ -301,9 +318,9 @@ internal fun SearchScreen(
 
   if (showSourcePicker) {
     SourcePicker(
-      sources = searchViewModel.sources.collectAsLazyPagingItems(),
+      sources = sources,
       onSourceSelected = { source ->
-        searchViewModel.dispatch(SearchEvent.OnSourceChanged(source))
+        dispatch(SearchEvent.OnSourceChanged(source))
         showSourcePicker = false
       },
       onDismiss = { showSourcePicker = false },
@@ -674,4 +691,21 @@ private fun SortDropdownMenu(
 @Composable
 private fun ClearSearchQueryButton(onClearClick: () -> Unit) {
   IconButton(icon = TwineIcons.Close, contentDescription = null, onClick = onClearClick)
+}
+
+@Preview(locale = "en")
+@Composable
+private fun SearchPreview() {
+  AppTheme {
+    SearchContent(
+      state = SearchState.DEFAULT,
+      searchResults = SearchState.DEFAULT.searchResults.collectAsLazyPagingItems(),
+      sources = emptyFlow<PagingData<Source>>().collectAsLazyPagingItems(),
+      searchQuery = TextFieldValue(text = "Google"),
+      searchSortOrder = Newest,
+      dispatch = {},
+      goBack = {},
+      openPost = { _, _, _, _ -> },
+    )
+  }
 }

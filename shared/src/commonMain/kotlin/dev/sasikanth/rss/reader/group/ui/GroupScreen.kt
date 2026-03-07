@@ -30,7 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -52,8 +52,10 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemContentType
 import app.cash.paging.compose.itemKey
@@ -62,10 +64,12 @@ import dev.sasikanth.rss.reader.components.ContextActionItem
 import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
 import dev.sasikanth.rss.reader.components.DropdownMenuDivider
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
+import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.ui.DeleteConfirmationDialog
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
 import dev.sasikanth.rss.reader.feeds.ui.common.AllFeedsHeader
 import dev.sasikanth.rss.reader.group.GroupEvent
+import dev.sasikanth.rss.reader.group.GroupState
 import dev.sasikanth.rss.reader.group.GroupViewModel
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Delete
@@ -92,14 +96,36 @@ fun GroupScreen(
   openGroupSelection: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val layoutDirection = LocalLayoutDirection.current
   val state by viewModel.state.collectAsStateWithLifecycle()
   val feeds = state.feeds.collectAsLazyPagingItems()
 
+  GroupContent(
+    state = state,
+    feeds = feeds,
+    groupName = viewModel.groupName,
+    dispatch = viewModel::dispatch,
+    goBack = goBack,
+    openGroupSelection = openGroupSelection,
+    modifier = modifier,
+  )
+}
+
+@Composable
+private fun GroupContent(
+  state: GroupState,
+  feeds: LazyPagingItems<Feed>,
+  groupName: TextFieldValue,
+  dispatch: (GroupEvent) -> Unit,
+  goBack: () -> Unit,
+  openGroupSelection: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val layoutDirection = LocalLayoutDirection.current
+
   if (state.showDeleteConfirmation) {
     DeleteConfirmationDialog(
-      onDelete = { viewModel.dispatch(GroupEvent.DeleteSelectedSources) },
-      dismiss = { viewModel.dispatch(GroupEvent.DismissDeleteConfirmation) },
+      onDelete = { dispatch(GroupEvent.DeleteSelectedSources) },
+      dismiss = { dispatch(GroupEvent.DismissDeleteConfirmation) },
     )
   }
 
@@ -112,8 +138,8 @@ fun GroupScreen(
             modifier = Modifier.padding(horizontal = 4.dp),
             title = {
               GroupNameTextField(
-                value = viewModel.groupName,
-                onValueChanged = { viewModel.dispatch(GroupEvent.OnGroupNameChanged(it.text)) },
+                value = groupName,
+                onValueChanged = { dispatch(GroupEvent.OnGroupNameChanged(it.text)) },
                 modifier = Modifier.weight(1f),
               )
             },
@@ -140,7 +166,7 @@ fun GroupScreen(
             feedsCount = feeds.itemCount,
             feedsSortOrder = state.feedsOrderBy,
             showAddButton = false,
-            onFeedsSortChanged = { viewModel.dispatch(GroupEvent.OnFeedsSortOrderChanged(it)) },
+            onFeedsSortChanged = { dispatch(GroupEvent.OnFeedsSortOrderChanged(it)) },
           )
         }
 
@@ -154,7 +180,7 @@ fun GroupScreen(
       if (state.isInMultiSelectMode) {
         ContextActionsBottomBar(
           tooltip = null,
-          onCancel = { viewModel.dispatch(GroupEvent.OnCancelSelectionClicked) },
+          onCancel = { dispatch(GroupEvent.OnCancelSelectionClicked) },
         ) {
           ContextActionItem(
             modifier = Modifier.weight(1f),
@@ -167,14 +193,14 @@ fun GroupScreen(
             modifier = Modifier.weight(1f),
             icon = TwineIcons.Delete,
             label = stringResource(Res.string.actionDelete),
-            onClick = { viewModel.dispatch(GroupEvent.OnDeleteSelectedFeedsClicked) },
+            onClick = { dispatch(GroupEvent.OnDeleteSelectedFeedsClicked) },
           )
 
           ContextActionItem(
             modifier = Modifier.weight(1f),
             icon = TwineIcons.UnGroup,
             label = stringResource(Res.string.actionUngroup),
-            onClick = { viewModel.dispatch(GroupEvent.OnUngroupClicked) },
+            onClick = { dispatch(GroupEvent.OnUngroupClicked) },
           )
         }
       }
@@ -205,14 +231,14 @@ fun GroupScreen(
             canShowUnreadPostsCount = false,
             isInMultiSelectMode = state.isInMultiSelectMode,
             isFeedSelected = state.selectedSources.any { it.id == feed.id },
-            onFeedClick = { viewModel.dispatch(GroupEvent.OnFeedClicked(feed)) },
-            onFeedSelected = { viewModel.dispatch(GroupEvent.OnFeedClicked(feed)) },
+            onFeedClick = { dispatch(GroupEvent.OnFeedClicked(feed)) },
+            onFeedSelected = { dispatch(GroupEvent.OnFeedClicked(feed)) },
             dropdownMenuContent = { onDismiss ->
               DropdownMenuItem(
                 text = stringResource(Res.string.actionMoveTo),
                 leadingIcon = TwineIcons.NewGroup,
                 onClick = {
-                  viewModel.dispatch(GroupEvent.OnFeedSelected(feed))
+                  dispatch(GroupEvent.OnFeedSelected(feed))
                   openGroupSelection()
                   onDismiss()
                 },
@@ -222,8 +248,8 @@ fun GroupScreen(
                 text = stringResource(Res.string.actionUngroup),
                 leadingIcon = TwineIcons.UnGroup,
                 onClick = {
-                  viewModel.dispatch(GroupEvent.OnFeedSelected(feed))
-                  viewModel.dispatch(GroupEvent.OnUngroupClicked)
+                  dispatch(GroupEvent.OnFeedSelected(feed))
+                  dispatch(GroupEvent.OnUngroupClicked)
                   onDismiss()
                 },
               )
@@ -234,8 +260,8 @@ fun GroupScreen(
                 text = stringResource(Res.string.feedOptionRemove),
                 leadingIcon = TwineIcons.RemoveFeed,
                 onClick = {
-                  viewModel.dispatch(GroupEvent.OnFeedSelected(feed))
-                  viewModel.dispatch(GroupEvent.OnDeleteSelectedFeedsClicked)
+                  dispatch(GroupEvent.OnFeedSelected(feed))
+                  dispatch(GroupEvent.OnDeleteSelectedFeedsClicked)
                   onDismiss()
                 },
               )
@@ -266,7 +292,7 @@ fun GroupNameTextField(
     colorScheme = MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.primary)
   ) {
     OutlinedTextField(
-      modifier = modifier,
+      modifier = modifier.padding(horizontal = 16.dp),
       value = input.copy(selection = TextRange(input.text.length)),
       onValueChange = { input = it },
       placeholder = {
@@ -276,7 +302,7 @@ fun GroupNameTextField(
           style = MaterialTheme.typography.bodyLarge,
         )
       },
-      shape = RoundedCornerShape(16.dp),
+      shape = CircleShape,
       singleLine = true,
       textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center),
       colors =
@@ -287,6 +313,21 @@ fun GroupNameTextField(
           focusedTextColor = AppTheme.colorScheme.onSurface,
           disabledTextColor = Color.Transparent,
         ),
+    )
+  }
+}
+
+@Preview(locale = "en")
+@Composable
+private fun GroupPreview() {
+  AppTheme {
+    GroupContent(
+      state = GroupState.DEFAULT,
+      feeds = GroupState.DEFAULT.feeds.collectAsLazyPagingItems(),
+      groupName = TextFieldValue(),
+      dispatch = {},
+      goBack = {},
+      openGroupSelection = {},
     )
   }
 }

@@ -31,10 +31,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.components.AlertDialog
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.SubHeader
@@ -43,6 +45,7 @@ import dev.sasikanth.rss.reader.data.sync.APIServiceProvider
 import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.settings.SettingsEvent
+import dev.sasikanth.rss.reader.settings.SettingsState
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.items.CloudSyncSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.OPMLSettingItem
@@ -81,8 +84,50 @@ internal fun SettingsServicesScreen(
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
-  val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
+
+  LaunchedEffect(state.authUrlToOpen) {
+    state.authUrlToOpen?.let { url ->
+      linkHandler.openLink(url, useInAppBrowser = true)
+      viewModel.dispatch(SettingsEvent.ClearAuthUrl)
+    }
+  }
+
+  LaunchedEffect(state.openPaywall) {
+    if (state.openPaywall) {
+      openPaywall()
+      viewModel.dispatch(SettingsEvent.MarkOpenPaywallAsDone)
+    }
+  }
+
+  LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+    viewModel.dispatch(SettingsEvent.LoadSubscriptionStatus)
+  }
+
+  SettingsServicesContent(
+    state = state,
+    dispatch = viewModel::dispatch,
+    availableProviders = viewModel.availableProviders,
+    goBack = goBack,
+    openPaywall = openPaywall,
+    openFreshRssLogin = openFreshRssLogin,
+    openMinifluxLogin = openMinifluxLogin,
+    modifier = modifier,
+  )
+}
+
+@Composable
+private fun SettingsServicesContent(
+  state: SettingsState,
+  dispatch: (SettingsEvent) -> Unit,
+  availableProviders: Set<CloudServiceProvider>,
+  goBack: () -> Unit,
+  openPaywall: () -> Unit,
+  openFreshRssLogin: () -> Unit,
+  openMinifluxLogin: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val layoutDirection = LocalLayoutDirection.current
 
   var showSwitchServiceDialog by remember { mutableStateOf<CloudServiceProvider?>(null) }
   var showSyncErrorDialog by remember { mutableStateOf<Exception?>(null) }
@@ -109,7 +154,7 @@ internal fun SettingsServicesScreen(
         dismissText = stringResource(Res.string.buttonCancel),
         onConfirm = {
           showSwitchServiceDialog = null
-          viewModel.dispatch(SettingsEvent.SignOutClicked)
+          dispatch(SettingsEvent.SignOutClicked)
 
           if (toProvider is APIServiceProvider) {
             when (toProvider.cloudService) {
@@ -120,30 +165,12 @@ internal fun SettingsServicesScreen(
               }
             }
           } else {
-            viewModel.dispatch(SettingsEvent.SyncClicked(toProvider))
+            dispatch(SettingsEvent.SyncClicked(toProvider))
           }
         },
         onDismiss = { showSwitchServiceDialog = null },
       )
     }
-  }
-
-  LaunchedEffect(state.authUrlToOpen) {
-    state.authUrlToOpen?.let { url ->
-      linkHandler.openLink(url, useInAppBrowser = true)
-      viewModel.dispatch(SettingsEvent.ClearAuthUrl)
-    }
-  }
-
-  LaunchedEffect(state.openPaywall) {
-    if (state.openPaywall) {
-      openPaywall()
-      viewModel.dispatch(SettingsEvent.MarkOpenPaywallAsDone)
-    }
-  }
-
-  LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
-    viewModel.dispatch(SettingsEvent.LoadSubscriptionStatus)
   }
 
   Scaffold(
@@ -159,9 +186,9 @@ internal fun SettingsServicesScreen(
     content = { padding ->
       if (state.opmlFeedsToSelect != null) {
         OpmlFeedSelectionSheet(
-          feeds = state.opmlFeedsToSelect!!,
-          onFeedsSelected = { viewModel.dispatch(SettingsEvent.OnOpmlFeedsSelected(it)) },
-          onDismiss = { viewModel.dispatch(SettingsEvent.ClearOpmlFeedsToSelect) },
+          feeds = state.opmlFeedsToSelect,
+          onFeedsSelected = { dispatch(SettingsEvent.OnOpmlFeedsSelected(it)) },
+          onDismiss = { dispatch(SettingsEvent.ClearOpmlFeedsToSelect) },
         )
       }
 
@@ -181,7 +208,7 @@ internal fun SettingsServicesScreen(
           CloudSyncSettingItem(
             syncProgress = state.syncProgress,
             lastSyncedAt = state.lastSyncedAt,
-            availableProviders = viewModel.availableProviders,
+            availableProviders = availableProviders,
             isSubscribed = state.isSubscribed,
             onSyncClicked = { provider ->
               if (provider.isPremium && !state.isSubscribed) {
@@ -192,7 +219,7 @@ internal fun SettingsServicesScreen(
                 ) {
                   showSwitchServiceDialog = provider
                 } else {
-                  viewModel.dispatch(SettingsEvent.SyncClicked(provider))
+                  dispatch(SettingsEvent.SyncClicked(provider))
                 }
               }
             },
@@ -217,7 +244,7 @@ internal fun SettingsServicesScreen(
                 }
               }
             },
-            onSignOutClicked = { viewModel.dispatch(SettingsEvent.SignOutClicked) },
+            onSignOutClicked = { dispatch(SettingsEvent.SignOutClicked) },
             onSyncErrorClicked = { showSyncErrorDialog = it },
           )
         }
@@ -227,9 +254,9 @@ internal fun SettingsServicesScreen(
         item {
           OPMLSettingItem(
             opmlResult = state.opmlResult,
-            onImportClicked = { viewModel.dispatch(SettingsEvent.ImportOpmlClicked) },
-            onExportClicked = { viewModel.dispatch(SettingsEvent.ExportOpmlClicked) },
-            onCancelClicked = { viewModel.dispatch(SettingsEvent.CancelOpmlImportOrExport) },
+            onImportClicked = { dispatch(SettingsEvent.ImportOpmlClicked) },
+            onExportClicked = { dispatch(SettingsEvent.ExportOpmlClicked) },
+            onCancelClicked = { dispatch(SettingsEvent.CancelOpmlImportOrExport) },
           )
         }
 
@@ -240,9 +267,7 @@ internal fun SettingsServicesScreen(
             title = stringResource(Res.string.enableAutoSyncTitle),
             subtitle = stringResource(Res.string.enableAutoSyncDesc),
             checked = state.enableAutoSync,
-            onValueChanged = { newValue ->
-              viewModel.dispatch(SettingsEvent.ToggleAutoSync(newValue))
-            },
+            onValueChanged = { newValue -> dispatch(SettingsEvent.ToggleAutoSync(newValue)) },
           )
         }
 
@@ -251,9 +276,7 @@ internal fun SettingsServicesScreen(
             title = stringResource(Res.string.settingsEnableNotificationsTitle),
             subtitle = stringResource(Res.string.settingsEnableNotificationsSubtitle),
             checked = state.enableNotifications,
-            onValueChanged = { newValue ->
-              viewModel.dispatch(SettingsEvent.ToggleNotifications(newValue))
-            },
+            onValueChanged = { newValue -> dispatch(SettingsEvent.ToggleNotifications(newValue)) },
           )
         }
 
@@ -264,9 +287,7 @@ internal fun SettingsServicesScreen(
             title = stringResource(Res.string.settingsBlockImagesTitle),
             subtitle = stringResource(Res.string.settingsBlockImagesSubtitle),
             checked = state.blockImages,
-            onValueChanged = { newValue ->
-              viewModel.dispatch(SettingsEvent.ToggleBlockImages(newValue))
-            },
+            onValueChanged = { newValue -> dispatch(SettingsEvent.ToggleBlockImages(newValue)) },
           )
         }
 
@@ -276,7 +297,7 @@ internal fun SettingsServicesScreen(
             subtitle = stringResource(Res.string.settingsDownloadFullContentSubtitle),
             checked = state.downloadFullContent,
             onValueChanged = { newValue ->
-              viewModel.dispatch(SettingsEvent.ToggleDownloadFullContent(newValue))
+              dispatch(SettingsEvent.ToggleDownloadFullContent(newValue))
             },
           )
         }
@@ -292,5 +313,31 @@ private fun serviceName(serviceType: ServiceType?): String {
     ServiceType.FRESH_RSS -> stringResource(Res.string.settingsSyncFreshRSS)
     ServiceType.MINIFLUX -> stringResource(Res.string.settingsSyncMiniflux)
     null -> ""
+  }
+}
+
+@Preview(locale = "en")
+@Composable
+private fun SettingsServicesPreview() {
+  AppTheme {
+    SettingsServicesContent(
+      state =
+        SettingsState.default(
+          appInfo =
+            AppInfo(
+              versionCode = 1,
+              versionName = "1.0.0",
+              isDebugBuild = true,
+              isFoss = false,
+              cachePath = { "" },
+            )
+        ),
+      dispatch = {},
+      availableProviders = emptySet(),
+      goBack = {},
+      openPaywall = {},
+      openFreshRssLogin = {},
+      openMinifluxLogin = {},
+    )
   }
 }

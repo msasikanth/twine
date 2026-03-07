@@ -32,12 +32,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.settings.SettingsEvent
+import dev.sasikanth.rss.reader.settings.SettingsState
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.items.AboutItem
 import dev.sasikanth.rss.reader.settings.ui.items.DeleteAppDataConfirmationDialog
@@ -62,8 +65,28 @@ internal fun SettingsAppInfoScreen(
   openChangelog: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val coroutineScope = rememberCoroutineScope()
   val state by viewModel.state.collectAsStateWithLifecycle()
+
+  SettingsAppInfoContent(
+    state = state,
+    dispatch = viewModel::dispatch,
+    goBack = goBack,
+    openAbout = openAbout,
+    openChangelog = openChangelog,
+    modifier = modifier,
+  )
+}
+
+@Composable
+private fun SettingsAppInfoContent(
+  state: SettingsState,
+  dispatch: (SettingsEvent) -> Unit,
+  goBack: () -> Unit,
+  openAbout: () -> Unit,
+  openChangelog: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val coroutineScope = rememberCoroutineScope()
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
   var showDeleteAppDataConfirmation by remember { mutableStateOf(false) }
@@ -72,7 +95,7 @@ internal fun SettingsAppInfoScreen(
     DeleteAppDataConfirmationDialog(
       onConfirm = {
         showDeleteAppDataConfirmation = false
-        viewModel.dispatch(SettingsEvent.DeleteAppData)
+        dispatch(SettingsEvent.DeleteAppData)
       },
       onDismiss = { showDeleteAppDataConfirmation = false },
     )
@@ -131,4 +154,28 @@ internal fun SettingsAppInfoScreen(
     containerColor = AppTheme.colorScheme.backdrop,
     contentColor = Color.Unspecified,
   )
+}
+
+@Preview(locale = "en")
+@Composable
+private fun SettingsAppInfoPreview() {
+  AppTheme {
+    SettingsAppInfoContent(
+      state =
+        SettingsState.default(
+          appInfo =
+            AppInfo(
+              versionCode = 1,
+              versionName = "1.0.0",
+              isDebugBuild = true,
+              isFoss = false,
+              cachePath = { "" },
+            )
+        ),
+      dispatch = {},
+      goBack = {},
+      openAbout = {},
+      openChangelog = {},
+    )
+  }
 }

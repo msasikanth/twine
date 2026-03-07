@@ -42,15 +42,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionEffect
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionEvent
+import dev.sasikanth.rss.reader.accountselection.AccountSelectionState
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionViewModel
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
+import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Dropbox
 import dev.sasikanth.rss.reader.resources.icons.Freshrss
@@ -111,6 +114,21 @@ internal fun AccountSelectionScreen(
     }
   }
 
+  AccountSelectionContent(
+    state = state,
+    availableProviders = viewModel.availableProviders,
+    dispatch = viewModel::dispatch,
+    modifier = modifier,
+  )
+}
+
+@Composable
+private fun AccountSelectionContent(
+  state: AccountSelectionState,
+  availableProviders: Set<CloudServiceProvider>,
+  dispatch: (AccountSelectionEvent) -> Unit,
+  modifier: Modifier = Modifier,
+) {
   Scaffold(
     modifier = modifier,
     containerColor = AppTheme.colorScheme.backdrop,
@@ -142,7 +160,7 @@ internal fun AccountSelectionScreen(
         AccountItem(
           label = stringResource(Res.string.accountSelectionLocalAccount),
           icon = TwineIcons.Home,
-          onClick = { viewModel.dispatch(AccountSelectionEvent.LocalAccountClicked) },
+          onClick = { dispatch(AccountSelectionEvent.LocalAccountClicked) },
         )
       }
 
@@ -155,7 +173,7 @@ internal fun AccountSelectionScreen(
 
       item { SubHeader(text = stringResource(Res.string.accountSelectionCloudSync)) }
 
-      items(viewModel.availableProviders.toList()) { provider ->
+      items(availableProviders.toList()) { provider ->
         val label =
           when (provider.cloudService) {
             ServiceType.DROPBOX -> stringResource(Res.string.settingsSyncDropbox)
@@ -175,7 +193,7 @@ internal fun AccountSelectionScreen(
           icon = icon,
           isPremium = provider.isPremium,
           isSubscribed = state.isSubscribed,
-          onClick = { viewModel.dispatch(AccountSelectionEvent.CloudServiceClicked(provider)) },
+          onClick = { dispatch(AccountSelectionEvent.CloudServiceClicked(provider)) },
         )
       }
     }
@@ -221,5 +239,17 @@ private fun AccountItem(
         }
       }
     }
+  }
+}
+
+@Preview(locale = "en")
+@Composable
+private fun AccountSelectionPreview() {
+  AppTheme {
+    AccountSelectionContent(
+      state = AccountSelectionState.DEFAULT,
+      availableProviders = emptySet(),
+      dispatch = {},
+    )
   }
 }

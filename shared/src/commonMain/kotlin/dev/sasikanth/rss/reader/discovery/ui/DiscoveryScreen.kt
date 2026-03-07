@@ -57,6 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.CircularIconButton
@@ -67,6 +68,7 @@ import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.DiscoveryFeed
 import dev.sasikanth.rss.reader.core.model.DiscoveryGroup
 import dev.sasikanth.rss.reader.discovery.DiscoveryEvent
+import dev.sasikanth.rss.reader.discovery.DiscoveryState
 import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
 import dev.sasikanth.rss.reader.resources.icons.Check
 import dev.sasikanth.rss.reader.resources.icons.Close
@@ -92,6 +94,26 @@ fun DiscoveryScreen(
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsState()
+
+  DiscoveryContent(
+    state = state,
+    dispatch = viewModel::dispatch,
+    goBack = goBack,
+    showDoneButton = showDoneButton,
+    onDone = onDone,
+    modifier = modifier,
+  )
+}
+
+@Composable
+private fun DiscoveryContent(
+  state: DiscoveryState,
+  dispatch: (DiscoveryEvent) -> Unit,
+  goBack: () -> Unit,
+  showDoneButton: Boolean,
+  onDone: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
   val focusRequester = remember { FocusRequester() }
   val appBarBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -109,7 +131,7 @@ fun DiscoveryScreen(
             modifier = Modifier.padding(end = refreshButtonPaddingEnd),
             icon = TwineIcons.Refresh,
             label = stringResource(Res.string.discoveryRefresh),
-            onClick = { viewModel.dispatch(DiscoveryEvent.Refresh) },
+            onClick = { dispatch(DiscoveryEvent.Refresh) },
           )
 
           if (showDoneButton) {
@@ -129,12 +151,12 @@ fun DiscoveryScreen(
           TextField(
             modifier = Modifier.fillMaxWidth().padding(16.dp).focusRequester(focusRequester),
             value = state.searchQuery,
-            onValueChange = { viewModel.dispatch(DiscoveryEvent.SearchQueryChanged(it)) },
+            onValueChange = { dispatch(DiscoveryEvent.SearchQueryChanged(it)) },
             hint = stringResource(Res.string.discoverySearchHint),
             trailingIcon = {
               if (state.searchQuery.text.isNotBlank()) {
                 IconButton(icon = TwineIcons.Close, contentDescription = null) {
-                  viewModel.dispatch(DiscoveryEvent.SearchQueryChanged(TextFieldValue()))
+                  dispatch(DiscoveryEvent.SearchQueryChanged(TextFieldValue()))
                 }
               }
             },
@@ -171,7 +193,7 @@ fun DiscoveryScreen(
               group = group,
               addedFeedLinks = state.addedFeedLinks,
               inProgressFeedLinks = state.inProgressFeedLinks,
-              onAddFeed = { feed -> viewModel.dispatch(DiscoveryEvent.AddFeedClicked(feed)) },
+              onAddFeed = { feed -> dispatch(DiscoveryEvent.AddFeedClicked(feed)) },
             )
           }
         }
@@ -318,5 +340,19 @@ private fun DiscoveryFeedItem(
         )
       }
     }
+  }
+}
+
+@Preview(locale = "en")
+@Composable
+private fun DiscoveryPreview() {
+  AppTheme {
+    DiscoveryContent(
+      state = DiscoveryState.DEFAULT,
+      dispatch = {},
+      goBack = {},
+      showDoneButton = false,
+      onDone = {},
+    )
   }
 }
