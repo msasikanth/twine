@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.feeds.ui.pinned
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -93,6 +94,7 @@ internal fun PinnedSourcesBottomBar(
         .shadow(elevation = 4.dp, shape = shape)
         .clip(shape)
         .background(AppTheme.colorScheme.bottomSheet)
+        .border(width = 1.dp, color = AppTheme.colorScheme.bottomSheetBorder, shape = shape)
         .fillMaxWidth()
         .height(PINNED_SOURCES_BOTTOM_BAR_HEIGHT),
     verticalAlignment = Alignment.CenterVertically,
