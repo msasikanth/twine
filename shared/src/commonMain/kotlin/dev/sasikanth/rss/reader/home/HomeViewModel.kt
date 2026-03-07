@@ -448,6 +448,9 @@ class HomeViewModel(
   }
 
   private fun refreshContent() {
+    if (_state.value.unreadSinceLastSync?.hasNewArticles == true) {
+      loadNewArticles()
+    }
     when (val selectedSource = _state.value.activeSource) {
       is FeedGroup -> syncCoordinator.triggerPull(selectedSource.feedIds)
       is Feed -> syncCoordinator.triggerPull(selectedSource.id)

@@ -78,6 +78,7 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonChange
 import twine.shared.generated.resources.discoveryAddFeed
 import twine.shared.generated.resources.discoveryAdded
+import twine.shared.generated.resources.discoveryOnboardingHint
 import twine.shared.generated.resources.discoveryRefresh
 import twine.shared.generated.resources.discoverySearchHint
 import twine.shared.generated.resources.discoveryTitle
@@ -118,28 +119,38 @@ fun DiscoveryScreen(
               modifier = Modifier.padding(end = 12.dp),
               icon = TwineIcons.Check,
               label = stringResource(Res.string.buttonChange),
+              enabled = state.addedFeedLinks.size >= 3,
               onClick = onDone,
             )
           }
         }
 
-        TextField(
-          modifier =
-            Modifier.fillMaxWidth()
-              .background(AppTheme.colorScheme.backdrop)
-              .padding(16.dp)
-              .focusRequester(focusRequester),
-          value = state.searchQuery,
-          onValueChange = { viewModel.dispatch(DiscoveryEvent.SearchQueryChanged(it)) },
-          hint = stringResource(Res.string.discoverySearchHint),
-          trailingIcon = {
-            if (state.searchQuery.text.isNotBlank()) {
-              IconButton(icon = TwineIcons.Close, contentDescription = null) {
-                viewModel.dispatch(DiscoveryEvent.SearchQueryChanged(TextFieldValue()))
+        Column(modifier = Modifier.background(AppTheme.colorScheme.backdrop)) {
+          TextField(
+            modifier = Modifier.fillMaxWidth().padding(16.dp).focusRequester(focusRequester),
+            value = state.searchQuery,
+            onValueChange = { viewModel.dispatch(DiscoveryEvent.SearchQueryChanged(it)) },
+            hint = stringResource(Res.string.discoverySearchHint),
+            trailingIcon = {
+              if (state.searchQuery.text.isNotBlank()) {
+                IconButton(icon = TwineIcons.Close, contentDescription = null) {
+                  viewModel.dispatch(DiscoveryEvent.SearchQueryChanged(TextFieldValue()))
+                }
               }
-            }
-          },
-        )
+            },
+          )
+
+          if (showDoneButton) {
+            Text(
+              text = stringResource(Res.string.discoveryOnboardingHint),
+              style = MaterialTheme.typography.bodyMedium,
+              color = AppTheme.colorScheme.onSurfaceVariant,
+              modifier =
+                Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 16.dp),
+              textAlign = TextAlign.Center,
+            )
+          }
+        }
       }
     },
     content = { paddingValues ->
