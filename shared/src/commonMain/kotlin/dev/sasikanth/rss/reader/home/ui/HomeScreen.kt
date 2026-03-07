@@ -214,7 +214,13 @@ private fun HomeContent(
   val dynamicColorState = LocalDynamicColorState.current
   val postsListState = rememberLazyListState()
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
-  val showScrollToTop by remember { derivedStateOf { postsListState.firstVisibleItemIndex > 0 } }
+  val showScrollToTop by
+    remember(featuredPosts, posts) {
+      derivedStateOf {
+        val hasContent = featuredPosts.isNotEmpty() || (posts?.itemCount ?: 0) > 0
+        hasContent && postsListState.firstVisibleItemIndex > 0
+      }
+    }
   val unreadSinceLastSync =
     if (state.isSyncing) {
       state.unreadSinceLastSync?.copy(hasNewArticles = false)
