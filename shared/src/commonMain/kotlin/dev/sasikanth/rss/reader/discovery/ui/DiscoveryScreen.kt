@@ -19,30 +19,40 @@ package dev.sasikanth.rss.reader.discovery.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -194,6 +204,7 @@ private fun DiscoveryContent(
               addedFeedLinks = state.addedFeedLinks,
               inProgressFeedLinks = state.inProgressFeedLinks,
               onAddFeed = { feed -> dispatch(DiscoveryEvent.AddFeedClicked(feed)) },
+              onFeedClick = { feed -> dispatch(DiscoveryEvent.ShowFeedInfo(feed)) },
             )
           }
         }
@@ -201,6 +212,19 @@ private fun DiscoveryContent(
     },
     containerColor = AppTheme.colorScheme.backdrop,
   )
+
+  if (state.selectedFeed != null) {
+    val selectedFeed = state.selectedFeed
+    DiscoveryFeedInfoBottomSheet(
+      feed = selectedFeed,
+      isAdded =
+        state.addedFeedLinks.contains(selectedFeed.link) ||
+          state.addedFeedLinks.contains(selectedFeed.link.removeSuffix("/")),
+      isLoading = state.inProgressFeedLinks.contains(selectedFeed.link),
+      onAddFeed = { dispatch(DiscoveryEvent.AddFeedClicked(selectedFeed)) },
+      dismiss = { dispatch(DiscoveryEvent.HideFeedInfo) },
+    )
+  }
 }
 
 @Composable
@@ -209,6 +233,7 @@ private fun DiscoveryGroupItem(
   addedFeedLinks: Set<String>,
   inProgressFeedLinks: Set<String>,
   onAddFeed: (DiscoveryFeed) -> Unit,
+  onFeedClick: (DiscoveryFeed) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Column(modifier = modifier.fillMaxWidth().padding(vertical = 16.dp)) {
@@ -243,6 +268,7 @@ private fun DiscoveryGroupItem(
               addedFeedLinks.contains(feed.link.removeSuffix("/")),
           isLoading = inProgressFeedLinks.contains(feed.link),
           onAddFeed = { onAddFeed(feed) },
+          onFeedClick = { onFeedClick(feed) },
         )
       }
     }
@@ -255,6 +281,7 @@ private fun DiscoveryFeedItem(
   isAdded: Boolean,
   isLoading: Boolean,
   onAddFeed: () -> Unit,
+  onFeedClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Column(
@@ -263,6 +290,7 @@ private fun DiscoveryFeedItem(
         .requiredWidth(160.dp)
         .clip(RoundedCornerShape(16.dp))
         .background(AppTheme.colorScheme.surfaceContainerLowest)
+        .clickable { onFeedClick() }
         .padding(horizontal = 16.dp, vertical = 12.dp),
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {
@@ -338,6 +366,108 @@ private fun DiscoveryFeedItem(
           style = MaterialTheme.typography.labelSmall,
           fontWeight = FontWeight.Medium,
         )
+      }
+    }
+  }
+}
+
+@Composable
+private fun DiscoveryFeedInfoBottomSheet(
+  feed: DiscoveryFeed,
+  isAdded: Boolean,
+  isLoading: Boolean,
+  onAddFeed: () -> Unit,
+  dismiss: () -> Unit,
+) {
+  val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+  ModalBottomSheet(
+    onDismissRequest = dismiss,
+    sheetState = sheetState,
+    containerColor = AppTheme.colorScheme.surfaceContainerLow,
+    contentColor = AppTheme.colorScheme.onSurface,
+  ) {
+    Column(
+      modifier =
+        Modifier.fillMaxWidth()
+          .padding(horizontal = 24.dp)
+          .padding(top = 16.dp, bottom = 24.dp)
+          .padding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues())
+    ) {
+      Column(modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+          FeedIcon(
+            icon = feed.icon,
+            homepageLink = feed.homepageLink,
+            showFeedFavIcon = !(feed.useFeedIcon),
+            contentDescription = null,
+            modifier = Modifier.requiredSize(80.dp),
+          )
+        }
+
+        Spacer(Modifier.requiredHeight(24.dp))
+
+        Text(
+          text = feed.name,
+          style = MaterialTheme.typography.headlineSmall,
+          color = AppTheme.colorScheme.onSurface,
+          textAlign = TextAlign.Center,
+          modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(Modifier.requiredHeight(8.dp))
+
+        Text(
+          text = feed.link,
+          style = MaterialTheme.typography.labelMedium,
+          color = AppTheme.colorScheme.onSurfaceVariant,
+          textAlign = TextAlign.Center,
+          modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(Modifier.requiredHeight(16.dp))
+
+        Text(
+          text = feed.description,
+          style = MaterialTheme.typography.bodyLarge,
+          color = AppTheme.colorScheme.onSurfaceVariant,
+          textAlign = TextAlign.Justify,
+          modifier = Modifier.fillMaxWidth(),
+        )
+      }
+
+      Spacer(Modifier.requiredHeight(24.dp))
+
+      Button(
+        modifier = Modifier.fillMaxWidth().requiredHeight(56.dp),
+        onClick = onAddFeed,
+        enabled = !isAdded && !isLoading,
+      ) {
+        if (isAdded) {
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+              imageVector = TwineIcons.Check,
+              contentDescription = null,
+              modifier = Modifier.requiredSize(24.dp),
+            )
+            Spacer(Modifier.requiredWidth(8.dp))
+            Text(
+              text = stringResource(Res.string.discoveryAdded),
+              style = MaterialTheme.typography.titleMedium,
+            )
+          }
+        } else if (isLoading) {
+          CircularProgressIndicator(
+            modifier = Modifier.requiredSize(24.dp),
+            color = AppTheme.colorScheme.onPrimary,
+            strokeWidth = 2.dp,
+          )
+        } else {
+          Text(
+            text = stringResource(Res.string.discoveryAddFeed),
+            style = MaterialTheme.typography.titleMedium,
+          )
+        }
       }
     }
   }

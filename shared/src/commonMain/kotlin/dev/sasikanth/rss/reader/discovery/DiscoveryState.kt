@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.discovery
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.input.TextFieldValue
+import dev.sasikanth.rss.reader.core.model.DiscoveryFeed
 import dev.sasikanth.rss.reader.core.model.DiscoveryGroup
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -30,6 +31,7 @@ data class DiscoveryState(
   val isLoading: Boolean,
   val addedFeedLinks: Set<String>,
   val inProgressFeedLinks: Set<String>,
+  val selectedFeed: DiscoveryFeed?,
 ) {
   companion object {
     val DEFAULT =
@@ -39,6 +41,7 @@ data class DiscoveryState(
         isLoading = false,
         addedFeedLinks = emptySet(),
         inProgressFeedLinks = emptySet(),
+        selectedFeed = null,
       )
   }
 

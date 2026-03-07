@@ -29,4 +29,8 @@ sealed interface DiscoveryEvent {
   data class SearchQueryChanged(val query: TextFieldValue) : DiscoveryEvent
 
   data class AddFeedClicked(val feed: DiscoveryFeed) : DiscoveryEvent
+
+  data class ShowFeedInfo(val feed: DiscoveryFeed) : DiscoveryEvent
+
+  data object HideFeedInfo : DiscoveryEvent
 }

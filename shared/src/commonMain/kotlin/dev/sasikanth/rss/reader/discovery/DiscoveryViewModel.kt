@@ -67,6 +67,12 @@ class DiscoveryViewModel(
         _state.update { it.copy(searchQuery = event.query) }
       }
       is DiscoveryEvent.AddFeedClicked -> addFeed(event.feed)
+      is DiscoveryEvent.ShowFeedInfo -> {
+        _state.update { it.copy(selectedFeed = event.feed) }
+      }
+      DiscoveryEvent.HideFeedInfo -> {
+        _state.update { it.copy(selectedFeed = null) }
+      }
     }
   }
 
