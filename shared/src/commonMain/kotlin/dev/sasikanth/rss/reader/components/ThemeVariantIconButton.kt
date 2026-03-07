@@ -163,7 +163,7 @@ fun ThemeVariantIconButton(
                 Brush.radialGradient(
                   colors = listOf(coralColor, Color.Transparent),
                   center = Offset(0f, 0f),
-                  radius = size.width,
+                  radius = size.width * 1.5f,
                 )
             )
 
@@ -172,7 +172,7 @@ fun ThemeVariantIconButton(
                 Brush.radialGradient(
                   colors = listOf(forestColor, Color.Transparent),
                   center = Offset(size.width, size.height),
-                  radius = size.width,
+                  radius = size.width * 1.5f,
                 )
             )
 
@@ -181,7 +181,7 @@ fun ThemeVariantIconButton(
                 Brush.radialGradient(
                   colors = listOf(raspberryColor, Color.Transparent),
                   center = Offset(0f, size.height),
-                  radius = size.width,
+                  radius = size.width * 1.5f,
                 )
             )
 
@@ -190,7 +190,7 @@ fun ThemeVariantIconButton(
                 Brush.radialGradient(
                   colors = listOf(skylineColor, Color.Transparent),
                   center = Offset(size.width, 0f),
-                  radius = size.width,
+                  radius = size.width * 1.5f,
                 )
             )
           }
