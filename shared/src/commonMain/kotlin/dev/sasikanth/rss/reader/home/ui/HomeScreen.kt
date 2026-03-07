@@ -171,7 +171,12 @@ internal fun HomeScreen(
   val postsListState = rememberLazyListState()
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
   val showScrollToTop by remember { derivedStateOf { postsListState.firstVisibleItemIndex > 0 } }
-  val unreadSinceLastSync = state.unreadSinceLastSync
+  val unreadSinceLastSync =
+    if (state.isSyncing) {
+      state.unreadSinceLastSync?.copy(hasNewArticles = false)
+    } else {
+      state.unreadSinceLastSync
+    }
 
   val canShowBottomBar = state.showPinnedSources && feedsState.pinnedSources.isNotEmpty()
   val appBarScrollBehaviour = TopAppBarDefaults.enterAlwaysScrollBehavior()
