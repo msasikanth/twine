@@ -70,6 +70,8 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -1580,7 +1582,11 @@ class RssRepository(
         readingHistoryQueries.firstReadingDate().executeAsOneOrNull()?.firstReadingDate
       val dailyAverage =
         if (firstReadingDate != null) {
-          val daysSinceFirstReading = (Clock.System.now() - firstReadingDate).inWholeDays + 1
+          val today =
+            Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toEpochDays()
+          val firstDay =
+            firstReadingDate.toLocalDateTime(TimeZone.currentSystemDefault()).date.toEpochDays()
+          val daysSinceFirstReading = (today - firstDay) + 1
           (totalReadCount / daysSinceFirstReading).toInt()
         } else {
           0
