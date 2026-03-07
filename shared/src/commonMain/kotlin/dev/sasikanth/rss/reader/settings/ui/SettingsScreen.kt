@@ -132,26 +132,6 @@ private fun SettingsContent(
           ),
       ) {
         item {
-          AnimatedVisibility(
-            visible = !state.appInfo.isFoss && state.subscriptionResult != null,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically(),
-          ) {
-            TwinePremiumBanner(
-              modifier = Modifier.animateItem(),
-              subscriptionResult = state.subscriptionResult,
-              onClick = { openPaywall() },
-            )
-          }
-        }
-
-        item {
-          if (!state.appInfo.isFoss && state.subscriptionResult != null) {
-            SettingsDivider(horizontalInsets = 24.dp)
-          }
-        }
-
-        item {
           SettingsNavigationItem(
             title = stringResource(Res.string.settingsAppearanceAndLayout),
             subtitle = stringResource(Res.string.settingsAppearanceAndLayoutSubtitle),
@@ -194,6 +174,26 @@ private fun SettingsContent(
             icon = TwineIcons.Changelog,
             onClick = openAppInfoSettings,
           )
+        }
+
+        item {
+          if (!state.appInfo.isFoss && state.subscriptionResult != null) {
+            SettingsDivider(horizontalInsets = 24.dp)
+          }
+        }
+
+        item {
+          AnimatedVisibility(
+            visible = !state.appInfo.isFoss && state.subscriptionResult != null,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically(),
+          ) {
+            TwinePremiumBanner(
+              modifier = Modifier.animateItem(),
+              subscriptionResult = state.subscriptionResult,
+              onClick = { openPaywall() },
+            )
+          }
         }
       }
     },
