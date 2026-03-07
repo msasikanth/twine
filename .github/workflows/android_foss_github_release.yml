@@ -1,0 +1,55 @@
+name: Upload FOSS Release to GitHub Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    env:
+      TERM: dumb
+      ORG_GRADLE_PROJECT_READER_KEYSTORE_PASSWORD: ${{ secrets.READER_KEYSTORE_PASSWORD }}
+      ORG_GRADLE_PROJECT_READER_KEY_PASSWORD: ${{ secrets.READER_KEY_PASSWORD }}
+      BUGSNAG_API_KEY: ${{ secrets.BUGSNAG_API_KEY }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: 21
+          distribution: zulu
+          cache: 'gradle'
+
+      - name: Setup versionName from Release Tag
+        run: |
+          # Use the tag name from the release (e.g., '1.0.0' or 'v1.0.0')
+          VERSION_NAME=${{ github.event.release.tag_name }}
+          echo "ORG_GRADLE_PROJECT_VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+
+      - name: Setup versionCode
+        run: |
+          # Use run number as a fallback version code, with an offset to ensure it's higher than the current latest version code
+          VERSION_CODE=$((2000 + ${{ github.run_number }}))
+          echo "ORG_GRADLE_PROJECT_VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+
+      - name: Decrypt secrets
+        run: gpg --batch --yes --quiet --decrypt --passphrase=${{ secrets.KEYSTORE_ENCRYPT_KEY }} --output release/reader.jks release/reader.gpg
+
+      - name: Build FOSS release artifact
+        run: ./gradlew --no-daemon androidApp:assembleFossRelease -Ptwine.isFoss=true
+
+      - name: Upload artifact to GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.event.release.tag_name }} androidApp/build/outputs/apk/foss/release/androidApp-foss-release.apk --clobber
+
+      - name: Clean secrets
+        if: always()
+        run: |
+          rm -f release/reader.jks
