@@ -71,7 +71,6 @@ import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.VisibilityOff
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.GolosFontFamily
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.Constants
@@ -181,7 +180,6 @@ internal fun PostHeader(
           },
         text = title.ifBlank { description },
         style = MaterialTheme.typography.headlineMedium,
-        fontFamily = GolosFontFamily,
         fontWeight = FontWeight.Bold,
         color = AppTheme.colorScheme.secondary,
         overflow = TextOverflow.Ellipsis,
