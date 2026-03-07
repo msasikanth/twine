@@ -45,11 +45,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.onboarding.OnboardingEffect
 import dev.sasikanth.rss.reader.onboarding.OnboardingEvent
+import dev.sasikanth.rss.reader.onboarding.OnboardingState
 import dev.sasikanth.rss.reader.onboarding.OnboardingViewModel
 import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.platform
@@ -72,7 +74,6 @@ internal fun OnboardingScreen(
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
-  val backgroundColor = AppTheme.colorScheme.primary
 
   LaunchedEffect(Unit) {
     viewModel.effects.collect { effect ->
@@ -83,6 +84,17 @@ internal fun OnboardingScreen(
       }
     }
   }
+
+  OnboardingContent(state = state, onEvent = viewModel::dispatch, modifier = modifier)
+}
+
+@Composable
+private fun OnboardingContent(
+  state: OnboardingState,
+  onEvent: (OnboardingEvent) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val backgroundColor = AppTheme.colorScheme.primary
 
   Scaffold(
     modifier =
@@ -111,7 +123,7 @@ internal fun OnboardingScreen(
         Spacer(Modifier.height(16.dp))
 
         Button(
-          onClick = { viewModel.dispatch(OnboardingEvent.GetStartedClicked) },
+          onClick = { onEvent(OnboardingEvent.GetStartedClicked) },
           modifier = Modifier.fillMaxWidth().height(56.dp),
           enabled = !state.isPrePopulating,
           shape = MaterialTheme.shapes.extraLarge,
@@ -153,7 +165,6 @@ internal fun OnboardingScreen(
           .padding(top = 88.dp),
       horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-      val backgroundColor = AppTheme.colorScheme.primary
       val backgroundBrush =
         Brush.radialGradient(
           0.17f to backgroundColor.copy(alpha = 0.55f).compositeOver(Color.White),
@@ -190,4 +201,10 @@ internal fun OnboardingScreen(
       )
     }
   }
+}
+
+@Preview(locale = "en")
+@Composable
+private fun OnboardingPreview() {
+  AppTheme { OnboardingContent(state = OnboardingState.DEFAULT, onEvent = {}) }
 }
