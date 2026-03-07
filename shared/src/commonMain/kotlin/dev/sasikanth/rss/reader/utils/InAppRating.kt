@@ -43,5 +43,8 @@ interface InAppRating {
   }
 }
 
-val LocalInAppRating =
-  staticCompositionLocalOf<InAppRating> { error("CompositionLocal LocalInAppRating not present") }
+val LocalInAppRating = staticCompositionLocalOf<InAppRating> { NoopInAppRating }
+
+private object NoopInAppRating : InAppRating {
+  override suspend fun request() {}
+}
