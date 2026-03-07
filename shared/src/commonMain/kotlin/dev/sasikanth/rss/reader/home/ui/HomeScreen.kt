@@ -402,6 +402,8 @@ internal fun HomeScreen(
                   listState = postsListState,
                   featuredPostsPagerState = featuredPostsPagerState,
                   homeViewMode = state.homeViewMode,
+                  postsType = state.postsType,
+                  markAsReadOn = state.markAsReadOn,
                   posts = { posts },
                   markFeaturedPostAsReadOnScroll = {
                     viewModel.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))

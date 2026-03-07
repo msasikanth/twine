@@ -53,7 +53,9 @@ import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
+import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
+import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
@@ -69,6 +71,8 @@ internal fun FeaturedSection(
   paddingValues: PaddingValues,
   featuredPosts: ImmutableList<FeaturedPostItem>,
   pagerState: PagerState,
+  postsType: PostsType,
+  markAsReadOn: MarkAsReadOn,
   modifier: Modifier = Modifier,
   markFeaturedPostAsReadOnScroll: (String) -> Unit,
   onItemClick: (ResolvedPost, postIndex: Int) -> Unit,
@@ -153,7 +157,12 @@ internal fun FeaturedSection(
                   val pageOffset = pagerState.getOffsetFractionForPage(page)
 
                   translationX = size.width * pageOffset
-                  alpha = calculateBackgroundAlpha(pageOffset)
+                  alpha =
+                    if (postsType == PostsType.UNREAD && markAsReadOn == MarkAsReadOn.Scroll) {
+                      calculateContentAlpha(pageOffset)
+                    } else {
+                      calculateBackgroundAlpha(pageOffset)
+                    }
                   renderEffect = blurEffect
                 },
             )
