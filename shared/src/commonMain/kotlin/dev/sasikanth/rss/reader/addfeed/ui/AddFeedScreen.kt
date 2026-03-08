@@ -49,7 +49,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -85,6 +84,7 @@ import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
 import dev.sasikanth.rss.reader.addfeed.FeedFetchingState
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.CircularIconButton
+import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.TextField
 import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
