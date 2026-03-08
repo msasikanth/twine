@@ -49,7 +49,6 @@ jobs:
       - name: Build release artifacts
         run: |
           ./gradlew --no-daemon androidApp:bundleFullRelease androidApp:assembleFullRelease -Ptwine.isFoss=false
-          ./gradlew --no-daemon androidApp:assembleFossRelease -Ptwine.isFoss=true
 
       - name: Upload Full Release Bundle
         uses: actions/upload-artifact@v4
