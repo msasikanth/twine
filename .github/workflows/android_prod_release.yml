@@ -51,7 +51,7 @@ jobs:
           ./gradlew --no-daemon androidApp:bundleFullRelease androidApp:assembleFullRelease -Ptwine.isFoss=false
 
       - name: Upload Full Release Bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: full-release.aab
           path: androidApp/build/outputs/bundle/fullRelease/androidApp-full-release.aab
