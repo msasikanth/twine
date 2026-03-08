@@ -25,7 +25,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
@@ -35,7 +34,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
@@ -206,7 +204,6 @@ fun App(
         24.dp
       }
     val screenModifier = Modifier.fillMaxSize()
-    val roundedCornerScreenModifier = screenModifier.clip(RoundedCornerShape(screenCornerRadius))
 
     LaunchedEffect(useDarkTheme) { onThemeChange(useDarkTheme) }
 
@@ -291,7 +288,7 @@ fun App(
         },
       ) {
         placeholderScreen(
-          modifier = roundedCornerScreenModifier,
+          modifier = screenModifier,
           placeholderViewModel = placeholderViewModel,
           navController = navController,
         )
@@ -334,7 +331,7 @@ fun App(
           navController = navController,
           toggleLightStatusBar = toggleLightStatusBar,
           toggleLightNavBar = toggleLightNavBar,
-          modifier = roundedCornerScreenModifier,
+          modifier = screenModifier,
         )
 
         addFeedScreen(
@@ -351,22 +348,22 @@ fun App(
           screenModifier = screenModifier,
         )
 
-        aboutScreen(modifier = roundedCornerScreenModifier, navController = navController)
+        aboutScreen(modifier = screenModifier, navController = navController)
 
         feedGroupScreen(
-          modifier = roundedCornerScreenModifier,
+          modifier = screenModifier,
           groupViewModel = groupViewModel,
           navController = navController,
         )
 
         blockedWordsScreen(
-          modifier = roundedCornerScreenModifier,
+          modifier = screenModifier,
           blockedWordsViewModel = blockedWordsViewModel,
           navController = navController,
         )
 
         paywallScreen(
-          modifier = roundedCornerScreenModifier,
+          modifier = screenModifier,
           premiumPaywallViewModel = premiumPaywallViewModel,
           navController = navController,
         )
