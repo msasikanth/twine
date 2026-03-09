@@ -180,6 +180,7 @@ class HomeViewModel(
           postId = post.id,
           sourceId = post.sourceId,
           activeSourceIds = activeSourceIds,
+          postsSortOrder = _state.value.postsSortOrder,
           unreadOnly = unreadOnly,
           after = postsAfter,
           postsUpperBound = postsUpperBound,
@@ -210,6 +211,7 @@ class HomeViewModel(
       return rssRepository.postPosition(
         postId = postId,
         activeSourceIds = activeSourceIds,
+        postsSortOrder = _state.value.postsSortOrder,
         unreadOnly = unreadOnly,
         after = postsAfter,
         postsUpperBound = lastRefreshedAt,
@@ -226,6 +228,7 @@ class HomeViewModel(
       rssRepository.nonFeaturedPostPosition(
         postId = postId,
         activeSourceIds = activeSourceIds,
+        postsSortOrder = _state.value.postsSortOrder,
         unreadOnly = unreadOnly,
         after = postsAfter,
         featuredPostsAfter = featuredPostsAfter,
