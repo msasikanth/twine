@@ -86,7 +86,7 @@ fun Instant.formatRelativeTime(): String {
   val days = duration.inWholeDays
 
   return when {
-    seconds < 60 -> stringResource(Res.string.unit_seconds, seconds)
+    seconds < 60 -> stringResource(Res.string.unit_seconds)
     seconds < 3600 -> stringResource(Res.string.unit_minutes, duration.inWholeMinutes)
     seconds < 86400 -> stringResource(Res.string.unit_hours, duration.inWholeHours)
     days < 7 -> stringResource(Res.string.unit_days, days)

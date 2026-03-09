@@ -91,7 +91,7 @@ fun ThemeVariantIconButton(
   val (backgroundColor, contentColor) =
     when (themeVariant) {
       ThemeVariant.Dynamic -> {
-        Pair(Color.Transparent, colorScheme.onSurface)
+        Pair(Color.Transparent, colorScheme.inverseOnSurface)
       }
 
       ThemeVariant.Solarized -> {
@@ -147,10 +147,10 @@ fun ThemeVariantIconButton(
         contentAlignment = Alignment.Center,
       ) {
         if (themeVariant == ThemeVariant.Dynamic) {
-          val coralColor = coralColorScheme(isDark = true).primary
-          val forestColor = forestColorScheme(isDark = true).primary
-          val raspberryColor = raspberryColorScheme(isDark = true).primary
-          val skylineColor = skylineColorScheme(isDark = true).primary
+          val coralColor = coralColorScheme(isDark = isDark).primary
+          val forestColor = forestColorScheme(isDark = isDark).primary
+          val raspberryColor = raspberryColorScheme(isDark = isDark).primary
+          val skylineColor = skylineColorScheme(isDark = isDark).primary
 
           Canvas(
             modifier =

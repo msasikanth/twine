@@ -28,10 +28,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,7 +43,6 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.BOTTOM_BAR_CORNER_RADIUS
 import dev.sasikanth.rss.reader.utils.BOTTOM_BAR_MAX_WIDTH
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
 import sh.calvin.reorderable.ReorderableItem
@@ -63,7 +60,7 @@ internal fun PinnedSourcesBottomBar(
   modifier: Modifier = Modifier,
   scrollBehavior: PinnedSourcesBottomBarScrollBehavior? = null,
 ) {
-  val shape = RoundedCornerShape(BOTTOM_BAR_CORNER_RADIUS)
+  val shape = CircleShape
 
   val translationY = scrollBehavior?.state?.heightOffset ?: 0f
   val lazyListState = rememberLazyListState()

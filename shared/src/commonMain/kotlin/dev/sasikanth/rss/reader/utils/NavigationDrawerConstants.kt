@@ -20,7 +20,6 @@ package dev.sasikanth.rss.reader.utils
 import androidx.compose.ui.unit.dp
 
 val PINNED_SOURCES_BOTTOM_BAR_HEIGHT = 80.dp
-val BOTTOM_BAR_CORNER_RADIUS = 32.dp
 val BOTTOM_BAR_MAX_WIDTH = 416.dp
 
 fun bottomPaddingOfSourceItem(index: Int, itemCount: Int) =
