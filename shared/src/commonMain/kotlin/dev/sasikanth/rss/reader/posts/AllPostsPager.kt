@@ -129,6 +129,7 @@ class AllPostsPager(
       rssRepository
         .featuredPosts(
           activeSourceIds = params.activeSourceIds,
+          postsSortOrder = params.postsSortOrder,
           unreadOnly = params.unreadOnly,
           after = params.postsAfter,
           featuredPostsAfter = params.featuredPostsAfter,
