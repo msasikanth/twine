@@ -310,29 +310,67 @@ class RssRepository(
 
   fun featuredPosts(
     activeSourceIds: List<String>,
+    postsSortOrder: PostsSortOrder,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     featuredPostsAfter: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     limit: Long = Constants.NUMBER_OF_FEATURED_POSTS,
   ): Flow<List<ResolvedPost>> {
-    return postQueries
-      .featuredPosts(
-        featuredPostsAfter = featuredPostsAfter,
-        postsAfter = after,
-        postsUpperBound = postsUpperBound,
-        isSourceIdsEmpty = activeSourceIds.isEmpty(),
-        sourceIds = activeSourceIds,
-        unreadOnly = unreadOnly,
-        limit = limit,
-        mapper = ::mapToResolvedPost,
-      )
-      .asFlow()
-      .mapToList(dispatchersProvider.databaseRead)
+    val query =
+      when (postsSortOrder) {
+        PostsSortOrder.Latest ->
+          postQueries.featuredPostsLatest(
+            featuredPostsAfter = featuredPostsAfter,
+            postsAfter = after,
+            postsUpperBound = postsUpperBound,
+            isSourceIdsEmpty = activeSourceIds.isEmpty(),
+            sourceIds = activeSourceIds,
+            unreadOnly = unreadOnly,
+            limit = limit,
+            mapper = ::mapToResolvedPost,
+          )
+        PostsSortOrder.Oldest ->
+          postQueries.featuredPostsOldest(
+            featuredPostsAfter = featuredPostsAfter,
+            postsAfter = after,
+            postsUpperBound = postsUpperBound,
+            isSourceIdsEmpty = activeSourceIds.isEmpty(),
+            sourceIds = activeSourceIds,
+            unreadOnly = unreadOnly,
+            limit = limit,
+            mapper = ::mapToResolvedPost,
+          )
+        PostsSortOrder.AddedLatest ->
+          postQueries.featuredPostsAddedLatest(
+            featuredPostsAfter = featuredPostsAfter,
+            postsAfter = after,
+            postsUpperBound = postsUpperBound,
+            isSourceIdsEmpty = activeSourceIds.isEmpty(),
+            sourceIds = activeSourceIds,
+            unreadOnly = unreadOnly,
+            limit = limit,
+            mapper = ::mapToResolvedPost,
+          )
+        PostsSortOrder.AddedOldest ->
+          postQueries.featuredPostsAddedOldest(
+            featuredPostsAfter = featuredPostsAfter,
+            postsAfter = after,
+            postsUpperBound = postsUpperBound,
+            isSourceIdsEmpty = activeSourceIds.isEmpty(),
+            sourceIds = activeSourceIds,
+            unreadOnly = unreadOnly,
+            limit = limit,
+            mapper = ::mapToResolvedPost,
+          )
+      }
+
+    return query.asFlow().mapToList(dispatchersProvider.databaseRead)
   }
 
   suspend fun featuredPostsBlocking(
     activeSourceIds: List<String>,
+    postsSortOrder: PostsSortOrder,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     featuredPostsAfter: Instant = Instant.DISTANT_PAST,
@@ -340,18 +378,55 @@ class RssRepository(
     limit: Long = Constants.NUMBER_OF_FEATURED_POSTS,
   ): List<ResolvedPost> {
     return withContext(dispatchersProvider.databaseRead) {
-      postQueries
-        .featuredPosts(
-          featuredPostsAfter = featuredPostsAfter,
-          postsAfter = after,
-          postsUpperBound = postsUpperBound,
-          isSourceIdsEmpty = activeSourceIds.isEmpty(),
-          sourceIds = activeSourceIds,
-          unreadOnly = unreadOnly,
-          limit = limit,
-          mapper = ::mapToResolvedPost,
-        )
-        .executeAsList()
+      val query =
+        when (postsSortOrder) {
+          PostsSortOrder.Latest ->
+            postQueries.featuredPostsLatest(
+              featuredPostsAfter = featuredPostsAfter,
+              postsAfter = after,
+              postsUpperBound = postsUpperBound,
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              limit = limit,
+              mapper = ::mapToResolvedPost,
+            )
+          PostsSortOrder.Oldest ->
+            postQueries.featuredPostsOldest(
+              featuredPostsAfter = featuredPostsAfter,
+              postsAfter = after,
+              postsUpperBound = postsUpperBound,
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              limit = limit,
+              mapper = ::mapToResolvedPost,
+            )
+          PostsSortOrder.AddedLatest ->
+            postQueries.featuredPostsAddedLatest(
+              featuredPostsAfter = featuredPostsAfter,
+              postsAfter = after,
+              postsUpperBound = postsUpperBound,
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              limit = limit,
+              mapper = ::mapToResolvedPost,
+            )
+          PostsSortOrder.AddedOldest ->
+            postQueries.featuredPostsAddedOldest(
+              featuredPostsAfter = featuredPostsAfter,
+              postsAfter = after,
+              postsUpperBound = postsUpperBound,
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              limit = limit,
+              mapper = ::mapToResolvedPost,
+            )
+        }
+
+      query.executeAsList()
     }
   }
 
@@ -374,6 +449,7 @@ class RssRepository(
           sourceIds = activeSourceIds,
           unreadOnly = unreadOnly,
           numberOfFeaturedPosts = numberOfFeaturedPosts,
+          postsSortOrder = postsSortOrder.name,
         ),
       transacter = postQueries,
       context = dispatchersProvider.databaseRead,
@@ -439,6 +515,7 @@ class RssRepository(
   suspend fun postPosition(
     postId: String,
     activeSourceIds: List<String>,
+    postsSortOrder: PostsSortOrder,
     sourceId: String? = null,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
@@ -452,24 +529,58 @@ class RssRepository(
           postQueries.postById(id = postId, mapper = ::Post).executeAsList().firstOrNull()
         } ?: return@withContext null
 
-      postQueries
-        .postPosition(
-          isSourceIdsEmpty = activeSourceIds.isEmpty(),
-          sourceIds = activeSourceIds,
-          unreadOnly = unreadOnly,
-          postsAfter = after,
-          postsUpperBound = postsUpperBound,
-          postDate = post.postDate,
-          postCreatedAt = post.createdAt,
-        )
-        .executeAsOne()
-        .toInt()
+      val query =
+        when (postsSortOrder) {
+          PostsSortOrder.Latest ->
+            postQueries.postPositionLatest(
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              postsAfter = after,
+              postsUpperBound = postsUpperBound,
+              postDate = post.postDate,
+              postCreatedAt = post.createdAt,
+            )
+          PostsSortOrder.Oldest ->
+            postQueries.postPositionOldest(
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              postsAfter = after,
+              postsUpperBound = postsUpperBound,
+              postDate = post.postDate,
+              postCreatedAt = post.createdAt,
+            )
+          PostsSortOrder.AddedLatest ->
+            postQueries.postPositionAddedLatest(
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              postsAfter = after,
+              postsUpperBound = postsUpperBound,
+              postDate = post.postDate,
+              postCreatedAt = post.createdAt,
+            )
+          PostsSortOrder.AddedOldest ->
+            postQueries.postPositionAddedOldest(
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              postsAfter = after,
+              postsUpperBound = postsUpperBound,
+              postDate = post.postDate,
+              postCreatedAt = post.createdAt,
+            )
+        }
+
+      query.executeAsOne().toInt()
     }
   }
 
   suspend fun nonFeaturedPostPosition(
     postId: String,
     activeSourceIds: List<String>,
+    postsSortOrder: PostsSortOrder,
     sourceId: String? = null,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
@@ -485,20 +596,59 @@ class RssRepository(
           postQueries.postById(id = postId, mapper = ::Post).executeAsList().firstOrNull()
         } ?: return@withContext null
 
-      postQueries
-        .nonFeaturedPostPosition(
-          featuredPostsAfter = featuredPostsAfter,
-          postsAfter = after,
-          postsUpperBound = postsUpperBound,
-          numberOfFeaturedPosts = numberOfFeaturedPosts,
-          isSourceIdsEmpty = activeSourceIds.isEmpty(),
-          sourceIds = activeSourceIds,
-          unreadOnly = unreadOnly,
-          postDate = post.postDate,
-          postCreatedAt = post.createdAt,
-        )
-        .executeAsOne()
-        .toInt()
+      val query =
+        when (postsSortOrder) {
+          PostsSortOrder.Latest ->
+            postQueries.nonFeaturedPostPositionLatest(
+              featuredPostsAfter = featuredPostsAfter,
+              postsAfter = after,
+              postsUpperBound = postsUpperBound,
+              numberOfFeaturedPosts = numberOfFeaturedPosts,
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              postDate = post.postDate,
+              postCreatedAt = post.createdAt,
+            )
+          PostsSortOrder.Oldest ->
+            postQueries.nonFeaturedPostPositionOldest(
+              featuredPostsAfter = featuredPostsAfter,
+              postsAfter = after,
+              postsUpperBound = postsUpperBound,
+              numberOfFeaturedPosts = numberOfFeaturedPosts,
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              postDate = post.postDate,
+              postCreatedAt = post.createdAt,
+            )
+          PostsSortOrder.AddedLatest ->
+            postQueries.nonFeaturedPostPositionAddedLatest(
+              featuredPostsAfter = featuredPostsAfter,
+              postsAfter = after,
+              postsUpperBound = postsUpperBound,
+              numberOfFeaturedPosts = numberOfFeaturedPosts,
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              postDate = post.postDate,
+              postCreatedAt = post.createdAt,
+            )
+          PostsSortOrder.AddedOldest ->
+            postQueries.nonFeaturedPostPositionAddedOldest(
+              featuredPostsAfter = featuredPostsAfter,
+              postsAfter = after,
+              postsUpperBound = postsUpperBound,
+              numberOfFeaturedPosts = numberOfFeaturedPosts,
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              postDate = post.postDate,
+              postCreatedAt = post.createdAt,
+            )
+        }
+
+      query.executeAsOne().toInt()
     }
   }
 
