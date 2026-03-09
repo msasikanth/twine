@@ -320,7 +320,7 @@
   <string name="accountSelectionLocalAccount">On Device</string>
   <string name="accountSelectionCloudSync">Cloud Sync</string>
 
-  <string name="unit_seconds">%1$ds</string>
+  <string name="unit_seconds">&lt;1m</string>
   <string name="unit_minutes">%1$dm</string>
   <string name="unit_hours">%1$dh</string>
   <string name="unit_days">%1$dd</string>
