@@ -36,7 +36,6 @@ import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlin.time.Clock
-import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -108,7 +107,8 @@ class MinifluxSyncCoordinator(
   private suspend fun pullInternal(): Boolean {
     return try {
       val syncStartTime = Clock.System.now()
-      val isInitialSync = refreshPolicy.fetchLastSyncedAt() == null
+      val lastSyncedAt = refreshPolicy.fetchLastSyncedAt()
+      val isInitialSync = lastSyncedAt == null
       updateSyncState(SyncState.InProgress(0f))
 
       // 1. Push local changes
@@ -119,15 +119,20 @@ class MinifluxSyncCoordinator(
       updateSyncState(SyncState.InProgress(0.3f))
 
       // 3. Sync Articles
-      val lastSyncedAt =
-        refreshPolicy.fetchLastSyncedAt()?.minus(24.hours) ?: syncStartTime.minus(14.days)
-      val after = lastSyncedAt.epochSeconds
+      if (isInitialSync) {
+        val allFeeds = rssRepository.allFeedsBlocking()
+        allFeeds.forEachIndexed { index, feed ->
+          if (feed.remoteId != null) {
+            syncArticles(feedId = feed.remoteId!!.toLong())
+          }
+          updateSyncState(SyncState.InProgress(0.3f + (0.4f * (index + 1) / allFeeds.size)))
+        }
+      } else {
+        val after = lastSyncedAt!!.minus(24.hours).epochSeconds
+        syncArticles(after = after)
+      }
 
-      syncArticles(after = after)
-
-      // Always update lastSyncedAt after a successful sync. The 24-hour overlap
-      // when fetching articles handles cases where articles might be added to
-      // the server with older timestamps.
+      // Always update lastSyncedAt after a successful sync.
       refreshPolicy.updateLastSyncedAt()
 
       // After finishing feeds, categories and articles, we continue syncing statuses and bookmarks.
@@ -399,6 +404,11 @@ class MinifluxSyncCoordinator(
               )
             )
           }
+
+          if (localFeed.remoteId != remoteFeed.id.toString()) {
+            rssRepository.updateFeedRemoteId(remoteFeed.id.toString(), localFeed.id, syncStartTime)
+          }
+
           localFeed.id
         } else {
           rssRepository
@@ -499,19 +509,21 @@ class MinifluxSyncCoordinator(
     // to avoid missing articles that might have been added with an older timestamp.
     val effectiveAfter = if (currentAfterEntryId != null) null else after
 
-    var beforeEntryId: Long? = null
+    var currentOffset = 0
+    var totalEntries = 0
     do {
       val entriesPayload =
         minifluxSource.entries(
           status = null,
           limit = limit,
+          offset = currentOffset,
           after = effectiveAfter,
           afterEntryId = currentAfterEntryId,
-          beforeEntryId = beforeEntryId,
           starred = starred,
           feedId = feedId,
         )
       val entries = entriesPayload.entries
+      totalEntries = entriesPayload.total
       if (entries.isEmpty()) break
 
       val remoteIds = entries.map { it.id.toString() }.toSet()
@@ -585,23 +597,23 @@ class MinifluxSyncCoordinator(
         )
       }
 
-      beforeEntryId = entries.last().id
-    } while (entries.size >= limit)
+      currentOffset += entries.size
+    } while (currentOffset < totalEntries)
 
     return hasNewArticlesOverall
   }
 
   private suspend fun fetchStarredEntryIds(): Set<String> {
     val bookmarkIds = mutableSetOf<String>()
-    var beforeEntryId: Long? = null
+    var currentOffset = 0
     val limit = 1000
     do {
       val entries =
         minifluxSource
-          .entries(starred = true, status = null, limit = limit, beforeEntryId = beforeEntryId)
+          .entries(starred = true, status = null, limit = limit, offset = currentOffset)
           .entries
       bookmarkIds.addAll(entries.map { it.id.toString() })
-      beforeEntryId = entries.lastOrNull()?.id
+      currentOffset += entries.size
     } while (entries.size >= limit)
     return bookmarkIds
   }
@@ -609,15 +621,13 @@ class MinifluxSyncCoordinator(
   private suspend fun syncStatuses(isInitialSync: Boolean = false) {
     // Paginate through unread entries to get IDs
     val unreadIds = mutableSetOf<String>()
-    var beforeEntryId: Long? = null
+    var currentOffset = 0
     val limit = 1000
     do {
       val entries =
-        minifluxSource
-          .entries(status = "unread", limit = limit, beforeEntryId = beforeEntryId)
-          .entries
+        minifluxSource.entries(status = "unread", limit = limit, offset = currentOffset).entries
       unreadIds.addAll(entries.map { it.id.toString() })
-      beforeEntryId = entries.lastOrNull()?.id
+      currentOffset += entries.size
     } while (entries.size >= limit)
 
     // Fetch starred entries to get bookmark IDs
