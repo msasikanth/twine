@@ -483,7 +483,7 @@ class MinifluxSyncCoordinator(
     afterEntryId: Long? = null,
     starred: Boolean? = null,
   ): Boolean {
-    var hasNewArticles = false
+    var hasNewArticlesOverall = false
     val limit = ARTICLE_PAGE_SIZE
     val downloadFullContent = settingsRepository.downloadFullContent.first()
 
@@ -508,11 +508,10 @@ class MinifluxSyncCoordinator(
     val effectiveAfter = if (currentAfterEntryId != null) null else after
 
     var beforeEntryId: Long? = null
-
     do {
       val entriesPayload =
         minifluxSource.entries(
-          status = listOf("read", "unread"),
+          status = null,
           limit = limit,
           after = effectiveAfter,
           afterEntryId = currentAfterEntryId,
@@ -572,7 +571,7 @@ class MinifluxSyncCoordinator(
               )
 
             postsToUpsertByFeed.getOrPut(feed.id) { mutableListOf() }.add(postPayload)
-            hasNewArticles = true
+            hasNewArticlesOverall = true
           }
         }
       }
@@ -597,7 +596,7 @@ class MinifluxSyncCoordinator(
       beforeEntryId = entries.last().id
     } while (entries.size >= limit)
 
-    return hasNewArticles
+    return hasNewArticlesOverall
   }
 
   private suspend fun fetchStarredEntryIds(): Set<String> {
@@ -606,7 +605,9 @@ class MinifluxSyncCoordinator(
     val limit = 1000
     do {
       val entries =
-        minifluxSource.entries(starred = true, limit = limit, beforeEntryId = beforeEntryId).entries
+        minifluxSource
+          .entries(starred = true, status = null, limit = limit, beforeEntryId = beforeEntryId)
+          .entries
       bookmarkIds.addAll(entries.map { it.id.toString() })
       beforeEntryId = entries.lastOrNull()?.id
     } while (entries.size >= limit)
@@ -621,7 +622,7 @@ class MinifluxSyncCoordinator(
     do {
       val entries =
         minifluxSource
-          .entries(status = listOf("unread"), limit = limit, beforeEntryId = beforeEntryId)
+          .entries(status = "unread", limit = limit, beforeEntryId = beforeEntryId)
           .entries
       unreadIds.addAll(entries.map { it.id.toString() })
       beforeEntryId = entries.lastOrNull()?.id
