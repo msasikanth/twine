@@ -488,19 +488,11 @@ class MinifluxSyncCoordinator(
     val downloadFullContent = settingsRepository.downloadFullContent.first()
 
     var currentAfterEntryId = afterEntryId
-    if (currentAfterEntryId == null && starred != true) {
-      val latestRemoteId =
-        if (feedId != null) {
-          val feed = rssRepository.allFeedsBlocking().find { it.remoteId == feedId.toString() }
-          if (feed != null) {
-            rssRepository.latestPostRemoteIdForFeed(feed.id)
-          } else {
-            null
-          }
-        } else {
-          rssRepository.latestPostRemoteId()
-        }
-      currentAfterEntryId = latestRemoteId?.toLongOrNull()
+    if (currentAfterEntryId == null && starred != true && feedId != null) {
+      val feed = rssRepository.allFeedsBlocking().find { it.remoteId == feedId.toString() }
+      if (feed != null) {
+        currentAfterEntryId = rssRepository.latestPostRemoteIdForFeed(feed.id)?.toLongOrNull()
+      }
     }
 
     // If we have a reliable ID-based boundary, we can ignore the timestamp filter
