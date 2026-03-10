@@ -118,8 +118,9 @@ class MinifluxSource(
   suspend fun entries(
     status: List<String>? = null,
     limit: Int? = null,
-    offset: Int? = null,
     after: Long? = null,
+    beforeEntryId: Long? = null,
+    afterEntryId: Long? = null,
     starred: Boolean? = null,
     feedId: Long? = null,
   ): MinifluxEntriesPayload {
@@ -130,8 +131,9 @@ class MinifluxSource(
             MinifluxApi.Entries(
               status = status,
               limit = limit,
-              offset = offset,
               after = after,
+              beforeEntryId = beforeEntryId,
+              afterEntryId = afterEntryId,
               starred = starred?.toString(),
             )
           )
@@ -143,8 +145,9 @@ class MinifluxSource(
               parent = MinifluxApi.Feed(feedId = feedId),
               status = status,
               limit = limit,
-              offset = offset,
               after = after,
+              beforeEntryId = beforeEntryId,
+              afterEntryId = afterEntryId,
               starred = starred?.toString(),
             )
           )

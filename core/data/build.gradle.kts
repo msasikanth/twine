@@ -61,6 +61,7 @@ kotlin {
       api(libs.androidx.datastore.okio)
       api(libs.uuid)
       api(libs.ktor.core)
+      implementation(libs.ktor.resources)
       implementation(libs.ktor.content.negotiation)
       implementation(libs.ktor.json)
       api(libs.kotlinx.serialization.json)
@@ -73,6 +74,7 @@ kotlin {
       implementation(libs.kotlin.test)
       implementation(libs.kotlinx.coroutines.test)
       implementation(libs.ktor.client.mock)
+      implementation(libs.ktor.resources)
     }
 
     androidMain.dependencies {
