@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
@@ -109,6 +110,7 @@ class AppViewModel(
           settingsRepository.blockImages,
           observableActiveSource.activeSource,
           settingsRepository.postsType,
+          settingsRepository.postsSortOrder,
           ::AppContentSettings,
         ),
       ) { appearanceSettings, contentSettings ->
@@ -123,6 +125,7 @@ class AppViewModel(
             blockImages = contentSettings.blockImages,
             activeSource = contentSettings.activeSource,
             postsType = contentSettings.postsType,
+            postsSortOrder = contentSettings.postsSortOrder,
           )
         }
       }
@@ -208,6 +211,7 @@ class AppViewModel(
           postId = playingPostId,
           sourceId = post.sourceId,
           activeSourceIds = finalActiveSourceIds,
+          postsSortOrder = finalState.postsSortOrder,
           unreadOnly = finalUnreadOnly,
           after = finalPostsAfter,
           postsUpperBound = postsUpperBound,
@@ -274,4 +278,5 @@ private data class AppContentSettings(
   val blockImages: Boolean,
   val activeSource: Source?,
   val postsType: PostsType,
+  val postsSortOrder: PostsSortOrder,
 )
