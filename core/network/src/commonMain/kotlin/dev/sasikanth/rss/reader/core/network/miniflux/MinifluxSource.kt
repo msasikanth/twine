@@ -116,7 +116,7 @@ class MinifluxSource(
   }
 
   suspend fun entries(
-    status: List<String>? = null,
+    status: String? = null,
     limit: Int? = null,
     after: Long? = null,
     beforeEntryId: Long? = null,

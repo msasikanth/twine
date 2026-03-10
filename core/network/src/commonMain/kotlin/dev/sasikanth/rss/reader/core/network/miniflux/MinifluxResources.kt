@@ -37,7 +37,7 @@ class MinifluxApi {
     @Resource("entries")
     class Entries(
       val parent: Feed,
-      val status: List<String>? = null,
+      val status: String? = null,
       val limit: Int? = null,
       val after: Long? = null,
       @SerialName("before_entry_id") val beforeEntryId: Long? = null,
@@ -52,7 +52,7 @@ class MinifluxApi {
   @Resource("entries")
   class Entries(
     val parent: MinifluxApi = MinifluxApi(),
-    val status: List<String>? = null,
+    val status: String? = null,
     val limit: Int? = null,
     val after: Long? = null,
     @SerialName("before_entry_id") val beforeEntryId: Long? = null,
