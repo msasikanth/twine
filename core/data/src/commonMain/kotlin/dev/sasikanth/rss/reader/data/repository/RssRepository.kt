@@ -1229,6 +1229,18 @@ class RssRepository(
     }
   }
 
+  suspend fun latestPostRemoteId(): String? {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.latestPostRemoteId().executeAsOneOrNull()
+    }
+  }
+
+  suspend fun latestPostRemoteIdForFeed(feedId: String): String? {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.latestPostRemoteIdForFeed(feedId).executeAsOneOrNull()
+    }
+  }
+
   suspend fun postsWithRemoteId(): List<Post> {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries.postsWithRemoteId(::Post).executeAsList()

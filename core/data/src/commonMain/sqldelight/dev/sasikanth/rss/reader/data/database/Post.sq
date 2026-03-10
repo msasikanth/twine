@@ -1024,6 +1024,18 @@ WHERE sourceId = :feedId AND (flags & 1) == 0;
 allReadPostsBlocking:
 SELECT id, updatedAt FROM post WHERE (flags & 2) != 0;
 
+latestPostRemoteId:
+SELECT remoteId FROM post
+WHERE remoteId IS NOT NULL
+ORDER BY CAST(remoteId AS INTEGER) DESC
+LIMIT 1;
+
+latestPostRemoteIdForFeed:
+SELECT remoteId FROM post
+WHERE sourceId = :feedId AND remoteId IS NOT NULL
+ORDER BY CAST(remoteId AS INTEGER) DESC
+LIMIT 1;
+
 deleteAll:
 DELETE FROM post;
 
