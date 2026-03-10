@@ -135,6 +135,8 @@ class MinifluxSource(
               beforeEntryId = beforeEntryId,
               afterEntryId = afterEntryId,
               starred = starred?.toString(),
+              order = "published_at",
+              direction = "desc",
             )
           )
           .body<MinifluxEntriesPayload>()
@@ -149,6 +151,8 @@ class MinifluxSource(
               beforeEntryId = beforeEntryId,
               afterEntryId = afterEntryId,
               starred = starred?.toString(),
+              order = "published_at",
+              direction = "desc",
             )
           )
           .body<MinifluxEntriesPayload>()
