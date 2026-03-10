@@ -177,4 +177,4 @@ UPDATE SET
     isDeleted = excluded.isDeleted,
     hideFromAllFeeds = excluded.hideFromAllFeeds,
     remoteId = excluded.remoteId
-WHERE excluded.lastUpdatedAt > feed.lastUpdatedAt OR feed.lastUpdatedAt IS NULL;
+WHERE excluded.lastUpdatedAt > feed.lastUpdatedAt OR feed.lastUpdatedAt IS NULL OR feed.remoteId IS NULL;
