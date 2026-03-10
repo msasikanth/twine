@@ -82,7 +82,6 @@ import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
-import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsState
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
@@ -145,12 +144,18 @@ internal fun HomeScreen(
   LaunchedEffect(Unit) { viewModel.openPost.collect { (index, post) -> openPost(index, post) } }
 
   val posts =
-    remember(state.homeViewMode, state.allPosts, state.feedPosts, shouldBlockImage, sizeClass) {
+    remember(
+        state.allPosts,
+        state.feedPosts,
+        state.showFeaturedSection,
+        shouldBlockImage,
+        sizeClass,
+      ) {
         val forceShowAllPosts =
           shouldBlockImage ||
             sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)
 
-        if (state.homeViewMode == HomeViewMode.Default && !forceShowAllPosts) {
+        if (state.showFeaturedSection && !forceShowAllPosts) {
           state.feedPosts
         } else {
           state.allPosts
