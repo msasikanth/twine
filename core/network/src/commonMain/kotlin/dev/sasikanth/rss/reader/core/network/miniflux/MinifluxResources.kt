@@ -18,6 +18,7 @@
 package dev.sasikanth.rss.reader.core.network.miniflux
 
 import io.ktor.resources.Resource
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -38,8 +39,9 @@ class MinifluxApi {
       val parent: Feed,
       val status: List<String>? = null,
       val limit: Int? = null,
-      val offset: Int? = null,
       val after: Long? = null,
+      @SerialName("before_entry_id") val beforeEntryId: Long? = null,
+      @SerialName("after_entry_id") val afterEntryId: Long? = null,
       val starred: String? = null,
       val order: String? = "published_at",
       val direction: String? = "desc",
@@ -52,8 +54,9 @@ class MinifluxApi {
     val parent: MinifluxApi = MinifluxApi(),
     val status: List<String>? = null,
     val limit: Int? = null,
-    val offset: Int? = null,
     val after: Long? = null,
+    @SerialName("before_entry_id") val beforeEntryId: Long? = null,
+    @SerialName("after_entry_id") val afterEntryId: Long? = null,
     val starred: String? = null,
     val order: String? = "published_at",
     val direction: String? = "desc",
@@ -68,17 +71,6 @@ class MinifluxApi {
   @Serializable
   @Resource("entries/{entryId}/fetch-content")
   class FetchContent(val parent: MinifluxApi = MinifluxApi(), val entryId: Long)
-
-  @Serializable
-  @Resource("feeds/{feedId}/entries")
-  class FeedEntries(
-    val parent: MinifluxApi = MinifluxApi(),
-    val feedId: Long,
-    val status: String? = null,
-    val limit: Int? = null,
-    val offset: Int? = null,
-    val after: Long? = null,
-  )
 
   @Serializable @Resource("categories") class Categories(val parent: MinifluxApi = MinifluxApi())
 
