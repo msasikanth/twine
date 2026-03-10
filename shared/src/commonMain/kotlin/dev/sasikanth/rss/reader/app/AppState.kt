@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.app
 
+import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
@@ -33,6 +34,7 @@ data class AppState(
   val blockImages: Boolean,
   val activeSource: Source?,
   val postsType: PostsType,
+  val postsSortOrder: PostsSortOrder,
   val showChangelog: Boolean,
   val versionName: String,
 ) {
@@ -49,6 +51,7 @@ data class AppState(
         blockImages = false,
         activeSource = null,
         postsType = PostsType.ALL,
+        postsSortOrder = PostsSortOrder.Latest,
         showChangelog = false,
         versionName = "",
       )
