@@ -118,6 +118,7 @@ class MinifluxSource(
   suspend fun entries(
     status: String? = null,
     limit: Int? = null,
+    offset: Int? = null,
     after: Long? = null,
     beforeEntryId: Long? = null,
     afterEntryId: Long? = null,
@@ -131,6 +132,7 @@ class MinifluxSource(
             MinifluxApi.Entries(
               status = status,
               limit = limit,
+              offset = offset,
               after = after,
               beforeEntryId = beforeEntryId,
               afterEntryId = afterEntryId,
@@ -147,6 +149,7 @@ class MinifluxSource(
               parent = MinifluxApi.Feed(feedId = feedId),
               status = status,
               limit = limit,
+              offset = offset,
               after = after,
               beforeEntryId = beforeEntryId,
               afterEntryId = afterEntryId,
