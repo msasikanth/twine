@@ -1,45 +1,46 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base"
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:recommended',
   ],
-  "packageRules": [
+  packageRules: [
     {
       matchDatasources: [
-        "maven"
+        'maven',
       ],
       registryUrls: [
-        "https://maven.google.com/",
-        "https://repo1.maven.org/maven2",
-        "https://plugins.gradle.org/m2/",
-        "https://jitpack.io",
+        'https://maven.google.com/',
+        'https://repo1.maven.org/maven2',
+        'https://plugins.gradle.org/m2/',
+        'https://jitpack.io',
       ],
     },
     {
-      "groupName": "Kotlin, KSP and Compose Multiplatform",
-      "groupSlug": "kotlin",
-      "matchPackagePrefixes": [
-        "org.jetbrains.kotlin",
-        "com.google.devtools.ksp",
-        "org.jetbrains.compose"
+      groupName: 'Kotlin, KSP and Compose Multiplatform',
+      groupSlug: 'kotlin',
+      matchPackageNames: [
+        'org.jetbrains.kotlin{/,}**',
+        'com.google.devtools.ksp{/,}**',
+        'org.jetbrains.compose{/,}**',
+        '!org.jetbrains.kotlinx{/,}**',
       ],
-      excludePackagePrefixes: [
-        "org.jetbrains.kotlinx"
-      ]
     },
     {
-      "matchPackagePatterns": [
-        "^com.arkivanov.decompose"
+      groupName: 'Decompose',
+      allowedVersions: '/^[0-9]+\\.[0-9]+\\.[0-9]+\\-compose-experimental$/',
+      matchPackageNames: [
+        '/^com.arkivanov.decompose/',
       ],
-      "groupName": "Decompose",
-      "allowedVersions": "/^[0-9]+\\.[0-9]+\\.[0-9]+\\-compose-experimental$/"
     },
     {
-      "description": "Automerge minor updates",
-      "matchUpdateTypes": ["minor", "patch"],
-      "automerge": false,
-      "automergeType": "pr",
-      "platformAutomerge": false
-    }
+      description: 'Automerge minor updates',
+      matchUpdateTypes: [
+        'minor',
+        'patch',
+      ],
+      automerge: false,
+      automergeType: 'pr',
+      platformAutomerge: false,
+    },
   ],
 }
