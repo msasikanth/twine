@@ -64,7 +64,6 @@ actual class DriverFactory(private val codeMigrations: Array<AfterVersion>) {
           }
         },
         extendedConfig = extendedConfig,
-        busyTimeout = 3000,
       )
     )
   }
