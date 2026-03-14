@@ -115,7 +115,7 @@ class FreshRSSSyncCoordinator(
       // 3. Sync Articles
       val lastSyncedAt =
         refreshPolicy.fetchLastSyncedAt()?.minus(24.hours) ?: syncStartTime.minus(14.days)
-      val newerThan = lastSyncedAt.toEpochMilliseconds()
+      val newerThan = lastSyncedAt.epochSeconds
 
       syncArticles(newerThan = newerThan)
 
@@ -444,7 +444,7 @@ class FreshRSSSyncCoordinator(
 
   private suspend fun syncArticles(
     streamId: String = "user/-/state/com.google/reading-list",
-    newerThan: Long = Instant.DISTANT_PAST.toEpochMilliseconds(),
+    newerThan: Long? = null,
   ): Boolean {
     var hasNewArticles = false
     var continuation: String? = null
