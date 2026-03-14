@@ -18,7 +18,6 @@
 package dev.sasikanth.rss.reader.core.network.freshrss
 
 import io.ktor.resources.Resource
-import kotlin.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -41,7 +40,7 @@ class Reader {
     @SerialName("s") val streamId: String = "user/-/state/com.google/reading-list",
     @SerialName("xt") val excludeState: String? = null,
     @SerialName("n") val limit: Int = 1000,
-    @SerialName("ot") val newerThan: Long = Instant.DISTANT_PAST.toEpochMilliseconds(),
+    @SerialName("ot") val newerThan: Long? = null,
     @SerialName("c") val continuation: String = "",
     val output: String = "json",
   )
