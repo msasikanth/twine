@@ -19,3 +19,8 @@ package dev.sasikanth.rss.reader.util
 fun String.splitAndTrim(separator: String): List<String> {
   return split(separator).map { it.trim() }.filter { it.isNotBlank() }
 }
+
+fun String.ensureTrailingSlash(): String {
+  val trimmed = trim()
+  return if (trimmed.endsWith('/')) trimmed else "$trimmed/"
+}
