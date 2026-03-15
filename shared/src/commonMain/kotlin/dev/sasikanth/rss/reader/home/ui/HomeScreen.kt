@@ -81,6 +81,7 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsState
@@ -239,6 +240,16 @@ private fun HomeContent(
     rememberPinnedSourcesBottomBarScrollBehavior(canScroll = { canShowBottomBar })
   val homeScrollBehavior = rememberHomeScrollBehavior(appBarScrollBehaviour, bottomBarScrollState)
 
+  val onSourceClick =
+    remember(feedsDispatch) { { feed: Source -> feedsDispatch(FeedsEvent.OnSourceClick(feed)) } }
+  val onHomeSelected = remember(feedsDispatch) { { feedsDispatch(FeedsEvent.OnHomeSelected) } }
+  val onPinnedSourceOrderChanged =
+    remember(feedsDispatch) {
+      { newPinnedSources: List<Source> ->
+        feedsDispatch(FeedsEvent.OnPinnedSourcePositionChanged(newPinnedSources))
+      }
+    }
+
   LaunchedEffect(state.activeSource) {
     if (state.activeSource != state.prevActiveSource) {
       bottomBarScrollState.state.heightOffset = 0f
@@ -294,39 +305,41 @@ private fun HomeContent(
             0.dp
           }
 
+        val bottomBarModifier =
+          remember(scaffoldBottomPadding, onMenuClicked, density) {
+            Modifier.padding(bottom = scaffoldBottomPadding).pointerInput(onMenuClicked) {
+              var verticalDragThresholdTriggered = false
+              var accumulatedDrag = 0f
+              val threshold = 40.dp.toPx()
+
+              detectVerticalDragGestures(
+                onDragStart = {
+                  verticalDragThresholdTriggered = false
+                  accumulatedDrag = 0f
+                },
+                onDragEnd = { verticalDragThresholdTriggered = false },
+                onDragCancel = { verticalDragThresholdTriggered = false },
+                onVerticalDrag = { _, dragAmount ->
+                  accumulatedDrag += dragAmount
+                  if (!verticalDragThresholdTriggered && accumulatedDrag < -threshold) {
+                    onMenuClicked?.invoke()
+                    verticalDragThresholdTriggered = true
+                  }
+                },
+              )
+            }
+          }
+
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
           AppTheme(useDarkTheme = true) {
             PinnedSourcesBottomBar(
-              modifier =
-                Modifier.padding(bottom = scaffoldBottomPadding).pointerInput(onMenuClicked) {
-                  var verticalDragThresholdTriggered = false
-                  var accumulatedDrag = 0f
-                  val threshold = with(density) { 40.dp.toPx() }
-
-                  detectVerticalDragGestures(
-                    onDragStart = {
-                      verticalDragThresholdTriggered = false
-                      accumulatedDrag = 0f
-                    },
-                    onDragEnd = { verticalDragThresholdTriggered = false },
-                    onDragCancel = { verticalDragThresholdTriggered = false },
-                    onVerticalDrag = { _, dragAmount ->
-                      accumulatedDrag += dragAmount
-                      if (!verticalDragThresholdTriggered && accumulatedDrag < -threshold) {
-                        onMenuClicked?.invoke()
-                        verticalDragThresholdTriggered = true
-                      }
-                    },
-                  )
-                },
+              modifier = bottomBarModifier,
               pinnedSources = feedsState.pinnedSources,
               activeSource = feedsState.activeSource,
               canShowUnreadPostsCount = feedsState.canShowUnreadPostsCount,
-              onSourceClick = { feed -> feedsDispatch(FeedsEvent.OnSourceClick(feed)) },
-              onHomeSelected = { feedsDispatch(FeedsEvent.OnHomeSelected) },
-              onPinnedSourceOrderChanged = { newPinnedSources ->
-                feedsDispatch(FeedsEvent.OnPinnedSourcePositionChanged(newPinnedSources))
-              },
+              onSourceClick = onSourceClick,
+              onHomeSelected = onHomeSelected,
+              onPinnedSourceOrderChanged = onPinnedSourceOrderChanged,
               scrollBehavior = bottomBarScrollState,
             )
           }
