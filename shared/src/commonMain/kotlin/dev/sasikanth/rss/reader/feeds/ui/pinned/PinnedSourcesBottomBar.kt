@@ -45,13 +45,14 @@ import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.BOTTOM_BAR_MAX_WIDTH
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
+import kotlinx.collections.immutable.ImmutableList
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun PinnedSourcesBottomBar(
-  pinnedSources: List<Source>,
+  pinnedSources: ImmutableList<Source>,
   activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
   onSourceClick: (Source) -> Unit,
@@ -83,7 +84,7 @@ internal fun PinnedSourcesBottomBar(
             scrollBehavior.state.heightOffsetLimit = -height
           }
         }
-        .graphicsLayer { this.translationY = -translationY }
+        .graphicsLayer { translationY = -(scrollBehavior?.state?.heightOffset ?: 0f) }
         .then(modifier)
         .navigationBarsPadding()
         .widthIn(max = BOTTOM_BAR_MAX_WIDTH)

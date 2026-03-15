@@ -45,6 +45,7 @@ import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -173,7 +174,7 @@ class FeedsViewModel(
 
   private fun onPinnedSourcePositionChanged(newSourcesList: List<Source>) {
     viewModelScope.launch {
-      _state.update { it.copy(pinnedSources = newSourcesList) }
+      _state.update { it.copy(pinnedSources = newSourcesList.toImmutableList()) }
       rssRepository.updatedSourcePinnedPosition(_state.value.pinnedSources)
     }
   }
@@ -391,6 +392,7 @@ class FeedsViewModel(
             postsUpperBound = dateTime.toInstant(TimeZone.currentSystemDefault()),
           )
         }
+        .map { it.toImmutableList() }
 
     val allSourcesFlow =
       combine(
