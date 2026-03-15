@@ -63,7 +63,6 @@ internal fun PinnedSourcesBottomBar(
 ) {
   val shape = CircleShape
 
-  val translationY = scrollBehavior?.state?.heightOffset ?: 0f
   val lazyListState = rememberLazyListState()
   val reorderableLazyRowState =
     rememberReorderableLazyListState(
