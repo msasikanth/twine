@@ -41,7 +41,6 @@ import io.ktor.http.contentType
 import io.ktor.http.parameters
 import io.ktor.serialization.kotlinx.KotlinxSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
-import kotlin.time.Instant
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -139,7 +138,7 @@ class FreshRssSource(
   suspend fun articles(
     streamId: String = "user/-/state/com.google/reading-list",
     limit: Int = 1000,
-    newerThan: Long = Instant.DISTANT_PAST.toEpochMilliseconds(),
+    newerThan: Long? = null,
     continuation: String? = null,
     excludeState: String? = null,
   ): ArticlesPayload {

@@ -72,4 +72,40 @@ class StringExtTest {
     // then
     assertEquals(emptyList<String>(), result)
   }
+
+  @Test
+  fun ensureTrailingSlashShouldWorkCorrectly() {
+    // given
+    val input = "https://example.com"
+
+    // when
+    val result = input.ensureTrailingSlash()
+
+    // then
+    assertEquals("https://example.com/", result)
+  }
+
+  @Test
+  fun ensureTrailingSlashShouldNotDuplicateSlash() {
+    // given
+    val input = "https://example.com/"
+
+    // when
+    val result = input.ensureTrailingSlash()
+
+    // then
+    assertEquals("https://example.com/", result)
+  }
+
+  @Test
+  fun ensureTrailingSlashShouldTrimAndAddSlash() {
+    // given
+    val input = " https://example.com "
+
+    // when
+    val result = input.ensureTrailingSlash()
+
+    // then
+    assertEquals("https://example.com/", result)
+  }
 }

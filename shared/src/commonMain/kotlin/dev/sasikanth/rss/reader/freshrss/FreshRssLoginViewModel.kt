@@ -29,6 +29,7 @@ import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.UserRepository
 import dev.sasikanth.rss.reader.data.sync.freshrss.FreshRSSSyncCoordinator
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.util.ensureTrailingSlash
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -71,7 +72,7 @@ class FreshRssLoginViewModel(
     viewModelScope.launch(dispatchersProvider.io) {
       _state.update { it.copy(isLoading = true, error = null) }
       try {
-        val endpoint = state.value.url.trim()
+        val endpoint = state.value.url.ensureTrailingSlash()
         val username = state.value.username.trim()
         val password = state.value.password.trim()
 
