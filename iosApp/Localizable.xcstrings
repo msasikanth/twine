@@ -251,16 +251,6 @@
         }
       }
     },
-    "widget_unread_remaining %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%lld more"
-          }
-        }
-      }
-    },
     "unread_no_posts" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -547,6 +537,7 @@
       }
     },
     "widget_unread_remaining %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -588,6 +579,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "+%@ 篇未读……"
+          }
+        }
+      }
+    },
+    "widget_unread_remaining %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld more"
           }
         }
       }
