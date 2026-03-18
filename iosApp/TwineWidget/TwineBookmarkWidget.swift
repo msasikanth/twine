@@ -65,7 +65,7 @@ struct TwineBookmarkWidgetEntryView : View {
                                     Text("bullet_separator")
                                         .font(.caption2)
                                     
-                                    Text(String(localized: "reading_time_estimate \(post.readingTimeEstimate.description)"))
+                                    Text("reading_time_estimate \(Int(post.readingTimeEstimate))")
                                         .lineLimit(1)
                                         .font(.caption2)
                                 }
@@ -142,7 +142,7 @@ struct TwineBookmarkWidget: Widget {
             }
         }
         .configurationDisplayName(String(localized: "widget_bookmarks_name"))
-        .supportedFamilies([.systemMedium, .systemLarge])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
 
@@ -204,6 +204,8 @@ struct BookmarkProvider: TimelineProvider {
         do {
             let numberOfPosts: Int
             switch widgetFamily {
+            case .systemSmall:
+                numberOfPosts = 1
             case .systemMedium:
                 numberOfPosts = 2
             default:

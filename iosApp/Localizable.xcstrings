@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "bookmarks_no_posts" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No bookmarked posts"
+          }
+        }
+      }
+    },
     "bullet_separator" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -48,76 +58,6 @@
         }
       },
       "shouldTranslate" : false
-    },
-    "bookmarks_no_posts" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No bookmarked posts"
-          }
-        }
-      }
-    },
-    "widget_bookmarks_name" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bookmarked posts"
-          }
-        }
-      }
-    },
-    "widget_unread_count_name" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unread count"
-          }
-        }
-      }
-    },
-    "widget_stats_name" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stats"
-          }
-        }
-      }
-    },
-    "widget_stats_total_read" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total Read"
-          }
-        }
-      }
-    },
-    "widget_stats_daily_average" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daily Average"
-          }
-        }
-      }
-    },
-    "reading_time_estimate" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@m"
-          }
-        }
-      }
     },
     "notification_new_articles_content" : {
       "localizations" : {
@@ -301,6 +241,26 @@
         }
       }
     },
+    "reading_time_estimate %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lldm"
+          }
+        }
+      }
+    },
+    "widget_unread_remaining %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld more"
+          }
+        }
+      }
+    },
     "unread_no_posts" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -442,6 +402,16 @@
         }
       }
     },
+    "widget_bookmarks_name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bookmarked posts"
+          }
+        }
+      }
+    },
     "widget_name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -532,6 +502,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "微件仅面向高级版用户。请在应用内订阅。"
+          }
+        }
+      }
+    },
+    "widget_stats_daily_average" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily Average"
+          }
+        }
+      }
+    },
+    "widget_stats_name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stats"
+          }
+        }
+      }
+    },
+    "widget_stats_total_read" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total Read"
+          }
+        }
+      }
+    },
+    "widget_unread_count_name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unread count"
           }
         }
       }
