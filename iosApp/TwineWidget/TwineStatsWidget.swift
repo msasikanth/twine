@@ -57,7 +57,7 @@ struct TwineStatsWidget: Widget {
             }
         }
         .configurationDisplayName(String(localized: "widget_stats_name"))
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.systemMedium])
     }
 }
 
