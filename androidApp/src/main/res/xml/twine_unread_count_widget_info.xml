@@ -19,9 +19,9 @@
     android:previewLayout="@layout/glance_default_loading_layout"
     android:updatePeriodMillis="1800000"
     android:resizeMode="horizontal|vertical"
-    android:targetCellWidth="4"
-    android:targetCellHeight="2"
-    android:minWidth="250dp"
-    android:minHeight="110dp"
+    android:targetCellWidth="1"
+    android:targetCellHeight="1"
+    android:minWidth="40dp"
+    android:minHeight="40dp"
     android:widgetCategory="home_screen">
 </appwidget-provider>

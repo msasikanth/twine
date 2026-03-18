@@ -222,6 +222,7 @@
 
     <receiver
         android:name=".widget.TwineWidgetReceiver"
+        android:label="@string/widget_unread_name"
         android:exported="true">
       <intent-filter>
         <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -229,6 +230,42 @@
       <meta-data
           android:name="android.appwidget.provider"
           android:resource="@xml/twine_widget_info" />
+    </receiver>
+
+    <receiver
+        android:name=".widget.TwineBookmarkWidgetReceiver"
+        android:label="@string/widget_bookmarks_name"
+        android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/twine_bookmark_widget_info" />
+    </receiver>
+
+    <receiver
+        android:name=".widget.TwineUnreadCountWidgetReceiver"
+        android:label="@string/widget_unread_count_name"
+        android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/twine_unread_count_widget_info" />
+    </receiver>
+
+    <receiver
+        android:name=".widget.TwineStatsWidgetReceiver"
+        android:label="@string/widget_stats_name"
+        android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/twine_stats_widget_info" />
     </receiver>
 
     <provider

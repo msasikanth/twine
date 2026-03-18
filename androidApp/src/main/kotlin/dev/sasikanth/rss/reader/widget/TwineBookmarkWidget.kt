@@ -20,7 +20,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,7 +37,6 @@ import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.components.CircleIconButton
-import androidx.glance.appwidget.components.OutlineButton
 import androidx.glance.appwidget.components.Scaffold
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.lazy.LazyColumn
@@ -68,7 +66,7 @@ import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import kotlin.time.Clock
 import kotlinx.coroutines.launch
 
-class TwineUnreadWidget : GlanceAppWidget() {
+class TwineBookmarkWidget : GlanceAppWidget() {
 
   override val sizeMode: SizeMode = SizeMode.Single
 
@@ -104,47 +102,49 @@ class TwineUnreadWidget : GlanceAppWidget() {
   @Composable
   private fun WidgetContent(widgetDataRepository: WidgetDataRepository, widgetId: Int) {
     val context = LocalContext.current
-    val unreadCount by
-      remember { widgetDataRepository.unreadPostsCount }.collectAsState(initial = 1L)
+    var bookmarkCount by remember { mutableStateOf(1L) }
+    var bookmarkPosts by remember {
+      mutableStateOf(
+        listOf(
+          WidgetPost(
+            id = "preview",
+            title = "Widget Preview",
+            description = "This is a preview of your bookmarked posts.",
+            image = null,
+            postedOn = Clock.System.now(),
+            feedName = "Twine",
+            feedIcon = null,
+            readingTimeEstimate = 0,
+          )
+        )
+      )
+    }
+
+    LaunchedEffect(Unit) {
+      bookmarkCount = widgetDataRepository.bookmarkPostsCountBlocking()
+      bookmarkPosts = widgetDataRepository.bookmarkPostsBlocking(NUMBER_OF_POSTS_IN_WIDGET)
+    }
 
     Scaffold(
       modifier = GlanceModifier.fillMaxSize().cornerRadius(16.dp),
-      titleBar = { TitleBar(unreadPostsCount = unreadCount, context = context) },
+      titleBar = { TitleBar(bookmarkPostsCount = bookmarkCount, context = context) },
       horizontalPadding = 0.dp,
     ) {
-      val unreadPosts by
-        remember { widgetDataRepository.unreadPosts(NUMBER_OF_UNREAD_POSTS_IN_WIDGET) }
-          .collectAsState(
-            initial =
-              listOf(
-                WidgetPost(
-                  id = "preview",
-                  title = "Widget Preview",
-                  description = "This is a preview of your unread posts.",
-                  image = null,
-                  postedOn = Clock.System.now(),
-                  feedName = "Twine",
-                  feedIcon = null,
-                  readingTimeEstimate = 0,
-                )
-              )
-          )
-
-      if (unreadPosts.isEmpty()) {
-        NoPosts()
+      if (bookmarkPosts.isEmpty()) {
+        NoBookmarks()
       } else {
         LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
-          itemsIndexed(unreadPosts) { index, post ->
+          itemsIndexed(bookmarkPosts) { index, post ->
             Column {
               WidgetPostListItem(
                 post = post,
-                showDivider = index < unreadPosts.lastIndex,
+                showDivider = index < bookmarkPosts.lastIndex,
                 onClick = {
                   val readerScreenArgs =
                     ReaderScreenArgs(
                       postIndex = index,
                       postId = post.id,
-                      fromScreen = ReaderScreenArgs.FromScreen.UnreadWidget,
+                      fromScreen = ReaderScreenArgs.FromScreen.Bookmarks,
                     )
                   val uri = Screen.Reader(readerScreenArgs).toRoute().toUri()
 
@@ -157,31 +157,33 @@ class TwineUnreadWidget : GlanceAppWidget() {
               )
             }
           }
-
-          if (unreadCount > NUMBER_OF_UNREAD_POSTS_IN_WIDGET) {
-            item {
-              Box(modifier = GlanceModifier.padding(vertical = 16.dp)) {
-                OutlineButton(
-                  text = context.getString(R.string.widget_see_more),
-                  contentColor = GlanceTheme.colors.primary,
-                  onClick = {
-                    val intent =
-                      Intent(context, MainActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                      }
-                    context.startActivity(intent)
-                  },
-                )
-              }
-            }
-          }
         }
       }
     }
   }
 
   @Composable
-  private fun TitleBar(unreadPostsCount: Long, context: Context) {
+  private fun NoBookmarks() {
+    val context = LocalContext.current
+    Box(
+      modifier = GlanceModifier.fillMaxSize().padding(16.dp),
+      contentAlignment = Alignment.Center,
+    ) {
+      Text(
+        text = context.getString(R.string.widget_bookmarks_no_posts),
+        style =
+          TextStyle(
+            color = GlanceTheme.colors.onSurfaceVariant,
+            fontWeight = FontWeight.Medium,
+            fontSize = 16.sp,
+            textAlign = androidx.glance.text.TextAlign.Center,
+          ),
+      )
+    }
+  }
+
+  @Composable
+  private fun TitleBar(bookmarkPostsCount: Long, context: Context) {
     val coroutineScope = rememberCoroutineScope()
     Row(
       GlanceModifier.fillMaxWidth().padding(vertical = 8.dp),
@@ -189,9 +191,9 @@ class TwineUnreadWidget : GlanceAppWidget() {
     ) {
       val title =
         context.resources.getQuantityString(
-          R.plurals.widget_unread_posts,
-          unreadPostsCount.toInt(),
-          unreadPostsCount,
+          R.plurals.widget_bookmark_posts,
+          bookmarkPostsCount.toInt(),
+          bookmarkPostsCount,
         )
       Text(
         text = title,
@@ -209,7 +211,7 @@ class TwineUnreadWidget : GlanceAppWidget() {
         imageProvider = ImageProvider(R.drawable.ic_refresh),
         backgroundColor = GlanceTheme.colors.widgetBackground,
         contentDescription = context.getString(R.string.widget_unread_refresh),
-        onClick = { coroutineScope.launch { this@TwineUnreadWidget.updateAll(context) } },
+        onClick = { coroutineScope.launch { this@TwineBookmarkWidget.updateAll(context) } },
       )
 
       Spacer(GlanceModifier.width(16.dp))
@@ -217,6 +219,6 @@ class TwineUnreadWidget : GlanceAppWidget() {
   }
 
   companion object {
-    private const val NUMBER_OF_UNREAD_POSTS_IN_WIDGET = 15
+    private const val NUMBER_OF_POSTS_IN_WIDGET = 15
   }
 }

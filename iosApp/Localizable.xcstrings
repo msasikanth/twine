@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "bookmarks_no_posts" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No bookmarked posts"
+          }
+        }
+      }
+    },
     "bullet_separator" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -231,6 +241,16 @@
         }
       }
     },
+    "reading_time_estimate %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lldm"
+          }
+        }
+      }
+    },
     "unread_no_posts" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -372,6 +392,16 @@
         }
       }
     },
+    "widget_bookmarks_name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bookmarked posts"
+          }
+        }
+      }
+    },
     "widget_name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -466,7 +496,48 @@
         }
       }
     },
+    "widget_stats_daily_average" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily Average"
+          }
+        }
+      }
+    },
+    "widget_stats_name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stats"
+          }
+        }
+      }
+    },
+    "widget_stats_total_read" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total Read"
+          }
+        }
+      }
+    },
+    "widget_unread_count_name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unread count"
+          }
+        }
+      }
+    },
     "widget_unread_remaining %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -508,6 +579,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "+%@ 篇未读……"
+          }
+        }
+      }
+    },
+    "widget_unread_remaining %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld more"
           }
         }
       }

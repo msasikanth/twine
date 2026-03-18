@@ -23,6 +23,10 @@
         <item quantity="one">Unread (%1$d post)</item>
         <item quantity="other">Unread (%1$d posts)</item>
     </plurals>
+    <string name="widget_unread_name">Unread posts</string>
+    <string name="widget_bookmarks_name">Bookmarks</string>
+    <string name="widget_unread_count_name">Unread count</string>
+    <string name="widget_stats_name">Reading statistics</string>
     <string name="widget_no_title">No title</string>
     <string name="widget_no_description">No description</string>
     <string name="widget_see_more">See more</string>
@@ -30,6 +34,35 @@
     <string name="widget_unread_add">Add feed</string>
     <string name="widget_required_premium">Widgets are only available for premium users. Please subscribe in the app.</string>
     <string name="widget_no_posts">No posts</string>
+
+    <plurals name="widget_bookmark_posts">
+        <item quantity="zero">Bookmarks</item>
+        <item quantity="one">Bookmarks (%1$d post)</item>
+        <item quantity="other">Bookmarks (%1$d posts)</item>
+    </plurals>
+    <string name="widget_bookmarks_no_posts">No bookmarks</string>
+    <string name="widget_unread_count_title">Unread</string>
+    <string name="widget_stats_total_read">Total Read</string>
+    <string name="widget_stats_daily_average">Daily Avg</string>
+    <string name="widget_reading_time">%1$dm</string>
+
+    <string name="unit_seconds">&lt;1m</string>
+    <string name="unit_minutes">%1$dm</string>
+    <string name="unit_hours">%1$dh</string>
+    <string name="unit_days">%1$dd</string>
+
+    <string name="month_jan">Jan</string>
+    <string name="month_feb">Feb</string>
+    <string name="month_mar">Mar</string>
+    <string name="month_apr">Apr</string>
+    <string name="month_may">May</string>
+    <string name="month_jun">Jun</string>
+    <string name="month_jul">Jul</string>
+    <string name="month_aug">Aug</string>
+    <string name="month_sep">Sep</string>
+    <string name="month_oct">Oct</string>
+    <string name="month_nov">Nov</string>
+    <string name="month_dec">Dec</string>
 
     <plurals name="notification_new_articles_title">
       <item quantity="one">You have a unread article today</item>

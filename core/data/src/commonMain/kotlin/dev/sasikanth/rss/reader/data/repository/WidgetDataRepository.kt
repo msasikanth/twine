@@ -23,23 +23,27 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.model.local.PostFlag
+import dev.sasikanth.rss.reader.core.model.local.ReadingStatistics
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.WidgetPost
 import dev.sasikanth.rss.reader.data.database.PostQueries
+import dev.sasikanth.rss.reader.data.database.ReadingHistoryQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.collections.Set
 import kotlin.time.Clock
-import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
 class WidgetDataRepository(
   private val postQueries: PostQueries,
+  private val readingHistoryQueries: ReadingHistoryQueries,
   private val dispatchersProvider: DispatchersProvider,
 ) {
 
@@ -67,8 +71,6 @@ class WidgetDataRepository(
   }
 
   fun unreadPosts(numberOfPosts: Int): Flow<List<WidgetPost>> {
-    val featuredPostsAfter = Clock.System.now().minus(24.hours)
-
     return postQueries
       .widgetUnreadPosts(
         numberOfPosts = numberOfPosts.toLong(),
@@ -91,7 +93,7 @@ class WidgetDataRepository(
           _: String,
           _: Boolean,
           _: Boolean,
-          _: Long?,
+          feedContentReadingTime: Long?,
           _: Long?,
           _: Long? ->
           WidgetPost(
@@ -102,6 +104,7 @@ class WidgetDataRepository(
             postedOn = date,
             feedName = feedName,
             feedIcon = feedIcon,
+            readingTimeEstimate = feedContentReadingTime?.toInt() ?: 0,
           )
         },
       )
@@ -133,7 +136,7 @@ class WidgetDataRepository(
             _: String,
             _: Boolean,
             _: Boolean,
-            _: Long?,
+            feedContentReadingTime: Long?,
             _: Long?,
             _: Long? ->
             WidgetPost(
@@ -144,6 +147,7 @@ class WidgetDataRepository(
               postedOn = date,
               feedName = feedName,
               feedIcon = feedIcon,
+              readingTimeEstimate = feedContentReadingTime?.toInt() ?: 0,
             )
           },
         )
@@ -207,5 +211,138 @@ class WidgetDataRepository(
         )
       },
     )
+  }
+
+  suspend fun bookmarkPostsCountBlocking(): Long {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.widgetBookmarkPostsCount().executeAsOne()
+    }
+  }
+
+  suspend fun bookmarkPostsBlocking(numberOfPosts: Int): List<WidgetPost> {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries
+        .widgetBookmarkPosts(
+          numberOfPosts = numberOfPosts.toLong(),
+          offset = 0,
+          mapper = {
+            id: String,
+            _: String,
+            title: String,
+            description: String,
+            imageUrl: String?,
+            _: String?,
+            date: Instant,
+            _: Instant,
+            _: String,
+            _: String?,
+            _: Set<PostFlag>,
+            _: String?,
+            feedName: String,
+            feedIcon: String,
+            _: String,
+            _: Boolean,
+            _: Boolean,
+            feedContentReadingTime: Long?,
+            _: Long?,
+            _: Long? ->
+            WidgetPost(
+              id = id,
+              title = title,
+              description = description,
+              image = imageUrl,
+              postedOn = date,
+              feedName = feedName,
+              feedIcon = feedIcon,
+              readingTimeEstimate = feedContentReadingTime?.toInt() ?: 0,
+            )
+          },
+        )
+        .executeAsList()
+    }
+  }
+
+  fun bookmarkPostsPager(): PagingSource<Int, ResolvedPost> {
+    return QueryPagingSource(
+      countQuery = postQueries.widgetBookmarkPostsCount(),
+      transacter = postQueries,
+      context = dispatchersProvider.databaseRead,
+      queryProvider = { limit, offset ->
+        postQueries.widgetBookmarkPosts(
+          numberOfPosts = limit,
+          offset = offset,
+          mapper = {
+            id,
+            sourceId,
+            title,
+            description,
+            imageUrl,
+            audioUrl,
+            date,
+            createdAt,
+            link,
+            commentsLink,
+            flags,
+            remoteId,
+            feedName,
+            feedIcon,
+            feedHomepageLink,
+            alwaysFetchSourceArticle,
+            showFeedFavIcon: Boolean,
+            feedContentReadingTime: Long?,
+            articleContentReadingTime: Long?,
+            seedColor: Long? ->
+            ResolvedPost(
+              id = id,
+              sourceId = sourceId,
+              title = title,
+              description = description,
+              imageUrl = imageUrl,
+              audioUrl = audioUrl,
+              date = date,
+              createdAt = createdAt,
+              link = link,
+              commentsLink = commentsLink,
+              flags = flags,
+              feedName = feedName,
+              feedIcon = feedIcon,
+              feedHomepageLink = feedHomepageLink,
+              alwaysFetchFullArticle = alwaysFetchSourceArticle,
+              showFeedFavIcon = showFeedFavIcon,
+              feedContentReadingTime = feedContentReadingTime?.toInt(),
+              articleContentReadingTime = articleContentReadingTime?.toInt(),
+              seedColor = seedColor?.toInt(),
+              remoteId = remoteId,
+            )
+          },
+        )
+      },
+    )
+  }
+
+  suspend fun statsBlocking(): ReadingStatistics {
+    return withContext(dispatchersProvider.databaseRead) {
+      val totalReadCount = readingHistoryQueries.totalReadPostsCount().executeAsOne()
+      val firstReadingDate =
+        readingHistoryQueries.firstReadingDate().executeAsOneOrNull()?.firstReadingDate
+      val dailyAverage =
+        if (firstReadingDate != null) {
+          val today =
+            Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toEpochDays()
+          val firstDay =
+            firstReadingDate.toLocalDateTime(TimeZone.currentSystemDefault()).date.toEpochDays()
+          val daysSinceFirstReading = (today - firstDay) + 1
+          (totalReadCount / daysSinceFirstReading).toInt()
+        } else {
+          0
+        }
+
+      ReadingStatistics(
+        totalReadCount = totalReadCount,
+        dailyAverage = dailyAverage,
+        topFeeds = kotlinx.collections.immutable.persistentListOf(),
+        readingTrends = kotlinx.collections.immutable.persistentListOf(),
+      )
+    }
   }
 }

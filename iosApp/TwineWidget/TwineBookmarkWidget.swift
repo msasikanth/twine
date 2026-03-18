@@ -1,16 +1,17 @@
 //
-//  TwineWidgetEntryView.swift
+//  TwineBookmarkWidget.swift
 //  iosApp
 //
-//  Created by Sasikanth Miriyampalli on 30/06/25.
-//  Copyright © 2025 orgName. All rights reserved.
+//  Created by Sasikanth Miriyampalli on 18/03/26.
+//  Copyright © 2026 orgName. All rights reserved.
 //
+
 import SwiftUI
 import WidgetKit
 import shared
 
-struct TwineUnreadWidgetEntryView : View {
-    var entry: Provider.Entry
+struct TwineBookmarkWidgetEntryView : View {
+    var entry: BookmarkPostsEntry
     
     private let formatter: RelativeDateTimeFormatter = {
         let formatter = RelativeDateTimeFormatter()
@@ -23,14 +24,14 @@ struct TwineUnreadWidgetEntryView : View {
             if entry.posts.isEmpty {
                 noPosts
             } else {
-                unreadPostsView
+                bookmarkPostsView
             }
         } else {
             twinePremium
         }
     }
     
-    var unreadPostsView: some View {
+    var bookmarkPostsView: some View {
         VStack(alignment: .leading) {
             ForEach(entry.posts.indices, id: \.self) { index in
                 let post = entry.posts[index]
@@ -97,16 +98,6 @@ struct TwineUnreadWidgetEntryView : View {
                 }
             }
             
-            let morePostsCount = entry.count - entry.posts.count
-            if morePostsCount > 0 {
-                Text(String(localized: "widget_unread_remaining \(morePostsCount)"))
-                    .foregroundColor(.blue)
-                    .font(.footnote)
-                    .padding(.top, 8)
-                    .padding(.horizontal, 16)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-            }
-            
             Spacer(minLength: 0)
         }
     }
@@ -121,14 +112,14 @@ struct TwineUnreadWidgetEntryView : View {
     
     var noPosts: some View {
         VStack {
-            Text("unread_no_posts")
+            Text("bookmarks_no_posts")
                 .font(.body)
                 .multilineTextAlignment(.center)
         }.frame(maxHeight: .infinity, alignment: .center)
     }
     
     private func createDeepLink(postIndex: Int, postId: String) -> URL {
-        let fromScreenType = "dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.UnreadWidget"
+        let fromScreenType = "dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Bookmarks"
         let json = "{\"postIndex\":\(postIndex),\"postId\":\"\(postId)\",\"fromScreen\":{\"type\":\"\(fromScreenType)\"}}"
         let encodedJson = json.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         let urlString = "twine://reader/\(encodedJson)"
@@ -136,28 +127,100 @@ struct TwineUnreadWidgetEntryView : View {
     }
 }
 
-struct TwineUnreadWidget: Widget {
-    let kind: String = "TwineUnreadWidget"
+struct TwineBookmarkWidget: Widget {
+    let kind: String = "TwineBookmarkWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: Provider()) { entry in
+        StaticConfiguration(kind: kind, provider: BookmarkProvider()) { entry in
             if #available(iOS 17.0, *) {
-                TwineUnreadWidgetEntryView(entry: entry)
+                TwineBookmarkWidgetEntryView(entry: entry)
                     .containerBackground(.fill.tertiary, for: .widget)
             } else {
-                TwineUnreadWidgetEntryView(entry: entry)
+                TwineBookmarkWidgetEntryView(entry: entry)
                     .padding()
                     .background()
             }
         }
-        .configurationDisplayName(String(localized: "widget_name"))
+        .configurationDisplayName(String(localized: "widget_bookmarks_name"))
         .supportedFamilies([.systemMedium, .systemLarge])
     }
 }
 
-struct UnreadPostsEntry: TimelineEntry {
+struct BookmarkPostsEntry: TimelineEntry {
     let date: Date
     let count: Int
     let posts: [ModelWidgetPost]
     let isSubscribed: Bool
+}
+
+struct BookmarkProvider: TimelineProvider {
+
+    let component = InjectApplicationComponent(uiViewControllerProvider: {
+        UIViewController()
+    })
+    
+    init() {
+        component.initializers
+            .compactMap { ($0 as! any Initializer) }
+            .forEach { initializer in
+                initializer.initialize()
+            }
+    }
+    
+    func placeholder(in context: Context) -> BookmarkPostsEntry {
+        BookmarkPostsEntry(date: Date(), count: 0, posts: [], isSubscribed: true)
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (BookmarkPostsEntry) -> ()) {
+        Task {
+            let currentDate = Date()
+            let entry = await makeEntry(widgetFamily: context.family, date: currentDate)
+            
+            if entry == nil {
+                return
+            }
+            
+            completion(entry!)
+        }
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<BookmarkPostsEntry>) -> ()) {
+        Task {
+            let currentDate = Date()
+            let entry = await makeEntry(widgetFamily: context.family, date: currentDate)
+            if entry == nil {
+                return
+            }
+            
+            let widgetUpdateDate = Calendar.current.date(byAdding: .hour, value: 1, to: currentDate)
+
+            let timeline = Timeline(entries: [entry!], policy: .after(widgetUpdateDate!))
+            completion(timeline)
+        
+        }
+    }
+    
+    private func makeEntry(widgetFamily: WidgetFamily, date: Date) async -> BookmarkPostsEntry? {
+        do {
+            let numberOfPosts: Int
+            switch widgetFamily {
+            case .systemSmall:
+                numberOfPosts = 1
+            case .systemMedium:
+                numberOfPosts = 2
+            default:
+                numberOfPosts = 4
+            }
+            let repository = component.widgetDataRepository
+            let bookmarkPostsCount = try await repository.bookmarkPostsCountBlocking()
+            let bookmarkPosts = try await repository.bookmarkPostsBlocking(numberOfPosts: Int32(numberOfPosts))
+            let isSubscribed = try await component.billingHandler.customerResult() is SubscriptionResultSubscribed
+            
+            let currentDate = Date()
+            return BookmarkPostsEntry(date: currentDate, count: Int(truncating: bookmarkPostsCount), posts: bookmarkPosts, isSubscribed: isSubscribed)
+        } catch {
+            print("Failed to create entry: \(error)")
+            return nil
+        }
+    }
 }

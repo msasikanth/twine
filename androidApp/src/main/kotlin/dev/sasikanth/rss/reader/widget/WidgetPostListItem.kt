@@ -58,7 +58,10 @@ import coil3.toBitmap
 import dev.sasikanth.rss.reader.R
 import dev.sasikanth.rss.reader.core.model.local.WidgetPost
 import dev.sasikanth.rss.reader.utils.Constants
-import dev.sasikanth.rss.reader.utils.formatRelativeTime
+import kotlin.time.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun WidgetPostListItem(
@@ -81,22 +84,12 @@ fun WidgetPostListItem(
         modifier = GlanceModifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        Column(modifier = GlanceModifier.defaultWeight()) {
+        Column(modifier = GlanceModifier.defaultWeight().padding(vertical = 4.dp)) {
           Text(
-            text = post.title ?: context.getString(R.string.widget_no_title),
+            text = post.title ?: post.description ?: context.getString(R.string.widget_no_title),
             maxLines = 2,
-            style = TextStyle(fontSize = 14.sp, color = GlanceTheme.colors.onSurface),
+            style = TextStyle(fontSize = 16.sp, color = GlanceTheme.colors.onSurface),
           )
-
-          Spacer(GlanceModifier.height(4.dp))
-
-          Text(
-            text = post.description ?: context.getString(R.string.widget_no_title),
-            maxLines = 3,
-            style = TextStyle(fontSize = 12.sp, color = GlanceTheme.colors.onSurfaceVariant),
-          )
-
-          Spacer(GlanceModifier.height(12.dp))
         }
 
         var postImage by remember(post.image) { mutableStateOf<Bitmap?>(null) }
@@ -110,42 +103,29 @@ fun WidgetPostListItem(
             provider = ImageProvider(postImage!!),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = GlanceModifier.width(80.dp).height(80.dp).cornerRadius(16.dp),
+            modifier = GlanceModifier.width(48.dp).height(48.dp).cornerRadius(12.dp),
           )
         }
       }
 
-      Row(
-        modifier = GlanceModifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        var feedImage by remember(post.image) { mutableStateOf<Bitmap?>(null) }
+      Spacer(GlanceModifier.height(4.dp))
 
-        LaunchedEffect(post.image) { feedImage = context.getImage(url = post.feedIcon) }
+      val metadata = buildString {
+        append(post.feedName.orEmpty())
+        append(" ${Constants.BULLET_POINT} ")
+        append(context.formatRelativeTime(post.postedOn))
 
-        if (feedImage != null) {
-          Image(
-            provider = ImageProvider(feedImage!!),
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
-            modifier = GlanceModifier.size(16.dp).cornerRadius(4.dp),
-          )
-
-          Spacer(GlanceModifier.width(8.dp))
-        } else {
-          // TODO: Placeholder icon?
+        if (post.readingTimeEstimate > 0) {
+          append(" ${Constants.BULLET_POINT} ")
+          append(context.getString(R.string.widget_reading_time, post.readingTimeEstimate))
         }
-
-        Text(
-          modifier = GlanceModifier.defaultWeight(),
-          text =
-            post.feedName.orEmpty() +
-              " ${Constants.BULLET_POINT} " +
-              post.postedOn.formatRelativeTime(),
-          maxLines = 1,
-          style = TextStyle(fontSize = 12.sp, color = GlanceTheme.colors.onSurfaceVariant),
-        )
       }
+
+      Text(
+        text = metadata,
+        maxLines = 1,
+        style = TextStyle(fontSize = 12.sp, color = GlanceTheme.colors.onSurfaceVariant),
+      )
     }
 
     if (showDivider) {
@@ -175,5 +155,39 @@ private suspend fun Context.getImage(url: String?, force: Boolean = false): Bitm
   return when (val result = imageLoader.execute(request)) {
     is ErrorResult -> null
     is SuccessResult -> result.image.toBitmap()
+  }
+}
+
+private fun Context.formatRelativeTime(instant: Instant): String {
+  val now = Clock.System.now()
+  val duration = now - instant
+  val seconds = duration.inWholeSeconds
+  val days = duration.inWholeDays
+
+  return when {
+    seconds < 60 -> getString(R.string.unit_seconds)
+    seconds < 3600 -> getString(R.string.unit_minutes, duration.inWholeMinutes)
+    seconds < 86400 -> getString(R.string.unit_hours, duration.inWholeHours)
+    days < 7 -> getString(R.string.unit_days, days)
+    else -> {
+      val monthNames =
+        listOf(
+          getString(R.string.month_jan),
+          getString(R.string.month_feb),
+          getString(R.string.month_mar),
+          getString(R.string.month_apr),
+          getString(R.string.month_may),
+          getString(R.string.month_jun),
+          getString(R.string.month_jul),
+          getString(R.string.month_aug),
+          getString(R.string.month_sep),
+          getString(R.string.month_oct),
+          getString(R.string.month_nov),
+          getString(R.string.month_dec),
+        )
+      val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+      val monthName = monthNames[localDateTime.monthNumber - 1]
+      "$monthName ${localDateTime.dayOfMonth}, ${localDateTime.year}"
+    }
   }
 }

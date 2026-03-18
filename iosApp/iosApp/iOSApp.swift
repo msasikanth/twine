@@ -1,6 +1,7 @@
 import SwiftUI
 import shared
 import BackgroundTasks
+import WidgetKit
 
 @main
 struct iOSApp: App {
@@ -21,6 +22,8 @@ struct iOSApp: App {
         }
         .onChange(of: scenePhase) {
             if scenePhase == .background {
+                WidgetCenter.shared.reloadAllTimelines()
+
                 Task.detached(priority: .background) {
                     print("Twine: App entered background")
                     

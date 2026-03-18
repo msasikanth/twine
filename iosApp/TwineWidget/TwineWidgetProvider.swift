@@ -60,6 +60,8 @@ struct Provider: TimelineProvider {
         do {
             let numberOfPosts: Int
             switch widgetFamily {
+            case .systemSmall:
+                numberOfPosts = 1
             case .systemMedium:
                 numberOfPosts = 2
             default:
@@ -69,10 +71,10 @@ struct Provider: TimelineProvider {
             let unreadPostsCount = try await repository.unreadPostsCountBlocking()
             let unreadPosts = try await repository.unreadPostsBlocking(numberOfPosts: Int32(numberOfPosts))
             let isSubscribed = try await component.billingHandler.customerResult() is SubscriptionResultSubscribed
-            
+
             let currentDate = Date()
-            return UnreadPostsEntry(date: currentDate, count: unreadPostsCount.intValue, posts: unreadPosts, isSubscribed: isSubscribed)
-        } catch {
+            return UnreadPostsEntry(date: currentDate, count: Int(unreadPostsCount), posts: unreadPosts, isSubscribed: isSubscribed)
+            } catch {
             print("Failed to create entry: \(error)")
             return nil
         }

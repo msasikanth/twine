@@ -104,6 +104,11 @@ class MainActivity : ComponentActivity() {
     intent.data?.let { ExternalUriHandler.onNewUri(it.toString()) }
   }
 
+  override fun onPause() {
+    super.onPause()
+    dev.sasikanth.rss.reader.widget.WidgetUpdater.update(this)
+  }
+
   override fun onDestroy() {
     PermissionRequestBridge.unregister()
     super.onDestroy()
