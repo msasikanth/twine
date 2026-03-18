@@ -151,7 +151,7 @@ struct TwineUnreadWidget: Widget {
             }
         }
         .configurationDisplayName(String(localized: "widget_name"))
-        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+        .supportedFamilies([.systemMedium, .systemLarge])
     }
 }
 
