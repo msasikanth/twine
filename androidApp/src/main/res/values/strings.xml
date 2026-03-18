@@ -23,6 +23,10 @@
         <item quantity="one">Unread (%1$d post)</item>
         <item quantity="other">Unread (%1$d posts)</item>
     </plurals>
+    <string name="widget_unread_name">Unread posts</string>
+    <string name="widget_bookmarks_name">Bookmarks</string>
+    <string name="widget_unread_count_name">Unread count</string>
+    <string name="widget_stats_name">Reading statistics</string>
     <string name="widget_no_title">No title</string>
     <string name="widget_no_description">No description</string>
     <string name="widget_see_more">See more</string>
