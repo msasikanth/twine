@@ -64,7 +64,7 @@ struct TwineUnreadWidgetEntryView : View {
                                     Text("bullet_separator")
                                         .font(.caption2)
                                     
-                                    Text("reading_time_estimate \(Int(post.readingTimeEstimate))")
+                                    Text(String(localized: "reading_time_estimate \(Int(post.readingTimeEstimate))"))
                                         .lineLimit(1)
                                         .font(.caption2)
                                 }
@@ -97,9 +97,9 @@ struct TwineUnreadWidgetEntryView : View {
                 }
             }
             
-            let morePostsCount = Int(entry.count) - entry.posts.count
+            let morePostsCount = entry.count - entry.posts.count
             if morePostsCount > 0 {
-                Text("widget_unread_remaining \(morePostsCount)")
+                Text(String(localized: "widget_unread_remaining \(morePostsCount)"))
                     .foregroundColor(.blue)
                     .font(.footnote)
                     .padding(.top, 8)
@@ -160,82 +160,4 @@ struct UnreadPostsEntry: TimelineEntry {
     let count: Int
     let posts: [ModelWidgetPost]
     let isSubscribed: Bool
-}
-
-struct Provider: TimelineProvider {
-
-    let component = InjectApplicationComponent(uiViewControllerProvider: {
-        UIViewController()
-    })
-    
-    init() {
-        component.initializers
-            .compactMap { ($0 as! any Initializer) }
-            .forEach { initializer in
-                initializer.initialize()
-            }
-    }
-    
-    func placeholder(in context: Context) -> UnreadPostsEntry {
-        UnreadPostsEntry(date: Date(), count: 0, posts: [], isSubscribed: true)
-    }
-
-    func getSnapshot(in context: Context, completion: @escaping (UnreadPostsEntry) -> ()) {
-        Task {
-            let currentDate = Date()
-            let entry = await makeEntry(widgetFamily: context.family, date: currentDate)
-            
-            if entry == nil {
-                return
-            }
-            
-            completion(entry!)
-        }
-    }
-
-    func getTimeline(in context: Context, completion: @escaping (Timeline<UnreadPostsEntry>) -> ()) {
-        Task {
-            let currentDate = Date()
-            let entry = await makeEntry(widgetFamily: context.family, date: currentDate)
-            if entry == nil {
-                return
-            }
-            
-            let widgetUpdateDate = Calendar.current.date(byAdding: .hour, value: 1, to: currentDate)
-
-            let timeline = Timeline(entries: [entry!], policy: .after(widgetUpdateDate!))
-            completion(timeline)
-        
-        }
-    }
-    
-    private func makeEntry(widgetFamily: WidgetFamily, date: Date) async -> UnreadPostsEntry? {
-        do {
-            let numberOfPosts: Int
-            switch widgetFamily {
-            case .systemSmall:
-                numberOfPosts = 1
-            case .systemMedium:
-                numberOfPosts = 2
-            default:
-                numberOfPosts = 4
-            }
-            let repository = component.widgetDataRepository
-            let unreadPostsCount = try await repository.unreadPostsCountBlocking()
-            let unreadPosts = try await repository.unreadPostsBlocking(numberOfPosts: Int32(numberOfPosts))
-            let isSubscribed = try await component.billingHandler.customerResult() is SubscriptionResultSubscribed
-            
-            let currentDate = Date()
-            return UnreadPostsEntry(date: currentDate, count: Int(unreadPostsCount), posts: unreadPosts, isSubscribed: isSubscribed)
-        } catch {
-            print("Failed to create entry: \(error)")
-            return nil
-        }
-    }
-}
-
-#Preview(as: .systemMedium) {
-    TwineUnreadWidget()
-} timeline: {
-    UnreadPostsEntry(date: .now, count: 0, posts: [], isSubscribed: true)
 }

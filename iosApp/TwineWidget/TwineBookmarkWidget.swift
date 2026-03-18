@@ -65,7 +65,7 @@ struct TwineBookmarkWidgetEntryView : View {
                                     Text("bullet_separator")
                                         .font(.caption2)
                                     
-                                    Text("reading_time_estimate \(Int(post.readingTimeEstimate))")
+                                    Text(String(localized: "reading_time_estimate \(Int(post.readingTimeEstimate))"))
                                         .lineLimit(1)
                                         .font(.caption2)
                                 }
