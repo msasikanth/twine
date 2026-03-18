@@ -60,6 +60,8 @@ struct Provider: TimelineProvider {
         do {
             let numberOfPosts: Int
             switch widgetFamily {
+            case .systemSmall:
+                numberOfPosts = 1
             case .systemMedium:
                 numberOfPosts = 2
             default:
