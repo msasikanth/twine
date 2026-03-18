@@ -64,6 +64,7 @@ import dev.sasikanth.rss.reader.core.model.local.WidgetPost
 import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 
 class TwineBookmarkWidget : GlanceAppWidget() {
 
@@ -86,14 +87,12 @@ class TwineBookmarkWidget : GlanceAppWidget() {
         LaunchedEffect(Unit) { isSubscribed = billingHandler.isSubscribed() }
 
         when (isSubscribed) {
-          true -> {
+          true,
+          null -> {
             WidgetContent(widgetDataRepository = widgetDataRepository, widgetId = widgetId)
           }
           false -> {
             RequireTwinePremium()
-          }
-          null -> {
-            // no-op
           }
         }
       }
@@ -103,8 +102,22 @@ class TwineBookmarkWidget : GlanceAppWidget() {
   @Composable
   private fun WidgetContent(widgetDataRepository: WidgetDataRepository, widgetId: Int) {
     val context = LocalContext.current
-    var bookmarkCount by remember { mutableStateOf(0L) }
-    var bookmarkPosts by remember { mutableStateOf(emptyList<WidgetPost>()) }
+    var bookmarkCount by remember { mutableStateOf(1L) }
+    var bookmarkPosts by remember {
+      mutableStateOf(
+        listOf(
+          WidgetPost(
+            id = "preview",
+            title = "Widget Preview",
+            description = "This is a preview of your bookmarked posts.",
+            image = null,
+            postedOn = kotlin.time.Clock.System.now(),
+            feedName = "Twine",
+            feedIcon = null,
+          )
+        )
+      )
+    }
 
     LaunchedEffect(Unit) {
       bookmarkCount = widgetDataRepository.bookmarkPostsCountBlocking()
