@@ -45,7 +45,7 @@ internal val settingsItemHorizontalPadding: Dp
 internal fun SettingsDivider(horizontalInsets: Dp = 0.dp) {
   HorizontalDivider(
     modifier = Modifier.padding(vertical = 8.dp, horizontal = horizontalInsets),
-    color = dev.sasikanth.rss.reader.ui.AppTheme.colorScheme.outlineVariant,
+    color = AppTheme.colorScheme.outlineVariant,
   )
 }
 

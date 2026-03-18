@@ -60,7 +60,7 @@ internal fun AboutItem(onClick: () -> Unit) {
         )
         Text(
           stringResource(Res.string.settingsAboutSubtitle),
-          style = MaterialTheme.typography.bodySmall,
+          style = MaterialTheme.typography.bodyMedium,
           color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }

@@ -133,7 +133,7 @@ internal fun PostListItem(
       Column(modifier = Modifier.weight(1f)) {
         Text(
           modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
-          style = MaterialTheme.typography.titleSmall,
+          style = MaterialTheme.typography.titleMedium,
           text = item.title.ifBlank { item.description },
           color = AppTheme.colorScheme.onSurface,
           maxLines = 2,
@@ -145,7 +145,7 @@ internal fun PostListItem(
 
           Text(
             modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium,
             text = item.description,
             color = AppTheme.colorScheme.onSurfaceVariant,
             maxLines = 2,
@@ -231,7 +231,7 @@ internal fun SimplePostListItem(
       Column(modifier = Modifier.padding(vertical = 4.dp).weight(1f)) {
         Text(
           modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
-          style = MaterialTheme.typography.titleSmall,
+          style = MaterialTheme.typography.titleMedium,
           text = item.title.ifBlank { item.description },
           color = AppTheme.colorScheme.onSurface,
           maxLines = 2,
@@ -338,7 +338,7 @@ internal fun CompactPostListItem(
 
     Text(
       text = item.title.ifBlank { item.description },
-      style = MaterialTheme.typography.titleSmall,
+      style = MaterialTheme.typography.titleMedium,
       color = AppTheme.colorScheme.onSurface,
       maxLines = 2,
       overflow = TextOverflow.Ellipsis,

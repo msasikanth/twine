@@ -52,7 +52,7 @@ fun SettingItem(
         if (subtitle != null) {
           Text(
             text = subtitle,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium,
             color = AppTheme.colorScheme.onSurfaceVariant,
           )
         }

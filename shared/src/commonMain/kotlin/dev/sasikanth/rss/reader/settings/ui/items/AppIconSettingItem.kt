@@ -101,7 +101,7 @@ internal fun AppIconSettingItem(
 
       Text(
         text = stringResource(Res.string.settingsAppIconSubtitle),
-        style = MaterialTheme.typography.bodySmall,
+        style = MaterialTheme.typography.bodyMedium,
         color = AppTheme.colorScheme.onSurfaceVariant,
       )
     }
