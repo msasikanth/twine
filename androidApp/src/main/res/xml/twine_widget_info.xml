@@ -20,8 +20,8 @@
     android:updatePeriodMillis="1800000"
     android:resizeMode="horizontal|vertical"
     android:targetCellWidth="4"
-    android:targetCellHeight="3"
-    android:minWidth="320dp"
-    android:minHeight="320dp"
+    android:targetCellHeight="2"
+    android:minWidth="250dp"
+    android:minHeight="110dp"
     android:widgetCategory="home_screen">
 </appwidget-provider>

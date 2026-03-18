@@ -62,9 +62,11 @@ import dev.sasikanth.rss.reader.MainActivity
 import dev.sasikanth.rss.reader.R
 import dev.sasikanth.rss.reader.ReaderApplication
 import dev.sasikanth.rss.reader.app.Screen
+import dev.sasikanth.rss.reader.core.model.local.WidgetPost
 import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 
 class TwineUnreadWidget : GlanceAppWidget() {
 
@@ -87,14 +89,12 @@ class TwineUnreadWidget : GlanceAppWidget() {
         LaunchedEffect(Unit) { isSubscribed = billingHandler.isSubscribed() }
 
         when (isSubscribed) {
-          true -> {
+          true,
+          null -> {
             WidgetContent(widgetDataRepository = widgetDataRepository, widgetId = widgetId)
           }
           false -> {
             RequireTwinePremium()
-          }
-          null -> {
-            // no-op
           }
         }
       }
@@ -105,7 +105,7 @@ class TwineUnreadWidget : GlanceAppWidget() {
   private fun WidgetContent(widgetDataRepository: WidgetDataRepository, widgetId: Int) {
     val context = LocalContext.current
     val unreadCount by
-      remember { widgetDataRepository.unreadPostsCount }.collectAsState(initial = 0L)
+      remember { widgetDataRepository.unreadPostsCount }.collectAsState(initial = 1L)
 
     Scaffold(
       modifier = GlanceModifier.fillMaxSize().cornerRadius(16.dp),
@@ -114,7 +114,20 @@ class TwineUnreadWidget : GlanceAppWidget() {
     ) {
       val unreadPosts by
         remember { widgetDataRepository.unreadPosts(NUMBER_OF_UNREAD_POSTS_IN_WIDGET) }
-          .collectAsState(initial = emptyList())
+          .collectAsState(
+            initial =
+              listOf(
+                WidgetPost(
+                  id = "preview",
+                  title = "Widget Preview",
+                  description = "This is a preview of your unread posts.",
+                  image = null,
+                  postedOn = kotlin.time.Clock.System.now(),
+                  feedName = "Twine",
+                  feedIcon = null,
+                )
+              )
+          )
 
       if (unreadPosts.isEmpty()) {
         NoPosts()
@@ -220,6 +233,8 @@ class TwineUnreadWidget : GlanceAppWidget() {
       Spacer(GlanceModifier.width(16.dp))
     }
   }
-}
 
-private const val NUMBER_OF_UNREAD_POSTS_IN_WIDGET = 15
+  companion object {
+    private const val NUMBER_OF_UNREAD_POSTS_IN_WIDGET = 15
+  }
+}

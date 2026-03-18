@@ -58,7 +58,7 @@ class TwineUnreadCountWidget : GlanceAppWidget() {
   private fun WidgetContent(widgetDataRepository: WidgetDataRepository) {
     val context = LocalContext.current
     val unreadCount by
-      remember { widgetDataRepository.unreadPostsCount }.collectAsState(initial = 0L)
+      remember { widgetDataRepository.unreadPostsCount }.collectAsState(initial = 1L)
 
     Box(
       modifier =

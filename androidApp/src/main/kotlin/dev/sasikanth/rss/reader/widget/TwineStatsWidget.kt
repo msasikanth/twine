@@ -52,6 +52,7 @@ import dev.sasikanth.rss.reader.R
 import dev.sasikanth.rss.reader.ReaderApplication
 import dev.sasikanth.rss.reader.core.model.local.ReadingStatistics
 import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
+import kotlinx.collections.immutable.persistentListOf
 
 class TwineStatsWidget : GlanceAppWidget() {
 
@@ -65,7 +66,16 @@ class TwineStatsWidget : GlanceAppWidget() {
   @Composable
   private fun WidgetContent(widgetDataRepository: WidgetDataRepository) {
     val context = LocalContext.current
-    var stats by remember { mutableStateOf<ReadingStatistics?>(null) }
+    var stats by remember {
+      mutableStateOf<ReadingStatistics?>(
+        ReadingStatistics(
+          totalReadCount = 100L,
+          dailyAverage = 5,
+          topFeeds = persistentListOf(),
+          readingTrends = persistentListOf(),
+        )
+      )
+    }
 
     LaunchedEffect(Unit) { stats = widgetDataRepository.statsBlocking() }
 
