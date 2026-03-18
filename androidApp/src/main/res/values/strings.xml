@@ -31,6 +31,16 @@
     <string name="widget_required_premium">Widgets are only available for premium users. Please subscribe in the app.</string>
     <string name="widget_no_posts">No posts</string>
 
+    <plurals name="widget_bookmark_posts">
+        <item quantity="zero">Bookmarks</item>
+        <item quantity="one">Bookmarks (%1$d post)</item>
+        <item quantity="other">Bookmarks (%1$d posts)</item>
+    </plurals>
+    <string name="widget_bookmarks_no_posts">No bookmarks</string>
+    <string name="widget_unread_count_title">Unread</string>
+    <string name="widget_stats_total_read">Total Read</string>
+    <string name="widget_stats_daily_average">Daily Avg</string>
+
     <plurals name="notification_new_articles_title">
       <item quantity="one">You have a unread article today</item>
       <item quantity="other">You have %1$d unread articles today</item>
