@@ -109,6 +109,16 @@
         }
       }
     },
+    "reading_time_estimate" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@m"
+          }
+        }
+      }
+    },
     "notification_new_articles_content" : {
       "localizations" : {
         "de" : {

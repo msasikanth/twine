@@ -44,6 +44,7 @@
     <string name="widget_unread_count_title">Unread</string>
     <string name="widget_stats_total_read">Total Read</string>
     <string name="widget_stats_daily_average">Daily Avg</string>
+    <string name="widget_reading_time">%1$dm</string>
 
     <string name="unit_seconds">&lt;1m</string>
     <string name="unit_minutes">%1$dm</string>

@@ -27,4 +27,5 @@ data class WidgetPost(
   val postedOn: Instant,
   val feedName: String?,
   val feedIcon: String?,
+  val readingTimeEstimate: Int,
 )
