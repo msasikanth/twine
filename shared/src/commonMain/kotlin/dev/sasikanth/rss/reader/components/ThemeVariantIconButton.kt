@@ -218,7 +218,7 @@ fun ThemeVariantIconButton(
 
       Text(
         text = themeVariant.name,
-        style = MaterialTheme.typography.bodySmall,
+        style = MaterialTheme.typography.bodyMedium,
         color = AppTheme.colorScheme.onSurfaceVariant,
       )
     }

@@ -17,19 +17,8 @@
 
 package dev.sasikanth.rss.reader.settings.ui.items
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.app.AppInfo
-import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.settingsReportIssue
@@ -37,23 +26,9 @@ import twine.shared.generated.resources.settingsVersion
 
 @Composable
 internal fun ReportIssueSettingItem(appInfo: AppInfo, onClick: () -> Unit) {
-  Box(modifier = Modifier.clickable(onClick = onClick)) {
-    Row(
-      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          stringResource(Res.string.settingsReportIssue),
-          style = MaterialTheme.typography.titleSmall,
-          color = AppTheme.colorScheme.onSurface,
-        )
-        Text(
-          stringResource(Res.string.settingsVersion, appInfo.versionName, appInfo.versionCode),
-          style = MaterialTheme.typography.bodySmall,
-          color = AppTheme.colorScheme.onSurfaceVariant,
-        )
-      }
-    }
-  }
+  SettingItem(
+    title = stringResource(Res.string.settingsReportIssue),
+    subtitle = stringResource(Res.string.settingsVersion, appInfo.versionName, appInfo.versionCode),
+    onClick = onClick,
+  )
 }

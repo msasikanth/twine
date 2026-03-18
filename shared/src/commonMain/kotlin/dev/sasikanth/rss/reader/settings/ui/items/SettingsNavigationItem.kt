@@ -67,7 +67,7 @@ internal fun SettingsNavigationItem(
       Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
         Text(
           title,
-          style = MaterialTheme.typography.titleSmall,
+          style = MaterialTheme.typography.titleMedium,
           fontWeight = FontWeight.Medium,
           color = AppTheme.colorScheme.onSurface,
         )
@@ -75,7 +75,7 @@ internal fun SettingsNavigationItem(
         if (!(subtitle.isNullOrBlank())) {
           Text(
             subtitle,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium,
             color = AppTheme.colorScheme.onSurfaceVariant,
           )
         }

@@ -47,14 +47,14 @@ internal fun BlockedWordsSettingItem(blockedWordsCount: Int, onClick: () -> Unit
     Column(modifier = Modifier.weight(1f)) {
       Text(
         text = stringResource(Res.string.blockedWords),
-        style = MaterialTheme.typography.titleSmall,
+        style = MaterialTheme.typography.titleMedium,
         color = AppTheme.colorScheme.onSurface,
       )
 
       Text(
         text =
           pluralStringResource(Res.plurals.blockedWordsCount, blockedWordsCount, blockedWordsCount),
-        style = MaterialTheme.typography.bodySmall,
+        style = MaterialTheme.typography.bodyMedium,
         color = AppTheme.colorScheme.onSurfaceVariant,
       )
     }
