@@ -49,6 +49,66 @@
       },
       "shouldTranslate" : false
     },
+    "bookmarks_no_posts" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No bookmarked posts"
+          }
+        }
+      }
+    },
+    "widget_bookmarks_name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bookmarked posts"
+          }
+        }
+      }
+    },
+    "widget_unread_count_name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unread count"
+          }
+        }
+      }
+    },
+    "widget_stats_name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stats"
+          }
+        }
+      }
+    },
+    "widget_stats_total_read" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total Read"
+          }
+        }
+      }
+    },
+    "widget_stats_daily_average" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily Average"
+          }
+        }
+      }
+    },
     "notification_new_articles_content" : {
       "localizations" : {
         "de" : {
