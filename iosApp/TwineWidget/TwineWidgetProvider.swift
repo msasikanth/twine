@@ -69,10 +69,11 @@ struct Provider: TimelineProvider {
             let unreadPostsCount = try await repository.unreadPostsCountBlocking()
             let unreadPosts = try await repository.unreadPostsBlocking(numberOfPosts: Int32(numberOfPosts))
             let isSubscribed = try await component.billingHandler.customerResult() is SubscriptionResultSubscribed
-            
+
             let currentDate = Date()
             return UnreadPostsEntry(date: currentDate, count: Int(truncating: unreadPostsCount), posts: unreadPosts, isSubscribed: isSubscribed)
-        } catch {
+            } catch {
+
             print("Failed to create entry: \(error)")
             return nil
         }

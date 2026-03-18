@@ -206,25 +206,6 @@ class TwineUnreadWidget : GlanceAppWidget() {
       )
 
       CircleIconButton(
-        imageProvider = ImageProvider(R.drawable.ic_add),
-        backgroundColor = GlanceTheme.colors.widgetBackground,
-        contentDescription = context.getString(R.string.widget_unread_add),
-        onClick = {
-          val deepLinkIntent =
-            Intent(
-                Intent.ACTION_VIEW,
-                Screen.AddFeed.ROUTE.toUri(),
-                context,
-                MainActivity::class.java,
-              )
-              .apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
-          context.startActivity(deepLinkIntent)
-        },
-      )
-
-      Spacer(GlanceModifier.width(4.dp))
-
-      CircleIconButton(
         imageProvider = ImageProvider(R.drawable.ic_refresh),
         backgroundColor = GlanceTheme.colors.widgetBackground,
         contentDescription = context.getString(R.string.widget_unread_refresh),

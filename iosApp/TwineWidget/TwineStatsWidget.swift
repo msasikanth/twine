@@ -120,7 +120,7 @@ struct StatsProvider: TimelineProvider {
             let statistics = try await repository.statsBlocking()
             
             let currentDate = Date()
-            return StatsEntry(date: currentDate, totalReadCount: Int(statistics.totalReadCount), dailyAverage: Int(statistics.dailyAverage))
+            return StatsEntry(date: currentDate, totalReadCount: Int(truncating: statistics.totalReadCount), dailyAverage: Int(truncating: statistics.dailyAverage))
         } catch {
             print("Failed to create entry: \(error)")
             return nil
