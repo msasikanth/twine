@@ -215,7 +215,7 @@ struct BookmarkProvider: TimelineProvider {
             let isSubscribed = try await component.billingHandler.customerResult() is SubscriptionResultSubscribed
             
             let currentDate = Date()
-            return BookmarkPostsEntry(date: currentDate, count: Int(truncating: bookmarkPostsCount), posts: bookmarkPosts, isSubscribed: isSubscribed)
+            return BookmarkPostsEntry(date: currentDate, count: Int(bookmarkPostsCount), posts: bookmarkPosts, isSubscribed: isSubscribed)
         } catch {
             print("Failed to create entry: \(error)")
             return nil
