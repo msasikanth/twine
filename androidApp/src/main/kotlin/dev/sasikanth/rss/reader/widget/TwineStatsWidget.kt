@@ -120,9 +120,9 @@ class TwineStatsWidget : GlanceAppWidget() {
         text = value,
         style =
           TextStyle(
-            color = GlanceTheme.colors.onSurface,
+            color = GlanceTheme.colors.primary,
             fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
+            fontSize = 32.sp,
           ),
       )
       Text(
