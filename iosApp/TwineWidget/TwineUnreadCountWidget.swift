@@ -103,7 +103,7 @@ struct UnreadCountProvider: TimelineProvider {
             let unreadPostsCount = try await repository.unreadPostsCountBlocking()
             
             let currentDate = Date()
-            return UnreadCountEntry(date: currentDate, count: Int(truncating: unreadPostsCount))
+            return UnreadCountEntry(date: currentDate, count: Int(unreadPostsCount))
         } catch {
             print("Failed to create entry: \(error)")
             return nil
