@@ -17,7 +17,8 @@ struct TwineStatsWidgetEntryView : View {
         HStack(alignment: .center) {
             VStack(alignment: .center) {
                 Text(String(entry.totalReadCount))
-                    .font(.system(size: 32, weight: .bold))
+                    .font(.system(size: 48, weight: .bold))
+                    .foregroundColor(.blue)
                 
                 Text("widget_stats_total_read")
                     .font(.caption)
@@ -29,7 +30,8 @@ struct TwineStatsWidgetEntryView : View {
             
             VStack(alignment: .center) {
                 Text(String(entry.dailyAverage))
-                    .font(.system(size: 32, weight: .bold))
+                    .font(.system(size: 48, weight: .bold))
+                    .foregroundColor(.blue)
                 
                 Text("widget_stats_daily_average")
                     .font(.caption)
