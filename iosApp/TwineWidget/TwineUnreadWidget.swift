@@ -101,6 +101,8 @@ struct TwineUnreadWidgetEntryView : View {
                 .padding(.top, 8)
                 .padding(.horizontal, 16)
                 .frame(maxWidth: .infinity, alignment: .trailing)
+            
+            Spacer(minLength: 0)
         }
     }
     
