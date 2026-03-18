@@ -36,6 +36,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
@@ -270,12 +274,33 @@ internal fun PostActions(
   ) {
     if (!commentsLink.isNullOrBlank()) {
       val commentsLabel = stringResource(Res.string.comments)
-      IconButton(
-        icon = TwineIcons.Comments,
-        contentDescription = commentsLabel,
-        size = IconButtonSize.Small,
-        onClick = onCommentsClick,
-      )
+      TooltipBox(
+        state = rememberTooltipState(),
+        positionProvider =
+          TooltipDefaults.rememberTooltipPositionProvider(
+            positioning = TooltipAnchorPosition.Above
+          ),
+        tooltip = {
+          Box(
+            modifier =
+              Modifier.background(AppTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+                .padding(8.dp)
+          ) {
+            Text(
+              text = commentsLabel,
+              style = MaterialTheme.typography.labelMedium,
+              color = AppTheme.colorScheme.onSurface,
+            )
+          }
+        },
+      ) {
+        IconButton(
+          icon = TwineIcons.Comments,
+          contentDescription = commentsLabel,
+          size = IconButtonSize.Small,
+          onClick = onCommentsClick,
+        )
+      }
     }
 
     val bookmarkLabel =
@@ -284,28 +309,69 @@ internal fun PostActions(
       } else {
         stringResource(Res.string.bookmark)
       }
-    IconButton(
-      icon =
-        if (postBookmarked) {
-          TwineIcons.Bookmarked
-        } else {
-          TwineIcons.Bookmark
-        },
-      contentDescription = bookmarkLabel,
-      size = IconButtonSize.Small,
-      onClick = onBookmarkClick,
-    )
+
+    TooltipBox(
+      state = rememberTooltipState(),
+      positionProvider =
+        TooltipDefaults.rememberTooltipPositionProvider(positioning = TooltipAnchorPosition.Above),
+      tooltip = {
+        Box(
+          modifier =
+            Modifier.background(AppTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+              .padding(8.dp)
+        ) {
+          Text(
+            text = bookmarkLabel,
+            style = MaterialTheme.typography.labelMedium,
+            color = AppTheme.colorScheme.onSurface,
+          )
+        }
+      },
+    ) {
+      IconButton(
+        icon =
+          if (postBookmarked) {
+            TwineIcons.Bookmarked
+          } else {
+            TwineIcons.Bookmark
+          },
+        contentDescription = bookmarkLabel,
+        size = IconButtonSize.Small,
+        onClick = onBookmarkClick,
+      )
+    }
 
     Box {
       val coroutineScope = rememberCoroutineScope()
       val moreMenuOptionsLabel = stringResource(Res.string.moreMenuOptions)
 
-      IconButton(
-        icon = TwineIcons.MoreHorizFilled,
-        contentDescription = moreMenuOptionsLabel,
-        size = IconButtonSize.Small,
+      TooltipBox(
+        state = rememberTooltipState(),
+        positionProvider =
+          TooltipDefaults.rememberTooltipPositionProvider(
+            positioning = TooltipAnchorPosition.Above
+          ),
+        tooltip = {
+          Box(
+            modifier =
+              Modifier.background(AppTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+                .padding(8.dp)
+          ) {
+            Text(
+              text = moreMenuOptionsLabel,
+              style = MaterialTheme.typography.labelMedium,
+              color = AppTheme.colorScheme.onSurface,
+            )
+          }
+        },
       ) {
-        onDropdownChange(true)
+        IconButton(
+          icon = TwineIcons.MoreHorizFilled,
+          contentDescription = moreMenuOptionsLabel,
+          size = IconButtonSize.Small,
+        ) {
+          onDropdownChange(true)
+        }
       }
 
       DropdownMenu(
