@@ -41,34 +41,11 @@ struct TwineBookmarkWidgetEntryView : View {
                 
                 Link(destination: createDeepLink(postIndex: index, postId: post.id)) {
                     HStack(alignment: .center, spacing: 4) {
-                        if let feedIconString = post.feedIcon,
-                           let feedIconURL = URL(string: feedIconString) {
-                            if let feedIconData = try? Data(contentsOf: feedIconURL),
-                               let uiImage = UIImage(data: feedIconData) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: 24, height: 24)
-                                    .cornerRadius(4)
-                                    .clipped()
-                            } else {
-                                Spacer()
-                                    .frame(width: 24, height: 24)
-                                    .background(Color.gray.opacity(0.2))
-                                    .cornerRadius(4)
-                            }
-                        } else {
-                            Spacer()
-                                .frame(width: 24, height: 24)
-                                .background(Color.gray.opacity(0.2))
-                                .cornerRadius(4)
-                        }
-                        
                         VStack(
                             alignment: .leading,
-                            spacing: 8
+                            spacing: 4
                         ) {
-                            Text(post.title ?? String(localized: "unread_widget_no_title"))
+                            Text(post.title ?? post.description_ ?? String(localized: "unread_widget_no_title"))
                                 .lineLimit(2)
                                 .font(.headline)
 
@@ -83,10 +60,36 @@ struct TwineBookmarkWidgetEntryView : View {
                                 Text(formatter.localizedString(for: date, relativeTo: Date()))
                                     .lineLimit(1)
                                     .font(.caption2)
+                                
+                                if (post.readingTimeEstimate > 0) {
+                                    Text("bullet_separator")
+                                        .font(.caption2)
+                                    
+                                    Text(String(localized: "reading_time_estimate \(post.readingTimeEstimate.description)"))
+                                        .lineLimit(1)
+                                        .font(.caption2)
+                                }
                             }
 
-                        }.padding(.horizontal, 16)
+                        }.padding(.trailing, 16)
+                        
+                        Spacer()
+                        
+                        if let imageString = post.image,
+                           let imageURL = URL(string: imageString) {
+                            if let imageData = try? Data(contentsOf: imageURL),
+                               let uiImage = UIImage(data: imageData) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 48, height: 48)
+                                    .cornerRadius(12)
+                                    .clipped()
+                            }
+                        }
                     }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 16)
                 }
                 
                 if (index != entry.posts.count - 1) {
@@ -212,7 +215,7 @@ struct BookmarkProvider: TimelineProvider {
             let isSubscribed = try await component.billingHandler.customerResult() is SubscriptionResultSubscribed
             
             let currentDate = Date()
-            return BookmarkPostsEntry(date: currentDate, count: Int(truncating: bookmarkPostsCount), posts: bookmarkPosts, isSubscribed: isSubscribed)
+            return BookmarkPostsEntry(date: currentDate, count: Int(bookmarkPostsCount), posts: bookmarkPosts, isSubscribed: isSubscribed)
         } catch {
             print("Failed to create entry: \(error)")
             return nil

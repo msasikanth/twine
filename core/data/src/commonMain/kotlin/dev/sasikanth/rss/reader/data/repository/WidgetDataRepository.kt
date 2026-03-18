@@ -93,7 +93,7 @@ class WidgetDataRepository(
           _: String,
           _: Boolean,
           _: Boolean,
-          _: Long?,
+          feedContentReadingTime: Long?,
           _: Long?,
           _: Long? ->
           WidgetPost(
@@ -104,6 +104,7 @@ class WidgetDataRepository(
             postedOn = date,
             feedName = feedName,
             feedIcon = feedIcon,
+            readingTimeEstimate = feedContentReadingTime?.toInt() ?: 0,
           )
         },
       )
@@ -135,7 +136,7 @@ class WidgetDataRepository(
             _: String,
             _: Boolean,
             _: Boolean,
-            _: Long?,
+            feedContentReadingTime: Long?,
             _: Long?,
             _: Long? ->
             WidgetPost(
@@ -146,6 +147,7 @@ class WidgetDataRepository(
               postedOn = date,
               feedName = feedName,
               feedIcon = feedIcon,
+              readingTimeEstimate = feedContentReadingTime?.toInt() ?: 0,
             )
           },
         )
@@ -241,7 +243,7 @@ class WidgetDataRepository(
             _: String,
             _: Boolean,
             _: Boolean,
-            _: Long?,
+            feedContentReadingTime: Long?,
             _: Long?,
             _: Long? ->
             WidgetPost(
@@ -252,6 +254,7 @@ class WidgetDataRepository(
               postedOn = date,
               feedName = feedName,
               feedIcon = feedIcon,
+              readingTimeEstimate = feedContentReadingTime?.toInt() ?: 0,
             )
           },
         )

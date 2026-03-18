@@ -114,6 +114,7 @@ class TwineBookmarkWidget : GlanceAppWidget() {
             postedOn = Clock.System.now(),
             feedName = "Twine",
             feedIcon = null,
+            readingTimeEstimate = 0,
           )
         )
       )
