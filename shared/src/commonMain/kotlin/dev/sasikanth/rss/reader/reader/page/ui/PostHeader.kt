@@ -17,73 +17,39 @@
 
 package dev.sasikanth.rss.reader.reader.page.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.DisableSelection
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.isTraversalGroup
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
+import dev.sasikanth.rss.reader.home.ui.PostActionBar
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
-import dev.sasikanth.rss.reader.resources.icons.Bookmark
-import dev.sasikanth.rss.reader.resources.icons.Bookmarked
-import dev.sasikanth.rss.reader.resources.icons.Comments
-import dev.sasikanth.rss.reader.resources.icons.Share
-import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.resources.icons.VisibilityOff
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
-import dev.sasikanth.rss.reader.util.readerDateTimestamp
-import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.ParallaxAlignment
+import dev.sasikanth.rss.reader.utils.formatRelativeTime
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
-import org.jetbrains.compose.resources.stringResource
-import twine.shared.generated.resources.Res
-import twine.shared.generated.resources.bookmark
-import twine.shared.generated.resources.comments
-import twine.shared.generated.resources.markAsUnRead
-import twine.shared.generated.resources.readingTimeEstimate
-import twine.shared.generated.resources.share
-import twine.shared.generated.resources.unBookmark
 
 @Composable
 internal fun PostHeader(
@@ -130,42 +96,6 @@ internal fun PostHeader(
     }
 
     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-      DisableSelection {
-        Row(
-          modifier = Modifier.padding(top = 20.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Text(
-            text = readerPost.date.readerDateTimestamp(),
-            style = MaterialTheme.typography.bodyMedium,
-            color = AppTheme.colorScheme.outline,
-            maxLines = 1,
-          )
-
-          val readingTimeEstimate =
-            readerPost.articleContentReadingTime?.takeIf { showFullArticle }
-              ?: readerPost.feedContentReadingTime
-              ?: 0
-
-          if (readingTimeEstimate > 0) {
-            Text(
-              modifier = Modifier.padding(horizontal = 4.dp).clearAndSetSemantics {},
-              style = MaterialTheme.typography.bodyMedium,
-              maxLines = 1,
-              text = Constants.BULLET_POINT,
-              color = AppTheme.colorScheme.outline,
-            )
-
-            Text(
-              text = stringResource(Res.string.readingTimeEstimate, readingTimeEstimate),
-              style = MaterialTheme.typography.bodyMedium,
-              color = AppTheme.colorScheme.outline,
-              maxLines = 1,
-            )
-          }
-        }
-      }
-
       Text(
         modifier =
           Modifier.padding(top = 12.dp).graphicsLayer {
@@ -199,196 +129,36 @@ internal fun PostHeader(
 
       Spacer(Modifier.requiredHeight(12.dp))
 
-      Row(verticalAlignment = Alignment.CenterVertically) {
-        DisableSelection {
-          PostSourcePill(
-            modifier = Modifier.weight(1f).clearAndSetSemantics {},
-            feedName = readerPost.feedName,
-            feedIcon = readerPost.feedIcon,
-            feedHomepageLink = readerPost.feedHomepageLink,
-            showFeedFavIcon = readerPost.showFeedFavIcon,
-            config =
-              PostMetadataConfig(
-                showUnreadIndicator = false,
-                showToggleReadUnreadOption = true,
-                enablePostSource = false,
-              ),
-            onSourceClick = {
-              // no-op
-            },
-          )
-        }
+      DisableSelection {
+        var showDropdown by remember { mutableStateOf(false) }
 
-        PostActions(
+        PostActionBar(
+          feedName = readerPost.feedName,
+          feedIcon = readerPost.feedIcon,
+          feedHomepageLink = readerPost.feedHomepageLink,
+          showFeedFavIcon = readerPost.showFeedFavIcon,
+          postRead = readerPost.read,
+          postRelativeTimestamp = readerPost.date.formatRelativeTime(),
+          postLink = readerPost.link,
           postBookmarked = readerPost.bookmarked,
           commentsLink = readerPost.commentsLink,
-          onCommentsClick = onCommentsClick,
-          onShareClick = onShareClick,
+          postReadingTimeEstimate = readerPost.feedContentReadingTime ?: 0,
           onBookmarkClick = onBookmarkClick,
-          onMarkAsUnread = onMarkAsUnread,
+          onCommentsClick = onCommentsClick,
+          onTogglePostReadClick = onMarkAsUnread,
+          showDropdown = showDropdown,
+          config =
+            PostMetadataConfig(
+              showUnreadIndicator = false,
+              showToggleReadUnreadOption = true,
+              enablePostSource = false,
+            ),
+          onDropdownChange = { showDropdown = it },
+          onSourceClick = {
+            // no-op
+          },
         )
       }
-    }
-  }
-}
-
-@Composable
-internal fun PostSourcePill(
-  feedIcon: String,
-  feedHomepageLink: String,
-  showFeedFavIcon: Boolean,
-  feedName: String,
-  config: PostMetadataConfig,
-  onSourceClick: () -> Unit,
-  modifier: Modifier = Modifier,
-) {
-  Box(modifier = modifier) {
-    val postSourceTextColor =
-      if (config.enablePostSource) {
-        AppTheme.colorScheme.onSurface
-      } else {
-        AppTheme.colorScheme.onSurfaceVariant
-      }
-
-    val translucentStyle = LocalTranslucentStyles.current
-    Row(
-      modifier =
-        Modifier.background(translucentStyle.default.background, RoundedCornerShape(50))
-          .border(
-            1.dp,
-            translucentStyle.default.outline,
-            androidx.compose.foundation.shape.RoundedCornerShape(50),
-          )
-          .clip(androidx.compose.foundation.shape.RoundedCornerShape(50))
-          .clickable(onClick = onSourceClick, enabled = config.enablePostSource)
-          .padding(vertical = 6.dp)
-          .padding(start = 8.dp, end = 12.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      FeedIcon(
-        icon = feedIcon,
-        homepageLink = feedHomepageLink,
-        showFeedFavIcon = showFeedFavIcon,
-        contentDescription = null,
-        modifier = Modifier.requiredSize(16.dp),
-      )
-
-      Spacer(Modifier.requiredWidth(6.dp))
-
-      Text(
-        style = MaterialTheme.typography.labelMedium,
-        maxLines = 1,
-        text = feedName,
-        color = postSourceTextColor,
-        overflow = TextOverflow.Ellipsis,
-      )
-    }
-  }
-}
-
-@Composable
-internal fun PostActions(
-  postBookmarked: Boolean,
-  commentsLink: String?,
-  onCommentsClick: () -> Unit,
-  onShareClick: () -> Unit,
-  onBookmarkClick: () -> Unit,
-  onMarkAsUnread: () -> Unit,
-  modifier: Modifier = Modifier,
-) {
-  Row(modifier = modifier.semantics { isTraversalGroup = true }) {
-    val markAsUnreadLabel = stringResource(Res.string.markAsUnRead)
-    val markAsUnreadIcon = TwineIcons.VisibilityOff
-
-    PostActionButton(
-      label = markAsUnreadLabel,
-      icon = markAsUnreadIcon,
-      iconTint = AppTheme.colorScheme.onSurfaceVariant,
-      onClick = onMarkAsUnread,
-    )
-
-    if (!commentsLink.isNullOrBlank()) {
-      val commentsLabel = stringResource(Res.string.comments)
-      PostActionButton(
-        label = commentsLabel,
-        icon = TwineIcons.Comments,
-        iconTint = AppTheme.colorScheme.onSurfaceVariant,
-        onClick = onCommentsClick,
-      )
-    }
-
-    val sharedLabel = stringResource(Res.string.share)
-    PostActionButton(
-      label = sharedLabel,
-      icon = TwineIcons.Share,
-      iconTint = AppTheme.colorScheme.onSurfaceVariant,
-      onClick = onShareClick,
-    )
-
-    val bookmarkLabel =
-      if (postBookmarked) {
-        stringResource(Res.string.unBookmark)
-      } else {
-        stringResource(Res.string.bookmark)
-      }
-    PostActionButton(
-      label = bookmarkLabel,
-      icon =
-        if (postBookmarked) {
-          TwineIcons.Bookmarked
-        } else {
-          TwineIcons.Bookmark
-        },
-      iconTint =
-        if (postBookmarked) {
-          AppTheme.colorScheme.primary
-        } else {
-          AppTheme.colorScheme.onSurfaceVariant
-        },
-      onClick = onBookmarkClick,
-    )
-  }
-}
-
-@Composable
-internal fun PostActionButton(
-  icon: ImageVector,
-  label: String,
-  modifier: Modifier = Modifier,
-  iconTint: Color = AppTheme.colorScheme.onSurface,
-  onClick: () -> Unit,
-) {
-  TooltipBox(
-    positionProvider =
-      TooltipDefaults.rememberTooltipPositionProvider(positioning = TooltipAnchorPosition.Above),
-    tooltip = {
-      Box(
-        modifier =
-          Modifier.background(AppTheme.colorScheme.surface, RoundedCornerShape(4.dp)).padding(8.dp)
-      ) {
-        Text(text = label)
-      }
-    },
-    state = rememberTooltipState(),
-  ) {
-    Box(
-      modifier =
-        Modifier.requiredSize(40.dp)
-          .clip(MaterialTheme.shapes.small)
-          .clickable(onClick = onClick)
-          .semantics {
-            role = Role.Button
-            contentDescription = label
-          }
-          .then(modifier),
-      contentAlignment = Alignment.Center,
-    ) {
-      Icon(
-        imageVector = icon,
-        contentDescription = null,
-        tint = iconTint,
-        modifier = Modifier.size(20.dp),
-      )
     }
   }
 }
