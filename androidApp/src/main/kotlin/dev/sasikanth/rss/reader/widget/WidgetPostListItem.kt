@@ -58,7 +58,10 @@ import coil3.toBitmap
 import dev.sasikanth.rss.reader.R
 import dev.sasikanth.rss.reader.core.model.local.WidgetPost
 import dev.sasikanth.rss.reader.utils.Constants
-import dev.sasikanth.rss.reader.utils.formatRelativeTime
+import kotlin.time.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun WidgetPostListItem(
@@ -141,7 +144,7 @@ fun WidgetPostListItem(
           text =
             post.feedName.orEmpty() +
               " ${Constants.BULLET_POINT} " +
-              post.postedOn.formatRelativeTime(),
+              context.formatRelativeTime(post.postedOn),
           maxLines = 1,
           style = TextStyle(fontSize = 12.sp, color = GlanceTheme.colors.onSurfaceVariant),
         )
@@ -175,5 +178,39 @@ private suspend fun Context.getImage(url: String?, force: Boolean = false): Bitm
   return when (val result = imageLoader.execute(request)) {
     is ErrorResult -> null
     is SuccessResult -> result.image.toBitmap()
+  }
+}
+
+private fun Context.formatRelativeTime(instant: Instant): String {
+  val now = Clock.System.now()
+  val duration = now - instant
+  val seconds = duration.inWholeSeconds
+  val days = duration.inWholeDays
+
+  return when {
+    seconds < 60 -> getString(R.string.unit_seconds)
+    seconds < 3600 -> getString(R.string.unit_minutes, duration.inWholeMinutes)
+    seconds < 86400 -> getString(R.string.unit_hours, duration.inWholeHours)
+    days < 7 -> getString(R.string.unit_days, days)
+    else -> {
+      val monthNames =
+        listOf(
+          getString(R.string.month_jan),
+          getString(R.string.month_feb),
+          getString(R.string.month_mar),
+          getString(R.string.month_apr),
+          getString(R.string.month_may),
+          getString(R.string.month_jun),
+          getString(R.string.month_jul),
+          getString(R.string.month_aug),
+          getString(R.string.month_sep),
+          getString(R.string.month_oct),
+          getString(R.string.month_nov),
+          getString(R.string.month_dec),
+        )
+      val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+      val monthName = monthNames[localDateTime.monthNumber - 1]
+      "$monthName ${localDateTime.dayOfMonth}, ${localDateTime.year}"
+    }
   }
 }
