@@ -65,8 +65,8 @@ import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.core.model.local.WidgetPost
 import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
+import kotlin.time.Clock
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 
 class TwineUnreadWidget : GlanceAppWidget() {
 
@@ -122,7 +122,7 @@ class TwineUnreadWidget : GlanceAppWidget() {
                   title = "Widget Preview",
                   description = "This is a preview of your unread posts.",
                   image = null,
-                  postedOn = kotlin.time.Clock.System.now(),
+                  postedOn = Clock.System.now(),
                   feedName = "Twine",
                   feedIcon = null,
                 )
