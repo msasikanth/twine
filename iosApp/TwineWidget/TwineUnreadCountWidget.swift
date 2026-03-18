@@ -104,7 +104,8 @@ struct UnreadCountProvider: TimelineProvider {
             
             let currentDate = Date()
             return UnreadCountEntry(date: currentDate, count: Int(truncating: unreadPostsCount))
-        } catch {
+            } catch {
+
             print("Failed to create entry: \(error)")
             return nil
         }
