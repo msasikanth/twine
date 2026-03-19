@@ -23,7 +23,6 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.model.local.PostFlag
-import dev.sasikanth.rss.reader.core.model.local.ReadingStatistics
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.WidgetPost
 import dev.sasikanth.rss.reader.data.database.PostQueries
@@ -31,13 +30,9 @@ import dev.sasikanth.rss.reader.data.database.ReadingHistoryQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.collections.Set
-import kotlin.time.Clock
 import kotlin.time.Instant
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -319,31 +314,5 @@ class WidgetDataRepository(
         )
       },
     )
-  }
-
-  suspend fun statsBlocking(): ReadingStatistics {
-    return withContext(dispatchersProvider.databaseRead) {
-      val totalReadCount = readingHistoryQueries.totalReadPostsCount().executeAsOne()
-      val firstReadingDate =
-        readingHistoryQueries.firstReadingDate().executeAsOneOrNull()?.firstReadingDate
-      val dailyAverage =
-        if (firstReadingDate != null) {
-          val today =
-            Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toEpochDays()
-          val firstDay =
-            firstReadingDate.toLocalDateTime(TimeZone.currentSystemDefault()).date.toEpochDays()
-          val daysSinceFirstReading = (today - firstDay) + 1
-          (totalReadCount / daysSinceFirstReading).toInt()
-        } else {
-          0
-        }
-
-      ReadingStatistics(
-        totalReadCount = totalReadCount,
-        dailyAverage = dailyAverage,
-        topFeeds = persistentListOf(),
-        readingTrends = persistentListOf(),
-      )
-    }
   }
 }

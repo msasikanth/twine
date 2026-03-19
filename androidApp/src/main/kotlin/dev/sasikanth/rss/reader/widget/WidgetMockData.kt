@@ -17,7 +17,6 @@
 
 package dev.sasikanth.rss.reader.widget
 
-import dev.sasikanth.rss.reader.core.model.local.ReadingStatistics
 import dev.sasikanth.rss.reader.core.model.local.WidgetPost
 import kotlin.time.Clock
 import kotlinx.collections.immutable.persistentListOf
@@ -60,13 +59,5 @@ object WidgetMockData {
         feedIcon = null,
         readingTimeEstimate = 8,
       ),
-    )
-
-  val readerStatistics =
-    ReadingStatistics(
-      totalReadCount = 1240,
-      dailyAverage = 12,
-      topFeeds = persistentListOf(),
-      readingTrends = persistentListOf(),
     )
 }
