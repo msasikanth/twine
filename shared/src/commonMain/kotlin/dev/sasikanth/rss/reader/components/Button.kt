@@ -17,7 +17,15 @@
 
 package dev.sasikanth.rss.reader.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -123,13 +131,29 @@ fun TranslucentButton(
         Spacer(Modifier.width(8.dp))
       }
 
-      Text(
-        text = text,
-        style = MaterialTheme.typography.labelLarge,
-        maxLines = 1,
-        overflow = TextOverflow.MiddleEllipsis,
-        color = AppTheme.colorScheme.onSurface,
-      )
+      AnimatedContent(
+        targetState = text,
+        contentAlignment = Alignment.Center,
+        transitionSpec = {
+          (fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+              slideInVertically(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { -it })
+            .togetherWith(
+              fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                slideOutVertically(animationSpec = spring(stiffness = Spring.StiffnessMedium)) {
+                  it
+                }
+            )
+        },
+        label = "ButtonText($text)",
+      ) { text ->
+        Text(
+          text = text,
+          style = MaterialTheme.typography.labelLarge,
+          maxLines = 1,
+          overflow = TextOverflow.MiddleEllipsis,
+          color = AppTheme.colorScheme.onSurface,
+        )
+      }
 
       if (trailingIcon != null) {
         Spacer(Modifier.width(8.dp))
