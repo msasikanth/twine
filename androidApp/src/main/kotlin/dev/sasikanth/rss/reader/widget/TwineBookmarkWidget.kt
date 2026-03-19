@@ -34,7 +34,6 @@ import androidx.glance.GlanceTheme
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.components.Scaffold
@@ -61,9 +60,7 @@ import dev.sasikanth.rss.reader.R
 import dev.sasikanth.rss.reader.ReaderApplication
 import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.core.model.local.WidgetPost
-import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
-import kotlin.time.Clock
 import kotlinx.coroutines.launch
 
 class TwineBookmarkWidget : GlanceAppWidget() {
@@ -77,87 +74,95 @@ class TwineBookmarkWidget : GlanceAppWidget() {
     val billingHandler = applicationComponent.billingHandler
 
     provideContent {
-      val widgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
+      var bookmarkCount by remember { mutableStateOf(1L) }
+      var bookmarkPosts by remember { mutableStateOf(emptyList<WidgetPost>()) }
+
+      LaunchedEffect(Unit) {
+        bookmarkCount = widgetDataRepository.bookmarkPostsCountBlocking()
+        bookmarkPosts = widgetDataRepository.bookmarkPostsBlocking(NUMBER_OF_POSTS_IN_WIDGET)
+      }
+
+      var isSubscribed: Boolean? by remember { mutableStateOf(null) }
+      LaunchedEffect(Unit) { isSubscribed = billingHandler.isSubscribed() }
 
       setSingletonImageLoaderFactory { imageLoader }
 
       GlanceTheme {
-        var isSubscribed: Boolean? by remember { mutableStateOf(null) }
+        WidgetContent(
+          bookmarkCount = bookmarkCount,
+          bookmarkPosts = bookmarkPosts,
+          isSubscribed = isSubscribed,
+        )
+      }
+    }
+  }
 
-        LaunchedEffect(Unit) { isSubscribed = billingHandler.isSubscribed() }
+  override suspend fun providePreview(context: Context, widgetCategory: Int) {
+    val applicationComponent = (context.applicationContext as ReaderApplication).appComponent
+    val imageLoader = applicationComponent.imageLoader
 
-        when (isSubscribed) {
-          true,
-          null -> {
-            WidgetContent(widgetDataRepository = widgetDataRepository, widgetId = widgetId)
-          }
-          false -> {
-            RequireTwinePremium()
-          }
-        }
+    provideContent {
+      setSingletonImageLoaderFactory { imageLoader }
+
+      GlanceTheme {
+        WidgetContent(
+          bookmarkCount = WidgetMockData.posts.size.toLong(),
+          bookmarkPosts = WidgetMockData.posts,
+          isSubscribed = true,
+        )
       }
     }
   }
 
   @Composable
-  private fun WidgetContent(widgetDataRepository: WidgetDataRepository, widgetId: Int) {
+  private fun WidgetContent(
+    bookmarkCount: Long,
+    bookmarkPosts: List<WidgetPost>,
+    isSubscribed: Boolean?,
+  ) {
     val context = LocalContext.current
-    var bookmarkCount by remember { mutableStateOf(1L) }
-    var bookmarkPosts by remember {
-      mutableStateOf(
-        listOf(
-          WidgetPost(
-            id = "preview",
-            title = "Widget Preview",
-            description = "This is a preview of your bookmarked posts.",
-            image = null,
-            postedOn = Clock.System.now(),
-            feedName = "Twine",
-            feedIcon = null,
-            readingTimeEstimate = 0,
-          )
-        )
-      )
-    }
 
-    LaunchedEffect(Unit) {
-      bookmarkCount = widgetDataRepository.bookmarkPostsCountBlocking()
-      bookmarkPosts = widgetDataRepository.bookmarkPostsBlocking(NUMBER_OF_POSTS_IN_WIDGET)
-    }
+    when (isSubscribed) {
+      true,
+      null -> {
+        Scaffold(
+          modifier = GlanceModifier.fillMaxSize().cornerRadius(16.dp),
+          titleBar = { TitleBar(bookmarkPostsCount = bookmarkCount, context = context) },
+          horizontalPadding = 0.dp,
+        ) {
+          if (bookmarkPosts.isEmpty()) {
+            NoBookmarks()
+          } else {
+            LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
+              itemsIndexed(bookmarkPosts) { index, post ->
+                Column {
+                  WidgetPostListItem(
+                    post = post,
+                    showDivider = index < bookmarkPosts.lastIndex,
+                    onClick = {
+                      val readerScreenArgs =
+                        ReaderScreenArgs(
+                          postIndex = index,
+                          postId = post.id,
+                          fromScreen = ReaderScreenArgs.FromScreen.Bookmarks,
+                        )
+                      val uri = Screen.Reader(readerScreenArgs).toRoute().toUri()
 
-    Scaffold(
-      modifier = GlanceModifier.fillMaxSize().cornerRadius(16.dp),
-      titleBar = { TitleBar(bookmarkPostsCount = bookmarkCount, context = context) },
-      horizontalPadding = 0.dp,
-    ) {
-      if (bookmarkPosts.isEmpty()) {
-        NoBookmarks()
-      } else {
-        LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
-          itemsIndexed(bookmarkPosts) { index, post ->
-            Column {
-              WidgetPostListItem(
-                post = post,
-                showDivider = index < bookmarkPosts.lastIndex,
-                onClick = {
-                  val readerScreenArgs =
-                    ReaderScreenArgs(
-                      postIndex = index,
-                      postId = post.id,
-                      fromScreen = ReaderScreenArgs.FromScreen.Bookmarks,
-                    )
-                  val uri = Screen.Reader(readerScreenArgs).toRoute().toUri()
-
-                  val deepLinkIntent =
-                    Intent(Intent.ACTION_VIEW, uri, context, MainActivity::class.java).apply {
-                      addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                  context.startActivity(deepLinkIntent)
-                },
-              )
+                      val deepLinkIntent =
+                        Intent(Intent.ACTION_VIEW, uri, context, MainActivity::class.java).apply {
+                          addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                      context.startActivity(deepLinkIntent)
+                    },
+                  )
+                }
+              }
             }
           }
         }
+      }
+      false -> {
+        RequireTwinePremium()
       }
     }
   }

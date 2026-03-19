@@ -28,6 +28,7 @@ import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.utils.NewArticleNotifier
 import dev.sasikanth.rss.reader.logging.CrashReporter
+import dev.sasikanth.rss.reader.widget.WidgetUpdater
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
@@ -75,6 +76,8 @@ class FeedsRefreshWorker(
           },
           content = { applicationContext.getString(R.string.notification_new_articles_content) },
         )
+
+        WidgetUpdater.update(applicationContext)
 
         Result.success()
       } catch (e: CancellationException) {

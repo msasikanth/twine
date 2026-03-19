@@ -35,7 +35,6 @@ import androidx.glance.GlanceTheme
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.components.OutlineButton
@@ -63,9 +62,7 @@ import dev.sasikanth.rss.reader.R
 import dev.sasikanth.rss.reader.ReaderApplication
 import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.core.model.local.WidgetPost
-import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
-import kotlin.time.Clock
 import kotlinx.coroutines.launch
 
 class TwineUnreadWidget : GlanceAppWidget() {
@@ -79,103 +76,111 @@ class TwineUnreadWidget : GlanceAppWidget() {
     val billingHandler = applicationComponent.billingHandler
 
     provideContent {
-      val widgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
+      val unreadCount by
+        remember { widgetDataRepository.unreadPostsCount }.collectAsState(initial = 1L)
+      val unreadPosts by
+        remember { widgetDataRepository.unreadPosts(NUMBER_OF_UNREAD_POSTS_IN_WIDGET) }
+          .collectAsState(initial = emptyList())
+
+      var isSubscribed: Boolean? by remember { mutableStateOf(null) }
+      LaunchedEffect(Unit) { isSubscribed = billingHandler.isSubscribed() }
 
       setSingletonImageLoaderFactory { imageLoader }
 
       GlanceTheme {
-        var isSubscribed: Boolean? by remember { mutableStateOf(null) }
+        WidgetContent(
+          unreadCount = unreadCount,
+          unreadPosts = unreadPosts,
+          isSubscribed = isSubscribed,
+        )
+      }
+    }
+  }
 
-        LaunchedEffect(Unit) { isSubscribed = billingHandler.isSubscribed() }
+  override suspend fun providePreview(context: Context, widgetCategory: Int) {
+    val applicationComponent = (context.applicationContext as ReaderApplication).appComponent
+    val imageLoader = applicationComponent.imageLoader
 
-        when (isSubscribed) {
-          true,
-          null -> {
-            WidgetContent(widgetDataRepository = widgetDataRepository, widgetId = widgetId)
-          }
-          false -> {
-            RequireTwinePremium()
-          }
-        }
+    provideContent {
+      setSingletonImageLoaderFactory { imageLoader }
+
+      GlanceTheme {
+        WidgetContent(
+          unreadCount = WidgetMockData.posts.size.toLong(),
+          unreadPosts = WidgetMockData.posts,
+          isSubscribed = true,
+        )
       }
     }
   }
 
   @Composable
-  private fun WidgetContent(widgetDataRepository: WidgetDataRepository, widgetId: Int) {
+  private fun WidgetContent(
+    unreadCount: Long,
+    unreadPosts: List<WidgetPost>,
+    isSubscribed: Boolean?,
+  ) {
     val context = LocalContext.current
-    val unreadCount by
-      remember { widgetDataRepository.unreadPostsCount }.collectAsState(initial = 1L)
 
-    Scaffold(
-      modifier = GlanceModifier.fillMaxSize().cornerRadius(16.dp),
-      titleBar = { TitleBar(unreadPostsCount = unreadCount, context = context) },
-      horizontalPadding = 0.dp,
-    ) {
-      val unreadPosts by
-        remember { widgetDataRepository.unreadPosts(NUMBER_OF_UNREAD_POSTS_IN_WIDGET) }
-          .collectAsState(
-            initial =
-              listOf(
-                WidgetPost(
-                  id = "preview",
-                  title = "Widget Preview",
-                  description = "This is a preview of your unread posts.",
-                  image = null,
-                  postedOn = Clock.System.now(),
-                  feedName = "Twine",
-                  feedIcon = null,
-                  readingTimeEstimate = 0,
-                )
-              )
-          )
+    when (isSubscribed) {
+      true,
+      null -> {
+        Scaffold(
+          modifier = GlanceModifier.fillMaxSize().cornerRadius(16.dp),
+          titleBar = { TitleBar(unreadPostsCount = unreadCount, context = context) },
+          horizontalPadding = 0.dp,
+        ) {
+          if (unreadPosts.isEmpty()) {
+            NoPosts()
+          } else {
+            LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
+              itemsIndexed(unreadPosts) { index, post ->
+                Column {
+                  WidgetPostListItem(
+                    post = post,
+                    showDivider = index < unreadPosts.lastIndex,
+                    onClick = {
+                      val readerScreenArgs =
+                        ReaderScreenArgs(
+                          postIndex = index,
+                          postId = post.id,
+                          fromScreen = ReaderScreenArgs.FromScreen.UnreadWidget,
+                        )
+                      val uri = Screen.Reader(readerScreenArgs).toRoute().toUri()
 
-      if (unreadPosts.isEmpty()) {
-        NoPosts()
-      } else {
-        LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
-          itemsIndexed(unreadPosts) { index, post ->
-            Column {
-              WidgetPostListItem(
-                post = post,
-                showDivider = index < unreadPosts.lastIndex,
-                onClick = {
-                  val readerScreenArgs =
-                    ReaderScreenArgs(
-                      postIndex = index,
-                      postId = post.id,
-                      fromScreen = ReaderScreenArgs.FromScreen.UnreadWidget,
+                      val deepLinkIntent =
+                        Intent(Intent.ACTION_VIEW, uri, context, MainActivity::class.java).apply {
+                          addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                      context.startActivity(deepLinkIntent)
+                    },
+                  )
+                }
+              }
+
+              if (unreadCount > NUMBER_OF_UNREAD_POSTS_IN_WIDGET) {
+                item {
+                  Box(modifier = GlanceModifier.padding(vertical = 16.dp)) {
+                    OutlineButton(
+                      text = context.getString(R.string.widget_see_more),
+                      contentColor = GlanceTheme.colors.primary,
+                      onClick = {
+                        val intent =
+                          Intent(context, MainActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                          }
+                        context.startActivity(intent)
+                      },
                     )
-                  val uri = Screen.Reader(readerScreenArgs).toRoute().toUri()
-
-                  val deepLinkIntent =
-                    Intent(Intent.ACTION_VIEW, uri, context, MainActivity::class.java).apply {
-                      addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                  context.startActivity(deepLinkIntent)
-                },
-              )
-            }
-          }
-
-          if (unreadCount > NUMBER_OF_UNREAD_POSTS_IN_WIDGET) {
-            item {
-              Box(modifier = GlanceModifier.padding(vertical = 16.dp)) {
-                OutlineButton(
-                  text = context.getString(R.string.widget_see_more),
-                  contentColor = GlanceTheme.colors.primary,
-                  onClick = {
-                    val intent =
-                      Intent(context, MainActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                      }
-                    context.startActivity(intent)
-                  },
-                )
+                  }
+                }
               }
             }
           }
         }
+      }
+      false -> {
+        RequireTwinePremium()
       }
     }
   }

@@ -30,6 +30,7 @@ import androidx.glance.GlanceTheme
 import androidx.glance.LocalContext
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -43,22 +44,30 @@ import androidx.glance.text.TextStyle
 import dev.sasikanth.rss.reader.MainActivity
 import dev.sasikanth.rss.reader.R
 import dev.sasikanth.rss.reader.ReaderApplication
-import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
 
 class TwineUnreadCountWidget : GlanceAppWidget() {
+
+  override val sizeMode: SizeMode = SizeMode.Single
 
   override suspend fun provideGlance(context: Context, id: GlanceId) {
     val applicationComponent = (context.applicationContext as ReaderApplication).appComponent
     val widgetDataRepository = applicationComponent.widgetDataRepository
 
-    provideContent { GlanceTheme { WidgetContent(widgetDataRepository = widgetDataRepository) } }
+    provideContent {
+      val unreadCount by
+        remember { widgetDataRepository.unreadPostsCount }.collectAsState(initial = 1L)
+
+      GlanceTheme { WidgetContent(unreadCount = unreadCount) }
+    }
+  }
+
+  override suspend fun providePreview(context: Context, widgetCategory: Int) {
+    provideContent { GlanceTheme { WidgetContent(unreadCount = 42L) } }
   }
 
   @Composable
-  private fun WidgetContent(widgetDataRepository: WidgetDataRepository) {
+  private fun WidgetContent(unreadCount: Long) {
     val context = LocalContext.current
-    val unreadCount by
-      remember { widgetDataRepository.unreadPostsCount }.collectAsState(initial = 1L)
 
     Box(
       modifier =

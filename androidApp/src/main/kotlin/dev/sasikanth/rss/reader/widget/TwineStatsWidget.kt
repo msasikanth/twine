@@ -33,6 +33,7 @@ import androidx.glance.GlanceTheme
 import androidx.glance.LocalContext
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -51,33 +52,31 @@ import dev.sasikanth.rss.reader.MainActivity
 import dev.sasikanth.rss.reader.R
 import dev.sasikanth.rss.reader.ReaderApplication
 import dev.sasikanth.rss.reader.core.model.local.ReadingStatistics
-import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
-import kotlinx.collections.immutable.persistentListOf
 
 class TwineStatsWidget : GlanceAppWidget() {
+
+  override val sizeMode: SizeMode = SizeMode.Single
 
   override suspend fun provideGlance(context: Context, id: GlanceId) {
     val applicationComponent = (context.applicationContext as ReaderApplication).appComponent
     val widgetDataRepository = applicationComponent.widgetDataRepository
 
-    provideContent { GlanceTheme { WidgetContent(widgetDataRepository = widgetDataRepository) } }
+    provideContent {
+      var stats by remember { mutableStateOf<ReadingStatistics?>(null) }
+
+      LaunchedEffect(Unit) { stats = widgetDataRepository.statsBlocking() }
+
+      GlanceTheme { WidgetContent(stats = stats) }
+    }
+  }
+
+  override suspend fun providePreview(context: Context, widgetCategory: Int) {
+    provideContent { GlanceTheme { WidgetContent(stats = WidgetMockData.readerStatistics) } }
   }
 
   @Composable
-  private fun WidgetContent(widgetDataRepository: WidgetDataRepository) {
+  private fun WidgetContent(stats: ReadingStatistics?) {
     val context = LocalContext.current
-    var stats by remember {
-      mutableStateOf<ReadingStatistics?>(
-        ReadingStatistics(
-          totalReadCount = 100L,
-          dailyAverage = 5,
-          topFeeds = persistentListOf(),
-          readingTrends = persistentListOf(),
-        )
-      )
-    }
-
-    LaunchedEffect(Unit) { stats = widgetDataRepository.statsBlocking() }
 
     Box(
       modifier =
