@@ -19,11 +19,11 @@ package dev.sasikanth.rss.reader.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -76,30 +77,29 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
     val coroutineScope = rememberCoroutineScope()
     AnimatedVisibility(
       visible = unreadSinceLastSync.hasNewArticles || canShowScrollToTop,
-      enter = slideInVertically { it },
-      exit = slideOutVertically { it },
-      modifier = modifier.align(Alignment.BottomCenter),
+      enter = fadeIn() + expandIn(expandFrom = Alignment.Center, clip = false),
+      exit = fadeOut() + shrinkOut(shrinkTowards = Alignment.Center, clip = false),
+      modifier =
+        modifier
+          .align(Alignment.BottomCenter)
+          .padding(bottom = 16.dp)
+          .background(AppTheme.colorScheme.bottomSheet, CircleShape)
+          .border(1.dp, AppTheme.colorScheme.bottomSheetBorder, CircleShape)
+          .dropShadow(shape = CircleShape) {
+            color = Color.Black.copy(alpha = 0.4f)
+            offset = Offset(0f, 16.dp.toPx())
+            radius = 32.dp.toPx()
+            spread = 0f
+          }
+          .dropShadow(shape = CircleShape) {
+            color = Color.Black.copy(alpha = 0.016f)
+            offset = Offset(0f, 4.dp.toPx())
+            radius = 8.dp.toPx()
+            spread = 0f
+          }
+          .padding(4.dp),
     ) {
-      val buttonShape = RoundedCornerShape(50)
-      Box(
-        modifier =
-          Modifier.padding(bottom = 16.dp)
-            .background(AppTheme.colorScheme.bottomSheet, buttonShape)
-            .border(1.dp, AppTheme.colorScheme.bottomSheetBorder, buttonShape)
-            .dropShadow(shape = buttonShape) {
-              color = Color.Black.copy(alpha = 0.4f)
-              offset = Offset(0f, 16.dp.toPx())
-              radius = 32.dp.toPx()
-              spread = 0f
-            }
-            .dropShadow(shape = buttonShape) {
-              color = Color.Black.copy(alpha = 0.016f)
-              offset = Offset(0f, 4.dp.toPx())
-              radius = 8.dp.toPx()
-              spread = 0f
-            }
-            .padding(4.dp)
-      ) {
+      Box {
         AppTheme(useDarkTheme = true) {
           Row(modifier = Modifier.height(IntrinsicSize.Min)) {
             AnimatedVisibility(visible = unreadSinceLastSync.hasNewArticles) {
