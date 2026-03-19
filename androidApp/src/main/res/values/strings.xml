@@ -25,8 +25,6 @@
     </plurals>
     <string name="widget_unread_name">Unread posts</string>
     <string name="widget_bookmarks_name">Bookmarks</string>
-    <string name="widget_unread_count_name">Unread count</string>
-    <string name="widget_stats_name">Reading statistics</string>
     <string name="widget_no_title">No title</string>
     <string name="widget_no_description">No description</string>
     <string name="widget_see_more">See more</string>
@@ -41,9 +39,6 @@
         <item quantity="other">Bookmarks (%1$d posts)</item>
     </plurals>
     <string name="widget_bookmarks_no_posts">No bookmarks</string>
-    <string name="widget_unread_count_title">Unread</string>
-    <string name="widget_stats_total_read">Total Read</string>
-    <string name="widget_stats_daily_average">Daily Avg</string>
     <string name="widget_reading_time">%1$dm</string>
 
     <string name="unit_seconds">&lt;1m</string>

@@ -244,30 +244,6 @@
           android:resource="@xml/twine_bookmark_widget_info" />
     </receiver>
 
-    <receiver
-        android:name=".widget.TwineUnreadCountWidgetReceiver"
-        android:label="@string/widget_unread_count_name"
-        android:exported="true">
-      <intent-filter>
-        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-      </intent-filter>
-      <meta-data
-          android:name="android.appwidget.provider"
-          android:resource="@xml/twine_unread_count_widget_info" />
-    </receiver>
-
-    <receiver
-        android:name=".widget.TwineStatsWidgetReceiver"
-        android:label="@string/widget_stats_name"
-        android:exported="true">
-      <intent-filter>
-        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-      </intent-filter>
-      <meta-data
-          android:name="android.appwidget.provider"
-          android:resource="@xml/twine_stats_widget_info" />
-    </receiver>
-
     <provider
         android:name="androidx.startup.InitializationProvider"
         android:authorities="${applicationId}.androidx-startup"
