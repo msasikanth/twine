@@ -99,67 +99,68 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
           }
           .padding(4.dp),
     ) {
-      Box {
-        AppTheme(useDarkTheme = true) {
-          Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-            AnimatedVisibility(visible = unreadSinceLastSync.hasNewArticles) {
-              Row {
-                val endPadding by
-                  animateDpAsState(targetValue = if (canShowScrollToTop) 12.dp else 16.dp)
+      AppTheme(useDarkTheme = true) {
+        Row(
+          modifier = Modifier.height(IntrinsicSize.Min),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          AnimatedVisibility(visible = unreadSinceLastSync.hasNewArticles) {
+            Row {
+              val endPadding by
+                animateDpAsState(targetValue = if (canShowScrollToTop) 12.dp else 16.dp)
 
-                TextButton(
-                  modifier = Modifier.fillMaxHeight(),
-                  onClick = onLoadNewArticlesClick,
-                  shape = RoundedCornerShape(50),
-                  colors =
-                    ButtonDefaults.textButtonColors(contentColor = AppTheme.colorScheme.onSurface),
-                  contentPadding =
-                    PaddingValues(start = 12.dp, top = 8.dp, end = endPadding, bottom = 8.dp),
-                  content = {
-                    unreadSinceLastSync.apply {
-                      OverlappedFeedIcons(
-                        feedHomepageLinks = feedHomepageLinks,
-                        feedIcons = feedIcons,
-                        feedShowFavIconSettings = feedShowFavIconSettings,
-                      )
-                    }
-
-                    Spacer(modifier = Modifier.requiredWidth(12.dp))
-
-                    Text(
-                      text = stringResource(Res.string.newArticles),
-                      style = MaterialTheme.typography.labelLarge,
+              TextButton(
+                modifier = Modifier.fillMaxHeight(),
+                onClick = onLoadNewArticlesClick,
+                shape = RoundedCornerShape(50),
+                colors =
+                  ButtonDefaults.textButtonColors(contentColor = AppTheme.colorScheme.onSurface),
+                contentPadding =
+                  PaddingValues(start = 12.dp, top = 8.dp, end = endPadding, bottom = 8.dp),
+                content = {
+                  unreadSinceLastSync.apply {
+                    OverlappedFeedIcons(
+                      feedHomepageLinks = feedHomepageLinks,
+                      feedIcons = feedIcons,
+                      feedShowFavIconSettings = feedShowFavIconSettings,
                     )
-                  },
-                )
-              }
-            }
+                  }
 
-            AnimatedVisibility(visible = unreadSinceLastSync.hasNewArticles && canShowScrollToTop) {
-              VerticalDivider(modifier = Modifier.fillMaxHeight().padding(vertical = 16.dp))
-            }
+                  Spacer(modifier = Modifier.requiredWidth(12.dp))
 
-            AnimatedVisibility(
-              visible = canShowScrollToTop,
-              enter =
-                if (unreadSinceLastSync.hasNewArticles) {
-                  fadeIn() + expandHorizontally()
-                } else {
-                  fadeIn()
+                  Text(
+                    text = stringResource(Res.string.newArticles),
+                    style = MaterialTheme.typography.labelLarge,
+                  )
                 },
-              exit =
-                if (unreadSinceLastSync.hasNewArticles) {
-                  fadeOut() + shrinkHorizontally()
-                } else {
-                  fadeOut()
-                },
-            ) {
-              IconButton(
-                icon = TwineIcons.ArrowUp,
-                contentDescription = stringResource(Res.string.scrollToTop),
-                onClick = { coroutineScope.launch { onScrollToTopClick() } },
               )
             }
+          }
+
+          AnimatedVisibility(visible = unreadSinceLastSync.hasNewArticles && canShowScrollToTop) {
+            VerticalDivider(modifier = Modifier.fillMaxHeight().padding(vertical = 16.dp))
+          }
+
+          AnimatedVisibility(
+            visible = canShowScrollToTop,
+            enter =
+              if (unreadSinceLastSync.hasNewArticles) {
+                fadeIn() + expandHorizontally()
+              } else {
+                fadeIn()
+              },
+            exit =
+              if (unreadSinceLastSync.hasNewArticles) {
+                fadeOut() + shrinkHorizontally()
+              } else {
+                fadeOut()
+              },
+          ) {
+            IconButton(
+              icon = TwineIcons.ArrowUp,
+              contentDescription = stringResource(Res.string.scrollToTop),
+              onClick = { coroutineScope.launch { onScrollToTopClick() } },
+            )
           }
         }
       }
