@@ -496,46 +496,6 @@
         }
       }
     },
-    "widget_stats_daily_average" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daily Average"
-          }
-        }
-      }
-    },
-    "widget_stats_name" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stats"
-          }
-        }
-      }
-    },
-    "widget_stats_total_read" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total Read"
-          }
-        }
-      }
-    },
-    "widget_unread_count_name" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unread count"
-          }
-        }
-      }
-    },
     "widget_unread_remaining %@" : {
       "extractionState" : "stale",
       "localizations" : {
