@@ -33,6 +33,7 @@ import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.collections.Set
 import kotlin.time.Clock
 import kotlin.time.Instant
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.TimeZone
@@ -340,8 +341,8 @@ class WidgetDataRepository(
       ReadingStatistics(
         totalReadCount = totalReadCount,
         dailyAverage = dailyAverage,
-        topFeeds = kotlinx.collections.immutable.persistentListOf(),
-        readingTrends = kotlinx.collections.immutable.persistentListOf(),
+        topFeeds = persistentListOf(),
+        readingTrends = persistentListOf(),
       )
     }
   }

@@ -56,6 +56,7 @@ import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
 import dev.sasikanth.rss.reader.feed.FeedViewModel
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
+import dev.sasikanth.rss.reader.freshrss.FreshRssLoginViewModel
 import dev.sasikanth.rss.reader.group.GroupViewModel
 import dev.sasikanth.rss.reader.groupselection.GroupSelectionViewModel
 import dev.sasikanth.rss.reader.home.HomeViewModel
@@ -130,7 +131,7 @@ fun App(
   bookmarksViewModel: () -> BookmarksViewModel,
   settingsViewModel: () -> SettingsViewModel,
   accountSelectionViewModel: () -> AccountSelectionViewModel,
-  freshRssLoginViewModel: () -> dev.sasikanth.rss.reader.freshrss.FreshRssLoginViewModel,
+  freshRssLoginViewModel: () -> FreshRssLoginViewModel,
   minifluxLoginViewModel: () -> MinifluxLoginViewModel,
   groupViewModel: (SavedStateHandle) -> GroupViewModel,
   blockedWordsViewModel: () -> BlockedWordsViewModel,

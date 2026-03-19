@@ -18,6 +18,7 @@
 package dev.sasikanth.rss.reader.data.sync
 
 import dev.sasikanth.rss.reader.core.model.local.PostFlag
+import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Instant
@@ -245,10 +246,7 @@ class PostSyncTest {
     assertEquals("musk", deserialized.blockedWords[1].content)
     assertEquals("trump", deserialized.blockedWords[2].content)
     // Verify ID generation
-    assertEquals(
-      dev.sasikanth.rss.reader.util.nameBasedUuidOf("elon musk").toString(),
-      deserialized.blockedWords[0].id,
-    )
+    assertEquals(nameBasedUuidOf("elon musk").toString(), deserialized.blockedWords[0].id)
   }
 
   @Test

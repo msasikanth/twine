@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -71,7 +72,7 @@ internal fun LazyListScope.pinnedSources(
 ) {
   if (pinnedSources.isNotEmpty()) {
     item(key = "PinnedSourcesRow") {
-      val lazyListState = androidx.compose.foundation.lazy.rememberLazyListState()
+      val lazyListState = rememberLazyListState()
       val reorderableLazyRowState =
         rememberReorderableLazyListState(
           lazyListState = lazyListState,

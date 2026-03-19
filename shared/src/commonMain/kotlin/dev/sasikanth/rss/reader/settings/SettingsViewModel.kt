@@ -24,7 +24,9 @@ import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.app.AppIconManager
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.BillingHandler
+import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
+import dev.sasikanth.rss.reader.core.model.local.User
 import dev.sasikanth.rss.reader.data.opml.OpmlFeed
 import dev.sasikanth.rss.reader.data.opml.OpmlFeedGroup
 import dev.sasikanth.rss.reader.data.opml.OpmlManager
@@ -453,7 +455,7 @@ private data class Settings(
   val downloadFullContent: Boolean,
   val lastSyncedAt: Instant?,
   val hasCloudServiceSignedIn: Boolean,
-  val signedInService: dev.sasikanth.rss.reader.core.model.local.ServiceType?,
+  val signedInService: ServiceType?,
   val appIcon: AppIcon,
 )
 
@@ -493,5 +495,5 @@ private data class SettingsGroup3(
 private data class SettingsGroup4(
   val enableNotifications: Boolean,
   val lastSyncedAt: Instant?,
-  val user: dev.sasikanth.rss.reader.core.model.local.User?,
+  val user: User?,
 )
