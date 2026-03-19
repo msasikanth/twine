@@ -19,32 +19,22 @@ package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -56,12 +46,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.CircularIconButton
+import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostsType
@@ -71,7 +60,6 @@ import dev.sasikanth.rss.reader.resources.icons.MarkAllAsRead
 import dev.sasikanth.rss.reader.resources.icons.Menu
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.appBarAllFeeds
@@ -194,45 +182,11 @@ private fun SourceInfo(source: Source?, modifier: Modifier = Modifier) {
 
 @Composable
 private fun PostTypePill(postsType: PostsType, onClick: () -> Unit, modifier: Modifier = Modifier) {
-  val translucentStyle = LocalTranslucentStyles.current
-  Row(
-    modifier =
-      modifier
-        .clip(RoundedCornerShape(50))
-        .clickable { onClick() }
-        .background(translucentStyle.default.background)
-        .heightIn(min = 40.dp)
-        .padding(start = 20.dp, end = 16.dp),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
-  ) {
-    AnimatedContent(
-      targetState = postsType,
-      contentAlignment = Alignment.Center,
-      transitionSpec = {
-        (fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
-            slideInVertically(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { -it })
-          .togetherWith(
-            fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
-              slideOutVertically(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { it }
-          )
-      },
-      label = "PostsTypePill",
-    ) { targetPostsType ->
-      Text(
-        text = getPostTypeLabel(targetPostsType),
-        style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.onSurface,
-      )
-    }
-
-    Icon(
-      modifier = Modifier.requiredSize(20.dp),
-      imageVector = TwineIcons.ArrowDown,
-      contentDescription = null,
-      tint = AppTheme.colorScheme.onSurface,
-    )
-  }
+  TranslucentButton(
+    text = getPostTypeLabel(postsType),
+    trailingIcon = TwineIcons.ArrowDown,
+    onClick = onClick,
+  )
 }
 
 @Composable
