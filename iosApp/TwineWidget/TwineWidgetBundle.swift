@@ -13,6 +13,7 @@ import SwiftUI
 struct TwineWidgetBundle: WidgetBundle {
     var body: some Widget {
         TwineUnreadWidget()
+        TwineUnreadSmallWidget()
         TwineBookmarkWidget()
     }
 }

@@ -25,6 +25,10 @@ class TwineWidgetReceiver : GlanceAppWidgetReceiver() {
   override val glanceAppWidget: GlanceAppWidget = TwineUnreadWidget()
 }
 
+class TwineUnreadSmallWidgetReceiver : GlanceAppWidgetReceiver() {
+  override val glanceAppWidget: GlanceAppWidget = TwineUnreadSmallWidget()
+}
+
 class TwineBookmarkWidgetReceiver : GlanceAppWidgetReceiver() {
 
   override val glanceAppWidget: GlanceAppWidget = TwineBookmarkWidget()

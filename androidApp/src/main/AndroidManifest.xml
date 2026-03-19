@@ -221,6 +221,18 @@
     </activity-alias>
 
     <receiver
+        android:name=".widget.TwineUnreadSmallWidgetReceiver"
+        android:label="@string/widget_unread_recent_name"
+        android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/twine_unread_small_widget_info" />
+    </receiver>
+
+    <receiver
         android:name=".widget.TwineWidgetReceiver"
         android:label="@string/widget_unread_name"
         android:exported="true">

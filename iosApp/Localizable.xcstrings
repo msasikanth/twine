@@ -496,6 +496,16 @@
         }
       }
     },
+    "widget_unread_recent_name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent unread"
+          }
+        }
+      }
+    },
     "widget_unread_remaining %@" : {
       "extractionState" : "stale",
       "localizations" : {

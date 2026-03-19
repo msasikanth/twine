@@ -40,6 +40,7 @@ object WidgetUpdater {
 
     scope.launch {
       TwineUnreadWidget().updateAll(context)
+      TwineUnreadSmallWidget().updateAll(context)
       TwineBookmarkWidget().updateAll(context)
 
       val lastUpdate = settingsRepository.lastWidgetPreviewUpdateTime.first()
@@ -56,6 +57,7 @@ object WidgetUpdater {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
       GlanceAppWidgetManager(context).apply {
         setWidgetPreviews(TwineWidgetReceiver::class)
+        setWidgetPreviews(TwineUnreadSmallWidgetReceiver::class)
         setWidgetPreviews(TwineBookmarkWidgetReceiver::class)
       }
     }
