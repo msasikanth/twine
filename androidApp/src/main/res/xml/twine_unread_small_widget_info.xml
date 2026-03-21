@@ -15,12 +15,14 @@
   ~
   -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:initialLayout="@layout/glance_default_loading_layout"
     android:updatePeriodMillis="1800000"
-    android:resizeMode="horizontal|vertical"
+    android:resizeMode="none"
     android:targetCellWidth="2"
     android:targetCellHeight="2"
-    android:minWidth="110dp"
-    android:minHeight="110dp"
-    android:widgetCategory="home_screen">
+    android:minWidth="166dp"
+    android:minHeight="166dp"
+    android:widgetCategory="home_screen"
+    tools:targetApi="31">
 </appwidget-provider>

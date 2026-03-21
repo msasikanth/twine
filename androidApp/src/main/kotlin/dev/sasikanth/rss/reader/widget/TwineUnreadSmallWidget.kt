@@ -27,12 +27,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
@@ -67,7 +67,6 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.imageLoader
 import coil3.request.CachePolicy
@@ -84,7 +83,7 @@ import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 
 class TwineUnreadSmallWidget : GlanceAppWidget() {
 
-  override val sizeMode: SizeMode = SizeMode.Single
+  override val sizeMode: SizeMode = SizeMode.Exact
 
   override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
 
@@ -175,16 +174,17 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
     val context = LocalContext.current
     val hasImage = !post.image.isNullOrBlank()
     var postImage by remember(post.image) { mutableStateOf<Bitmap?>(null) }
+
     LaunchedEffect(post.image) { postImage = context.getImage(url = post.image) }
 
-    Box(modifier = GlanceModifier.fillMaxSize().clickable(onClick)) {
-      Column(modifier = GlanceModifier.fillMaxSize()) {
+    Box(modifier = GlanceModifier.fillMaxSize()) {
+      Column(modifier = GlanceModifier.fillMaxSize().clickable(onClick)) {
         if (hasImage && postImage != null) {
           Image(
             provider = ImageProvider(postImage!!),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = GlanceModifier.fillMaxWidth().height(100.dp).cornerRadius(24.dp),
+            modifier = GlanceModifier.fillMaxWidth().defaultWeight().cornerRadius(24.dp),
           )
           Spacer(GlanceModifier.height(8.dp))
           Text(
@@ -192,11 +192,11 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
             style =
               TextStyle(
                 color = GlanceTheme.colors.onSurface,
-                fontSize = 10.sp,
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
               ),
             maxLines = 2,
-            modifier = GlanceModifier.padding(horizontal = 8.dp),
+            modifier = GlanceModifier.padding(horizontal = 8.dp).height(32.dp),
           )
         } else {
           Spacer(GlanceModifier.defaultWeight())
@@ -212,8 +212,6 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
             modifier = GlanceModifier.padding(horizontal = 8.dp),
           )
         }
-
-        Spacer(GlanceModifier.defaultWeight())
 
         Row(
           modifier = GlanceModifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
@@ -259,40 +257,87 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
         }
       }
 
-      // Next Button (Arrow)
-      Box(
-        modifier =
-          GlanceModifier.padding(12.dp)
-            .size(24.dp)
-            .background(ColorProvider(Color(0xFFF0F0F0)))
-            .cornerRadius(99.dp)
-            .clickable(actionRunCallback<NextPostAction>()),
-        contentAlignment = Alignment.Center,
-      ) {
-        Image(
-          provider = ImageProvider(R.drawable.ic_chevron_right),
-          contentDescription = null,
-          modifier = GlanceModifier.size(12.dp),
-        )
+      // Navigation Buttons
+      Box(modifier = GlanceModifier.fillMaxWidth(), contentAlignment = Alignment.TopStart) {
+        Row(
+          modifier = GlanceModifier.fillMaxWidth(),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          if (index > 0) {
+            Box(
+              modifier =
+                GlanceModifier.size(48.dp).clickable(actionRunCallback<PreviousPostAction>()),
+              contentAlignment = Alignment.Center,
+            ) {
+              Box(
+                modifier =
+                  GlanceModifier.size(24.dp)
+                    .background(GlanceTheme.colors.surface)
+                    .cornerRadius(99.dp)
+                    .clickable(actionRunCallback<PreviousPostAction>()),
+                contentAlignment = Alignment.Center,
+              ) {
+                Image(
+                  provider = ImageProvider(R.drawable.ic_chevron_left),
+                  contentDescription = null,
+                  colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurface),
+                  modifier = GlanceModifier.size(12.dp),
+                )
+              }
+            }
+          } else {
+            Spacer(GlanceModifier.size(24.dp))
+          }
+
+          Spacer(GlanceModifier.defaultWeight())
+
+          if (index < count - 1) {
+            Box(
+              modifier =
+                GlanceModifier.size(48.dp).clickable(actionRunCallback<PreviousPostAction>()),
+              contentAlignment = Alignment.Center,
+            ) {
+              Box(
+                modifier =
+                  GlanceModifier.size(24.dp)
+                    .background(GlanceTheme.colors.surface)
+                    .cornerRadius(99.dp)
+                    .clickable(actionRunCallback<NextPostAction>()),
+                contentAlignment = Alignment.Center,
+              ) {
+                Image(
+                  provider = ImageProvider(R.drawable.ic_chevron_right),
+                  contentDescription = null,
+                  colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurface),
+                  modifier = GlanceModifier.size(12.dp),
+                )
+              }
+            }
+          } else {
+            Spacer(GlanceModifier.size(24.dp))
+          }
+        }
       }
     }
   }
 
   @Composable
   private fun PaginationDots(index: Int, count: Int) {
+    val context = LocalContext.current
     Row(verticalAlignment = Alignment.CenterVertically) {
       for (i in 0 until minOf(count, 5)) {
         val isSelected = i == (index % 5)
-        Box(
-          modifier =
-            GlanceModifier.size(4.dp)
-              .padding(horizontal = 1.dp)
-              .background(
-                if (isSelected) GlanceTheme.colors.onSurface
-                else GlanceTheme.colors.onSurfaceVariant
-              )
-              .cornerRadius(99.dp)
-        ) {}
+        val indicatorColor =
+          if (isSelected) {
+            GlanceTheme.colors.onSurface.getColor(context)
+          } else {
+            GlanceTheme.colors.onSurface.getColor(context).copy(alpha = 0.4f)
+          }
+
+        Box(modifier = GlanceModifier.size(4.dp).background(indicatorColor).cornerRadius(99.dp)) {}
+        if (i < minOf(count, 5) - 1) {
+          Spacer(GlanceModifier.width(4.dp))
+        }
       }
     }
   }
@@ -351,6 +396,22 @@ class NextPostAction : ActionCallback {
     updateAppWidgetState(context, glanceId) { prefs ->
       val currentIndex = prefs[TwineUnreadSmallWidget.CurrentIndexKey] ?: 0
       prefs[TwineUnreadSmallWidget.CurrentIndexKey] = (currentIndex + 1) % 10
+    }
+    TwineUnreadSmallWidget().update(context, glanceId)
+  }
+}
+
+class PreviousPostAction : ActionCallback {
+  override suspend fun onAction(
+    context: Context,
+    glanceId: GlanceId,
+    parameters: ActionParameters,
+  ) {
+    updateAppWidgetState(context, glanceId) { prefs ->
+      val currentIndex = prefs[TwineUnreadSmallWidget.CurrentIndexKey] ?: 0
+      if (currentIndex > 0) {
+        prefs[TwineUnreadSmallWidget.CurrentIndexKey] = currentIndex - 1
+      }
     }
     TwineUnreadSmallWidget().update(context, glanceId)
   }
