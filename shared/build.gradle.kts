@@ -54,6 +54,7 @@ kotlin {
 
       freeCompilerArgs += iOSBinaryFlags
 
+      export(projects.core.base)
       export(libs.crashkios.bugsnag)
     }
   }

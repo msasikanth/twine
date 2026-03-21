@@ -47,7 +47,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
         UNUserNotificationCenter.current().delegate = self
 
-        IosWidgetUpdateBridge().register {
+        IosWidgetUpdateBridge.shared.register {
             WidgetCenter.shared.reloadAllTimelines()
         }
 
