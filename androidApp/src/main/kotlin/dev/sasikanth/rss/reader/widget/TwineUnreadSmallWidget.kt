@@ -378,7 +378,7 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
   }
 
   companion object {
-    private const val NUMBER_OF_UNREAD_POSTS_IN_WIDGET = 10
+    private const val NUMBER_OF_UNREAD_POSTS_IN_WIDGET = 5
     val CurrentIndexKey = intPreferencesKey("current_index")
   }
 }
@@ -391,7 +391,7 @@ class NextPostAction : ActionCallback {
   ) {
     updateAppWidgetState(context, glanceId) { prefs ->
       val currentIndex = prefs[TwineUnreadSmallWidget.CurrentIndexKey] ?: 0
-      prefs[TwineUnreadSmallWidget.CurrentIndexKey] = (currentIndex + 1) % 10
+      prefs[TwineUnreadSmallWidget.CurrentIndexKey] = (currentIndex + 1) % 5
     }
     TwineUnreadSmallWidget().update(context, glanceId)
   }
