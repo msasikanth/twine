@@ -6,134 +6,162 @@
 //  Copyright © 2026 orgName. All rights reserved.
 //
 
+import AppIntents
 import SwiftUI
 import WidgetKit
 import shared
 
-struct TwineUnreadSmallWidgetEntryView : View {
+struct TwineUnreadSmallWidgetEntryView: View {
     var entry: UnreadSmallPostsEntry
-    
+
     var body: some View {
-        if entry.posts.isEmpty {
-            noPosts
-        } else {
-            let safeIndex = entry.currentIndex < entry.posts.count ? entry.currentIndex : 0
-            let post = entry.posts[safeIndex]
-            unreadPostView(post: post, index: safeIndex)
+        ZStack {
+            if entry.isSubscribed {
+                if entry.posts.isEmpty {
+                    noPosts
+                } else {
+                    let safeIndex = entry.currentIndex < entry.posts.count ? entry.currentIndex : 0
+                    let post = entry.posts[safeIndex]
+                    unreadPostView(post: post, index: safeIndex)
+                }
+            } else {
+                twinePremium
+            }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-    
-    func unreadPostView(post: ModelWidgetPost, index: Int) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            ZStack(alignment: .topLeading) {
-                if let imageString = post.image,
-                   let imageURL = URL(string: imageString) {
-                    if let imageData = try? Data(contentsOf: imageURL),
-                       let uiImage = UIImage(data: imageData) {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 100)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+    func unreadPostView(post: UIWidgetPost, index: Int) -> some View {
+        ZStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 0) {
+                if let uiImage = post.image {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 94)
+                        .clipShape(
+                            UnevenRoundedRectangle(
+                                topLeadingRadius: 24,
+                                bottomLeadingRadius: 12,
+                                bottomTrailingRadius: 12,
+                                topTrailingRadius: 24
+                            ))
+                }
+
+                if post.hasImage {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(post.title ?? String(localized: "unread_widget_no_title"))
+                            .font(.system(size: 12, weight: .medium))
+                            .lineLimit(2...2)
+
+                        footer(post: post, index: index)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.top, 10)
+                    .padding(.bottom, 10)
+                } else {
+                    Spacer()
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(post.title ?? String(localized: "unread_widget_no_title"))
+                            .font(.system(size: 14, weight: .medium))
+                            .lineLimit(2...3)
+
+                        footer(post: post, index: index)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.bottom, 10)
+                }
+
+                Spacer()
+            }
+            .frame(maxHeight: .infinity)
+            .widgetURL(createDeepLink(postIndex: index, postId: post.id))
+
+            // Navigation Buttons
+            HStack {
+                if index > 0 {
+                    if #available(iOS 17.0, *) {
+                        Button(intent: PreviousPostIntent()) {
+                            navigationIcon(name: "chevron.left")
+                        }
+                        .buttonStyle(.plain)
                     } else {
-                        Color.gray.opacity(0.1)
-                            .frame(height: 100)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        navigationIcon(name: "chevron.left")
                     }
                 } else {
                     Spacer()
-                        .frame(height: 60)
+                        .frame(width: 48, height: 48)
                 }
-                
-                HStack {
-                    if index > 0 {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 10, weight: .bold))
-                            .padding(6)
-                            .background(Color.white.opacity(0.8))
-                            .clipShape(Circle())
-                            .padding(8)
-                    } else {
-                        Spacer()
-                            .frame(width: 34)
-                    }
-                    
-                    Spacer()
-                    
-                    if index < entry.posts.count - 1 {
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 10, weight: .bold))
-                            .padding(6)
-                            .background(Color.white.opacity(0.8))
-                            .clipShape(Circle())
-                            .padding(8)
-                    } else {
-                        Spacer()
-                            .frame(width: 34)
-                    }
-                }
-            }
-            
-            if post.image != nil {
-                Spacer(minLength: 4)
-            } else {
-                Spacer(minLength: 0)
-            }
-            
-            Text(post.title ?? post.description_ ?? String(localized: "unread_widget_no_title"))
-                .font(.system(size: post.image != nil ? 10 : 14, weight: .medium))
-                .lineLimit(post.image != nil ? 2 : 4)
-                .padding(.horizontal, 8)
-            
-            Spacer(minLength: 0)
-            
-            HStack {
-                // Publisher Info
-                HStack(spacing: 4) {
-                    ZStack(alignment: .bottomTrailing) {
-                        if let iconString = post.feedIcon,
-                           let iconURL = URL(string: iconString),
-                           let iconData = try? Data(contentsOf: iconURL),
-                           let uiIcon = UIImage(data: iconData) {
-                            Image(uiImage: uiIcon)
-                                .resizable()
-                                .frame(width: 10, height: 12)
-                                .cornerRadius(2)
-                        } else {
-                            Image(systemName: "rss")
-                                .resizable()
-                                .frame(width: 10, height: 10)
-                        }
-                        
-                        Circle()
-                            .fill(Color.blue)
-                            .frame(width: 4, height: 4)
-                            .offset(x: 1, y: 1)
-                    }
-                    
-                    Text(post.feedName ?? "")
-                        .font(.system(size: 8, weight: .medium))
-                        .lineLimit(1)
-                }
-                
+
                 Spacer()
-                
-                // Pagination Dots
-                HStack(spacing: 4) {
-                    ForEach(0..<min(entry.posts.count, 5), id: \.self) { i in
-                        Circle()
-                            .fill(i == (index % 5) ? Color.black : Color.black.opacity(0.4))
-                            .frame(width: 4, height: 4)
+
+                if index < entry.posts.count - 1 {
+                    if #available(iOS 17.0, *) {
+                        Button(intent: NextPostIntent()) {
+                            navigationIcon(name: "chevron.right")
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        navigationIcon(name: "chevron.right")
                     }
+                } else {
+                    Spacer()
+                        .frame(width: 48, height: 48)
                 }
             }
-            .padding(.horizontal, 8)
-            .padding(.bottom, 10)
         }
-        .widgetURL(createDeepLink(postIndex: index, postId: post.id))
     }
-    
+
+    func footer(post: UIWidgetPost, index: Int) -> some View {
+        HStack(alignment: .center) {
+            // Publisher Info
+            HStack(spacing: 4) {
+                ZStack(alignment: .bottomTrailing) {
+                    if let uiIcon = post.feedIcon {
+                        Image(uiImage: uiIcon)
+                            .resizable()
+                            .frame(width: 10, height: 10)
+                            .cornerRadius(2)
+                    } else {
+                        Image(systemName: "rss")
+                            .resizable()
+                            .frame(width: 10, height: 10)
+                    }
+                }
+
+                Text(post.feedName ?? "")
+                    .font(.system(size: 8, weight: .medium))
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            // Pagination Dots
+            HStack(spacing: 4) {
+                ForEach(0..<min(entry.posts.count, 5), id: \.self) { i in
+                    Circle()
+                        .fill(i == (index % 5) ? Color.primary : Color.primary.opacity(0.4))
+                        .frame(width: 4, height: 4)
+                }
+            }
+        }
+    }
+
+    func navigationIcon(name: String) -> some View {
+        ZStack {
+            Circle()
+                .fill(Color(red: 240 / 255, green: 240 / 255, blue: 240 / 255))
+                .frame(width: 24, height: 24)
+
+            Image(systemName: name)
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(.black)
+        }
+        .frame(width: 48, height: 48)
+    }
+
     var twinePremium: some View {
         VStack {
             Text("widget_premium")
@@ -141,7 +169,7 @@ struct TwineUnreadSmallWidgetEntryView : View {
                 .multilineTextAlignment(.center)
         }.frame(maxHeight: .infinity, alignment: .center)
     }
-    
+
     var noPosts: some View {
         VStack(spacing: 8) {
             Image(systemName: "newspaper")
@@ -151,7 +179,7 @@ struct TwineUnreadSmallWidgetEntryView : View {
                 .multilineTextAlignment(.center)
         }.frame(maxHeight: .infinity, alignment: .center)
     }
-    
+
     private func createDeepLink(postIndex: Int, postId: String) -> URL {
         let fromScreenType = "dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.UnreadWidget"
         let json = "{\"postIndex\":\(postIndex),\"postId\":\"\(postId)\",\"fromScreen\":{\"type\":\"\(fromScreenType)\"}}"
@@ -166,34 +194,73 @@ struct TwineUnreadSmallWidget: Widget {
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: UnreadSmallProvider()) { entry in
-            if #available(iOS 17.0, *) {
-                TwineUnreadSmallWidgetEntryView(entry: entry)
-                    .containerBackground(.fill.tertiary, for: .widget)
-            } else {
-                TwineUnreadSmallWidgetEntryView(entry: entry)
-                    .padding(4)
-                    .background()
-            }
+            TwineUnreadSmallWidgetEntryView(entry: entry)
+                .containerBackground(for: .widget) {
+                    Color("WidgetBackground")
+                }
+                .padding(4)
         }
+        .contentMarginsDisabled()
         .configurationDisplayName(String(localized: "widget_unread_recent_name"))
         .supportedFamilies([.systemSmall])
     }
 }
 
+
+@available(iOS 17.0, *)
+struct NextPostIntent: AppIntent {
+    static var title: LocalizedStringResource = "Next Post"
+
+    func perform() async throws -> some IntentResult {
+        let defaults = UserDefaults(suiteName: "group.dev.sasikanth.rss.reader")
+        let index = defaults?.integer(forKey: "unread_widget_index") ?? 0
+        defaults?.set((index + 1) % 10, forKey: "unread_widget_index")
+        WidgetCenter.shared.reloadTimelines(ofKind: "TwineUnreadSmallWidget")
+        return .result()
+    }
+}
+
+@available(iOS 17.0, *)
+struct PreviousPostIntent: AppIntent {
+    static var title: LocalizedStringResource = "Previous Post"
+
+    func perform() async throws -> some IntentResult {
+        let defaults = UserDefaults(suiteName: "group.dev.sasikanth.rss.reader")
+        let index = defaults?.integer(forKey: "unread_widget_index") ?? 0
+        if index > 0 {
+            defaults?.set(index - 1, forKey: "unread_widget_index")
+        }
+        WidgetCenter.shared.reloadTimelines(ofKind: "TwineUnreadSmallWidget")
+        return .result()
+    }
+}
+
+
+struct UIWidgetPost {
+    let id: String
+    let title: String?
+    let feedName: String?
+    let image: UIImage?
+    let feedIcon: UIImage?
+    let hasImage: Bool
+}
+
 struct UnreadSmallPostsEntry: TimelineEntry {
     let date: Date
     let count: Int
-    let posts: [ModelWidgetPost]
+    let posts: [UIWidgetPost]
     let currentIndex: Int
     let isSubscribed: Bool
 }
 
 struct UnreadSmallProvider: TimelineProvider {
 
+    private let rotationInterval: TimeInterval = 5
+
     let component = InjectApplicationComponent(uiViewControllerProvider: {
         UIViewController()
     })
-    
+
     init() {
         component.initializers
             .compactMap { ($0 as! any Initializer) }
@@ -201,55 +268,125 @@ struct UnreadSmallProvider: TimelineProvider {
                 initializer.initialize()
             }
     }
-    
+
+    private func fetchImage(from urlString: String?) async -> UIImage? {
+        guard let urlString = urlString, let url = URL(string: urlString) else { return nil }
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            return UIImage(data: data)
+        } catch {
+            return nil
+        }
+    }
+
+    private func fetchUIWidgetPosts(from posts: [ModelWidgetPost]) async -> [UIWidgetPost] {
+        await withTaskGroup(of: UIWidgetPost.self) { group in
+            for post in posts {
+                group.addTask {
+                    let image = await self.fetchImage(from: post.image)
+                    let feedIcon = await self.fetchImage(from: post.feedIcon)
+                    return UIWidgetPost(
+                        id: post.id,
+                        title: post.title,
+                        feedName: post.feedName,
+                        image: image,
+                        feedIcon: feedIcon,
+                        hasImage: post.image != nil
+                    )
+                }
+            }
+
+            var results: [UIWidgetPost] = []
+            for await result in group {
+                results.append(result)
+            }
+
+            // Re-sort to maintain original order
+            return posts.compactMap { post in
+                results.first(where: { $0.id == post.id })
+            }
+        }
+    }
+
     func placeholder(in context: Context) -> UnreadSmallPostsEntry {
         UnreadSmallPostsEntry(date: Date(), count: 0, posts: [], currentIndex: 0, isSubscribed: true)
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (UnreadSmallPostsEntry) -> ()) {
+    func getSnapshot(in context: Context, completion: @escaping (UnreadSmallPostsEntry) -> Void) {
         Task {
             let currentDate = Date()
-            let entry = await makeEntry(date: currentDate, index: 0)
-            
-            if entry == nil {
-                return
-            }
-            
-            completion(entry!)
+            let entry = await makeEntry(date: currentDate)
+            completion(entry ?? placeholder(in: context))
         }
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<UnreadSmallPostsEntry>) -> ()) {
+    func getTimeline(in context: Context, completion: @escaping (Timeline<UnreadSmallPostsEntry>) -> Void) {
         Task {
             let currentDate = Date()
-            var entries: [UnreadSmallPostsEntry] = []
-            
-            // Generate entries to cycle through 10 posts, 10 minutes apart.
-            for i in 0..<10 {
-                if let entry = await makeEntry(date: Calendar.current.date(byAdding: .minute, value: i * 10, to: currentDate)!, index: i) {
+
+            do {
+                let repository = component.widgetDataRepository
+                let unreadPostsCount = try await repository.unreadPostsCountBlocking()
+                let unreadPosts = try await repository.unreadPostsBlocking(numberOfPosts: 10)
+                let isSubscribed = try await component.billingHandler.customerResult() is SubscriptionResultSubscribed
+
+                let defaults = UserDefaults(suiteName: "group.dev.sasikanth.rss.reader")
+                let startIndex = defaults?.integer(forKey: "unread_widget_index") ?? 0
+
+                if unreadPosts.isEmpty {
+                    let entry = UnreadSmallPostsEntry(date: currentDate, count: 0, posts: [], currentIndex: 0, isSubscribed: isSubscribed)
+                    completion(Timeline(entries: [entry], policy: .atEnd))
+                    return
+                }
+
+                let uiPosts = await fetchUIWidgetPosts(from: unreadPosts)
+
+                var entries: [UnreadSmallPostsEntry] = []
+                let postCount = uiPosts.count
+
+                // Generate 50 entries (250 seconds of rotation) to cycle through posts
+                // Modulo by postCount ensures it circles back to the first post
+                for i in 0..<50 {
+                    let entryDate = currentDate.addingTimeInterval(Double(i) * rotationInterval)
+                    let currentIndex = (startIndex + i) % postCount
+
+                    let entry = UnreadSmallPostsEntry(
+                        date: entryDate,
+                        count: Int(truncating: unreadPostsCount),
+                        posts: uiPosts,
+                        currentIndex: currentIndex,
+                        isSubscribed: isSubscribed
+                    )
                     entries.append(entry)
                 }
+
+                // Persist the next starting index for the next timeline refresh
+                let nextStartIndex = (startIndex + 50) % postCount
+                defaults?.set(nextStartIndex, forKey: "unread_widget_index")
+
+                let timeline = Timeline(entries: entries, policy: .atEnd)
+                completion(timeline)
+            } catch {
+                let entry = await makeEntry(date: currentDate)
+                let timeline = Timeline(entries: [entry ?? placeholder(in: context)], policy: .atEnd)
+                completion(timeline)
             }
-            
-            if entries.isEmpty {
-                return
-            }
-            
-            let timeline = Timeline(entries: entries, policy: .atEnd)
-            completion(timeline)
         }
     }
-    
-    private func makeEntry(date: Date, index: Int) async -> UnreadSmallPostsEntry? {
+
+    private func makeEntry(date: Date) async -> UnreadSmallPostsEntry? {
         do {
             let repository = component.widgetDataRepository
             let unreadPostsCount = try await repository.unreadPostsCountBlocking()
             let unreadPosts = try await repository.unreadPostsBlocking(numberOfPosts: 10)
             let isSubscribed = try await component.billingHandler.customerResult() is SubscriptionResultSubscribed
+            let defaults = UserDefaults(suiteName: "group.dev.sasikanth.rss.reader")
+            let index = defaults?.integer(forKey: "unread_widget_index") ?? 0
 
-            return UnreadSmallPostsEntry(date: date, count: Int(unreadPostsCount), posts: unreadPosts, currentIndex: index, isSubscribed: isSubscribed)
+            let uiPosts = await fetchUIWidgetPosts(from: unreadPosts)
+
+            return UnreadSmallPostsEntry(date: date, count: Int(truncating: unreadPostsCount), posts: uiPosts, currentIndex: index, isSubscribed: isSubscribed)
         } catch {
-            print("Failed to create entry: \(error)")
             return nil
         }
     }
