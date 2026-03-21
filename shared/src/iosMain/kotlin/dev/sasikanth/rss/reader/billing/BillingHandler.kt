@@ -20,6 +20,7 @@ package dev.sasikanth.rss.reader.billing
 import com.revenuecat.purchases.kmp.Purchases
 import com.revenuecat.purchases.kmp.ktx.awaitCustomerInfo
 import com.revenuecat.purchases.kmp.models.CacheFetchPolicy
+import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.ENTITLEMENT_PREMIUM
@@ -28,12 +29,19 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-actual class BillingHandler(private val dispatchersProvider: DispatchersProvider) {
+actual class BillingHandler(
+  private val appInfo: AppInfo,
+  private val dispatchersProvider: DispatchersProvider,
+) {
 
   private val purchases by lazy { Purchases.sharedInstance }
 
   actual suspend fun isSubscribed(): Boolean {
-    return customerResult() is SubscriptionResult.Subscribed
+    return if (!appInfo.isDebugBuild) {
+      customerResult() is SubscriptionResult.Subscribed
+    } else {
+      true
+    }
   }
 
   actual suspend fun canSubscribe(): Boolean {
@@ -41,6 +49,10 @@ actual class BillingHandler(private val dispatchersProvider: DispatchersProvider
   }
 
   actual suspend fun customerResult(): SubscriptionResult {
+    if (appInfo.isDebugBuild) {
+      return SubscriptionResult.Subscribed
+    }
+
     try {
       val customerInfo =
         withContext(dispatchersProvider.io) {
