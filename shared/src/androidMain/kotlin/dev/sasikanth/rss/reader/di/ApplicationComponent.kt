@@ -31,13 +31,14 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.media.AndroidAudioCache
 import dev.sasikanth.rss.reader.reader.readability.AndroidReadabilityRunner
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
+import dev.sasikanth.rss.reader.widget.di.WidgetPlatformComponent
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
 @AppScope
 @Component
 abstract class ApplicationComponent(@get:Provides val context: Context) :
-  SharedApplicationComponent() {
+  SharedApplicationComponent(), WidgetPlatformComponent {
 
   abstract val rssRepository: RssRepository
 

@@ -27,6 +27,7 @@ import dev.sasikanth.rss.reader.data.sync.utils.NewArticleNotifier
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.reader.readability.IosReadabilityRunner
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
+import dev.sasikanth.rss.reader.widget.di.WidgetPlatformComponent
 import kotlin.experimental.ExperimentalNativeApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import me.tatarka.inject.annotations.Component
@@ -41,7 +42,7 @@ import platform.UIKit.UIViewController
 @Component
 abstract class ApplicationComponent(
   @get:Provides val uiViewControllerProvider: () -> UIViewController
-) : SharedApplicationComponent() {
+) : SharedApplicationComponent(), WidgetPlatformComponent {
 
   abstract val rssRepository: RssRepository
 

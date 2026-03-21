@@ -20,13 +20,14 @@ import dev.sasikanth.rss.reader.data.sync.utils.NewArticleNotifier
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.reader.readability.HtmlReadabilityRunner
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
+import dev.sasikanth.rss.reader.widget.di.WidgetPlatformComponent
 import java.io.File
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
 @AppScope
 @Component
-abstract class ApplicationComponent : SharedApplicationComponent() {
+abstract class ApplicationComponent : SharedApplicationComponent(), WidgetPlatformComponent {
 
   abstract val rssRepository: RssRepository
 
