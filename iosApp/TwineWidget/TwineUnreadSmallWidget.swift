@@ -38,22 +38,54 @@ struct TwineUnreadSmallWidgetEntryView: View {
     func unreadPostView(post: UIWidgetPost, index: Int) -> some View {
         ZStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 0) {
-                // No image content
-                Spacer()
+                let hasImage = post.postImage != nil
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(
-                        post.title
-                            ?? String(localized: "unread_widget_no_title")
-                    )
-                    .font(.system(size: 16, weight: .medium))
-                    .lineLimit(2...3)
+                if hasImage {
+                    // Image content
+                    // TODO: Replace color placeholder with actual image
+                    Color.green.opacity(0.4)
+                        .frame(width: .infinity, height: .infinity)
+                        .clipShape(
+                            UnevenRoundedRectangle(
+                                topLeadingRadius: 24,
+                                bottomLeadingRadius: 12,
+                                bottomTrailingRadius: 12,
+                                topTrailingRadius: 24,
+                                style: .continuous
+                            )
+                        )
 
-                    footer(post: post, index: index)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(
+                            post.title
+                                ?? String(localized: "unread_widget_no_title")
+                        )
+                        .font(.system(size: 16, weight: .medium))
+                        .lineLimit(2...3)
+
+                        footer(post: post, index: index)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.top, 8)
+                    .padding(.bottom, 12)
+                } else {
+                    // No image content
+                    Spacer()
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(
+                            post.title
+                                ?? String(localized: "unread_widget_no_title")
+                        )
+                        .font(.system(size: 16, weight: .medium))
+                        .lineLimit(2...3)
+
+                        footer(post: post, index: index)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.top, 8)
+                    .padding(.bottom, 12)
                 }
-                .padding(.horizontal, 8)
-                .padding(.top, 8)
-                .padding(.bottom, 12)
             }
             .frame(maxHeight: .infinity)
             .widgetURL(createDeepLink(postIndex: index, postId: post.id))
