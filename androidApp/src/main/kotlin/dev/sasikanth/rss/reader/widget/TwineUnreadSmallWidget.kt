@@ -234,11 +234,6 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
                   modifier = GlanceModifier.fillMaxSize().cornerRadius(2.dp),
                 )
               }
-              Image(
-                provider = ImageProvider(R.drawable.ic_unread_tick),
-                contentDescription = null,
-                modifier = GlanceModifier.size(6.dp).padding(start = 6.dp, top = 6.dp),
-              )
             }
             Spacer(GlanceModifier.width(4.dp))
             Text(
