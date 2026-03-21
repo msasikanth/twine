@@ -192,11 +192,11 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
             style =
               TextStyle(
                 color = GlanceTheme.colors.onSurface,
-                fontSize = 12.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
               ),
             maxLines = 2,
-            modifier = GlanceModifier.padding(horizontal = 8.dp).height(32.dp),
+            modifier = GlanceModifier.padding(horizontal = 8.dp).height(40.dp),
           )
         } else {
           Spacer(GlanceModifier.defaultWeight())
@@ -245,7 +245,7 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
               style =
                 TextStyle(
                   color = GlanceTheme.colors.onSurface,
-                  fontSize = 8.sp,
+                  fontSize = 10.sp,
                   fontWeight = FontWeight.Medium,
                 ),
               maxLines = 1,
@@ -273,8 +273,7 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
                 modifier =
                   GlanceModifier.size(24.dp)
                     .background(GlanceTheme.colors.surface)
-                    .cornerRadius(99.dp)
-                    .clickable(actionRunCallback<PreviousPostAction>()),
+                    .cornerRadius(99.dp),
                 contentAlignment = Alignment.Center,
               ) {
                 Image(
@@ -293,16 +292,14 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
 
           if (index < count - 1) {
             Box(
-              modifier =
-                GlanceModifier.size(48.dp).clickable(actionRunCallback<PreviousPostAction>()),
+              modifier = GlanceModifier.size(48.dp).clickable(actionRunCallback<NextPostAction>()),
               contentAlignment = Alignment.Center,
             ) {
               Box(
                 modifier =
                   GlanceModifier.size(24.dp)
                     .background(GlanceTheme.colors.surface)
-                    .cornerRadius(99.dp)
-                    .clickable(actionRunCallback<NextPostAction>()),
+                    .cornerRadius(99.dp),
                 contentAlignment = Alignment.Center,
               ) {
                 Image(
