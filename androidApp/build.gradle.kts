@@ -73,7 +73,7 @@ android {
     create("full") { dimension = "version" }
     create("foss") {
       dimension = "version"
-      applicationIdSuffix = ".foss"
+      versionNameSuffix = "-FOSS"
     }
   }
 
