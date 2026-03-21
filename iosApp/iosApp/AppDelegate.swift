@@ -47,6 +47,10 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
         UNUserNotificationCenter.current().delegate = self
 
+        IosWidgetUpdateBridge().register {
+            WidgetCenter.shared.reloadAllTimelines()
+        }
+
         applicationComponent.initializers
             .compactMap { ($0 as! any Initializer) }
             .forEach { initializer in
@@ -118,7 +122,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                     )
                 }
                 
-                WidgetCenter.shared.reloadTimelines(ofKind: AppDelegate.unreadWidgetKind)
                 task.setTaskCompleted(success: true)
             } catch {
                 Bugsnag.notifyError(error)

@@ -51,7 +51,7 @@ struct ContentView: View {
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: UIScene.didEnterBackgroundNotification)) { output in
-                WidgetCenter.shared.reloadTimelines(ofKind: AppDelegate.unreadWidgetKind)
+                // Handled by RssRepository
             }
 	}
 }
