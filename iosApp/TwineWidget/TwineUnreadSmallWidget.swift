@@ -34,18 +34,19 @@ struct TwineUnreadSmallWidgetEntryView: View {
     func unreadPostView(post: UIWidgetPost, index: Int) -> some View {
         ZStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 0) {
+                // No image content
                 Spacer()
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text(post.title ?? String(localized: "unread_widget_no_title"))
-                        .font(.system(size: 14, weight: .medium))
+                        .font(.system(size: 16, weight: .medium))
                         .lineLimit(2...3)
 
                     footer(post: post, index: index)
                 }
                 .padding(.horizontal, 8)
-                .padding(.top, 10)
-                .padding(.bottom, 10)
+                .padding(.top, 8)
+                .padding(.bottom, 12)
             }
             .frame(maxHeight: .infinity)
             .widgetURL(createDeepLink(postIndex: index, postId: post.id))
@@ -53,14 +54,10 @@ struct TwineUnreadSmallWidgetEntryView: View {
             // Navigation Buttons
             HStack {
                 if index > 0 {
-                    if #available(iOS 17.0, *) {
-                        Button(intent: PreviousPostIntent()) {
-                            navigationIcon(name: "chevron.left")
-                        }
-                        .buttonStyle(.plain)
-                    } else {
+                    Button(intent: PreviousPostIntent()) {
                         navigationIcon(name: "chevron.left")
                     }
+                    .buttonStyle(.plain)
                 } else {
                     Spacer()
                         .frame(width: 48, height: 48)
@@ -69,14 +66,10 @@ struct TwineUnreadSmallWidgetEntryView: View {
                 Spacer()
 
                 if index < entry.posts.count - 1 {
-                    if #available(iOS 17.0, *) {
-                        Button(intent: NextPostIntent()) {
-                            navigationIcon(name: "chevron.right")
-                        }
-                        .buttonStyle(.plain)
-                    } else {
+                    Button(intent: NextPostIntent()) {
                         navigationIcon(name: "chevron.right")
                     }
+                    .buttonStyle(.plain)
                 } else {
                     Spacer()
                         .frame(width: 48, height: 48)
@@ -93,17 +86,17 @@ struct TwineUnreadSmallWidgetEntryView: View {
                     if let uiIcon = post.feedIcon {
                         Image(uiImage: uiIcon)
                             .resizable()
-                            .frame(width: 10, height: 10)
+                            .frame(width: 12, height: 12)
                             .cornerRadius(2)
                     } else {
                         Image(systemName: "rss")
                             .resizable()
-                            .frame(width: 10, height: 10)
+                            .frame(width: 12, height: 12)
                     }
                 }
 
                 Text(post.feedName ?? "")
-                    .font(.system(size: 8, weight: .medium))
+                    .font(.system(size: 9, weight: .medium))
                     .lineLimit(1)
             }
 
@@ -114,7 +107,7 @@ struct TwineUnreadSmallWidgetEntryView: View {
                 ForEach(0..<min(entry.posts.count, 5), id: \.self) { i in
                     Circle()
                         .fill(i == (index % 5) ? Color.primary : Color.primary.opacity(0.4))
-                        .frame(width: 4, height: 4)
+                        .frame(width: 5, height: 5)
                 }
             }
         }.padding(.horizontal, 4)

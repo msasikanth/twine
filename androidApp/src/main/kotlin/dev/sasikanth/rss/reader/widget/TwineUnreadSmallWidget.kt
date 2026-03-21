@@ -193,7 +193,7 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
             style =
               TextStyle(
                 color = GlanceTheme.colors.onSurface,
-                fontSize = 14.sp,
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
               ),
             maxLines = 2,
@@ -206,16 +206,19 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
             style =
               TextStyle(
                 color = GlanceTheme.colors.onSurface,
-                fontSize = 14.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
               ),
-            maxLines = 4,
+            maxLines = 3,
             modifier = GlanceModifier.padding(horizontal = 8.dp),
           )
         }
 
         Row(
-          modifier = GlanceModifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+          modifier =
+            GlanceModifier.fillMaxWidth()
+              .padding(horizontal = 12.dp)
+              .padding(top = 8.dp, bottom = 12.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
           // Publisher Info
@@ -223,7 +226,7 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
             verticalAlignment = Alignment.CenterVertically,
             modifier = GlanceModifier.defaultWeight(),
           ) {
-            Box(modifier = GlanceModifier.size(10.dp)) {
+            Box(modifier = GlanceModifier.size(12.dp)) {
               var feedIcon by remember(post.feedIcon) { mutableStateOf<Bitmap?>(null) }
               LaunchedEffect(post.feedIcon) { feedIcon = context.getImage(url = post.feedIcon) }
 
@@ -241,7 +244,7 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
               style =
                 TextStyle(
                   color = GlanceTheme.colors.onSurface,
-                  fontSize = 10.sp,
+                  fontSize = 9.sp,
                   fontWeight = FontWeight.Medium,
                 ),
               maxLines = 1,
@@ -327,7 +330,7 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
             GlanceTheme.colors.onSurface.getColor(context).copy(alpha = 0.4f)
           }
 
-        Box(modifier = GlanceModifier.size(4.dp).background(indicatorColor).cornerRadius(99.dp)) {}
+        Box(modifier = GlanceModifier.size(5.dp).background(indicatorColor).cornerRadius(99.dp)) {}
         if (i < minOf(count, 5) - 1) {
           Spacer(GlanceModifier.width(4.dp))
         }
