@@ -70,22 +70,9 @@ struct TwineUnreadWidgetEntryView : View {
                                 }
                             }
 
-                        }.padding(.trailing, 16)
+                        }
                         
                         Spacer()
-                        
-                        if let imageString = post.image,
-                           let imageURL = URL(string: imageString) {
-                            if let imageData = try? Data(contentsOf: imageURL),
-                               let uiImage = UIImage(data: imageData) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: 48, height: 48)
-                                    .cornerRadius(12)
-                                    .clipped()
-                            }
-                        }
                     }
                     .padding(.vertical, 8)
                     .padding(.horizontal, 16)
