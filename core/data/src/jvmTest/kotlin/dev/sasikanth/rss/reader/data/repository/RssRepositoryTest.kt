@@ -33,6 +33,7 @@ import dev.sasikanth.rss.reader.data.database.User
 import dev.sasikanth.rss.reader.data.database.adapter.PostFlagsAdapter
 import dev.sasikanth.rss.reader.data.utils.ReadingTimeCalculator
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.widget.WidgetUpdater
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -115,6 +116,7 @@ class RssRepositoryTest {
         sourceQueries = database.sourceQueries,
         readingHistoryQueries = database.readingHistoryQueries,
         readingTimeCalculator = ReadingTimeCalculator(testDispatchersProvider),
+        widgetUpdater = NoopWidgetUpdater,
         dispatchersProvider = testDispatchersProvider,
       )
   }
@@ -408,5 +410,12 @@ class RssRepositoryTest {
       remoteId = null,
       isDateParsedCorrectly = 1L,
     )
+  }
+}
+
+object NoopWidgetUpdater : WidgetUpdater {
+
+  override fun updateUnreadWidget() {
+    // no-op
   }
 }
