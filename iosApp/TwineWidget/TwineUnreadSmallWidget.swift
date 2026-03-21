@@ -11,6 +11,8 @@ import SwiftUI
 import WidgetKit
 import shared
 
+let numberOfUnreadPostsInWidget = 5
+
 struct TwineUnreadSmallWidgetEntryView: View {
     var entry: UnreadSmallPostsEntry
 
@@ -104,9 +106,9 @@ struct TwineUnreadSmallWidgetEntryView: View {
 
             // Pagination Dots
             HStack(spacing: 4) {
-                ForEach(0..<min(entry.posts.count, 5), id: \.self) { i in
+                ForEach(0..<min(entry.posts.count, numberOfUnreadPostsInWidget), id: \.self) { i in
                     Circle()
-                        .fill(i == (index % 5) ? Color.primary : Color.primary.opacity(0.4))
+                        .fill(i == (index % numberOfUnreadPostsInWidget) ? Color.primary : Color.primary.opacity(0.4))
                         .frame(width: 5, height: 5)
                 }
             }
@@ -178,7 +180,7 @@ struct NextPostIntent: AppIntent {
     func perform() async throws -> some IntentResult {
         let defaults = UserDefaults(suiteName: "group.dev.sasikanth.rss.reader")
         let index = defaults?.integer(forKey: "unread_widget_index") ?? 0
-        defaults?.set((index + 1) % 10, forKey: "unread_widget_index")
+        defaults?.set((index + 1) % numberOfUnreadPostsInWidget, forKey: "unread_widget_index")
         WidgetCenter.shared.reloadTimelines(ofKind: "TwineUnreadSmallWidget")
         return .result()
     }
@@ -286,7 +288,7 @@ struct UnreadSmallProvider: TimelineProvider {
             do {
                 let repository = component.widgetDataRepository
                 let unreadPostsCount = try await repository.unreadPostsCountBlocking()
-                let unreadPosts = try await repository.unreadPostsBlocking(numberOfPosts: 10)
+                let unreadPosts = try await repository.unreadPostsBlocking(numberOfPosts: Int32(numberOfUnreadPostsInWidget))
                 let isSubscribed = try await component.billingHandler.customerResult() is SubscriptionResultSubscribed
 
                 let defaults = UserDefaults(suiteName: "group.dev.sasikanth.rss.reader")
@@ -337,7 +339,7 @@ struct UnreadSmallProvider: TimelineProvider {
         do {
             let repository = component.widgetDataRepository
             let unreadPostsCount = try await repository.unreadPostsCountBlocking()
-            let unreadPosts = try await repository.unreadPostsBlocking(numberOfPosts: 10)
+            let unreadPosts = try await repository.unreadPostsBlocking(numberOfPosts: Int32(numberOfUnreadPostsInWidget))
             let isSubscribed = try await component.billingHandler.customerResult() is SubscriptionResultSubscribed
             let defaults = UserDefaults(suiteName: "group.dev.sasikanth.rss.reader")
             let index = defaults?.integer(forKey: "unread_widget_index") ?? 0
