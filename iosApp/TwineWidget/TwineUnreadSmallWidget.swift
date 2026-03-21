@@ -34,47 +34,18 @@ struct TwineUnreadSmallWidgetEntryView: View {
     func unreadPostView(post: UIWidgetPost, index: Int) -> some View {
         ZStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 0) {
-                if let uiImage = post.image {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 94)
-                        .clipShape(
-                            UnevenRoundedRectangle(
-                                topLeadingRadius: 24,
-                                bottomLeadingRadius: 12,
-                                bottomTrailingRadius: 12,
-                                topTrailingRadius: 24
-                            ))
-                }
-
-                if post.hasImage {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(post.title ?? String(localized: "unread_widget_no_title"))
-                            .font(.system(size: 12, weight: .medium))
-                            .lineLimit(2...2)
-
-                        footer(post: post, index: index)
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.top, 10)
-                    .padding(.bottom, 10)
-                } else {
-                    Spacer()
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(post.title ?? String(localized: "unread_widget_no_title"))
-                            .font(.system(size: 14, weight: .medium))
-                            .lineLimit(2...3)
-
-                        footer(post: post, index: index)
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.bottom, 10)
-                }
-
                 Spacer()
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(post.title ?? String(localized: "unread_widget_no_title"))
+                        .font(.system(size: 14, weight: .medium))
+                        .lineLimit(2...3)
+
+                    footer(post: post, index: index)
+                }
+                .padding(.horizontal, 8)
+                .padding(.top, 10)
+                .padding(.bottom, 10)
             }
             .frame(maxHeight: .infinity)
             .widgetURL(createDeepLink(postIndex: index, postId: post.id))
@@ -146,7 +117,7 @@ struct TwineUnreadSmallWidgetEntryView: View {
                         .frame(width: 4, height: 4)
                 }
             }
-        }
+        }.padding(.horizontal, 4)
     }
 
     func navigationIcon(name: String) -> some View {
@@ -240,9 +211,7 @@ struct UIWidgetPost {
     let id: String
     let title: String?
     let feedName: String?
-    let image: UIImage?
     let feedIcon: UIImage?
-    let hasImage: Bool
 }
 
 struct UnreadSmallPostsEntry: TimelineEntry {
@@ -283,15 +252,12 @@ struct UnreadSmallProvider: TimelineProvider {
         await withTaskGroup(of: UIWidgetPost.self) { group in
             for post in posts {
                 group.addTask {
-                    let image = await self.fetchImage(from: post.image)
                     let feedIcon = await self.fetchImage(from: post.feedIcon)
                     return UIWidgetPost(
                         id: post.id,
                         title: post.title,
                         feedName: post.feedName,
-                        image: image,
-                        feedIcon: feedIcon,
-                        hasImage: post.image != nil
+                        feedIcon: feedIcon
                     )
                 }
             }
