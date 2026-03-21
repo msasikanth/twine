@@ -35,6 +35,7 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
+import dev.sasikanth.rss.reader.widget.WidgetUpdater
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
@@ -60,6 +61,7 @@ class MinifluxSyncCoordinator(
   private val settingsRepository: SettingsRepository,
   private val userRepository: UserRepository,
   private val fullArticleFetcher: FullArticleFetcher,
+  private val widgetUpdater: WidgetUpdater,
 ) : SyncCoordinator {
 
   companion object {
@@ -140,6 +142,7 @@ class MinifluxSyncCoordinator(
       syncStatuses(isInitialSync = isInitialSync)
 
       updateSyncState(SyncState.Complete)
+      widgetUpdater.updateUnreadWidget()
       true
     } catch (e: Exception) {
       Logger.e(e) { "Miniflux pull failed: $e" }
@@ -159,6 +162,7 @@ class MinifluxSyncCoordinator(
       if (feed?.remoteId != null) {
         syncArticles(feedId = feed.remoteId!!.toLong())
         updateSyncState(SyncState.Complete)
+        widgetUpdater.updateUnreadWidget()
       } else {
         pullInternal()
       }

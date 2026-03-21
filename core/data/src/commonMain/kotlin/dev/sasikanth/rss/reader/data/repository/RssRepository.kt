@@ -57,6 +57,7 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import dev.sasikanth.rss.reader.util.splitAndTrim
+import dev.sasikanth.rss.reader.widget.WidgetUpdater
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant
@@ -91,6 +92,7 @@ class RssRepository(
   private val sourceQueries: SourceQueries,
   private val readingHistoryQueries: ReadingHistoryQueries,
   private val readingTimeCalculator: ReadingTimeCalculator,
+  private val widgetUpdater: WidgetUpdater,
   private val dispatchersProvider: DispatchersProvider,
 ) {
   private companion object {
@@ -153,6 +155,7 @@ class RssRepository(
         .collect { batch -> upsertPostsBatch(batch, finalFeedId) }
     }
 
+    widgetUpdater.updateUnreadWidget()
     return finalFeedId
   }
 
@@ -660,6 +663,7 @@ class RssRepository(
         updatedAt = Clock.System.now(),
       )
     }
+    widgetUpdater.updateUnreadWidget()
   }
 
   suspend fun updatePostReadStatus(read: Boolean, id: String, recordHistory: Boolean = true) {
@@ -677,6 +681,7 @@ class RssRepository(
         }
       }
     }
+    widgetUpdater.updateUnreadWidget()
   }
 
   suspend fun updateSeedColor(seedColor: Int, id: String) {
@@ -791,6 +796,7 @@ class RssRepository(
         postQueries.deletePostsForFeed(feedId)
       }
     }
+    widgetUpdater.updateUnreadWidget()
   }
 
   private fun mapToFeedShowFavIconSettings(feedShowFavIconSettings: String?): List<Boolean> {
@@ -1008,12 +1014,15 @@ class RssRepository(
 
   /** @return list of feeds from which posts are deleted from */
   suspend fun deleteReadPosts(before: Instant): List<String> {
-    return withContext(dispatchersProvider.databaseWrite) {
+    val results =
+      withContext(dispatchersProvider.databaseWrite) {
         postQueries.transactionWithResult {
           postQueries.deleteReadPosts(before = before).executeAsList()
         }
       }
-      .distinct()
+
+    widgetUpdater.updateUnreadWidget()
+    return results.distinct()
   }
 
   suspend fun updateFeedsLastCleanUpAt(
@@ -1041,6 +1050,7 @@ class RssRepository(
         }
       }
     }
+    widgetUpdater.updateUnreadWidget()
   }
 
   suspend fun markPostsAsRead(postIds: Set<String>) {
@@ -1073,6 +1083,7 @@ class RssRepository(
         }
       }
     }
+    widgetUpdater.updateUnreadWidget()
   }
 
   suspend fun updateBookmarkStatus(postIds: Set<String>, bookmarked: Boolean) {
@@ -1089,6 +1100,7 @@ class RssRepository(
         }
       }
     }
+    widgetUpdater.updateUnreadWidget()
   }
 
   suspend fun markPostsInFeedAsRead(
@@ -1109,6 +1121,7 @@ class RssRepository(
         }
       }
     }
+    widgetUpdater.updateUnreadWidget()
   }
 
   suspend fun post(postId: String): Post {
@@ -1345,6 +1358,7 @@ class RssRepository(
         }
       }
     }
+    widgetUpdater.updateUnreadWidget()
   }
 
   suspend fun upsertFeeds(feeds: List<Feed>) {
@@ -1371,6 +1385,7 @@ class RssRepository(
         }
       }
     }
+    widgetUpdater.updateUnreadWidget()
   }
 
   suspend fun upsertGroup(
@@ -1392,6 +1407,7 @@ class RssRepository(
         remoteId = remoteId,
       )
     }
+    widgetUpdater.updateUnreadWidget()
   }
 
   suspend fun feedGroupBlocking(id: String): FeedGroup? {
@@ -1430,13 +1446,14 @@ class RssRepository(
   }
 
   suspend fun updateFeedHideFromAllFeeds(feedId: String, newValue: Boolean) {
-    return withContext(dispatchersProvider.databaseWrite) {
+    withContext(dispatchersProvider.databaseWrite) {
       feedQueries.updateHideFromAllFeeds(
         hideFromAllFeeds = newValue,
         lastUpdatedAt = Clock.System.now(),
         id = feedId,
       )
     }
+    widgetUpdater.updateUnreadWidget()
   }
 
   suspend fun createGroup(name: String): String {
@@ -1550,6 +1567,7 @@ class RssRepository(
         }
       }
     }
+    widgetUpdater.updateUnreadWidget()
   }
 
   suspend fun deleteSources(sources: Set<Source>) {
@@ -1572,6 +1590,7 @@ class RssRepository(
         }
       }
     }
+    widgetUpdater.updateUnreadWidget()
   }
 
   fun pinnedSources(

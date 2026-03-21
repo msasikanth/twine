@@ -32,6 +32,7 @@ import dev.sasikanth.rss.reader.data.sync.SyncState
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
+import dev.sasikanth.rss.reader.widget.WidgetUpdater
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
@@ -57,6 +58,7 @@ class FreshRSSSyncCoordinator(
   private val refreshPolicy: RefreshPolicy,
   private val settingsRepository: SettingsRepository,
   private val fullArticleFetcher: FullArticleFetcher,
+  private val widgetUpdater: WidgetUpdater,
 ) : SyncCoordinator {
   private companion object {
     private const val ARTICLE_PAGE_SIZE = 500
@@ -129,6 +131,7 @@ class FreshRSSSyncCoordinator(
       syncStatuses(isInitialSync = isInitialSync)
 
       updateSyncState(SyncState.Complete)
+      widgetUpdater.updateUnreadWidget()
 
       true
     } catch (e: Exception) {
@@ -149,6 +152,7 @@ class FreshRSSSyncCoordinator(
       if (feed?.remoteId != null) {
         syncArticles(streamId = feed.remoteId!!)
         updateSyncState(SyncState.Complete)
+        widgetUpdater.updateUnreadWidget()
       } else {
         pullInternal()
       }

@@ -31,6 +31,7 @@ import dev.sasikanth.rss.reader.data.sync.SyncState
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.widget.WidgetUpdater
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
@@ -54,6 +55,7 @@ import me.tatarka.inject.annotations.Inject
 class LocalSyncCoordinator(
   private val feedFetcher: FeedFetcher,
   private val rssRepository: RssRepository,
+  private val widgetUpdater: WidgetUpdater,
   private val dispatchersProvider: DispatchersProvider,
   private val observableActiveSource: ObservableActiveSource,
   private val settingsRepository: SettingsRepository,
@@ -92,6 +94,7 @@ class LocalSyncCoordinator(
 
         refreshPolicy.updateLastSyncedAt()
         updateSyncState(SyncState.Complete)
+        widgetUpdater.updateUnreadWidget()
       } catch (e: Exception) {
         updateSyncState(SyncState.Error(e))
       }
@@ -119,6 +122,7 @@ class LocalSyncCoordinator(
 
         refreshPolicy.updateLastSyncedAt()
         updateSyncState(SyncState.Complete)
+        widgetUpdater.updateUnreadWidget()
       } catch (e: Exception) {
         updateSyncState(SyncState.Error(e))
       }
@@ -145,6 +149,7 @@ class LocalSyncCoordinator(
 
         refreshPolicy.updateLastSyncedAt()
         updateSyncState(SyncState.Complete)
+        widgetUpdater.updateUnreadWidget()
       } catch (e: Exception) {
         updateSyncState(SyncState.Error(e))
       }
