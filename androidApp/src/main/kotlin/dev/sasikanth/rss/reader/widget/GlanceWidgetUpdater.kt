@@ -30,7 +30,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-object WidgetUpdater {
+object GlanceWidgetUpdater {
 
   private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 

@@ -31,7 +31,7 @@ import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.create
 import dev.sasikanth.rss.reader.media.AudioCacheProvider
 import dev.sasikanth.rss.reader.widget.AndroidWidgetUpdateBridge
-import dev.sasikanth.rss.reader.widget.WidgetUpdater
+import dev.sasikanth.rss.reader.widget.GlanceWidgetUpdater
 
 class ReaderApplication : Application(), Configuration.Provider {
 
@@ -96,7 +96,7 @@ class ReaderApplication : Application(), Configuration.Provider {
 
     BugsnagInitializer.start(this)
 
-    AndroidWidgetUpdateBridge.register { context -> WidgetUpdater.update(context) }
+    AndroidWidgetUpdateBridge.register { context -> GlanceWidgetUpdater.update(context) }
 
     enqueuePeriodicFeedsRefresh()
     enqueuePeriodicPostsCleanUp()

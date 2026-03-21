@@ -33,7 +33,7 @@ import dev.sasikanth.rss.reader.notifications.PermissionRequestBridge
 import dev.sasikanth.rss.reader.platform.PlatformComponent
 import dev.sasikanth.rss.reader.share.ShareComponent
 import dev.sasikanth.rss.reader.utils.ExternalUriHandler
-import dev.sasikanth.rss.reader.widget.WidgetUpdater
+import dev.sasikanth.rss.reader.widget.GlanceWidgetUpdater
 import io.github.vinceglb.filekit.core.FileKit
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
@@ -107,7 +107,7 @@ class MainActivity : ComponentActivity() {
 
   override fun onPause() {
     super.onPause()
-    WidgetUpdater.update(this)
+    GlanceWidgetUpdater.update(this)
   }
 
   override fun onDestroy() {
