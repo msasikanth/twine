@@ -14,27 +14,20 @@ struct TwineUnreadSmallWidgetEntryView : View {
     var entry: UnreadSmallPostsEntry
     
     var body: some View {
-        if entry.isSubscribed {
-            if entry.posts.isEmpty {
-                noPosts
-            } else {
-                let safeIndex = entry.currentIndex < entry.posts.count ? entry.currentIndex : 0
-                let post = entry.posts[safeIndex]
-                unreadPostView(post: post, index: safeIndex)
-            }
+        if entry.posts.isEmpty {
+            noPosts
         } else {
-            twinePremium
+            let safeIndex = entry.currentIndex < entry.posts.count ? entry.currentIndex : 0
+            let post = entry.posts[safeIndex]
+            unreadPostView(post: post, index: safeIndex)
         }
     }
     
     func unreadPostView(post: ModelWidgetPost, index: Int) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            ZStack(alignment: .topTrailing) {
+            ZStack(alignment: .topLeading) {
                 if let imageString = post.image,
                    let imageURL = URL(string: imageString) {
-                    // Note: In a real app, you'd want to handle image loading better in widgets,
-                    // but for now we follow the existing pattern in TwineUnreadWidget.swift.
-                    // Wait, TwineUnreadWidget.swift used try? Data(contentsOf: imageURL) which is synchronous.
                     if let imageData = try? Data(contentsOf: imageURL),
                        let uiImage = UIImage(data: imageData) {
                         Image(uiImage: uiImage)
@@ -48,25 +41,50 @@ struct TwineUnreadSmallWidgetEntryView : View {
                             .frame(height: 100)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
+                } else {
+                    Spacer()
+                        .frame(height: 60)
                 }
                 
-                // Arrow icon (Next post)
-                // Since we don't have App Intents yet, this is just for UI.
-                // In a real implementation, we could make this a button that updates the widget state.
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 10, weight: .bold))
-                    .padding(6)
-                    .background(Color.gray.opacity(0.2))
-                    .clipShape(Circle())
-                    .padding(8)
+                HStack {
+                    if index > 0 {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 10, weight: .bold))
+                            .padding(6)
+                            .background(Color.white.opacity(0.8))
+                            .clipShape(Circle())
+                            .padding(8)
+                    } else {
+                        Spacer()
+                            .frame(width: 34)
+                    }
+                    
+                    Spacer()
+                    
+                    if index < entry.posts.count - 1 {
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 10, weight: .bold))
+                            .padding(6)
+                            .background(Color.white.opacity(0.8))
+                            .clipShape(Circle())
+                            .padding(8)
+                    } else {
+                        Spacer()
+                            .frame(width: 34)
+                    }
+                }
             }
             
-            Spacer(minLength: 4)
+            if post.image != nil {
+                Spacer(minLength: 4)
+            } else {
+                Spacer(minLength: 0)
+            }
             
             Text(post.title ?? post.description_ ?? String(localized: "unread_widget_no_title"))
-                .font(.system(size: 12, weight: .medium))
-                .lineLimit(2)
-                .padding(.horizontal, 4)
+                .font(.system(size: post.image != nil ? 10 : 14, weight: .medium))
+                .lineLimit(post.image != nil ? 2 : 4)
+                .padding(.horizontal, 8)
             
             Spacer(minLength: 0)
             
@@ -80,18 +98,18 @@ struct TwineUnreadSmallWidgetEntryView : View {
                            let uiIcon = UIImage(data: iconData) {
                             Image(uiImage: uiIcon)
                                 .resizable()
-                                .frame(width: 12, height: 12)
+                                .frame(width: 10, height: 12)
                                 .cornerRadius(2)
                         } else {
                             Image(systemName: "rss")
                                 .resizable()
-                                .frame(width: 12, height: 12)
+                                .frame(width: 10, height: 10)
                         }
                         
                         Circle()
                             .fill(Color.blue)
-                            .frame(width: 6, height: 6)
-                            .offset(x: 2, y: 2)
+                            .frame(width: 4, height: 4)
+                            .offset(x: 1, y: 1)
                     }
                     
                     Text(post.feedName ?? "")
@@ -102,16 +120,16 @@ struct TwineUnreadSmallWidgetEntryView : View {
                 Spacer()
                 
                 // Pagination Dots
-                HStack(spacing: 2) {
+                HStack(spacing: 4) {
                     ForEach(0..<min(entry.posts.count, 5), id: \.self) { i in
                         Circle()
-                            .fill(i == (index % 5) ? Color.primary : Color.secondary.opacity(0.3))
+                            .fill(i == (index % 5) ? Color.black : Color.black.opacity(0.4))
                             .frame(width: 4, height: 4)
                     }
                 }
             }
-            .padding(.horizontal, 4)
-            .padding(.bottom, 8)
+            .padding(.horizontal, 8)
+            .padding(.bottom, 10)
         }
         .widgetURL(createDeepLink(postIndex: index, postId: post.id))
     }
