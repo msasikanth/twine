@@ -131,7 +131,7 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
           modifier =
             GlanceModifier.fillMaxSize()
               .background(GlanceTheme.colors.widgetBackground)
-              .cornerRadius(28.dp)
+              .appWidgetInnerCornerRadius(4.dp)
               .padding(4.dp)
         ) {
           if (unreadPosts.isEmpty()) {
@@ -184,7 +184,8 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
             provider = ImageProvider(postImage!!),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = GlanceModifier.fillMaxWidth().defaultWeight().cornerRadius(24.dp),
+            modifier =
+              GlanceModifier.fillMaxWidth().defaultWeight().appWidgetInnerCornerRadius(4.dp),
           )
           Spacer(GlanceModifier.height(8.dp))
           Text(
@@ -266,7 +267,7 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
           if (index > 0) {
             Box(
               modifier =
-                GlanceModifier.size(48.dp).clickable(actionRunCallback<PreviousPostAction>()),
+                GlanceModifier.size(44.dp).clickable(actionRunCallback<PreviousPostAction>()),
               contentAlignment = Alignment.Center,
             ) {
               Box(
@@ -292,7 +293,7 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
 
           if (index < count - 1) {
             Box(
-              modifier = GlanceModifier.size(48.dp).clickable(actionRunCallback<NextPostAction>()),
+              modifier = GlanceModifier.size(44.dp).clickable(actionRunCallback<NextPostAction>()),
               contentAlignment = Alignment.Center,
             ) {
               Box(
