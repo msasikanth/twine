@@ -22,6 +22,7 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import app.cash.sqldelight.paging3.QueryPagingSource
+import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.FeedReadCount
@@ -57,7 +58,6 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import dev.sasikanth.rss.reader.util.splitAndTrim
-import dev.sasikanth.rss.reader.widget.WidgetUpdater
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant

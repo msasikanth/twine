@@ -15,11 +15,11 @@
  *
  */
 
-package dev.sasikanth.rss.reader.widget.di
+package dev.sasikanth.rss.reader.core.base.widget.di
 
+import dev.sasikanth.rss.reader.core.base.widget.AndroidWidgetUpdater
+import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import dev.sasikanth.rss.reader.widget.AndroidWidgetUpdater
-import dev.sasikanth.rss.reader.widget.WidgetUpdater
 import me.tatarka.inject.annotations.Provides
 
 interface WidgetPlatformComponent {

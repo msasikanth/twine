@@ -15,9 +15,9 @@
  *
  */
 
-package dev.sasikanth.rss.reader.widget.di
+package dev.sasikanth.rss.reader.core.base.widget.di
 
-import dev.sasikanth.rss.reader.widget.WidgetUpdater
+import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
 
 interface WidgetComponent {
   val widgetUpdater: WidgetUpdater

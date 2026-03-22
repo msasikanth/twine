@@ -13,6 +13,7 @@ package dev.sasikanth.rss.reader.di
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.app.isFoss
 import dev.sasikanth.rss.reader.billing.BillingHandler
+import dev.sasikanth.rss.reader.core.base.widget.di.WidgetPlatformComponent
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
@@ -20,7 +21,6 @@ import dev.sasikanth.rss.reader.data.sync.utils.NewArticleNotifier
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.reader.readability.HtmlReadabilityRunner
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
-import dev.sasikanth.rss.reader.widget.di.WidgetPlatformComponent
 import java.io.File
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides

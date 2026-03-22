@@ -15,7 +15,7 @@
  *
  */
 
-package dev.sasikanth.rss.reader.widget
+package dev.sasikanth.rss.reader.core.base.widget
 
 import android.content.Context
 

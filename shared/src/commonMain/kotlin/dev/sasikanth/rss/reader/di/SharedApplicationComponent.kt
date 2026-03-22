@@ -17,6 +17,7 @@
 package dev.sasikanth.rss.reader.di
 
 import dev.sasikanth.rss.reader.billing.BillingComponent
+import dev.sasikanth.rss.reader.core.base.widget.di.WidgetComponent
 import dev.sasikanth.rss.reader.core.network.di.NetworkComponent
 import dev.sasikanth.rss.reader.data.di.DataComponent
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
@@ -27,7 +28,6 @@ import dev.sasikanth.rss.reader.notifications.di.NotificationsComponent
 import dev.sasikanth.rss.reader.posts.PostsComponent
 import dev.sasikanth.rss.reader.util.DefaultDispatchersProvider
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.widget.di.WidgetComponent
 import me.tatarka.inject.annotations.Provides
 
 abstract class SharedApplicationComponent :

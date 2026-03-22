@@ -20,6 +20,7 @@ package dev.sasikanth.rss.reader.data.repository
 import app.cash.sqldelight.ColumnAdapter
 import app.cash.sqldelight.EnumColumnAdapter
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.data.database.BlockedWord
 import dev.sasikanth.rss.reader.data.database.Feed
@@ -33,7 +34,6 @@ import dev.sasikanth.rss.reader.data.database.User
 import dev.sasikanth.rss.reader.data.database.adapter.PostFlagsAdapter
 import dev.sasikanth.rss.reader.data.utils.ReadingTimeCalculator
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.widget.WidgetUpdater
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
