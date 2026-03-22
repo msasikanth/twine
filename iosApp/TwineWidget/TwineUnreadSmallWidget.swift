@@ -7,6 +7,7 @@
 //
 
 import AppIntents
+import ImageIO
 import SwiftUI
 import WidgetKit
 import shared
@@ -270,6 +271,8 @@ struct UnreadSmallPostsEntry: TimelineEntry {
 }
 
 struct UnreadSmallProvider: TimelineProvider {
+    private let postImageMaxPixelSize = 300
+    private let feedIconMaxPixelSize = 24
 
     private let rotationInterval: TimeInterval = 5
 
@@ -285,16 +288,46 @@ struct UnreadSmallProvider: TimelineProvider {
             }
     }
 
-    private func fetchImage(from urlString: String?) async -> UIImage? {
+    private func fetchImage(from urlString: String?, maxPixelSize: Int) async
+        -> UIImage?
+    {
         guard let urlString = urlString, let url = URL(string: urlString) else {
             return nil
         }
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
-            return UIImage(data: data)
+            return downsampleImage(data: data, maxPixelSize: maxPixelSize)
         } catch {
             return nil
         }
+    }
+
+    private func downsampleImage(data: Data, maxPixelSize: Int) -> UIImage? {
+        let options = [kCGImageSourceShouldCache: false] as CFDictionary
+        guard let imageSource = CGImageSourceCreateWithData(
+            data as CFData,
+            options
+        ) else {
+            return nil
+        }
+
+        let downsampleOptions =
+            [
+                kCGImageSourceCreateThumbnailFromImageAlways: true,
+                kCGImageSourceShouldCacheImmediately: true,
+                kCGImageSourceCreateThumbnailWithTransform: true,
+                kCGImageSourceThumbnailMaxPixelSize: maxPixelSize,
+            ] as CFDictionary
+
+        guard let cgImage = CGImageSourceCreateThumbnailAtIndex(
+            imageSource,
+            0,
+            downsampleOptions
+        ) else {
+            return nil
+        }
+
+        return UIImage(cgImage: cgImage)
     }
 
     private func fetchUIWidgetPosts(from posts: [ModelWidgetPost]) async
@@ -303,8 +336,14 @@ struct UnreadSmallProvider: TimelineProvider {
         await withTaskGroup(of: UIWidgetPost.self) { group in
             for post in posts {
                 group.addTask {
-                    let feedIcon = await self.fetchImage(from: post.feedIcon)
-                    let postImage = await self.fetchImage(from: post.image)
+                    let feedIcon = await self.fetchImage(
+                        from: post.feedIcon,
+                        maxPixelSize: self.feedIconMaxPixelSize
+                    )
+                    let postImage = await self.fetchImage(
+                        from: post.image,
+                        maxPixelSize: self.postImageMaxPixelSize
+                    )
 
                     return UIWidgetPost(
                         id: post.id,
