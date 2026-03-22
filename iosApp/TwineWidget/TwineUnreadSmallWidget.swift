@@ -39,30 +39,26 @@ struct TwineUnreadSmallWidgetEntryView: View {
     func unreadPostView(post: UIWidgetPost, index: Int) -> some View {
         ZStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 0) {
-                let hasImage = post.postImage != nil
-
-                if hasImage {
+                if let postImage = post.postImage {
                     // Image content
-                    // TODO: Replace color placeholder with actual image
-                    Color.green.opacity(0.4)
-                        .frame(width: .infinity, height: .infinity)
-                        .clipShape(
-                            UnevenRoundedRectangle(
-                                topLeadingRadius: 24,
-                                bottomLeadingRadius: 12,
-                                bottomTrailingRadius: 12,
-                                topTrailingRadius: 24,
-                                style: .continuous
-                            )
-                        )
+                    ZStack {
+                        Color.gray.opacity(0.25)
+                        
+                        Image(uiImage: postImage)
+                            .resizable()
+                            .scaledToFill()
+                            .clipped()
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 84, maxHeight: 174)
+                    .clipShape(ContainerRelativeShape())
 
                     VStack(alignment: .leading, spacing: 8) {
                         Text(
                             post.title
                                 ?? String(localized: "unread_widget_no_title")
                         )
-                        .font(.system(size: 16, weight: .medium))
-                        .lineLimit(2...3)
+                        .font(.system(size: 12, weight: .medium))
+                        .lineLimit(2...2)
 
                         footer(post: post, index: index)
                     }
@@ -210,9 +206,7 @@ struct TwineUnreadSmallWidget: Widget {
         StaticConfiguration(kind: kind, provider: UnreadSmallProvider()) {
             entry in
             TwineUnreadSmallWidgetEntryView(entry: entry)
-                .containerBackground(for: .widget) {
-                    Color("WidgetBackground")
-                }
+                .containerBackground(.background, for: .widget)
                 .padding(4)
         }
         .contentMarginsDisabled()
