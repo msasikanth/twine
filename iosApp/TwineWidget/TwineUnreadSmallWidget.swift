@@ -274,8 +274,6 @@ struct UnreadSmallProvider: TimelineProvider {
     private let postImageMaxPixelSize = 300
     private let feedIconMaxPixelSize = 24
 
-    private let rotationInterval: TimeInterval = 5
-
     let component = InjectApplicationComponent(uiViewControllerProvider: {
         UIViewController()
     })
@@ -425,33 +423,15 @@ struct UnreadSmallProvider: TimelineProvider {
                 }
 
                 let uiPosts = await fetchUIWidgetPosts(from: unreadPosts)
-
-                var entries: [UnreadSmallPostsEntry] = []
-                let postCount = uiPosts.count
-
-                // Generate 50 entries (250 seconds of rotation) to cycle through posts
-                // Modulo by postCount ensures it circles back to the first post
-                for i in 0..<50 {
-                    let entryDate = currentDate.addingTimeInterval(
-                        Double(i) * rotationInterval
-                    )
-                    let currentIndex = (startIndex + i) % postCount
-
-                    let entry = UnreadSmallPostsEntry(
-                        date: entryDate,
-                        count: Int(truncating: unreadPostsCount),
-                        posts: uiPosts,
-                        currentIndex: currentIndex,
-                        isSubscribed: isSubscribed
-                    )
-                    entries.append(entry)
-                }
-
-                // Persist the next starting index for the next timeline refresh
-                let nextStartIndex = (startIndex + 50) % postCount
-                defaults?.set(nextStartIndex, forKey: "unread_widget_index")
-
-                let timeline = Timeline(entries: entries, policy: .atEnd)
+                let safeIndex = min(startIndex, max(uiPosts.count - 1, 0))
+                let entry = UnreadSmallPostsEntry(
+                    date: currentDate,
+                    count: Int(truncating: unreadPostsCount),
+                    posts: uiPosts,
+                    currentIndex: safeIndex,
+                    isSubscribed: isSubscribed
+                )
+                let timeline = Timeline(entries: [entry], policy: .atEnd)
                 completion(timeline)
             } catch {
                 let entry = await makeEntry(date: currentDate)
@@ -486,7 +466,7 @@ struct UnreadSmallProvider: TimelineProvider {
                 date: date,
                 count: Int(truncating: unreadPostsCount),
                 posts: uiPosts,
-                currentIndex: index,
+                currentIndex: uiPosts.isEmpty ? 0 : min(index, uiPosts.count - 1),
                 isSubscribed: isSubscribed
             )
         } catch {
