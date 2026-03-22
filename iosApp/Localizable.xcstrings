@@ -686,6 +686,53 @@
         }
       }
     },
+    "widget_unread_recent_desc" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Shows 5 recent unread in a carousel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows 5 recent unread in a carousel"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Shows 5 recent unread in a carousel"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Shows 5 recent unread in a carousel"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Shows 5 recent unread in a carousel"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Shows 5 recent unread in a carousel"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Shows 5 recent unread in a carousel"
+          }
+        }
+      }
+    },
     "widget_unread_recent_name" : {
       "localizations" : {
         "de" : {
