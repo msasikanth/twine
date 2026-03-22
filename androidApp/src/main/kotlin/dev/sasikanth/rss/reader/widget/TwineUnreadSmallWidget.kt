@@ -62,6 +62,7 @@ import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.layout.width
+import androidx.glance.layout.wrapContentHeight
 import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
@@ -177,8 +178,8 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
 
     LaunchedEffect(post.image) { postImage = context.getImage(url = post.image) }
 
-    Box(modifier = GlanceModifier.fillMaxSize()) {
-      Column(modifier = GlanceModifier.fillMaxSize().clickable(onClick)) {
+    Box(modifier = GlanceModifier.fillMaxSize().clickable(onClick)) {
+      Column(modifier = GlanceModifier.fillMaxSize()) {
         if (hasImage && postImage != null) {
           Image(
             provider = ImageProvider(postImage!!),
@@ -257,7 +258,7 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
       }
 
       // Navigation Buttons
-      Box(modifier = GlanceModifier.fillMaxWidth(), contentAlignment = Alignment.TopStart) {
+      Box(modifier = GlanceModifier.fillMaxWidth().wrapContentHeight()) {
         Row(
           modifier = GlanceModifier.fillMaxWidth(),
           verticalAlignment = Alignment.CenterVertically,
@@ -265,7 +266,9 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
           if (index > 0) {
             Box(
               modifier =
-                GlanceModifier.size(44.dp).clickable(actionRunCallback<PreviousPostAction>()),
+                GlanceModifier.cornerRadius(99.dp)
+                  .size(44.dp)
+                  .clickable(actionRunCallback<PreviousPostAction>()),
               contentAlignment = Alignment.Center,
             ) {
               Box(
@@ -284,14 +287,17 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
               }
             }
           } else {
-            Spacer(GlanceModifier.size(24.dp))
+            Spacer(GlanceModifier.size(44.dp))
           }
 
           Spacer(GlanceModifier.defaultWeight())
 
           if (index < count - 1) {
             Box(
-              modifier = GlanceModifier.size(44.dp).clickable(actionRunCallback<NextPostAction>()),
+              modifier =
+                GlanceModifier.cornerRadius(99.dp)
+                  .size(44.dp)
+                  .clickable(actionRunCallback<NextPostAction>()),
               contentAlignment = Alignment.Center,
             ) {
               Box(
@@ -310,7 +316,7 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
               }
             }
           } else {
-            Spacer(GlanceModifier.size(24.dp))
+            Spacer(GlanceModifier.size(44.dp))
           }
         }
       }
