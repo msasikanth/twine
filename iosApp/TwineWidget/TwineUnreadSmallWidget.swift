@@ -213,6 +213,7 @@ struct TwineUnreadSmallWidget: Widget {
         .configurationDisplayName(
             String(localized: "widget_unread_recent_name")
         )
+        .description(String(localized: "widget_unread_recent_desc"))
         .supportedFamilies([.systemSmall])
     }
 }

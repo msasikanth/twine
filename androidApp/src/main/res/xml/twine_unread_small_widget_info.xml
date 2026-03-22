@@ -24,5 +24,6 @@
     android:minWidth="166dp"
     android:minHeight="166dp"
     android:widgetCategory="home_screen"
+    android:description="@string/widget_unread_recent_desc"
     tools:targetApi="31">
 </appwidget-provider>
