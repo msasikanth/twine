@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -195,39 +196,56 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
 
     Box(modifier = GlanceModifier.fillMaxSize().clickable(onClick)) {
       Column(modifier = GlanceModifier.fillMaxSize()) {
-        if (hasImage && postImage != null) {
-          Image(
-            provider = ImageProvider(postImage!!),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier =
-              GlanceModifier.fillMaxWidth().defaultWeight().appWidgetInnerCornerRadius(4.dp),
-          )
-          Spacer(GlanceModifier.height(8.dp))
-          Text(
-            text = post.title ?: "",
-            style =
-              TextStyle(
-                color = GlanceTheme.colors.onSurface,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-              ),
-            maxLines = 2,
-            modifier = GlanceModifier.padding(horizontal = 8.dp).height(40.dp),
-          )
-        } else {
-          Spacer(GlanceModifier.defaultWeight())
-          Text(
-            text = post.title ?: "",
-            style =
-              TextStyle(
-                color = GlanceTheme.colors.onSurface,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-              ),
-            maxLines = 3,
-            modifier = GlanceModifier.padding(horizontal = 8.dp),
-          )
+        when {
+          hasImage -> {
+            // image content
+            if (postImage != null) {
+              Image(
+                provider = ImageProvider(postImage!!),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier =
+                  GlanceModifier.fillMaxWidth().defaultWeight().appWidgetInnerCornerRadius(4.dp),
+              )
+            } else {
+              Box(
+                modifier =
+                  GlanceModifier.fillMaxWidth()
+                    .defaultWeight()
+                    .background(Color.Gray.copy(alpha = 0.25f))
+                    .appWidgetInnerCornerRadius(4.dp)
+              ) {}
+            }
+
+            Spacer(GlanceModifier.height(8.dp))
+            Text(
+              text = post.title ?: "",
+              style =
+                TextStyle(
+                  color = GlanceTheme.colors.onSurface,
+                  fontSize = 12.sp,
+                  fontWeight = FontWeight.Medium,
+                ),
+              maxLines = 2,
+              modifier = GlanceModifier.padding(horizontal = 8.dp).height(40.dp),
+            )
+          }
+
+          else -> {
+            // no-image content
+            Spacer(GlanceModifier.defaultWeight())
+            Text(
+              text = post.title ?: "",
+              style =
+                TextStyle(
+                  color = GlanceTheme.colors.onSurface,
+                  fontSize = 16.sp,
+                  fontWeight = FontWeight.Medium,
+                ),
+              maxLines = 3,
+              modifier = GlanceModifier.padding(horizontal = 8.dp),
+            )
+          }
         }
 
         Row(
