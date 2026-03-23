@@ -249,10 +249,7 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
         }
 
         Row(
-          modifier =
-            GlanceModifier.fillMaxWidth()
-              .padding(horizontal = 12.dp)
-              .padding(top = 8.dp, bottom = 12.dp),
+          modifier = GlanceModifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
           // Publisher Info
