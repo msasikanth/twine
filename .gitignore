@@ -31,3 +31,4 @@ core/network/http_requests/http-client.private.env.json
 .idea/deviceManager.xml
 gradle.xml
 *.iml
+.idea/runConfigurations/
