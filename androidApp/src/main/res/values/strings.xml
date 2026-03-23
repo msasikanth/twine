@@ -18,30 +18,10 @@
 <resources>
     <string name="app_name" translatable="false">Twine</string>
 
-    <plurals name="widget_unread_posts">
-        <item quantity="zero">Unread</item>
-        <item quantity="one">Unread (%1$d post)</item>
-        <item quantity="other">Unread (%1$d posts)</item>
-    </plurals>
-    <string name="widget_unread_name">Unread posts</string>
     <string name="widget_unread_recent_name">Recent unread</string>
     <string name="widget_unread_recent_desc">Shows 5 recent unread in a carousel</string>
-    <string name="widget_bookmarks_name">Bookmarks</string>
-    <string name="widget_no_title">No title</string>
-    <string name="widget_no_description">No description</string>
-    <string name="widget_see_more">See more</string>
-    <string name="widget_unread_refresh">Refresh</string>
-    <string name="widget_unread_add">Add feed</string>
     <string name="widget_required_premium">Widgets are only available for premium users. Please subscribe in the app.</string>
     <string name="widget_no_posts">No posts</string>
-
-    <plurals name="widget_bookmark_posts">
-        <item quantity="zero">Bookmarks</item>
-        <item quantity="one">Bookmarks (%1$d post)</item>
-        <item quantity="other">Bookmarks (%1$d posts)</item>
-    </plurals>
-    <string name="widget_bookmarks_no_posts">No bookmarks</string>
-    <string name="widget_reading_time">%1$dm</string>
 
     <string name="unit_seconds">&lt;1m</string>
     <string name="unit_minutes">%1$dm</string>

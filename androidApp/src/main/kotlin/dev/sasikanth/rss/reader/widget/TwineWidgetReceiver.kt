@@ -20,16 +20,6 @@ package dev.sasikanth.rss.reader.widget
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 
-class TwineWidgetReceiver : GlanceAppWidgetReceiver() {
-
-  override val glanceAppWidget: GlanceAppWidget = TwineUnreadWidget()
-}
-
 class TwineUnreadSmallWidgetReceiver : GlanceAppWidgetReceiver() {
   override val glanceAppWidget: GlanceAppWidget = TwineUnreadSmallWidget()
-}
-
-class TwineBookmarkWidgetReceiver : GlanceAppWidgetReceiver() {
-
-  override val glanceAppWidget: GlanceAppWidget = TwineBookmarkWidget()
 }
