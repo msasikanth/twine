@@ -63,8 +63,7 @@ struct TwineUnreadSmallWidgetEntryView: View {
                         footer(post: post, index: index)
                     }
                     .padding(.horizontal, 8)
-                    .padding(.top, 8)
-                    .padding(.bottom, 12)
+                    .padding(.vertical, 8)
                 } else {
                     // No image content
                     Spacer()
@@ -80,8 +79,7 @@ struct TwineUnreadSmallWidgetEntryView: View {
                         footer(post: post, index: index)
                     }
                     .padding(.horizontal, 8)
-                    .padding(.top, 8)
-                    .padding(.bottom, 12)
+                    .padding(.vertical, 8)
                 }
             }
             .frame(maxHeight: .infinity)
