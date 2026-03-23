@@ -20,7 +20,6 @@ package dev.sasikanth.rss.reader.data.repository
 import app.cash.paging.PagingSource
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
-import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.model.local.PostFlag
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
@@ -42,17 +41,6 @@ class WidgetDataRepository(
   private val readingHistoryQueries: ReadingHistoryQueries,
   private val dispatchersProvider: DispatchersProvider,
 ) {
-
-  val unreadPostsCount: Flow<Long>
-    get() =
-      postQueries
-        .unreadPostsCountInSource(
-          isSourceIdsEmpty = true,
-          sourceIds = emptyList(),
-          after = Instant.DISTANT_PAST,
-        )
-        .asFlow()
-        .mapToOne(dispatchersProvider.databaseRead)
 
   suspend fun unreadPostsCountBlocking(): Long {
     return withContext(dispatchersProvider.databaseRead) {
@@ -158,113 +146,6 @@ class WidgetDataRepository(
       context = dispatchersProvider.databaseRead,
       queryProvider = { limit, offset ->
         postQueries.widgetUnreadPosts(
-          numberOfPosts = limit,
-          offset = offset,
-          mapper = {
-            id,
-            sourceId,
-            title,
-            description,
-            imageUrl,
-            audioUrl,
-            date,
-            createdAt,
-            link,
-            commentsLink,
-            flags,
-            remoteId,
-            feedName,
-            feedIcon,
-            feedHomepageLink,
-            alwaysFetchSourceArticle,
-            showFeedFavIcon: Boolean,
-            feedContentReadingTime: Long?,
-            articleContentReadingTime: Long?,
-            seedColor: Long? ->
-            ResolvedPost(
-              id = id,
-              sourceId = sourceId,
-              title = title,
-              description = description,
-              imageUrl = imageUrl,
-              audioUrl = audioUrl,
-              date = date,
-              createdAt = createdAt,
-              link = link,
-              commentsLink = commentsLink,
-              flags = flags,
-              feedName = feedName,
-              feedIcon = feedIcon,
-              feedHomepageLink = feedHomepageLink,
-              alwaysFetchFullArticle = alwaysFetchSourceArticle,
-              showFeedFavIcon = showFeedFavIcon,
-              feedContentReadingTime = feedContentReadingTime?.toInt(),
-              articleContentReadingTime = articleContentReadingTime?.toInt(),
-              seedColor = seedColor?.toInt(),
-              remoteId = remoteId,
-            )
-          },
-        )
-      },
-    )
-  }
-
-  suspend fun bookmarkPostsCountBlocking(): Long {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.widgetBookmarkPostsCount().executeAsOne()
-    }
-  }
-
-  suspend fun bookmarkPostsBlocking(numberOfPosts: Int): List<WidgetPost> {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries
-        .widgetBookmarkPosts(
-          numberOfPosts = numberOfPosts.toLong(),
-          offset = 0,
-          mapper = {
-            id: String,
-            _: String,
-            title: String,
-            description: String,
-            imageUrl: String?,
-            _: String?,
-            date: Instant,
-            _: Instant,
-            _: String,
-            _: String?,
-            _: Set<PostFlag>,
-            _: String?,
-            feedName: String,
-            feedIcon: String,
-            _: String,
-            _: Boolean,
-            _: Boolean,
-            feedContentReadingTime: Long?,
-            _: Long?,
-            _: Long? ->
-            WidgetPost(
-              id = id,
-              title = title,
-              description = description,
-              image = imageUrl,
-              postedOn = date,
-              feedName = feedName,
-              feedIcon = feedIcon,
-              readingTimeEstimate = feedContentReadingTime?.toInt() ?: 0,
-            )
-          },
-        )
-        .executeAsList()
-    }
-  }
-
-  fun bookmarkPostsPager(): PagingSource<Int, ResolvedPost> {
-    return QueryPagingSource(
-      countQuery = postQueries.widgetBookmarkPostsCount(),
-      transacter = postQueries,
-      context = dispatchersProvider.databaseRead,
-      queryProvider = { limit, offset ->
-        postQueries.widgetBookmarkPosts(
           numberOfPosts = limit,
           offset = offset,
           mapper = {
