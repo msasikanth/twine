@@ -81,6 +81,8 @@ import dev.sasikanth.rss.reader.ReaderApplication
 import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.core.model.local.WidgetPost
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class TwineUnreadSmallWidget : GlanceAppWidget() {
 
@@ -382,6 +384,7 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
 
   private suspend fun Context.getImage(url: String?): Bitmap? {
     if (url.isNullOrBlank()) return null
+
     val request =
       ImageRequest.Builder(this)
         .size(250)
@@ -390,9 +393,11 @@ class TwineUnreadSmallWidget : GlanceAppWidget() {
         .diskCachePolicy(CachePolicy.ENABLED)
         .build()
 
-    return when (val result = imageLoader.execute(request)) {
-      is ErrorResult -> null
-      is SuccessResult -> result.image.toBitmap()
+    return withContext(Dispatchers.IO) {
+      when (val result = imageLoader.execute(request)) {
+        is ErrorResult -> null
+        is SuccessResult -> result.image.toBitmap()
+      }
     }
   }
 
