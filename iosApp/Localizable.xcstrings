@@ -1,100 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "bookmarks_no_posts" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "No bookmarked posts"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No bookmarked posts"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "No bookmarked posts"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "No bookmarked posts"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "No bookmarked posts"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "No bookmarked posts"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "No bookmarked posts"
-          }
-        }
-      }
-    },
-    "bullet_separator" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "•"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "•"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "•"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "•"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "•"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "•"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "•"
-          }
-        }
-      },
-      "shouldTranslate" : false
-    },
     "Next Post" : {
       "comment" : "Title of an intent to navigate to the next unread post in the widget.",
       "localizations" : {
@@ -124,8 +30,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Next Post"
+            "state" : "translated",
+            "value" : "Sonraki Gönderi"
           }
         },
         "zh-Hans" : {
@@ -171,7 +77,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Akışlarınızdaki yeniliklere göz atın."
+            "value" : "Akışlarındaki yeniliklere göz at."
           }
         },
         "zh-Hans" : {
@@ -292,13 +198,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Bugün %lld yeni makaleniz var"
+                  "value" : "Bugün okunmamış 1 makalen var"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Bugün %lld yeni makaleniz var"
+                  "value" : "Bugün okunmamış %lld makalen var"
                 }
               }
             }
@@ -347,60 +253,14 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Previous Post"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Previous Post"
-          }
-        }
-      }
-    },
-    "reading_time_estimate %lld" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%lldm"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
             "state" : "translated",
-            "value" : "%lldm"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%lldm"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%lldm"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%lldm"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%lldm"
+            "value" : "Önceki Gönderi"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "%lldm"
+            "value" : "Previous Post"
           }
         }
       }
@@ -452,53 +312,6 @@
         }
       }
     },
-    "unread_widget_no_feed_name" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kein Feed-Name"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No feed name"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas de nom de flux"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "कोई फीड नाम नहीं"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нет названия канала"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Akış adı yok"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "没有订阅源名称"
-          }
-        }
-      }
-    },
     "unread_widget_no_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -546,99 +359,6 @@
         }
       }
     },
-    "widget_bookmarks_name" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Bookmarked posts"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bookmarked posts"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Bookmarked posts"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Bookmarked posts"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Bookmarked posts"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Bookmarked posts"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Bookmarked posts"
-          }
-        }
-      }
-    },
-    "widget_name" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ungelesene Beiträge"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unread posts"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Articles non lus"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "अपठित लेख"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Непрочитанные посты"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Okunmamış gönderiler"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "未读文章"
-          }
-        }
-      }
-    },
     "widget_premium" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -675,7 +395,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Widget'lar sadece premium kullanıcılar için kullanılabilir. Lütfen uygulama içinden abone olun."
+            "value" : "Araç takımları yalnızca premium kullanıcılar içindir.\nLütfen uygulama içinden abone ol."
           }
         },
         "zh-Hans" : {
@@ -721,8 +441,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Shows 5 recent unread in a carousel"
+            "state" : "translated",
+            "value" : "Son 5 okunmamış gönderiyi kaydırmalı bantta gösterir"
           }
         },
         "zh-Hans" : {
@@ -767,107 +487,14 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Recent unread"
+            "state" : "translated",
+            "value" : "Son okunmayanlar"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Recent unread"
-          }
-        }
-      }
-    },
-    "widget_unread_remaining %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%@ ungelesen…"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%@ unread…"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%@ non lus…"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%@ अपठित…"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%@ непрочитанные…"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%@ okunmamış…"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%@ 篇未读……"
-          }
-        }
-      }
-    },
-    "widget_unread_remaining %lld" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "+%lld more"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%lld more"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "+%lld more"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "+%lld more"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "+%lld more"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "+%lld more"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "+%lld more"
           }
         }
       }
