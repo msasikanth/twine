@@ -1,6 +1,88 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    " • %@" : {
+      "comment" : "A small, secondary label below the title of a widget post, showing the relative time since it was published.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : " • %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : " • %@"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : " • %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : " • %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : " • %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : " • %@"
+          }
+        }
+      }
+    },
+    " • %dm read" : {
+      "comment" : "A text indicating how long it takes to read a post. The argument is the estimated reading time of the post in minutes.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : " • %dm read"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : " • %dm read"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : " • %dm read"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : " • %dm read"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : " • %dm read"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : " • %dm read"
+          }
+        }
+      }
+    },
     "Next Post" : {
       "comment" : "Title of an intent to navigate to the next unread post in the widget.",
       "localizations" : {
@@ -359,6 +441,52 @@
         }
       }
     },
+    "widget_latest" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Latest"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Latest"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Latest"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Latest"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Latest"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Latest"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Latest"
+          }
+        }
+      }
+    },
     "widget_premium" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -453,48 +581,232 @@
         }
       }
     },
-    "widget_unread_recent_name" : {
+    "widget_unread_recent_large_desc" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Recent unread"
+            "value" : "Shows a list of recent unread articles"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Recent unread"
+            "value" : "Shows a list of recent unread articles"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Recent unread"
+            "value" : "Shows a list of recent unread articles"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Recent unread"
+            "value" : "Shows a list of recent unread articles"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Recent unread"
+            "value" : "Shows a list of recent unread articles"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Son okunmayanlar"
+            "state" : "new",
+            "value" : "Shows a list of recent unread articles"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Recent unread"
+            "value" : "Shows a list of recent unread articles"
+          }
+        }
+      }
+    },
+    "widget_unread_recent_large_name" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Large)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent unread (Large)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Large)"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Large)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Large)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Large)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Large)"
+          }
+        }
+      }
+    },
+    "widget_unread_recent_medium_desc" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Shows recent unread articles with more details"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows recent unread articles with more details"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Shows recent unread articles with more details"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Shows recent unread articles with more details"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Shows recent unread articles with more details"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Shows recent unread articles with more details"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Shows recent unread articles with more details"
+          }
+        }
+      }
+    },
+    "widget_unread_recent_medium_name" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Medium)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent unread (Medium)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Medium)"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Medium)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Medium)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Medium)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Medium)"
+          }
+        }
+      }
+    },
+    "widget_unread_recent_name" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Small)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent unread (Small)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Small)"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Small)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Small)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Small)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recent unread (Small)"
           }
         }
       }
