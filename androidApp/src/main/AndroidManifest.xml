@@ -232,6 +232,30 @@
           android:resource="@xml/twine_unread_small_widget_info" />
     </receiver>
 
+    <receiver
+        android:name=".widget.TwineUnreadMediumWidgetReceiver"
+        android:label="@string/widget_unread_recent_medium_name"
+        android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/twine_unread_medium_widget_info" />
+    </receiver>
+
+    <receiver
+        android:name=".widget.TwineUnreadLargeWidgetReceiver"
+        android:label="@string/widget_unread_recent_large_name"
+        android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/twine_unread_large_widget_info" />
+    </receiver>
+
     <provider
         android:name="androidx.startup.InitializationProvider"
         android:authorities="${applicationId}.androidx-startup"

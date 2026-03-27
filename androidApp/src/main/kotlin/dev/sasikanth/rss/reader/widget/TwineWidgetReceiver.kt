@@ -23,3 +23,11 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 class TwineUnreadSmallWidgetReceiver : GlanceAppWidgetReceiver() {
   override val glanceAppWidget: GlanceAppWidget = TwineUnreadSmallWidget()
 }
+
+class TwineUnreadMediumWidgetReceiver : GlanceAppWidgetReceiver() {
+  override val glanceAppWidget: GlanceAppWidget = TwineUnreadMediumWidget()
+}
+
+class TwineUnreadLargeWidgetReceiver : GlanceAppWidgetReceiver() {
+  override val glanceAppWidget: GlanceAppWidget = TwineUnreadLargeWidget()
+}

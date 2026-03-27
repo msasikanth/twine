@@ -18,8 +18,13 @@
 <resources>
     <string name="app_name" translatable="false">Twine</string>
 
-    <string name="widget_unread_recent_name">Recent unread</string>
+    <string name="widget_unread_recent_name">Recent unread (Small)</string>
     <string name="widget_unread_recent_desc">Shows 5 recent unread in a carousel</string>
+    <string name="widget_unread_recent_medium_name">Recent unread (Medium)</string>
+    <string name="widget_unread_recent_medium_desc">Shows recent unread articles with more details</string>
+    <string name="widget_unread_recent_large_name">Recent unread (Large)</string>
+    <string name="widget_unread_recent_large_desc">Shows a list of recent unread articles</string>
+    <string name="widget_latest">Latest</string>
     <string name="widget_required_premium">Widgets are only available for premium users. Please subscribe in the app.</string>
     <string name="widget_no_posts">No posts</string>
 

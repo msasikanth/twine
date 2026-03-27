@@ -13,5 +13,7 @@ import SwiftUI
 struct TwineWidgetBundle: WidgetBundle {
     var body: some Widget {
         TwineUnreadSmallWidget()
+        TwineUnreadMediumWidget()
+        TwineUnreadLargeWidget()
     }
 }
