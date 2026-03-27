@@ -123,7 +123,7 @@ struct TwineUnreadSmallWidgetEntryView: View {
                             .frame(width: 12, height: 12)
                             .cornerRadius(2)
                     } else {
-                        Image(systemName: "rss")
+                        Image(systemName: "newspaper")
                             .resizable()
                             .frame(width: 12, height: 12)
                     }
@@ -253,6 +253,8 @@ struct UIWidgetPost {
     let postImage: UIImage?
     let feedName: String?
     let feedIcon: UIImage?
+    let postedOn: KotlinInstant
+    let readingTimeEstimate: Int32
 }
 
 struct UnreadSmallPostsEntry: TimelineEntry {
@@ -341,7 +343,9 @@ struct UnreadSmallProvider: TimelineProvider {
                         title: post.title,
                         postImage: postImage,
                         feedName: post.feedName,
-                        feedIcon: feedIcon
+                        feedIcon: feedIcon,
+                        postedOn: post.postedOn,
+                        readingTimeEstimate: post.readingTimeEstimate
                     )
                 }
             }

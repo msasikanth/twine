@@ -237,13 +237,6 @@ class TwineUnreadLargeWidget : GlanceAppWidget() {
         contentScale = ContentScale.Crop,
         modifier = GlanceModifier.size(56.dp).cornerRadius(14.dp),
       )
-    } else {
-      Box(
-        modifier =
-          GlanceModifier.size(56.dp)
-            .background(GlanceTheme.colors.onSurface.getColor(context).copy(alpha = 0.1f))
-            .cornerRadius(14.dp)
-      ) {}
     }
   }
 
@@ -371,6 +364,6 @@ class TwineUnreadLargeWidget : GlanceAppWidget() {
   }
 
   companion object {
-    private const val NUMBER_OF_UNREAD_POSTS_IN_WIDGET = 4
+    private const val NUMBER_OF_UNREAD_POSTS_IN_WIDGET = 5
   }
 }

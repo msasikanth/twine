@@ -35,23 +35,15 @@ struct TwineUnreadLargeWidgetEntryView: View {
                 Text("widget_latest")
                     .font(.system(size: 16, weight: .medium))
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 12)
             .padding(.top, 8)
             .padding(.bottom, 12)
-
-            Spacer()
 
             // Posts List
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(Array(entry.posts.enumerated()), id: \.offset) { index, post in
                     Link(destination: createDeepLink(postIndex: index, postId: post.id)) {
                         postItem(post: post)
-                    }
-                    
-                    if index < entry.posts.count - 1 {
-                        Divider()
-                            .padding(.horizontal, 16)
-                            .opacity(0.1)
                     }
                 }
             }
@@ -78,13 +70,9 @@ struct TwineUnreadLargeWidgetEntryView: View {
                     .scaledToFill()
                     .frame(width: 56, height: 56)
                     .clipShape(RoundedRectangle(cornerRadius: 14))
-            } else {
-                Color.gray.opacity(0.1)
-                    .frame(width: 56, height: 56)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 12)
         .padding(.vertical, 8)
     }
 
@@ -104,7 +92,7 @@ struct TwineUnreadLargeWidgetEntryView: View {
             Text(post.feedName ?? "")
                 .font(.system(size: 10, weight: .medium))
                 .lineLimit(1)
-            
+
             let relativeTime = RelativeTimeFormatter.format(post.postedOn)
             if !relativeTime.isEmpty {
                 Text(" \u{2022} \(relativeTime)")
@@ -112,7 +100,7 @@ struct TwineUnreadLargeWidgetEntryView: View {
                     .foregroundColor(.secondary)
                     .lineLimit(1)
             }
-            
+
             if post.readingTimeEstimate > 0 {
                 Text(" \u{2022} \(post.readingTimeEstimate)m read")
                     .font(.system(size: 10, weight: .regular))
@@ -147,7 +135,7 @@ struct TwineUnreadLargeWidgetEntryView: View {
             "{\"postIndex\":\(postIndex),\"postId\":\"\(postId)\",\"fromScreen\":{\"type\":\"\(fromScreenType)\"}}"
         let encodedJson =
             json.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)
-            ?? ""
+                ?? ""
         let urlString = "twine://reader/\(encodedJson)"
         return URL(string: urlString) ?? URL(string: "twine://")!
     }
@@ -161,6 +149,7 @@ struct TwineUnreadLargeWidget: Widget {
             entry in
             TwineUnreadLargeWidgetEntryView(entry: entry)
                 .containerBackground(.background, for: .widget)
+                .padding(4)
         }
         .contentMarginsDisabled()
         .configurationDisplayName(
@@ -188,10 +177,10 @@ struct UnreadLargeProvider: TimelineProvider {
 
     init() {
         component.initializers
-            .compactMap { ($0 as? any Initializer) }
-            .forEach { initializer in
-                initializer.initialize()
-            }
+        .compactMap { ($0 as? any Initializer) }
+        .forEach { initializer in
+            initializer.initialize()
+        }
     }
 
     private func fetchImage(from urlString: String?, maxPixelSize: Int) async
@@ -308,7 +297,7 @@ struct UnreadLargeProvider: TimelineProvider {
                 )
                 let isSubscribed =
                     try await component.billingHandler.customerResult()
-                    is SubscriptionResultSubscribed
+                        is SubscriptionResultSubscribed
 
                 if unreadPosts.isEmpty {
                     let entry = UnreadLargePostsEntry(
@@ -347,7 +336,7 @@ struct UnreadLargeProvider: TimelineProvider {
             )
             let isSubscribed =
                 try await component.billingHandler.customerResult()
-                is SubscriptionResultSubscribed
+                    is SubscriptionResultSubscribed
 
             let uiPosts = await fetchUIWidgetPosts(from: unreadPosts)
 

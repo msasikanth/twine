@@ -23,7 +23,7 @@ struct TwineUnreadMediumWidgetEntryView: View {
                 } else {
                     let safeIndex =
                         entry.currentIndex < entry.posts.count
-                        ? entry.currentIndex : 0
+                            ? entry.currentIndex : 0
                     let post = entry.posts[safeIndex]
                     unreadPostView(post: post, index: safeIndex)
                 }
@@ -38,12 +38,11 @@ struct TwineUnreadMediumWidgetEntryView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
             HStack(alignment: .center) {
+                // Latest label
                 Text("widget_latest")
                     .font(.system(size: 16, weight: .medium))
-                
-                Spacer()
-                    .frame(width: 16)
-                
+                    .padding(.trailing, 12)
+
                 // Pagination Dots
                 HStack(spacing: 4) {
                     ForEach(
@@ -58,9 +57,9 @@ struct TwineUnreadMediumWidgetEntryView: View {
                             .frame(width: 6, height: 6)
                     }
                 }
-                
+
                 Spacer()
-                
+
                 // Navigation Buttons
                 HStack(spacing: 8) {
                     if index > 0 {
@@ -68,6 +67,7 @@ struct TwineUnreadMediumWidgetEntryView: View {
                             navigationIcon(name: "chevron.left")
                         }
                         .buttonStyle(.plain)
+                        .frame(width: 32, height: 32)
                     } else {
                         Spacer()
                             .frame(width: 32, height: 32)
@@ -78,13 +78,14 @@ struct TwineUnreadMediumWidgetEntryView: View {
                             navigationIcon(name: "chevron.right")
                         }
                         .buttonStyle(.plain)
+                        .frame(width: 32, height: 32)
                     } else {
                         Spacer()
                             .frame(width: 32, height: 32)
                     }
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 12)
             .padding(.top, 8)
 
             Spacer()
@@ -96,32 +97,28 @@ struct TwineUnreadMediumWidgetEntryView: View {
                         post.title
                             ?? String(localized: "unread_widget_no_title")
                     )
-                    .font(.system(size: 16, weight: .medium))
-                    .lineLimit(3)
-                    .frame(height: 64, alignment: .topLeading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                        .font(.system(size: 16, weight: .medium))
+                        .lineLimit(2)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(maxHeight: .infinity, alignment: .center)
+                        .padding(.bottom, 12)
 
                     footer(post: post)
                 }
                 .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
 
-                Box(cornerRadius: 24) {
+                HStack {
                     if let postImage = post.postImage {
                         Image(uiImage: postImage)
                             .resizable()
                             .scaledToFill()
-                            .frame(width: 110, height: 110)
-                    } else {
-                        Color.gray.opacity(0.1)
-                            .frame(width: 110, height: 110)
+                            .frame(maxWidth: 108, maxHeight: .infinity)
                     }
-                }
+                }.cornerRadius(24)
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 8)
+            .padding(.leading, 12)
             .widgetURL(createDeepLink(postIndex: index, postId: post.id))
-            
-            Spacer()
         }
     }
 
@@ -141,7 +138,7 @@ struct TwineUnreadMediumWidgetEntryView: View {
             Text(post.feedName ?? "")
                 .font(.system(size: 12, weight: .medium))
                 .lineLimit(1)
-            
+
             let relativeTime = RelativeTimeFormatter.format(post.postedOn)
             if !relativeTime.isEmpty {
                 Text(" \u{2022} \(relativeTime)")
@@ -149,7 +146,7 @@ struct TwineUnreadMediumWidgetEntryView: View {
                     .foregroundColor(.secondary)
                     .lineLimit(1)
             }
-            
+
             if post.readingTimeEstimate > 0 {
                 Text(" \u{2022} \(post.readingTimeEstimate)m read")
                     .font(.system(size: 12, weight: .regular))
@@ -197,22 +194,22 @@ struct TwineUnreadMediumWidgetEntryView: View {
             "{\"postIndex\":\(postIndex),\"postId\":\"\(postId)\",\"fromScreen\":{\"type\":\"\(fromScreenType)\"}}"
         let encodedJson =
             json.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)
-            ?? ""
+                ?? ""
         let urlString = "twine://reader/\(encodedJson)"
         return URL(string: urlString) ?? URL(string: "twine://")!
     }
 }
 
 struct RelativeTimeFormatter {
-    static func format(_ instant: Kotlinx_datetimeInstant) -> String {
+    static func format(_ instant: KotlinInstant) -> String {
         let now = Date()
         let date = Date(timeIntervalSince1970: Double(instant.epochSeconds))
         let diff = now.timeIntervalSince(date)
-        
+
         let minutes = Int(diff / 60)
         let hours = Int(diff / 3600)
         let days = Int(diff / 86400)
-        
+
         if minutes < 1 {
             return "<1m"
         } else if minutes < 60 {
@@ -235,6 +232,7 @@ struct TwineUnreadMediumWidget: Widget {
             entry in
             TwineUnreadMediumWidgetEntryView(entry: entry)
                 .containerBackground(.background, for: .widget)
+                .padding(4)
         }
         .contentMarginsDisabled()
         .configurationDisplayName(
@@ -294,10 +292,10 @@ struct UnreadMediumProvider: TimelineProvider {
 
     init() {
         component.initializers
-            .compactMap { ($0 as? any Initializer) }
-            .forEach { initializer in
-                initializer.initialize()
-            }
+        .compactMap { ($0 as? any Initializer) }
+        .forEach { initializer in
+            initializer.initialize()
+        }
     }
 
     private func fetchImage(from urlString: String?, maxPixelSize: Int) async
@@ -418,7 +416,7 @@ struct UnreadMediumProvider: TimelineProvider {
                 )
                 let isSubscribed =
                     try await component.billingHandler.customerResult()
-                    is SubscriptionResultSubscribed
+                        is SubscriptionResultSubscribed
 
                 let defaults = UserDefaults(
                     suiteName: "group.dev.sasikanth.rss.reader"
@@ -470,7 +468,7 @@ struct UnreadMediumProvider: TimelineProvider {
             )
             let isSubscribed =
                 try await component.billingHandler.customerResult()
-                is SubscriptionResultSubscribed
+                    is SubscriptionResultSubscribed
             let defaults = UserDefaults(
                 suiteName: "group.dev.sasikanth.rss.reader"
             )

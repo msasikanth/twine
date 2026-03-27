@@ -56,6 +56,7 @@ import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
@@ -216,7 +217,13 @@ class TwineUnreadMediumWidget : GlanceAppWidget() {
         modifier = GlanceModifier.fillMaxWidth().defaultWeight().padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        Column(modifier = GlanceModifier.defaultWeight().padding(start = 8.dp, end = 16.dp)) {
+        Column(
+          modifier =
+            GlanceModifier.defaultWeight()
+              .fillMaxHeight()
+              .padding(start = 8.dp, end = 16.dp, bottom = 12.dp)
+        ) {
+          Spacer(GlanceModifier.defaultWeight())
           Text(
             text = post.title ?: "",
             style =
@@ -226,40 +233,34 @@ class TwineUnreadMediumWidget : GlanceAppWidget() {
                 fontWeight = FontWeight.Medium,
               ),
             maxLines = 3,
-            modifier = GlanceModifier.fillMaxWidth().height(64.dp),
+            modifier = GlanceModifier.fillMaxWidth(),
           )
-          Spacer(GlanceModifier.height(8.dp))
+          Spacer(GlanceModifier.defaultWeight())
           PublisherInfo(post = post)
         }
 
         val hasImage = !post.image.isNullOrBlank()
         if (hasImage) {
-          PostImage(url = post.image)
+          PostImage(url = post.image, modifier = GlanceModifier.size(128.dp))
         }
       }
     }
   }
 
   @Composable
-  private fun PostImage(url: String?) {
+  private fun PostImage(url: String?, modifier: GlanceModifier = GlanceModifier) {
     val context = LocalContext.current
     var postImage by remember(url) { mutableStateOf<Bitmap?>(null) }
     LaunchedEffect(url) { postImage = context.getImage(url = url) }
 
-    Box(modifier = GlanceModifier.cornerRadius(24.dp)) {
+    Box(modifier = GlanceModifier.then(modifier).cornerRadius(24.dp)) {
       if (postImage != null) {
         Image(
           provider = ImageProvider(postImage!!),
           contentDescription = null,
           contentScale = ContentScale.Crop,
-          modifier = GlanceModifier.size(110.dp),
+          modifier = GlanceModifier.fillMaxSize(),
         )
-      } else {
-        Box(
-          modifier =
-            GlanceModifier.size(110.dp)
-              .background(GlanceTheme.colors.onSurface.getColor(context).copy(alpha = 0.1f))
-        ) {}
       }
     }
   }
