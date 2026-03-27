@@ -44,7 +44,6 @@ struct TwineUnreadLargeWidgetEntryView: View {
                 .padding(.vertical, 8)
             }
             .padding(.horizontal, 8)
-            .padding(.bottom, 8)
 
             // Posts List
             VStack(alignment: .leading, spacing: 0) {
