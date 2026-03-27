@@ -160,6 +160,7 @@ class TwineUnreadLargeWidget : GlanceAppWidget() {
           }
         }
       }
+
       false -> {
         RequireTwinePremium()
       }
@@ -171,8 +172,7 @@ class TwineUnreadLargeWidget : GlanceAppWidget() {
     val context = LocalContext.current
     Row(
       modifier =
-        GlanceModifier.fillMaxWidth()
-          .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 12.dp),
+        GlanceModifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
       Text(
@@ -184,6 +184,8 @@ class TwineUnreadLargeWidget : GlanceAppWidget() {
             fontWeight = FontWeight.Medium,
           ),
       )
+
+      Spacer(GlanceModifier.size(32.dp))
     }
   }
 

@@ -194,7 +194,9 @@ class TwineUnreadMediumWidget : GlanceAppWidget() {
     Column(modifier = GlanceModifier.fillMaxSize().clickable(onClick)) {
       // Header
       Row(
-        modifier = GlanceModifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp),
+        modifier =
+          GlanceModifier.fillMaxWidth()
+            .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Text(
@@ -214,14 +216,14 @@ class TwineUnreadMediumWidget : GlanceAppWidget() {
 
       // Card Content
       Row(
-        modifier = GlanceModifier.fillMaxWidth().defaultWeight().padding(8.dp),
+        modifier = GlanceModifier.fillMaxWidth().defaultWeight().padding(top = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Column(
           modifier =
             GlanceModifier.defaultWeight()
               .fillMaxHeight()
-              .padding(start = 8.dp, end = 16.dp, bottom = 12.dp)
+              .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
         ) {
           Spacer(GlanceModifier.defaultWeight())
           Text(
@@ -241,7 +243,7 @@ class TwineUnreadMediumWidget : GlanceAppWidget() {
 
         val hasImage = !post.image.isNullOrBlank()
         if (hasImage) {
-          PostImage(url = post.image, modifier = GlanceModifier.size(128.dp))
+          PostImage(url = post.image, modifier = GlanceModifier.size(128.dp).fillMaxHeight())
         }
       }
     }

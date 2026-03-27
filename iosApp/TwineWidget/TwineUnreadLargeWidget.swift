@@ -34,10 +34,17 @@ struct TwineUnreadLargeWidgetEntryView: View {
             HStack(alignment: .center) {
                 Text("widget_latest")
                     .font(.system(size: 16, weight: .medium))
+
+                Spacer()
+
+                // no-op navigation button frame
+                HStack() {
+
+                }.frame(width: 32, height: 32)
+                .padding(.vertical, 8)
             }
-            .padding(.horizontal, 12)
-            .padding(.top, 8)
-            .padding(.bottom, 12)
+            .padding(.horizontal, 8)
+            .padding(.bottom, 8)
 
             // Posts List
             VStack(alignment: .leading, spacing: 0) {
@@ -48,6 +55,7 @@ struct TwineUnreadLargeWidgetEntryView: View {
                 }
             }
             .padding(.bottom, 8)
+            .padding(.top, 4)
         }
     }
 
