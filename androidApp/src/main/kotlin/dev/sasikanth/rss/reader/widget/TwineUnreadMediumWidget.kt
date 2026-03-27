@@ -255,7 +255,7 @@ class TwineUnreadMediumWidget : GlanceAppWidget() {
     var postImage by remember(url) { mutableStateOf<Bitmap?>(null) }
     LaunchedEffect(url) { postImage = context.getImage(url = url) }
 
-    Box(modifier = GlanceModifier.then(modifier).cornerRadius(24.dp)) {
+    Box(modifier = GlanceModifier.then(modifier).appWidgetInnerCornerRadius(4.dp)) {
       if (postImage != null) {
         Image(
           provider = ImageProvider(postImage!!),
