@@ -26,7 +26,12 @@ sealed interface Screen {
 
   @Serializable data object Onboarding : Screen
 
-  @Serializable data class Main(val triggerSync: Boolean = false) : Screen
+  @Serializable
+  data class Main(val triggerSync: Boolean = false, val startTab: String? = null) : Screen {
+    companion object {
+      const val TAB_BOOKMARKS = "bookmarks"
+    }
+  }
 
   @Serializable data object Home : Screen
 

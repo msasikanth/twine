@@ -6,6 +6,7 @@
 //  Copyright © 2026 orgName. All rights reserved.
 //
 
+import AppIntents
 import SwiftUI
 import WidgetKit
 import shared
@@ -29,7 +30,7 @@ struct TwineUnreadLargeWidgetEntryView: View {
     }
 
     var unreadPostsList: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(spacing: 4) {
             // Header
             HStack(alignment: .center) {
                 Text("widget_latest")
@@ -37,11 +38,18 @@ struct TwineUnreadLargeWidgetEntryView: View {
 
                 Spacer()
 
-                // no-op navigation button frame
-                HStack() {
+                HStack {
+                    Button(intent: LargeRefreshIntent()) {
+                        headerIcon(name: "arrow.triangle.2.circlepath")
+                    }
+                    .buttonStyle(.plain)
+                    .frame(width: 32, height: 32)
 
-                }.frame(width: 32, height: 32)
-                .padding(.vertical, 8)
+                    Link(destination: URL(string: "twine://bookmarks")!) {
+                        headerIcon(name: "bookmark")
+                    }
+                    .frame(width: 32, height: 32)
+                }.padding(.vertical, 8)
             }
             .padding(.horizontal, 8)
 
@@ -54,7 +62,6 @@ struct TwineUnreadLargeWidgetEntryView: View {
                 }
             }
             .padding(.bottom, 8)
-            .padding(.top, 4)
         }
     }
 
@@ -133,6 +140,19 @@ struct TwineUnreadLargeWidgetEntryView: View {
                 .font(.system(size: 14, weight: .medium))
                 .multilineTextAlignment(.center)
         }.frame(maxHeight: .infinity, alignment: .center)
+    }
+
+    func headerIcon(name: String) -> some View {
+        ZStack {
+            Circle()
+                .fill(Color(red: 240 / 255, green: 240 / 255, blue: 240 / 255))
+                .frame(width: 32, height: 32)
+
+            Image(systemName: name)
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(.black)
+        }
+        .frame(width: 32, height: 32)
     }
 
     private func createDeepLink(postIndex: Int, postId: String) -> URL {
@@ -355,5 +375,26 @@ struct UnreadLargeProvider: TimelineProvider {
         } catch {
             return nil
         }
+    }
+}
+
+@available(iOS 17.0, *)
+struct LargeRefreshIntent: AppIntent {
+    static var title: LocalizedStringResource = "Refresh"
+
+    func perform() async throws -> some IntentResult {
+        let component = InjectApplicationComponent(uiViewControllerProvider: {
+            UIViewController()
+        })
+
+        component.initializers
+            .compactMap { ($0 as? any Initializer) }
+            .forEach { initializer in
+                initializer.initialize()
+            }
+
+        try await component.syncCoordinator.pull()
+        WidgetCenter.shared.reloadTimelines(ofKind: "TwineUnreadLargeWidget")
+        return .result()
     }
 }

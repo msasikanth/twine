@@ -228,6 +228,11 @@ fun App(
         if (uri != null) {
           if (uri.startsWith("twine://oauth")) {
             appViewModel.onOAuthRedirect(uri, linkHandler)
+          } else if (uri == "twine://bookmarks") {
+            navController.navigate(Screen.Main(startTab = Screen.Main.TAB_BOOKMARKS)) {
+              popUpTo<Screen.Placeholder> { inclusive = true }
+              launchSingleTop = true
+            }
           } else if (uri == "twine://reader/currently-playing") {
             val playingPostId = audioPlayer.playbackState.value.playingPostId
             if (playingPostId != null) {

@@ -37,9 +37,12 @@ import androidx.glance.GlanceTheme
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
+import androidx.glance.action.ActionParameters
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
+import androidx.glance.appwidget.action.ActionCallback
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.lazy.itemsIndexed
@@ -189,7 +192,61 @@ class TwineUnreadLargeWidget : GlanceAppWidget() {
           ),
       )
 
-      Spacer(GlanceModifier.size(32.dp))
+      Spacer(GlanceModifier.defaultWeight())
+
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+          modifier =
+            GlanceModifier.cornerRadius(99.dp)
+              .size(32.dp)
+              .clickable(actionRunCallback<LargeRefreshAction>()),
+          contentAlignment = Alignment.Center,
+        ) {
+          Box(
+            modifier =
+              GlanceModifier.size(32.dp).background(GlanceTheme.colors.surface).cornerRadius(99.dp),
+            contentAlignment = Alignment.Center,
+          ) {
+            Image(
+              provider = ImageProvider(R.drawable.ic_refresh),
+              contentDescription = null,
+              colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurface),
+              modifier = GlanceModifier.size(16.dp),
+            )
+          }
+        }
+
+        Spacer(GlanceModifier.width(8.dp))
+
+        Box(
+          modifier =
+            GlanceModifier.cornerRadius(99.dp).size(32.dp).clickable {
+              val deepLinkIntent =
+                Intent(
+                    Intent.ACTION_VIEW,
+                    "twine://bookmarks".toUri(),
+                    context,
+                    MainActivity::class.java,
+                  )
+                  .apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
+              context.startActivity(deepLinkIntent)
+            },
+          contentAlignment = Alignment.Center,
+        ) {
+          Box(
+            modifier =
+              GlanceModifier.size(32.dp).background(GlanceTheme.colors.surface).cornerRadius(99.dp),
+            contentAlignment = Alignment.Center,
+          ) {
+            Image(
+              provider = ImageProvider(R.drawable.ic_bookmark),
+              contentDescription = null,
+              colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurface),
+              modifier = GlanceModifier.size(16.dp),
+            )
+          }
+        }
+      }
     }
   }
 
@@ -371,5 +428,16 @@ class TwineUnreadLargeWidget : GlanceAppWidget() {
 
   companion object {
     private const val NUMBER_OF_UNREAD_POSTS_IN_WIDGET = 15
+  }
+}
+
+class LargeRefreshAction : ActionCallback {
+  override suspend fun onAction(
+    context: Context,
+    glanceId: GlanceId,
+    parameters: ActionParameters,
+  ) {
+    val applicationComponent = (context.applicationContext as ReaderApplication).appComponent
+    applicationComponent.syncCoordinator.triggerPull()
   }
 }

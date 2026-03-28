@@ -183,7 +183,9 @@ fun NavGraphBuilder.mainScreen(
   screenModifier: Modifier,
 ) {
   composable<Screen.Main> {
-    val triggerSync = it.toRoute<Screen.Main>().triggerSync
+    val mainRoute = it.toRoute<Screen.Main>()
+    val triggerSync = mainRoute.triggerSync
+    val startTab = mainRoute.startTab
     val feedsViewModel = viewModel { feedsViewModel() }
 
     val currentEntry by navController.currentBackStackEntryAsState()
@@ -196,6 +198,7 @@ fun NavGraphBuilder.mainScreen(
 
     MainScreen(
       feedsViewModel = feedsViewModel,
+      startTab = startTab,
       homeContent = { openDrawer ->
         val viewModel = viewModel { homeViewModel() }
 

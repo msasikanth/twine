@@ -81,6 +81,7 @@ internal fun MainScreen(
   openPaywall: () -> Unit,
   modifier: Modifier = Modifier,
   canHandleBack: Boolean = true,
+  startTab: String? = null,
 ) {
   val sizeClass = LocalWindowSizeClass.current
   val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -99,6 +100,16 @@ internal fun MainScreen(
       currentDestination?.hasRoute(Screen.MainDiscovery::class) == true -> MainDestination.Discovery
       else -> MainDestination.Home
     }
+
+  LaunchedEffect(startTab) {
+    if (startTab == Screen.Main.TAB_BOOKMARKS) {
+      navController.navigate(Screen.MainBookmarks) {
+        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+      }
+    }
+  }
 
   var isSideNavigationExpanded by rememberSaveable {
     mutableStateOf(sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND))

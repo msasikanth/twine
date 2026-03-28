@@ -35,7 +35,7 @@ struct TwineUnreadMediumWidgetEntryView: View {
     }
 
     func unreadPostView(post: UIWidgetPost, index: Int) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 4) {
             // Header
             HStack(alignment: .center) {
                 // Latest label
@@ -83,12 +83,9 @@ struct TwineUnreadMediumWidgetEntryView: View {
                         Spacer()
                             .frame(width: 32, height: 32)
                     }
-                }
+                }.padding(.vertical, 8)
             }
             .padding(.horizontal, 12)
-            .padding(.top, 8)
-
-            Spacer()
 
             // Card Content
             HStack(alignment: .center, spacing: 16) {
@@ -105,8 +102,8 @@ struct TwineUnreadMediumWidgetEntryView: View {
 
                     footer(post: post)
                 }
+                .padding(.bottom, 12)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
 
                 HStack {
                     if let postImage = post.postImage {
