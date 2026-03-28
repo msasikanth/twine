@@ -30,7 +30,7 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : " • %@"
           }
         },
@@ -71,8 +71,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : " • %dm read"
+            "state" : "translated",
+            "value" : " • %d dk okuma"
           }
         },
         "zh-Hans" : {
@@ -347,6 +347,47 @@
         }
       }
     },
+    "Refresh" : {
+      "comment" : "Title of the refresh intent.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Refresh"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Refresh"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Refresh"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Refresh"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Refresh"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Refresh"
+          }
+        }
+      }
+    },
     "unread_no_posts" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -475,8 +516,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Latest"
+            "state" : "translated",
+            "value" : "En Yeni"
           }
         },
         "zh-Hans" : {
@@ -615,8 +656,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Shows a list of recent unread articles"
+            "state" : "translated",
+            "value" : "Son okunmamış makalelerin listesini gösterir"
           }
         },
         "zh-Hans" : {
@@ -661,8 +702,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Recent unread (Large)"
+            "state" : "translated",
+            "value" : "Son okunmamış (Büyük)"
           }
         },
         "zh-Hans" : {
@@ -707,8 +748,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Shows recent unread articles with more details"
+            "state" : "translated",
+            "value" : "Son okunmamış makaleleri daha fazla ayrıntıyla gösterir"
           }
         },
         "zh-Hans" : {
@@ -753,8 +794,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Recent unread (Medium)"
+            "state" : "translated",
+            "value" : "Son okunmamış (Orta)"
           }
         },
         "zh-Hans" : {
@@ -799,8 +840,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Recent unread (Small)"
+            "state" : "translated",
+            "value" : "Son okunmamış (Küçük)"
           }
         },
         "zh-Hans" : {
