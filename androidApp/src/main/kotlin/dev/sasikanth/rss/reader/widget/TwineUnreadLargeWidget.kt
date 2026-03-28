@@ -41,6 +41,8 @@ import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.cornerRadius
+import androidx.glance.appwidget.lazy.LazyColumn
+import androidx.glance.appwidget.lazy.itemsIndexed
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
@@ -135,26 +137,28 @@ class TwineUnreadLargeWidget : GlanceAppWidget() {
             Column(modifier = GlanceModifier.fillMaxSize()) {
               Header()
 
-              unreadPosts.take(NUMBER_OF_UNREAD_POSTS_IN_WIDGET).forEachIndexed { index, post ->
-                PostItem(
-                  post = post,
-                  index = index,
-                  onClick = {
-                    val readerScreenArgs =
-                      ReaderScreenArgs(
-                        postIndex = index,
-                        postId = post.id,
-                        fromScreen = ReaderScreenArgs.FromScreen.UnreadWidget,
-                      )
-                    val uri = Screen.Reader(readerScreenArgs).toRoute().toUri()
+              LazyColumn {
+                itemsIndexed(unreadPosts) { index, post ->
+                  PostItem(
+                    post = post,
+                    index = index,
+                    onClick = {
+                      val readerScreenArgs =
+                        ReaderScreenArgs(
+                          postIndex = index,
+                          postId = post.id,
+                          fromScreen = ReaderScreenArgs.FromScreen.UnreadWidget,
+                        )
+                      val uri = Screen.Reader(readerScreenArgs).toRoute().toUri()
 
-                    val deepLinkIntent =
-                      Intent(Intent.ACTION_VIEW, uri, context, MainActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                      }
-                    context.startActivity(deepLinkIntent)
-                  },
-                )
+                      val deepLinkIntent =
+                        Intent(Intent.ACTION_VIEW, uri, context, MainActivity::class.java).apply {
+                          addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                      context.startActivity(deepLinkIntent)
+                    },
+                  )
+                }
               }
             }
           }
@@ -366,6 +370,6 @@ class TwineUnreadLargeWidget : GlanceAppWidget() {
   }
 
   companion object {
-    private const val NUMBER_OF_UNREAD_POSTS_IN_WIDGET = 5
+    private const val NUMBER_OF_UNREAD_POSTS_IN_WIDGET = 15
   }
 }
