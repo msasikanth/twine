@@ -43,6 +43,11 @@ CREATE INDEX post_sync_index ON post(updatedAt, syncedAt) WHERE remoteId IS NOT 
 CREATE INDEX post_bookmarked_index ON post(id) WHERE (flags & 1) != 0;
 CREATE INDEX post_read_index ON post(id) WHERE (flags & 2) != 0;
 
+CREATE INDEX post_unread_by_source_date_index ON post(sourceId, postDate) WHERE (flags & 2) == 0;
+CREATE INDEX post_unread_by_date_index ON post(postDate) WHERE (flags & 2) == 0;
+CREATE INDEX post_read_by_date_index ON post(postDate) WHERE (flags & 2) != 0;
+CREATE INDEX post_read_by_source_date_index ON post(sourceId, postDate) WHERE (flags & 2) != 0;
+
 CREATE TRIGGER hide_post_if_blocked_word_is_present_AFTER_INSERT
 AFTER INSERT ON post
 FOR EACH ROW
@@ -674,18 +679,20 @@ deleteReadPostsForFeed:
 DELETE FROM post
 WHERE sourceId = :feedId AND (post.flags & 2) != 0 AND post.postDate < :before;
 
-markPostsAsRead:
+markPostsAsReadForFeed:
 UPDATE post
 SET flags = flags | 2, updatedAt = :updatedAt
-WHERE (sourceId = :sourceId OR :sourceId IS NULL)
+WHERE sourceId = :sourceId
   AND postDate > :after
-  AND (flags & 2) == 0;
+  AND (flags & 2) == 0
+RETURNING id;
 
-unreadPostIds:
-SELECT id FROM post
-WHERE (sourceId = :sourceId OR :sourceId IS NULL)
-  AND postDate > :after
-  AND (flags & 2) == 0;
+markAllPostsAsRead:
+UPDATE post
+SET flags = flags | 2, updatedAt = :updatedAt
+WHERE postDate > :after
+  AND (flags & 2) == 0
+RETURNING id;
 
 postById:
 SELECT * FROM post

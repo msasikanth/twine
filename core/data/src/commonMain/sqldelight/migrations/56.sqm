@@ -1,0 +1,9 @@
+-- Optimized indexes for mark as read and delete operations
+-- Index for markPostsAsRead query: finds unread posts by sourceId and postDate
+CREATE INDEX post_unread_by_source_date_index ON post(sourceId, postDate) WHERE (flags & 2) == 0;
+-- Index for markPostsAsRead query when sourceId is NULL (all feeds): finds all unread posts by postDate
+CREATE INDEX post_unread_by_date_index ON post(postDate) WHERE (flags & 2) == 0;
+-- Index for deleteReadPosts query: finds read posts by postDate for deletion
+CREATE INDEX post_read_by_date_index ON post(postDate) WHERE (flags & 2) != 0;
+-- Index for deleteReadPostsForFeed query: finds read posts by sourceId and postDate
+CREATE INDEX post_read_by_source_date_index ON post(sourceId, postDate) WHERE (flags & 2) != 0;

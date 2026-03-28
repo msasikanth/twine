@@ -1043,8 +1043,8 @@ class RssRepository(
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
         val now = Clock.System.now()
-        val postIds = postQueries.unreadPostIds(sourceId = null, after = postsAfter).executeAsList()
-        postQueries.markPostsAsRead(sourceId = null, after = postsAfter, updatedAt = now)
+        val postIds =
+          postQueries.markAllPostsAsRead(after = postsAfter, updatedAt = now).executeAsList()
         postIds.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
           readingHistoryQueries.insertReadingHistoryForPosts(readAt = now, postIds = chunk)
         }
@@ -1113,8 +1113,9 @@ class RssRepository(
         val now = Clock.System.now()
         feedIdsSnapshot.forEach { feedId ->
           val postIds =
-            postQueries.unreadPostIds(sourceId = feedId, after = postsAfter).executeAsList()
-          postQueries.markPostsAsRead(sourceId = feedId, after = postsAfter, updatedAt = now)
+            postQueries
+              .markPostsAsReadForFeed(sourceId = feedId, after = postsAfter, updatedAt = now)
+              .executeAsList()
           postIds.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
             readingHistoryQueries.insertReadingHistoryForPosts(readAt = now, postIds = chunk)
           }
