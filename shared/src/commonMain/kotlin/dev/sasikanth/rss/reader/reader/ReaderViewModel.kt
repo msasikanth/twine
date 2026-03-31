@@ -82,6 +82,7 @@ class ReaderViewModel(
     ReaderState.default(
       initialPostIndex = readerScreenArgs.postIndex,
       initialPostId = readerScreenArgs.postId,
+      fromScreen = readerScreenArgs.fromScreen,
     )
   private val _state = MutableStateFlow(defaultReaderState)
   val state: StateFlow<ReaderState>
