@@ -34,7 +34,7 @@ struct TwineUnreadLargeWidgetEntryView: View {
             // Header
             HStack(alignment: .center) {
                 Text("widget_latest")
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.custom("Outfit-Medium", size: 16))
 
                 Spacer()
 
@@ -69,7 +69,7 @@ struct TwineUnreadLargeWidgetEntryView: View {
         HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(post.title ?? String(localized: "unread_widget_no_title"))
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.custom("Outfit-Medium", size: 12))
                     .lineLimit(2)
                     .frame(height: 32, alignment: .topLeading)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -104,20 +104,20 @@ struct TwineUnreadLargeWidgetEntryView: View {
             }
 
             Text(post.feedName ?? "")
-                .font(.system(size: 10, weight: .medium))
+                .font(.custom("Outfit-Medium", size: 10))
                 .lineLimit(1)
 
             let relativeTime = RelativeTimeFormatter.format(post.postedOn)
             if !relativeTime.isEmpty {
                 Text(" \u{2022} \(relativeTime)")
-                    .font(.system(size: 10, weight: .regular))
+                    .font(.custom("Outfit-Regular", size: 10))
                     .foregroundColor(.secondary)
                     .lineLimit(1)
             }
 
             if post.readingTimeEstimate > 0 {
                 Text(" \u{2022} \(post.readingTimeEstimate)m read")
-                    .font(.system(size: 10, weight: .regular))
+                    .font(.custom("Outfit-Regular", size: 10))
                     .foregroundColor(.secondary)
                     .lineLimit(1)
             }
@@ -127,7 +127,7 @@ struct TwineUnreadLargeWidgetEntryView: View {
     var twinePremium: some View {
         VStack {
             Text("widget_premium")
-                .font(.body)
+                .font(.custom("Outfit-Medium", size: 16))
                 .multilineTextAlignment(.center)
         }.frame(maxHeight: .infinity, alignment: .center)
     }
@@ -137,7 +137,7 @@ struct TwineUnreadLargeWidgetEntryView: View {
             Image(systemName: "newspaper")
                 .font(.system(size: 32))
             Text("unread_no_posts")
-                .font(.system(size: 14, weight: .medium))
+                .font(.custom("Outfit-Medium", size: 14))
                 .multilineTextAlignment(.center)
         }.frame(maxHeight: .infinity, alignment: .center)
     }
