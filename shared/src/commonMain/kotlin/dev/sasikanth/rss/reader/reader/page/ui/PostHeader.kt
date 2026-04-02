@@ -46,6 +46,7 @@ import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostActionBar
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
+import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.formatRelativeTime
@@ -60,6 +61,7 @@ internal fun PostHeader(
   excerpt: String,
   darkTheme: Boolean,
   themeVariant: ThemeVariant,
+  fromScreen: ReaderScreenArgs.FromScreen,
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
@@ -147,6 +149,8 @@ internal fun PostHeader(
           onCommentsClick = onCommentsClick,
           onTogglePostReadClick = onMarkAsUnread,
           showDropdown = showDropdown,
+          alwaysShowMarkAsUnread = true,
+          hideMarkAsOptions = fromScreen == ReaderScreenArgs.FromScreen.Bookmarks,
           config =
             PostMetadataConfig(
               showUnreadIndicator = false,

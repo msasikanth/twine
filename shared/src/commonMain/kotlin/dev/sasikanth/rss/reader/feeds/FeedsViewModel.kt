@@ -336,6 +336,7 @@ class FeedsViewModel(
       .launchIn(viewModelScope)
   }
 
+  @OptIn(FlowPreview::class)
   private fun observeSources() {
     val activeSourceFlow = observableActiveSource.activeSource
     val postsTypeFlow = settingsRepository.postsType

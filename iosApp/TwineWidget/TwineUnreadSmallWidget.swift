@@ -57,7 +57,7 @@ struct TwineUnreadSmallWidgetEntryView: View {
                             post.title
                                 ?? String(localized: "unread_widget_no_title")
                         )
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.custom("Outfit-Medium", size: 12))
                         .lineLimit(2...2)
 
                         footer(post: post, index: index)
@@ -73,7 +73,7 @@ struct TwineUnreadSmallWidgetEntryView: View {
                             post.title
                                 ?? String(localized: "unread_widget_no_title")
                         )
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.custom("Outfit-Medium", size: 16))
                         .lineLimit(2...3)
 
                         footer(post: post, index: index)
@@ -130,7 +130,7 @@ struct TwineUnreadSmallWidgetEntryView: View {
                 }
 
                 Text(post.feedName ?? "")
-                    .font(.system(size: 9, weight: .medium))
+                    .font(.custom("Outfit-Medium", size: 9))
                     .lineLimit(1)
             }
 
@@ -169,7 +169,7 @@ struct TwineUnreadSmallWidgetEntryView: View {
     var twinePremium: some View {
         VStack {
             Text("widget_premium")
-                .font(.body)
+                .font(.custom("Outfit-Medium", size: 16))
                 .multilineTextAlignment(.center)
         }.frame(maxHeight: .infinity, alignment: .center)
     }
@@ -179,7 +179,7 @@ struct TwineUnreadSmallWidgetEntryView: View {
             Image(systemName: "newspaper")
                 .font(.system(size: 32))
             Text("unread_no_posts")
-                .font(.system(size: 14, weight: .medium))
+                .font(.custom("Outfit-Medium", size: 14))
                 .multilineTextAlignment(.center)
         }.frame(maxHeight: .infinity, alignment: .center)
     }

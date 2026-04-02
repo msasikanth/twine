@@ -73,6 +73,7 @@ import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
 import dev.sasikanth.rss.reader.media.PlaybackState
 import dev.sasikanth.rss.reader.media.SleepTimerOption
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
 import dev.sasikanth.rss.reader.reader.page.ReaderProcessingProgress
 import dev.sasikanth.rss.reader.reader.ui.LocalOnImageClick
@@ -93,6 +94,7 @@ internal fun ReaderPage(
   markdownComponents: MarkdownComponents,
   isDarkTheme: Boolean,
   themeVariant: ThemeVariant,
+  fromScreen: ReaderScreenArgs.FromScreen,
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
   onImageClick: (String) -> Unit,
@@ -116,6 +118,7 @@ internal fun ReaderPage(
     markdownComponents = markdownComponents,
     isDarkTheme = isDarkTheme,
     themeVariant = themeVariant,
+    fromScreen = fromScreen,
     onBookmarkClick = onBookmarkClick,
     onMarkAsUnread = onMarkAsUnread,
     onImageClick = onImageClick,
@@ -144,6 +147,7 @@ private fun ReaderPageContent(
   markdownComponents: MarkdownComponents,
   isDarkTheme: Boolean,
   themeVariant: ThemeVariant,
+  fromScreen: ReaderScreenArgs.FromScreen,
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
   onImageClick: (String) -> Unit,
@@ -232,6 +236,7 @@ private fun ReaderPageContent(
                 excerpt = excerptState ?: "",
                 darkTheme = isDarkTheme,
                 themeVariant = themeVariant,
+                fromScreen = fromScreen,
                 onCommentsClick = {
                   val commentsLink = readerPost.commentsLink
                   if (commentsLink != null) {
@@ -375,6 +380,7 @@ private fun ReaderPagePreview() {
       markdownComponents = markdownComponents(),
       isDarkTheme = false,
       themeVariant = ThemeVariant.Dynamic,
+      fromScreen = ReaderScreenArgs.FromScreen.Home,
       onBookmarkClick = {},
       onMarkAsUnread = {},
       onImageClick = {},

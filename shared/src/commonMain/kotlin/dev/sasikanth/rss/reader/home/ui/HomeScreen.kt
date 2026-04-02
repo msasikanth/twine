@@ -151,6 +151,7 @@ internal fun HomeScreen(
         state.showFeaturedSection,
         shouldBlockImage,
         sizeClass,
+        state.activeSource?.id,
       ) {
         val forceShowAllPosts =
           shouldBlockImage ||
@@ -165,7 +166,13 @@ internal fun HomeScreen(
       ?.collectAsLazyPagingItems()
 
   val featuredPosts by
-    remember(state.featuredPosts, state.themeVariant, sizeClass, shouldBlockImage) {
+    remember(
+        state.featuredPosts,
+        state.themeVariant,
+        sizeClass,
+        shouldBlockImage,
+        state.activeSource?.id,
+      ) {
         if (
           shouldBlockImage ||
             sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)

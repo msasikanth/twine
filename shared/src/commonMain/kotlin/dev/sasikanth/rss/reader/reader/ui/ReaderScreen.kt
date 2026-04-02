@@ -473,6 +473,7 @@ internal fun ReaderScreen(
                 markdownComponents = markdownComponents,
                 isDarkTheme = isDarkTheme,
                 themeVariant = state.selectedThemeVariant,
+                fromScreen = state.fromScreen,
                 onBookmarkClick = {
                   viewModel.dispatch(
                     ReaderEvent.TogglePostBookmark(

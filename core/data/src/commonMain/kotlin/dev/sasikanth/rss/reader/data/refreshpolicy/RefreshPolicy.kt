@@ -26,6 +26,7 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDateTime
@@ -45,13 +46,15 @@ class RefreshPolicy(private val dataStore: DataStore<Preferences>) {
   private val lastSyncedAtKey = stringPreferencesKey("pref_last_sync_time")
 
   val lastRefreshedAtFlow: Flow<LocalDateTime> =
-    dataStore.data.map { preferences ->
-      val timeZone = TimeZone.currentSystemDefault()
-      val instantString =
-        preferences[lastRefreshedAtKey] ?: return@map Clock.System.now().toLocalDateTime(timeZone)
-      val instant = Instant.parse(instantString)
-      instant.toLocalDateTime(timeZone)
-    }
+    dataStore.data
+      .map { preferences ->
+        val timeZone = TimeZone.currentSystemDefault()
+        val instantString =
+          preferences[lastRefreshedAtKey] ?: return@map Clock.System.now().toLocalDateTime(timeZone)
+        val instant = Instant.parse(instantString)
+        instant.toLocalDateTime(timeZone)
+      }
+      .distinctUntilChanged()
 
   val lastSyncedAtFlow: Flow<Instant?> =
     dataStore.data.map { preferences -> preferences[lastSyncedAtKey]?.let { Instant.parse(it) } }

@@ -109,18 +109,7 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		CDBE05C72E129DDB00CC593E /* TwineWidget */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				CDBE05D72E129DDC00CC593E /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = TwineWidget;
-			sourceTree = "<group>";
-		};
+		CDBE05C72E129DDB00CC593E /* TwineWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (CDBE05D72E129DDC00CC593E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = TwineWidget; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */

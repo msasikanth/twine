@@ -108,6 +108,8 @@ internal fun PostActionBar(
   onTogglePostReadClick: () -> Unit,
   modifier: Modifier = Modifier,
   showDropdown: Boolean = false,
+  alwaysShowMarkAsUnread: Boolean = false,
+  hideMarkAsOptions: Boolean = false,
   onDropdownChange: (Boolean) -> Unit = {},
   config: PostMetadataConfig = PostMetadataConfig.DEFAULT,
   onSourceClick: () -> Unit,
@@ -177,6 +179,8 @@ internal fun PostActionBar(
       config = config,
       commentsLink = commentsLink,
       showDropdown = showDropdown,
+      alwaysShowMarkAsUnread = alwaysShowMarkAsUnread,
+      hideMarkAsOptions = hideMarkAsOptions,
       onDropdownChange = onDropdownChange,
       onBookmarkClick = onBookmarkClick,
       onCommentsClick = onCommentsClick,
@@ -263,6 +267,8 @@ internal fun PostActions(
   commentsLink: String?,
   modifier: Modifier = Modifier,
   showDropdown: Boolean = false,
+  alwaysShowMarkAsUnread: Boolean = false,
+  hideMarkAsOptions: Boolean = false,
   onDropdownChange: (Boolean) -> Unit = {},
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
@@ -379,9 +385,9 @@ internal fun PostActions(
         expanded = showDropdown,
         onDismissRequest = { onDropdownChange(false) },
       ) {
-        if (config.showToggleReadUnreadOption) {
+        if (config.showToggleReadUnreadOption && !hideMarkAsOptions) {
           val markAsReadLabel =
-            if (postRead) {
+            if (alwaysShowMarkAsUnread || postRead) {
               stringResource(Res.string.markAsUnRead)
             } else {
               stringResource(Res.string.markAsRead)
@@ -390,7 +396,7 @@ internal fun PostActions(
           DropdownMenuItem(
             modifier = Modifier.fillMaxWidth(),
             leadingIcon =
-              if (postRead) {
+              if (alwaysShowMarkAsUnread || postRead) {
                 TwineIcons.VisibilityOff
               } else {
                 TwineIcons.Visibility

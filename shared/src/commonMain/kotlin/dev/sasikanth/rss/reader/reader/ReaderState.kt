@@ -22,6 +22,7 @@ import app.cash.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
+import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
@@ -37,11 +38,12 @@ data class ReaderState(
   val readerLineHeightScaleFactor: Float,
   val openPaywall: Boolean,
   val isSubscribed: Boolean,
+  val fromScreen: FromScreen,
 ) {
 
   companion object {
 
-    fun default(initialPostIndex: Int, initialPostId: String): ReaderState {
+    fun default(initialPostIndex: Int, initialPostId: String, fromScreen: FromScreen): ReaderState {
       return ReaderState(
         activePostIndex = initialPostIndex,
         activePostId = initialPostId,
@@ -53,6 +55,7 @@ data class ReaderState(
         readerLineHeightScaleFactor = 1f,
         openPaywall = false,
         isSubscribed = false,
+        fromScreen = fromScreen,
       )
     }
   }
