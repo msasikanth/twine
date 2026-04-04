@@ -18,7 +18,6 @@ package dev.sasikanth.rss.reader.data.repository
 
 import app.cash.paging.PagingSource
 import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
@@ -88,6 +87,7 @@ class RssRepository(
   private val feedGroupRepository: FeedGroupRepository,
   private val sourceRepository: SourceRepository,
   private val postRepository: PostRepository,
+  private val feedRepository: FeedRepository,
 ) {
   private companion object {
     private const val POST_UPSERT_BATCH_SIZE = 200
@@ -401,16 +401,11 @@ class RssRepository(
   }
 
   fun allFeeds(): Flow<List<Feed>> {
-    return feedQueries
-      .allFeedsBlocking(mapper = ::mapToFeed)
-      .asFlow()
-      .mapToList(dispatchersProvider.databaseRead)
+    return feedRepository.allFeeds()
   }
 
   suspend fun allFeedsBlocking(): List<Feed> {
-    return withContext(dispatchersProvider.databaseRead) {
-      feedQueries.allFeedsBlocking(mapper = ::mapToFeed).executeAsList()
-    }
+    return feedRepository.allFeedsBlocking()
   }
 
   suspend fun allFeedGroupsBlocking(): List<FeedGroup> {
@@ -418,7 +413,7 @@ class RssRepository(
   }
 
   fun numberOfFeeds(): Flow<Long> {
-    return feedQueries.numberOfFeeds().asFlow().mapToOne(dispatchersProvider.databaseRead)
+    return feedRepository.numberOfFeeds()
   }
 
   /** Search feeds, returns all feeds if [searchQuery] is empty */
@@ -426,22 +421,7 @@ class RssRepository(
     searchQuery: String,
     postsAfter: Instant = Instant.DISTANT_PAST,
   ): PagingSource<Int, Feed> {
-    val sanitizedSearchQuery = sanitizeSearchQuery(searchQuery)
-
-    return QueryPagingSource(
-      countQuery = feedSearchFTSQueries.countSearchResults(searchQuery = sanitizedSearchQuery),
-      transacter = feedSearchFTSQueries,
-      context = dispatchersProvider.databaseRead,
-      queryProvider = { limit, offset ->
-        feedSearchFTSQueries.search(
-          searchQuery = sanitizedSearchQuery,
-          postsAfter = postsAfter,
-          limit = limit,
-          offset = offset,
-          mapper = ::mapToFeedWithUnreadCountAndRefreshInterval,
-        )
-      },
-    )
+    return feedRepository.searchFeed(searchQuery, postsAfter)
   }
 
   fun feed(
@@ -449,15 +429,7 @@ class RssRepository(
     postsAfter: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
   ): Flow<Feed> {
-    return feedQueries
-      .feedWithUnreadPostsCount(
-        id = feedId,
-        postsAfter = postsAfter,
-        postsUpperBound = postsUpperBound,
-        mapper = ::mapToFeedWithUnreadCount,
-      )
-      .asFlow()
-      .mapToOne(dispatchersProvider.databaseRead)
+    return feedRepository.feedWithUnreadCount(feedId, postsAfter, postsUpperBound)
   }
 
   suspend fun feedBlocking(
@@ -465,16 +437,7 @@ class RssRepository(
     postsAfter: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
   ): Feed {
-    return withContext(dispatchersProvider.databaseRead) {
-      feedQueries
-        .feedWithUnreadPostsCount(
-          id = feedId,
-          postsAfter = postsAfter,
-          postsUpperBound = postsUpperBound,
-          mapper = ::mapToFeedWithUnreadCount,
-        )
-        .executeAsOne()
-    }
+    return feedRepository.feedWithUnreadCountBlocking(feedId, postsAfter, postsUpperBound)
   }
 
   suspend fun removeFeed(feedId: String) {
@@ -501,19 +464,11 @@ class RssRepository(
   }
 
   suspend fun updateFeedName(newFeedName: String, feedId: String) {
-    withContext(dispatchersProvider.databaseWrite) {
-      feedQueries.updateFeedName(
-        newFeedName = newFeedName,
-        id = feedId,
-        lastUpdatedAt = Clock.System.now(),
-      )
-    }
+    feedRepository.updateFeedName(newFeedName, feedId)
   }
 
   suspend fun updateFeedLastUpdatedAt(feedId: String, lastUpdatedAt: Instant) {
-    withContext(dispatchersProvider.databaseWrite) {
-      feedQueries.updateLastUpdatedAt(lastUpdatedAt = lastUpdatedAt, id = feedId)
-    }
+    feedRepository.updateFeedLastUpdatedAt(feedId, lastUpdatedAt)
   }
 
   suspend fun updateFeedGroupUpdatedAt(groupId: String, updatedAt: Instant) {
@@ -521,9 +476,7 @@ class RssRepository(
   }
 
   suspend fun updateFeedRefreshInterval(feedId: String, refreshInterval: Duration) {
-    withContext(dispatchersProvider.databaseWrite) {
-      feedQueries.updateRefreshInterval(refreshInterval = refreshInterval.toString(), id = feedId)
-    }
+    feedRepository.updateFeedRefreshInterval(feedId, refreshInterval)
   }
 
   fun search(
@@ -608,7 +561,7 @@ class RssRepository(
   }
 
   suspend fun hasFeed(id: String): Boolean {
-    return withContext(dispatchersProvider.databaseRead) { feedQueries.hasFeed(id).executeAsOne() }
+    return feedRepository.hasFeed(id)
   }
 
   suspend fun hasPost(id: String): Boolean {
@@ -640,9 +593,7 @@ class RssRepository(
   }
 
   fun hasFeeds(): Flow<Boolean> {
-    return feedQueries.numberOfFeeds().asFlow().mapToOne(dispatchersProvider.databaseRead).map {
-      it > 0
-    }
+    return feedRepository.hasFeeds()
   }
 
   /** @return list of feeds from which posts are deleted from */
@@ -985,15 +936,11 @@ class RssRepository(
   }
 
   suspend fun updateFeedAlwaysFetchSource(feedId: String, newValue: Boolean) {
-    return withContext(dispatchersProvider.databaseWrite) {
-      feedQueries.updateAlwaysFetchSourceArticle(newValue, feedId)
-    }
+    feedRepository.updateFeedAlwaysFetchSource(feedId, newValue)
   }
 
   suspend fun updateFeedShowFavIcon(feedId: String, newValue: Boolean) {
-    return withContext(dispatchersProvider.databaseWrite) {
-      feedQueries.updateShowFeedFavIcon(newValue, feedId)
-    }
+    feedRepository.updateFeedShowFavIcon(feedId, newValue)
   }
 
   suspend fun updateFeedHideFromAllFeeds(feedId: String, newValue: Boolean) {
@@ -1169,20 +1116,7 @@ class RssRepository(
     feedIds: List<String>,
     orderBy: FeedsOrderBy = FeedsOrderBy.Latest,
   ): PagingSource<Int, Feed> {
-    return QueryPagingSource(
-      countQuery = feedQueries.feedsInGroupPaginatedCount(feedIds),
-      transacter = feedQueries,
-      context = dispatchersProvider.databaseRead,
-      queryProvider = { limit, offset ->
-        feedQueries.feedsInGroupPaginated(
-          feedIds = feedIds,
-          orderBy = orderBy.value,
-          limit = limit,
-          offset = offset,
-          mapper = ::mapToFeedWithUnreadCount,
-        )
-      },
-    )
+    return feedRepository.feedsInGroup(feedIds, orderBy)
   }
 
   suspend fun updatedSourcePinnedPosition(sources: List<Source>) {
