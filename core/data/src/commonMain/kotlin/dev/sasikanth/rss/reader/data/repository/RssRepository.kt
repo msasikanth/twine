@@ -40,7 +40,6 @@ import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.data.database.AppConfigQueries
 import dev.sasikanth.rss.reader.data.database.BlockedWordsQueries
-import dev.sasikanth.rss.reader.data.database.BookmarkQueries
 import dev.sasikanth.rss.reader.data.database.FeedGroupFeedQueries
 import dev.sasikanth.rss.reader.data.database.FeedGroupQueries
 import dev.sasikanth.rss.reader.data.database.FeedQueries
@@ -83,7 +82,6 @@ class RssRepository(
   private val postQueries: PostQueries,
   private val postContentQueries: PostContentQueries,
   private val postSearchFTSQueries: PostSearchFTSQueries,
-  private val bookmarkQueries: BookmarkQueries,
   private val feedSearchFTSQueries: FeedSearchFTSQueries,
   private val feedGroupQueries: FeedGroupQueries,
   private val feedGroupFeedQueries: FeedGroupFeedQueries,
@@ -94,6 +92,7 @@ class RssRepository(
   private val readingTimeCalculator: ReadingTimeCalculator,
   private val widgetUpdater: WidgetUpdater,
   private val dispatchersProvider: DispatchersProvider,
+  private val bookmarkRepository: BookmarkRepository,
 ) {
   private companion object {
     private const val POST_UPSERT_BATCH_SIZE = 200
@@ -656,14 +655,7 @@ class RssRepository(
   }
 
   suspend fun updateBookmarkStatus(bookmarked: Boolean, id: String) {
-    withContext(dispatchersProvider.databaseWrite) {
-      postQueries.updateBookmarkStatus(
-        bookmarked = if (bookmarked) 1L else 0L,
-        id = id,
-        updatedAt = Clock.System.now(),
-      )
-    }
-    widgetUpdater.updateUnreadWidget()
+    bookmarkRepository.updateBookmarkStatus(bookmarked, id)
   }
 
   suspend fun updatePostReadStatus(read: Boolean, id: String, recordHistory: Boolean = true) {
@@ -711,13 +703,11 @@ class RssRepository(
   }
 
   suspend fun deleteBookmark(id: String) {
-    withContext(dispatchersProvider.databaseWrite) { bookmarkQueries.deleteBookmark(id) }
+    bookmarkRepository.deleteBookmark(id)
   }
 
   suspend fun allBookmarkIdsBlocking(): List<String> {
-    return withContext(dispatchersProvider.databaseRead) {
-      bookmarkQueries.allBookmarkIds().executeAsList()
-    }
+    return bookmarkRepository.allBookmarkIdsBlocking()
   }
 
   fun allFeeds(): Flow<List<Feed>> {
@@ -928,58 +918,7 @@ class RssRepository(
   }
 
   fun bookmarks(): PagingSource<Int, ResolvedPost> {
-    return QueryPagingSource(
-      countQuery = bookmarkQueries.countBookmarks(),
-      transacter = bookmarkQueries,
-      context = dispatchersProvider.databaseRead,
-      queryProvider = { limit, offset ->
-        bookmarkQueries.bookmarks(
-          limit,
-          offset,
-          mapper = {
-            id: String,
-            sourceId: String,
-            title: String,
-            description: String,
-            imageUrl: String?,
-            audioUrl: String?,
-            date: Instant,
-            createdAt: Instant,
-            link: String,
-            commentsLink: String?,
-            flags: Set<PostFlag>,
-            feedName: String,
-            feedIcon: String,
-            feedHomepageLink: String,
-            showFeedFavIcon: Boolean,
-            feedContentReadingTime: Long?,
-            articleContentReadingTime: Long?,
-            seedColor: Long? ->
-            ResolvedPost(
-              id = id,
-              sourceId = sourceId,
-              title = title,
-              description = description,
-              imageUrl = imageUrl,
-              audioUrl = audioUrl,
-              date = date,
-              createdAt = createdAt,
-              link = link,
-              commentsLink = commentsLink,
-              flags = flags,
-              feedName = feedName,
-              feedIcon = feedIcon,
-              feedHomepageLink = feedHomepageLink,
-              alwaysFetchFullArticle = true,
-              showFeedFavIcon = showFeedFavIcon,
-              feedContentReadingTime = feedContentReadingTime?.toInt(),
-              articleContentReadingTime = articleContentReadingTime?.toInt(),
-              seedColor = seedColor?.toInt(),
-            )
-          },
-        )
-      },
-    )
+    return bookmarkRepository.bookmarks()
   }
 
   suspend fun hasFeed(id: String): Boolean {
@@ -1097,20 +1036,7 @@ class RssRepository(
   }
 
   suspend fun updateBookmarkStatus(postIds: Set<String>, bookmarked: Boolean) {
-    val postIdsSnapshot = postIds.toList()
-    val now = Clock.System.now()
-    withContext(dispatchersProvider.databaseWrite) {
-      transactionRunner.invoke {
-        postIdsSnapshot.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
-          postQueries.updatePostsBookmarkStatus(
-            bookmarked = if (bookmarked) 1L else 0L,
-            updatedAt = now,
-            ids = chunk,
-          )
-        }
-      }
-    }
-    widgetUpdater.updateUnreadWidget()
+    bookmarkRepository.updateBookmarkStatus(postIds, bookmarked)
   }
 
   suspend fun markPostsInFeedAsRead(
