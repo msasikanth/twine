@@ -170,33 +170,45 @@ fun <T> PagerState.CollectItemTransition(
 
   LaunchedEffect(this, key) {
     snapshotFlow {
-        val settledPage = settledPage
-        val offset = getOffsetFractionForPage(settledPage)
+        val page = currentPage
+        val offset = currentPageOffsetFraction
 
         // Quantize offset to 2 decimal places to throttle transitions
         val quantizedOffset = (offset * 100).toInt() / 100f
-        settledPage to quantizedOffset
+        page to quantizedOffset
       }
       .distinctUntilChanged()
-      .collect { (settledPage, offset) ->
-        val activePost = currentItemProvider(settledPage)
-        if (activePost == null) return@collect
+      .collect { (page, offset) ->
+        val activeItem = currentItemProvider(page)
+        if (activeItem == null) return@collect
 
-        val fromItem =
-          if (offset < -Constants.EPSILON) {
-            currentItemProvider(settledPage - 1) ?: activePost
-          } else {
-            activePost
+        val fromItem: T
+        val toItem: T
+        val normalizedOffset: Float
+
+        when {
+          offset < -Constants.EPSILON -> {
+            // Swiping backward (toward previous page)
+            fromItem = currentItemProvider(page - 1) ?: activeItem
+            toItem = activeItem
+            // Convert negative offset to positive progress (0 to 1)
+            normalizedOffset = 1f + offset
           }
-
-        val toItem =
-          if (offset > Constants.EPSILON) {
-            currentItemProvider(settledPage + 1) ?: activePost
-          } else {
-            activePost
+          offset > Constants.EPSILON -> {
+            // Swiping forward (toward next page)
+            fromItem = activeItem
+            toItem = currentItemProvider(page + 1) ?: activeItem
+            normalizedOffset = offset
           }
+          else -> {
+            // No significant offset, stay on current item
+            fromItem = activeItem
+            toItem = activeItem
+            normalizedOffset = 0f
+          }
+        }
 
-        currentOnTransition(fromItem, toItem, offset)
+        currentOnTransition(fromItem, toItem, normalizedOffset)
       }
   }
 }
