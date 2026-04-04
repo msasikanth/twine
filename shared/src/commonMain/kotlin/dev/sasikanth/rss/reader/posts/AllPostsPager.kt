@@ -138,7 +138,7 @@ class AllPostsPager(
           postsUpperBound = params.postsUpperBound,
         )
         .onEach { posts ->
-          coroutineScope.launch {
+          coroutineScope.launch(dispatchersProvider.io) {
             val seedColorUpdates =
               posts
                 .filter { it.seedColor == null && !it.imageUrl.isNullOrBlank() }
