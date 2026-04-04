@@ -35,7 +35,7 @@ ksoup = "0.2.6"
 sqliteAndroid = "3.49.0"
 desugarJdk = "2.1.5"
 atomicfu = "0.32.1"
-paging = "3.3.0-alpha02-0.5.1"
+paging = "3.4.2"
 stately = "2.1.0"
 xmlutil = "0.91.3"
 ktxml = "1.0.0"
@@ -124,8 +124,8 @@ ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
 ksoup-kotlinx-io = { module = "com.fleeksoft.ksoup:ksoup-kotlinx", version.ref = "ksoup" }
 sqliteAndroid = { module = "com.github.requery:sqlite-android", version.ref = "sqliteAndroid" }
 desugarJdk = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdk" }
-paging-common = { module = "app.cash.paging:paging-common", version.ref = "paging" }
-paging-compose = { module = "app.cash.paging:paging-compose-common", version.ref = "paging" }
+paging-common = { module = "androidx.paging:paging-common", version.ref = "paging" }
+paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
 stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "stately" }
 stately-iso-collections = { module = "co.touchlab:stately-iso-collections", version.ref = "stately" }
 xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlutil" }

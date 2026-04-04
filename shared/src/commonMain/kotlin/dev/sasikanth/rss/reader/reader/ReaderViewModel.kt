@@ -21,9 +21,9 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
-import app.cash.paging.cachedIn
-import app.cash.paging.createPager
-import app.cash.paging.createPagingConfig
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
@@ -174,7 +174,7 @@ class ReaderViewModel(
         _state.update { it.copy(posts = allPostsPagingData) }
       } else {
         val posts =
-          createPager(config = createPagingConfig(pageSize = 4, enablePlaceholders = true)) {
+          Pager(config = PagingConfig(pageSize = 4, enablePlaceholders = true)) {
               when (readerScreenArgs.fromScreen) {
                 is Search -> {
                   rssRepository.search(

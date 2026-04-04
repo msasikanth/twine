@@ -26,9 +26,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import app.cash.paging.cachedIn
-import app.cash.paging.createPager
-import app.cash.paging.createPagingConfig
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.core.model.local.Feed
@@ -129,7 +129,7 @@ class GroupViewModel(
       }
       .onEach { (group, state) ->
         val feeds =
-          createPager(config = createPagingConfig(pageSize = 20)) {
+          Pager(config = PagingConfig(pageSize = 20)) {
               rssRepository.feedsInGroup(feedIds = group.feedIds, orderBy = state.feedsOrderBy)
             }
             .flow

@@ -19,9 +19,9 @@ package dev.sasikanth.rss.reader.bookmarks
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.cash.paging.cachedIn
-import app.cash.paging.createPager
-import app.cash.paging.createPagingConfig
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,7 +68,7 @@ class BookmarksViewModel(private val rssRepository: RssRepository) : ViewModel()
 
   private fun init() {
     val bookmarks =
-      createPager(config = createPagingConfig(pageSize = 20)) { rssRepository.bookmarks() }
+      Pager(config = PagingConfig(pageSize = 20)) { rssRepository.bookmarks() }
         .flow
         .cachedIn(viewModelScope)
 

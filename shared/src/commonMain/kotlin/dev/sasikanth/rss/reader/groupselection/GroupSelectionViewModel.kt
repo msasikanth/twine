@@ -21,9 +21,9 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.cash.paging.cachedIn
-import app.cash.paging.createPager
-import app.cash.paging.createPagingConfig
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import dev.sasikanth.rss.reader.app.Modals
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.data.repository.RssRepository
@@ -60,7 +60,7 @@ class GroupSelectionViewModel(
 
   private fun observeGroups() {
     val groups =
-      createPager(config = createPagingConfig(pageSize = 20)) { rssRepository.allGroups() }
+      Pager(config = PagingConfig(pageSize = 20)) { rssRepository.allGroups() }
         .flow
         .cachedIn(viewModelScope)
 

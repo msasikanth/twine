@@ -52,7 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.cash.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.InverseButton
 import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.feeds.ui.CreateGroupDialog

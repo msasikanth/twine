@@ -44,8 +44,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.cash.paging.compose.LazyPagingItems
-import app.cash.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.bookmarks.BookmarksEvent
 import dev.sasikanth.rss.reader.bookmarks.BookmarksState
 import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel

@@ -21,7 +21,7 @@ package dev.sasikanth.rss.reader.home
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Immutable
-import app.cash.paging.PagingData
+import androidx.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType

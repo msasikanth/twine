@@ -40,8 +40,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
-import app.cash.paging.compose.LazyPagingItems
-import app.cash.paging.compose.itemKey
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemKey
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuDivider

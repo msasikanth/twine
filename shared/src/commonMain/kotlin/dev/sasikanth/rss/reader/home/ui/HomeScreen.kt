@@ -75,9 +75,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.window.core.layout.WindowSizeClass
-import app.cash.paging.compose.LazyPagingItems
-import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost

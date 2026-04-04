@@ -25,7 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import app.cash.paging.compose.LazyPagingItems
+import androidx.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost

@@ -24,9 +24,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.cash.paging.cachedIn
-import app.cash.paging.createPager
-import app.cash.paging.createPagingConfig
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
@@ -52,7 +52,7 @@ import me.tatarka.inject.annotations.Inject
 class SearchViewModel(private val rssRepository: RssRepository) : ViewModel() {
 
   val sources =
-    createPager(config = createPagingConfig(pageSize = 20)) { rssRepository.sources() }
+    Pager(config = PagingConfig(pageSize = 20)) { rssRepository.sources() }
       .flow
       .cachedIn(viewModelScope)
 
@@ -178,7 +178,7 @@ class SearchViewModel(private val rssRepository: RssRepository) : ViewModel() {
     onlyUnread: Boolean,
   ) {
     val searchResults =
-      createPager(config = createPagingConfig(pageSize = 20)) {
+      Pager(config = PagingConfig(pageSize = 20)) {
           rssRepository.search(
             searchQuery = query,
             sortOrder = sortOrder,

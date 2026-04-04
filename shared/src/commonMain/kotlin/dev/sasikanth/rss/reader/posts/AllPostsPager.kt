@@ -18,9 +18,9 @@
 package dev.sasikanth.rss.reader.posts
 
 import androidx.compose.ui.graphics.toArgb
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import app.cash.paging.createPager
-import app.cash.paging.createPagingConfig
 import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -99,7 +99,7 @@ class AllPostsPager(
 
   val allPostsPagingData: Flow<PagingData<ResolvedPost>> =
     baseParameters.flatMapLatest { params ->
-      createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = true)) {
+      Pager(config = PagingConfig(pageSize = 20, enablePlaceholders = true)) {
           rssRepository.allPosts(
             activeSourceIds = params.activeSourceIds,
             postsSortOrder = params.postsSortOrder,
@@ -113,7 +113,7 @@ class AllPostsPager(
 
   val nonFeaturedPostsPagingData: Flow<PagingData<ResolvedPost>> =
     baseParameters.flatMapLatest { params ->
-      createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = true)) {
+      Pager(config = PagingConfig(pageSize = 20, enablePlaceholders = true)) {
           rssRepository.nonFeaturedPosts(
             activeSourceIds = params.activeSourceIds,
             postsSortOrder = params.postsSortOrder,

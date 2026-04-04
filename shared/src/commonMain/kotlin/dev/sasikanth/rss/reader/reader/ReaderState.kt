@@ -18,7 +18,7 @@
 package dev.sasikanth.rss.reader.reader
 
 import androidx.compose.runtime.Immutable
-import app.cash.paging.PagingData
+import androidx.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.ReaderFont

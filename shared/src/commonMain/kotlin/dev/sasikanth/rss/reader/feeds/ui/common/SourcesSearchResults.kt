@@ -21,8 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import app.cash.paging.compose.LazyPagingItems
-import app.cash.paging.compose.itemKey
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemKey
 import dev.sasikanth.rss.reader.components.DropdownMenuDivider
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.core.model.local.Feed

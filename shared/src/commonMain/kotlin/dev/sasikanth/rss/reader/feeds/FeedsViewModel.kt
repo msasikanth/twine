@@ -24,12 +24,12 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
-import app.cash.paging.createPager
-import app.cash.paging.createPagingConfig
-import app.cash.paging.map
+import androidx.paging.map
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.Source
@@ -425,7 +425,7 @@ class FeedsViewModel(
   }
 
   private fun feedsSearchResultsPager(transformedSearchQuery: String, postsAfter: Instant) =
-    createPager(config = createPagingConfig(pageSize = 20)) {
+    Pager(config = PagingConfig(pageSize = 20)) {
         rssRepository.searchFeed(searchQuery = transformedSearchQuery, postsAfter = postsAfter)
       }
       .flow
@@ -435,7 +435,7 @@ class FeedsViewModel(
     postsUpperBound: LocalDateTime,
     feedsSortOrder: FeedsOrderBy,
   ) =
-    createPager(config = createPagingConfig(pageSize = 20)) {
+    Pager(config = PagingConfig(pageSize = 20)) {
         rssRepository.sources(
           postsAfter = postsAfter,
           postsUpperBound = postsUpperBound.toInstant(TimeZone.currentSystemDefault()),

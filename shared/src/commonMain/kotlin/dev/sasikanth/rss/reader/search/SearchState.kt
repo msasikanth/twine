@@ -17,7 +17,7 @@
 package dev.sasikanth.rss.reader.search
 
 import androidx.compose.runtime.Immutable
-import app.cash.paging.PagingData
+import androidx.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.Source
