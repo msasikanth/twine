@@ -245,7 +245,9 @@ class OpmlManager(
   private suspend fun addFeed(feed: OpmlFeed): String? {
     val feedFetcherResult = feedFetcher.fetch(feed.link)
     if (feedFetcherResult !is FeedFetchResult.Success) {
-      Logger.e("OPMLImport") { "Failed to import: ${feed.link}" }
+      Logger.e(throwable = IllegalArgumentException("Failed to import OPML"), tag = "OPMLImport") {
+        "Failed to import: ${feed.link}"
+      }
       return null
     }
 

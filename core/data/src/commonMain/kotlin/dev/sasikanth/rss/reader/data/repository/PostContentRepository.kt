@@ -58,7 +58,9 @@ class PostContentRepository(
       .asFlow()
       .mapToOneOrNull(dispatcherProvider.databaseRead)
       .catch { error ->
-        Logger.e("PostContentError", error) { "Failed to load post content for $postId" }
+        Logger.e(throwable = error, tag = "PostContentError") {
+          "Failed to load post content for $postId"
+        }
         emit(null)
       }
   }
