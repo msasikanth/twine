@@ -88,6 +88,7 @@ class RssRepository(
   private val dispatchersProvider: DispatchersProvider,
   private val bookmarkRepository: BookmarkRepository,
   private val readingHistoryRepository: ReadingHistoryRepository,
+  private val feedGroupRepository: FeedGroupRepository,
 ) {
   private companion object {
     private const val POST_UPSERT_BATCH_SIZE = 200
@@ -719,9 +720,7 @@ class RssRepository(
   }
 
   suspend fun allFeedGroupsBlocking(): List<FeedGroup> {
-    return withContext(dispatchersProvider.databaseRead) {
-      feedGroupQueries.allGroupsBlocking(mapper = ::mapToFeedGroup).executeAsList()
-    }
+    return feedGroupRepository.allFeedGroupsBlocking()
   }
 
   fun numberOfFeeds(): Flow<Long> {
@@ -824,9 +823,7 @@ class RssRepository(
   }
 
   suspend fun updateFeedGroupUpdatedAt(groupId: String, updatedAt: Instant) {
-    withContext(dispatchersProvider.databaseWrite) {
-      feedGroupQueries.updateUpdatedAt(updatedAt, groupId)
-    }
+    feedGroupRepository.updateFeedGroupUpdatedAt(groupId, updatedAt)
   }
 
   suspend fun updateFeedRefreshInterval(feedId: String, refreshInterval: Duration) {
@@ -1131,47 +1128,11 @@ class RssRepository(
     groupId: String,
     updatedAt: Instant = Clock.System.now(),
   ) {
-    withContext(dispatchersProvider.databaseWrite) {
-      feedGroupQueries.updateFeedGroupRemoteId(
-        remoteId = remoteId,
-        updatedAt = updatedAt,
-        id = groupId,
-      )
-    }
+    feedGroupRepository.updateFeedGroupRemoteId(remoteId, groupId, updatedAt)
   }
 
   suspend fun feedGroupByRemoteId(remoteId: String): FeedGroup? {
-    return withContext(dispatchersProvider.databaseRead) {
-      feedGroupQueries
-        .feedGroupByRemoteId(
-          remoteId = remoteId,
-          mapper = {
-            id: String,
-            name: String,
-            createdAt: Instant,
-            updatedAt: Instant,
-            pinnedAt: Instant?,
-            pinnedPosition: Double,
-            isDeleted: Boolean,
-            remoteId: String? ->
-            FeedGroup(
-              id = id,
-              name = name,
-              feedIds = emptyList(),
-              feedHomepageLinks = emptyList(),
-              feedIconLinks = emptyList(),
-              feedShowFavIconSettings = emptyList(),
-              createdAt = createdAt,
-              updatedAt = updatedAt,
-              pinnedAt = pinnedAt,
-              pinnedPosition = pinnedPosition,
-              isDeleted = isDeleted,
-              remoteId = remoteId,
-            )
-          },
-        )
-        .executeAsOneOrNull()
-    }
+    return feedGroupRepository.feedGroupByRemoteId(remoteId)
   }
 
   suspend fun latestPostRemoteId(): String? {
@@ -1328,35 +1289,15 @@ class RssRepository(
     isDeleted: Boolean,
     remoteId: String? = null,
   ) {
-    withContext(dispatchersProvider.databaseWrite) {
-      feedGroupQueries.upsertSyncGroup(
-        id = id,
-        name = name,
-        createdAt = Clock.System.now(),
-        updatedAt = updatedAt,
-        pinnedAt = pinnedAt,
-        isDeleted = isDeleted,
-        remoteId = remoteId,
-      )
-    }
-    widgetUpdater.updateUnreadWidget()
+    feedGroupRepository.upsertGroup(id, name, pinnedAt, updatedAt, isDeleted, remoteId)
   }
 
   suspend fun feedGroupBlocking(id: String): FeedGroup? {
-    return withContext(dispatchersProvider.databaseRead) {
-      feedGroupQueries.group(id, mapper = ::mapToFeedGroup).executeAsOneOrNull()
-    }
+    return feedGroupRepository.feedGroupBlocking(id)
   }
 
   suspend fun replaceFeedsInGroup(groupId: String, feedIds: List<String>) {
-    withContext(dispatchersProvider.databaseWrite) {
-      transactionRunner.invoke {
-        feedGroupFeedQueries.removeAllFeedsFromGroup(groupId)
-        feedIds.forEach { feedId ->
-          feedGroupFeedQueries.addFeedToGroup(feedGroupId = groupId, feedId = feedId)
-        }
-      }
-    }
+    feedGroupRepository.replaceFeedsInGroup(groupId, feedIds)
   }
 
   suspend fun deleteReadPostsForFeedOlderThan(feedId: String, before: Instant) {
@@ -1389,23 +1330,11 @@ class RssRepository(
   }
 
   suspend fun createGroup(name: String): String {
-    return withContext(dispatchersProvider.databaseWrite) {
-      val id = nameBasedUuidOf(name).toString()
-      feedGroupQueries.createGroup(
-        id = id,
-        name = name,
-        createdAt = Clock.System.now(),
-        updatedAt = Clock.System.now(),
-      )
-
-      return@withContext id
-    }
+    return feedGroupRepository.createGroup(name)
   }
 
   suspend fun updateGroupName(groupId: String, name: String) {
-    withContext(dispatchersProvider.databaseWrite) {
-      feedGroupQueries.updateGroupName(name = name, id = groupId, updatedAt = Clock.System.now())
-    }
+    feedGroupRepository.updateGroupName(groupId, name)
   }
 
   suspend fun addFeedIdsToGroups(groupIds: Set<String>, feedIds: List<String>) {
@@ -1437,13 +1366,7 @@ class RssRepository(
   }
 
   suspend fun groupIdsForFeed(feedId: String): List<String> {
-    return withContext(dispatchersProvider.io) {
-      feedGroupFeedQueries
-        .groupIdsForFeed(feedId)
-        .executeAsList()
-        .map { it.feedGroupId }
-        .filterNotNull()
-    }
+    return feedGroupRepository.groupIdsForFeed(feedId)
   }
 
   suspend fun removeFeedIdsFromGroups(groupIds: Set<String>, feedIds: List<String>) {
@@ -1578,33 +1501,19 @@ class RssRepository(
   }
 
   fun allGroups(): PagingSource<Int, FeedGroup> {
-    return QueryPagingSource(
-      countQuery = feedGroupQueries.count(),
-      transacter = feedGroupQueries,
-      context = dispatchersProvider.databaseRead,
-      queryProvider = { limit, offset ->
-        feedGroupQueries.groups(limit = limit, offset = offset, mapper = ::mapToFeedGroupFromGroups)
-      },
-    )
+    return feedGroupRepository.allGroups()
   }
 
   fun numberOfFeedGroups(): Flow<Long> {
-    return feedGroupQueries.count().asFlow().mapToOne(dispatchersProvider.databaseRead)
+    return feedGroupRepository.numberOfFeedGroups()
   }
 
   suspend fun groupByIds(ids: Set<String>): List<FeedGroup> {
-    return withContext(dispatchersProvider.databaseRead) {
-      feedGroupQueries
-        .groupsByIds(ids = ids, mapper = ::mapToFeedGroupFromGroupsByIds)
-        .executeAsList()
-    }
+    return feedGroupRepository.groupByIds(ids)
   }
 
   fun groupById(groupId: String): Flow<FeedGroup> {
-    return feedGroupQueries
-      .groupsByIds(ids = setOf(groupId), mapper = ::mapToFeedGroupFromGroupsByIds)
-      .asFlow()
-      .mapToOne(dispatchersProvider.databaseRead)
+    return feedGroupRepository.groupById(groupId)
   }
 
   fun feedsInGroup(
@@ -1865,90 +1774,6 @@ class RssRepository(
         remoteId = remoteId,
       )
     }
-  }
-
-  private fun mapToFeedGroup(
-    id: String,
-    name: String,
-    feedIds: String?,
-    feedHomepageLinks: String,
-    feedIconLinks: String,
-    feedShowFavIconSettings: String,
-    createdAt: Instant,
-    updatedAt: Instant,
-    pinnedAt: Instant?,
-    pinnedPosition: Double,
-    isDeleted: Boolean,
-    remoteId: String?,
-  ): FeedGroup {
-    return FeedGroup(
-      id = id,
-      name = name,
-      feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-      feedHomepageLinks = feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-      feedIconLinks = feedIconLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-      feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
-      createdAt = createdAt,
-      updatedAt = updatedAt,
-      pinnedAt = pinnedAt,
-      pinnedPosition = pinnedPosition,
-      isDeleted = isDeleted,
-      remoteId = remoteId,
-    )
-  }
-
-  private fun mapToFeedGroupFromGroups(
-    id: String,
-    name: String,
-    feedIds: String?,
-    feedHomepageLinks: String,
-    feedIcons: String,
-    feedShowFavIconSettings: String,
-    createdAt: Instant,
-    updatedAt: Instant,
-    pinnedAt: Instant?,
-    pinnedPosition: Double,
-    remoteId: String?,
-  ): FeedGroup {
-    return FeedGroup(
-      id = id,
-      name = name,
-      feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-      feedHomepageLinks = feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-      feedIconLinks = feedIcons.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-      feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
-      createdAt = createdAt,
-      updatedAt = updatedAt,
-      pinnedAt = pinnedAt,
-      pinnedPosition = pinnedPosition,
-      remoteId = remoteId,
-    )
-  }
-
-  private fun mapToFeedGroupFromGroupsByIds(
-    id: String,
-    name: String,
-    feedIds: String?,
-    feedHomepageLinks: String,
-    feedIcons: String,
-    feedShowFavIconSettings: String,
-    createdAt: Instant,
-    updatedAt: Instant,
-    pinnedAt: Instant?,
-    remoteId: String?,
-  ): FeedGroup {
-    return FeedGroup(
-      id = id,
-      name = name,
-      feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-      feedHomepageLinks = feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-      feedIconLinks = feedIcons.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-      feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
-      createdAt = createdAt,
-      updatedAt = updatedAt,
-      pinnedAt = pinnedAt,
-      remoteId = remoteId,
-    )
   }
 
   private fun mapToResolvedPost(
