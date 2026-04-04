@@ -52,6 +52,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -136,15 +138,25 @@ class AllPostsPager(
           postsUpperBound = params.postsUpperBound,
         )
         .onEach { posts ->
-          posts.forEach { post ->
-            if (post.seedColor == null && !post.imageUrl.isNullOrBlank()) {
-              coroutineScope.launch {
-                val seedColor = seedColorExtractor.calculateSeedColor(post.imageUrl)
-                if (seedColor != null) {
-                  rssRepository.updateSeedColor(seedColor.toArgb(), post.id)
+          val seedColorUpdates =
+            posts
+              .filter { it.seedColor == null && !it.imageUrl.isNullOrBlank() }
+              .map { post ->
+                coroutineScope.async {
+                  val seedColor = seedColorExtractor.calculateSeedColor(post.imageUrl)
+                  if (seedColor != null) {
+                    post.id to seedColor.toArgb()
+                  } else {
+                    null
+                  }
                 }
               }
-            }
+              .awaitAll()
+              .filterNotNull()
+              .toMap()
+
+          if (seedColorUpdates.isNotEmpty()) {
+            rssRepository.updateSeedColors(seedColorUpdates)
           }
         }
         .map { featuredPosts ->

@@ -27,6 +27,8 @@ import dev.sasikanth.rss.reader.ui.SeedColorExtractor
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -58,13 +60,25 @@ class PostSyncProcessor(
       val posts =
         rssRepository.postsWithImagesAndNoSeedColor(limit = Constants.NUMBER_OF_FEATURED_POSTS * 2)
 
-      posts.forEach { post ->
-        if (post.seedColor == null && !post.imageUrl.isNullOrBlank()) {
-          val seedColor = seedColorExtractor.calculateSeedColor(post.imageUrl)
-          if (seedColor != null) {
-            rssRepository.updateSeedColor(seedColor = seedColor.toArgb(), id = post.id)
+      val seedColorUpdates =
+        posts
+          .filter { it.seedColor == null && !it.imageUrl.isNullOrBlank() }
+          .map { post ->
+            async {
+              val seedColor = seedColorExtractor.calculateSeedColor(post.imageUrl)
+              if (seedColor != null) {
+                post.id to seedColor.toArgb()
+              } else {
+                null
+              }
+            }
           }
-        }
+          .awaitAll()
+          .filterNotNull()
+          .toMap()
+
+      if (seedColorUpdates.isNotEmpty()) {
+        rssRepository.updateSeedColors(seedColorUpdates)
       }
     }
   }
