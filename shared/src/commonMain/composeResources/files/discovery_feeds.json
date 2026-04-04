@@ -11,30 +11,6 @@
         "useFeedIcon": false
       },
       {
-        "name": "The Verge | Front page",
-        "link": "https://www.theverge.com/rss/front-page/index.xml",
-        "description": "The Verge is about technology and how it makes us feel. Founded in 2011, we offer our audience everything from breaking news to reviews to award-winning features and investigations, on our site, in video, and in podcasts.",
-        "homepageLink": "https://www.theverge.com",
-        "icon": "https://platform.theverge.com/wp-content/uploads/sites/2/2025/01/verge-rss-large_80b47e.png?w=150&h=150&crop=1",
-        "useFeedIcon": false
-      },
-      {
-        "name": "The Verge | Reviews",
-        "link": "https://www.theverge.com/rss/reviews/index.xml",
-        "description": "The Verge is about technology and how it makes us feel. Founded in 2011, we offer our audience everything from breaking news to reviews to award-winning features and investigations, on our site, in video, and in podcasts.",
-        "homepageLink": "https://www.theverge.com/reviews",
-        "icon": "https://platform.theverge.com/wp-content/uploads/sites/2/2025/01/verge-rss-large_80b47e.png?w=150&h=150&crop=1",
-        "useFeedIcon": false
-      },
-      {
-        "name": "The Verge | Tech",
-        "link": "https://www.theverge.com/rss/tech/index.xml",
-        "description": "The Verge is about technology and how it makes us feel. Founded in 2011, we offer our audience everything from breaking news to reviews to award-winning features and investigations, on our site, in video, and in podcasts.",
-        "homepageLink": "https://www.theverge.com/tech",
-        "icon": "https://platform.theverge.com/wp-content/uploads/sites/2/2025/01/verge-rss-large_80b47e.png?w=150&h=150&crop=1",
-        "useFeedIcon": false
-      },
-      {
         "name": "TechCrunch",
         "link": "https://techcrunch.com/feed/",
         "description": "Startup and Technology News",
