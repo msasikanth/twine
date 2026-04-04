@@ -170,16 +170,16 @@ class ReaderPageViewModel(
     combine(postContentRepository.postContent(readerPost.id), showFullArticle) {
         postContent,
         alwaysFetchFullArticle ->
-        Pair(postContent, alwaysFetchFullArticle)
-      }
-      .distinctUntilChanged()
-      .onEach { (postContent, alwaysFetchFullArticle) ->
         val content =
           if (alwaysFetchFullArticle) {
             postContent?.articleContent ?: postContent?.feedContent
           } else {
             postContent?.feedContent ?: readerPost.description
           }
+        content
+      }
+      .distinctUntilChanged()
+      .onEach { content ->
         val readabilityResult =
           readabilityRunner.parseHtml(
             link = readerPost.link,
