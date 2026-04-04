@@ -25,12 +25,10 @@ import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
-import dev.sasikanth.rss.reader.core.model.local.FeedReadCount
 import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.local.PostFlag
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.ReadingStatistics
-import dev.sasikanth.rss.reader.core.model.local.ReadingTrend
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.Source
@@ -60,18 +58,14 @@ import dev.sasikanth.rss.reader.util.splitAndTrim
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.chunked
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -93,6 +87,7 @@ class RssRepository(
   private val widgetUpdater: WidgetUpdater,
   private val dispatchersProvider: DispatchersProvider,
   private val bookmarkRepository: BookmarkRepository,
+  private val readingHistoryRepository: ReadingHistoryRepository,
 ) {
   private companion object {
     private const val POST_UPSERT_BATCH_SIZE = 200
@@ -1694,47 +1689,7 @@ class RssRepository(
   }
 
   suspend fun getReadingStatistics(startDate: Instant): Flow<ReadingStatistics> {
-    return withContext(dispatchersProvider.databaseRead) {
-      val totalReadCount = readingHistoryQueries.totalReadPostsCount().executeAsOne()
-      val firstReadingDate =
-        readingHistoryQueries.firstReadingDate().executeAsOneOrNull()?.firstReadingDate
-      val dailyAverage =
-        if (firstReadingDate != null) {
-          val today =
-            Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toEpochDays()
-          val firstDay =
-            firstReadingDate.toLocalDateTime(TimeZone.currentSystemDefault()).date.toEpochDays()
-          val daysSinceFirstReading = (today - firstDay) + 1
-          (totalReadCount / daysSinceFirstReading).toInt()
-        } else {
-          0
-        }
-
-      val topFeeds =
-        readingHistoryQueries.readPostsByFeed().executeAsList().map {
-          FeedReadCount(
-            feedId = it.feedId,
-            feedName = it.feedName,
-            feedIcon = it.feedIcon,
-            homepageLink = it.feedHomepageLink,
-            readCount = it.readCount,
-          )
-        }
-
-      val readingTrends =
-        readingHistoryQueries.readPostsOverTime(startDate).executeAsList().map {
-          ReadingTrend(date = it.date, count = it.count)
-        }
-
-      flowOf(
-        ReadingStatistics(
-          totalReadCount = totalReadCount,
-          dailyAverage = dailyAverage,
-          topFeeds = topFeeds.toImmutableList(),
-          readingTrends = readingTrends.toImmutableList(),
-        )
-      )
-    }
+    return readingHistoryRepository.getReadingStatistics(startDate)
   }
 
   private fun mapToFeed(
