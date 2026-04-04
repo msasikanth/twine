@@ -20,7 +20,6 @@ import app.cash.paging.PagingSource
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
-import app.cash.sqldelight.coroutines.mapToOneOrNull
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
 import dev.sasikanth.rss.reader.core.model.local.Feed
@@ -46,7 +45,6 @@ import dev.sasikanth.rss.reader.data.database.PostContentQueries
 import dev.sasikanth.rss.reader.data.database.PostQueries
 import dev.sasikanth.rss.reader.data.database.PostSearchFTSQueries
 import dev.sasikanth.rss.reader.data.database.ReadingHistoryQueries
-import dev.sasikanth.rss.reader.data.database.SourceQueries
 import dev.sasikanth.rss.reader.data.database.TransactionRunner
 import dev.sasikanth.rss.reader.data.sync.ReadPostSyncEntity
 import dev.sasikanth.rss.reader.data.utils.Constants
@@ -81,7 +79,6 @@ class RssRepository(
   private val feedGroupFeedQueries: FeedGroupFeedQueries,
   private val blockedWordsQueries: BlockedWordsQueries,
   private val appConfigQueries: AppConfigQueries,
-  private val sourceQueries: SourceQueries,
   private val readingHistoryQueries: ReadingHistoryQueries,
   private val readingTimeCalculator: ReadingTimeCalculator,
   private val widgetUpdater: WidgetUpdater,
@@ -89,6 +86,7 @@ class RssRepository(
   private val bookmarkRepository: BookmarkRepository,
   private val readingHistoryRepository: ReadingHistoryRepository,
   private val feedGroupRepository: FeedGroupRepository,
+  private val sourceRepository: SourceRepository,
 ) {
   private companion object {
     private const val POST_UPSERT_BATCH_SIZE = 200
@@ -1452,14 +1450,7 @@ class RssRepository(
     postsAfter: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
   ): Flow<List<Source>> {
-    return sourceQueries
-      .pinnedSources(
-        postsAfter = postsAfter,
-        postsUpperBound = postsUpperBound,
-        mapper = ::mapToSource,
-      )
-      .asFlow()
-      .mapToList(dispatchersProvider.databaseRead)
+    return sourceRepository.pinnedSources(postsAfter, postsUpperBound)
   }
 
   fun sources(
@@ -1467,21 +1458,7 @@ class RssRepository(
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     orderBy: FeedsOrderBy = FeedsOrderBy.Latest,
   ): PagingSource<Int, Source> {
-    return QueryPagingSource(
-      countQuery = sourceQueries.sourcesCount(),
-      transacter = sourceQueries,
-      context = dispatchersProvider.databaseRead,
-      queryProvider = { limit, offset ->
-        sourceQueries.sources(
-          postsAfter = postsAfter,
-          postsUpperBound = postsUpperBound,
-          orderBy = orderBy.value,
-          limit = limit,
-          offset = offset,
-          mapper = ::mapToSource,
-        )
-      },
-    )
+    return sourceRepository.sources(postsAfter, postsUpperBound, orderBy)
   }
 
   fun source(
@@ -1489,15 +1466,7 @@ class RssRepository(
     postsAfter: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
   ): Flow<Source?> {
-    return sourceQueries
-      .source(
-        postsAfter = postsAfter,
-        postsUpperBound = postsUpperBound,
-        id = id,
-        mapper = ::mapToSource,
-      )
-      .asFlow()
-      .mapToOneOrNull(dispatchersProvider.databaseRead)
+    return sourceRepository.source(id, postsAfter, postsUpperBound)
   }
 
   fun allGroups(): PagingSource<Int, FeedGroup> {
@@ -1719,61 +1688,6 @@ class RssRepository(
       showFeedFavIcon = showFeedFavIcon,
       hideFromAllFeeds = hideFromAllFeeds,
     )
-  }
-
-  private fun mapToSource(
-    type: String,
-    id: String,
-    name: String,
-    icon: String?,
-    description: String?,
-    link: String?,
-    homepageLink: String?,
-    createdAt: Instant,
-    pinnedAt: Instant?,
-    lastCleanUpAt: Instant?,
-    numberOfUnreadPosts: Long,
-    feedIds: String?,
-    feedHomepageLinks: String?,
-    feedIcons: String?,
-    feedShowFavIconSettings: String?,
-    updatedAt: Instant?,
-    pinnedPosition: Double,
-    showFeedFavIcon: Boolean?,
-    remoteId: String?,
-  ): Source {
-    return if (type == "group") {
-      FeedGroup(
-        id = id,
-        name = name,
-        feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-        feedHomepageLinks =
-          feedHomepageLinks.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-        feedIconLinks = feedIcons.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-        feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
-        createdAt = createdAt,
-        updatedAt = updatedAt!!,
-        pinnedAt = pinnedAt,
-        numberOfUnreadPosts = numberOfUnreadPosts,
-        pinnedPosition = pinnedPosition,
-      )
-    } else {
-      Feed(
-        id = id,
-        name = name,
-        icon = icon!!,
-        description = description!!,
-        link = link!!,
-        homepageLink = homepageLink!!,
-        createdAt = createdAt,
-        pinnedAt = pinnedAt,
-        lastCleanUpAt = lastCleanUpAt,
-        numberOfUnreadPosts = numberOfUnreadPosts,
-        pinnedPosition = pinnedPosition,
-        showFeedFavIcon = showFeedFavIcon ?: true,
-        remoteId = remoteId,
-      )
-    }
   }
 
   private fun mapToResolvedPost(
