@@ -690,6 +690,16 @@ class RssRepository(
     }
   }
 
+  suspend fun updateSeedColors(updates: Map<String, Int>) {
+    withContext(dispatchersProvider.databaseWrite) {
+      transactionRunner.invoke {
+        updates.forEach { (id, seedColor) ->
+          postQueries.updateSeedColor(seedColor = seedColor.toLong(), id = id)
+        }
+      }
+    }
+  }
+
   suspend fun allReadPostsBlocking(): List<ReadPostSyncEntity> {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries

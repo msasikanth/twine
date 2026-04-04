@@ -45,6 +45,8 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -136,14 +138,26 @@ class AllPostsPager(
           postsUpperBound = params.postsUpperBound,
         )
         .onEach { posts ->
-          posts.forEach { post ->
-            if (post.seedColor == null && !post.imageUrl.isNullOrBlank()) {
-              coroutineScope.launch {
-                val seedColor = seedColorExtractor.calculateSeedColor(post.imageUrl)
-                if (seedColor != null) {
-                  rssRepository.updateSeedColor(seedColor.toArgb(), post.id)
+          coroutineScope.launch {
+            val seedColorUpdates =
+              posts
+                .filter { it.seedColor == null && !it.imageUrl.isNullOrBlank() }
+                .map { post ->
+                  async {
+                    val seedColor = seedColorExtractor.calculateSeedColor(post.imageUrl)
+                    if (seedColor != null) {
+                      post.id to seedColor.toArgb()
+                    } else {
+                      null
+                    }
+                  }
                 }
-              }
+                .awaitAll()
+                .filterNotNull()
+                .toMap()
+
+            if (seedColorUpdates.isNotEmpty()) {
+              rssRepository.updateSeedColors(seedColorUpdates)
             }
           }
         }

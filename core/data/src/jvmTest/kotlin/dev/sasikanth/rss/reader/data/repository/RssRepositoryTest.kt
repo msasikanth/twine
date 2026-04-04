@@ -322,6 +322,39 @@ class RssRepositoryTest {
   }
 
   @Test
+  fun updateSeedColorsShouldUpdateMultiplePosts() = runTest {
+    // given
+    val feedId = "feed-1"
+    database.feedQueries.upsert(
+      id = feedId,
+      name = "Feed 1",
+      icon = "icon",
+      description = "description",
+      homepageLink = "homepage",
+      createdAt = Instant.fromEpochMilliseconds(0),
+      link = "link",
+      alwaysFetchSourceArticle = false,
+      showFeedFavIcon = false,
+      lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+    )
+
+    insertPost(id = "post-1", sourceId = feedId, postDate = Instant.fromEpochMilliseconds(0))
+    insertPost(id = "post-2", sourceId = feedId, postDate = Instant.fromEpochMilliseconds(0))
+
+    val updates = mapOf("post-1" to 123, "post-2" to 456)
+
+    // when
+    repository.updateSeedColors(updates)
+
+    // then
+    val post1 = repository.post("post-1")
+    val post2 = repository.post("post-2")
+
+    assertEquals(123, post1.seedColor)
+    assertEquals(456, post2.seedColor)
+  }
+
+  @Test
   fun postPositionShouldMatchIndexInAllPostsForAllSortOrders() = runTest {
     // given
     val feedId = "feed-1"
