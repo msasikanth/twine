@@ -32,10 +32,12 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -49,6 +51,10 @@ import dev.sasikanth.rss.reader.resources.icons.FilterList
 import dev.sasikanth.rss.reader.resources.icons.Sort
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.drop
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.filter
@@ -63,6 +69,9 @@ import twine.shared.generated.resources.postsToday
 import twine.shared.generated.resources.postsUnread
 import twine.shared.generated.resources.sort
 
+private const val DEBOUNCE_TIMEOUT_MILLIS = 300L
+
+@OptIn(FlowPreview::class)
 @Composable
 internal fun PostsPreferencesSheet(
   postsType: PostsType,
@@ -102,6 +111,16 @@ internal fun PostsPreferencesSheet(
         )
       }
 
+    LaunchedEffect(Unit) {
+      snapshotFlow { Triple(selectedPostsType, selectedSortBy, selectedSortDirection) }
+        .drop(1)
+        .debounce(DEBOUNCE_TIMEOUT_MILLIS)
+        .collectLatest { (postsType, sortBy, sortDirection) ->
+          val sortOrder = getSortedPostsOrder(sortBy, sortDirection)
+          onApply(postsType, sortOrder)
+        }
+    }
+
     Column(
       modifier =
         Modifier.fillMaxWidth()
@@ -137,12 +156,7 @@ internal fun PostsPreferencesSheet(
               identifier = PostsType.UNREAD,
             ),
           ),
-        onItemSelected = {
-          selectedPostsType = it.identifier as PostsType
-          val postsSortOrder = getSortedPostsOrder(selectedSortBy, selectedSortDirection)
-
-          onApply(selectedPostsType, postsSortOrder)
-        },
+        onItemSelected = { selectedPostsType = it.identifier as PostsType },
       )
 
       SectionHeader(text = stringResource(Res.string.postsSortBy), icon = TwineIcons.CalendarClock)
@@ -162,12 +176,7 @@ internal fun PostsPreferencesSheet(
               identifier = SortBy.Added,
             ),
           ),
-        onItemSelected = {
-          selectedSortBy = it.identifier as SortBy
-          val postsSortOrder = getSortedPostsOrder(selectedSortBy, selectedSortDirection)
-
-          onApply(selectedPostsType, postsSortOrder)
-        },
+        onItemSelected = { selectedSortBy = it.identifier as SortBy },
       )
 
       SectionHeader(text = stringResource(Res.string.sort), icon = TwineIcons.Sort)
@@ -187,12 +196,7 @@ internal fun PostsPreferencesSheet(
               identifier = SortDirection.Oldest,
             ),
           ),
-        onItemSelected = {
-          selectedSortDirection = it.identifier as SortDirection
-          val postsSortOrder = getSortedPostsOrder(selectedSortBy, selectedSortDirection)
-
-          onApply(selectedPostsType, postsSortOrder)
-        },
+        onItemSelected = { selectedSortDirection = it.identifier as SortDirection },
       )
     }
   }
