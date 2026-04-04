@@ -130,7 +130,7 @@ class MinifluxSyncCoordinator(
           updateSyncState(SyncState.InProgress(0.3f + (0.4f * (index + 1) / allFeeds.size)))
         }
       } else {
-        val after = lastSyncedAt!!.minus(24.hours).epochSeconds
+        val after = lastSyncedAt.minus(24.hours).epochSeconds
         syncArticles(after = after)
       }
 
