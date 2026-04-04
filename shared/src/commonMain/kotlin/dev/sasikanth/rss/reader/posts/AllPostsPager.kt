@@ -45,6 +45,8 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,8 +54,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -138,25 +138,27 @@ class AllPostsPager(
           postsUpperBound = params.postsUpperBound,
         )
         .onEach { posts ->
-          val seedColorUpdates =
-            posts
-              .filter { it.seedColor == null && !it.imageUrl.isNullOrBlank() }
-              .map { post ->
-                coroutineScope.async {
-                  val seedColor = seedColorExtractor.calculateSeedColor(post.imageUrl)
-                  if (seedColor != null) {
-                    post.id to seedColor.toArgb()
-                  } else {
-                    null
+          coroutineScope.launch {
+            val seedColorUpdates =
+              posts
+                .filter { it.seedColor == null && !it.imageUrl.isNullOrBlank() }
+                .map { post ->
+                  async {
+                    val seedColor = seedColorExtractor.calculateSeedColor(post.imageUrl)
+                    if (seedColor != null) {
+                      post.id to seedColor.toArgb()
+                    } else {
+                      null
+                    }
                   }
                 }
-              }
-              .awaitAll()
-              .filterNotNull()
-              .toMap()
+                .awaitAll()
+                .filterNotNull()
+                .toMap()
 
-          if (seedColorUpdates.isNotEmpty()) {
-            rssRepository.updateSeedColors(seedColorUpdates)
+            if (seedColorUpdates.isNotEmpty()) {
+              rssRepository.updateSeedColors(seedColorUpdates)
+            }
           }
         }
         .map { featuredPosts ->
