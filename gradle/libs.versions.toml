@@ -1,15 +1,16 @@
 [versions]
-kotlin = "2.3.10"
+kotlin = "2.3.20"
 android_gradle_plugin = "9.1.0"
-compose = "1.11.0-alpha04"
+compose = "1.11.0-beta01"
+compose-material3 = "1.11.0-alpha05"
 compose_material3_adaptive = "1.3.0-alpha06"
 
 android_sdk_compile = "36"
 android_sdk_target = "36"
 android_sdk_min = "26"
 
-sqldelight = "2.2.1"
-ktor = "3.4.1"
+sqldelight = "2.3.2"
+ktor = "3.4.2"
 kotlinx_coroutines = "1.10.2"
 kotlinx_date_time = "0.7.1"
 kotlinx_immutable_collections = "0.4.0"
@@ -21,19 +22,19 @@ androidx_core = "1.18.0"
 androidx_collection = "1.6.0"
 androidx_test_runner = "1.7.0"
 androidx_test_rules = "1.7.0"
-androidx_work = "2.11.1"
+androidx_work = "2.11.2"
 androidx_datastore = "1.2.1"
-androidx_browser = "1.9.0"
+androidx_browser = "1.10.0"
 androidx_annotation = "1.9.1"
 coil = "3.4.0"
-spotless = "8.3.0"
+spotless = "8.4.0"
 ktfmt = "0.61"
 kotlininject = "0.9.0"
 ksp = "2.3.6"
 ksoup = "0.2.6"
 sqliteAndroid = "3.49.0"
 desugarJdk = "2.1.5"
-atomicfu = "0.31.0"
+atomicfu = "0.32.1"
 paging = "3.3.0-alpha02-0.5.1"
 stately = "2.1.0"
 xmlutil = "0.91.3"
@@ -49,15 +50,15 @@ korlibs = "6.0.0"
 filekit = "0.8.8"
 leakcanary = "2.14"
 markdown = "0.39.2"
-revenuecat = "2.8.0+17.46.0"
-landscapist = "2.9.5"
-viewmodel = "2.9.6"
+revenuecat = "2.10.1+17.54.0"
+landscapist = "2.9.6"
+viewmodel = "2.10.0"
 navigation = "2.9.2"
 navigation-event = "1.0.1"
 glance = "1.2.0-rc01"
 material-kolor = "4.1.1"
 htmlunit = "4.21.0"
-androidx_media3 = "1.9.2"
+androidx_media3 = "1.10.0"
 vlcj = "4.12.1"
 
 [libraries]
@@ -69,10 +70,10 @@ compose_ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
 compose_ui_tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose" }
 compose_ui_util = { module = "org.jetbrains.compose.ui:ui-util", version.ref = "compose" }
 compose_material = { module = "org.jetbrains.compose.material:material", version.ref = "compose" }
-compose_material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose" }
+compose_material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
 compose_material3_adaptive = { module = "org.jetbrains.compose.material3.adaptive:adaptive", version.ref = "compose_material3_adaptive" }
 compose_resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
-compose_material3_windowsizeclass = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "compose" }
+compose_material3_windowsizeclass = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "compose-material3" }
 compose_ui_tooling_preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose" }
 compose_backhandler = { module = "org.jetbrains.compose.ui:ui-backhandler", version.ref = "compose" }
 ktor_core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
