@@ -88,6 +88,7 @@ class RssRepository(
   private val sourceRepository: SourceRepository,
   private val postRepository: PostRepository,
   private val feedRepository: FeedRepository,
+  private val syncRepository: SyncRepository,
 ) {
   private companion object {
     private const val POST_UPSERT_BATCH_SIZE = 200
@@ -713,51 +714,23 @@ class RssRepository(
     feedId: String,
     lastUpdatedAt: Instant = Clock.System.now(),
   ) {
-    withContext(dispatchersProvider.databaseWrite) {
-      feedQueries.updateFeedRemoteId(
-        remoteId = remoteId,
-        lastUpdatedAt = lastUpdatedAt,
-        id = feedId,
-      )
-    }
+    syncRepository.updateFeedRemoteId(remoteId, feedId, lastUpdatedAt)
   }
 
   suspend fun updatePostRemoteId(remoteId: String, postId: String) {
-    withContext(dispatchersProvider.databaseWrite) {
-      postQueries.updatePostRemoteId(
-        remoteId = remoteId,
-        updatedAt = Clock.System.now(),
-        id = postId,
-      )
-    }
+    syncRepository.updatePostRemoteId(remoteId, postId)
   }
 
   suspend fun updatePostSyncedAt(postId: String, syncedAt: Instant) {
-    withContext(dispatchersProvider.databaseWrite) {
-      postQueries.updatePostSyncedAt(syncedAt = syncedAt, id = postId)
-    }
+    syncRepository.updatePostSyncedAt(postId, syncedAt)
   }
 
   suspend fun updatePostSyncedAt(postIds: Set<String>, syncedAt: Instant) {
-    val postIdsSnapshot = postIds.toList()
-    withContext(dispatchersProvider.databaseWrite) {
-      transactionRunner.invoke {
-        postIdsSnapshot.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
-          postQueries.updatePostsSyncedAt(syncedAt = syncedAt, ids = chunk)
-        }
-      }
-    }
+    syncRepository.updatePostSyncedAt(postIds, syncedAt)
   }
 
   suspend fun updatePostSyncedAt(posts: List<Post>) {
-    val postIds = posts.map { it.id }
-    withContext(dispatchersProvider.databaseWrite) {
-      transactionRunner.invoke {
-        postIds.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
-          postQueries.updatePostsSyncedAtToUpdatedAt(ids = chunk)
-        }
-      }
-    }
+    syncRepository.updatePostSyncedAt(posts)
   }
 
   suspend fun updateFeedGroupRemoteId(
@@ -773,45 +746,31 @@ class RssRepository(
   }
 
   suspend fun latestPostRemoteId(): String? {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.latestPostRemoteId().executeAsOneOrNull()
-    }
+    return syncRepository.latestPostRemoteId()
   }
 
   suspend fun latestPostRemoteIdForFeed(feedId: String): String? {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.latestPostRemoteIdForFeed(feedId).executeAsOneOrNull()
-    }
+    return syncRepository.latestPostRemoteIdForFeed(feedId)
   }
 
   suspend fun postsWithRemoteId(): List<Post> {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.postsWithRemoteId(::Post).executeAsList()
-    }
+    return syncRepository.postsWithRemoteId()
   }
 
   suspend fun postsWithRemoteIdPaged(limit: Long, offset: Long): List<Post> {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.postsWithRemoteIdPaged(limit, offset, ::Post).executeAsList()
-    }
+    return syncRepository.postsWithRemoteIdPaged(limit, offset)
   }
 
   suspend fun postsWithLocalChanges(): List<Post> {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.postsWithLocalChanges(::Post).executeAsList()
-    }
+    return syncRepository.postsWithLocalChanges()
   }
 
   suspend fun postsWithLocalChangesPaged(limit: Long, offset: Long): List<Post> {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.postsWithLocalChangesPaged(limit, offset, ::Post).executeAsList()
-    }
+    return syncRepository.postsWithLocalChangesPaged(limit, offset)
   }
 
   suspend fun postsWithLocalChangesForFeed(feedId: String): List<Post> {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.postsWithLocalChangesForFeed(feedId, ::Post).executeAsList()
-    }
+    return syncRepository.postsWithLocalChangesForFeed(feedId)
   }
 
   suspend fun postsWithLocalChangesForFeedPaged(
@@ -819,21 +778,15 @@ class RssRepository(
     limit: Long,
     offset: Long,
   ): List<Post> {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.postsWithLocalChangesForFeedPaged(feedId, limit, offset, ::Post).executeAsList()
-    }
+    return syncRepository.postsWithLocalChangesForFeedPaged(feedId, limit, offset)
   }
 
   suspend fun postByRemoteId(remoteId: String): Post? {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.postByRemoteId(remoteId, ::Post).executeAsOneOrNull()
-    }
+    return syncRepository.postByRemoteId(remoteId)
   }
 
   suspend fun postsByRemoteIds(remoteIds: Set<String>): List<Post> {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.postsByRemoteIds(remoteIds, ::Post).executeAsList()
-    }
+    return syncRepository.postsByRemoteIds(remoteIds)
   }
 
   suspend fun postsWithImagesAndNoSeedColor(limit: Long): List<ResolvedPost> {
@@ -849,65 +802,19 @@ class RssRepository(
   }
 
   fun feedByRemoteId(remoteId: String): Feed? {
-    return feedQueries.feedByRemoteId(remoteId, mapper = ::mapToFeed).executeAsOneOrNull()
+    return syncRepository.feedByRemoteId(remoteId)
   }
 
   fun feedsByRemoteIds(remoteIds: Set<String>): List<Feed> {
-    return feedQueries.feedsByRemoteIds(remoteIds, mapper = ::mapToFeed).executeAsList()
+    return syncRepository.feedsByRemoteIds(remoteIds)
   }
 
   suspend fun upsertPosts(posts: List<Post>) {
-    val postsSnapshot = posts.toList()
-    withContext(dispatchersProvider.databaseWrite) {
-      transactionRunner.invoke {
-        postsSnapshot.forEach { post ->
-          postQueries.upsertSyncPost(
-            id = post.id,
-            sourceId = post.sourceId,
-            title = post.title,
-            description = post.description,
-            imageUrl = post.imageUrl,
-            audioUrl = post.audioUrl,
-            postDate = post.postDate,
-            createdAt = post.createdAt,
-            updatedAt = post.updatedAt,
-            syncedAt = post.syncedAt,
-            link = post.link,
-            commentsLink = post.commentsLink,
-            flags = post.flags,
-            remoteId = post.remoteId,
-          )
-        }
-      }
-    }
-    widgetUpdater.updateUnreadWidget()
+    syncRepository.upsertPosts(posts)
   }
 
   suspend fun upsertFeeds(feeds: List<Feed>) {
-    val feedsSnapshot = feeds.toList()
-    withContext(dispatchersProvider.databaseWrite) {
-      transactionRunner.invoke {
-        feedsSnapshot.forEach { feed ->
-          feedQueries.upsertSyncFeed(
-            id = feed.id,
-            name = feed.name,
-            icon = feed.icon,
-            description = feed.description,
-            link = feed.link,
-            homepageLink = feed.homepageLink,
-            createdAt = feed.createdAt,
-            pinnedAt = feed.pinnedAt,
-            lastCleanUpAt = feed.lastCleanUpAt,
-            alwaysFetchSourceArticle = feed.alwaysFetchSourceArticle,
-            lastUpdatedAt = feed.lastUpdatedAt,
-            isDeleted = feed.isDeleted,
-            hideFromAllFeeds = feed.hideFromAllFeeds,
-            remoteId = feed.remoteId,
-          )
-        }
-      }
-    }
-    widgetUpdater.updateUnreadWidget()
+    syncRepository.upsertFeeds(feeds)
   }
 
   suspend fun upsertGroup(
