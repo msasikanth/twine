@@ -47,9 +47,9 @@ struct TwineUnreadSmallWidgetEntryView: View {
                         Image(uiImage: postImage)
                             .resizable()
                             .scaledToFill()
-                            .clipped()
                     }
                     .frame(maxWidth: .infinity, minHeight: 84, maxHeight: 174)
+                    .clipped()
                     .clipShape(ContainerRelativeShape())
 
                     VStack(alignment: .leading, spacing: 8) {
