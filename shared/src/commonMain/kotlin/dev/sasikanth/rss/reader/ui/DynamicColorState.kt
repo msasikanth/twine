@@ -24,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
-import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -119,27 +118,20 @@ internal class DynamicColorState(
 
     val (interpolatedLight, interpolatedDark) =
       withContext(Dispatchers.Default) {
-        val normalizedProgress =
-          ease(
-            if (progress < -EPSILON) {
-              progress.absoluteValue.inverse()
-            } else {
-              progress
-            }
-          )
+        val easedProgress = ease(progress)
 
         val light =
           when {
-            normalizedProgress < EPSILON -> startLight
-            normalizedProgress > 1f - EPSILON -> endLight
-            else -> startLight.lerp(to = endLight, fraction = normalizedProgress)
+            easedProgress < EPSILON -> startLight
+            easedProgress > 1f - EPSILON -> endLight
+            else -> startLight.lerp(to = endLight, fraction = easedProgress)
           }
 
         val dark =
           when {
-            normalizedProgress < EPSILON -> startDark
-            normalizedProgress > 1f - EPSILON -> endDark
-            else -> startDark.lerp(to = endDark, fraction = normalizedProgress)
+            easedProgress < EPSILON -> startDark
+            easedProgress > 1f - EPSILON -> endDark
+            else -> startDark.lerp(to = endDark, fraction = easedProgress)
           }
 
         light to dark
