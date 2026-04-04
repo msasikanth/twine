@@ -75,7 +75,7 @@ class AllPostsPager(
   private val seedColorExtractor: SeedColorExtractor,
   dispatchersProvider: DispatchersProvider,
 ) {
-  private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
+  private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.default)
 
   private data class PostsParameters(
     val activeSourceIds: List<String>,
