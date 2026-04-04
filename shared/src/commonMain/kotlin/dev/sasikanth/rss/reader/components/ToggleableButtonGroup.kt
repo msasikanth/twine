@@ -17,7 +17,7 @@
 
 package dev.sasikanth.rss.reader.components
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,7 +32,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -43,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.ui.AppTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun ToggleableButtonGroup(
@@ -62,11 +65,9 @@ fun ToggleableButtonGroup(
         .border(width = 1.dp, color = AppTheme.colorScheme.outline, shape = CircleShape)
   ) {
     val backgroundColor = AppTheme.colorScheme.inverseSurface
-    val selectedItemIndex by
-      animateFloatAsState(
-        targetValue = items.indexOfFirst { it.isSelected }.coerceAtLeast(0).toFloat(),
-        label = "selected_index",
-      )
+    val initialIndex = items.indexOfFirst { it.isSelected }.coerceAtLeast(0).toFloat()
+    val selectedItemIndex = remember { Animatable(initialIndex) }
+    val coroutineScope = rememberCoroutineScope()
 
     Row(
       modifier =
@@ -80,7 +81,8 @@ fun ToggleableButtonGroup(
 
           drawRoundRect(
             color = backgroundColor,
-            topLeft = Offset(x = (itemWidth + itemSpacingPx) * selectedItemIndex, y = yOffset),
+            topLeft =
+              Offset(x = (itemWidth + itemSpacingPx) * selectedItemIndex.value, y = yOffset),
             size = Size(width = itemWidth, height = indicatorHeightPx),
             cornerRadius = CornerRadius(size.height / 2),
           )
@@ -97,7 +99,12 @@ fun ToggleableButtonGroup(
           modifier = Modifier.weight(1f),
           item = item,
           showDivider = !isFirst && !isSelected && !isPreviousSelected,
-          onClick = { onItemSelected(item) },
+          onClick = {
+            coroutineScope.launch {
+              selectedItemIndex.animateTo(index.toFloat())
+              onItemSelected(item)
+            }
+          },
         )
       }
     }
@@ -145,4 +152,5 @@ private fun ToggleableButton(
   }
 }
 
+@Immutable
 data class ToggleableButtonItem(val label: String, val isSelected: Boolean, val identifier: Any?)
