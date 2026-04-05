@@ -40,6 +40,7 @@ import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -49,6 +50,7 @@ class RssRepositoryTest {
   private lateinit var database: ReaderDatabase
   private lateinit var repository: RssRepository
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   private val testDispatchersProvider =
     object : DispatchersProvider {
       override val main: CoroutineDispatcher = UnconfinedTestDispatcher()
@@ -107,17 +109,48 @@ class RssRepositoryTest {
         postQueries = database.postQueries,
         postContentQueries = database.postContentQueries,
         postSearchFTSQueries = database.postSearchFTSQueries,
-        bookmarkQueries = database.bookmarkQueries,
-        feedSearchFTSQueries = database.feedSearchFTSQueries,
         feedGroupQueries = database.feedGroupQueries,
         feedGroupFeedQueries = database.feedGroupFeedQueries,
         blockedWordsQueries = database.blockedWordsQueries,
         appConfigQueries = database.appConfigQueries,
-        sourceQueries = database.sourceQueries,
         readingHistoryQueries = database.readingHistoryQueries,
         readingTimeCalculator = ReadingTimeCalculator(testDispatchersProvider),
         widgetUpdater = NoopWidgetUpdater,
         dispatchersProvider = testDispatchersProvider,
+        bookmarkRepository =
+          BookmarkRepository(
+            database.bookmarkQueries,
+            database.postQueries,
+            transactionRunner = TransactionRunner(database),
+            widgetUpdater = NoopWidgetUpdater,
+            dispatchersProvider = testDispatchersProvider,
+          ),
+        readingHistoryRepository =
+          ReadingHistoryRepository(database.readingHistoryQueries, testDispatchersProvider),
+        feedGroupRepository =
+          FeedGroupRepository(
+            database.feedGroupQueries,
+            database.feedGroupFeedQueries,
+            TransactionRunner(database),
+            NoopWidgetUpdater,
+            testDispatchersProvider,
+          ),
+        sourceRepository = SourceRepository(database.sourceQueries, testDispatchersProvider),
+        feedRepository =
+          FeedRepository(
+            database.feedQueries,
+            database.feedSearchFTSQueries,
+            testDispatchersProvider,
+          ),
+        postRepository = PostRepository(database.postQueries, testDispatchersProvider),
+        syncRepository =
+          SyncRepository(
+            database.feedQueries,
+            database.postQueries,
+            transactionRunner = TransactionRunner(database),
+            widgetUpdater = NoopWidgetUpdater,
+            dispatchersProvider = testDispatchersProvider,
+          ),
       )
   }
 
@@ -372,13 +405,12 @@ class RssRepositoryTest {
     )
 
     val now = Instant.fromEpochMilliseconds(1000000000)
-    val posts =
-      (1..10).map { i ->
-        val postDate = now.minus(i.hours)
-        val id = "post-$i"
-        insertPost(id = id, sourceId = feedId, postDate = postDate)
-        id to postDate
-      }
+    (1..10).forEach { i ->
+      val postDate = now.minus(i.hours)
+      val id = "post-$i"
+      insertPost(id = id, sourceId = feedId, postDate = postDate)
+      id to postDate
+    }
 
     val sortOrders = PostsSortOrder.entries
 
