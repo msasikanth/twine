@@ -39,7 +39,6 @@ import dev.sasikanth.rss.reader.data.database.BlockedWordsQueries
 import dev.sasikanth.rss.reader.data.database.FeedGroupFeedQueries
 import dev.sasikanth.rss.reader.data.database.FeedGroupQueries
 import dev.sasikanth.rss.reader.data.database.FeedQueries
-import dev.sasikanth.rss.reader.data.database.FeedSearchFTSQueries
 import dev.sasikanth.rss.reader.data.database.PostContentQueries
 import dev.sasikanth.rss.reader.data.database.PostQueries
 import dev.sasikanth.rss.reader.data.database.PostSearchFTSQueries
@@ -73,7 +72,6 @@ class RssRepository(
   private val postQueries: PostQueries,
   private val postContentQueries: PostContentQueries,
   private val postSearchFTSQueries: PostSearchFTSQueries,
-  private val feedSearchFTSQueries: FeedSearchFTSQueries,
   private val feedGroupQueries: FeedGroupQueries,
   private val feedGroupFeedQueries: FeedGroupFeedQueries,
   private val blockedWordsQueries: BlockedWordsQueries,
