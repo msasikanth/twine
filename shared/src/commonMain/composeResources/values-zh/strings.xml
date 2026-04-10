@@ -219,8 +219,8 @@
   <string name="settingsSyncDropboxDesc">一致的跨平台同步</string>
   <string name="settingsSyncStatusIdle">未同步</string>
   <string name="settingsSyncStatusSyncing">同步中...</string>
-  <string name="settingsSyncStatusSuccess">最后一次同步：成功</string>
-  <string name="settingsSyncStatusFailure">最后一次同步：失败</string>
+  <string name="settingsSyncStatusSuccess">Synced • %1$s ago</string>
+  <string name="settingsSyncStatusFailure">Sync failed</string>
   <string name="settingsSyncSignIn">登录</string>
   <string name="settingsSyncSignOut">退出登录</string>
   <string name="settingsCustomisations">定制</string>

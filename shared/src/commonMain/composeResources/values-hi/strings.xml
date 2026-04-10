@@ -219,8 +219,8 @@
   <string name="settingsSyncDropboxDesc">लगातार क्रॉस-प्लेटफ़ॉर्म सिंक</string>
   <string name="settingsSyncStatusIdle">सिंक नहीं किया गया</string>
   <string name="settingsSyncStatusSyncing">सिंक हो रहा है...</string>
-  <string name="settingsSyncStatusSuccess">पिछला सिंक: सफल</string>
-  <string name="settingsSyncStatusFailure">पिछला सिंक: विफल</string>
+  <string name="settingsSyncStatusSuccess">Synced • %1$s ago</string>
+  <string name="settingsSyncStatusFailure">Sync failed</string>
   <string name="settingsSyncSignIn">साइन इन करें</string>
   <string name="settingsSyncSignOut">साइन आउट करें</string>
   <string name="settingsCustomisations">अनुकूलन</string>

@@ -219,8 +219,8 @@
   <string name="settingsSyncDropboxDesc">Konsistente plattformübergreifende Synchronisierung</string>
   <string name="settingsSyncStatusIdle">Nicht synchronisiert</string>
   <string name="settingsSyncStatusSyncing">Synchronisierung...</string>
-  <string name="settingsSyncStatusSuccess">Letzte Synchronisierung: Erfolgreich</string>
-  <string name="settingsSyncStatusFailure">Letzte Synchronisierung: Fehlgeschlagen</string>
+  <string name="settingsSyncStatusSuccess">Synced • %1$s ago</string>
+  <string name="settingsSyncStatusFailure">Sync failed</string>
   <string name="settingsSyncSignIn">Anmelden</string>
   <string name="settingsSyncSignOut">Abmelden</string>
   <string name="settingsCustomisations">Anpassungen</string>

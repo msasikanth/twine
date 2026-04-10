@@ -239,9 +239,9 @@
   <string name="settingsSyncFreshRSS" translatable="false">FreshRSS (GReader)</string>
   <string name="settingsSyncDropboxDesc">Consistent cross-platform sync</string>
   <string name="settingsSyncStatusIdle">Not synced</string>
-  <string name="settingsSyncStatusSyncing">Syncing...</string>
-  <string name="settingsSyncStatusSuccess">Last sync: Success</string>
-  <string name="settingsSyncStatusFailure">Last sync: Failed</string>
+  <string name="settingsSyncStatusSyncing">Sync in progress</string>
+  <string name="settingsSyncStatusSuccess">Synced • %1$s ago</string>
+  <string name="settingsSyncStatusFailure">Sync failed</string>
   <string name="settingSyncLabel">Sync</string>
   <string name="settingsSyncSignIn">Sign in</string>
   <string name="settingsSyncSignOut">Sign out</string>

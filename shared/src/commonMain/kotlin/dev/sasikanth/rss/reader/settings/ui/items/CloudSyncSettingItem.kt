@@ -61,7 +61,6 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.settings.SettingsState
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
-import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.formatRelativeTime
 import kotlin.time.Instant
 import org.jetbrains.compose.resources.stringResource
@@ -154,27 +153,25 @@ internal fun CloudSyncSettingItem(
 
           Spacer(Modifier.height(4.dp))
 
-          var statusString =
+          val statusString =
             when (syncProgress) {
               SettingsState.SyncProgress.Idle -> stringResource(Res.string.settingsSyncStatusIdle)
               SettingsState.SyncProgress.Syncing ->
                 stringResource(Res.string.settingsSyncStatusSyncing)
 
-              SettingsState.SyncProgress.Success ->
-                stringResource(Res.string.settingsSyncStatusSuccess)
+              SettingsState.SyncProgress.Success if (lastSyncedAt != null && isSignedIn) ->
+                stringResource(
+                  Res.string.settingsSyncStatusSuccess,
+                  lastSyncedAt.formatRelativeTime(),
+                )
 
               is SettingsState.SyncProgress.Failure ->
                 stringResource(Res.string.settingsSyncStatusFailure)
-            }
 
-          if (
-            syncProgress !is SettingsState.SyncProgress.Idle &&
-              syncProgress !is SettingsState.SyncProgress.Syncing &&
-              lastSyncedAt != null &&
-              isSignedIn
-          ) {
-            statusString += " ${Constants.BULLET_POINT} ${lastSyncedAt.formatRelativeTime()}"
-          }
+              else -> {
+                ""
+              }
+            }
 
           AnimatedVisibility(
             visible = syncProgress !is SettingsState.SyncProgress.Idle && isSignedIn

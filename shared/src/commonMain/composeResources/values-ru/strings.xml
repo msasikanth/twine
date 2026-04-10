@@ -219,8 +219,8 @@
   <string name="settingsSyncDropboxDesc">Согласованная кроссплатформенная синхронизация</string>
   <string name="settingsSyncStatusIdle">Не синхронизировано</string>
   <string name="settingsSyncStatusSyncing">Синхронизация...</string>
-  <string name="settingsSyncStatusSuccess">Последняя синхронизация: Успешно</string>
-  <string name="settingsSyncStatusFailure">Последняя синхронизация: Ошибка</string>
+  <string name="settingsSyncStatusSuccess">Synced • %1$s ago</string>
+  <string name="settingsSyncStatusFailure">Sync failed</string>
   <string name="settingsSyncSignIn">Войти</string>
   <string name="settingsSyncSignOut">Выйти</string>
   <string name="settingsCustomisations">Настройки внешнего вида</string>
