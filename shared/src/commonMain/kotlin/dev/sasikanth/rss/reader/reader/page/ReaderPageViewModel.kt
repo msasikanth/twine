@@ -26,6 +26,7 @@ import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.data.repository.PostContentRepository
+import dev.sasikanth.rss.reader.data.repository.PostRepository
 import dev.sasikanth.rss.reader.media.AudioPlayer
 import dev.sasikanth.rss.reader.media.SleepTimerOption
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
@@ -53,6 +54,7 @@ import me.tatarka.inject.annotations.Inject
 class ReaderPageViewModel(
   dispatchersProvider: DispatchersProvider,
   private val postContentRepository: PostContentRepository,
+  private val postRepository: PostRepository,
   private val fullArticleFetcher: FullArticleFetcher,
   private val readabilityRunner: ReadabilityRunner,
   val audioPlayer: AudioPlayer,
@@ -115,11 +117,20 @@ class ReaderPageViewModel(
       artist = readerPost.feedName,
       coverUrl = coverUrl,
       postId = readerPost.id,
+      initialPosition = readerPost.audioProgress,
     )
   }
 
   fun pauseAudio() {
     audioPlayer.pause()
+    saveAudioProgress()
+  }
+
+  private fun saveAudioProgress() {
+    val currentPosition = audioPlayer.playbackState.value.currentPosition
+    if (currentPosition > 0) {
+      viewModelScope.launch { postRepository.updateAudioProgress(readerPost.id, currentPosition) }
+    }
   }
 
   fun resumeAudio() {
