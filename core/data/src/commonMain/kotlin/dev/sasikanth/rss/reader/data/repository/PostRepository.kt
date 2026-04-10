@@ -522,6 +522,12 @@ class PostRepository(
     }
   }
 
+  suspend fun updateAudioProgress(postId: String, audioProgress: Long) {
+    withContext(dispatchersProvider.databaseWrite) {
+      postQueries.updateAudioProgress(audioProgress = audioProgress, id = postId)
+    }
+  }
+
   private fun mapToResolvedPost(
     id: String,
     sourceId: String,
@@ -543,6 +549,7 @@ class PostRepository(
     feedContentReadingTime: Long?,
     articleContentReadingTime: Long?,
     seedColor: Long?,
+    audioProgress: Long,
   ): ResolvedPost {
     return ResolvedPost(
       id = id,
@@ -565,6 +572,7 @@ class PostRepository(
       articleContentReadingTime = articleContentReadingTime?.toInt(),
       seedColor = seedColor?.toInt(),
       remoteId = remoteId,
+      audioProgress = audioProgress,
     )
   }
 }

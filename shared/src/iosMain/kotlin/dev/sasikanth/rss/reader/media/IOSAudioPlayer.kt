@@ -90,6 +90,7 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     artist: String,
     coverUrl: String?,
     postId: String?,
+    initialPosition: Long,
   ) {
     playJob?.cancel()
     playJob =
@@ -106,9 +107,9 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
         if (!isActive) return@launch
 
         if (isDownloaded) {
-          playInternal(localUrl, title, artist, coverUrl)
+          playInternal(localUrl, title, artist, coverUrl, initialPosition)
         } else {
-          downloadAndPlay(url, localUrl, title, artist, coverUrl)
+          downloadAndPlay(url, localUrl, title, artist, coverUrl, initialPosition)
         }
       }
   }
@@ -119,6 +120,7 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     title: String,
     artist: String,
     coverUrl: String?,
+    initialPosition: Long,
   ) {
     val nsUrl = NSURL.URLWithString(remoteUrl) ?: return
     val task =
@@ -127,7 +129,7 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
           fileManager.moveItemAtURL(location, localUrl, null)
           dispatch_async(dispatch_get_main_queue()) {
             if (playingUrl == remoteUrl && _playbackState.value.isPlaying) {
-              playInternal(localUrl, title, artist, coverUrl)
+              playInternal(localUrl, title, artist, coverUrl, 0L)
             }
           }
         }
@@ -137,16 +139,28 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     // While downloading, we can start playing from the remote URL if we want streaming + caching,
     // but AVPlayer can't easily switch from remote to local seamlessly or use a shared cache.
     // For simplicity, we play the remote URL first, and subsequent plays will use the local file.
-    playInternal(nsUrl, title, artist, coverUrl)
+    playInternal(nsUrl, title, artist, coverUrl, initialPosition)
   }
 
-  private fun playInternal(url: NSURL, title: String, artist: String, coverUrl: String?) {
+  private fun playInternal(
+    url: NSURL,
+    title: String,
+    artist: String,
+    coverUrl: String?,
+    initialPosition: Long,
+  ) {
     val audioSession = AVAudioSession.sharedInstance()
     audioSession.setCategory(AVAudioSessionCategoryPlayback, null)
     audioSession.setActive(true, null)
 
     val playerItem = AVPlayerItem(uRL = url)
     player.replaceCurrentItemWithPlayerItem(playerItem)
+
+    if (initialPosition > 0) {
+      val cmTime = CMTimeMakeWithSeconds(initialPosition.toDouble() / 1000.0, 1000)
+      player.seekToTime(cmTime)
+    }
+
     player.playImmediatelyAtRate(currentSpeed)
 
     updateNowPlayingInfo(title, artist, coverUrl)

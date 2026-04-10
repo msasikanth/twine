@@ -26,11 +26,14 @@ import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.data.repository.PostContentRepository
+import dev.sasikanth.rss.reader.data.repository.PostRepository
 import dev.sasikanth.rss.reader.media.AudioPlayer
 import dev.sasikanth.rss.reader.media.SleepTimerOption
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -41,6 +44,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -53,6 +57,7 @@ import me.tatarka.inject.annotations.Inject
 class ReaderPageViewModel(
   dispatchersProvider: DispatchersProvider,
   private val postContentRepository: PostContentRepository,
+  private val postRepository: PostRepository,
   private val fullArticleFetcher: FullArticleFetcher,
   private val readabilityRunner: ReadabilityRunner,
   val audioPlayer: AudioPlayer,
@@ -83,9 +88,42 @@ class ReaderPageViewModel(
   private val _showFullArticle = MutableStateFlow(readerPost.alwaysFetchFullArticle)
   val showFullArticle: StateFlow<Boolean> = _showFullArticle
 
+  private var autoSaveJob: Job? = null
+
   init {
     loadPostContent()
     loadFullArticle()
+    observePlaybackStateForAutoSave()
+  }
+
+  private fun observePlaybackStateForAutoSave() {
+    audioPlayer.playbackState
+      .map { it.isPlaying && it.playingPostId == readerPost.id }
+      .distinctUntilChanged()
+      .onEach { isPlayingThisPost ->
+        if (isPlayingThisPost) {
+          startAutoSave()
+        } else {
+          stopAutoSave()
+        }
+      }
+      .launchIn(viewModelScope)
+  }
+
+  private fun startAutoSave() {
+    autoSaveJob?.cancel()
+    autoSaveJob =
+      viewModelScope.launch {
+        while (true) {
+          delay(10.seconds)
+          saveAudioProgress()
+        }
+      }
+  }
+
+  private fun stopAutoSave() {
+    autoSaveJob?.cancel()
+    autoSaveJob = null
   }
 
   fun toggleFullArticle() {
@@ -115,11 +153,20 @@ class ReaderPageViewModel(
       artist = readerPost.feedName,
       coverUrl = coverUrl,
       postId = readerPost.id,
+      initialPosition = readerPost.audioProgress,
     )
   }
 
   fun pauseAudio() {
     audioPlayer.pause()
+    saveAudioProgress()
+  }
+
+  private fun saveAudioProgress() {
+    val currentPosition = audioPlayer.playbackState.value.currentPosition
+    if (currentPosition > 0) {
+      viewModelScope.launch { postRepository.updateAudioProgress(readerPost.id, currentPosition) }
+    }
   }
 
   fun resumeAudio() {
@@ -128,6 +175,7 @@ class ReaderPageViewModel(
 
   fun seekAudio(position: Long) {
     audioPlayer.seekTo(position)
+    viewModelScope.launch { postRepository.updateAudioProgress(readerPost.id, position) }
   }
 
   fun seekForward() {

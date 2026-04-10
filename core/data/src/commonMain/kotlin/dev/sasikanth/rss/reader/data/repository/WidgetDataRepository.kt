@@ -79,7 +79,8 @@ class WidgetDataRepository(
           _: Boolean,
           feedContentReadingTime: Long?,
           _: Long?,
-          _: Long? ->
+          _: Long?,
+          _: Long ->
           WidgetPost(
             id = id,
             title = title,
@@ -122,7 +123,8 @@ class WidgetDataRepository(
             _: Boolean,
             feedContentReadingTime: Long?,
             _: Long?,
-            _: Long? ->
+            _: Long?,
+            _: Long ->
             WidgetPost(
               id = id,
               title = title,
@@ -168,7 +170,8 @@ class WidgetDataRepository(
             showFeedFavIcon: Boolean,
             feedContentReadingTime: Long?,
             articleContentReadingTime: Long?,
-            seedColor: Long? ->
+            seedColor: Long?,
+            audioProgress: Long ->
             ResolvedPost(
               id = id,
               sourceId = sourceId,
@@ -190,6 +193,7 @@ class WidgetDataRepository(
               articleContentReadingTime = articleContentReadingTime?.toInt(),
               seedColor = seedColor?.toInt(),
               remoteId = remoteId,
+              audioProgress = audioProgress,
             )
           },
         )

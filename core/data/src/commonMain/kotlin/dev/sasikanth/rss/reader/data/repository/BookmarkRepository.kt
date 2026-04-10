@@ -112,6 +112,7 @@ class BookmarkRepository(
     feedContentReadingTime: Long?,
     articleContentReadingTime: Long?,
     seedColor: Long?,
+    audioProgress: Long,
   ): ResolvedPost {
     return ResolvedPost(
       id = id,
@@ -133,6 +134,7 @@ class BookmarkRepository(
       feedContentReadingTime = feedContentReadingTime?.toInt(),
       articleContentReadingTime = articleContentReadingTime?.toInt(),
       seedColor = seedColor?.toInt(),
+      audioProgress = audioProgress,
     )
   }
 }
