@@ -105,10 +105,14 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     artist: String,
     coverUrl: String?,
     postId: String?,
+    initialPosition: Long,
   ) {
     playingUrl = url
     playingPostId = postId
     mediaPlayer?.media()?.play(url)
+    if (initialPosition > 0) {
+      mediaPlayer?.controls()?.setTime(initialPosition)
+    }
     updatePlaybackState()
   }
 

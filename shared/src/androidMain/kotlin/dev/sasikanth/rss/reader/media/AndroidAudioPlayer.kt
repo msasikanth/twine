@@ -108,6 +108,7 @@ class AndroidAudioPlayer(
     artist: String,
     coverUrl: String?,
     postId: String?,
+    initialPosition: Long,
   ) {
     playJob?.cancel()
     playJob =
@@ -128,6 +129,10 @@ class AndroidAudioPlayer(
         val controller = controllerDeferred.await()
         controller.setMediaItem(mediaItem)
         controller.prepare()
+
+        if (initialPosition > 0) {
+          controller.seekTo(initialPosition)
+        }
 
         if (isActive) {
           controller.play()
