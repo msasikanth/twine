@@ -48,6 +48,8 @@ CREATE INDEX post_unread_by_date_index ON post(postDate) WHERE (flags & 2) == 0;
 CREATE INDEX post_read_by_date_index ON post(postDate) WHERE (flags & 2) != 0;
 CREATE INDEX post_read_by_source_date_index ON post(sourceId, postDate) WHERE (flags & 2) != 0;
 
+CREATE INDEX post_with_image_index ON post(postDate DESC) WHERE imageUrl IS NOT NULL;
+
 CREATE TRIGGER hide_post_if_blocked_word_is_present_AFTER_INSERT
 AFTER INSERT ON post
 FOR EACH ROW

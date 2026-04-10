@@ -1,0 +1,2 @@
+CREATE INDEX post_with_image_index ON post(postDate DESC) WHERE imageUrl IS NOT NULL;
+CREATE INDEX IF NOT EXISTS feed_group_feed_feedGroupId_feedId_index ON feedGroupFeed(feedGroupId, feedId);

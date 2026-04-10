@@ -8,6 +8,7 @@ CREATE TABLE feedGroupFeed (
 
 CREATE INDEX feed_group_feed_feedGroupId_index ON feedGroupFeed(feedGroupId);
 CREATE INDEX feed_group_feed_feedId_index ON feedGroupFeed(feedId);
+CREATE INDEX feed_group_feed_feedGroupId_feedId_index ON feedGroupFeed(feedGroupId, feedId);
 
 addFeedToGroup:
 INSERT OR REPLACE INTO feedGroupFeed(feedGroupId, feedId)

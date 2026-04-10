@@ -9,37 +9,31 @@ SELECT feeds.count + feedGroups.count
 FROM feeds, feedGroups;
 
 pinnedSources:
-WITH feed_group_metadata AS (
+WITH ranked_feeds AS (
   SELECT
-    distinct_groups.feedGroupId,
-    (
-      SELECT GROUP_CONCAT(gf.feedId, '::')
-      FROM feedGroupFeed gf
-      JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
-    ) AS feedIds,
-    COALESCE((
-      SELECT GROUP_CONCAT(f.homepageLink, '::')
-      FROM feedGroupFeed gf
-      JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
-      LIMIT 4
-    ), '') AS feedHomepageLinks,
-    COALESCE((
-      SELECT GROUP_CONCAT(f.icon, '::')
-      FROM feedGroupFeed gf
-      JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
-      LIMIT 4
-    ), '') AS feedIcons,
-    COALESCE((
-      SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END, '::')
-      FROM feedGroupFeed gf
-      JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
-      LIMIT 4
-    ), '') AS feedShowFavIconSettings
-  FROM (SELECT DISTINCT feedGroupId FROM feedGroupFeed) AS distinct_groups
+    gf.feedGroupId,
+    gf.feedId,
+    f.homepageLink,
+    f.icon,
+    CASE
+      WHEN f.showFeedFavIcon IS NULL THEN 'null'
+      WHEN f.showFeedFavIcon = 1 THEN 'true'
+      ELSE 'false'
+    END AS showFeedFavIconStr,
+    ROW_NUMBER() OVER (PARTITION BY gf.feedGroupId ORDER BY gf.rowid) AS rn
+  FROM feedGroupFeed gf
+  JOIN feed f ON gf.feedId = f.id
+  WHERE f.isDeleted = 0
+),
+feed_group_metadata AS (
+  SELECT
+    feedGroupId,
+    GROUP_CONCAT(feedId, '::') AS feedIds,
+    COALESCE(GROUP_CONCAT(CASE WHEN rn <= 4 THEN homepageLink END, '::'), '') AS feedHomepageLinks,
+    COALESCE(GROUP_CONCAT(CASE WHEN rn <= 4 THEN icon END, '::'), '') AS feedIcons,
+    COALESCE(GROUP_CONCAT(CASE WHEN rn <= 4 THEN showFeedFavIconStr END, '::'), '') AS feedShowFavIconSettings
+  FROM ranked_feeds
+  GROUP BY feedGroupId
 )
 
 SELECT
@@ -122,37 +116,31 @@ WHERE pinnedAt IS NOT NULL
 ORDER BY pinnedPosition, pinnedAt DESC;
 
 sources:
-WITH feed_group_metadata AS (
+WITH ranked_feeds AS (
   SELECT
-    distinct_groups.feedGroupId,
-    (
-      SELECT GROUP_CONCAT(gf.feedId, '::')
-      FROM feedGroupFeed gf
-      JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
-    ) AS feedIds,
-    COALESCE((
-      SELECT GROUP_CONCAT(f.homepageLink, '::')
-      FROM feedGroupFeed gf
-      JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
-      LIMIT 4
-    ), '') AS feedHomepageLinks,
-    COALESCE((
-      SELECT GROUP_CONCAT(f.icon, '::')
-      FROM feedGroupFeed gf
-      JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
-      LIMIT 4
-    ), '') AS feedIcons,
-    COALESCE((
-      SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END, '::')
-      FROM feedGroupFeed gf
-      JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
-      LIMIT 4
-    ), '') AS feedShowFavIconSettings
-  FROM (SELECT DISTINCT feedGroupId FROM feedGroupFeed) AS distinct_groups
+    gf.feedGroupId,
+    gf.feedId,
+    f.homepageLink,
+    f.icon,
+    CASE
+      WHEN f.showFeedFavIcon IS NULL THEN 'null'
+      WHEN f.showFeedFavIcon = 1 THEN 'true'
+      ELSE 'false'
+    END AS showFeedFavIconStr,
+    ROW_NUMBER() OVER (PARTITION BY gf.feedGroupId ORDER BY gf.rowid) AS rn
+  FROM feedGroupFeed gf
+  JOIN feed f ON gf.feedId = f.id
+  WHERE f.isDeleted = 0
+),
+feed_group_metadata AS (
+  SELECT
+    feedGroupId,
+    GROUP_CONCAT(feedId, '::') AS feedIds,
+    COALESCE(GROUP_CONCAT(CASE WHEN rn <= 4 THEN homepageLink END, '::'), '') AS feedHomepageLinks,
+    COALESCE(GROUP_CONCAT(CASE WHEN rn <= 4 THEN icon END, '::'), '') AS feedIcons,
+    COALESCE(GROUP_CONCAT(CASE WHEN rn <= 4 THEN showFeedFavIconStr END, '::'), '') AS feedShowFavIconSettings
+  FROM ranked_feeds
+  GROUP BY feedGroupId
 )
 
 SELECT
@@ -240,37 +228,31 @@ ORDER BY type DESC,
 LIMIT :limit OFFSET :offset;
 
 source:
-WITH feed_group_metadata AS (
+WITH ranked_feeds AS (
   SELECT
-    distinct_groups.feedGroupId,
-    (
-      SELECT GROUP_CONCAT(gf.feedId, '::')
-      FROM feedGroupFeed gf
-      JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
-    ) AS feedIds,
-    COALESCE((
-      SELECT GROUP_CONCAT(f.homepageLink, '::')
-      FROM feedGroupFeed gf
-      JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
-      LIMIT 4
-    ), '') AS feedHomepageLinks,
-    COALESCE((
-      SELECT GROUP_CONCAT(f.icon, '::')
-      FROM feedGroupFeed gf
-      JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
-      LIMIT 4
-    ), '') AS feedIcons,
-    COALESCE((
-      SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END, '::')
-      FROM feedGroupFeed gf
-      JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
-      LIMIT 4
-    ), '') AS feedShowFavIconSettings
-  FROM (SELECT DISTINCT feedGroupId FROM feedGroupFeed) AS distinct_groups
+    gf.feedGroupId,
+    gf.feedId,
+    f.homepageLink,
+    f.icon,
+    CASE
+      WHEN f.showFeedFavIcon IS NULL THEN 'null'
+      WHEN f.showFeedFavIcon = 1 THEN 'true'
+      ELSE 'false'
+    END AS showFeedFavIconStr,
+    ROW_NUMBER() OVER (PARTITION BY gf.feedGroupId ORDER BY gf.rowid) AS rn
+  FROM feedGroupFeed gf
+  JOIN feed f ON gf.feedId = f.id
+  WHERE f.isDeleted = 0
+),
+feed_group_metadata AS (
+  SELECT
+    feedGroupId,
+    GROUP_CONCAT(feedId, '::') AS feedIds,
+    COALESCE(GROUP_CONCAT(CASE WHEN rn <= 4 THEN homepageLink END, '::'), '') AS feedHomepageLinks,
+    COALESCE(GROUP_CONCAT(CASE WHEN rn <= 4 THEN icon END, '::'), '') AS feedIcons,
+    COALESCE(GROUP_CONCAT(CASE WHEN rn <= 4 THEN showFeedFavIconStr END, '::'), '') AS feedShowFavIconSettings
+  FROM ranked_feeds
+  GROUP BY feedGroupId
 )
 
 SELECT
