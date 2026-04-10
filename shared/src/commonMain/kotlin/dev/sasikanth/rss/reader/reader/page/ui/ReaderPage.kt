@@ -30,7 +30,6 @@ import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -284,13 +283,6 @@ private fun ReaderPageContent(
                   )
                 }
               }
-            }
-
-            item(key = "divider") {
-              HorizontalDivider(
-                modifier = Modifier.padding(24.dp),
-                color = AppTheme.colorScheme.outlineVariant,
-              )
             }
 
             if (contentParsingProgress == ReaderProcessingProgress.Loading) {
