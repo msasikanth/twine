@@ -223,8 +223,8 @@
   <string name="settingsSyncDropboxDesc">Platformlar arası tutarlı senkronizasyon</string>
   <string name="settingsSyncStatusIdle">Senkronize edilmedi</string>
   <string name="settingsSyncStatusSyncing">Senkronize ediliyor...</string>
-  <string name="settingsSyncStatusSuccess">Son senkronizasyon: Başarılı</string>
-  <string name="settingsSyncStatusFailure">Son senkronizasyon: Başarısız</string>
+  <string name="settingsSyncStatusSuccess">Synced • %1$s ago</string>
+  <string name="settingsSyncStatusFailure">Sync failed</string>
   <string name="settingSyncLabel">Senkronizasyon</string>
   <string name="settingsSyncSignIn">Giriş yap</string>
   <string name="settingsSyncSignOut">Çıkış yap</string>
