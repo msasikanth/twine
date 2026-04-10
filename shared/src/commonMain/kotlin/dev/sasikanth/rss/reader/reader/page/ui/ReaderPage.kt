@@ -228,6 +228,7 @@ private fun ReaderPageContent(
           ) {
             item(key = "reader-header") {
               PostHeader(
+                modifier = Modifier.padding(bottom = 40.dp),
                 readerPost = readerPost,
                 showFullArticle = showFullArticle,
                 page = page,
@@ -279,7 +280,7 @@ private fun ReaderPageContent(
                       onPlaybackSpeedChange(newSpeed)
                     },
                     onSleepTimerClick = { showSleepTimerSheet = true },
-                    modifier = Modifier.padding(horizontal = 24.dp).padding(top = 24.dp),
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 40.dp),
                   )
                 }
               }
@@ -289,14 +290,14 @@ private fun ReaderPageContent(
               item(key = "progress-indicator") { ProgressIndicator() }
             }
 
-            when (val state = markdownContentState) {
+            when (markdownContentState) {
               is State.Success -> {
-                items(items = state.node.children) { node ->
+                items(items = markdownContentState.node.children) { node ->
                   Box(modifier = Modifier.padding(horizontal = 24.dp)) {
                     MarkdownElement(
                       node = node,
                       components = markdownComponents,
-                      content = state.content,
+                      content = markdownContentState.content,
                       includeSpacer = true,
                     )
                   }
