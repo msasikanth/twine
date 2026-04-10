@@ -1,0 +1,29 @@
+-- Create new table with correct column order
+CREATE TABLE readingHistory_new (
+  postId TEXT NOT NULL PRIMARY KEY,
+  feedId TEXT NOT NULL,
+  feedName TEXT NOT NULL,
+  feedIcon TEXT NOT NULL,
+  feedHomepageLink TEXT NOT NULL,
+  showFeedFavIcon INTEGER NOT NULL DEFAULT 1,
+  readAt INTEGER NOT NULL,
+  postDate INTEGER NOT NULL
+);
+
+-- Drop indexes
+DROP INDEX reading_history_feedId_index;
+DROP INDEX reading_history_readAt_index;
+
+-- Copy data from old table to new table
+INSERT INTO readingHistory_new (postId, feedId, feedName, feedIcon, feedHomepageLink, showFeedFavIcon, readAt, postDate)
+SELECT postId, feedId, feedName, feedIcon, feedHomepageLink, 1, readAt, postDate FROM readingHistory;
+
+-- Drop old table
+DROP TABLE readingHistory;
+
+-- Rename new table to original name
+ALTER TABLE readingHistory_new RENAME TO readingHistory;
+
+-- Recreate indexes
+CREATE INDEX reading_history_feedId_index ON readingHistory(feedId);
+CREATE INDEX reading_history_readAt_index ON readingHistory(readAt);

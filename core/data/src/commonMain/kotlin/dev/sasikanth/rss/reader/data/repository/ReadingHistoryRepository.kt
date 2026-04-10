@@ -39,24 +39,6 @@ class ReadingHistoryRepository(
   private val dispatchersProvider: DispatchersProvider,
 ) {
 
-  suspend fun insertReadingHistory(postIds: List<String>, readAt: Instant = Clock.System.now()) {
-    withContext(dispatchersProvider.databaseWrite) {
-      readingHistoryQueries.insertReadingHistoryForPosts(readAt = readAt, postIds = postIds)
-    }
-  }
-
-  suspend fun deleteReadingHistory(postId: String) {
-    withContext(dispatchersProvider.databaseWrite) {
-      readingHistoryQueries.deleteReadingHistory(postId = postId)
-    }
-  }
-
-  suspend fun deleteReadingHistoryForPosts(postIds: List<String>) {
-    withContext(dispatchersProvider.databaseWrite) {
-      readingHistoryQueries.deleteReadingHistoryForPosts(postIds = postIds)
-    }
-  }
-
   suspend fun deleteAll() {
     withContext(dispatchersProvider.databaseWrite) { readingHistoryQueries.deleteAll() }
   }
@@ -85,6 +67,7 @@ class ReadingHistoryRepository(
             feedName = it.feedName,
             feedIcon = it.feedIcon,
             homepageLink = it.feedHomepageLink,
+            showFeedFavIcon = it.showFeedFavIcon,
             readCount = it.readCount,
           )
         }

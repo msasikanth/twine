@@ -66,7 +66,6 @@ import dev.sasikanth.rss.reader.statistics.StatisticsState
 import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
-import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.formatReadingTrendDate
 import kotlin.time.Clock
 import kotlinx.collections.immutable.ImmutableList
@@ -366,7 +365,7 @@ private fun FeedReadCountItem(
     FeedIcon(
       icon = feedReadCount.feedIcon,
       homepageLink = feedReadCount.homepageLink,
-      showFeedFavIcon = LocalShowFeedFavIconSetting.current,
+      showFeedFavIcon = feedReadCount.showFeedFavIcon,
       contentDescription = null,
       modifier = Modifier.requiredSize(iconSize),
     )
@@ -458,6 +457,7 @@ private fun SettingsDataPreview() {
             feedIcon =
               "https://platform.theverge.com/wp-content/uploads/sites/2/2025/01/verge-rss-large_80b47e.png?w=150&h=150&crop=1",
             homepageLink = "https://www.theverge.com",
+            showFeedFavIcon = true,
             readCount = 450,
           ),
           FeedReadCount(
@@ -466,6 +466,7 @@ private fun SettingsDataPreview() {
             feedIcon =
               "https://techcrunch.com/wp-content/uploads/2015/02/cropped-cropped-favicon-gradient.png?w=32",
             homepageLink = "https://techcrunch.com/",
+            showFeedFavIcon = true,
             readCount = 320,
           ),
           FeedReadCount(
@@ -473,6 +474,7 @@ private fun SettingsDataPreview() {
             feedName = "WIRED",
             feedIcon = "https://icon.horse/icon/www.wired.com",
             homepageLink = "https://www.wired.com",
+            showFeedFavIcon = true,
             readCount = 280,
           ),
           FeedReadCount(
@@ -481,6 +483,7 @@ private fun SettingsDataPreview() {
             feedIcon =
               "https://9to5google.com/wp-content/uploads/sites/4/2017/03/favicon-bg-none-face-white.png?w=32",
             homepageLink = "https://9to5google.com/",
+            showFeedFavIcon = true,
             readCount = 150,
           ),
           FeedReadCount(
@@ -488,6 +491,7 @@ private fun SettingsDataPreview() {
             feedName = "Android Authority",
             feedIcon = "https://icon.horse/icon/www.androidauthority.com",
             homepageLink = "https://www.androidauthority.com/",
+            showFeedFavIcon = true,
             readCount = 120,
           ),
         ),

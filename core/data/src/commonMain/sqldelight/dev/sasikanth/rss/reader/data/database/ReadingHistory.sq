@@ -1,3 +1,4 @@
+import kotlin.Boolean;
 import kotlin.time.Instant;
 
 CREATE TABLE readingHistory (
@@ -6,16 +7,13 @@ CREATE TABLE readingHistory (
   feedName TEXT NOT NULL,
   feedIcon TEXT NOT NULL,
   feedHomepageLink TEXT NOT NULL,
+  showFeedFavIcon INTEGER AS Boolean NOT NULL DEFAULT 1,
   readAt INTEGER AS Instant NOT NULL,
   postDate INTEGER AS Instant NOT NULL
 );
 
 CREATE INDEX reading_history_feedId_index ON readingHistory(feedId);
 CREATE INDEX reading_history_readAt_index ON readingHistory(readAt);
-
-insertReadingHistory:
-INSERT OR REPLACE INTO readingHistory(postId, feedId, feedName, feedIcon, feedHomepageLink, readAt, postDate)
-VALUES (:postId, :feedId, :feedName, :feedIcon, :feedHomepageLink, :readAt, :postDate);
 
 deleteReadingHistory:
 DELETE FROM readingHistory WHERE postId = :postId;
@@ -24,13 +22,14 @@ deleteReadingHistoryForPosts:
 DELETE FROM readingHistory WHERE postId IN :postIds;
 
 insertReadingHistoryForPosts:
-INSERT OR IGNORE INTO readingHistory(postId, feedId, feedName, feedIcon, feedHomepageLink, readAt, postDate)
+INSERT OR IGNORE INTO readingHistory(postId, feedId, feedName, feedIcon, feedHomepageLink, showFeedFavIcon, readAt, postDate)
 SELECT
   post.id,
   feed.id,
   feed.name,
   feed.icon,
   feed.homepageLink,
+  feed.showFeedFavIcon,
   :readAt,
   post.postDate
 FROM post
@@ -49,9 +48,10 @@ SELECT
   feedName,
   feedIcon,
   feedHomepageLink,
+  showFeedFavIcon,
   COUNT(postId) AS readCount
 FROM readingHistory
-GROUP BY feedId, feedName, feedIcon, feedHomepageLink
+GROUP BY feedId, feedName, feedIcon, feedHomepageLink, showFeedFavIcon
 ORDER BY readCount DESC;
 
 readPostsOverTime:

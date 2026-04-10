@@ -26,6 +26,7 @@ data class FeedReadCount(
   val feedName: String,
   val feedIcon: String,
   val homepageLink: String,
+  val showFeedFavIcon: Boolean,
   val readCount: Long,
 )
 
