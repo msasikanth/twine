@@ -1,25 +1,16 @@
 ## Features
 
-- **Home Screen Widgets**: Added unread posts, bookmarks, unread count, and reading statistics widgets for Android and iOS. Includes support for different widget sizes (small, medium, large).
-- **Home Screen Sort**: Introduced sort-aware post management, allowing you to view and navigate posts based on your preferred sort order.
-- **Improved Feed Management**: Added the ability to delete feeds directly from the Group screen.
-- **Deep Linking**: Enhanced app-wide deep link handling for better navigation from widgets and external sources.
+- **Audio Progress Persistence**: Save and restore playback position for podcast/audio posts. Progress is auto-saved every 10 seconds and when seeking, allowing you to resume playback from where you left off.
 
 ## Changes
 
 - **Improved Sync Performance**:
-    - Implemented per-feed initial sync and robust offset-based pagination.
-    - Reduced database load with improved indexes and queries.
-- **UI & UX Refinements**:
-    - Redesigned and stabilized home screen components for a smoother experience.
-    - Refined navigation drawer and feed list selection styles with new animations.
-    - Updated typography and UI consistency across the app.
-    - Added tooltips to post action bar icons.
+    - Optimized database queries with new indexes for faster feed group and post lookups.
+    - Batch update seed colors to eliminate N+1 query pattern, reducing SQLite transaction overhead.
+- **Cloud Sync Status**: Refined sync status messaging to show relative time (e.g., "Synced • 2m ago") instead of static messages.
+- **Reader Page**: Improved content spacing for better visual appearance.
 
 ## Fixes
 
-- Fixed widget navigation and layout issues on both Android and iOS.
-- Improved empty state handling for widgets.
-- Fixed an issue where posts could disappear when marked as read on scroll.
-- Fixed JS evaluation in reader view on iOS.
-- Fixed race conditions in the Audio Player across platforms.
+- Fixed crash when no unread posts exist since last sync.
+- Fixed iOS runtime crashes caused by paging library.
