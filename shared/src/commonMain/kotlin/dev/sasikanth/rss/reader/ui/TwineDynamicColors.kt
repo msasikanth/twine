@@ -34,7 +34,7 @@ internal object TwineDynamicColors {
 
   private val dynamicColors = MaterialDynamicColors()
 
-  private val bottomSheet: DynamicColor =
+  internal val bottomSheet: DynamicColor =
     DynamicColor.fromPalette(
       name = "bottomSheet",
       palette = { s: DynamicScheme -> s.primaryPalette },
@@ -42,7 +42,7 @@ internal object TwineDynamicColors {
       isBackground = true,
     )
 
-  private val bottomSheetInverse: DynamicColor =
+  internal val bottomSheetInverse: DynamicColor =
     DynamicColor.fromPalette(
       name = "bottomSheetInverse",
       palette = { s: DynamicScheme -> s.primaryPalette },
@@ -50,7 +50,7 @@ internal object TwineDynamicColors {
       isBackground = true,
     )
 
-  private val backdrop: DynamicColor =
+  internal val backdrop: DynamicColor =
     DynamicColor.fromPalette(
       name = "backdrop",
       palette = { s: DynamicScheme -> s.neutralPalette },
@@ -58,7 +58,7 @@ internal object TwineDynamicColors {
       isBackground = true,
     )
 
-  private val bottomSheetBorder: DynamicColor =
+  internal val bottomSheetBorder: DynamicColor =
     DynamicColor.fromPalette(
       name = "bottomSheetBorder",
       palette = { s: DynamicScheme -> s.neutralPalette },
