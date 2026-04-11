@@ -205,6 +205,7 @@
   <string name="readerCustomisationsTypeface">Шрифт</string>
   <string name="themeVariantColorScheme">Color scheme</string>
   <string name="themeVariantDynamic">Dynamic</string>
+  <string name="themeVariantSystemDynamic">Material You</string>
   <string name="postsFilter">Фильтр постов</string>
   <string name="postsSortBy">Сортировать по</string>
   <string name="postsSortByPostDate">Дата публикации</string>
