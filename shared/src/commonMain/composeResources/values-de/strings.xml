@@ -205,6 +205,7 @@
   <string name="readerCustomisationsTypeface">Schriftart</string>
   <string name="themeVariantColorScheme">Color scheme</string>
   <string name="themeVariantDynamic">Dynamic</string>
+  <string name="themeVariantSystemDynamic">Material You</string>
   <string name="postsFilter">Beitragsfilter</string>
   <string name="postsSortBy">Sortieren nach</string>
   <string name="postsSortByPostDate">Beitragsdatum</string>
