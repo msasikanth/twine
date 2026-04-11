@@ -205,6 +205,7 @@
   <string name="readerCustomisationsTypeface">Typeface</string>
   <string name="themeVariantColorScheme">Color scheme</string>
   <string name="themeVariantDynamic">Dynamic</string>
+  <string name="themeVariantSystemDynamic">Material You</string>
   <string name="postsFilter">पोस्ट फ़िल्टर</string>
   <string name="postsSortBy">क्रमबद्ध करें</string>
   <string name="postsSortByPostDate">पोस्ट की तारीख</string>
