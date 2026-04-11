@@ -47,6 +47,8 @@ class MinifluxApi {
       val order: String? = "published_at",
       val direction: String? = "desc",
     )
+
+    @Serializable @Resource("icon") class Icon(val parent: Feed)
   }
 
   @Serializable
