@@ -25,10 +25,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.resources.icons.DarkMode
@@ -58,7 +62,19 @@ import dev.sasikanth.rss.reader.ui.parchmentColorScheme
 import dev.sasikanth.rss.reader.ui.raspberryColorScheme
 import dev.sasikanth.rss.reader.ui.skylineColorScheme
 import dev.sasikanth.rss.reader.ui.solarizedColorScheme
+import dev.sasikanth.rss.reader.ui.systemDynamicColorScheme
 import dev.sasikanth.rss.reader.util.canBlurImage
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.themeVariantAmber
+import twine.shared.generated.resources.themeVariantCoral
+import twine.shared.generated.resources.themeVariantDynamic
+import twine.shared.generated.resources.themeVariantForest
+import twine.shared.generated.resources.themeVariantParchment
+import twine.shared.generated.resources.themeVariantRaspberry
+import twine.shared.generated.resources.themeVariantSkyline
+import twine.shared.generated.resources.themeVariantSolarized
+import twine.shared.generated.resources.themeVariantSystemDynamic
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -79,6 +95,7 @@ fun ThemeVariantIconButton(
         if (isDark) appDynamicColorState.darkAppColorScheme
         else appDynamicColorState.lightAppColorScheme
       }
+      ThemeVariant.SystemDynamic -> systemDynamicColorScheme(isDark)
       ThemeVariant.Solarized -> solarizedColorScheme(isDark)
       ThemeVariant.Forest -> forestColorScheme(isDark)
       ThemeVariant.Amber -> amberColorScheme(isDark)
@@ -92,6 +109,10 @@ fun ThemeVariantIconButton(
     when (themeVariant) {
       ThemeVariant.Dynamic -> {
         Pair(Color.Transparent, colorScheme.inverseOnSurface)
+      }
+
+      ThemeVariant.SystemDynamic -> {
+        Pair(colorScheme.primaryContainer, colorScheme.onPrimaryContainer)
       }
 
       ThemeVariant.Solarized -> {
@@ -117,7 +138,10 @@ fun ThemeVariantIconButton(
       if (selected) AppTheme.colorScheme.outline else AppTheme.colorScheme.outlineVariant
     )
 
-  Column(horizontalAlignment = Alignment.CenterHorizontally) {
+  Column(
+    modifier = Modifier.width(IntrinsicSize.Min),
+    horizontalAlignment = Alignment.CenterHorizontally,
+  ) {
     Box(
       modifier =
         Modifier.then(
@@ -216,10 +240,27 @@ fun ThemeVariantIconButton(
     if (showLabel) {
       Spacer(Modifier.height(8.dp))
 
+      val themeName =
+        when (themeVariant) {
+          ThemeVariant.Dynamic -> stringResource(Res.string.themeVariantDynamic)
+          ThemeVariant.SystemDynamic -> stringResource(Res.string.themeVariantSystemDynamic)
+          ThemeVariant.Solarized -> stringResource(Res.string.themeVariantSolarized)
+          ThemeVariant.Forest -> stringResource(Res.string.themeVariantForest)
+          ThemeVariant.Amber -> stringResource(Res.string.themeVariantAmber)
+          ThemeVariant.Coral -> stringResource(Res.string.themeVariantCoral)
+          ThemeVariant.Raspberry -> stringResource(Res.string.themeVariantRaspberry)
+          ThemeVariant.Skyline -> stringResource(Res.string.themeVariantSkyline)
+          ThemeVariant.Parchment -> stringResource(Res.string.themeVariantParchment)
+        }
+
       Text(
-        text = themeVariant.name,
+        modifier = Modifier.fillMaxWidth(),
+        text = themeName,
         style = MaterialTheme.typography.bodyMedium,
         color = AppTheme.colorScheme.onSurfaceVariant,
+        minLines = 2,
+        maxLines = 2,
+        textAlign = TextAlign.Center,
       )
     }
   }

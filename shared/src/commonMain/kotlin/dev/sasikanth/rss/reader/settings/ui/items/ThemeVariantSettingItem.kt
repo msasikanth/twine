@@ -24,12 +24,14 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.ThemeVariantIconButton
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.settings.ui.settingsItemHorizontalPadding
+import dev.sasikanth.rss.reader.ui.isSystemDynamicColorSupported
 import dev.sasikanth.rss.reader.utils.ignoreHorizontalParentPadding
 
 @Composable
@@ -40,9 +42,13 @@ internal fun ThemeVariantSettingItem(
   onThemeVariantChanged: (ThemeVariant) -> Unit,
   modifier: Modifier = Modifier,
 ) {
+  val availableThemeVariants =
+    remember(isSystemDynamicColorSupported) {
+      ThemeVariant.entries.filter { !it.isAndroidOnly || isSystemDynamicColorSupported }
+    }
   val themeVariantListState =
     rememberLazyListState(
-      initialFirstVisibleItemIndex = ThemeVariant.entries.indexOf(selectedThemeVariant)
+      initialFirstVisibleItemIndex = availableThemeVariants.indexOf(selectedThemeVariant)
     )
 
   LazyRow(
@@ -50,9 +56,9 @@ internal fun ThemeVariantSettingItem(
     modifier = modifier.fillMaxWidth().ignoreHorizontalParentPadding(settingsItemHorizontalPadding),
     contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
     horizontalArrangement = Arrangement.spacedBy(12.dp),
-    verticalAlignment = Alignment.CenterVertically,
+    verticalAlignment = Alignment.Top,
   ) {
-    items(ThemeVariant.entries) { themeVariant ->
+    items(availableThemeVariants) { themeVariant ->
       ThemeVariantIconButton(
         themeVariant = themeVariant,
         selected = themeVariant == selectedThemeVariant,

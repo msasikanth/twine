@@ -52,6 +52,7 @@ import dev.sasikanth.rss.reader.blockedwords.BlockedWordsViewModel
 import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
 import dev.sasikanth.rss.reader.changelog.ui.ChangelogSheet
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
+import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
 import dev.sasikanth.rss.reader.feed.FeedViewModel
@@ -86,6 +87,7 @@ import dev.sasikanth.rss.reader.ui.darkAppColorScheme
 import dev.sasikanth.rss.reader.ui.getOverriddenColorScheme
 import dev.sasikanth.rss.reader.ui.lightAppColorScheme
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
+import dev.sasikanth.rss.reader.ui.systemDynamicColorScheme
 import dev.sasikanth.rss.reader.utils.ExternalUriHandler
 import dev.sasikanth.rss.reader.utils.InAppRating
 import dev.sasikanth.rss.reader.utils.LocalAmoledSetting
@@ -176,9 +178,15 @@ fun App(
           }
         )
       }
+    val systemDynamicColors =
+      if (appState.themeVariant == ThemeVariant.SystemDynamic) {
+        systemDynamicColorScheme(useDarkTheme)
+      } else {
+        null
+      }
     val overriddenColorScheme =
-      remember(appState.themeVariant, useDarkTheme) {
-        appState.themeVariant.getOverriddenColorScheme(useDarkTheme)
+      remember(appState.themeVariant, useDarkTheme, systemDynamicColors) {
+        systemDynamicColors ?: appState.themeVariant.getOverriddenColorScheme(useDarkTheme)
       }
     val navController = rememberNavController()
     val openPost: (Int, ResolvedPost, FromScreen) -> Unit =

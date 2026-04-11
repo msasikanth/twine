@@ -118,6 +118,7 @@ import twine.shared.generated.resources.themeVariantParchment
 import twine.shared.generated.resources.themeVariantRaspberry
 import twine.shared.generated.resources.themeVariantSkyline
 import twine.shared.generated.resources.themeVariantSolarized
+import twine.shared.generated.resources.themeVariantSystemDynamic
 
 @Composable
 internal fun SettingsAppearanceScreen(
@@ -468,6 +469,7 @@ private fun LayoutPreview(homeViewMode: HomeViewMode) {
 private fun ThemeVariant.displayName(): String {
   return when (this) {
     ThemeVariant.Dynamic -> stringResource(Res.string.themeVariantDynamic)
+    ThemeVariant.SystemDynamic -> stringResource(Res.string.themeVariantSystemDynamic)
     ThemeVariant.Solarized -> stringResource(Res.string.themeVariantSolarized)
     ThemeVariant.Forest -> stringResource(Res.string.themeVariantForest)
     ThemeVariant.Amber -> stringResource(Res.string.themeVariantAmber)

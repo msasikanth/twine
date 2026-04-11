@@ -118,6 +118,7 @@ import dev.sasikanth.rss.reader.ui.OutfitFontFamily
 import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
 import dev.sasikanth.rss.reader.ui.getOverriddenColorScheme
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
+import dev.sasikanth.rss.reader.ui.systemDynamicColorScheme
 import dev.sasikanth.rss.reader.ui.typography
 import dev.sasikanth.rss.reader.utils.CollectItemTransition
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
@@ -248,15 +249,27 @@ internal fun ReaderScreen(
     LocalUriHandler provides readerLinkHandler,
   ) {
     val sourceColorScheme = AppTheme.colorScheme
+    val systemDynamicColors =
+      if (state.selectedThemeVariant == ThemeVariant.SystemDynamic) {
+        systemDynamicColorScheme(isDarkTheme)
+      } else {
+        null
+      }
     val overriddenColorScheme =
-      remember(state.selectedThemeVariant, isDarkTheme, sourceColorScheme) {
-        state.selectedThemeVariant.getOverriddenColorScheme(isDarkTheme)
+      remember(state.selectedThemeVariant, isDarkTheme, sourceColorScheme, systemDynamicColors) {
+        systemDynamicColors ?: state.selectedThemeVariant.getOverriddenColorScheme(isDarkTheme)
       }
 
     val darkAppColorScheme = appDynamicColorState.darkAppColorScheme
+    val systemDynamicDarkColors =
+      if (state.selectedThemeVariant == ThemeVariant.SystemDynamic) {
+        systemDynamicColorScheme(true)
+      } else {
+        null
+      }
     val overriddenDarkColorScheme =
-      remember(state.selectedThemeVariant, darkAppColorScheme) {
-        state.selectedThemeVariant.getOverriddenColorScheme(true)
+      remember(state.selectedThemeVariant, darkAppColorScheme, systemDynamicDarkColors) {
+        systemDynamicDarkColors ?: state.selectedThemeVariant.getOverriddenColorScheme(true)
       }
 
     AppTheme(

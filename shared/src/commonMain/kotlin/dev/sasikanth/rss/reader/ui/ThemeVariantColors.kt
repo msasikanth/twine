@@ -23,6 +23,7 @@ import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 internal fun ThemeVariant.getOverriddenColorScheme(isDark: Boolean): AppColorScheme? {
   return when (this) {
     ThemeVariant.Dynamic -> null
+    ThemeVariant.SystemDynamic -> null // Handled separately in App.kt via composable function
     ThemeVariant.Solarized -> solarizedColorScheme(isDark)
     ThemeVariant.Forest -> forestColorScheme(isDark)
     ThemeVariant.Amber -> amberColorScheme(isDark)
