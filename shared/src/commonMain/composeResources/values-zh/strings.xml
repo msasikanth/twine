@@ -205,6 +205,7 @@
   <string name="readerCustomisationsTypeface">排版</string>
   <string name="themeVariantColorScheme">Color scheme</string>
   <string name="themeVariantDynamic">Dynamic</string>
+  <string name="themeVariantSystemDynamic">Material You</string>
   <string name="postsFilter">文章过滤</string>
   <string name="postsSortBy">排序方式</string>
   <string name="postsSortByPostDate">发布日期</string>
