@@ -83,8 +83,6 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
         modifier
           .align(Alignment.BottomCenter)
           .padding(bottom = 16.dp)
-          .background(AppTheme.colorScheme.bottomSheet, CircleShape)
-          .border(1.dp, AppTheme.colorScheme.bottomSheetBorder, CircleShape)
           .dropShadow(shape = CircleShape) {
             color = Color.Black.copy(alpha = 0.4f)
             offset = Offset(0f, 16.dp.toPx())
@@ -97,6 +95,8 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
             radius = 8.dp.toPx()
             spread = 0f
           }
+          .background(AppTheme.colorScheme.bottomSheet, CircleShape)
+          .border(1.dp, AppTheme.colorScheme.bottomSheetBorder, CircleShape)
           .padding(4.dp),
     ) {
       AppTheme(useDarkTheme = true) {
