@@ -112,7 +112,7 @@ internal fun ReaderCustomizationsContent(
       state = themeVariantListState,
       contentPadding = PaddingValues(horizontal = 28.dp, vertical = 8.dp),
       horizontalArrangement = Arrangement.spacedBy(16.dp),
-      verticalAlignment = Alignment.CenterVertically,
+      verticalAlignment = Alignment.Top,
     ) {
       items(ThemeVariant.entries) { themeVariant ->
         ThemeVariantIconButton(
