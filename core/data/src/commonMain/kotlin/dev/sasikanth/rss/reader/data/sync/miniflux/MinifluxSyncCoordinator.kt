@@ -333,7 +333,6 @@ class MinifluxSyncCoordinator(
   }
 
   private suspend fun syncSubscriptions(syncStartTime: Instant): Boolean {
-    val serverUrl = userRepository.currentUser()?.serverUrl?.removeSuffix("/")
     val remoteFeeds = minifluxSource.feeds()
     val localFeeds = rssRepository.allFeedsBlocking()
     val localGroups = rssRepository.allFeedGroupsBlocking()
@@ -377,9 +376,14 @@ class MinifluxSyncCoordinator(
     val localGroupsByName = localGroups.associateBy { it.name }
 
     remoteFeeds.forEach { remoteFeed ->
-      val iconUrl =
-        if (remoteFeed.icon.externalIconId.isNotBlank() && serverUrl != null) {
-          "$serverUrl/feed/icon/${remoteFeed.icon.externalIconId}"
+      val iconDataUri =
+        if (remoteFeed.icon.externalIconId.isNotBlank()) {
+          val iconResponse = minifluxSource.feedIcon(remoteFeed.id)
+          if (iconResponse != null) {
+            "data:${iconResponse.data}"
+          } else {
+            null
+          }
         } else {
           null
         }
@@ -393,7 +397,7 @@ class MinifluxSyncCoordinator(
             localFeed.remoteId != remoteFeed.id.toString() ||
               localFeed.name != remoteFeed.title ||
               localFeed.homepageLink != remoteFeed.siteUrl ||
-              localFeed.icon != (iconUrl ?: localFeed.icon)
+              localFeed.icon != (iconDataUri ?: localFeed.icon)
           ) {
             rssRepository.upsertFeeds(
               listOf(
@@ -403,7 +407,7 @@ class MinifluxSyncCoordinator(
                   remoteId = remoteFeed.id.toString(),
                   lastUpdatedAt = syncStartTime,
                   isDeleted = false,
-                  icon = iconUrl ?: localFeed.icon,
+                  icon = iconDataUri ?: localFeed.icon,
                 )
               )
             )
@@ -420,7 +424,7 @@ class MinifluxSyncCoordinator(
               feedPayload =
                 FeedPayload(
                   name = remoteFeed.title,
-                  icon = iconUrl ?: "",
+                  icon = iconDataUri ?: "",
                   description = "",
                   homepageLink = remoteFeed.siteUrl,
                   link = remoteFeed.feedUrl,
