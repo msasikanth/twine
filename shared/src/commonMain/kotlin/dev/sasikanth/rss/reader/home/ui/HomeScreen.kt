@@ -241,7 +241,7 @@ private fun HomeContent(
       state.unreadSinceLastSync
     }
 
-  val canShowBottomBar = state.showPinnedSources && feedsState.pinnedSources.isNotEmpty()
+  val canShowBottomBar = platform !is Platform.Desktop && state.showPinnedSources
   val appBarScrollBehaviour = TopAppBarDefaults.enterAlwaysScrollBehavior()
   val bottomBarScrollState =
     rememberPinnedSourcesBottomBarScrollBehavior(canScroll = { canShowBottomBar })
