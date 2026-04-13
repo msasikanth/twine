@@ -57,6 +57,7 @@ import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
 import dev.sasikanth.rss.reader.resources.icons.Add
 import dev.sasikanth.rss.reader.resources.icons.Check
 import dev.sasikanth.rss.reader.resources.icons.Edit
+import dev.sasikanth.rss.reader.resources.icons.MarkAllAsRead
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.RemoveFeed
 import dev.sasikanth.rss.reader.resources.icons.Sort
@@ -74,6 +75,7 @@ import twine.shared.generated.resources.feedOptionRemove
 import twine.shared.generated.resources.feedsSortAlphabetical
 import twine.shared.generated.resources.feedsSortLatest
 import twine.shared.generated.resources.feedsSortOldest
+import twine.shared.generated.resources.markAllAsRead
 import twine.shared.generated.resources.sort
 import twine.shared.generated.resources.sourcesCount
 
@@ -90,6 +92,7 @@ internal fun LazyListScope.allSources(
   onSourceEditClick: (Source) -> Unit,
   onAddToGroupClick: (Source) -> Unit,
   onRemoveSourceClick: (Source) -> Unit,
+  onMarkAsReadClick: (Source) -> Unit,
 ) {
   if (sources.itemCount > 0) {
     items(
@@ -149,6 +152,16 @@ internal fun LazyListScope.allSources(
                     )
                     .animateItem(),
                 dropdownMenuContent = { onDismiss ->
+                  DropdownMenuItem(
+                    text = stringResource(Res.string.markAllAsRead),
+                    leadingIcon = TwineIcons.MarkAllAsRead,
+                    enabled = source.numberOfUnreadPosts > 0,
+                    onClick = {
+                      onMarkAsReadClick(source)
+                      onDismiss()
+                    },
+                  )
+
                   DropdownMenuItem(
                     text = stringResource(Res.string.edit),
                     leadingIcon = TwineIcons.Edit,
@@ -217,6 +230,16 @@ internal fun LazyListScope.allSources(
                     )
                     .animateItem(),
                 dropdownMenuContent = { onDismiss ->
+                  DropdownMenuItem(
+                    text = stringResource(Res.string.markAllAsRead),
+                    leadingIcon = TwineIcons.MarkAllAsRead,
+                    enabled = source.numberOfUnreadPosts > 0,
+                    onClick = {
+                      onMarkAsReadClick(source)
+                      onDismiss()
+                    },
+                  )
+
                   DropdownMenuItem(
                     text = stringResource(Res.string.actionAddTo),
                     leadingIcon = TwineIcons.NewGroup,
