@@ -76,7 +76,9 @@ import dev.sasikanth.rss.reader.home.ui.CompactPostListItem
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.home.ui.SimplePostListItem
 import dev.sasikanth.rss.reader.resources.icons.ArrowDown
+import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsState
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
@@ -254,13 +256,15 @@ private fun SettingsAppearanceContent(
           )
         }
 
-        item {
-          SettingsSwitchItem(
-            title = stringResource(Res.string.settingsShowPinnedSourcesTitle),
-            subtitle = stringResource(Res.string.settingsShowPinnedSourcesSubtitle),
-            checked = state.showPinnedSources,
-            onValueChanged = { dispatch(SettingsEvent.ToggleShowPinnedSources(it)) },
-          )
+        if (platform !is Platform.Desktop) {
+          item {
+            SettingsSwitchItem(
+              title = stringResource(Res.string.settingsShowPinnedSourcesTitle),
+              subtitle = stringResource(Res.string.settingsShowPinnedSourcesSubtitle),
+              checked = state.showPinnedSources,
+              onValueChanged = { dispatch(SettingsEvent.ToggleShowPinnedSources(it)) },
+            )
+          }
         }
 
         item {
