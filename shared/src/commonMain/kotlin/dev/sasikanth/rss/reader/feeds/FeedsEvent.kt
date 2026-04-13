@@ -31,6 +31,8 @@ sealed interface FeedsEvent {
 
   data class OnDeleteSourceClicked(val source: Source) : FeedsEvent
 
+  data class OnMarkSourceAsReadClicked(val source: Source) : FeedsEvent
+
   data class OnFeedNameUpdated(val newFeedName: String, val feedId: String) : FeedsEvent
 
   data class OnSourcePinClicked(val source: Source) : FeedsEvent

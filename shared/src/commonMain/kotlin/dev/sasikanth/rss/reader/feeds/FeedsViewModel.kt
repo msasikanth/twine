@@ -32,6 +32,7 @@ import androidx.paging.insertSeparators
 import androidx.paging.map
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
@@ -53,6 +54,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
@@ -95,6 +97,7 @@ class FeedsViewModel(
       is FeedsEvent.OnToggleFeedSelection -> onToggleSourceSelection(event.source)
       is FeedsEvent.OnSourceAddToGroupClicked -> onSourceAddToGroupClicked(event.source)
       is FeedsEvent.OnDeleteSourceClicked -> onDeleteSourceClicked(event.source)
+      is FeedsEvent.OnMarkSourceAsReadClicked -> onMarkSourceAsReadClicked(event.source)
       is FeedsEvent.OnFeedNameUpdated -> onFeedNameUpdated(event.newFeedName, event.feedId)
       is FeedsEvent.OnSourcePinClicked -> onSourcePinClicked(event.source)
       FeedsEvent.ClearSearchQuery -> clearSearchQuery()
@@ -246,6 +249,25 @@ class FeedsViewModel(
 
   private fun onDeleteSourceClicked(source: Source) {
     _state.update { it.copy(sourceToDelete = source, showDeleteConfirmation = true) }
+  }
+
+  private fun onMarkSourceAsReadClicked(source: Source) {
+    viewModelScope.launch {
+      val postsAfter =
+        PostsFilterUtils.postsThresholdTime(
+          postsType = settingsRepository.postsType.first(),
+          dateTime = refreshPolicy.lastRefreshedAtFlow.first(),
+        )
+
+      when (source) {
+        is Feed -> {
+          rssRepository.markPostsInFeedAsRead(feedIds = listOf(source.id), postsAfter = postsAfter)
+        }
+        is FeedGroup -> {
+          rssRepository.markPostsInFeedAsRead(feedIds = source.feedIds, postsAfter = postsAfter)
+        }
+      }
+    }
   }
 
   private fun onCancelSourcesSelection() {
