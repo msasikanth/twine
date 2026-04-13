@@ -30,6 +30,7 @@ import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
 import dev.sasikanth.rss.reader.resources.icons.Check
 import dev.sasikanth.rss.reader.resources.icons.Edit
+import dev.sasikanth.rss.reader.resources.icons.MarkAllAsRead
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.RemoveFeed
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -40,6 +41,7 @@ import twine.shared.generated.resources.actionAddTo
 import twine.shared.generated.resources.actionSelect
 import twine.shared.generated.resources.edit
 import twine.shared.generated.resources.feedOptionRemove
+import twine.shared.generated.resources.markAllAsRead
 
 internal fun LazyListScope.sourcesSearchResults(
   searchResults: LazyPagingItems<Feed>,
@@ -53,6 +55,7 @@ internal fun LazyListScope.sourcesSearchResults(
   onSourceEditClick: (Source) -> Unit,
   onAddToGroupClick: (Source) -> Unit,
   onRemoveSourceClick: (Source) -> Unit,
+  onMarkAsReadClick: (Source) -> Unit,
 ) {
   items(
     count = searchResults.itemCount,
@@ -87,6 +90,16 @@ internal fun LazyListScope.sourcesSearchResults(
             bottom = bottomPadding,
           ),
         dropdownMenuContent = { onDismiss ->
+          DropdownMenuItem(
+            text = stringResource(Res.string.markAllAsRead),
+            leadingIcon = TwineIcons.MarkAllAsRead,
+            enabled = feed.numberOfUnreadPosts > 0,
+            onClick = {
+              onMarkAsReadClick(feed)
+              onDismiss()
+            },
+          )
+
           DropdownMenuItem(
             text = stringResource(Res.string.actionAddTo),
             leadingIcon = TwineIcons.NewGroup,
