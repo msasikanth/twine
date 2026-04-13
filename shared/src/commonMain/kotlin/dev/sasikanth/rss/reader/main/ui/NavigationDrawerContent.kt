@@ -418,6 +418,7 @@ private fun ExpandedDrawerContent(
               },
               onAddToGroupClick = { dispatch(FeedsEvent.OnSourceAddToGroupClicked(it)) },
               onRemoveSourceClick = { dispatch(FeedsEvent.OnDeleteSourceClicked(it)) },
+              onMarkAsReadClick = { dispatch(FeedsEvent.OnMarkSourceAsReadClicked(it)) },
             )
           } else {
             allSources(
@@ -449,6 +450,7 @@ private fun ExpandedDrawerContent(
               },
               onAddToGroupClick = { dispatch(FeedsEvent.OnSourceAddToGroupClicked(it)) },
               onRemoveSourceClick = { dispatch(FeedsEvent.OnDeleteSourceClicked(it)) },
+              onMarkAsReadClick = { dispatch(FeedsEvent.OnMarkSourceAsReadClicked(it)) },
             )
           }
         }
