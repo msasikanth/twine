@@ -11,6 +11,9 @@
 
 package dev.sasikanth.rss.reader
 
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import dev.sasikanth.rss.reader.di.ApplicationComponent
@@ -18,6 +21,7 @@ import dev.sasikanth.rss.reader.di.DesktopComponent
 import dev.sasikanth.rss.reader.di.create
 import dev.sasikanth.rss.reader.utils.ExternalUriHandler
 import java.awt.Desktop
+import java.awt.Toolkit
 
 fun main() {
   val applicationComponent = ApplicationComponent::class.create()
@@ -35,11 +39,18 @@ fun main() {
 
   application {
     Window(onCloseRequest = ::exitApplication, title = "") {
-      desktopComponent.app(
-        { /* Handle theme change if needed */ },
-        { /* No-op on desktop */ },
-        { /* No-op on desktop */ },
-      )
+      val systemDpi = Toolkit.getDefaultToolkit().screenResolution
+      // Standard DPI is 96 on most systems. Scale the density based on system DPI.
+      val scaleFactor = systemDpi / 96f
+      val density = Density(density = scaleFactor, fontScale = 1f)
+
+      CompositionLocalProvider(LocalDensity provides density) {
+        desktopComponent.app(
+          { /* Handle theme change if needed */ },
+          { /* No-op on desktop */ },
+          { /* No-op on desktop */ },
+        )
+      }
     }
   }
 }
