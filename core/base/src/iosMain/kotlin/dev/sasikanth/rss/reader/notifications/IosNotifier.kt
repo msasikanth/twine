@@ -39,12 +39,21 @@ import platform.UserNotifications.UNUserNotificationCenter
 @AppScope
 class IosNotifier : Notifier {
 
-  override fun show(title: String, content: String, notificationId: Int) {
+  override fun show(
+    title: String,
+    content: String,
+    notificationId: Int,
+    groupId: String?,
+    isSummary: Boolean,
+  ) {
     val notificationContent =
       UNMutableNotificationContent().apply {
         setTitle(title)
         setBody(content)
         setSound(UNNotificationSound.defaultSound())
+        if (groupId != null) {
+          setThreadIdentifier(groupId)
+        }
       }
 
     val request =

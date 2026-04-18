@@ -18,7 +18,13 @@
 package dev.sasikanth.rss.reader.notifications
 
 interface Notifier {
-  fun show(title: String, content: String, notificationId: Int = 1)
+  fun show(
+    title: String,
+    content: String,
+    notificationId: Int = 1,
+    groupId: String? = null,
+    isSummary: Boolean = false,
+  )
 
   suspend fun requestPermission(): Boolean
 

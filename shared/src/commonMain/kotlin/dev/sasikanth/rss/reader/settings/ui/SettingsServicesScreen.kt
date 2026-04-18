@@ -16,6 +16,9 @@
  */
 package dev.sasikanth.rss.reader.settings.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -64,6 +67,8 @@ import twine.shared.generated.resources.settingsDownloadFullContentSubtitle
 import twine.shared.generated.resources.settingsDownloadFullContentTitle
 import twine.shared.generated.resources.settingsEnableNotificationsSubtitle
 import twine.shared.generated.resources.settingsEnableNotificationsTitle
+import twine.shared.generated.resources.settingsGroupByFeedNotificationsSubtitle
+import twine.shared.generated.resources.settingsGroupByFeedNotificationsTitle
 import twine.shared.generated.resources.settingsHeaderData
 import twine.shared.generated.resources.settingsHeaderSync
 import twine.shared.generated.resources.settingsServicesAndSync
@@ -278,6 +283,23 @@ private fun SettingsServicesContent(
             checked = state.enableNotifications,
             onValueChanged = { newValue -> dispatch(SettingsEvent.ToggleNotifications(newValue)) },
           )
+        }
+
+        item {
+          AnimatedVisibility(
+            visible = state.enableNotifications,
+            enter = expandVertically(),
+            exit = shrinkVertically(),
+          ) {
+            SettingsSwitchItem(
+              title = stringResource(Res.string.settingsGroupByFeedNotificationsTitle),
+              subtitle = stringResource(Res.string.settingsGroupByFeedNotificationsSubtitle),
+              checked = state.groupByFeedNotifications,
+              onValueChanged = { newValue ->
+                dispatch(SettingsEvent.ToggleGroupByFeedNotifications(newValue))
+              },
+            )
+          }
         }
 
         item { SettingsDivider(horizontalInsets = 24.dp) }

@@ -62,6 +62,7 @@ class SettingsRepository(
   private val themeVariantKey = stringPreferencesKey("pref_theme_variant")
   private val blockImagesKey = booleanPreferencesKey("block_images")
   private val enableNotificationsKey = booleanPreferencesKey("enable_notifications")
+  private val groupByFeedNotificationsKey = booleanPreferencesKey("group_by_feed_notifications")
   private val downloadFullContentKey = booleanPreferencesKey("download_full_content")
   private val lastReviewPromptDateKey = longPreferencesKey("last_review_prompt_date")
   private val installDateKey = longPreferencesKey("install_date")
@@ -150,6 +151,9 @@ class SettingsRepository(
 
   val enableNotifications: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[enableNotificationsKey] ?: false }
+
+  val groupByFeedNotifications: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[groupByFeedNotificationsKey] ?: false }
 
   val downloadFullContent: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[downloadFullContentKey] ?: false }
@@ -287,6 +291,10 @@ class SettingsRepository(
 
   suspend fun toggleNotifications(value: Boolean) {
     dataStore.edit { preferences -> preferences[enableNotificationsKey] = value }
+  }
+
+  suspend fun toggleGroupByFeedNotifications(value: Boolean) {
+    dataStore.edit { preferences -> preferences[groupByFeedNotificationsKey] = value }
   }
 
   suspend fun toggleDownloadFullContent(value: Boolean) {

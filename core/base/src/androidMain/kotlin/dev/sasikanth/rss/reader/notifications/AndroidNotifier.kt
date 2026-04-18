@@ -49,7 +49,13 @@ class AndroidNotifier(private val context: Context) : Notifier {
     notificationManager.createNotificationChannel(channel)
   }
 
-  override fun show(title: String, content: String, notificationId: Int) {
+  override fun show(
+    title: String,
+    content: String,
+    notificationId: Int,
+    groupId: String?,
+    isSummary: Boolean,
+  ) {
     val intent =
       context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -70,6 +76,11 @@ class AndroidNotifier(private val context: Context) : Notifier {
         .setSmallIcon(R.drawable.rss_feed)
         .setContentIntent(pendingIntent)
         .setAutoCancel(true)
+
+    if (groupId != null) {
+      notificationBuilder.setGroup(groupId)
+      notificationBuilder.setGroupSummary(isSummary)
+    }
 
     notificationManager.notify(notificationId, notificationBuilder.build())
   }

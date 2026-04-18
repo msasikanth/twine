@@ -15,20 +15,16 @@
  *
  */
 
-package dev.sasikanth.rss.reader.feed
+package dev.sasikanth.rss.reader.core.model.local
 
 import androidx.compose.runtime.Immutable
-import dev.sasikanth.rss.reader.core.model.local.Feed
 
 @Immutable
-data class FeedState(
-  val feed: Feed?,
-  val dismissSheet: Boolean,
-  val globalNotificationsEnabled: Boolean,
-) {
-
-  companion object {
-    internal val DEFAULT =
-      FeedState(feed = null, dismissSheet = false, globalNotificationsEnabled = false)
-  }
-}
+data class UnreadSinceLastSyncPerFeed(
+  val feedId: String,
+  val feedName: String,
+  val newArticleCount: Long,
+  val feedHomepageLink: String,
+  val feedIcon: String,
+  val showFeedFavIcon: Boolean,
+)

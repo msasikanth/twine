@@ -210,6 +210,7 @@ class SyncRepository(
             lastUpdatedAt = feed.lastUpdatedAt,
             isDeleted = feed.isDeleted,
             hideFromAllFeeds = feed.hideFromAllFeeds,
+            enableNotifications = feed.enableNotifications,
             remoteId = feed.remoteId,
           )
         }
@@ -236,6 +237,7 @@ class SyncRepository(
     isDeleted: Boolean,
     hideFromAllFeeds: Boolean,
     remoteId: String?,
+    enableNotifications: Boolean,
   ): Feed {
     return Feed(
       id = id,
@@ -253,6 +255,7 @@ class SyncRepository(
       pinnedPosition = pinnedPosition,
       showFeedFavIcon = showFeedFavIcon,
       hideFromAllFeeds = hideFromAllFeeds,
+      enableNotifications = enableNotifications,
       isDeleted = isDeleted,
       remoteId = remoteId,
     )

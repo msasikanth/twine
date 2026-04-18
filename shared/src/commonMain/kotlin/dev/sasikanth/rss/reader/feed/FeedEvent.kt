@@ -30,5 +30,7 @@ sealed interface FeedEvent {
 
   data class OnHideFromAllFeedsChanged(val newValue: Boolean, val feedId: String) : FeedEvent
 
+  data class OnEnableNotificationsChanged(val newValue: Boolean, val feedId: String) : FeedEvent
+
   data class OnMarkPostsAsRead(val feedId: String) : FeedEvent
 }

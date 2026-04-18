@@ -50,5 +50,9 @@
       <item quantity="one">You have a unread article today</item>
       <item quantity="other">You have %1$d unread articles today</item>
     </plurals>
+    <plurals name="notification_new_articles_per_feed_title">
+      <item quantity="one">%1$s: 1 new article</item>
+      <item quantity="other">%1$s: %2$d new articles</item>
+    </plurals>
     <string name="notification_new_articles_content">See what\'s new in your feeds.</string>
 </resources>

@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.data.repository
 
 import androidx.paging.PagingSource
 import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
@@ -32,6 +33,7 @@ import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
+import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSyncPerFeed
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.data.database.AppConfigQueries
@@ -116,6 +118,7 @@ class RssRepository(
     feedLastCleanUpAt: Instant? = null,
     alwaysFetchSourceArticle: Boolean = false,
     showWebsiteFavIcon: Boolean = true,
+    enableNotifications: Boolean = true,
     updateFeed: Boolean = true,
   ): String {
     val finalFeedId = feedId ?: nameBasedUuidOf(feedPayload.link).toString()
@@ -134,6 +137,7 @@ class RssRepository(
           alwaysFetchSourceArticle = alwaysFetchSourceArticle,
           createdAt = Clock.System.now(),
           lastUpdatedAt = Clock.System.now(),
+          enableNotifications = enableNotifications,
         )
       }
     }
@@ -850,6 +854,10 @@ class RssRepository(
     feedRepository.updateFeedShowFavIcon(feedId, newValue)
   }
 
+  suspend fun updateFeedEnableNotifications(feedId: String, newValue: Boolean) {
+    feedRepository.updateFeedEnableNotifications(feedId, newValue)
+  }
+
   suspend fun updateFeedHideFromAllFeeds(feedId: String, newValue: Boolean) {
     withContext(dispatchersProvider.databaseWrite) {
       feedQueries.updateHideFromAllFeeds(
@@ -1087,6 +1095,37 @@ class RssRepository(
       .mapToOne(dispatchersProvider.databaseRead)
   }
 
+  fun unreadSinceLastSyncPerFeed(
+    sources: List<String>,
+    postsAfter: Instant,
+    postsUpperBound: Instant,
+  ): Flow<List<UnreadSinceLastSyncPerFeed>> {
+    return postQueries
+      .unreadSinceLastSyncPerFeed(
+        isSourceIdsEmpty = sources.isEmpty(),
+        sourceIds = sources,
+        postsAfter = postsAfter,
+        postsUpperBound = postsUpperBound,
+        mapper = { feedId, feedName, count, feedHomepageLink, feedIcon, showFeedFavIconStr ->
+          UnreadSinceLastSyncPerFeed(
+            feedId = feedId,
+            feedName = feedName,
+            newArticleCount = count,
+            feedHomepageLink = feedHomepageLink,
+            feedIcon = feedIcon,
+            showFeedFavIcon =
+              when (showFeedFavIconStr) {
+                "true" -> true
+                "false" -> false
+                else -> true
+              },
+          )
+        },
+      )
+      .asFlow()
+      .mapToList(dispatchersProvider.databaseRead)
+  }
+
   suspend fun getReadingStatistics(startDate: Instant): Flow<ReadingStatistics> {
     return readingHistoryRepository.getReadingStatistics(startDate)
   }
@@ -1109,6 +1148,7 @@ class RssRepository(
     isDeleted: Boolean,
     hideFromAllFeeds: Boolean,
     remoteId: String?,
+    enableNotifications: Boolean,
   ): Feed {
     return Feed(
       id = id,
@@ -1126,6 +1166,7 @@ class RssRepository(
       pinnedPosition = pinnedPosition,
       showFeedFavIcon = showFeedFavIcon,
       hideFromAllFeeds = hideFromAllFeeds,
+      enableNotifications = enableNotifications,
       isDeleted = isDeleted,
       remoteId = remoteId,
     )
@@ -1147,6 +1188,7 @@ class RssRepository(
     showFeedFavIcon: Boolean,
     hideFromAllFeeds: Boolean,
     isDeleted: Boolean,
+    enableNotifications: Boolean,
     remoteId: String?,
   ): Feed {
     return Feed(
@@ -1164,6 +1206,7 @@ class RssRepository(
       numberOfUnreadPosts = numberOfUnreadPosts,
       showFeedFavIcon = showFeedFavIcon,
       hideFromAllFeeds = hideFromAllFeeds,
+      enableNotifications = enableNotifications,
       isDeleted = isDeleted,
       remoteId = remoteId,
     )
@@ -1184,6 +1227,7 @@ class RssRepository(
     lastUpdatedAt: Instant?,
     refreshInterval: String,
     isDeleted: Boolean,
+    enableNotifications: Boolean,
     remoteId: String?,
     numberOfUnreadPosts: Long,
     showFeedFavIcon: Boolean,
@@ -1208,6 +1252,7 @@ class RssRepository(
       numberOfUnreadPosts = numberOfUnreadPosts,
       showFeedFavIcon = showFeedFavIcon,
       hideFromAllFeeds = hideFromAllFeeds,
+      enableNotifications = enableNotifications,
     )
   }
 
