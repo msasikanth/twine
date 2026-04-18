@@ -16,6 +16,9 @@
  */
 package dev.sasikanth.rss.reader.settings.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -282,8 +285,12 @@ private fun SettingsServicesContent(
           )
         }
 
-        if (state.enableNotifications) {
-          item {
+        item {
+          AnimatedVisibility(
+            visible = state.enableNotifications,
+            enter = expandVertically(),
+            exit = shrinkVertically(),
+          ) {
             SettingsSwitchItem(
               title = stringResource(Res.string.settingsGroupByFeedNotificationsTitle),
               subtitle = stringResource(Res.string.settingsGroupByFeedNotificationsSubtitle),
