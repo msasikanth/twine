@@ -120,6 +120,7 @@ class SettingsViewModel(
         ),
         combine(
           settingsRepository.enableNotifications,
+          settingsRepository.groupByFeedNotifications,
           refreshPolicy.lastSyncedAtFlow,
           userRepository.user(),
           ::SettingsGroup4,
@@ -141,6 +142,7 @@ class SettingsViewModel(
           homeViewMode = group3.homeViewMode,
           blockImages = group3.blockImages,
           enableNotifications = group4.enableNotifications,
+          groupByFeedNotifications = group4.groupByFeedNotifications,
           downloadFullContent = group3.downloadFullContent,
           lastSyncedAt = group4.lastSyncedAt,
           hasCloudServiceSignedIn = group4.user != null,
@@ -166,6 +168,7 @@ class SettingsViewModel(
             homeViewMode = settings.homeViewMode,
             blockImages = settings.blockImages,
             enableNotifications = settings.enableNotifications,
+            groupByFeedNotifications = settings.groupByFeedNotifications,
             downloadFullContent = settings.downloadFullContent,
             lastSyncedAt = settings.lastSyncedAt,
             hasCloudServiceSignedIn = settings.hasCloudServiceSignedIn,
@@ -231,6 +234,7 @@ class SettingsViewModel(
       is SettingsEvent.ChangeHomeViewMode -> changeHomeViewMode(event.homeViewMode)
       is SettingsEvent.ToggleBlockImages -> toggleBlockImages(event.value)
       is SettingsEvent.ToggleNotifications -> toggleNotifications(event.value)
+      is SettingsEvent.ToggleGroupByFeedNotifications -> toggleGroupByFeedNotifications(event.value)
       is SettingsEvent.ToggleDownloadFullContent -> toggleDownloadFullContent(event.value)
       is SettingsEvent.SyncClicked -> syncClicked(event.provider)
       SettingsEvent.TriggerSync -> triggerSync()
@@ -311,6 +315,10 @@ class SettingsViewModel(
         settingsRepository.toggleNotifications(false)
       }
     }
+  }
+
+  private fun toggleGroupByFeedNotifications(value: Boolean) {
+    viewModelScope.launch { settingsRepository.toggleGroupByFeedNotifications(value) }
   }
 
   private fun toggleBlockImages(value: Boolean) {
@@ -452,6 +460,7 @@ private data class Settings(
   val homeViewMode: HomeViewMode,
   val blockImages: Boolean,
   val enableNotifications: Boolean,
+  val groupByFeedNotifications: Boolean,
   val downloadFullContent: Boolean,
   val lastSyncedAt: Instant?,
   val hasCloudServiceSignedIn: Boolean,
@@ -494,6 +503,7 @@ private data class SettingsGroup3(
 
 private data class SettingsGroup4(
   val enableNotifications: Boolean,
+  val groupByFeedNotifications: Boolean,
   val lastSyncedAt: Instant?,
   val user: User?,
 )

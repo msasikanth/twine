@@ -1160,3 +1160,32 @@ SELECT
     ''
   ) AS feedShowFavIconSettings
 FROM unreadPosts;
+
+unreadSinceLastSyncPerFeed:
+WITH unreadPosts AS (
+  SELECT
+    f.id AS feedId,
+    f.name AS feedName,
+    f.homepageLink,
+    f.icon,
+    f.showFeedFavIcon,
+    p.createdAt
+  FROM post p
+  INNER JOIN feed f ON p.sourceId = f.id
+  WHERE ((:isSourceIdsEmpty AND f.hideFromAllFeeds = 0) OR p.sourceId IN :sourceIds)
+    AND (p.flags & 4) = 0
+    AND f.isDeleted = 0
+    AND (p.flags & 2) = 0
+    AND f.enableNotifications = 1
+    AND p.postDate > :postsAfter
+    AND p.createdAt > :postsUpperBound
+)
+SELECT
+  feedId,
+  feedName,
+  COUNT(*) AS count,
+  homepageLink,
+  icon,
+  CASE WHEN showFeedFavIcon IS NULL THEN 'null' WHEN showFeedFavIcon = 1 THEN 'true' ELSE 'false' END AS showFeedFavIconStr
+FROM unreadPosts
+GROUP BY feedId;

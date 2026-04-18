@@ -15,18 +15,16 @@
  *
  */
 
-package dev.sasikanth.rss.reader.notifications
+package dev.sasikanth.rss.reader.core.model.local
 
-interface Notifier {
-  fun show(
-    title: String,
-    content: String,
-    notificationId: Int = 1,
-    groupId: String? = null,
-    isSummary: Boolean = false,
-  )
+import androidx.compose.runtime.Immutable
 
-  suspend fun requestPermission(): Boolean
-
-  fun openSettings()
-}
+@Immutable
+data class UnreadSinceLastSyncPerFeed(
+  val feedId: String,
+  val feedName: String,
+  val newArticleCount: Long,
+  val feedHomepageLink: String,
+  val feedIcon: String,
+  val showFeedFavIcon: Boolean,
+)

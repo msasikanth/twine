@@ -22,6 +22,7 @@ import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.notifications.Notifier
+import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.TimeZone
@@ -39,7 +40,15 @@ class NewArticleNotifier(
   private val notifier: Notifier,
 ) {
 
-  suspend fun notifyIfNewArticles(title: (count: Int) -> String, content: () -> String) {
+  private companion object {
+    private const val NOTIFICATION_GROUP_ID = "twine_new_articles"
+  }
+
+  suspend fun notifyIfNewArticles(
+    title: (count: Int) -> String,
+    content: () -> String,
+    perFeedTitle: (feedName: String, count: Int) -> String,
+  ) {
     if (settingsRepository.enableNotifications.first()) {
       val lastRefreshedAtDateTime = refreshPolicy.lastRefreshedAtFlow.first()
       val now = Clock.System.now()
@@ -48,20 +57,53 @@ class NewArticleNotifier(
       val today = now.toLocalDateTime(tz).date
       val startOfDay = today.atStartOfDayIn(tz)
 
-      val unreadSinceLastSync =
-        rssRepository
-          .unreadSinceLastSync(
-            sources = emptyList(),
-            postsAfter = startOfDay,
-            postsUpperBound = lastRefreshedAtDateTime.toInstant(TimeZone.currentSystemDefault()),
-          )
-          .first()
+      val postsUpperBound = lastRefreshedAtDateTime.toInstant(TimeZone.currentSystemDefault())
 
-      if (unreadSinceLastSync.hasNewArticles) {
-        notifier.show(
-          title = title(unreadSinceLastSync.newArticleCount.toInt()),
-          content = content(),
-        )
+      if (settingsRepository.groupByFeedNotifications.first()) {
+        val unreadSinceLastSyncPerFeed =
+          rssRepository
+            .unreadSinceLastSyncPerFeed(
+              sources = emptyList(),
+              postsAfter = startOfDay,
+              postsUpperBound = postsUpperBound,
+            )
+            .first()
+
+        if (unreadSinceLastSyncPerFeed.isNotEmpty()) {
+          unreadSinceLastSyncPerFeed.forEach { unread ->
+            notifier.show(
+              title = perFeedTitle(unread.feedName, unread.newArticleCount.toInt()),
+              content = content(),
+              notificationId = nameBasedUuidOf(unread.feedId).hashCode(),
+              groupId = NOTIFICATION_GROUP_ID,
+            )
+          }
+
+          val totalNewArticles = unreadSinceLastSyncPerFeed.sumOf { it.newArticleCount }
+          notifier.show(
+            title = title(totalNewArticles.toInt()),
+            content = content(),
+            notificationId = 1,
+            groupId = NOTIFICATION_GROUP_ID,
+            isSummary = true,
+          )
+        }
+      } else {
+        val unreadSinceLastSync =
+          rssRepository
+            .unreadSinceLastSync(
+              sources = emptyList(),
+              postsAfter = startOfDay,
+              postsUpperBound = postsUpperBound,
+            )
+            .first()
+
+        if (unreadSinceLastSync.hasNewArticles) {
+          notifier.show(
+            title = title(unreadSinceLastSync.newArticleCount.toInt()),
+            content = content(),
+          )
+        }
       }
     }
   }

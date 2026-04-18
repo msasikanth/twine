@@ -293,11 +293,11 @@ class FeedRepository(
     lastUpdatedAt: Instant?,
     refreshInterval: String,
     isDeleted: Boolean,
-    hideFromAllFeeds: Boolean,
     enableNotifications: Boolean,
     remoteId: String?,
     numberOfUnreadPosts: Long,
     showFeedFavIcon: Boolean,
+    hideFromAllFeeds: Boolean,
   ): Feed {
     return Feed(
       id = id,

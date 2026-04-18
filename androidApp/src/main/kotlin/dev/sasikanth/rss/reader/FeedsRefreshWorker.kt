@@ -75,6 +75,14 @@ class FeedsRefreshWorker(
             )
           },
           content = { applicationContext.getString(R.string.notification_new_articles_content) },
+          perFeedTitle = { feedName, count ->
+            applicationContext.resources.getQuantityString(
+              R.plurals.notification_new_articles_per_feed_title,
+              count,
+              feedName,
+              count,
+            )
+          },
         )
 
         GlanceWidgetUpdater.update(applicationContext)

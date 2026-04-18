@@ -68,6 +68,8 @@ sealed interface SettingsEvent {
 
   data class ToggleNotifications(val value: Boolean) : SettingsEvent
 
+  data class ToggleGroupByFeedNotifications(val value: Boolean) : SettingsEvent
+
   data class ToggleDownloadFullContent(val value: Boolean) : SettingsEvent
 
   data class SyncClicked(val provider: CloudServiceProvider) : SettingsEvent

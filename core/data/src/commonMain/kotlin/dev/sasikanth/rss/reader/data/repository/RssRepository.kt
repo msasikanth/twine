@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.data.repository
 
 import androidx.paging.PagingSource
 import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
@@ -32,6 +33,7 @@ import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
+import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSyncPerFeed
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.data.database.AppConfigQueries
@@ -1091,6 +1093,37 @@ class RssRepository(
       )
       .asFlow()
       .mapToOne(dispatchersProvider.databaseRead)
+  }
+
+  fun unreadSinceLastSyncPerFeed(
+    sources: List<String>,
+    postsAfter: Instant,
+    postsUpperBound: Instant,
+  ): Flow<List<UnreadSinceLastSyncPerFeed>> {
+    return postQueries
+      .unreadSinceLastSyncPerFeed(
+        isSourceIdsEmpty = sources.isEmpty(),
+        sourceIds = sources,
+        postsAfter = postsAfter,
+        postsUpperBound = postsUpperBound,
+        mapper = { feedId, feedName, count, feedHomepageLink, feedIcon, showFeedFavIconStr ->
+          UnreadSinceLastSyncPerFeed(
+            feedId = feedId,
+            feedName = feedName,
+            newArticleCount = count,
+            feedHomepageLink = feedHomepageLink,
+            feedIcon = feedIcon,
+            showFeedFavIcon =
+              when (showFeedFavIconStr) {
+                "true" -> true
+                "false" -> false
+                else -> true
+              },
+          )
+        },
+      )
+      .asFlow()
+      .mapToList(dispatchersProvider.databaseRead)
   }
 
   suspend fun getReadingStatistics(startDate: Instant): Flow<ReadingStatistics> {
