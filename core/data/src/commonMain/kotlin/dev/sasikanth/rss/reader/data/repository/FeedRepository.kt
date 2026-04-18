@@ -213,8 +213,8 @@ class FeedRepository(
     refreshInterval: String,
     isDeleted: Boolean,
     hideFromAllFeeds: Boolean,
-    enableNotifications: Boolean,
     remoteId: String?,
+    enableNotifications: Boolean,
   ): Feed {
     return Feed(
       id = id,

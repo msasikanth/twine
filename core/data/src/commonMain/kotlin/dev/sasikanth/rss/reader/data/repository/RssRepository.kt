@@ -1147,8 +1147,8 @@ class RssRepository(
     refreshInterval: String,
     isDeleted: Boolean,
     hideFromAllFeeds: Boolean,
-    enableNotifications: Boolean,
     remoteId: String?,
+    enableNotifications: Boolean,
   ): Feed {
     return Feed(
       id = id,
@@ -1227,11 +1227,11 @@ class RssRepository(
     lastUpdatedAt: Instant?,
     refreshInterval: String,
     isDeleted: Boolean,
+    enableNotifications: Boolean,
     remoteId: String?,
     numberOfUnreadPosts: Long,
     showFeedFavIcon: Boolean,
     hideFromAllFeeds: Boolean,
-    enableNotifications: Boolean,
   ): Feed {
     return Feed(
       id = id,

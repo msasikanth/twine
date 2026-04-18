@@ -19,8 +19,8 @@ CREATE TABLE feed(
   refreshInterval TEXT NOT NULL DEFAULT '1h',
   isDeleted INTEGER AS Boolean NOT NULL DEFAULT 0,
   hideFromAllFeeds INTEGER AS Boolean NOT NULL DEFAULT 0,
-  enableNotifications INTEGER AS Boolean NOT NULL DEFAULT 1,
-  remoteId TEXT
+  remoteId TEXT,
+  enableNotifications INTEGER AS Boolean NOT NULL DEFAULT 1
 );
 
 CREATE INDEX feed_link_index ON feed(link);
