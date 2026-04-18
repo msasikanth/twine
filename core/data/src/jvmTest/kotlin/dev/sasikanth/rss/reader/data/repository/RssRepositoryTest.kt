@@ -169,6 +169,7 @@ class RssRepositoryTest {
       alwaysFetchSourceArticle = false,
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+      enableNotifications = true,
     )
 
     val now = Instant.fromEpochMilliseconds(1000000000)
@@ -216,6 +217,7 @@ class RssRepositoryTest {
       alwaysFetchSourceArticle = false,
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+      enableNotifications = true,
     )
 
     val now = Instant.fromEpochMilliseconds(1000000000)
@@ -293,6 +295,7 @@ class RssRepositoryTest {
       alwaysFetchSourceArticle = false,
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+      enableNotifications = true,
     )
 
     val now = Instant.fromEpochMilliseconds(1000000000)
@@ -369,6 +372,7 @@ class RssRepositoryTest {
       alwaysFetchSourceArticle = false,
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+      enableNotifications = true,
     )
 
     insertPost(id = "post-1", sourceId = feedId, postDate = Instant.fromEpochMilliseconds(0))
@@ -402,6 +406,7 @@ class RssRepositoryTest {
       alwaysFetchSourceArticle = false,
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+      enableNotifications = true,
     )
 
     val now = Instant.fromEpochMilliseconds(1000000000)
