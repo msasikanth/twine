@@ -128,6 +128,7 @@
   <string name="delete">Löschen</string>
   <string name="removeFeedDesc">Möchten Sie <b>"%1$s"</b> entfernen?</string>
   <string name="alwaysFetchSourceArticle">Immer vollständige Beiträge in der Leseansicht abrufen</string>
+  <string name="enableNotifications">Enable notifications</string>
   <string name="getFeedInfo">Informationen bekommen</string>
   <string name="newTag">Neuer Tag</string>
   <string name="tags">Tags</string>
@@ -216,6 +217,8 @@
   <string name="screenHome">Startseite</string>
   <string name="settingsEnableNotificationsTitle">Benachrichtigungen aktivieren</string>
   <string name="settingsEnableNotificationsSubtitle">Wenn aktiviert, erhalten Sie Benachrichtigungen, wenn bei der Hintergrundsynchronisierung neue Artikel gefunden werden</string>
+  <string name="settingsGroupByFeedNotificationsTitle">Group notifications by feed</string>
+  <string name="settingsGroupByFeedNotificationsSubtitle">When enabled, you will receive individual notifications for each feed</string>
   <string name="settingsDownloadFullContentTitle">Vollständige Artikel herunterladen</string>
   <string name="settingsDownloadFullContentSubtitle">Wenn aktiviert, versucht die App, während der Synchronisierung vollständige Artikel herunterzuladen.</string>
   <string name="settingsDownloadFullContentWarning">Achtung!: Dies kann die Ladezeiten der Feeds, den Datenverbrauch, den Arbeitsspeicher und den Speicherplatzbedarf erhöhen. Es kann potenziell Ihr Nutzererlebnis beeinträchtigen.</string>
