@@ -118,6 +118,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                         },
                         content: {
                             return NSLocalizedString("notification_new_articles_content", comment: "")
+                        },
+                        perFeedTitle: { feedName, count in
+                            return String.localizedStringWithFormat(NSLocalizedString("notification_new_articles_per_feed_title", comment: ""), feedName, count)
                         }
                     )
                 }
