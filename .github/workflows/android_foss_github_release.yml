@@ -38,6 +38,10 @@ jobs:
           VERSION_CODE=$((2000 + ${{ github.run_number }}))
           echo "ORG_GRADLE_PROJECT_VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
 
+      - name: Create FOSS release metadata
+        run: |
+          echo "{\"version_code\": $ORG_GRADLE_PROJECT_VERSION_CODE, \"version_name\": \"$ORG_GRADLE_PROJECT_VERSION_NAME\"}" > foss_release.json
+
       - name: Decrypt secrets
         run: gpg --batch --yes --quiet --decrypt --passphrase=${{ secrets.KEYSTORE_ENCRYPT_KEY }} --output release/reader.jks release/reader.gpg
 
@@ -48,6 +52,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ github.event.release.tag_name }} androidApp/build/outputs/apk/foss/release/androidApp-foss-release.apk --clobber
+
+      - name: Commit and push FOSS release metadata
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add foss_release.json
+          git commit -m "Update FOSS release metadata: $ORG_GRADLE_PROJECT_VERSION_NAME ($ORG_GRADLE_PROJECT_VERSION_CODE) [skip ci]"
+          git push origin HEAD:${{ github.event.release.target_commitish }}
 
       - name: Clean secrets
         if: always()
