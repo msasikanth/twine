@@ -128,6 +128,7 @@
   <string name="delete">Sil</string>
   <string name="removeFeedDesc"><b>"%1$s"</b> akışını kaldırmak istiyor musunuz?</string>
   <string name="alwaysFetchSourceArticle">Okuyucu görünümünde her zaman makalenin tamamını getir</string>
+  <string name="enableNotifications">Enable notifications</string>
   <string name="getFeedInfo">Bilgi Al</string>
   <string name="newTag">Yeni etiket</string>
   <string name="tags">Etiketler</string>
@@ -216,6 +217,8 @@
   <string name="screenHome">Ana Sayfa</string>
   <string name="settingsEnableNotificationsTitle">Makale bildirimlerini etkinleştir</string>
   <string name="settingsEnableNotificationsSubtitle">Yeni makaleler geldiğinde bildirim alın</string>
+  <string name="settingsGroupByFeedNotificationsTitle">Group notifications by feed</string>
+  <string name="settingsGroupByFeedNotificationsSubtitle">When enabled, you will receive individual notifications for each feed</string>
   <string name="settingsDownloadFullContentTitle">Makalelerin tamamını indir</string>
   <string name="settingsDownloadFullContentSubtitle">Etkinleştirildiğinde, uygulama senkronizasyon sırasında makalelerin tamamını indirmeye çalışır</string>
   <string name="settingsDownloadFullContentWarning">Uyarı: Bu işlem akış yükleme sürelerini, veri kullanımını, bellek ve depolama tüketimini artırabilir. Kullanıcı deneyiminizi olumsuz etkileyebilir.</string>
