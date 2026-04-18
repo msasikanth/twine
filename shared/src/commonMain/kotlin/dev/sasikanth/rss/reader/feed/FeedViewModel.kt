@@ -32,8 +32,10 @@ import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -146,6 +148,9 @@ class FeedViewModel(
           postsUpperBound = dateTime.toInstant(TimeZone.currentSystemDefault()),
         )
         .combine(settingsRepository.enableNotifications) { feed, globalNotificationsEnabled ->
+          feed to globalNotificationsEnabled
+        }
+        .onEach { (feed, globalNotificationsEnabled) ->
           _state.update {
             it.copy(feed = feed, globalNotificationsEnabled = globalNotificationsEnabled)
           }
