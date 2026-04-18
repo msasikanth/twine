@@ -1114,6 +1114,7 @@ WITH unreadPosts AS (
     AND (p.flags & 4) = 0
     AND f.isDeleted = 0
     AND (p.flags & 2) = 0
+    AND f.enableNotifications = 1
     AND p.postDate > :postsAfter
     AND p.createdAt > :postsUpperBound
 )

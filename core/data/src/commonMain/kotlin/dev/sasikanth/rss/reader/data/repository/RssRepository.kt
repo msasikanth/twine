@@ -116,6 +116,7 @@ class RssRepository(
     feedLastCleanUpAt: Instant? = null,
     alwaysFetchSourceArticle: Boolean = false,
     showWebsiteFavIcon: Boolean = true,
+    enableNotifications: Boolean = true,
     updateFeed: Boolean = true,
   ): String {
     val finalFeedId = feedId ?: nameBasedUuidOf(feedPayload.link).toString()
@@ -134,6 +135,7 @@ class RssRepository(
           alwaysFetchSourceArticle = alwaysFetchSourceArticle,
           createdAt = Clock.System.now(),
           lastUpdatedAt = Clock.System.now(),
+          enableNotifications = enableNotifications,
         )
       }
     }
@@ -850,6 +852,10 @@ class RssRepository(
     feedRepository.updateFeedShowFavIcon(feedId, newValue)
   }
 
+  suspend fun updateFeedEnableNotifications(feedId: String, newValue: Boolean) {
+    feedRepository.updateFeedEnableNotifications(feedId, newValue)
+  }
+
   suspend fun updateFeedHideFromAllFeeds(feedId: String, newValue: Boolean) {
     withContext(dispatchersProvider.databaseWrite) {
       feedQueries.updateHideFromAllFeeds(
@@ -1108,6 +1114,7 @@ class RssRepository(
     refreshInterval: String,
     isDeleted: Boolean,
     hideFromAllFeeds: Boolean,
+    enableNotifications: Boolean,
     remoteId: String?,
   ): Feed {
     return Feed(
@@ -1126,6 +1133,7 @@ class RssRepository(
       pinnedPosition = pinnedPosition,
       showFeedFavIcon = showFeedFavIcon,
       hideFromAllFeeds = hideFromAllFeeds,
+      enableNotifications = enableNotifications,
       isDeleted = isDeleted,
       remoteId = remoteId,
     )
@@ -1147,6 +1155,7 @@ class RssRepository(
     showFeedFavIcon: Boolean,
     hideFromAllFeeds: Boolean,
     isDeleted: Boolean,
+    enableNotifications: Boolean,
     remoteId: String?,
   ): Feed {
     return Feed(
@@ -1164,6 +1173,7 @@ class RssRepository(
       numberOfUnreadPosts = numberOfUnreadPosts,
       showFeedFavIcon = showFeedFavIcon,
       hideFromAllFeeds = hideFromAllFeeds,
+      enableNotifications = enableNotifications,
       isDeleted = isDeleted,
       remoteId = remoteId,
     )
@@ -1188,6 +1198,7 @@ class RssRepository(
     numberOfUnreadPosts: Long,
     showFeedFavIcon: Boolean,
     hideFromAllFeeds: Boolean,
+    enableNotifications: Boolean,
   ): Feed {
     return Feed(
       id = id,
@@ -1208,6 +1219,7 @@ class RssRepository(
       numberOfUnreadPosts = numberOfUnreadPosts,
       showFeedFavIcon = showFeedFavIcon,
       hideFromAllFeeds = hideFromAllFeeds,
+      enableNotifications = enableNotifications,
     )
   }
 

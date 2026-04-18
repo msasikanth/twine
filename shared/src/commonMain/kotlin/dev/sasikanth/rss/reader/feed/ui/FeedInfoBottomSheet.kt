@@ -100,6 +100,7 @@ import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.actionDelete
 import twine.shared.generated.resources.alwaysFetchSourceArticle
+import twine.shared.generated.resources.enableNotifications
 import twine.shared.generated.resources.feedOptionCopyLink
 import twine.shared.generated.resources.feedOptionWebsite
 import twine.shared.generated.resources.feedTitleHint
@@ -186,6 +187,15 @@ fun FeedInfoBottomSheet(
             feed = feed,
             onValueChanged = { newValue, feedId ->
               feedViewModel.dispatch(FeedEvent.OnHideFromAllFeedsChanged(newValue, feedId))
+            },
+          )
+
+          Divider(horizontalInsets = HORIZONTAL_PADDING)
+
+          EnableNotificationsSwitch(
+            feed = feed,
+            onValueChanged = { newValue, feedId ->
+              feedViewModel.dispatch(FeedEvent.OnEnableNotificationsChanged(newValue, feedId))
             },
           )
 
@@ -432,6 +442,20 @@ private fun HidePostsFromAllFeedsSwitch(
   FeedOptionSwitch(
     title = stringResource(Res.string.hidePostsFromHome),
     checked = feed.hideFromAllFeeds,
+    modifier = modifier,
+    onValueChanged = { newValue -> onValueChanged(newValue, feed.id) },
+  )
+}
+
+@Composable
+private fun EnableNotificationsSwitch(
+  feed: Feed,
+  modifier: Modifier = Modifier,
+  onValueChanged: (newValue: Boolean, feedId: String) -> Unit,
+) {
+  FeedOptionSwitch(
+    title = stringResource(Res.string.enableNotifications),
+    checked = feed.enableNotifications,
     modifier = modifier,
     onValueChanged = { newValue -> onValueChanged(newValue, feed.id) },
   )

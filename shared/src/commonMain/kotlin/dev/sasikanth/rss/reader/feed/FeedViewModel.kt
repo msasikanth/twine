@@ -73,8 +73,14 @@ class FeedViewModel(
         onShowFeedFavIconChanged(event.newValue, event.feedId)
       is FeedEvent.OnHideFromAllFeedsChanged ->
         onHideFromAllFeedsChanged(event.newValue, event.feedId)
+      is FeedEvent.OnEnableNotificationsChanged ->
+        onEnableNotificationsChanged(event.newValue, event.feedId)
       is FeedEvent.OnMarkPostsAsRead -> onMarkPostsAsRead(event.feedId)
     }
+  }
+
+  private fun onEnableNotificationsChanged(newValue: Boolean, feedId: String) {
+    viewModelScope.launch { rssRepository.updateFeedEnableNotifications(feedId, newValue) }
   }
 
   private fun onHideFromAllFeedsChanged(newValue: Boolean, feedId: String) {

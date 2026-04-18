@@ -19,6 +19,7 @@ CREATE TABLE feed(
   refreshInterval TEXT NOT NULL DEFAULT '1h',
   isDeleted INTEGER AS Boolean NOT NULL DEFAULT 0,
   hideFromAllFeeds INTEGER AS Boolean NOT NULL DEFAULT 0,
+  enableNotifications INTEGER AS Boolean NOT NULL DEFAULT 1,
   remoteId TEXT
 );
 
@@ -30,8 +31,8 @@ CREATE INDEX feed_isDeleted_hideFromAllFeeds_index ON feed(isDeleted, hideFromAl
 CREATE INDEX feed_remoteId_index ON feed(remoteId) WHERE remoteId IS NOT NULL;
 
 upsert:
-INSERT INTO feed(id, name, icon, description, homepageLink, createdAt, link, alwaysFetchSourceArticle, showFeedFavIcon, lastUpdatedAt)
-VALUES (:id, :name, :icon, :description, :homepageLink, :createdAt, :link, :alwaysFetchSourceArticle, :showFeedFavIcon, :lastUpdatedAt)
+INSERT INTO feed(id, name, icon, description, homepageLink, createdAt, link, alwaysFetchSourceArticle, showFeedFavIcon, lastUpdatedAt, enableNotifications)
+VALUES (:id, :name, :icon, :description, :homepageLink, :createdAt, :link, :alwaysFetchSourceArticle, :showFeedFavIcon, :lastUpdatedAt, :enableNotifications)
 ON CONFLICT(id) DO
 UPDATE SET
 icon = excluded.icon,
@@ -40,6 +41,7 @@ description = excluded.description,
 homepageLink = excluded.homepageLink,
 alwaysFetchSourceArticle = excluded.alwaysFetchSourceArticle,
 showFeedFavIcon = excluded.showFeedFavIcon,
+enableNotifications = excluded.enableNotifications,
 isDeleted = 0,
 lastUpdatedAt = :lastUpdatedAt;
 
@@ -76,6 +78,7 @@ SELECT
   f.showFeedFavIcon,
   f.hideFromAllFeeds,
   f.isDeleted,
+  f.enableNotifications,
   f.remoteId
 FROM feed f
 LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :postsUpperBound
@@ -106,6 +109,9 @@ UPDATE feed SET showFeedFavIcon = :showFeedFavIcon WHERE id = :id;
 updateHideFromAllFeeds:
 UPDATE feed SET hideFromAllFeeds = :hideFromAllFeeds, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
 
+updateEnableNotifications:
+UPDATE feed SET enableNotifications = :enableNotifications, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
+
 feedsInGroupPaginatedCount:
 SELECT COUNT(*) FROM feed
 WHERE id IN :feedIds AND isDeleted = 0;
@@ -127,6 +133,7 @@ SELECT
   f.showFeedFavIcon,
   f.hideFromAllFeeds,
   f.isDeleted,
+  f.enableNotifications,
   f.remoteId
 FROM feed f
 WHERE f.id IN :feedIds AND f.isDeleted = 0
@@ -162,8 +169,8 @@ deleteAll:
 DELETE FROM feed;
 
 upsertSyncFeed:
-INSERT INTO feed(id, name, icon, description, link, homepageLink, createdAt, pinnedAt, lastCleanUpAt, alwaysFetchSourceArticle, lastUpdatedAt, isDeleted, hideFromAllFeeds, remoteId)
-VALUES (:id, :name, :icon, :description, :link, :homepageLink, :createdAt, :pinnedAt, :lastCleanUpAt, :alwaysFetchSourceArticle, :lastUpdatedAt, :isDeleted, :hideFromAllFeeds, :remoteId)
+INSERT INTO feed(id, name, icon, description, link, homepageLink, createdAt, pinnedAt, lastCleanUpAt, alwaysFetchSourceArticle, lastUpdatedAt, isDeleted, hideFromAllFeeds, enableNotifications, remoteId)
+VALUES (:id, :name, :icon, :description, :link, :homepageLink, :createdAt, :pinnedAt, :lastCleanUpAt, :alwaysFetchSourceArticle, :lastUpdatedAt, :isDeleted, :hideFromAllFeeds, :enableNotifications, :remoteId)
 ON CONFLICT(id) DO
 UPDATE SET
     name = excluded.name,
@@ -176,5 +183,6 @@ UPDATE SET
     lastUpdatedAt = excluded.lastUpdatedAt,
     isDeleted = excluded.isDeleted,
     hideFromAllFeeds = excluded.hideFromAllFeeds,
+    enableNotifications = excluded.enableNotifications,
     remoteId = excluded.remoteId
 WHERE excluded.lastUpdatedAt > feed.lastUpdatedAt OR feed.lastUpdatedAt IS NULL OR feed.remoteId IS NULL;

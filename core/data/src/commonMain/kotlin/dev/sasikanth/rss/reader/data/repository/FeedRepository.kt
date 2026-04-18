@@ -162,6 +162,16 @@ class FeedRepository(
     }
   }
 
+  suspend fun updateFeedEnableNotifications(feedId: String, newValue: Boolean) {
+    withContext(dispatchersProvider.databaseWrite) {
+      feedQueries.updateEnableNotifications(
+        enableNotifications = newValue,
+        lastUpdatedAt = kotlin.time.Clock.System.now(),
+        id = feedId,
+      )
+    }
+  }
+
   fun feedsInGroup(
     feedIds: List<String>,
     orderBy: FeedsOrderBy = FeedsOrderBy.Latest,
@@ -203,6 +213,7 @@ class FeedRepository(
     refreshInterval: String,
     isDeleted: Boolean,
     hideFromAllFeeds: Boolean,
+    enableNotifications: Boolean,
     remoteId: String?,
   ): Feed {
     return Feed(
@@ -221,6 +232,7 @@ class FeedRepository(
       pinnedPosition = pinnedPosition,
       showFeedFavIcon = showFeedFavIcon,
       hideFromAllFeeds = hideFromAllFeeds,
+      enableNotifications = enableNotifications,
       isDeleted = isDeleted,
       remoteId = remoteId,
     )
@@ -242,6 +254,7 @@ class FeedRepository(
     showFeedFavIcon: Boolean,
     hideFromAllFeeds: Boolean,
     isDeleted: Boolean,
+    enableNotifications: Boolean,
     remoteId: String?,
   ): Feed {
     return Feed(
@@ -259,6 +272,7 @@ class FeedRepository(
       numberOfUnreadPosts = numberOfUnreadPosts,
       showFeedFavIcon = showFeedFavIcon,
       hideFromAllFeeds = hideFromAllFeeds,
+      enableNotifications = enableNotifications,
       isDeleted = isDeleted,
       remoteId = remoteId,
     )
@@ -279,10 +293,11 @@ class FeedRepository(
     lastUpdatedAt: Instant?,
     refreshInterval: String,
     isDeleted: Boolean,
+    hideFromAllFeeds: Boolean,
+    enableNotifications: Boolean,
     remoteId: String?,
     numberOfUnreadPosts: Long,
     showFeedFavIcon: Boolean,
-    hideFromAllFeeds: Boolean,
   ): Feed {
     return Feed(
       id = id,
@@ -303,6 +318,7 @@ class FeedRepository(
       numberOfUnreadPosts = numberOfUnreadPosts,
       showFeedFavIcon = showFeedFavIcon,
       hideFromAllFeeds = hideFromAllFeeds,
+      enableNotifications = enableNotifications,
     )
   }
 }
