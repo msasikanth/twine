@@ -128,6 +128,7 @@
   <string name="delete">Удалить</string>
   <string name="removeFeedDesc">Вы хотите удалить <b>"%1$s"</b>?</string>
   <string name="alwaysFetchSourceArticle">Всегда загружать полные статьи в режиме чтения</string>
+  <string name="enableNotifications">Enable notifications</string>
   <string name="getFeedInfo">Получить информацию</string>
   <string name="newTag">Новый тег</string>
   <string name="tags">Теги</string>
@@ -216,6 +217,8 @@
   <string name="screenHome">Главная</string>
   <string name="settingsEnableNotificationsTitle">Включить уведомления</string>
   <string name="settingsEnableNotificationsSubtitle">Если функция включена, вы будете получать уведомления при обнаружении новых статей во время фоновой синхронизации</string>
+  <string name="settingsGroupByFeedNotificationsTitle">Group notifications by feed</string>
+  <string name="settingsGroupByFeedNotificationsSubtitle">When enabled, you will receive individual notifications for each feed</string>
   <string name="settingsDownloadFullContentTitle">Скачивать полные статьи</string>
   <string name="settingsDownloadFullContentSubtitle">Если функция включена, приложение будет пытаться скачивать полные статьи во время синхронизации.</string>
   <string name="settingsDownloadFullContentWarning">Внимание!: это может увеличить время загрузки фида, использование данных, потребление памяти и хранилища. Это может потенциально повлиять на ваш пользовательский опыт.</string>
