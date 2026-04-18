@@ -128,6 +128,7 @@
   <string name="delete">Delete</string>
   <string name="removeFeedDesc">Do you want to remove <b>"%1$s"</b>?</string>
   <string name="alwaysFetchSourceArticle">Always fetch full articles in reader view</string>
+  <string name="enableNotifications">Enable notifications</string>
   <string name="getFeedInfo">Get Info</string>
   <string name="newTag">New tag</string>
   <string name="tags">Tags</string>
@@ -216,6 +217,8 @@
   <string name="screenHome">होम</string>
   <string name="settingsEnableNotificationsTitle">सूचनाएं सक्षम करें</string>
   <string name="settingsEnableNotificationsSubtitle">चालू होने पर, बैकग्राउंड सिंक के दौरान नए लेख मिलने पर आपको सूचनाएं मिलेंगी</string>
+  <string name="settingsGroupByFeedNotificationsTitle">Group notifications by feed</string>
+  <string name="settingsGroupByFeedNotificationsSubtitle">When enabled, you will receive individual notifications for each feed</string>
   <string name="settingsDownloadFullContentTitle">पूरे लेख डाउनलोड करें</string>
   <string name="settingsDownloadFullContentSubtitle">सक्षम होने पर, ऐप सिंक के दौरान पूरे लेख डाउनलोड करने की कोशिश करेगा।</string>
   <string name="settingsDownloadFullContentWarning">चेतावनी!: इससे फीड लोड होने का समय, डेटा उपयोग, मेमोरी और स्टोरेज की खपत बढ़ सकती है। यह आपके उपयोगकर्ता अनुभव को संभावित रूप से प्रभावित कर सकता है।</string>
