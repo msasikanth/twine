@@ -128,6 +128,7 @@
   <string name="delete">删除</string>
   <string name="removeFeedDesc">你想移除 <b>%1$s</b> 吗？</string>
   <string name="alwaysFetchSourceArticle">总是在阅读器视图中获取全文</string>
+  <string name="enableNotifications">Enable notifications</string>
   <string name="getFeedInfo">获取信息</string>
   <string name="newTag">新建标签</string>
   <string name="tags">标签</string>
@@ -216,6 +217,8 @@
   <string name="screenHome">首页</string>
   <string name="settingsEnableNotificationsTitle">启用通知</string>
   <string name="settingsEnableNotificationsSubtitle">开启后，后台同步发现新文章时您将收到通知</string>
+  <string name="settingsGroupByFeedNotificationsTitle">Group notifications by feed</string>
+  <string name="settingsGroupByFeedNotificationsSubtitle">When enabled, you will receive individual notifications for each feed</string>
   <string name="settingsDownloadFullContentTitle">下载完整文章</string>
   <string name="settingsDownloadFullContentSubtitle">启用后，应用将在同步期间尝试下载完整文章。</string>
   <string name="settingsDownloadFullContentWarning">警告！：这可能会增加订阅源加载时间、数据使用量、内存和存储消耗。它可能会影响您的用户体验。</string>
