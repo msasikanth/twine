@@ -128,6 +128,7 @@
   <string name="delete">Delete</string>
   <string name="removeFeedDesc">Do you want to remove <b>"%1$s"</b>?</string>
   <string name="alwaysFetchSourceArticle">Always fetch full articles in reader view</string>
+  <string name="enableNotifications">Enable notifications</string>
   <string name="getFeedInfo">Get Info</string>
   <string name="newTag">New tag</string>
   <string name="tags">Tags</string>
@@ -216,6 +217,8 @@
   <string name="screenHome">Accueil</string>
   <string name="settingsEnableNotificationsTitle">Activer les notifications</string>
   <string name="settingsEnableNotificationsSubtitle">Une fois activé, vous recevrez des notifications lorsque de nouveaux articles seront trouvés lors de la synchronisation en arrière-plan</string>
+  <string name="settingsGroupByFeedNotificationsTitle">Group notifications by feed</string>
+  <string name="settingsGroupByFeedNotificationsSubtitle">When enabled, you will receive individual notifications for each feed</string>
   <string name="settingsDownloadFullContentTitle">Télécharger les articles complets</string>
   <string name="settingsDownloadFullContentSubtitle">Une fois activé, l'application tentera de télécharger les articles complets pendant la synchronisation.</string>
   <string name="settingsDownloadFullContentWarning">Attention ! : cela peut augmenter le temps de chargement des flux, l'utilisation des données, la consommation de mémoire et de stockage. Cela peut potentiellement affecter votre expérience utilisateur.</string>
