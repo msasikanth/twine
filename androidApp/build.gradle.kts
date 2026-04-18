@@ -99,7 +99,12 @@ android {
     debug { applicationIdSuffix = ".debug" }
   }
 
-  packaging { resources { excludes.add("/META-INF/{AL2.0,LGPL2.1}") } }
+  packaging {
+    resources { excludes.add("/META-INF/{AL2.0,LGPL2.1}") }
+    if (project.findProperty("twine.isFoss")?.toString()?.toBoolean() == true) {
+      jniLibs { keepDebugSymbols.add("**/*.so") }
+    }
+  }
 
   buildFeatures { buildConfig = true }
 
