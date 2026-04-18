@@ -13,7 +13,8 @@
  */
 var JUNK_SELECTORS = [
   ".share", ".social", ".ad", ".promo", ".related", ".newsletter-widget",
-  "[id*='share']", "[class*='share']", ".sharedaddy", ".jp-relatedposts"
+  ".sharedaddy", ".jp-relatedposts", ".share-links", ".share-tools",
+  ".social-share", ".share-container"
 ].join(",");
 
 
@@ -71,12 +72,12 @@ function cleanContent(doc) {
     ".subscription-widget-container",
     ".sub-button-container",
     ".newsletter-widget",
-    "[id*='share']",
-    "[class*='share']",
-    "[id*='social']",
-    "[class*='social']",
     ".sharedaddy",
     ".jp-relatedposts",
+    ".share-links",
+    ".share-tools",
+    ".social-share",
+    ".share-container",
   ];
 
   for (var i = 0; i < junkSelectors.length; i++) {
