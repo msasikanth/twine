@@ -60,11 +60,7 @@ class SyncRepository(
 
   suspend fun updatePostRemoteId(remoteId: String, postId: String) {
     withContext(dispatchersProvider.databaseWrite) {
-      postQueries.updatePostRemoteId(
-        remoteId = remoteId,
-        updatedAt = Clock.System.now(),
-        id = postId,
-      )
+      postQueries.updatePostRemoteId(remoteId = remoteId, id = postId)
     }
   }
 

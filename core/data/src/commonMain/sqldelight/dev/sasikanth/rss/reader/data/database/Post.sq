@@ -951,7 +951,7 @@ WHERE
   (post.createdAt < :postCreatedAt OR (post.createdAt = :postCreatedAt AND post.postDate < :postDate));
 
 updatePostRemoteId:
-UPDATE post SET remoteId = :remoteId, updatedAt = :updatedAt, syncedAt = :updatedAt WHERE id = :id;
+UPDATE post SET remoteId = :remoteId WHERE id = :id;
 
 updatePostSyncedAt:
 UPDATE post SET syncedAt = :syncedAt WHERE id = :id;
