@@ -1,0 +1,16 @@
+CREATE TRIGGER IF NOT EXISTS inherit_flags_on_insert
+AFTER INSERT ON post
+FOR EACH ROW
+BEGIN
+  UPDATE post
+  SET flags = (
+    SELECT flags FROM post
+    WHERE id = new.id AND sourceId != new.sourceId
+    LIMIT 1
+  )
+  WHERE id = new.id AND sourceId = new.sourceId
+  AND EXISTS (
+    SELECT 1 FROM post
+    WHERE id = new.id AND sourceId != new.sourceId
+  );
+END;

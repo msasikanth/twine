@@ -97,6 +97,23 @@ BEGIN
   UPDATE post SET flags = flags & ~4 WHERE id = new.id;
 END;
 
+CREATE TRIGGER inherit_flags_on_insert
+AFTER INSERT ON post
+FOR EACH ROW
+BEGIN
+  UPDATE post
+  SET flags = (
+    SELECT flags FROM post
+    WHERE id = new.id AND sourceId != new.sourceId
+    LIMIT 1
+  )
+  WHERE id = new.id AND sourceId = new.sourceId
+  AND EXISTS (
+    SELECT 1 FROM post
+    WHERE id = new.id AND sourceId != new.sourceId
+  );
+END;
+
 upsert:
 INSERT INTO post(id, sourceId, title, description, imageUrl, audioUrl, postDate, createdAt, updatedAt, syncedAt, link, commentsLink, remoteId)
 VALUES (:id,  :sourceId, :title, :description, :imageUrl, :audioUrl, :postDate,  :createdAt, :updatedAt, :syncedAt, :link, :commentsLink, :remoteId)
