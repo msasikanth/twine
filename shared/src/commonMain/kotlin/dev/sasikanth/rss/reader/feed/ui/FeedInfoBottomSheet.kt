@@ -194,6 +194,7 @@ fun FeedInfoBottomSheet(
 
           EnableNotificationsSwitch(
             feed = feed,
+            globalNotificationsEnabled = state.globalNotificationsEnabled,
             onValueChanged = { newValue, feedId ->
               feedViewModel.dispatch(FeedEvent.OnEnableNotificationsChanged(newValue, feedId))
             },
@@ -450,12 +451,13 @@ private fun HidePostsFromAllFeedsSwitch(
 @Composable
 private fun EnableNotificationsSwitch(
   feed: Feed,
+  globalNotificationsEnabled: Boolean,
   modifier: Modifier = Modifier,
   onValueChanged: (newValue: Boolean, feedId: String) -> Unit,
 ) {
   FeedOptionSwitch(
     title = stringResource(Res.string.enableNotifications),
-    checked = feed.enableNotifications,
+    checked = globalNotificationsEnabled && feed.enableNotifications,
     modifier = modifier,
     onValueChanged = { newValue -> onValueChanged(newValue, feed.id) },
   )

@@ -21,9 +21,14 @@ import androidx.compose.runtime.Immutable
 import dev.sasikanth.rss.reader.core.model.local.Feed
 
 @Immutable
-data class FeedState(val feed: Feed?, val dismissSheet: Boolean) {
+data class FeedState(
+  val feed: Feed?,
+  val dismissSheet: Boolean,
+  val globalNotificationsEnabled: Boolean,
+) {
 
   companion object {
-    internal val DEFAULT = FeedState(feed = null, dismissSheet = false)
+    internal val DEFAULT =
+      FeedState(feed = null, dismissSheet = false, globalNotificationsEnabled = false)
   }
 }
