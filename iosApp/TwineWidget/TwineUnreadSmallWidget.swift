@@ -37,76 +37,79 @@ struct TwineUnreadSmallWidgetEntryView: View {
     }
 
     func unreadPostView(post: UIWidgetPost, index: Int) -> some View {
-        ZStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 0) {
-                if let postImage = post.postImage {
-                    // Image content
-                    ZStack {
-                        Color.gray.opacity(0.25)
-                        
-                        Image(uiImage: postImage)
-                            .resizable()
-                            .scaledToFill()
+        GeometryReader { geometry in
+            ZStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 0) {
+                    if let postImage = post.postImage {
+                        // Image content
+                        ZStack {
+                            Color.gray.opacity(0.25)
+
+                            Image(uiImage: postImage)
+                                .resizable()
+                                .scaledToFill()
+                        }
+                        .frame(width: geometry.size.width)
+                        .frame(minHeight: 84, maxHeight: 174)
+                        .clipped()
+                        .clipShape(ContainerRelativeShape())
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(
+                                post.title
+                                    ?? String(localized: "unread_widget_no_title")
+                            )
+                            .font(.custom("Outfit-Medium", size: 12))
+                            .lineLimit(2...2)
+
+                            footer(post: post, index: index)
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 8)
+                    } else {
+                        // No image content
+                        Spacer()
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(
+                                post.title
+                                    ?? String(localized: "unread_widget_no_title")
+                            )
+                            .font(.custom("Outfit-Medium", size: 16))
+                            .lineLimit(2...3)
+
+                            footer(post: post, index: index)
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 8)
                     }
-                    .frame(maxWidth: .infinity, minHeight: 84, maxHeight: 174)
-                    .clipped()
-                    .clipShape(ContainerRelativeShape())
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(
-                            post.title
-                                ?? String(localized: "unread_widget_no_title")
-                        )
-                        .font(.custom("Outfit-Medium", size: 12))
-                        .lineLimit(2...2)
-
-                        footer(post: post, index: index)
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 8)
-                } else {
-                    // No image content
-                    Spacer()
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(
-                            post.title
-                                ?? String(localized: "unread_widget_no_title")
-                        )
-                        .font(.custom("Outfit-Medium", size: 16))
-                        .lineLimit(2...3)
-
-                        footer(post: post, index: index)
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 8)
                 }
-            }
-            .frame(maxHeight: .infinity)
-            .widgetURL(createDeepLink(postIndex: index, postId: post.id))
+                .frame(maxHeight: .infinity)
+                .widgetURL(createDeepLink(postIndex: index, postId: post.id))
 
-            // Navigation Buttons
-            HStack {
-                if index > 0 {
-                    Button(intent: PreviousPostIntent()) {
-                        navigationIcon(name: "chevron.left")
+                // Navigation Buttons
+                HStack {
+                    if index > 0 {
+                        Button(intent: PreviousPostIntent()) {
+                            navigationIcon(name: "chevron.left")
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        Spacer()
+                            .frame(width: 48, height: 48)
                     }
-                    .buttonStyle(.plain)
-                } else {
+
                     Spacer()
-                        .frame(width: 48, height: 48)
-                }
 
-                Spacer()
-
-                if index < entry.posts.count - 1 {
-                    Button(intent: NextPostIntent()) {
-                        navigationIcon(name: "chevron.right")
+                    if index < entry.posts.count - 1 {
+                        Button(intent: NextPostIntent()) {
+                            navigationIcon(name: "chevron.right")
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        Spacer()
+                            .frame(width: 48, height: 48)
                     }
-                    .buttonStyle(.plain)
-                } else {
-                    Spacer()
-                        .frame(width: 48, height: 48)
                 }
             }
         }
