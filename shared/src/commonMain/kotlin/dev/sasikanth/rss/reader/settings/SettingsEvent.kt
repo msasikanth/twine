@@ -20,6 +20,7 @@ import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.opml.OpmlFeed
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
+import dev.sasikanth.rss.reader.data.repository.AudioMarkAsReadThreshold
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
@@ -57,6 +58,9 @@ sealed interface SettingsEvent {
   data class ToggleAmoled(val value: Boolean) : SettingsEvent
 
   data class MarkAsReadOnChanged(val newMarkAsReadOn: MarkAsReadOn) : SettingsEvent
+
+  data class AudioMarkAsReadThresholdChanged(val threshold: AudioMarkAsReadThreshold) :
+    SettingsEvent
 
   data object LoadSubscriptionStatus : SettingsEvent
 
