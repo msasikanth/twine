@@ -223,8 +223,15 @@ class RssRepository(
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
+    sessionPostIds: List<String> = emptyList(),
   ): Long? {
-    return postRepository.allPostsCount(activeSourceIds, unreadOnly, after, postsUpperBound)
+    return postRepository.allPostsCount(
+      activeSourceIds,
+      unreadOnly,
+      after,
+      postsUpperBound,
+      sessionPostIds,
+    )
   }
 
   fun allPosts(
@@ -233,6 +240,7 @@ class RssRepository(
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
+    sessionPostIds: List<String> = emptyList(),
   ): PagingSource<Int, ResolvedPost> {
     return postRepository.allPosts(
       activeSourceIds,
@@ -240,6 +248,7 @@ class RssRepository(
       unreadOnly,
       after,
       postsUpperBound,
+      sessionPostIds,
     )
   }
 
@@ -251,6 +260,7 @@ class RssRepository(
     featuredPostsAfter: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     limit: Long = Constants.NUMBER_OF_FEATURED_POSTS,
+    sessionPostIds: List<String> = emptyList(),
   ): Flow<List<ResolvedPost>> {
     return postRepository.featuredPosts(
       activeSourceIds,
@@ -260,6 +270,7 @@ class RssRepository(
       featuredPostsAfter,
       postsUpperBound,
       limit,
+      sessionPostIds,
     )
   }
 
@@ -271,6 +282,7 @@ class RssRepository(
     featuredPostsAfter: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     limit: Long = Constants.NUMBER_OF_FEATURED_POSTS,
+    sessionPostIds: List<String> = emptyList(),
   ): List<ResolvedPost> {
     return postRepository.featuredPostsBlocking(
       activeSourceIds,
@@ -280,6 +292,7 @@ class RssRepository(
       featuredPostsAfter,
       postsUpperBound,
       limit,
+      sessionPostIds,
     )
   }
 
@@ -291,6 +304,7 @@ class RssRepository(
     featuredPostsAfter: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     numberOfFeaturedPosts: Long = Constants.NUMBER_OF_FEATURED_POSTS,
+    sessionPostIds: List<String> = emptyList(),
   ): PagingSource<Int, ResolvedPost> {
     return postRepository.nonFeaturedPosts(
       activeSourceIds,
@@ -300,6 +314,7 @@ class RssRepository(
       featuredPostsAfter,
       postsUpperBound,
       numberOfFeaturedPosts,
+      sessionPostIds,
     )
   }
 
@@ -488,6 +503,7 @@ class RssRepository(
     sourceIds: List<String> = emptyList(),
     onlyBookmarked: Boolean = false,
     onlyUnread: Boolean = false,
+    sessionPostIds: List<String> = emptyList(),
   ): PagingSource<Int, ResolvedPost> {
     val sanitizedSearchQuery = sanitizeSearchQuery(searchQuery)
 
@@ -499,6 +515,7 @@ class RssRepository(
           sourceIds = sourceIds,
           onlyBookmarked = if (onlyBookmarked) 1L else 0L,
           onlyUnread = if (onlyUnread) 1L else 0L,
+          sessionPostIds = sessionPostIds,
         ),
       transacter = postSearchFTSQueries,
       context = dispatchersProvider.databaseRead,
@@ -512,6 +529,7 @@ class RssRepository(
           onlyUnread = if (onlyUnread) 1L else 0L,
           limit = limit,
           offset = offset,
+          sessionPostIds = sessionPostIds,
           mapper = {
             id: String,
             sourceId: String,

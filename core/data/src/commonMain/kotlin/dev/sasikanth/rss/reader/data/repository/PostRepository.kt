@@ -51,6 +51,7 @@ class PostRepository(
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
+    sessionPostIds: List<String> = emptyList(),
   ): Long? {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries
@@ -60,6 +61,7 @@ class PostRepository(
           unreadOnly = unreadOnly,
           postsAfter = after,
           postsUpperBound = postsUpperBound,
+          sessionPostIds = sessionPostIds,
         )
         .executeAsOneOrNull()
     }
@@ -71,6 +73,7 @@ class PostRepository(
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
+    sessionPostIds: List<String> = emptyList(),
   ): PagingSource<Int, ResolvedPost> {
     return QueryPagingSource(
       countQuery =
@@ -80,6 +83,7 @@ class PostRepository(
           unreadOnly = unreadOnly,
           postsAfter = after,
           postsUpperBound = postsUpperBound,
+          sessionPostIds = sessionPostIds,
         ),
       transacter = postQueries,
       context = dispatchersProvider.databaseRead,
@@ -94,6 +98,7 @@ class PostRepository(
               unreadOnly = unreadOnly,
               limit = limit,
               offset = offset,
+              sessionPostIds = sessionPostIds,
               mapper = ::mapToResolvedPost,
             )
           PostsSortOrder.Oldest ->
@@ -105,6 +110,7 @@ class PostRepository(
               unreadOnly = unreadOnly,
               limit = limit,
               offset = offset,
+              sessionPostIds = sessionPostIds,
               mapper = ::mapToResolvedPost,
             )
           PostsSortOrder.AddedLatest ->
@@ -116,6 +122,7 @@ class PostRepository(
               unreadOnly = unreadOnly,
               limit = limit,
               offset = offset,
+              sessionPostIds = sessionPostIds,
               mapper = ::mapToResolvedPost,
             )
           PostsSortOrder.AddedOldest ->
@@ -127,6 +134,7 @@ class PostRepository(
               unreadOnly = unreadOnly,
               limit = limit,
               offset = offset,
+              sessionPostIds = sessionPostIds,
               mapper = ::mapToResolvedPost,
             )
         }
@@ -142,6 +150,7 @@ class PostRepository(
     featuredPostsAfter: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     limit: Long = Constants.NUMBER_OF_FEATURED_POSTS,
+    sessionPostIds: List<String> = emptyList(),
   ): Flow<List<ResolvedPost>> {
     val query =
       when (postsSortOrder) {
@@ -154,6 +163,7 @@ class PostRepository(
             sourceIds = activeSourceIds,
             unreadOnly = unreadOnly,
             limit = limit,
+            sessionPostIds = sessionPostIds,
             mapper = ::mapToResolvedPost,
           )
         PostsSortOrder.Oldest ->
@@ -165,6 +175,7 @@ class PostRepository(
             sourceIds = activeSourceIds,
             unreadOnly = unreadOnly,
             limit = limit,
+            sessionPostIds = sessionPostIds,
             mapper = ::mapToResolvedPost,
           )
         PostsSortOrder.AddedLatest ->
@@ -176,6 +187,7 @@ class PostRepository(
             sourceIds = activeSourceIds,
             unreadOnly = unreadOnly,
             limit = limit,
+            sessionPostIds = sessionPostIds,
             mapper = ::mapToResolvedPost,
           )
         PostsSortOrder.AddedOldest ->
@@ -187,6 +199,7 @@ class PostRepository(
             sourceIds = activeSourceIds,
             unreadOnly = unreadOnly,
             limit = limit,
+            sessionPostIds = sessionPostIds,
             mapper = ::mapToResolvedPost,
           )
       }
@@ -202,6 +215,7 @@ class PostRepository(
     featuredPostsAfter: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     limit: Long = Constants.NUMBER_OF_FEATURED_POSTS,
+    sessionPostIds: List<String> = emptyList(),
   ): List<ResolvedPost> {
     return withContext(dispatchersProvider.databaseRead) {
       val query =
@@ -215,6 +229,7 @@ class PostRepository(
               sourceIds = activeSourceIds,
               unreadOnly = unreadOnly,
               limit = limit,
+              sessionPostIds = sessionPostIds,
               mapper = ::mapToResolvedPost,
             )
           PostsSortOrder.Oldest ->
@@ -226,6 +241,7 @@ class PostRepository(
               sourceIds = activeSourceIds,
               unreadOnly = unreadOnly,
               limit = limit,
+              sessionPostIds = sessionPostIds,
               mapper = ::mapToResolvedPost,
             )
           PostsSortOrder.AddedLatest ->
@@ -237,6 +253,7 @@ class PostRepository(
               sourceIds = activeSourceIds,
               unreadOnly = unreadOnly,
               limit = limit,
+              sessionPostIds = sessionPostIds,
               mapper = ::mapToResolvedPost,
             )
           PostsSortOrder.AddedOldest ->
@@ -248,6 +265,7 @@ class PostRepository(
               sourceIds = activeSourceIds,
               unreadOnly = unreadOnly,
               limit = limit,
+              sessionPostIds = sessionPostIds,
               mapper = ::mapToResolvedPost,
             )
         }
@@ -264,6 +282,7 @@ class PostRepository(
     featuredPostsAfter: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     numberOfFeaturedPosts: Long = Constants.NUMBER_OF_FEATURED_POSTS,
+    sessionPostIds: List<String> = emptyList(),
   ): PagingSource<Int, ResolvedPost> {
     return QueryPagingSource(
       countQuery =
@@ -276,6 +295,7 @@ class PostRepository(
           unreadOnly = unreadOnly,
           numberOfFeaturedPosts = numberOfFeaturedPosts,
           postsSortOrder = postsSortOrder.name,
+          sessionPostIds = sessionPostIds,
         ),
       transacter = postQueries,
       context = dispatchersProvider.databaseRead,
@@ -292,6 +312,7 @@ class PostRepository(
               numberOfFeaturedPosts = numberOfFeaturedPosts,
               limit = limit,
               offset = offset,
+              sessionPostIds = sessionPostIds,
               mapper = ::mapToResolvedPost,
             )
           PostsSortOrder.Oldest ->
@@ -305,6 +326,7 @@ class PostRepository(
               numberOfFeaturedPosts = numberOfFeaturedPosts,
               limit = limit,
               offset = offset,
+              sessionPostIds = sessionPostIds,
               mapper = ::mapToResolvedPost,
             )
           PostsSortOrder.AddedLatest ->
@@ -318,6 +340,7 @@ class PostRepository(
               numberOfFeaturedPosts = numberOfFeaturedPosts,
               limit = limit,
               offset = offset,
+              sessionPostIds = sessionPostIds,
               mapper = ::mapToResolvedPost,
             )
           PostsSortOrder.AddedOldest ->
@@ -331,6 +354,7 @@ class PostRepository(
               numberOfFeaturedPosts = numberOfFeaturedPosts,
               limit = limit,
               offset = offset,
+              sessionPostIds = sessionPostIds,
               mapper = ::mapToResolvedPost,
             )
         }
@@ -346,6 +370,7 @@ class PostRepository(
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
+    sessionPostIds: List<String> = emptyList(),
   ): Int? {
     return withContext(dispatchersProvider.databaseRead) {
       val post =
@@ -367,6 +392,7 @@ class PostRepository(
               postsUpperBound = postsUpperBound,
               postDate = post.postDate,
               postCreatedAt = post.createdAt,
+              sessionPostIds = sessionPostIds,
             )
           PostsSortOrder.Oldest ->
             postQueries.postPositionOldest(
@@ -378,6 +404,7 @@ class PostRepository(
               postsUpperBound = postsUpperBound,
               postDate = post.postDate,
               postCreatedAt = post.createdAt,
+              sessionPostIds = sessionPostIds,
             )
           PostsSortOrder.AddedLatest ->
             postQueries.postPositionAddedLatest(
@@ -389,6 +416,7 @@ class PostRepository(
               postsUpperBound = postsUpperBound,
               postDate = post.postDate,
               postCreatedAt = post.createdAt,
+              sessionPostIds = sessionPostIds,
             )
           PostsSortOrder.AddedOldest ->
             postQueries.postPositionAddedOldest(
@@ -400,6 +428,7 @@ class PostRepository(
               postsUpperBound = postsUpperBound,
               postDate = post.postDate,
               postCreatedAt = post.createdAt,
+              sessionPostIds = sessionPostIds,
             )
         }
 
@@ -417,6 +446,7 @@ class PostRepository(
     featuredPostsAfter: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     numberOfFeaturedPosts: Long = Constants.NUMBER_OF_FEATURED_POSTS,
+    sessionPostIds: List<String> = emptyList(),
   ): Int? {
     return withContext(dispatchersProvider.databaseRead) {
       val post =
@@ -440,6 +470,7 @@ class PostRepository(
               unreadOnly = unreadOnly,
               postDate = post.postDate,
               postCreatedAt = post.createdAt,
+              sessionPostIds = sessionPostIds,
             )
           PostsSortOrder.Oldest ->
             postQueries.nonFeaturedPostPositionOldest(
@@ -453,6 +484,7 @@ class PostRepository(
               unreadOnly = unreadOnly,
               postDate = post.postDate,
               postCreatedAt = post.createdAt,
+              sessionPostIds = sessionPostIds,
             )
           PostsSortOrder.AddedLatest ->
             postQueries.nonFeaturedPostPositionAddedLatest(
@@ -466,6 +498,7 @@ class PostRepository(
               unreadOnly = unreadOnly,
               postDate = post.postDate,
               postCreatedAt = post.createdAt,
+              sessionPostIds = sessionPostIds,
             )
           PostsSortOrder.AddedOldest ->
             postQueries.nonFeaturedPostPositionAddedOldest(
@@ -479,6 +512,7 @@ class PostRepository(
               unreadOnly = unreadOnly,
               postDate = post.postDate,
               postCreatedAt = post.createdAt,
+              sessionPostIds = sessionPostIds,
             )
         }
 

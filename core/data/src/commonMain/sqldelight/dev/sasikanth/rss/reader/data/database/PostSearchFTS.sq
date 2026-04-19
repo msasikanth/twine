@@ -33,7 +33,11 @@ WHERE ps.post_search MATCH :searchQuery
   AND (p.flags & 4) == 0
   AND (:isSourceIdsEmpty OR p.sourceId IN :sourceIds)
   AND (:onlyBookmarked = 0 OR (p.flags & 1) != 0)
-  AND (:onlyUnread = 0 OR (p.flags & 2) == 0);
+  AND (
+    :onlyUnread = 0 
+    OR (p.flags & 2) == 0 
+    OR p.id IN :sessionPostIds
+  );
 
 search:
 SELECT
@@ -67,7 +71,11 @@ WHERE post_search MATCH :searchQuery
   AND (post.flags & 4) == 0
   AND (:isSourceIdsEmpty OR post.sourceId IN :sourceIds)
   AND (:onlyBookmarked = 0 OR (post.flags & 1) != 0)
-  AND (:onlyUnread = 0 OR (post.flags & 2) == 0)
+  AND (
+    :onlyUnread = 0 
+    OR (post.flags & 2) == 0 
+    OR post.id IN :sessionPostIds
+  )
 ORDER BY
   CASE WHEN :sortOrder = 'oldest' THEN post.postDate END ASC,
   CASE WHEN :sortOrder = 'newest' THEN post.postDate END DESC

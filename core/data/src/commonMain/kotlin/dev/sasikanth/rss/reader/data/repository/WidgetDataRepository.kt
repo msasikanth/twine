@@ -59,6 +59,7 @@ class WidgetDataRepository(
       .widgetUnreadPosts(
         numberOfPosts = numberOfPosts.toLong(),
         offset = 0,
+        sessionPostIds = emptyList(),
         mapper = {
           id: String,
           _: String,
@@ -104,6 +105,7 @@ class WidgetDataRepository(
         .widgetUnreadPosts(
           numberOfPosts = numberOfPosts.toLong(),
           offset = 0,
+          sessionPostIds = emptyList(),
           mapper = {
             id: String,
             _: String,
@@ -143,15 +145,18 @@ class WidgetDataRepository(
     }
   }
 
-  fun unreadPostsPager(): PagingSource<Int, ResolvedPost> {
+  fun unreadPostsPager(
+    sessionPostIds: List<String> = emptyList()
+  ): PagingSource<Int, ResolvedPost> {
     return QueryPagingSource(
-      countQuery = postQueries.widgetUnreadPostsCount(),
+      countQuery = postQueries.widgetUnreadPostsCount(sessionPostIds = sessionPostIds),
       transacter = postQueries,
       context = dispatchersProvider.databaseRead,
       queryProvider = { limit, offset ->
         postQueries.widgetUnreadPosts(
           numberOfPosts = limit,
           offset = offset,
+          sessionPostIds = sessionPostIds,
           mapper = {
             id,
             sourceId,
