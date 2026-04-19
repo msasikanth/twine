@@ -161,7 +161,7 @@ WHERE
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
-ORDER BY post.postDate DESC, post.createdAt DESC
+ORDER BY post.postDate DESC, post.createdAt DESC, post.id DESC
 LIMIT :limit;
 
 featuredPostsOldest:
@@ -199,7 +199,7 @@ WHERE
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
-ORDER BY post.postDate ASC, post.createdAt ASC
+ORDER BY post.postDate ASC, post.createdAt ASC, post.id ASC
 LIMIT :limit;
 
 featuredPostsAddedLatest:
@@ -237,7 +237,7 @@ WHERE
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
-ORDER BY post.createdAt DESC, post.postDate DESC
+ORDER BY post.createdAt DESC, post.postDate DESC, post.id DESC
 LIMIT :limit;
 
 featuredPostsAddedOldest:
@@ -275,7 +275,7 @@ WHERE
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
-ORDER BY post.createdAt ASC, post.postDate ASC
+ORDER BY post.createdAt ASC, post.postDate ASC, post.id ASC
 LIMIT :limit;
 
 allPostsCount:
@@ -324,7 +324,8 @@ WHERE
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
 ORDER BY
   post.postDate DESC,
-  post.createdAt DESC
+  post.createdAt DESC,
+  post.id DESC
 LIMIT :limit OFFSET :offset;
 
 allPostsOldest:
@@ -362,7 +363,8 @@ WHERE
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
 ORDER BY
   post.postDate ASC,
-  post.createdAt ASC
+  post.createdAt ASC,
+  post.id ASC
 LIMIT :limit OFFSET :offset;
 
 allPostsAddedLatest:
@@ -400,7 +402,8 @@ WHERE
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
 ORDER BY
   post.createdAt DESC,
-  post.postDate DESC
+  post.postDate DESC,
+  post.id DESC
 LIMIT :limit OFFSET :offset;
 
 allPostsAddedOldest:
@@ -438,7 +441,8 @@ WHERE
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
 ORDER BY
   post.createdAt ASC,
-  post.postDate ASC
+  post.postDate ASC,
+  post.id ASC
 LIMIT :limit OFFSET :offset;
 
 nonFeaturedPostsLatest:
@@ -480,7 +484,7 @@ WHERE
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
       (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
-    ORDER BY p2.postDate DESC, p2.createdAt DESC
+    ORDER BY p2.postDate DESC, p2.createdAt DESC, p2.id DESC
     LIMIT :numberOfFeaturedPosts
   ) AND
   post.postDate > :postsAfter AND
@@ -491,7 +495,8 @@ WHERE
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
 ORDER BY
   post.postDate DESC,
-  post.createdAt DESC
+  post.createdAt DESC,
+  post.id DESC
 LIMIT :limit OFFSET :offset;
 
 nonFeaturedPostsOldest:
@@ -533,7 +538,7 @@ WHERE
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
       (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
-    ORDER BY p2.postDate ASC, p2.createdAt ASC
+    ORDER BY p2.postDate ASC, p2.createdAt ASC, p2.id ASC
     LIMIT :numberOfFeaturedPosts
   ) AND
   post.postDate > :postsAfter AND
@@ -544,7 +549,8 @@ WHERE
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
 ORDER BY
   post.postDate ASC,
-  post.createdAt ASC
+  post.createdAt ASC,
+  post.id ASC
 LIMIT :limit OFFSET :offset;
 
 nonFeaturedPostsAddedLatest:
@@ -586,7 +592,7 @@ WHERE
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
       (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
-    ORDER BY p2.createdAt DESC, p2.postDate DESC
+    ORDER BY p2.createdAt DESC, p2.postDate DESC, p2.id DESC
     LIMIT :numberOfFeaturedPosts
   ) AND
   post.postDate > :postsAfter AND
@@ -597,7 +603,8 @@ WHERE
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
 ORDER BY
   post.createdAt DESC,
-  post.postDate DESC
+  post.postDate DESC,
+  post.id DESC
 LIMIT :limit OFFSET :offset;
 
 nonFeaturedPostsAddedOldest:
@@ -639,7 +646,7 @@ WHERE
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
       (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
-    ORDER BY p2.createdAt ASC, p2.postDate ASC
+    ORDER BY p2.createdAt ASC, p2.postDate ASC, p2.id ASC
     LIMIT :numberOfFeaturedPosts
   ) AND
   post.postDate > :postsAfter AND
@@ -650,7 +657,8 @@ WHERE
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
 ORDER BY
   post.createdAt ASC,
-  post.postDate ASC
+  post.postDate ASC,
+  post.id ASC
 LIMIT :limit OFFSET :offset;
 
 nonFeaturedPostsCount:
@@ -821,7 +829,7 @@ WHERE
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
-  (post.postDate > :postDate OR (post.postDate = :postDate AND post.createdAt > :postCreatedAt));
+  (post.postDate > :postDate OR (post.postDate = :postDate AND (post.createdAt > :postCreatedAt OR (post.createdAt = :postCreatedAt AND post.id > :postId))));
 
 postPositionOldest:
 SELECT COUNT(*) FROM post
@@ -833,7 +841,7 @@ WHERE
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
-  (post.postDate < :postDate OR (post.postDate = :postDate AND post.createdAt < :postCreatedAt));
+  (post.postDate < :postDate OR (post.postDate = :postDate AND (post.createdAt < :postCreatedAt OR (post.createdAt = :postCreatedAt AND post.id < :postId))));
 
 postPositionAddedLatest:
 SELECT COUNT(*) FROM post
@@ -845,7 +853,7 @@ WHERE
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
-  (post.createdAt > :postCreatedAt OR (post.createdAt = :postCreatedAt AND post.postDate > :postDate));
+  (post.createdAt > :postCreatedAt OR (post.createdAt = :postCreatedAt AND (post.postDate > :postDate OR (post.postDate = :postDate AND post.id > :postId))));
 
 postPositionAddedOldest:
 SELECT COUNT(*) FROM post
@@ -857,7 +865,7 @@ WHERE
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
-  (post.createdAt < :postCreatedAt OR (post.createdAt = :postCreatedAt AND post.postDate < :postDate));
+  (post.createdAt < :postCreatedAt OR (post.createdAt = :postCreatedAt AND (post.postDate < :postDate OR (post.postDate = :postDate AND post.id < :postId))));
 
 nonFeaturedPostPositionLatest:
 SELECT COUNT(*) FROM post
@@ -875,7 +883,7 @@ WHERE
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
       (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
-    ORDER BY p2.postDate DESC, p2.createdAt DESC
+    ORDER BY p2.postDate DESC, p2.createdAt DESC, p2.id DESC
     LIMIT :numberOfFeaturedPosts
   ) AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
@@ -884,7 +892,7 @@ WHERE
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
-  (post.postDate > :postDate OR (post.postDate = :postDate AND post.createdAt > :postCreatedAt));
+  (post.postDate > :postDate OR (post.postDate = :postDate AND (post.createdAt > :postCreatedAt OR (post.createdAt = :postCreatedAt AND post.id > :postId))));
 
 nonFeaturedPostPositionOldest:
 SELECT COUNT(*) FROM post
@@ -902,7 +910,7 @@ WHERE
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
       (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
-    ORDER BY p2.postDate ASC, p2.createdAt ASC
+    ORDER BY p2.postDate ASC, p2.createdAt ASC, p2.id ASC
     LIMIT :numberOfFeaturedPosts
   ) AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
@@ -911,7 +919,7 @@ WHERE
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
-  (post.postDate < :postDate OR (post.postDate = :postDate AND post.createdAt < :postCreatedAt));
+  (post.postDate < :postDate OR (post.postDate = :postDate AND (post.createdAt < :postCreatedAt OR (post.createdAt = :postCreatedAt AND post.id < :postId))));
 
 nonFeaturedPostPositionAddedLatest:
 SELECT COUNT(*) FROM post
@@ -929,7 +937,7 @@ WHERE
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
       (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
-    ORDER BY p2.createdAt DESC, p2.postDate DESC
+    ORDER BY p2.createdAt DESC, p2.postDate DESC, p2.id DESC
     LIMIT :numberOfFeaturedPosts
   ) AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
@@ -938,7 +946,7 @@ WHERE
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
-  (post.createdAt > :postCreatedAt OR (post.createdAt = :postCreatedAt AND post.postDate > :postDate));
+  (post.createdAt > :postCreatedAt OR (post.createdAt = :postCreatedAt AND (post.postDate > :postDate OR (post.postDate = :postDate AND post.id > :postId))));
 
 nonFeaturedPostPositionAddedOldest:
 SELECT COUNT(*) FROM post
@@ -956,7 +964,7 @@ WHERE
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
       (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
-    ORDER BY p2.createdAt ASC, p2.postDate ASC
+    ORDER BY p2.createdAt ASC, p2.postDate ASC, p2.id ASC
     LIMIT :numberOfFeaturedPosts
   ) AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
@@ -965,7 +973,7 @@ WHERE
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
-  (post.createdAt < :postCreatedAt OR (post.createdAt = :postCreatedAt AND post.postDate < :postDate));
+  (post.createdAt < :postCreatedAt OR (post.createdAt = :postCreatedAt AND (post.postDate < :postDate OR (post.postDate = :postDate AND post.id < :postId))));
 
 updatePostRemoteId:
 UPDATE post SET remoteId = :remoteId WHERE id = :id;

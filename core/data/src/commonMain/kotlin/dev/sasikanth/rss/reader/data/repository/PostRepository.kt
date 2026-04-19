@@ -359,6 +359,7 @@ class PostRepository(
         when (postsSortOrder) {
           PostsSortOrder.Latest ->
             postQueries.postPositionLatest(
+              postId = postId,
               isSourceIdsEmpty = activeSourceIds.isEmpty(),
               sourceIds = activeSourceIds,
               unreadOnly = unreadOnly,
@@ -369,6 +370,7 @@ class PostRepository(
             )
           PostsSortOrder.Oldest ->
             postQueries.postPositionOldest(
+              postId = postId,
               isSourceIdsEmpty = activeSourceIds.isEmpty(),
               sourceIds = activeSourceIds,
               unreadOnly = unreadOnly,
@@ -379,6 +381,7 @@ class PostRepository(
             )
           PostsSortOrder.AddedLatest ->
             postQueries.postPositionAddedLatest(
+              postId = postId,
               isSourceIdsEmpty = activeSourceIds.isEmpty(),
               sourceIds = activeSourceIds,
               unreadOnly = unreadOnly,
@@ -389,6 +392,7 @@ class PostRepository(
             )
           PostsSortOrder.AddedOldest ->
             postQueries.postPositionAddedOldest(
+              postId = postId,
               isSourceIdsEmpty = activeSourceIds.isEmpty(),
               sourceIds = activeSourceIds,
               unreadOnly = unreadOnly,
@@ -426,6 +430,7 @@ class PostRepository(
         when (postsSortOrder) {
           PostsSortOrder.Latest ->
             postQueries.nonFeaturedPostPositionLatest(
+              postId = postId,
               featuredPostsAfter = featuredPostsAfter,
               postsAfter = after,
               postsUpperBound = postsUpperBound,
@@ -438,6 +443,7 @@ class PostRepository(
             )
           PostsSortOrder.Oldest ->
             postQueries.nonFeaturedPostPositionOldest(
+              postId = postId,
               featuredPostsAfter = featuredPostsAfter,
               postsAfter = after,
               postsUpperBound = postsUpperBound,
@@ -450,6 +456,7 @@ class PostRepository(
             )
           PostsSortOrder.AddedLatest ->
             postQueries.nonFeaturedPostPositionAddedLatest(
+              postId = postId,
               featuredPostsAfter = featuredPostsAfter,
               postsAfter = after,
               postsUpperBound = postsUpperBound,
@@ -462,6 +469,7 @@ class PostRepository(
             )
           PostsSortOrder.AddedOldest ->
             postQueries.nonFeaturedPostPositionAddedOldest(
+              postId = postId,
               featuredPostsAfter = featuredPostsAfter,
               postsAfter = after,
               postsUpperBound = postsUpperBound,
