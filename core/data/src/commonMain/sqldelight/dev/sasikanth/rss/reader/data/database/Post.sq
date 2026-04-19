@@ -19,6 +19,7 @@ CREATE TABLE post(
   audioUrl TEXT,
   seedColor INTEGER,
   audioProgress INTEGER NOT NULL DEFAULT 0,
+  audioDuration INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (id, sourceId),
   FOREIGN KEY(sourceId) REFERENCES feed(id)
 );
@@ -148,7 +149,8 @@ SELECT
   pc.feedContentReadingTime AS feedContentReadingTime,
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
-  post.audioProgress AS audioProgress
+  post.audioProgress AS audioProgress,
+  post.audioDuration AS audioDuration
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -186,7 +188,8 @@ SELECT
   pc.feedContentReadingTime AS feedContentReadingTime,
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
-  post.audioProgress AS audioProgress
+  post.audioProgress AS audioProgress,
+  post.audioDuration AS audioDuration
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -224,7 +227,8 @@ SELECT
   pc.feedContentReadingTime AS feedContentReadingTime,
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
-  post.audioProgress AS audioProgress
+  post.audioProgress AS audioProgress,
+  post.audioDuration AS audioDuration
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -262,7 +266,8 @@ SELECT
   pc.feedContentReadingTime AS feedContentReadingTime,
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
-  post.audioProgress AS audioProgress
+  post.audioProgress AS audioProgress,
+  post.audioDuration AS audioDuration
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -311,7 +316,8 @@ SELECT
   pc.feedContentReadingTime AS feedContentReadingTime,
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
-  post.audioProgress AS audioProgress
+  post.audioProgress AS audioProgress,
+  post.audioDuration AS audioDuration
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -350,7 +356,8 @@ SELECT
   pc.feedContentReadingTime AS feedContentReadingTime,
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
-  post.audioProgress AS audioProgress
+  post.audioProgress AS audioProgress,
+  post.audioDuration AS audioDuration
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -389,7 +396,8 @@ SELECT
   pc.feedContentReadingTime AS feedContentReadingTime,
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
-  post.audioProgress AS audioProgress
+  post.audioProgress AS audioProgress,
+  post.audioDuration AS audioDuration
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -428,7 +436,8 @@ SELECT
   pc.feedContentReadingTime AS feedContentReadingTime,
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
-  post.audioProgress AS audioProgress
+  post.audioProgress AS audioProgress,
+  post.audioDuration AS audioDuration
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -467,7 +476,8 @@ SELECT
   pc.feedContentReadingTime AS feedContentReadingTime,
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
-  post.audioProgress AS audioProgress
+  post.audioProgress AS audioProgress,
+  post.audioDuration AS audioDuration
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -521,7 +531,8 @@ SELECT
   pc.feedContentReadingTime AS feedContentReadingTime,
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
-  post.audioProgress AS audioProgress
+  post.audioProgress AS audioProgress,
+  post.audioDuration AS audioDuration
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -575,7 +586,8 @@ SELECT
   pc.feedContentReadingTime AS feedContentReadingTime,
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
-  post.audioProgress AS audioProgress
+  post.audioProgress AS audioProgress,
+  post.audioDuration AS audioDuration
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -629,7 +641,8 @@ SELECT
   pc.feedContentReadingTime AS feedContentReadingTime,
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
-  post.audioProgress AS audioProgress
+  post.audioProgress AS audioProgress,
+  post.audioDuration AS audioDuration
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -711,7 +724,7 @@ updateSeedColor:
 UPDATE post SET seedColor = :seedColor WHERE id = :id;
 
 updateAudioProgress:
-UPDATE post SET audioProgress = :audioProgress WHERE id = :id;
+UPDATE post SET audioProgress = :audioProgress, audioDuration = :audioDuration WHERE id = :id;
 
 deleteReadPosts:
 DELETE FROM post
@@ -736,6 +749,10 @@ SET flags = flags | 2, updatedAt = :updatedAt
 WHERE postDate > :after
   AND (flags & 2) == 0
 RETURNING id;
+
+postsByIds:
+SELECT * FROM post
+WHERE id IN :ids;
 
 postById:
 SELECT * FROM post
@@ -763,7 +780,8 @@ SELECT
   pc.feedContentReadingTime AS feedContentReadingTime,
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
-  post.audioProgress AS audioProgress
+  post.audioProgress AS audioProgress,
+  post.audioDuration AS audioDuration
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -795,7 +813,8 @@ SELECT
   pc.feedContentReadingTime AS feedContentReadingTime,
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
-  post.audioProgress AS audioProgress
+  post.audioProgress AS audioProgress,
+  post.audioDuration AS audioDuration
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -1059,7 +1078,8 @@ SELECT
   pc.feedContentReadingTime AS feedContentReadingTime,
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
-  post.audioProgress AS audioProgress
+  post.audioProgress AS audioProgress,
+  post.audioDuration AS audioDuration
 FROM post
 INNER JOIN feed ON post.sourceId == feed.id
 LEFT JOIN postContent pc ON post.id == pc.id

@@ -163,9 +163,17 @@ class ReaderPageViewModel(
   }
 
   private fun saveAudioProgress() {
-    val currentPosition = audioPlayer.playbackState.value.currentPosition
+    val playbackState = audioPlayer.playbackState.value
+    val currentPosition = playbackState.currentPosition
+    val duration = playbackState.duration
     if (currentPosition > 0) {
-      viewModelScope.launch { postRepository.updateAudioProgress(readerPost.id, currentPosition) }
+      viewModelScope.launch {
+        postRepository.updateAudioProgress(
+          postId = readerPost.id,
+          audioProgress = currentPosition,
+          audioDuration = duration,
+        )
+      }
     }
   }
 
@@ -174,8 +182,15 @@ class ReaderPageViewModel(
   }
 
   fun seekAudio(position: Long) {
+    val duration = audioPlayer.playbackState.value.duration
     audioPlayer.seekTo(position)
-    viewModelScope.launch { postRepository.updateAudioProgress(readerPost.id, position) }
+    viewModelScope.launch {
+      postRepository.updateAudioProgress(
+        postId = readerPost.id,
+        audioProgress = position,
+        audioDuration = duration,
+      )
+    }
   }
 
   fun seekForward() {

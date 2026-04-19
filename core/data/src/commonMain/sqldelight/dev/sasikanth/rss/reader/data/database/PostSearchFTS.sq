@@ -56,7 +56,8 @@ SELECT
   pc.feedContentReadingTime AS feedContentReadingTime,
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
-  post.audioProgress AS audioProgress
+  post.audioProgress AS audioProgress,
+  post.audioDuration AS audioDuration
 FROM post_search
 INNER JOIN post ON post.id == post_search.id
 INNER JOIN feed ON post.sourceId == feed.id

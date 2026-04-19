@@ -532,7 +532,8 @@ class RssRepository(
             feedContentReadingTime: Long?,
             articleContentReadingTime: Long?,
             seedColor: Long?,
-            audioProgress: Long ->
+            audioProgress: Long,
+            audioDuration: Long ->
             ResolvedPost(
               id = id,
               sourceId = sourceId,
@@ -554,6 +555,7 @@ class RssRepository(
               articleContentReadingTime = articleContentReadingTime?.toInt(),
               seedColor = seedColor?.toInt(),
               audioProgress = audioProgress,
+              audioDuration = audioDuration,
             )
           },
         )
@@ -1278,6 +1280,7 @@ class RssRepository(
     articleContentReadingTime: Long?,
     seedColor: Long?,
     audioProgress: Long,
+    audioDuration: Long,
   ): ResolvedPost {
     return ResolvedPost(
       id = id,
@@ -1301,6 +1304,7 @@ class RssRepository(
       seedColor = seedColor?.toInt(),
       remoteId = remoteId,
       audioProgress = audioProgress,
+      audioDuration = audioDuration,
     )
   }
 
