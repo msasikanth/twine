@@ -22,8 +22,6 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.animateBounds
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -61,10 +59,13 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -596,12 +597,16 @@ private fun ReaderActionsPanel(
               color = shadowColor2
             }
             .clip(backgroundShape)
-            .background(color = AppTheme.colorScheme.bottomSheet, shape = backgroundShape)
-            .border(
-              width = 1.dp,
-              color = AppTheme.colorScheme.bottomSheetBorder,
-              shape = backgroundShape,
-            )
+            .drawBehind { drawRect(colorScheme.bottomSheet) }
+            .drawWithContent {
+              drawContent()
+              val outline = backgroundShape.createOutline(size, layoutDirection, this)
+              drawOutline(
+                outline = outline,
+                color = colorScheme.bottomSheetBorder,
+                style = Stroke(width = 1.dp.toPx()),
+              )
+            }
             .graphicsLayer { clip = true }
       ) {
         AppTheme(useDarkTheme = true, overriddenColorScheme = overriddenColorScheme) {

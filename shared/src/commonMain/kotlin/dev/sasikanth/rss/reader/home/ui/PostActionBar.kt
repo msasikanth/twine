@@ -16,8 +16,6 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,10 +46,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.isTraversalGroup
@@ -114,6 +116,7 @@ internal fun PostActionBar(
   config: PostMetadataConfig = PostMetadataConfig.DEFAULT,
   onSourceClick: () -> Unit,
 ) {
+  val colorScheme = AppTheme.colorScheme
   Row(
     modifier = Modifier.height(IntrinsicSize.Min).then(modifier),
     verticalAlignment = Alignment.CenterVertically,
@@ -138,7 +141,7 @@ internal fun PostActionBar(
         style = MaterialTheme.typography.labelMedium,
         maxLines = 1,
         text = Constants.BULLET_POINT,
-        color = AppTheme.colorScheme.outline,
+        color = colorScheme.outline,
       )
 
       Text(
@@ -146,7 +149,7 @@ internal fun PostActionBar(
         style = MaterialTheme.typography.labelMedium,
         maxLines = 1,
         text = postRelativeTimestamp,
-        color = AppTheme.colorScheme.outline,
+        color = colorScheme.outline,
         textAlign = TextAlign.Start,
         overflow = TextOverflow.Ellipsis,
       )
@@ -157,7 +160,7 @@ internal fun PostActionBar(
           style = MaterialTheme.typography.labelMedium,
           maxLines = 1,
           text = Constants.BULLET_POINT,
-          color = AppTheme.colorScheme.outline,
+          color = colorScheme.outline,
         )
 
         Text(
@@ -165,7 +168,7 @@ internal fun PostActionBar(
           style = MaterialTheme.typography.labelMedium,
           maxLines = 1,
           text = stringResource(Res.string.readingTimeEstimate, postReadingTimeEstimate),
-          color = AppTheme.colorScheme.outline,
+          color = colorScheme.outline,
           textAlign = TextAlign.Start,
           overflow = TextOverflow.Ellipsis,
         )
@@ -200,11 +203,12 @@ private fun SourceInfo(
   onSourceClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
+  val colorScheme = AppTheme.colorScheme
   val postSourceTextColor =
     if (config.enablePostSource) {
-      AppTheme.colorScheme.onSurface
+      colorScheme.onSurface
     } else {
-      AppTheme.colorScheme.onSurfaceVariant
+      colorScheme.onSurfaceVariant
     }
 
   Row(
@@ -220,6 +224,7 @@ private fun SourceInfo(
         Modifier.requiredSize(18.dp)
           .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
     ) {
+      val feedIconShape = RoundedCornerShape(25)
       FeedIcon(
         icon = feedIcon,
         homepageLink = feedHomepageLink,
@@ -227,7 +232,15 @@ private fun SourceInfo(
         contentDescription = null,
         modifier =
           Modifier.requiredSize(16.dp)
-            .border(1.dp, AppTheme.colorScheme.outlineVariant, RoundedCornerShape(25))
+            .drawWithContent {
+              drawContent()
+              val outline = feedIconShape.createOutline(size, layoutDirection, this)
+              drawOutline(
+                outline = outline,
+                color = colorScheme.outlineVariant,
+                style = Stroke(width = 1.dp.toPx()),
+              )
+            }
             .align(Alignment.Center),
       )
 
@@ -241,7 +254,7 @@ private fun SourceInfo(
                 spread = 1.dp.toPx()
                 blendMode = BlendMode.DstOut
               }
-              .background(MaterialTheme.colorScheme.error, CircleShape)
+              .drawBehind { drawCircle(colorScheme.error) }
         )
       }
     }
@@ -274,6 +287,9 @@ internal fun PostActions(
   onCommentsClick: () -> Unit,
   togglePostReadClick: () -> Unit,
 ) {
+  val colorScheme = AppTheme.colorScheme
+  val tooltipShape = RoundedCornerShape(4.dp)
+
   Row(
     modifier = modifier.semantics { isTraversalGroup = true },
     horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
@@ -289,13 +305,16 @@ internal fun PostActions(
         tooltip = {
           Box(
             modifier =
-              Modifier.background(AppTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+              Modifier.drawBehind {
+                  val outline = tooltipShape.createOutline(size, layoutDirection, this)
+                  drawOutline(outline, colorScheme.surface)
+                }
                 .padding(8.dp)
           ) {
             Text(
               text = commentsLabel,
               style = MaterialTheme.typography.labelMedium,
-              color = AppTheme.colorScheme.onSurface,
+              color = colorScheme.onSurface,
             )
           }
         },
@@ -323,13 +342,16 @@ internal fun PostActions(
       tooltip = {
         Box(
           modifier =
-            Modifier.background(AppTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+            Modifier.drawBehind {
+                val outline = tooltipShape.createOutline(size, layoutDirection, this)
+                drawOutline(outline, colorScheme.surface)
+              }
               .padding(8.dp)
         ) {
           Text(
             text = bookmarkLabel,
             style = MaterialTheme.typography.labelMedium,
-            color = AppTheme.colorScheme.onSurface,
+            color = colorScheme.onSurface,
           )
         }
       },
@@ -360,13 +382,16 @@ internal fun PostActions(
         tooltip = {
           Box(
             modifier =
-              Modifier.background(AppTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+              Modifier.drawBehind {
+                  val outline = tooltipShape.createOutline(size, layoutDirection, this)
+                  drawOutline(outline, colorScheme.surface)
+                }
                 .padding(8.dp)
           ) {
             Text(
               text = moreMenuOptionsLabel,
               style = MaterialTheme.typography.labelMedium,
-              color = AppTheme.colorScheme.onSurface,
+              color = colorScheme.onSurface,
             )
           }
         },

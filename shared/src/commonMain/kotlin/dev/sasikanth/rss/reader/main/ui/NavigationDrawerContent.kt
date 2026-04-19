@@ -66,10 +66,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
@@ -252,11 +254,13 @@ private fun ExpandedDrawerContent(
     )
   }
 
+  val colorScheme = AppTheme.colorScheme
+
   Column(
     modifier =
       Modifier.fillMaxWidth()
         .fillMaxHeight()
-        .background(AppTheme.colorScheme.backdrop)
+        .drawBehind { drawRect(colorScheme.backdrop) }
         .windowInsetsPadding(WindowInsets.systemBars)
   ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -352,10 +356,10 @@ private fun ExpandedDrawerContent(
             shape = navigationItemShape,
             colors =
               NavigationDrawerItemDefaults.colors(
-                selectedIconColor = AppTheme.colorScheme.onSurface,
-                unselectedIconColor = AppTheme.colorScheme.onSurface,
-                selectedTextColor = AppTheme.colorScheme.onSurface,
-                unselectedTextColor = AppTheme.colorScheme.onSurface,
+                selectedIconColor = colorScheme.onSurface,
+                unselectedIconColor = colorScheme.onSurface,
+                selectedTextColor = colorScheme.onSurface,
+                unselectedTextColor = colorScheme.onSurface,
                 selectedContainerColor = Color.Transparent,
                 unselectedContainerColor = Color.Transparent,
               ),
@@ -553,11 +557,12 @@ private fun CollapsedDrawerContent(
   dismissOnSelection: Boolean,
 ) {
   val sources = state.sources.collectAsLazyPagingItems()
+  val colorScheme = AppTheme.colorScheme
 
   val navigationRailItemColors =
     NavigationRailItemDefaults.colors(
-      selectedIconColor = AppTheme.colorScheme.primary,
-      unselectedIconColor = AppTheme.colorScheme.onSurfaceVariant,
+      selectedIconColor = colorScheme.primary,
+      unselectedIconColor = colorScheme.onSurfaceVariant,
       indicatorColor = Color.Transparent,
     )
 
@@ -565,7 +570,7 @@ private fun CollapsedDrawerContent(
     modifier =
       Modifier.fillMaxHeight()
         .fillMaxWidth()
-        .background(AppTheme.colorScheme.backdrop)
+        .drawBehind { drawRect(colorScheme.backdrop) }
         .windowInsetsPadding(WindowInsets.systemBars)
         .padding(vertical = 16.dp),
     horizontalAlignment = Alignment.CenterHorizontally,
@@ -610,7 +615,7 @@ private fun CollapsedDrawerContent(
 
         HorizontalDivider(
           modifier = Modifier.padding(horizontal = 16.dp),
-          color = AppTheme.colorScheme.outlineVariant,
+          color = colorScheme.outlineVariant,
         )
 
         Spacer(Modifier.requiredHeight(16.dp))
@@ -645,7 +650,7 @@ private fun CollapsedDrawerContent(
 
         HorizontalDivider(
           modifier = Modifier.padding(horizontal = 16.dp),
-          color = AppTheme.colorScheme.outlineVariant,
+          color = colorScheme.outlineVariant,
         )
 
         Spacer(Modifier.requiredHeight(16.dp))
@@ -687,6 +692,7 @@ private fun PinnedSourceIcon(
   hasActiveSource: Boolean,
   onClick: () -> Unit,
 ) {
+  val colorScheme = AppTheme.colorScheme
   val iconSize = 32.dp
 
   Box(
@@ -701,13 +707,20 @@ private fun PinnedSourceIcon(
     val selectedColor by
       animateColorAsState(
         if (selected) {
-          AppTheme.colorScheme.primaryContainer
+          colorScheme.primaryContainer
         } else {
           Color.Transparent
         }
       )
 
-    Box(modifier = Modifier.matchParentSize().background(selectedColor, RoundedCornerShape(12.dp)))
+    val selectedColorShape = RoundedCornerShape(12.dp)
+    Box(
+      modifier =
+        Modifier.matchParentSize().drawBehind {
+          val outline = selectedColorShape.createOutline(size, layoutDirection, this)
+          drawOutline(outline, selectedColor)
+        }
+    )
 
     val shape = RoundedCornerShape(8.dp)
     val clickableModifier = Modifier.requiredSize(iconSize).clip(shape).clickable { onClick() }
@@ -725,9 +738,10 @@ private fun PinnedSourceIcon(
       is FeedGroup -> {
         Box(
           modifier =
-            Modifier.clip(shape)
-              .then(clickableModifier)
-              .background(AppTheme.colorScheme.secondary.copy(alpha = 0.16f)),
+            Modifier.clip(shape).then(clickableModifier).drawBehind {
+              val outline = shape.createOutline(size, layoutDirection, this)
+              drawOutline(outline, colorScheme.secondary.copy(alpha = 0.16f))
+            },
           contentAlignment = Alignment.Center,
         ) {
           FeedGroupIconGrid(
@@ -747,8 +761,8 @@ private fun PinnedSourceIcon(
           blendMode = BlendMode.DstOut
         },
       shape = CircleShape,
-      color = AppTheme.colorScheme.inverseSurface,
-      contentColor = AppTheme.colorScheme.inverseOnSurface,
+      color = colorScheme.inverseSurface,
+      contentColor = colorScheme.inverseOnSurface,
     ) {
       Icon(
         imageVector = TwineIcons.Pin,
@@ -766,6 +780,7 @@ private fun SourceIcon(
   hasActiveSource: Boolean,
   onClick: () -> Unit,
 ) {
+  val colorScheme = AppTheme.colorScheme
   val iconSize = 32.dp
 
   Box(
@@ -775,15 +790,19 @@ private fun SourceIcon(
     val selectedColor by
       animateColorAsState(
         if (selected) {
-          AppTheme.colorScheme.primaryContainer
+          colorScheme.primaryContainer
         } else {
           Color.Transparent
         }
       )
 
+    val selectedColorShape = RoundedCornerShape(12.dp)
     Box(
       modifier =
-        Modifier.requiredSize(iconSize + 8.dp).background(selectedColor, RoundedCornerShape(12.dp))
+        Modifier.requiredSize(iconSize + 8.dp).drawBehind {
+          val outline = selectedColorShape.createOutline(size, layoutDirection, this)
+          drawOutline(outline, selectedColor)
+        }
     )
 
     val clickableModifier = Modifier.requiredSize(iconSize).clickable { onClick() }
@@ -799,11 +818,13 @@ private fun SourceIcon(
         )
       }
       is FeedGroup -> {
+        val shape = RoundedCornerShape(8.dp)
         Box(
           modifier =
-            Modifier.clip(RoundedCornerShape(8.dp))
-              .then(clickableModifier)
-              .background(AppTheme.colorScheme.secondary.copy(alpha = 0.16f)),
+            Modifier.clip(shape).then(clickableModifier).drawBehind {
+              val outline = shape.createOutline(size, layoutDirection, this)
+              drawOutline(outline, colorScheme.secondary.copy(alpha = 0.16f))
+            },
           contentAlignment = Alignment.Center,
         ) {
           FeedGroupIconGrid(
@@ -826,6 +847,7 @@ private fun SearchBar(
   val keyboardState by keyboardVisibilityAsState()
   val focusManager = LocalFocusManager.current
   val translucentStyle = LocalTranslucentStyles.current
+  val colorScheme = AppTheme.colorScheme
 
   LaunchedEffect(keyboardState) {
     if (keyboardState == KeyboardState.Closed) {
@@ -844,7 +866,7 @@ private fun SearchBar(
     placeholder = {
       Text(
         text = stringResource(Res.string.feedsSearchHint),
-        color = AppTheme.colorScheme.onSurfaceVariant,
+        color = colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.bodyMedium,
       )
     },
@@ -861,7 +883,7 @@ private fun SearchBar(
       OutlinedTextFieldDefaults.colors(
         focusedBorderColor = translucentStyle.default.outline,
         unfocusedBorderColor = translucentStyle.default.outline,
-        focusedTextColor = AppTheme.colorScheme.onSurfaceVariant,
+        focusedTextColor = colorScheme.onSurfaceVariant,
         disabledTextColor = Color.Transparent,
         unfocusedContainerColor = translucentStyle.default.background,
         focusedContainerColor = translucentStyle.default.background,
@@ -871,13 +893,14 @@ private fun SearchBar(
 
 @Composable
 private fun NoFeeds() {
+  val colorScheme = AppTheme.colorScheme
   Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
       Text(
         modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp),
         text = stringResource(Res.string.feedsLetsStart),
         style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.onSurfaceVariant,
+        color = colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
       )
     }

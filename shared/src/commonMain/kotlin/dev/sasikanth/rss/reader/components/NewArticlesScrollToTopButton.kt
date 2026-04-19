@@ -24,8 +24,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkOut
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -49,9 +47,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.FeedIcon
@@ -75,6 +77,9 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
 ) {
   if (unreadSinceLastSync != null) {
     val coroutineScope = rememberCoroutineScope()
+    val colorScheme = AppTheme.colorScheme
+    val shape = CircleShape
+
     AnimatedVisibility(
       visible = unreadSinceLastSync.hasNewArticles || canShowScrollToTop,
       enter = fadeIn() + expandIn(expandFrom = Alignment.Center, clip = false),
@@ -95,8 +100,19 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
             radius = 8.dp.toPx()
             spread = 0f
           }
-          .background(AppTheme.colorScheme.bottomSheet, CircleShape)
-          .border(1.dp, AppTheme.colorScheme.bottomSheetBorder, CircleShape)
+          .drawBehind {
+            val outline = shape.createOutline(size, layoutDirection, this)
+            drawOutline(outline = outline, color = colorScheme.bottomSheet)
+          }
+          .drawWithContent {
+            drawContent()
+            val outline = shape.createOutline(size, layoutDirection, this)
+            drawOutline(
+              outline = outline,
+              color = colorScheme.bottomSheetBorder,
+              style = Stroke(width = 1.dp.toPx()),
+            )
+          }
           .padding(4.dp),
     ) {
       AppTheme(useDarkTheme = true) {
@@ -175,6 +191,9 @@ private fun OverlappedFeedIcons(
   feedShowFavIconSettings: List<Boolean>,
   modifier: Modifier = Modifier,
 ) {
+  val colorScheme = AppTheme.colorScheme
+  val extraSmallShape = MaterialTheme.shapes.extraSmall
+
   Layout(
     modifier = modifier,
     content = {
@@ -187,7 +206,10 @@ private fun OverlappedFeedIcons(
         if (!homepageLink.isNullOrBlank() || !icon.isNullOrBlank()) {
           Box(
             modifier =
-              Modifier.background(AppTheme.colorScheme.bottomSheet, MaterialTheme.shapes.extraSmall)
+              Modifier.drawBehind {
+                  val outline = extraSmallShape.createOutline(size, layoutDirection, this)
+                  drawOutline(outline, colorScheme.bottomSheet)
+                }
                 .padding(horizontal = 2.dp, vertical = 1.dp)
           ) {
             FeedIcon(

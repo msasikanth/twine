@@ -18,8 +18,6 @@
 package dev.sasikanth.rss.reader.feeds.ui.pinned
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,7 +31,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -62,6 +64,7 @@ internal fun PinnedSourcesBottomBar(
   scrollBehavior: PinnedSourcesBottomBarScrollBehavior? = null,
 ) {
   val shape = CircleShape
+  val colorScheme = AppTheme.colorScheme
 
   val lazyListState = rememberLazyListState()
   val reorderableLazyRowState =
@@ -90,8 +93,16 @@ internal fun PinnedSourcesBottomBar(
         .padding(horizontal = 32.dp)
         .shadow(elevation = 4.dp, shape = shape)
         .clip(shape)
-        .background(AppTheme.colorScheme.bottomSheet)
-        .border(width = 1.dp, color = AppTheme.colorScheme.bottomSheetBorder, shape = shape)
+        .drawBehind { drawRect(colorScheme.bottomSheet) }
+        .drawWithContent {
+          drawContent()
+          val outline = shape.createOutline(size, layoutDirection, this)
+          drawOutline(
+            outline = outline,
+            color = colorScheme.bottomSheetBorder,
+            style = Stroke(width = 1.dp.toPx()),
+          )
+        }
         .fillMaxWidth()
         .height(PINNED_SOURCES_BOTTOM_BAR_HEIGHT),
     verticalAlignment = Alignment.CenterVertically,

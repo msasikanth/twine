@@ -17,7 +17,6 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.core.animate
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -354,7 +353,8 @@ private fun HomeContent(
       }
     },
   ) { scaffoldPadding ->
-    Box(modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.backdrop)) {
+    val colorScheme = AppTheme.colorScheme
+    Box(modifier = Modifier.fillMaxSize().drawBehind { drawRect(colorScheme.backdrop) }) {
       val hasFeeds = state.hasFeeds
       val nestedScrollModifier =
         if (platform !is Platform.Desktop) {

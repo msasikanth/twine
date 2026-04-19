@@ -22,7 +22,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -73,10 +72,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -192,12 +193,13 @@ private fun SearchContent(
   val linkHandler = LocalLinkHandler.current
 
   var showSourcePicker by remember { mutableStateOf(false) }
+  val colorScheme = AppTheme.colorScheme
 
   Scaffold(
     modifier = modifier,
     topBar = {
       Column(
-        Modifier.background(AppTheme.colorScheme.surface)
+        Modifier.drawBehind { drawRect(colorScheme.surface) }
           .windowInsetsPadding(
             WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
           )
@@ -231,10 +233,7 @@ private fun SearchContent(
 
         Spacer(Modifier.requiredHeight(12.dp))
 
-        HorizontalDivider(
-          modifier = Modifier.fillMaxWidth(),
-          color = AppTheme.colorScheme.outlineVariant,
-        )
+        HorizontalDivider(modifier = Modifier.fillMaxWidth(), color = colorScheme.outlineVariant)
       }
     },
     content = { padding ->
@@ -297,7 +296,7 @@ private fun SearchContent(
               if (index != searchResults.itemCount - 1) {
                 HorizontalDivider(
                   modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
-                  color = AppTheme.colorScheme.outlineVariant,
+                  color = colorScheme.outlineVariant,
                 )
               }
             }
@@ -318,7 +317,7 @@ private fun SearchContent(
         }
       }
     },
-    containerColor = AppTheme.colorScheme.backdrop,
+    containerColor = colorScheme.backdrop,
     contentColor = Color.Unspecified,
   )
 
@@ -345,8 +344,9 @@ private fun SourceFilterChips(
   onOnlyUnreadChanged: (Boolean) -> Unit,
   modifier: Modifier = Modifier,
 ) {
+  val colorScheme = AppTheme.colorScheme
   LazyRow(
-    modifier = modifier.fillMaxWidth().background(AppTheme.colorScheme.surface),
+    modifier = modifier.fillMaxWidth().drawBehind { drawRect(colorScheme.surface) },
     horizontalArrangement = Arrangement.spacedBy(8.dp),
     verticalAlignment = Alignment.CenterVertically,
     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -436,16 +436,19 @@ private fun SourceChip(
   icon: @Composable (() -> Unit)? = null,
   onTrailingIconClick: (() -> Unit)? = null,
 ) {
-  val backgroundColor =
-    if (selected) AppTheme.colorScheme.primary else AppTheme.colorScheme.surfaceContainer
-  val contentColor =
-    if (selected) AppTheme.colorScheme.onPrimary else AppTheme.colorScheme.onSurface
+  val colorScheme = AppTheme.colorScheme
+  val backgroundColor = if (selected) colorScheme.primary else colorScheme.surfaceContainer
+  val contentColor = if (selected) colorScheme.onPrimary else colorScheme.onSurface
+  val shape = RoundedCornerShape(12.dp)
 
   Row(
     modifier =
       modifier
-        .clip(RoundedCornerShape(12.dp))
-        .background(backgroundColor)
+        .clip(shape)
+        .drawBehind {
+          val outline = shape.createOutline(size, layoutDirection, this)
+          drawOutline(outline, backgroundColor)
+        }
         .clickable(onClick = onClick)
         .padding(horizontal = 12.dp, vertical = 6.dp),
     verticalAlignment = Alignment.CenterVertically,
@@ -498,12 +501,13 @@ private fun SourcePicker(
   onDismiss: () -> Unit,
 ) {
   val sheetState = rememberModalBottomSheetState()
+  val colorScheme = AppTheme.colorScheme
 
   ModalBottomSheet(
     onDismissRequest = onDismiss,
     sheetState = sheetState,
-    containerColor = AppTheme.colorScheme.surfaceContainer,
-    contentColor = AppTheme.colorScheme.onSurface,
+    containerColor = colorScheme.surfaceContainer,
+    contentColor = colorScheme.onSurface,
   ) {
     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
       SubHeader(text = stringResource(Res.string.feeds))
@@ -522,6 +526,7 @@ private fun SourcePicker(
 
 @Composable
 private fun SourcePickerItem(source: Source, onClick: () -> Unit, modifier: Modifier = Modifier) {
+  val colorScheme = AppTheme.colorScheme
   Row(
     modifier =
       modifier
@@ -540,7 +545,7 @@ private fun SourcePickerItem(source: Source, onClick: () -> Unit, modifier: Modi
           else -> ""
         },
       style = MaterialTheme.typography.bodyLarge,
-      color = AppTheme.colorScheme.onSurface,
+      color = colorScheme.onSurface,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
     )
@@ -560,6 +565,7 @@ private fun SearchBar(
   val keyboardState by keyboardVisibilityAsState()
   val focusManager = LocalFocusManager.current
   var isSearchBarFocused by remember { mutableStateOf(false) }
+  val colorScheme = AppTheme.colorScheme
 
   LaunchedEffect(keyboardState) {
     if (keyboardState == KeyboardState.Closed) {
@@ -569,9 +575,7 @@ private fun SearchBar(
 
   LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
-  MaterialTheme(
-    colorScheme = MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.primary)
-  ) {
+  MaterialTheme(colorScheme = MaterialTheme.colorScheme.copy(primary = colorScheme.primary)) {
     Row(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
       verticalAlignment = Alignment.CenterVertically,
@@ -594,7 +598,7 @@ private fun SearchBar(
         placeholder = {
           Text(
             text = stringResource(Res.string.postsSearchHint),
-            color = AppTheme.colorScheme.onSurface,
+            color = colorScheme.onSurface,
             style = MaterialTheme.typography.bodyLarge,
           )
         },
@@ -619,7 +623,7 @@ private fun SearchBar(
           TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
-            focusedTextColor = AppTheme.colorScheme.onSurface,
+            focusedTextColor = colorScheme.onSurface,
             unfocusedIndicatorColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
@@ -635,6 +639,7 @@ private fun SearchSortButton(
   sortOrder: SearchSortOrder,
   onSortOrderChanged: (SearchSortOrder) -> Unit,
 ) {
+  val colorScheme = AppTheme.colorScheme
   Box {
     var isDropdownExpanded by remember { mutableStateOf(false) }
 
@@ -651,14 +656,10 @@ private fun SearchSortButton(
             Oldest -> stringResource(Res.string.searchSortOldest)
           },
         style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.onSurface,
+        color = colorScheme.onSurface,
       )
       Spacer(Modifier.requiredWidth(8.dp))
-      Icon(
-        imageVector = TwineIcons.Sort,
-        contentDescription = null,
-        tint = AppTheme.colorScheme.onSurface,
-      )
+      Icon(imageVector = TwineIcons.Sort, contentDescription = null, tint = colorScheme.onSurface)
       Spacer(Modifier.requiredWidth(4.dp))
     }
 
