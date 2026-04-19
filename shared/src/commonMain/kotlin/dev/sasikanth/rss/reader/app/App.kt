@@ -410,11 +410,7 @@ fun App(
 
         settingsServicesScreen(settingsViewModel = settingsViewModel, navController = navController)
 
-        settingsDataScreen(
-          settingsViewModel = settingsViewModel,
-          statisticsViewModel = statisticsViewModel,
-          navController = navController,
-        )
+        settingsDataScreen(statisticsViewModel = statisticsViewModel, navController = navController)
 
         settingsAppInfoScreen(
           settingsViewModel = settingsViewModel,

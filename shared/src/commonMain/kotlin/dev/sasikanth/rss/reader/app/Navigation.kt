@@ -362,12 +362,10 @@ fun NavGraphBuilder.settingsServicesScreen(
 }
 
 fun NavGraphBuilder.settingsDataScreen(
-  settingsViewModel: () -> SettingsViewModel,
   statisticsViewModel: () -> StatisticsViewModel,
   navController: NavHostController,
 ) {
   composable<Screen.SettingsData> {
-    val settingsViewModel = viewModel { settingsViewModel() }
     val statisticsViewModel = viewModel { statisticsViewModel() }
     SettingsDataScreen(
       statisticsViewModel = statisticsViewModel,
