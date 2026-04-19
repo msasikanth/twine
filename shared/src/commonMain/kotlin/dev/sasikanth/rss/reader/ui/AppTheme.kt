@@ -68,20 +68,22 @@ internal fun AppTheme(
 
       val onSurface = colorScheme.onSurface
       val localTranslucentStyles =
-        TranslucentStyles(
-          default =
-            TranslucentStyle(
-              background = onSurface.copy(alpha = 0.08f),
-              outline = onSurface.copy(alpha = 0.16f),
-              foreground = onSurface,
-            ),
-          prominent =
-            TranslucentStyle(
-              background = onSurface.copy(alpha = 0.16f),
-              outline = onSurface.copy(alpha = 0.16f),
-              foreground = onSurface,
-            ),
-        )
+        remember(onSurface) {
+          TranslucentStyles(
+            default =
+              TranslucentStyle(
+                background = onSurface.copy(alpha = 0.08f),
+                outline = onSurface.copy(alpha = 0.16f),
+                foreground = onSurface,
+              ),
+            prominent =
+              TranslucentStyle(
+                background = onSurface.copy(alpha = 0.16f),
+                outline = onSurface.copy(alpha = 0.16f),
+                foreground = onSurface,
+              ),
+          )
+        }
 
       CompositionLocalProvider(
         LocalAppColorScheme provides colorScheme,

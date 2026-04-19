@@ -40,10 +40,12 @@ internal actual fun systemDynamicColorScheme(isDark: Boolean): AppColorScheme {
   // Dynamic colors are available on Android 12+ (API 31+)
   return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
     val colorScheme =
-      if (isDark) {
-        dynamicDarkColorScheme(context)
-      } else {
-        dynamicLightColorScheme(context)
+      remember(context, isDark) {
+        if (isDark) {
+          dynamicDarkColorScheme(context)
+        } else {
+          dynamicLightColorScheme(context)
+        }
       }
     val sourceColorHct = remember(colorScheme) { Hct.fromInt(colorScheme.primary.toArgb()) }
     val dynamicColorScheme =
@@ -51,41 +53,47 @@ internal actual fun systemDynamicColorScheme(isDark: Boolean): AppColorScheme {
         SchemeTonalSpot(sourceColorHct = sourceColorHct, isDark = isDark, contrastLevel = 0.0)
       }
 
-    AppColorScheme(
-      AppColorValues(
-        primary = colorScheme.primary,
-        onPrimary = colorScheme.onPrimary,
-        inversePrimary = colorScheme.inversePrimary,
-        secondary = colorScheme.secondary,
-        onSurface = colorScheme.onSurface,
-        onSurfaceVariant = colorScheme.onSurfaceVariant,
-        outline = colorScheme.outline,
-        outlineVariant = colorScheme.outlineVariant,
-        primaryContainer = colorScheme.primaryContainer,
-        onPrimaryContainer = colorScheme.onPrimaryContainer,
-        surface = colorScheme.surface,
-        surfaceContainerLowest = colorScheme.surfaceContainerLowest,
-        surfaceContainerLow = colorScheme.surfaceContainerLow,
-        surfaceContainer = colorScheme.surfaceContainer,
-        surfaceContainerHigh = colorScheme.surfaceContainerHigh,
-        surfaceContainerHighest = colorScheme.surfaceContainerHighest,
-        inverseSurface = colorScheme.inverseSurface,
-        inverseOnSurface = colorScheme.inverseOnSurface,
-        backdrop = TwineDynamicColors.backdrop.getColor(dynamicColorScheme),
-        bottomSheet = TwineDynamicColors.bottomSheet.getColor(dynamicColorScheme),
-        bottomSheetInverse = TwineDynamicColors.bottomSheetInverse.getColor(dynamicColorScheme),
-        bottomSheetBorder = TwineDynamicColors.bottomSheetBorder.getColor(dynamicColorScheme),
-        error = colorScheme.error,
-      )
-    )
+    val appColorValues =
+      remember(colorScheme, dynamicColorScheme) {
+        AppColorValues(
+          primary = colorScheme.primary,
+          onPrimary = colorScheme.onPrimary,
+          inversePrimary = colorScheme.inversePrimary,
+          secondary = colorScheme.secondary,
+          onSurface = colorScheme.onSurface,
+          onSurfaceVariant = colorScheme.onSurfaceVariant,
+          outline = colorScheme.outline,
+          outlineVariant = colorScheme.outlineVariant,
+          primaryContainer = colorScheme.primaryContainer,
+          onPrimaryContainer = colorScheme.onPrimaryContainer,
+          surface = colorScheme.surface,
+          surfaceContainerLowest = colorScheme.surfaceContainerLowest,
+          surfaceContainerLow = colorScheme.surfaceContainerLow,
+          surfaceContainer = colorScheme.surfaceContainer,
+          surfaceContainerHigh = colorScheme.surfaceContainerHigh,
+          surfaceContainerHighest = colorScheme.surfaceContainerHighest,
+          inverseSurface = colorScheme.inverseSurface,
+          inverseOnSurface = colorScheme.inverseOnSurface,
+          backdrop = TwineDynamicColors.backdrop.getColor(dynamicColorScheme),
+          bottomSheet = TwineDynamicColors.bottomSheet.getColor(dynamicColorScheme),
+          bottomSheetInverse = TwineDynamicColors.bottomSheetInverse.getColor(dynamicColorScheme),
+          bottomSheetBorder = TwineDynamicColors.bottomSheetBorder.getColor(dynamicColorScheme),
+          error = colorScheme.error,
+        )
+      }
+
+    remember(appColorValues) { AppColorScheme(appColorValues) }
   } else {
     // Fallback for older Android versions - use Forest theme as default
-    AppColorScheme(
-      TwineDynamicColors.calculateColorScheme(
-        seedColor = Color(0xFF73D995),
-        useDarkTheme = isDark,
-        scheme = TwineDynamicColors.Scheme.Vibrant,
-      )
-    )
+    val appColorValues =
+      remember(isDark) {
+        TwineDynamicColors.calculateColorScheme(
+          seedColor = Color(0xFF73D995),
+          useDarkTheme = isDark,
+          scheme = TwineDynamicColors.Scheme.Vibrant,
+        )
+      }
+
+    remember(appColorValues) { AppColorScheme(appColorValues) }
   }
 }

@@ -18,6 +18,7 @@
 package dev.sasikanth.rss.reader.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 
 internal actual val isSystemDynamicColorSupported: Boolean = false
@@ -26,11 +27,14 @@ internal actual val isSystemDynamicColorSupported: Boolean = false
 internal actual fun systemDynamicColorScheme(isDark: Boolean): AppColorScheme {
   // Desktop doesn't support system dynamic colors like Android's Material You
   // Return Forest theme as fallback
-  return AppColorScheme(
-    TwineDynamicColors.calculateColorScheme(
-      seedColor = Color(0xFF73D995),
-      useDarkTheme = isDark,
-      scheme = TwineDynamicColors.Scheme.Vibrant,
-    )
-  )
+  val appColorValues =
+    remember(isDark) {
+      TwineDynamicColors.calculateColorScheme(
+        seedColor = Color(0xFF73D995),
+        useDarkTheme = isDark,
+        scheme = TwineDynamicColors.Scheme.Vibrant,
+      )
+    }
+
+  return remember(appColorValues) { AppColorScheme(appColorValues) }
 }
