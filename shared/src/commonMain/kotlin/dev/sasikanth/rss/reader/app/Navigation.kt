@@ -145,11 +145,13 @@ fun NavGraphBuilder.onboardingScreen(
 fun NavGraphBuilder.accountSelectionScreen(
   accountSelectionViewModel: () -> AccountSelectionViewModel,
   navController: NavHostController,
+  modifier: Modifier = Modifier,
 ) {
   composable<Screen.AccountSelection> {
     val viewModel = viewModel { accountSelectionViewModel() }
 
     AccountSelectionScreen(
+      modifier = modifier,
       viewModel = viewModel,
       onNavigateToHome = {
         navController.navigate(Screen.Main(triggerSync = true)) {
@@ -320,10 +322,12 @@ fun NavGraphBuilder.mainScreen(
 fun NavGraphBuilder.settingsAppearanceScreen(
   settingsViewModel: () -> SettingsViewModel,
   navController: NavHostController,
+  modifier: Modifier = Modifier,
 ) {
   composable<Screen.SettingsAppearance> {
     val viewModel = viewModel { settingsViewModel() }
     SettingsAppearanceScreen(
+      modifier = modifier,
       viewModel = viewModel,
       goBack = { navController.popBackStack() },
       openPaywall = { navController.navigate(Screen.Paywall) },
@@ -334,10 +338,12 @@ fun NavGraphBuilder.settingsAppearanceScreen(
 fun NavGraphBuilder.settingsBehaviorScreen(
   settingsViewModel: () -> SettingsViewModel,
   navController: NavHostController,
+  modifier: Modifier = Modifier,
 ) {
   composable<Screen.SettingsBehavior> {
     val viewModel = viewModel { settingsViewModel() }
     SettingsBehaviorScreen(
+      modifier = modifier,
       viewModel = viewModel,
       goBack = { navController.popBackStack() },
       openBlockedWords = { navController.navigate(Screen.BlockedWords) },
@@ -348,10 +354,12 @@ fun NavGraphBuilder.settingsBehaviorScreen(
 fun NavGraphBuilder.settingsServicesScreen(
   settingsViewModel: () -> SettingsViewModel,
   navController: NavHostController,
+  modifier: Modifier = Modifier,
 ) {
   composable<Screen.SettingsServices> {
     val viewModel = viewModel { settingsViewModel() }
     SettingsServicesScreen(
+      modifier = modifier,
       viewModel = viewModel,
       goBack = { navController.popBackStack() },
       openPaywall = { navController.navigate(Screen.Paywall) },
@@ -364,10 +372,12 @@ fun NavGraphBuilder.settingsServicesScreen(
 fun NavGraphBuilder.settingsDataScreen(
   statisticsViewModel: () -> StatisticsViewModel,
   navController: NavHostController,
+  modifier: Modifier = Modifier,
 ) {
   composable<Screen.SettingsData> {
     val statisticsViewModel = viewModel { statisticsViewModel() }
     SettingsDataScreen(
+      modifier = modifier,
       statisticsViewModel = statisticsViewModel,
       goBack = { navController.popBackStack() },
     )
@@ -378,10 +388,12 @@ fun NavGraphBuilder.settingsAppInfoScreen(
   settingsViewModel: () -> SettingsViewModel,
   openChangelog: () -> Unit,
   navController: NavHostController,
+  modifier: Modifier = Modifier,
 ) {
   composable<Screen.SettingsAppInfo> {
     val viewModel = viewModel { settingsViewModel() }
     SettingsAppInfoScreen(
+      modifier = modifier,
       viewModel = viewModel,
       goBack = { navController.popBackStack() },
       openAbout = { navController.navigate(Screen.About) },
@@ -393,10 +405,12 @@ fun NavGraphBuilder.settingsAppInfoScreen(
 fun NavGraphBuilder.freshRssLoginScreen(
   freshRssLoginViewModel: () -> FreshRssLoginViewModel,
   navController: NavHostController,
+  modifier: Modifier = Modifier,
 ) {
   composable<Screen.FreshRssLogin> {
     val viewModel = viewModel { freshRssLoginViewModel() }
     FreshRssLoginScreen(
+      modifier = modifier,
       viewModel = viewModel,
       onLoginSuccess = {
         navController.previousBackStackEntry
@@ -412,10 +426,12 @@ fun NavGraphBuilder.freshRssLoginScreen(
 fun NavGraphBuilder.minifluxLoginScreen(
   minifluxLoginViewModel: () -> MinifluxLoginViewModel,
   navController: NavHostController,
+  modifier: Modifier = Modifier,
 ) {
   composable<Screen.MinifluxLogin> {
     val viewModel = viewModel { minifluxLoginViewModel() }
     MinifluxLoginScreen(
+      modifier = modifier,
       viewModel = viewModel,
       onLoginSuccess = {
         navController.previousBackStackEntry
@@ -467,6 +483,7 @@ fun NavGraphBuilder.addFeedScreen(
   useDarkTheme: Boolean,
   toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
   toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   composable<Screen.AddFeed>(
     deepLinks = listOf(navDeepLink<Screen.AddFeed>(basePath = Screen.AddFeed.ROUTE))
@@ -492,6 +509,7 @@ fun NavGraphBuilder.addFeedScreen(
     }
 
     AddFeedScreen(
+      modifier = modifier,
       viewModel = viewModel,
       goBack = { navController.popBackStack() },
       openGroupSelection = { selectedGroupIds ->
@@ -599,10 +617,12 @@ fun NavGraphBuilder.imageViewerScreen(
   navController: NavHostController,
   toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
   toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   composable<Screen.ImageViewer> {
     val imageUrl = it.toRoute<Screen.ImageViewer>().imageUrl
     ImageViewerScreen(
+      modifier = modifier,
       imageUrl = imageUrl,
       onBack = { navController.popBackStack() },
       toggleLightStatusBar = toggleLightStatusBar,

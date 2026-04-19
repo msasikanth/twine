@@ -323,6 +323,7 @@ fun App(
         onboardingScreen(onboardingViewModel = onboardingViewModel, navController = navController)
 
         accountSelectionScreen(
+          modifier = screenModifier,
           accountSelectionViewModel = accountSelectionViewModel,
           navController = navController,
         )
@@ -343,11 +344,13 @@ fun App(
         )
 
         freshRssLoginScreen(
+          modifier = screenModifier,
           freshRssLoginViewModel = freshRssLoginViewModel,
           navController = navController,
         )
 
         minifluxLoginScreen(
+          modifier = screenModifier,
           minifluxLoginViewModel = minifluxLoginViewModel,
           navController = navController,
         )
@@ -362,6 +365,7 @@ fun App(
         )
 
         addFeedScreen(
+          modifier = screenModifier,
           addFeedViewModel = addFeedViewModel,
           navController = navController,
           useDarkTheme = useDarkTheme,
@@ -396,23 +400,38 @@ fun App(
         )
 
         imageViewerScreen(
+          modifier = screenModifier,
           navController = navController,
           toggleLightStatusBar = toggleLightStatusBar,
           toggleLightNavBar = toggleLightNavBar,
         )
 
         settingsAppearanceScreen(
+          modifier = screenModifier,
           settingsViewModel = settingsViewModel,
           navController = navController,
         )
 
-        settingsBehaviorScreen(settingsViewModel = settingsViewModel, navController = navController)
+        settingsBehaviorScreen(
+          modifier = screenModifier,
+          settingsViewModel = settingsViewModel,
+          navController = navController,
+        )
 
-        settingsServicesScreen(settingsViewModel = settingsViewModel, navController = navController)
+        settingsServicesScreen(
+          modifier = screenModifier,
+          settingsViewModel = settingsViewModel,
+          navController = navController,
+        )
 
-        settingsDataScreen(statisticsViewModel = statisticsViewModel, navController = navController)
+        settingsDataScreen(
+          statisticsViewModel = statisticsViewModel,
+          navController = navController,
+          modifier = screenModifier,
+        )
 
         settingsAppInfoScreen(
+          modifier = screenModifier,
           settingsViewModel = settingsViewModel,
           openChangelog = { appViewModel.openChangelog() },
           navController = navController,
