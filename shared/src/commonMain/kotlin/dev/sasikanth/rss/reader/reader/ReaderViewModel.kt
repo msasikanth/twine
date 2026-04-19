@@ -172,38 +172,31 @@ class ReaderViewModel(
   private fun markPostsAsRead(): Job {
     return coroutineScope.launch {
       val markAsReadOn = settingsRepository.markAsReadOn.first()
-      if (markAsReadOn == MarkAsReadOn.Open) {
-        val audioMarkAsReadThreshold = settingsRepository.audioMarkAsReadThreshold.first()
-        val posts = postRepository.postsByIds(openedPostItems)
-        val postsToMarkAsRead = mutableSetOf<String>()
+      if (markAsReadOn != MarkAsReadOn.Open || openedPostItems.isEmpty()) return@launch
 
-        posts.forEach { post ->
+      val audioMarkAsReadThreshold = settingsRepository.audioMarkAsReadThreshold.first()
+      val posts = postRepository.postsByIds(openedPostItems)
+      val playbackState = audioPlayer.playbackState.value
+      val thresholdValue = audioMarkAsReadThreshold.value
+
+      val postsToMarkAsRead = buildSet {
+        for (post in posts) {
+          val postId = post.id
           if (post.audioUrl != null) {
-            val progress =
-              if (audioPlayer.playbackState.value.playingPostId == post.id) {
-                audioPlayer.playbackState.value.currentPosition
-              } else {
-                post.audioProgress
-              }
+            val isPlaying = playbackState.playingPostId == postId
+            val progress = if (isPlaying) playbackState.currentPosition else post.audioProgress
+            val duration = if (isPlaying) playbackState.duration else post.audioDuration
 
-            val duration =
-              if (audioPlayer.playbackState.value.playingPostId == post.id) {
-                audioPlayer.playbackState.value.duration
-              } else {
-                post.audioDuration
-              }
-
-            if (duration > 0) {
-              val percentage = progress.toFloat() / duration.toFloat()
-              if (percentage >= audioMarkAsReadThreshold.value) {
-                postsToMarkAsRead.add(post.id)
-              }
+            if (duration > 0 && (progress.toFloat() / duration.toFloat()) >= thresholdValue) {
+              add(postId)
             }
           } else {
-            postsToMarkAsRead.add(post.id)
+            add(postId)
           }
         }
+      }
 
+      if (postsToMarkAsRead.isNotEmpty()) {
         rssRepository.markPostsAsRead(postsToMarkAsRead)
       }
     }
