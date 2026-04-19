@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.feeds.ui.common
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -40,14 +41,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -66,6 +70,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 
 internal fun LazyListScope.pinnedSources(
   pinnedSources: List<Source>,
+  activeSource: Source?,
   onSourceClick: (Source) -> Unit,
   onPinClick: (Source) -> Unit,
   onPinnedSourceOrderChanged: (List<Source>) -> Unit,
@@ -97,6 +102,7 @@ internal fun LazyListScope.pinnedSources(
 
             PinnedSourceItem(
               source = source,
+              selected = activeSource?.id == source.id,
               onSourceClick = onSourceClick,
               onRemoveClick = onPinClick,
               isDragging = isDragging,
@@ -116,6 +122,7 @@ internal fun LazyListScope.pinnedSources(
 @Composable
 private fun PinnedSourceItem(
   source: Source,
+  selected: Boolean,
   onSourceClick: (Source) -> Unit,
   onRemoveClick: (Source) -> Unit,
   isDragging: Boolean,
@@ -129,12 +136,31 @@ private fun PinnedSourceItem(
           .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen),
       contentAlignment = Alignment.Center,
     ) {
+      val selectedColor by
+        animateColorAsState(
+          if (selected) {
+            AppTheme.colorScheme.primaryContainer
+          } else {
+            Color.Transparent
+          }
+        )
+      val selectedColorShape = RoundedCornerShape(16.dp)
+
+      Box(
+        modifier =
+          Modifier.requiredSize(56.dp).drawBehind {
+            val outline = selectedColorShape.createOutline(size, layoutDirection, this)
+            drawOutline(outline, selectedColor)
+          }
+      )
+
       val shape = RoundedCornerShape(25)
       val borderColor = AppTheme.colorScheme.outlineVariant
 
       Box(
         modifier =
-          Modifier.clip(shape)
+          Modifier.requiredSize(48.dp)
+            .clip(shape)
             .background(AppTheme.colorScheme.backdrop)
             .border(1.dp, borderColor, shape)
             .clickable(enabled = !isDragging) { onSourceClick(source) },

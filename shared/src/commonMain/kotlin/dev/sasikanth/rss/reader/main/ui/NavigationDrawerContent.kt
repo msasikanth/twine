@@ -377,6 +377,7 @@ private fun ExpandedDrawerContent(
 
         pinnedSources(
           pinnedSources = state.pinnedSources,
+          activeSource = state.activeSource,
           onSourceClick = { dispatch(FeedsEvent.OnSourceClick(it)) },
           onPinClick = { dispatch(FeedsEvent.OnSourcePinClicked(it)) },
           onPinnedSourceOrderChanged = { dispatch(FeedsEvent.OnPinnedSourcePositionChanged(it)) },
