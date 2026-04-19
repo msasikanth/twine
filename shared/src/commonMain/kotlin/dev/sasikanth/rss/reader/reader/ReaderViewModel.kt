@@ -77,7 +77,7 @@ class ReaderViewModel(
 ) : ViewModel() {
 
   private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
-  private val openedPostItems = mutableSetOf<String>()
+  private val _openedPostItems = MutableStateFlow(emptySet<String>())
   private val readerScreenArgs =
     savedStateHandle
       .toRoute<Screen.Reader>(
@@ -123,7 +123,7 @@ class ReaderViewModel(
 
   private fun onMarkAsUnreadAndExit(postId: String) {
     coroutineScope.launch {
-      openedPostItems.remove(postId)
+      _openedPostItems.update { it - postId }
       rssRepository.updatePostReadStatus(read = false, id = postId)
       _exitScreen.emit(true)
     }
@@ -164,14 +164,22 @@ class ReaderViewModel(
   }
 
   private fun postPageChange(postIndex: Int, post: ResolvedPost) {
-    openedPostItems += post.id
+    _openedPostItems.update { it + post.id }
     _state.update { it.copy(activePostIndex = postIndex, activePostId = post.id) }
     observableSelectedPost.updateSelectedPost(postIndex, post.id)
+
+    coroutineScope.launch {
+      val markAsReadOn = settingsRepository.markAsReadOn.first()
+      if (markAsReadOn == MarkAsReadOn.Open && post.audioUrl == null) {
+        rssRepository.updatePostReadStatus(read = true, id = post.id)
+      }
+    }
   }
 
   private fun markPostsAsRead(): Job {
     return coroutineScope.launch {
       val markAsReadOn = settingsRepository.markAsReadOn.first()
+      val openedPostItems = _openedPostItems.value
       if (markAsReadOn != MarkAsReadOn.Open || openedPostItems.isEmpty()) return@launch
 
       val audioMarkAsReadThreshold = settingsRepository.audioMarkAsReadThreshold.first()
@@ -205,23 +213,28 @@ class ReaderViewModel(
   private fun init() {
     coroutineScope.launch {
       if (readerScreenArgs.fromScreen == Home || readerScreenArgs.fromScreen == AudioPlayer) {
-        val allPostsPagingData = allPostsPager.allPostsPagingData.cachedIn(coroutineScope)
+        val allPostsPagingData =
+          allPostsPager
+            .allPostsPagingData(sessionPostIds = { _openedPostItems.value.toList() })
+            .cachedIn(coroutineScope)
         _state.update { it.copy(posts = allPostsPagingData) }
       } else {
         val posts =
           Pager(config = PagingConfig(pageSize = 4, enablePlaceholders = true)) {
+              val sessionPostIds = _openedPostItems.value.toList()
               when (readerScreenArgs.fromScreen) {
                 is Search -> {
                   rssRepository.search(
                     searchQuery = readerScreenArgs.fromScreen.searchQuery,
                     sortOrder = readerScreenArgs.fromScreen.sortOrder,
+                    sessionPostIds = sessionPostIds,
                   )
                 }
                 Bookmarks -> {
                   rssRepository.bookmarks()
                 }
                 UnreadWidget -> {
-                  widgetDataRepository.unreadPostsPager()
+                  widgetDataRepository.unreadPostsPager(sessionPostIds = sessionPostIds)
                 }
               }
             }

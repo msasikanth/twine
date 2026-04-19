@@ -256,11 +256,11 @@ class HomeViewModel(
   private fun init() {
     val activeSourceFlow = observableActiveSource.activeSource
     val postsTypeFlow = settingsRepository.postsType
-    val allPostsPagingData = allPostsPager.allPostsPagingData.cachedIn(viewModelScope)
-    val feedPostsPagingData = allPostsPager.nonFeaturedPostsPagingData.cachedIn(viewModelScope)
+    val allPostsPagingData = allPostsPager.allPostsPagingData().cachedIn(viewModelScope)
+    val feedPostsPagingData = allPostsPager.nonFeaturedPostsPagingData().cachedIn(viewModelScope)
 
     val featuredPosts =
-      combine(allPostsPager.featuredPosts, settingsRepository.showFeaturedSection) {
+      combine(allPostsPager.featuredPosts(), settingsRepository.showFeaturedSection) {
         featuredPosts,
         showFeaturedSection ->
         if (showFeaturedSection) {

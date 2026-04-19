@@ -55,6 +55,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -73,7 +74,7 @@ class AllPostsPager(
   private val rssRepository: RssRepository,
   private val syncCoordinator: SyncCoordinator,
   private val seedColorExtractor: SeedColorExtractor,
-  dispatchersProvider: DispatchersProvider,
+  private val dispatchersProvider: DispatchersProvider,
 ) {
   private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.default)
 
@@ -97,7 +98,9 @@ class AllPostsPager(
       }
       .distinctUntilChanged()
 
-  val allPostsPagingData: Flow<PagingData<ResolvedPost>> =
+  fun allPostsPagingData(
+    sessionPostIds: () -> List<String> = { emptyList() }
+  ): Flow<PagingData<ResolvedPost>> =
     baseParameters.flatMapLatest { params ->
       Pager(config = PagingConfig(pageSize = 20, enablePlaceholders = true)) {
           rssRepository.allPosts(
@@ -106,12 +109,15 @@ class AllPostsPager(
             unreadOnly = params.unreadOnly,
             after = params.postsAfter,
             postsUpperBound = params.postsUpperBound,
+            sessionPostIds = sessionPostIds(),
           )
         }
         .flow
     }
 
-  val nonFeaturedPostsPagingData: Flow<PagingData<ResolvedPost>> =
+  fun nonFeaturedPostsPagingData(
+    sessionPostIds: () -> List<String> = { emptyList() }
+  ): Flow<PagingData<ResolvedPost>> =
     baseParameters.flatMapLatest { params ->
       Pager(config = PagingConfig(pageSize = 20, enablePlaceholders = true)) {
           rssRepository.nonFeaturedPosts(
@@ -121,13 +127,16 @@ class AllPostsPager(
             after = params.postsAfter,
             featuredPostsAfter = params.featuredPostsAfter,
             postsUpperBound = params.postsUpperBound,
+            sessionPostIds = sessionPostIds(),
           )
         }
         .flow
     }
 
-  val featuredPosts: Flow<ImmutableList<FeaturedPostItem>> =
-    baseParameters.flatMapLatest { params ->
+  fun featuredPosts(
+    sessionPostIds: Flow<List<String>> = flowOf(emptyList())
+  ): Flow<ImmutableList<FeaturedPostItem>> =
+    combine(baseParameters, sessionPostIds, ::Pair).flatMapLatest { (params, sessionPostIds) ->
       rssRepository
         .featuredPosts(
           activeSourceIds = params.activeSourceIds,
@@ -136,6 +145,7 @@ class AllPostsPager(
           after = params.postsAfter,
           featuredPostsAfter = params.featuredPostsAfter,
           postsUpperBound = params.postsUpperBound,
+          sessionPostIds = sessionPostIds,
         )
         .onEach { posts ->
           coroutineScope.launch(dispatchersProvider.io) {
