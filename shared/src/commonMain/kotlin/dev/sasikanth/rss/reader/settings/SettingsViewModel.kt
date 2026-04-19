@@ -32,6 +32,7 @@ import dev.sasikanth.rss.reader.data.opml.OpmlFeedGroup
 import dev.sasikanth.rss.reader.data.opml.OpmlManager
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
+import dev.sasikanth.rss.reader.data.repository.AudioMarkAsReadThreshold
 import dev.sasikanth.rss.reader.data.repository.BlockedWordsRepository
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
@@ -116,6 +117,7 @@ class SettingsViewModel(
           settingsRepository.blockImages,
           settingsRepository.downloadFullContent,
           settingsRepository.enableAutoSync,
+          settingsRepository.audioMarkAsReadThreshold,
           ::SettingsGroup3,
         ),
         combine(
@@ -139,6 +141,7 @@ class SettingsViewModel(
           showFeaturedSection = combinedGroup.showFeaturedSection,
           showPinnedSources = combinedGroup.showPinnedSources,
           markAsReadOn = group1.markAsReadOn,
+          audioMarkAsReadThreshold = group3.audioMarkAsReadThreshold,
           homeViewMode = group3.homeViewMode,
           blockImages = group3.blockImages,
           enableNotifications = group4.enableNotifications,
@@ -165,6 +168,7 @@ class SettingsViewModel(
             showFeaturedSection = settings.showFeaturedSection,
             showPinnedSources = settings.showPinnedSources,
             markAsReadOn = settings.markAsReadOn,
+            audioMarkAsReadThreshold = settings.audioMarkAsReadThreshold,
             homeViewMode = settings.homeViewMode,
             blockImages = settings.blockImages,
             enableNotifications = settings.enableNotifications,
@@ -227,6 +231,8 @@ class SettingsViewModel(
       is SettingsEvent.OnThemeVariantChanged -> onThemeVariantChanged(event.themeVariant)
       is SettingsEvent.ToggleAmoled -> toggleAmoled(event.value)
       is SettingsEvent.MarkAsReadOnChanged -> markAsReadOnChanged(event.newMarkAsReadOn)
+      is SettingsEvent.AudioMarkAsReadThresholdChanged ->
+        audioMarkAsReadThresholdChanged(event.threshold)
       is SettingsEvent.LoadSubscriptionStatus -> loadSubscriptionStatus()
       is SettingsEvent.MarkOpenPaywallAsDone -> {
         _state.update { it.copy(openPaywall = false) }
@@ -343,6 +349,10 @@ class SettingsViewModel(
     viewModelScope.launch { settingsRepository.updateMarkAsReadOn(markAsReadOn) }
   }
 
+  private fun audioMarkAsReadThresholdChanged(threshold: AudioMarkAsReadThreshold) {
+    viewModelScope.launch { settingsRepository.updateAudioMarkAsReadThreshold(threshold) }
+  }
+
   private fun toggleShowFeedFavIcon(value: Boolean) {
     viewModelScope.launch { settingsRepository.toggleShowFeedFavIcon(value) }
   }
@@ -457,6 +467,7 @@ private data class Settings(
   val showFeaturedSection: Boolean,
   val showPinnedSources: Boolean,
   val markAsReadOn: MarkAsReadOn,
+  val audioMarkAsReadThreshold: AudioMarkAsReadThreshold,
   val homeViewMode: HomeViewMode,
   val blockImages: Boolean,
   val enableNotifications: Boolean,
@@ -499,6 +510,7 @@ private data class SettingsGroup3(
   val blockImages: Boolean,
   val downloadFullContent: Boolean,
   val enableAutoSync: Boolean,
+  val audioMarkAsReadThreshold: AudioMarkAsReadThreshold,
 )
 
 private data class SettingsGroup4(

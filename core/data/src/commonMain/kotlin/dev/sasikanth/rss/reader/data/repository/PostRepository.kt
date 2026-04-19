@@ -530,9 +530,19 @@ class PostRepository(
     }
   }
 
-  suspend fun updateAudioProgress(postId: String, audioProgress: Long) {
+  suspend fun postsByIds(postIds: Set<String>): List<Post> {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.postsByIds(postIds.toList(), ::Post).executeAsList()
+    }
+  }
+
+  suspend fun updateAudioProgress(postId: String, audioProgress: Long, audioDuration: Long) {
     withContext(dispatchersProvider.databaseWrite) {
-      postQueries.updateAudioProgress(audioProgress = audioProgress, id = postId)
+      postQueries.updateAudioProgress(
+        audioProgress = audioProgress,
+        audioDuration = audioDuration,
+        id = postId,
+      )
     }
   }
 
@@ -558,6 +568,7 @@ class PostRepository(
     articleContentReadingTime: Long?,
     seedColor: Long?,
     audioProgress: Long,
+    audioDuration: Long,
   ): ResolvedPost {
     return ResolvedPost(
       id = id,
@@ -581,6 +592,7 @@ class PostRepository(
       seedColor = seedColor?.toInt(),
       remoteId = remoteId,
       audioProgress = audioProgress,
+      audioDuration = audioDuration,
     )
   }
 }

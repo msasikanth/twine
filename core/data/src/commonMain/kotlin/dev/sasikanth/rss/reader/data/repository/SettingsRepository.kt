@@ -55,6 +55,7 @@ class SettingsRepository(
   private val enableAutoSyncKey = booleanPreferencesKey("enable_auto_sync")
   private val showFeedFavIconKey = booleanPreferencesKey("show_feed_fav_icon")
   private val markPostsAsReadOnKey = stringPreferencesKey("mark_posts_as_read_on")
+  private val audioMarkAsReadThresholdKey = stringPreferencesKey("audio_mark_as_read_threshold")
   private val homeViewModeKey = stringPreferencesKey("home_view_mode")
   private val readerFontScaleFactorKey = floatPreferencesKey("reader_font_scale")
   private val readerLineHeightScaleFactorKey = floatPreferencesKey("reader_line_height_scale")
@@ -130,6 +131,11 @@ class SettingsRepository(
 
   val markAsReadOn: Flow<MarkAsReadOn> =
     dataStore.data.map { preferences -> mapToMarkAsReadOnType(preferences[markPostsAsReadOnKey]) }
+
+  val audioMarkAsReadThreshold: Flow<AudioMarkAsReadThreshold> =
+    dataStore.data.map { preferences ->
+      mapToAudioMarkAsReadThreshold(preferences[audioMarkAsReadThresholdKey])
+    }
 
   val homeViewMode: Flow<HomeViewMode> =
     dataStore.data.map { preferences -> mapToHomeViewMode(preferences[homeViewModeKey]) }
@@ -265,6 +271,10 @@ class SettingsRepository(
     dataStore.edit { preferences -> preferences[markPostsAsReadOnKey] = value.name }
   }
 
+  suspend fun updateAudioMarkAsReadThreshold(value: AudioMarkAsReadThreshold) {
+    dataStore.edit { preferences -> preferences[audioMarkAsReadThresholdKey] = value.name }
+  }
+
   suspend fun updateHomeViewMode(value: HomeViewMode) {
     dataStore.edit { preferences -> preferences[homeViewModeKey] = value.name }
   }
@@ -382,6 +392,15 @@ class SettingsRepository(
     return MarkAsReadOn.valueOf(pref)
   }
 
+  private fun mapToAudioMarkAsReadThreshold(pref: String?): AudioMarkAsReadThreshold {
+    if (pref.isNullOrBlank()) return AudioMarkAsReadThreshold.Fifty
+    return try {
+      AudioMarkAsReadThreshold.valueOf(pref)
+    } catch (e: Exception) {
+      AudioMarkAsReadThreshold.Fifty
+    }
+  }
+
   private fun mapToHomeViewMode(pref: String?): HomeViewMode {
     if (pref.isNullOrBlank()) return HomeViewMode.Default
     return HomeViewMode.valueOf(pref)
@@ -438,6 +457,14 @@ enum class Period {
 enum class MarkAsReadOn {
   Open,
   Scroll,
+}
+
+enum class AudioMarkAsReadThreshold(val value: Float) {
+  TwentyFive(0.25f),
+  Fifty(0.50f),
+  SeventyFive(0.75f),
+  Ninety(0.90f),
+  Hundred(1f),
 }
 
 enum class HomeViewMode {

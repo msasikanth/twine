@@ -25,6 +25,7 @@ import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.opml.OpmlFeed
 import dev.sasikanth.rss.reader.data.opml.OpmlResult
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
+import dev.sasikanth.rss.reader.data.repository.AudioMarkAsReadThreshold
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
@@ -48,6 +49,7 @@ data class SettingsState(
   val showFeaturedSection: Boolean,
   val showPinnedSources: Boolean,
   val markAsReadOn: MarkAsReadOn,
+  val audioMarkAsReadThreshold: AudioMarkAsReadThreshold,
   val subscriptionResult: SubscriptionResult?,
   val openPaywall: Boolean,
   val homeViewMode: HomeViewMode,
@@ -100,6 +102,7 @@ data class SettingsState(
         showFeaturedSection = true,
         showPinnedSources = true,
         markAsReadOn = MarkAsReadOn.Open,
+        audioMarkAsReadThreshold = AudioMarkAsReadThreshold.Fifty,
         subscriptionResult = null,
         openPaywall = false,
         homeViewMode = HomeViewMode.Default,

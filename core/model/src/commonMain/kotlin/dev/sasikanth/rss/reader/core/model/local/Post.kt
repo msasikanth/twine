@@ -36,6 +36,7 @@ data class Post(
   val audioUrl: String?,
   val seedColor: Long? = null,
   val audioProgress: Long = 0L,
+  val audioDuration: Long = 0L,
 ) {
   val bookmarked: Boolean
     get() = PostFlag.Bookmarked in flags

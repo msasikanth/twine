@@ -80,6 +80,7 @@ class WidgetDataRepository(
           feedContentReadingTime: Long?,
           _: Long?,
           _: Long?,
+          _: Long,
           _: Long ->
           WidgetPost(
             id = id,
@@ -124,6 +125,7 @@ class WidgetDataRepository(
             feedContentReadingTime: Long?,
             _: Long?,
             _: Long?,
+            _: Long,
             _: Long ->
             WidgetPost(
               id = id,
@@ -171,7 +173,8 @@ class WidgetDataRepository(
             feedContentReadingTime: Long?,
             articleContentReadingTime: Long?,
             seedColor: Long?,
-            audioProgress: Long ->
+            audioProgress: Long,
+            audioDuration: Long ->
             ResolvedPost(
               id = id,
               sourceId = sourceId,
@@ -194,6 +197,7 @@ class WidgetDataRepository(
               seedColor = seedColor?.toInt(),
               remoteId = remoteId,
               audioProgress = audioProgress,
+              audioDuration = audioDuration,
             )
           },
         )

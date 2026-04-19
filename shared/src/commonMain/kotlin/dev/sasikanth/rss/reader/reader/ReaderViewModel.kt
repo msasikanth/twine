@@ -28,12 +28,15 @@ import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
+import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.ObservableSelectedPost
+import dev.sasikanth.rss.reader.data.repository.PostRepository
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
 import dev.sasikanth.rss.reader.data.repository.isPremium
+import dev.sasikanth.rss.reader.media.AudioPlayer as MediaAudioPlayer
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.AudioPlayer
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Bookmarks
@@ -50,6 +53,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -62,6 +66,8 @@ import me.tatarka.inject.annotations.Inject
 class ReaderViewModel(
   dispatchersProvider: DispatchersProvider,
   private val rssRepository: RssRepository,
+  private val postRepository: PostRepository,
+  private val audioPlayer: MediaAudioPlayer,
   private val widgetDataRepository: WidgetDataRepository,
   private val allPostsPager: AllPostsPager,
   private val settingsRepository: SettingsRepository,
@@ -164,7 +170,36 @@ class ReaderViewModel(
   }
 
   private fun markPostsAsRead(): Job {
-    return coroutineScope.launch { rssRepository.markPostsAsRead(openedPostItems) }
+    return coroutineScope.launch {
+      val markAsReadOn = settingsRepository.markAsReadOn.first()
+      if (markAsReadOn != MarkAsReadOn.Open || openedPostItems.isEmpty()) return@launch
+
+      val audioMarkAsReadThreshold = settingsRepository.audioMarkAsReadThreshold.first()
+      val posts = postRepository.postsByIds(openedPostItems)
+      val playbackState = audioPlayer.playbackState.value
+      val thresholdValue = audioMarkAsReadThreshold.value
+
+      val postsToMarkAsRead = buildSet {
+        for (post in posts) {
+          val postId = post.id
+          if (post.audioUrl != null) {
+            val isPlaying = playbackState.playingPostId == postId
+            val progress = if (isPlaying) playbackState.currentPosition else post.audioProgress
+            val duration = if (isPlaying) playbackState.duration else post.audioDuration
+
+            if (duration > 0 && (progress.toFloat() / duration.toFloat()) >= thresholdValue) {
+              add(postId)
+            }
+          } else {
+            add(postId)
+          }
+        }
+      }
+
+      if (postsToMarkAsRead.isNotEmpty()) {
+        rssRepository.markPostsAsRead(postsToMarkAsRead)
+      }
+    }
   }
 
   private fun init() {

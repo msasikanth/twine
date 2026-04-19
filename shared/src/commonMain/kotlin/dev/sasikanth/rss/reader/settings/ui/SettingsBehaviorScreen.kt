@@ -16,6 +16,9 @@
  */
 package dev.sasikanth.rss.reader.settings.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -45,9 +48,11 @@ import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.data.repository.BrowserType
+import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsState
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
+import dev.sasikanth.rss.reader.settings.ui.items.AudioMarkAsReadThresholdSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.BlockedWordsSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.MarkAsReadOnSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.OpmlFeedSelectionSheet
@@ -205,6 +210,19 @@ private fun SettingsBehaviorContent(
         item {
           MarkAsReadOnSettingItem(articleMarkAsReadOn = state.markAsReadOn) {
             dispatch(SettingsEvent.MarkAsReadOnChanged(it))
+          }
+        }
+
+        item {
+          AnimatedVisibility(
+            visible = state.markAsReadOn == MarkAsReadOn.Open,
+            enter = expandVertically(),
+            exit = shrinkVertically(),
+          ) {
+            AudioMarkAsReadThresholdSettingItem(
+              threshold = state.audioMarkAsReadThreshold,
+              onThresholdChanged = { dispatch(SettingsEvent.AudioMarkAsReadThresholdChanged(it)) },
+            )
           }
         }
 
