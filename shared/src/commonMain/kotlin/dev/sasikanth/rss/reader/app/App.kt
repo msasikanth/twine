@@ -25,6 +25,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
@@ -34,6 +35,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
@@ -212,7 +215,17 @@ fun App(
       } else {
         24.dp
       }
-    val screenModifier = Modifier.fillMaxSize()
+    val screenModifier =
+      Modifier.fillMaxSize().let {
+        if (platform == Platform.Apple) {
+          it.dropShadow(shape = RoundedCornerShape(screenCornerRadius)) {
+            color = Color.Black.copy(alpha = 0.1f)
+            radius = 32.dp.toPx()
+          }
+        } else {
+          it
+        }
+      }
 
     LaunchedEffect(useDarkTheme) { onThemeChange(useDarkTheme) }
 
