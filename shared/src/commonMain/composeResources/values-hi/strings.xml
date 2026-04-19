@@ -192,6 +192,13 @@
   <string name="markArticleAsRead">Mark article as read</string>
   <string name="markArticleAsReadOnOpen">On Open</string>
   <string name="markArticleAsReadOnScroll">On Scroll</string>
+  <string name="audioMarkAsReadThresholdTitle">Auto-Mark Audio as Read</string>
+  <string name="audioMarkAsReadThresholdSubtitle">Automatically mark audio posts as read after playing this amount</string>
+  <string name="audioMarkAsReadThreshold25">25%</string>
+  <string name="audioMarkAsReadThreshold50">50%</string>
+  <string name="audioMarkAsReadThreshold75">75%</string>
+  <string name="audioMarkAsReadThreshold90">90%</string>
+  <string name="audioMarkAsReadThreshold100">100%</string>
   <string name="noReaderContent">No content to display in the reader, please try fetching article or visiting the website.</string>
   <string name="pullToClose">Pull down to close</string>
   <string name="readerSettings">Reader screen settings</string>
