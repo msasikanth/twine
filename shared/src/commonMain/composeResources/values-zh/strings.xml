@@ -192,6 +192,13 @@
   <string name="markArticleAsRead">标记文章为已读</string>
   <string name="markArticleAsReadOnOpen">打开后</string>
   <string name="markArticleAsReadOnScroll">滚动时</string>
+  <string name="audioMarkAsReadThresholdTitle">Auto-Mark Audio as Read</string>
+  <string name="audioMarkAsReadThresholdSubtitle">Automatically mark audio posts as read after playing this amount</string>
+  <string name="audioMarkAsReadThreshold25">25%</string>
+  <string name="audioMarkAsReadThreshold50">50%</string>
+  <string name="audioMarkAsReadThreshold75">75%</string>
+  <string name="audioMarkAsReadThreshold90">90%</string>
+  <string name="audioMarkAsReadThreshold100">100%</string>
   <string name="noReaderContent">阅读器中没有可显示的内容，请尝试抓取文章或访问网站。</string>
   <string name="pullToClose">下拉以关闭</string>
   <string name="readerSettings">阅读器屏幕设置</string>
