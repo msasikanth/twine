@@ -28,6 +28,7 @@ import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
+import dev.sasikanth.rss.reader.notifications.Notifier
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,6 +53,7 @@ class FeedViewModel(
   private val settingsRepository: SettingsRepository,
   private val observableActiveSource: ObservableActiveSource,
   private val refreshPolicy: RefreshPolicy,
+  private val notifier: Notifier,
   @Assisted savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -82,9 +84,15 @@ class FeedViewModel(
 
   private fun onEnableNotificationsChanged(newValue: Boolean, feedId: String) {
     viewModelScope.launch {
-      rssRepository.updateFeedEnableNotifications(feedId, newValue)
       if (newValue && !_state.value.globalNotificationsEnabled) {
-        settingsRepository.toggleNotifications(true)
+        val granted = notifier.requestPermission()
+        if (granted) {
+          rssRepository.disableNotificationsForFeeds()
+          rssRepository.updateFeedEnableNotifications(feedId, true)
+          settingsRepository.toggleNotifications(true)
+        }
+      } else {
+        rssRepository.updateFeedEnableNotifications(feedId, newValue)
       }
     }
   }
