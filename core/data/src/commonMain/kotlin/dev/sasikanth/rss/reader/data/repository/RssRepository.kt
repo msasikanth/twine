@@ -878,6 +878,10 @@ class RssRepository(
     feedRepository.updateFeedEnableNotifications(feedId, newValue)
   }
 
+  suspend fun disableNotificationsForFeeds() {
+    feedRepository.disableNotificationsForFeeds()
+  }
+
   suspend fun updateFeedHideFromAllFeeds(feedId: String, newValue: Boolean) {
     withContext(dispatchersProvider.databaseWrite) {
       feedQueries.updateHideFromAllFeeds(

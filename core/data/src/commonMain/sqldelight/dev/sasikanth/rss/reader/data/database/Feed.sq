@@ -112,6 +112,9 @@ UPDATE feed SET hideFromAllFeeds = :hideFromAllFeeds, lastUpdatedAt = :lastUpdat
 updateEnableNotifications:
 UPDATE feed SET enableNotifications = :enableNotifications, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
 
+disableNotifications:
+UPDATE feed SET enableNotifications = 0, lastUpdatedAt = :lastUpdatedAt;
+
 feedsInGroupPaginatedCount:
 SELECT COUNT(*) FROM feed
 WHERE id IN :feedIds AND isDeleted = 0;

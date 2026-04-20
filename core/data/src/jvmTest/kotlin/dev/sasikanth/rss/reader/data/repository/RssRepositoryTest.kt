@@ -392,6 +392,47 @@ class RssRepositoryTest {
   }
 
   @Test
+  fun disableNotificationsForFeedsShouldDisableAllFeeds() = runTest {
+    // given
+    database.feedQueries.upsert(
+      id = "feed-1",
+      name = "Feed 1",
+      icon = "icon",
+      description = "description",
+      homepageLink = "homepage",
+      createdAt = Instant.fromEpochMilliseconds(0),
+      link = "link-1",
+      alwaysFetchSourceArticle = false,
+      showFeedFavIcon = false,
+      lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+      enableNotifications = true,
+    )
+    database.feedQueries.upsert(
+      id = "feed-2",
+      name = "Feed 2",
+      icon = "icon",
+      description = "description",
+      homepageLink = "homepage",
+      createdAt = Instant.fromEpochMilliseconds(0),
+      link = "link-2",
+      alwaysFetchSourceArticle = false,
+      showFeedFavIcon = false,
+      lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+      enableNotifications = true,
+    )
+
+    // when
+    repository.disableNotificationsForFeeds()
+
+    // then
+    val feed1 = repository.feed(feedId = "feed-1", postsAfter = Instant.DISTANT_PAST).first()
+    val feed2 = repository.feed(feedId = "feed-2", postsAfter = Instant.DISTANT_PAST).first()
+
+    assertEquals(false, feed1.enableNotifications)
+    assertEquals(false, feed2.enableNotifications)
+  }
+
+  @Test
   fun postPositionShouldMatchIndexInAllPostsForAllSortOrders() = runTest {
     // given
     val feedId = "feed-1"

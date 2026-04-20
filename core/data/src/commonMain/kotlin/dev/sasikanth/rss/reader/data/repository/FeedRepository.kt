@@ -26,6 +26,7 @@ import dev.sasikanth.rss.reader.data.database.FeedQueries
 import dev.sasikanth.rss.reader.data.database.FeedSearchFTSQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
@@ -133,7 +134,7 @@ class FeedRepository(
       feedQueries.updateFeedName(
         newFeedName = newFeedName,
         id = feedId,
-        lastUpdatedAt = kotlin.time.Clock.System.now(),
+        lastUpdatedAt = Clock.System.now(),
       )
     }
   }
@@ -166,9 +167,15 @@ class FeedRepository(
     withContext(dispatchersProvider.databaseWrite) {
       feedQueries.updateEnableNotifications(
         enableNotifications = newValue,
-        lastUpdatedAt = kotlin.time.Clock.System.now(),
+        lastUpdatedAt = Clock.System.now(),
         id = feedId,
       )
+    }
+  }
+
+  suspend fun disableNotificationsForFeeds() {
+    withContext(dispatchersProvider.databaseWrite) {
+      feedQueries.disableNotifications(lastUpdatedAt = Clock.System.now())
     }
   }
 
