@@ -116,7 +116,6 @@ kotlin {
       api(libs.coil.svg)
       implementation(libs.kermit)
       implementation(libs.reorderable)
-      api(libs.filekit)
       implementation(libs.landscapist.image)
       implementation(libs.landscapist.coil3)
       implementation(libs.landscapist.zoomable)

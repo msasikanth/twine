@@ -65,7 +65,7 @@ kotlin {
       implementation(libs.ktor.content.negotiation)
       implementation(libs.ktor.json)
       api(libs.kotlinx.serialization.json)
-      implementation(libs.filekit)
+      implementation(libs.filekit.core)
       implementation(libs.ksoup)
       implementation(libs.bundles.xmlutil)
       implementation(libs.stately.isolate)

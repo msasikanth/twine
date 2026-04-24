@@ -129,4 +129,5 @@ dependencies {
   implementation(libs.glance)
   implementation(libs.glance.material3)
   implementation(libs.kotlinx.immutable.collections)
+  implementation(libs.filekit.core)
 }
