@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.utils
 
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import kotlin.math.roundToInt
 
 // source: https://chrisbanes.me/posts/parallax-effect-compose/#alignmentparallax
+@Stable
 internal class ParallaxAlignment(
   private val horizontalBias: () -> Float,
   private val verticalBias: Float = 0f,

@@ -82,17 +82,54 @@ internal fun FeaturedSection(
   updateReadStatus: (id: String, updatedReadStatus: Boolean) -> Unit,
 ) {
   val layoutDirection = LocalLayoutDirection.current
+  val density = LocalDensity.current
+  val sizeClass = LocalWindowSizeClass.current
 
   val systemBarsPaddingValues =
     WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
-  val systemBarsStartPadding = systemBarsPaddingValues.calculateStartPadding(layoutDirection)
-  val systemBarsEndPadding = systemBarsPaddingValues.calculateEndPadding(layoutDirection)
-
   val systemBarsHorizontalPadding =
-    if (systemBarsStartPadding > systemBarsEndPadding) {
-      systemBarsStartPadding
-    } else {
-      systemBarsEndPadding
+    remember(systemBarsPaddingValues, layoutDirection) {
+      val systemBarsStartPadding = systemBarsPaddingValues.calculateStartPadding(layoutDirection)
+      val systemBarsEndPadding = systemBarsPaddingValues.calculateEndPadding(layoutDirection)
+
+      if (systemBarsStartPadding > systemBarsEndPadding) {
+        systemBarsStartPadding
+      } else {
+        systemBarsEndPadding
+      }
+    }
+
+  val blurEffect =
+    remember(density) {
+      if (canBlurImage) {
+        val blurRadius = 100.dp
+        val blurRadiusPx = with(density) { blurRadius.toPx() }
+        BlurEffect(radiusX = blurRadiusPx, radiusY = blurRadiusPx, edgeTreatment = TileMode.Decal)
+      } else {
+        null
+      }
+    }
+
+  val imageAspectRatio =
+    remember(sizeClass) {
+      when {
+        sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> 2f
+        sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) -> 1.5f
+        else -> 1f
+      }
+    }
+
+  val targetHeightPx =
+    remember(sizeClass, density) {
+      val baseHeight =
+        when {
+          sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) ->
+            360.dp
+          sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) -> 250.dp
+          else -> 200.dp
+        }
+      val targetHeight = (baseHeight * 0.5f).coerceAtLeast(120.dp)
+      with(density) { targetHeight.roundToPx() }
     }
 
   Box(modifier) {
@@ -118,16 +155,6 @@ internal fun FeaturedSection(
       val featuredPost = featuredPosts.getOrNull(page)
       if (featuredPost != null) {
         val postWithMetadata = featuredPost.resolvedPost
-        val blurRadius = 100.dp
-        val blurRadiusPx = with(LocalDensity.current) { blurRadius.toPx() }
-        val blurEffect =
-          remember(blurRadiusPx) {
-            BlurEffect(
-              radiusX = blurRadiusPx,
-              radiusY = blurRadiusPx,
-              edgeTreatment = TileMode.Decal,
-            )
-          }
         val imageAlignment =
           remember(page) {
             ParallaxAlignment(
@@ -136,12 +163,20 @@ internal fun FeaturedSection(
             )
           }
 
+        val contentAlphaProvider =
+          remember(page) {
+            {
+              val pageOffset = pagerState.getOffsetFractionForPage(page)
+              calculateContentAlpha(pageOffset)
+            }
+          }
+
         Box(
           modifier =
             Modifier.onVisibilityChanged(minDurationMs = 500) {
-              val previousFeaturedPost = featuredPosts.getOrNull(page - 1)
+              val previousFeaturedPost =
+                featuredPosts.getOrNull(page - 1) ?: return@onVisibilityChanged
 
-              if (previousFeaturedPost == null) return@onVisibilityChanged
               if (previousFeaturedPost.resolvedPost.read) return@onVisibilityChanged
 
               if (it) {
@@ -149,9 +184,11 @@ internal fun FeaturedSection(
               }
             }
         ) {
-          if (canBlurImage) {
+          if (canBlurImage && blurEffect != null) {
             FeaturedSectionBackground(
               imageUrl = postWithMetadata.imageUrl,
+              imageAspectRatio = imageAspectRatio,
+              targetHeightPx = targetHeightPx,
               modifier =
                 Modifier.ignoreHorizontalParentPadding(horizontal = 24.dp).graphicsLayer {
                   val pageOffset = pagerState.getOffsetFractionForPage(page)
@@ -170,10 +207,7 @@ internal fun FeaturedSection(
 
           FeaturedPostItem(
             item = postWithMetadata,
-            contentAlphaProvider = {
-              val pageOffset = pagerState.getOffsetFractionForPage(page)
-              calculateContentAlpha(pageOffset)
-            },
+            contentAlphaProvider = contentAlphaProvider,
             onClick = { onItemClick(postWithMetadata, page) },
             onBookmarkClick = { onPostBookmarkClick(postWithMetadata) },
             onCommentsClick = { onPostCommentsClick(postWithMetadata.commentsLink!!) },
@@ -215,17 +249,12 @@ internal fun FeaturedSection(
 @Composable
 private fun FeaturedSectionBackground(
   imageUrl: String?,
+  imageAspectRatio: Float,
+  targetHeightPx: Int,
   modifier: Modifier = Modifier,
   alignment: Alignment = Alignment.Center,
 ) {
-  val sizeClass = LocalWindowSizeClass.current
   val overlayColor = AppTheme.colorScheme.inversePrimary
-  val imageAspectRatio =
-    when {
-      sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> 2f
-      sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) -> 1.5f
-      else -> 1f
-    }
   val isDarkTheme = AppTheme.isDark
   val colorFilter =
     remember(isDarkTheme) {
@@ -239,17 +268,6 @@ private fun FeaturedSectionBackground(
 
   if (imageUrl == null) return
 
-  val downsampleFactor = 0.5f
-  val baseHeight =
-    when {
-      sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> 360.dp
-      sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) -> 250.dp
-      else -> 200.dp
-    }
-  val targetHeight = (baseHeight * downsampleFactor).coerceAtLeast(120.dp)
-  val density = LocalDensity.current
-  val targetHeightPx =
-    remember(targetHeight, density) { with(density) { targetHeight.roundToPx() } }
   val backgroundImageSize = remember(targetHeightPx) { Size(Dimension.Undefined, targetHeightPx) }
 
   AsyncImage(
