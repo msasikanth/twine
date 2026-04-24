@@ -567,10 +567,12 @@ private fun ReaderActionsPanel(
       contentAlignment = Alignment.Center,
     ) {
       val (shadowColor1, shadowColor2) =
-        if (isDarkTheme) {
-          Pair(Color.Black.copy(alpha = 0.6f), Color.Black.copy(alpha = 0.24f))
-        } else {
-          Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))
+        remember(isDarkTheme) {
+          if (isDarkTheme) {
+            Pair(Color.Black.copy(alpha = 0.6f), Color.Black.copy(alpha = 0.24f))
+          } else {
+            Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))
+          }
         }
       val backgroundShape = RoundedCornerShape(36.dp)
 
