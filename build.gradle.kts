@@ -37,23 +37,6 @@ subprojects {
 }
 
 allprojects {
-  configurations.all {
-    resolutionStrategy.eachDependency {
-      if (requested.group.startsWith("org.jetbrains.compose") && requested.name.contains("uikit")) {
-        // Force old uikit artifacts to use the new ios naming convention
-        // filekit-compose 0.8.8 depends on Compose 1.7.1 which uses old uikit naming
-        // Old: ui-uikitsimarm64 -> New: ui-iossimulatorarm64
-        // Old: ui-uikitarm64 -> New: ui-iosarm64
-        // Old: ui-uikitx64 -> New: ui-iosx64
-        val newName =
-          requested.name
-            .replace("uikitsimarm64", "iossimulatorarm64")
-            .replace("uikitarm64", "iosarm64")
-            .replace("uikitx64", "iosx64")
-        useTarget("${requested.group}:$newName:1.11.0-beta01")
-      }
-    }
-  }
   apply(plugin = rootProject.libs.plugins.spotless.get().pluginId)
   configure<SpotlessExtension> {
     kotlin {
