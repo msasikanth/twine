@@ -5,8 +5,8 @@ compose = "1.11.0-beta03"
 compose-material3 = "1.11.0-alpha07"
 compose_material3_adaptive = "1.3.0-alpha07"
 
-android_sdk_compile = "36"
-android_sdk_target = "36"
+android_sdk_compile = "37"
+android_sdk_target = "37"
 android_sdk_min = "26"
 
 sqldelight = "2.3.2"
