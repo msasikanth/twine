@@ -24,7 +24,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -41,12 +40,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.CircularIconButton
@@ -85,9 +84,9 @@ internal fun HomeTopAppBar(
   onShowPostsSortFilter: () -> Unit,
   onMarkPostsAsRead: (Source?) -> Unit,
 ) {
-  val backgroundAlpha by
+  val backgroundAlphaProvider =
     remember(listState) {
-      derivedStateOf {
+      {
         if (listState.firstVisibleItemIndex == 0) {
           (listState.firstVisibleItemScrollOffset / APP_BAR_OPAQUE_THRESHOLD).coerceIn(0f, 0.85f)
         } else {
@@ -97,8 +96,10 @@ internal fun HomeTopAppBar(
     }
   var hasUnreadPosts by remember(hasUnreadPosts) { mutableStateOf(hasUnreadPosts) }
 
+  val backgroundColor = AppTheme.colorScheme.surface
   TopAppBar(
-    modifier = modifier.background(AppTheme.colorScheme.surface.copy(alpha = backgroundAlpha)),
+    modifier =
+      modifier.drawBehind { drawRect(backgroundColor.copy(alpha = backgroundAlphaProvider())) },
     scrollBehavior = scrollBehavior,
     contentPadding = PaddingValues(start = 0.dp, top = 8.dp, end = 12.dp, bottom = 8.dp),
     title = { SourceInfo(source = source) },

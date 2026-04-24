@@ -146,7 +146,7 @@ internal fun FeaturedSection(
       state = pagerState,
       verticalAlignment = Alignment.Top,
       contentPadding = contentPadding,
-      beyondViewportPageCount = 2,
+      beyondViewportPageCount = 1,
       key = { page ->
         val post = featuredPosts.getOrNull(page)
         post?.let { PostListKey.from(post.resolvedPost).encode() } ?: page
@@ -190,18 +190,19 @@ internal fun FeaturedSection(
               imageAspectRatio = imageAspectRatio,
               targetHeightPx = targetHeightPx,
               modifier =
-                Modifier.ignoreHorizontalParentPadding(horizontal = 24.dp).graphicsLayer {
-                  val pageOffset = pagerState.getOffsetFractionForPage(page)
+                Modifier.ignoreHorizontalParentPadding(horizontal = 24.dp)
+                  .graphicsLayer { renderEffect = blurEffect }
+                  .graphicsLayer {
+                    val pageOffset = pagerState.getOffsetFractionForPage(page)
 
-                  translationX = size.width * pageOffset
-                  alpha =
-                    if (postsType == PostsType.UNREAD && markAsReadOn == MarkAsReadOn.Scroll) {
-                      calculateContentAlpha(pageOffset)
-                    } else {
-                      calculateBackgroundAlpha(pageOffset)
-                    }
-                  renderEffect = blurEffect
-                },
+                    translationX = size.width * pageOffset
+                    alpha =
+                      if (postsType == PostsType.UNREAD && markAsReadOn == MarkAsReadOn.Scroll) {
+                        calculateContentAlpha(pageOffset)
+                      } else {
+                        calculateBackgroundAlpha(pageOffset)
+                      }
+                  },
             )
           }
 

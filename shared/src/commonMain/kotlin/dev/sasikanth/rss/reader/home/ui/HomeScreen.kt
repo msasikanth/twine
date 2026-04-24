@@ -363,142 +363,164 @@ private fun HomeContent(
           Modifier
         }
 
+      val latestState by rememberUpdatedState(state)
+      val latestFeedsState by rememberUpdatedState(feedsState)
+      val latestPosts by rememberUpdatedState(posts)
+      val latestFeaturedPosts by rememberUpdatedState(featuredPosts)
+
+      val homeTopAppBar =
+        remember(postsListState, appBarScrollBehaviour, onMenuClicked) {
+          @Composable {
+            HomeTopAppBar(
+              source = latestState.activeSource,
+              postsType = latestState.postsType,
+              listState = postsListState,
+              hasUnreadPosts = latestState.hasUnreadPosts,
+              scrollBehavior = if (platform !is Platform.Desktop) appBarScrollBehaviour else null,
+              onMenuClicked = onMenuClicked,
+              onShowPostsSortFilter = { dispatch(HomeEvent.ShowPostsSortFilter(true)) },
+              onMarkPostsAsRead = { dispatch(HomeEvent.MarkPostsAsRead(it)) },
+            )
+          }
+        }
+
+      val homeBody =
+        remember(
+          postsListState,
+          featuredPostsPagerState,
+          coroutineScope,
+          linkHandler,
+          density,
+          onMenuClicked,
+        ) {
+          @Composable { paddingValues: PaddingValues ->
+            val featuredPosts = latestFeaturedPosts
+            val state = latestState
+            val posts = latestPosts
+            val feedsState = latestFeedsState
+
+            val topOffset =
+              remember(paddingValues, featuredPosts) {
+                val topPaddingPx = with(density) { paddingValues.calculateTopPadding().roundToPx() }
+                if (featuredPosts.isEmpty()) {
+                  postsListState.layoutInfo.beforeContentPadding
+                } else {
+                  topPaddingPx
+                }
+              }
+
+            LaunchedEffect(state.activePostIndex, featuredPosts.isNotEmpty()) {
+              val activePostIndex = state.activePostIndex
+              val numberOfFeaturedPosts = featuredPosts.size
+
+              if (activePostIndex < numberOfFeaturedPosts && numberOfFeaturedPosts > 0) {
+                postsListState.scrollToItem(0)
+                featuredPostsPagerState.scrollToPage(activePostIndex)
+              } else {
+                // Since indexes start from 0, we are increasing the featured posts size by one
+                val featuredPostsLastIndex = (numberOfFeaturedPosts - 1).coerceAtLeast(0)
+                val adjustedIndex = (activePostIndex - featuredPostsLastIndex).coerceAtLeast(0)
+
+                // Since we apply top content padding to the LazyColumn, we are offsetting
+                // the scroll so that the actual item is visible at top of the page for user.
+                postsListState.scrollToItem(adjustedIndex, scrollOffset = topOffset.unaryMinus())
+              }
+            }
+
+            val saveVisibleItemIndex by
+              rememberUpdatedState({
+                val firstVisibleItemInfoAfterOffset =
+                  postsListState.layoutInfo.visibleItemsInfo.firstOrNull { itemInfo ->
+                    itemInfo.offset >= topOffset || itemInfo.offset == 0
+                  }
+                val firstVisibleItemIndexAfterOffset = firstVisibleItemInfoAfterOffset?.index ?: 0
+                val firstVisibleItemKey = firstVisibleItemInfoAfterOffset?.key as? String
+                val settledPage = featuredPostsPagerState.settledPage
+
+                dispatch(
+                  HomeEvent.OnScreenStopped(
+                    firstVisibleItemIndex = firstVisibleItemIndexAfterOffset,
+                    firstVisibleItemKey = firstVisibleItemKey,
+                    settledPage = settledPage,
+                  )
+                )
+              })
+
+            LifecycleEventEffect(event = Lifecycle.Event.ON_STOP) { saveVisibleItemIndex() }
+
+            DisposableEffect(Unit) { onDispose { saveVisibleItemIndex() } }
+
+            val pullToRefreshState = rememberPullToRefreshState()
+
+            when {
+              state.hasFeeds == null || posts == null -> {
+                // no-op
+              }
+              !state.hasFeeds -> {
+                NoFeeds { onMenuClicked?.invoke() }
+              }
+              featuredPosts.isEmpty() && posts.itemCount == 0 -> {
+                PullToRefreshContent(
+                  pullToRefreshState = pullToRefreshState,
+                  state = state,
+                  paddingValues = paddingValues,
+                  onRefresh = { dispatch(HomeEvent.OnSwipeToRefresh) },
+                ) {
+                  NoNewPosts()
+                }
+              }
+              else -> {
+                PullToRefreshContent(
+                  pullToRefreshState = pullToRefreshState,
+                  state = state,
+                  paddingValues = paddingValues,
+                  onRefresh = { dispatch(HomeEvent.OnSwipeToRefresh) },
+                ) {
+                  PostsList(
+                    paddingValues = paddingValues,
+                    featuredPosts = featuredPosts,
+                    listState = postsListState,
+                    featuredPostsPagerState = featuredPostsPagerState,
+                    homeViewMode = state.homeViewMode,
+                    postsType = state.postsType,
+                    markAsReadOn = state.markAsReadOn,
+                    posts = { posts },
+                    markFeaturedPostAsReadOnScroll = {
+                      dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
+                    },
+                    onVisiblePostsChanged = { visiblePosts, firstVisibleItemIndex ->
+                      dispatch(
+                        HomeEvent.OnVisiblePostsChanged(
+                          visiblePosts = visiblePosts,
+                          firstVisibleItemIndex = firstVisibleItemIndex,
+                        )
+                      )
+                    },
+                    onPostClicked = { post, _ -> dispatch(HomeEvent.OnPostClicked(post)) },
+                    onFeaturedPostClicked = { post -> dispatch(HomeEvent.OnPostClicked(post)) },
+                    onPostBookmarkClick = { dispatch(HomeEvent.OnPostBookmarkClick(it)) },
+                    onPostCommentsClick = { commentsLink ->
+                      coroutineScope.launch { linkHandler.openLink(commentsLink) }
+                    },
+                    onPostSourceClick = { feedId ->
+                      dispatch(HomeEvent.OnPostSourceClicked(feedId))
+                    },
+                    updateReadStatus = { postId, updatedReadStatus ->
+                      dispatch(HomeEvent.UpdatePostReadStatus(postId, updatedReadStatus))
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                  )
+                }
+              }
+            }
+          }
+        }
+
       HomeScreenContentScaffold(
         modifier = Modifier.then(nestedScrollModifier),
         bottomPadding = scaffoldPadding.calculateBottomPadding(),
-        homeTopAppBar = {
-          val scrollBehavior =
-            if (platform !is Platform.Desktop) {
-              appBarScrollBehaviour
-            } else {
-              null
-            }
-
-          HomeTopAppBar(
-            source = state.activeSource,
-            postsType = state.postsType,
-            listState = postsListState,
-            hasUnreadPosts = state.hasUnreadPosts,
-            scrollBehavior = scrollBehavior,
-            onMenuClicked = onMenuClicked,
-            onShowPostsSortFilter = { dispatch(HomeEvent.ShowPostsSortFilter(true)) },
-            onMarkPostsAsRead = { dispatch(HomeEvent.MarkPostsAsRead(it)) },
-          )
-        },
-        body = { paddingValues ->
-          val topOffset =
-            remember(paddingValues, featuredPosts) {
-              val topPaddingPx = with(density) { paddingValues.calculateTopPadding().roundToPx() }
-              if (featuredPosts.isEmpty()) {
-                postsListState.layoutInfo.beforeContentPadding
-              } else {
-                topPaddingPx
-              }
-            }
-
-          LaunchedEffect(state.activePostIndex, featuredPosts.isNotEmpty()) {
-            val activePostIndex = state.activePostIndex
-            val numberOfFeaturedPosts = featuredPosts.size
-
-            if (activePostIndex < numberOfFeaturedPosts && numberOfFeaturedPosts > 0) {
-              postsListState.scrollToItem(0)
-              featuredPostsPagerState.scrollToPage(activePostIndex)
-            } else {
-              // Since indexes start from 0, we are increasing the featured posts size by one
-              val featuredPostsLastIndex = (numberOfFeaturedPosts - 1).coerceAtLeast(0)
-              val adjustedIndex = (activePostIndex - featuredPostsLastIndex).coerceAtLeast(0)
-
-              // Since we apply top content padding to the LazyColumn, we are offsetting
-              // the scroll so that the actual item is visible at top of the page for user.
-              postsListState.scrollToItem(adjustedIndex, scrollOffset = topOffset.unaryMinus())
-            }
-          }
-
-          val saveVisibleItemIndex by
-            rememberUpdatedState({
-              val firstVisibleItemInfoAfterOffset =
-                postsListState.layoutInfo.visibleItemsInfo.firstOrNull { itemInfo ->
-                  itemInfo.offset >= topOffset || itemInfo.offset == 0
-                }
-              val firstVisibleItemIndexAfterOffset = firstVisibleItemInfoAfterOffset?.index ?: 0
-              val firstVisibleItemKey = firstVisibleItemInfoAfterOffset?.key as? String
-              val settledPage = featuredPostsPagerState.settledPage
-
-              dispatch(
-                HomeEvent.OnScreenStopped(
-                  firstVisibleItemIndex = firstVisibleItemIndexAfterOffset,
-                  firstVisibleItemKey = firstVisibleItemKey,
-                  settledPage = settledPage,
-                )
-              )
-            })
-
-          LifecycleEventEffect(event = Lifecycle.Event.ON_STOP) { saveVisibleItemIndex() }
-
-          DisposableEffect(Unit) { onDispose { saveVisibleItemIndex() } }
-
-          val pullToRefreshState = rememberPullToRefreshState()
-
-          when {
-            hasFeeds == null || posts == null -> {
-              // no-op
-            }
-            !hasFeeds -> {
-              NoFeeds { onMenuClicked?.invoke() }
-            }
-            featuredPosts.isEmpty() && posts.itemCount == 0 -> {
-              PullToRefreshContent(
-                pullToRefreshState = pullToRefreshState,
-                state = state,
-                paddingValues = paddingValues,
-                onRefresh = { dispatch(HomeEvent.OnSwipeToRefresh) },
-              ) {
-                NoNewPosts()
-              }
-            }
-            else -> {
-              PullToRefreshContent(
-                pullToRefreshState = pullToRefreshState,
-                state = state,
-                paddingValues = paddingValues,
-                onRefresh = { dispatch(HomeEvent.OnSwipeToRefresh) },
-              ) {
-                PostsList(
-                  paddingValues = paddingValues,
-                  featuredPosts = featuredPosts,
-                  listState = postsListState,
-                  featuredPostsPagerState = featuredPostsPagerState,
-                  homeViewMode = state.homeViewMode,
-                  postsType = state.postsType,
-                  markAsReadOn = state.markAsReadOn,
-                  posts = { posts },
-                  markFeaturedPostAsReadOnScroll = {
-                    dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
-                  },
-                  onVisiblePostsChanged = { visiblePosts, firstVisibleItemIndex ->
-                    dispatch(
-                      HomeEvent.OnVisiblePostsChanged(
-                        visiblePosts = visiblePosts,
-                        firstVisibleItemIndex = firstVisibleItemIndex,
-                      )
-                    )
-                  },
-                  onPostClicked = { post, _ -> dispatch(HomeEvent.OnPostClicked(post)) },
-                  onFeaturedPostClicked = { post -> dispatch(HomeEvent.OnPostClicked(post)) },
-                  onPostBookmarkClick = { dispatch(HomeEvent.OnPostBookmarkClick(it)) },
-                  onPostCommentsClick = { commentsLink ->
-                    coroutineScope.launch { linkHandler.openLink(commentsLink) }
-                  },
-                  onPostSourceClick = { feedId -> dispatch(HomeEvent.OnPostSourceClicked(feedId)) },
-                  updateReadStatus = { postId, updatedReadStatus ->
-                    dispatch(HomeEvent.UpdatePostReadStatus(postId, updatedReadStatus))
-                  },
-                  modifier = Modifier.fillMaxSize(),
-                )
-              }
-            }
-          }
-        },
+        homeTopAppBar = homeTopAppBar,
+        body = homeBody,
       )
 
       if (canShowBottomBar) {
