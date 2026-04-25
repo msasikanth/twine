@@ -192,8 +192,7 @@
   <string name="markArticleAsRead">Beitrag als gelesen markieren</string>
   <string name="markArticleAsReadOnOpen">Beim Öffnen</string>
   <string name="markArticleAsReadOnScroll">Beim Scrollen</string>
-  <string name="audioMarkAsReadThresholdTitle">Auto-Mark Audio as Read</string>
-  <string name="audioMarkAsReadThresholdSubtitle">Automatically mark audio posts as read after playing this amount</string>
+  <string name="audioMarkAsReadThresholdTitle">Auto mark audio as read at</string>
   <string name="audioMarkAsReadThreshold25">25%</string>
   <string name="audioMarkAsReadThreshold50">50%</string>
   <string name="audioMarkAsReadThreshold75">75%</string>
