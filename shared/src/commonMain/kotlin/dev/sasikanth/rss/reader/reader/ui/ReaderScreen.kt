@@ -62,7 +62,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -303,7 +302,6 @@ internal fun ReaderScreen(
             }
           },
         topBar = {
-          val colorScheme = AppTheme.colorScheme
           val scrollBehavior =
             if (platform !is Platform.Desktop) {
               scrollBehaviour
@@ -312,12 +310,6 @@ internal fun ReaderScreen(
             }
 
           CenterAlignedTopAppBar(
-            modifier =
-              Modifier.drawBehind {
-                drawRect(
-                  brush = Brush.verticalGradient(listOf(colorScheme.backdrop, Color.Transparent))
-                )
-              },
             expandedHeight = 72.dp,
             scrollBehavior = scrollBehavior,
             colors =
@@ -549,11 +541,6 @@ private fun ReaderActionsPanel(
       modifier =
         Modifier.fillMaxWidth()
           .wrapContentHeight()
-          .drawBehind {
-            drawRect(
-              brush = Brush.verticalGradient(listOf(Color.Transparent, colorScheme.backdrop))
-            )
-          }
           .animateBounds(
             lookaheadScope = this,
             boundsTransform = { _, _ ->

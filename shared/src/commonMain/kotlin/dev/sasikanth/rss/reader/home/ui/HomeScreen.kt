@@ -53,8 +53,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -469,27 +472,27 @@ private fun HomeContent(
                   updateReadStatus = { postId, updatedReadStatus ->
                     dispatch(HomeEvent.UpdatePostReadStatus(postId, updatedReadStatus))
                   },
-                  modifier = Modifier.fillMaxSize(),
+                  modifier =
+                    Modifier.fillMaxSize()
+                      .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+                      .drawWithContent {
+                        drawContent()
+                        drawRect(
+                          brush =
+                            Brush.verticalGradient(
+                              0f to Color.Black,
+                              0.85f to Color.Black,
+                              1f to Color.Transparent,
+                            ),
+                          blendMode = BlendMode.DstIn,
+                        )
+                      },
                 )
               }
             }
           }
         },
       )
-
-      if (canShowBottomBar) {
-        val colorScheme = AppTheme.colorScheme
-        Box(
-          modifier =
-            Modifier.fillMaxWidth()
-              .requiredHeight(PINNED_SOURCES_BOTTOM_BAR_HEIGHT)
-              .align(Alignment.BottomCenter)
-              .graphicsLayer { translationY = -bottomBarScrollState.state.heightOffset }
-              .drawBehind {
-                drawRect(Brush.verticalGradient(listOf(Color.Transparent, colorScheme.backdrop)))
-              }
-        )
-      }
 
       NewArticlesScrollToTopButton(
         unreadSinceLastSync = unreadSinceLastSync,

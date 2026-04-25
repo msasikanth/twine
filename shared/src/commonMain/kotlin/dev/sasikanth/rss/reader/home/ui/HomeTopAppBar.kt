@@ -88,9 +88,9 @@ internal fun HomeTopAppBar(
     remember(listState) {
       {
         if (listState.firstVisibleItemIndex == 0) {
-          (listState.firstVisibleItemScrollOffset / APP_BAR_OPAQUE_THRESHOLD).coerceIn(0f, 0.85f)
+          (listState.firstVisibleItemScrollOffset / APP_BAR_OPAQUE_THRESHOLD).coerceIn(0f, 0.9f)
         } else {
-          0.85f
+          0.9f
         }
       }
     }
