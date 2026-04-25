@@ -42,7 +42,8 @@ fun SettingItem(
 ) {
   Box(modifier = modifier.clickable { onClick() }) {
     Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-      Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
+      Spacer(Modifier.width(8.dp))
+      Column(modifier = Modifier.weight(1f)) {
         Text(
           text = title,
           style = MaterialTheme.typography.titleMedium,
@@ -61,6 +62,7 @@ fun SettingItem(
       if (action != null) {
         Spacer(Modifier.width(16.dp))
         action()
+        Spacer(Modifier.width(8.dp))
       }
     }
   }

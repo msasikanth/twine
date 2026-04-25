@@ -18,25 +18,17 @@
 package dev.sasikanth.rss.reader.settings.ui.items
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.resources.icons.ArrowDown
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.markArticleAsRead
@@ -50,48 +42,42 @@ internal fun MarkAsReadOnSettingItem(
 ) {
   var showDropdown by remember { mutableStateOf(false) }
 
-  Row(
-    modifier = Modifier.padding(start = 16.dp, end = 24.dp).padding(vertical = 16.dp),
-    verticalAlignment = Alignment.CenterVertically,
-  ) {
-    Text(
-      modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
-      text = stringResource(Res.string.markArticleAsRead),
-      style = MaterialTheme.typography.titleMedium,
-      color = AppTheme.colorScheme.onSurface,
-    )
+  SettingItem(
+    title = stringResource(Res.string.markArticleAsRead),
+    onClick = { showDropdown = !showDropdown },
+    action = {
+      Box {
+        val markAsReadOnLabel =
+          when (articleMarkAsReadOn) {
+            MarkAsReadOn.Open -> stringResource(Res.string.markArticleAsReadOnOpen)
+            MarkAsReadOn.Scroll -> stringResource(Res.string.markArticleAsReadOnScroll)
+          }
 
-    Box {
-      val markAsReadOnLabel =
-        when (articleMarkAsReadOn) {
-          MarkAsReadOn.Open -> stringResource(Res.string.markArticleAsReadOnOpen)
-          MarkAsReadOn.Scroll -> stringResource(Res.string.markArticleAsReadOnScroll)
-        }
+        TranslucentButton(
+          text = markAsReadOnLabel,
+          trailingIcon = TwineIcons.ArrowDown,
+          onClick = { showDropdown = true },
+        )
 
-      TranslucentButton(
-        text = markAsReadOnLabel,
-        trailingIcon = TwineIcons.ArrowDown,
-        onClick = { showDropdown = true },
-      )
+        DropdownMenu(expanded = showDropdown, onDismissRequest = { showDropdown = false }) {
+          MarkAsReadOn.entries.forEach { markAsReadOn ->
+            val label =
+              when (markAsReadOn) {
+                MarkAsReadOn.Open -> stringResource(Res.string.markArticleAsReadOnOpen)
+                MarkAsReadOn.Scroll -> stringResource(Res.string.markArticleAsReadOnScroll)
+              }
 
-      DropdownMenu(expanded = showDropdown, onDismissRequest = { showDropdown = false }) {
-        MarkAsReadOn.entries.forEach { markAsReadOn ->
-          val label =
-            when (markAsReadOn) {
-              MarkAsReadOn.Open -> stringResource(Res.string.markArticleAsReadOnOpen)
-              MarkAsReadOn.Scroll -> stringResource(Res.string.markArticleAsReadOnScroll)
-            }
-
-          DropdownMenuItem(
-            text = label,
-            selected = markAsReadOn == articleMarkAsReadOn,
-            onClick = {
-              onMarkAsReadOnChanged(markAsReadOn)
-              showDropdown = false
-            },
-          )
+            DropdownMenuItem(
+              text = label,
+              selected = markAsReadOn == articleMarkAsReadOn,
+              onClick = {
+                onMarkAsReadOnChanged(markAsReadOn)
+                showDropdown = false
+              },
+            )
+          }
         }
       }
-    }
-  }
+    },
+  )
 }

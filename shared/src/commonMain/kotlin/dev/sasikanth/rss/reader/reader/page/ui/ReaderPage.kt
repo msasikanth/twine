@@ -41,6 +41,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -218,7 +224,22 @@ private fun ReaderPageContent(
             ),
         ) {
           LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier =
+              Modifier.fillMaxSize()
+                .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+                .drawWithContent {
+                  drawContent()
+                  drawRect(
+                    brush =
+                      Brush.verticalGradient(
+                        0f to Color.Transparent,
+                        0.15f to Color.Black,
+                        0.85f to Color.Black,
+                        1f to Color.Transparent,
+                      ),
+                    blendMode = BlendMode.DstIn,
+                  )
+                },
             overscrollEffect = null,
             contentPadding =
               PaddingValues(
