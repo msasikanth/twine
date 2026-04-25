@@ -192,8 +192,7 @@
   <string name="markArticleAsRead">Yazıyı okundu olarak işaretle</string>
   <string name="markArticleAsReadOnOpen">Açıldığında</string>
   <string name="markArticleAsReadOnScroll">Kaydırıldığında</string>
-  <string name="audioMarkAsReadThresholdTitle">Sesli İçerikleri Otomatik Okundu İşaretle</string>
-  <string name="audioMarkAsReadThresholdSubtitle">Sesli içerik şu kadar dinlendiğinde onu okundu say:</string>
+  <string name="audioMarkAsReadThresholdTitle">Auto mark audio as read at</string>
   <string name="audioMarkAsReadThreshold25">%25</string>
   <string name="audioMarkAsReadThreshold50">%50</string>
   <string name="audioMarkAsReadThreshold75">%75</string>
