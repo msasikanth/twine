@@ -192,8 +192,7 @@
   <string name="markArticleAsRead">Отметить статью как прочитанную</string>
   <string name="markArticleAsReadOnOpen">При открытии</string>
   <string name="markArticleAsReadOnScroll">При прокрутке</string>
-  <string name="audioMarkAsReadThresholdTitle">Auto-Mark Audio as Read</string>
-  <string name="audioMarkAsReadThresholdSubtitle">Automatically mark audio posts as read after playing this amount</string>
+  <string name="audioMarkAsReadThresholdTitle">Auto mark audio as read at</string>
   <string name="audioMarkAsReadThreshold25">25%</string>
   <string name="audioMarkAsReadThreshold50">50%</string>
   <string name="audioMarkAsReadThreshold75">75%</string>
