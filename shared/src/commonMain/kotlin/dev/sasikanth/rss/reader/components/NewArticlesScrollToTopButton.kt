@@ -80,42 +80,42 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
     val colorScheme = AppTheme.colorScheme
     val shape = CircleShape
 
-    AnimatedVisibility(
-      visible = unreadSinceLastSync.hasNewArticles || canShowScrollToTop,
-      enter = fadeIn() + expandIn(expandFrom = Alignment.Center, clip = false),
-      exit = fadeOut() + shrinkOut(shrinkTowards = Alignment.Center, clip = false),
-      modifier =
-        modifier
-          .align(Alignment.BottomCenter)
-          .padding(bottom = 16.dp)
-          .dropShadow(shape = CircleShape) {
-            color = Color.Black.copy(alpha = 0.4f)
-            offset = Offset(0f, 16.dp.toPx())
-            radius = 32.dp.toPx()
-            spread = 0f
-          }
-          .dropShadow(shape = CircleShape) {
-            color = Color.Black.copy(alpha = 0.016f)
-            offset = Offset(0f, 4.dp.toPx())
-            radius = 8.dp.toPx()
-            spread = 0f
-          }
-          .drawBehind {
-            val outline = shape.createOutline(size, layoutDirection, this)
-            drawOutline(outline = outline, color = colorScheme.bottomSheet)
-          }
-          .drawWithContent {
-            drawContent()
-            val outline = shape.createOutline(size, layoutDirection, this)
-            drawOutline(
-              outline = outline,
-              color = colorScheme.bottomSheetBorder,
-              style = Stroke(width = 1.dp.toPx()),
-            )
-          }
-          .padding(4.dp),
-    ) {
-      AppTheme(useDarkTheme = true) {
+    AppTheme(useDarkTheme = true) {
+      AnimatedVisibility(
+        visible = unreadSinceLastSync.hasNewArticles || canShowScrollToTop,
+        enter = fadeIn() + expandIn(expandFrom = Alignment.Center, clip = false),
+        exit = fadeOut() + shrinkOut(shrinkTowards = Alignment.Center, clip = false),
+        modifier =
+          modifier
+            .align(Alignment.BottomCenter)
+            .padding(bottom = 16.dp)
+            .dropShadow(shape = CircleShape) {
+              color = Color.Black.copy(alpha = 0.4f)
+              offset = Offset(0f, 16.dp.toPx())
+              radius = 32.dp.toPx()
+              spread = 0f
+            }
+            .dropShadow(shape = CircleShape) {
+              color = Color.Black.copy(alpha = 0.016f)
+              offset = Offset(0f, 4.dp.toPx())
+              radius = 8.dp.toPx()
+              spread = 0f
+            }
+            .drawBehind {
+              val outline = shape.createOutline(size, layoutDirection, this)
+              drawOutline(outline = outline, color = colorScheme.bottomSheet)
+            }
+            .drawWithContent {
+              drawContent()
+              val outline = shape.createOutline(size, layoutDirection, this)
+              drawOutline(
+                outline = outline,
+                color = colorScheme.bottomSheetBorder,
+                style = Stroke(width = 1.dp.toPx()),
+              )
+            }
+            .padding(4.dp),
+      ) {
         Row(
           modifier = Modifier.height(IntrinsicSize.Min),
           verticalAlignment = Alignment.CenterVertically,
