@@ -18,7 +18,6 @@ package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.core.animate
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -313,27 +312,7 @@ private fun HomeContent(
 
         val bottomBarModifier =
           remember(scaffoldBottomPadding, onMenuClicked, density) {
-            Modifier.padding(bottom = scaffoldBottomPadding).pointerInput(onMenuClicked) {
-              var verticalDragThresholdTriggered = false
-              var accumulatedDrag = 0f
-              val threshold = 40.dp.toPx()
-
-              detectVerticalDragGestures(
-                onDragStart = {
-                  verticalDragThresholdTriggered = false
-                  accumulatedDrag = 0f
-                },
-                onDragEnd = { verticalDragThresholdTriggered = false },
-                onDragCancel = { verticalDragThresholdTriggered = false },
-                onVerticalDrag = { _, dragAmount ->
-                  accumulatedDrag += dragAmount
-                  if (!verticalDragThresholdTriggered && accumulatedDrag < -threshold) {
-                    onMenuClicked?.invoke()
-                    verticalDragThresholdTriggered = true
-                  }
-                },
-              )
-            }
+            Modifier.padding(bottom = scaffoldBottomPadding)
           }
 
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
