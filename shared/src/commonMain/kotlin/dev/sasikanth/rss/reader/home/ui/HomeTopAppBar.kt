@@ -184,6 +184,7 @@ private fun SourceInfo(source: Source?, modifier: Modifier = Modifier) {
 @Composable
 private fun PostTypePill(postsType: PostsType, onClick: () -> Unit, modifier: Modifier = Modifier) {
   TranslucentButton(
+    modifier = modifier,
     text = getPostTypeLabel(postsType),
     trailingIcon = TwineIcons.ArrowDown,
     onClick = onClick,

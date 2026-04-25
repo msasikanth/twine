@@ -37,7 +37,6 @@ import twine.shared.generated.resources.audioMarkAsReadThreshold25
 import twine.shared.generated.resources.audioMarkAsReadThreshold50
 import twine.shared.generated.resources.audioMarkAsReadThreshold75
 import twine.shared.generated.resources.audioMarkAsReadThreshold90
-import twine.shared.generated.resources.audioMarkAsReadThresholdSubtitle
 import twine.shared.generated.resources.audioMarkAsReadThresholdTitle
 
 @Composable
@@ -51,7 +50,6 @@ internal fun AudioMarkAsReadThresholdSettingItem(
   SettingItem(
     modifier = modifier,
     title = stringResource(Res.string.audioMarkAsReadThresholdTitle),
-    subtitle = stringResource(Res.string.audioMarkAsReadThresholdSubtitle),
     onClick = { showDropdown = !showDropdown },
     action = {
       Box {
