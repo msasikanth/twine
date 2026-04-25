@@ -192,7 +192,7 @@
   <string name="markArticleAsRead">标记文章为已读</string>
   <string name="markArticleAsReadOnOpen">打开后</string>
   <string name="markArticleAsReadOnScroll">滚动时</string>
-  <string name="audioMarkAsReadThresholdTitle">Auto mark audio as read at</string>
+  <string name="audioMarkAsReadThresholdTitle">自动标记已读阈值</string>
   <string name="audioMarkAsReadThreshold25">25%</string>
   <string name="audioMarkAsReadThreshold50">50%</string>
   <string name="audioMarkAsReadThreshold75">75%</string>
