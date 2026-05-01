@@ -53,11 +53,11 @@
   <string name="bookmarksPlaceholder">Mit Lesezeichen versehene Beiträge werden hier angezeigt 🔖</string>
   <string name="settings">Einstellungen</string>
   <string name="settingsAppearanceAndLayout">Aussehen &amp; Layout</string>
-  <string name="settingsAppearanceAndLayoutSubtitle">Customize how Twine looks</string>
+  <string name="settingsAppearanceAndLayoutSubtitle">Anpassen, wie Twine aussieht</string>
   <string name="settingsFeaturesAndBehaviors">Funktionen &amp; Verhalten</string>
-  <string name="settingsFeaturesAndBehaviorsSubtitle">Customize how Twine works</string>
+  <string name="settingsFeaturesAndBehaviorsSubtitle">Anpassen, wie Twine funktioniert</string>
   <string name="settingsServicesAndSync">Dienste &amp; Synchronisation</string>
-  <string name="settingsServicesAndSyncSubtitle">Manage RSS services</string>
+  <string name="settingsServicesAndSyncSubtitle">RSS-Dienste verwalten</string>
   <string name="settingsYourInsights">Ihre Einblicke</string>
   <string name="settingsYourInsightsSubtitle">Verwalten Sie Ihre Lesedaten</string>
   <string name="settingsAppInfoAndFeedback">App-Info &amp; Feedback</string>
@@ -85,9 +85,9 @@
   <string name="settingsOpmlCancel">Abbrechen</string>
   <string name="settingsOpmlSelectionTitle">Feeds auswählen</string>
   <string name="settingsOpmlSelectionSubtitle">You can select up to %1$d feeds under the free plan.</string>
-  <string name="settingsFreeFeedLimitReached">You have reached the maximum number of free feeds.</string>
-  <string name="settingsUpgradeToPremium">Go Premium</string>
-  <string name="settingsPostsDeletionPeriodTitle">Gelesene Beiträge löschen, die älter sind als</string>
+  <string name="settingsFreeFeedLimitReached">Sie haben die maximale Anzahl an kostenlosen Feeds erreicht.</string>
+  <string name="settingsUpgradeToPremium">Zu Premium wechseln</string>
+  <string name="settingsPostsDeletionPeriodTitle">Beiträge löschen, die älter sind als</string>
   <string name="settingsPostsDeletionPeriodOneWeek">1 Woche</string>
   <string name="settingsPostsDeletionPeriodOneMonth">1 Monat</string>
   <string name="settingsPostsDeletionPeriodThreeMonths">3 Monate</string>
@@ -141,7 +141,7 @@
   <string name="settingsDeleteAppDataTitle">App-Daten zurücksetzen</string>
   <string name="settingsDeleteAppDataSubtitle">Clear all your feeds, settings and image cache. You will be logged out as well.</string>
   <string name="settingsDeleteAppDataDialogTitle">App-Daten löschen?</string>
-  <string name="settingsDeleteAppDataDialogDesc">This action will clear all your feeds, settings, and image cache. This action cannot be undone.</string>
+  <string name="settingsDeleteAppDataDialogDesc">Diese Aktion wird alle Ihre Feeds, Einstellungen und den Bild-Cache löschen. Diese Aktion kann nicht rückgängig gemacht werden.</string>
   <string name="settingsDeleteAppDataButton">Löschen</string>
   <string name="feedOptionShare">Teilen</string>
   <string name="feedOptionCopyLink">Copy Link</string>
@@ -182,7 +182,7 @@
   <string name="showFeedFavIconDesc">Wenn ausgeschaltet, wird das Feed-Symbol anstelle des Favoriten-Symbols der Website angezeigt</string>
   <string name="settingsShowFeaturedSectionTitle">Show featured section</string>
   <string name="settingsShowFeaturedSectionSubtitle">Zeigt ein Karussell mit den neuesten Beiträgen an</string>
-  <string name="hidePostsFromHome">Hide from "Home"</string>
+  <string name="hidePostsFromHome">Auf Startseite ausblenden</string>
   <string name="blockedWords">Blockierte Wörter</string>
   <string name="blockedWordsHint">Geben Sie ein Wort ein</string>
   <string name="blockedWordsDesc">Beiträge können aufgrund ihres Textes auf dem Startbildschirm ausgeblendet werden. Wir empfehlen, häufige Wörter, die in vielen Beiträgen vorkommen, zu vermeiden, da dies dazu führen kann, dass keine Beiträge angezeigt werden oder die Leistung der App negativ beeinflusst wird. \n\nAusgeblendete Beiträge werden weiterhin in der Suche und in den Lesezeichen angezeigt.</string>
@@ -222,7 +222,7 @@
   <string name="buttonApply">Anwenden</string>
   <string name="screenHome">Startseite</string>
   <string name="settingsEnableNotificationsTitle">Beitragsbenachrichtigungen aktivieren</string>
-  <string name="settingsEnableNotificationsSubtitle">Wenn aktiviert, erhalten Sie Benachrichtigungen, wenn bei der Hintergrundsynchronisierung neue Artikel gefunden werden</string>
+  <string name="settingsEnableNotificationsSubtitle">Benachrichtigen, wenn neue Beiträge abgerufen werden</string>
   <string name="settingsGroupByFeedNotificationsTitle">Benachrichtigungen nach Feed gruppieren</string>
   <string name="settingsGroupByFeedNotificationsSubtitle">Wenn aktiviert, erhalten Sie individuelle Benachrichtigungen für jeden Feed</string>
   <string name="settingsDownloadFullContentTitle">Vollständige Artikel herunterladen</string>
@@ -289,7 +289,7 @@
   <string name="statisticsLess">Weniger</string>
   <string name="statisticsMore">Mehr</string>
   <string name="settingsStatisticsTitle">Statistiken</string>
-  <string name="settingsStatisticsSubtitle">View your reading habits and insights</string>
+  <string name="settingsStatisticsSubtitle">Ihre Lesegewohnheiten und Einblicke anzeigen</string>
   <string name="settingsDangerZone">Gefahrenzone</string>
   <string name="changelogTitle">Was ist neu</string>
   <string name="changelogVersion">Version: %1$s</string>
@@ -305,7 +305,7 @@
   <string name="accountSelectionLocal">Lokal</string>
   <string name="accountSelectionLocalAccount">Auf dem Gerät</string>
   <string name="accountSelectionCloudSync">Cloud-Synchronisation</string>
-  <string name="unit_seconds">%1$ds</string>
+  <string name="unit_seconds">&lt;1 min</string>
   <string name="unit_minutes">%1$d min</string>
   <string name="unit_hours">%1$d h</string>
   <string name="unit_days">%1$d d</string>
