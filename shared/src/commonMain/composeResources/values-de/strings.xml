@@ -52,7 +52,7 @@
   <string name="bookmarks">Lesezeichen</string>
   <string name="bookmarksPlaceholder">Mit Lesezeichen versehene Beiträge werden hier angezeigt 🔖</string>
   <string name="settings">Einstellungen</string>
-  <string name="settingsAppearanceAndLayout">Appearance &amp; layout</string>
+  <string name="settingsAppearanceAndLayout">Erscheinungsbild &amp; Layout</string>
   <string name="settingsAppearanceAndLayoutSubtitle">Customize how Twine looks</string>
   <string name="settingsFeaturesAndBehaviors">Funktionen &amp; Verhalten</string>
   <string name="settingsFeaturesAndBehaviorsSubtitle">Customize how Twine works</string>
@@ -60,7 +60,7 @@
   <string name="settingsServicesAndSyncSubtitle">Manage RSS services</string>
   <string name="settingsYourInsights">Your insights</string>
   <string name="settingsYourInsightsSubtitle">Manage your reading data</string>
-  <string name="settingsAppInfoAndFeedback">App info &amp; feedback</string>
+  <string name="settingsAppInfoAndFeedback">App-Info &amp; Feedback</string>
   <string name="moreMenuOptions">Weitere Menüoptionen</string>
   <string name="settingsHeaderBehaviour">Verhalten</string>
   <string name="settingsHeaderReadingAndBrowsing">Reading &amp; browsing</string>
