@@ -54,7 +54,7 @@
   <string name="settings">Einstellungen</string>
   <string name="settingsAppearanceAndLayout">Appearance &amp; layout</string>
   <string name="settingsAppearanceAndLayoutSubtitle">Customize how Twine looks</string>
-  <string name="settingsFeaturesAndBehaviors">Features &amp; behaviors</string>
+  <string name="settingsFeaturesAndBehaviors">Funktionen &amp; Verhalten</string>
   <string name="settingsFeaturesAndBehaviorsSubtitle">Customize how Twine works</string>
   <string name="settingsServicesAndSync">Services &amp; sync</string>
   <string name="settingsServicesAndSyncSubtitle">Manage RSS services</string>
