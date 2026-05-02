@@ -31,7 +31,7 @@
   <string name="newArticles">Neue Beiträge</string>
   <string name="noFeeds">Keine Feeds vorhanden!</string>
   <string name="swipeUpGetStarted">Wischen Sie nach oben, um zu beginnen</string>
-  <string name="feedsLetsStart">Sie werden alle Ihre Feeds hier sehen, lassen Sie uns damit beginnen, einen Feed hinzuzufügen.</string>
+  <string name="feedsLetsStart">Sie werden alle Ihre Feeds hier sehen. Lassen Sie uns damit beginnen, einen Feed hinzuzufügen.</string>
   <string name="feedNameHint">Feed-Name</string>
   <string name="editFeedName">Bearbeiten</string>
   <string name="errorUnsupportedFeed">Der Link enthält keinen RSS-/Atom-Feed.</string>
@@ -73,7 +73,7 @@
   <string name="settingsShowUnreadCountTitle">Anzahl ungelesener Beiträge anzeigen</string>
   <string name="settingsShowUnreadCountSubtitle">Zeigt eine Blase über der Feed-Auswahl an</string>
   <string name="settingsShowPinnedSourcesTitle">Angepinnte Feeds auf der Startseite anzeigen</string>
-  <string name="settingsShowPinnedSourcesSubtitle">Displays a floating bar with pinned sources at the bottom of the home screen</string>
+  <string name="settingsShowPinnedSourcesSubtitle">Zeigt unten eine Leiste mit allen angepinnten Feeds an</string>
   <string name="settingsReportIssue">Ein Problem melden</string>
   <string name="settingsVersion">%1$s (%2$s)</string>
   <string name="settingsAboutTitle">Über</string>
