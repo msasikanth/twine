@@ -24,6 +24,7 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.notifications.Notifier
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -45,19 +46,22 @@ class NewArticleNotifier(
   }
 
   suspend fun notifyIfNewArticles(
+    lastRefreshedAt: Instant? = null,
     title: (count: Int) -> String,
     content: () -> String,
     perFeedTitle: (feedName: String, count: Int) -> String,
   ) {
     if (settingsRepository.enableNotifications.first()) {
-      val lastRefreshedAtDateTime = refreshPolicy.lastRefreshedAtFlow.first()
+      val lastRefreshedAtInstant =
+        lastRefreshedAt
+          ?: refreshPolicy.lastRefreshedAtFlow.first().toInstant(TimeZone.currentSystemDefault())
       val now = Clock.System.now()
       val tz = TimeZone.currentSystemDefault()
 
       val today = now.toLocalDateTime(tz).date
       val startOfDay = today.atStartOfDayIn(tz)
 
-      val postsUpperBound = lastRefreshedAtDateTime.toInstant(TimeZone.currentSystemDefault())
+      val postsUpperBound = lastRefreshedAtInstant
 
       if (settingsRepository.groupByFeedNotifications.first()) {
         val unreadSinceLastSyncPerFeed =
