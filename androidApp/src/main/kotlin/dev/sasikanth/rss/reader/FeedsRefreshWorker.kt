@@ -64,9 +64,11 @@ class FeedsRefreshWorker(
 
     return if (refreshPolicy.hasExpired()) {
       try {
+        val lastRefreshedAt = refreshPolicy.fetchLastRefreshedAt()
         syncCoordinator.pull()
 
         newArticleNotifier.notifyIfNewArticles(
+          lastRefreshedAt = lastRefreshedAt,
           title = { count ->
             applicationContext.resources.getQuantityString(
               R.plurals.notification_new_articles_title,

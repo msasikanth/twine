@@ -110,9 +110,11 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                 
                 let hasLastUpdatedAtExpired = try await applicationComponent.refreshPolicy.hasExpired().boolValue
                 if hasLastUpdatedAtExpired {
+                    let lastRefreshedAt = try await applicationComponent.refreshPolicy.fetchLastRefreshedAt()
                     try await applicationComponent.syncCoordinator.pull()
 
                     try await applicationComponent.newArticleNotifier.notifyIfNewArticles(
+                        lastRefreshedAt: lastRefreshedAt,
                         title: { count in
                             return String.localizedStringWithFormat(NSLocalizedString("notification_new_articles_title", comment: ""), count)
                         },
