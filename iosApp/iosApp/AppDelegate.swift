@@ -19,7 +19,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     static let unreadWidgetKind = "TwineUnreadWidget"
 
     lazy var applicationComponent: InjectApplicationComponent = InjectApplicationComponent(
-      uiViewControllerProvider: { UIApplication.topViewController()! }
+        uiViewControllerProvider: { UIApplication.topViewController() ?? UIViewController() }
     )
     
     private let feedsRefreshTaskIdentifier = "dev.sasikanth.reader.feeds_refresh"
@@ -116,13 +116,13 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                     try await applicationComponent.newArticleNotifier.notifyIfNewArticles(
                         lastRefreshedAt: lastRefreshedAt,
                         title: { count in
-                            return String.localizedStringWithFormat(NSLocalizedString("notification_new_articles_title", comment: ""), count)
+                            return String.localizedStringWithFormat(NSLocalizedString("notification_new_articles_title", comment: ""), Int(count))
                         },
                         content: {
                             return NSLocalizedString("notification_new_articles_content", comment: "")
                         },
                         perFeedTitle: { feedName, count in
-                            return String.localizedStringWithFormat(NSLocalizedString("notification_new_articles_per_feed_title", comment: ""), feedName, count)
+                            return String.localizedStringWithFormat(NSLocalizedString("notification_new_articles_per_feed_title", comment: ""), feedName, Int(count))
                         }
                     )
                 }
