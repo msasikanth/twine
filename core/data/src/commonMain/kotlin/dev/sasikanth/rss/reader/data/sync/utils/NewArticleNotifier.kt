@@ -24,6 +24,7 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.notifications.Notifier
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.TimeZone
@@ -58,8 +59,7 @@ class NewArticleNotifier(
       val now = Clock.System.now()
       val tz = TimeZone.currentSystemDefault()
 
-      val today = now.toLocalDateTime(tz).date
-      val startOfDay = today.atStartOfDayIn(tz)
+      val postsAfter = now.minus(24.hours)
 
       val postsUpperBound = lastRefreshedAtInstant
 
@@ -68,7 +68,7 @@ class NewArticleNotifier(
           rssRepository
             .unreadSinceLastSyncPerFeed(
               sources = emptyList(),
-              postsAfter = startOfDay,
+              postsAfter = postsAfter,
               postsUpperBound = postsUpperBound,
             )
             .first()
@@ -97,7 +97,7 @@ class NewArticleNotifier(
           rssRepository
             .unreadSinceLastSync(
               sources = emptyList(),
-              postsAfter = startOfDay,
+              postsAfter = postsAfter,
               postsUpperBound = postsUpperBound,
             )
             .first()
