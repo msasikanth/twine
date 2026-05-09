@@ -84,7 +84,7 @@
   <string name="settingsOpmlExporting">Wird exportiert.. %1$d%</string>
   <string name="settingsOpmlCancel">Abbrechen</string>
   <string name="settingsOpmlSelectionTitle">Feeds auswählen</string>
-  <string name="settingsOpmlSelectionSubtitle">You can select up to %1$d feeds under the free plan.</string>
+  <string name="settingsOpmlSelectionSubtitle">Im kostenlosen Plan kannst du bis zu %1$d Feeds auswählen.</string>
   <string name="settingsFreeFeedLimitReached">Sie haben die maximale Anzahl an kostenlosen Feeds erreicht.</string>
   <string name="settingsUpgradeToPremium">Zu Premium wechseln</string>
   <string name="settingsPostsDeletionPeriodTitle">Beiträge löschen, die älter sind als</string>
@@ -139,7 +139,7 @@
   <string name="deleteTagDesc">Das Tag wird gelöscht und aus allen zugewiesenen Feeds entfernt. Ihre Feeds werden nicht gelöscht</string>
   <string name="settingsHeaderData">Datennutzung</string>
   <string name="settingsDeleteAppDataTitle">App-Daten zurücksetzen</string>
-  <string name="settingsDeleteAppDataSubtitle">Clear all your feeds, settings and image cache. You will be logged out as well.</string>
+  <string name="settingsDeleteAppDataSubtitle">Lösche alle deine Feeds, Einstellungen und den Bild-Cache. Du wirst ebenfalls abgemeldet.</string>
   <string name="settingsDeleteAppDataDialogTitle">App-Daten löschen?</string>
   <string name="settingsDeleteAppDataDialogDesc">Diese Aktion wird alle Ihre Feeds, Einstellungen und den Bild-Cache löschen. Diese Aktion kann nicht rückgängig gemacht werden.</string>
   <string name="settingsDeleteAppDataButton">Löschen</string>
@@ -235,7 +235,7 @@
   <string name="settingsSyncStatusSyncing">Synchronisation läuft</string>
   <string name="settingsSyncStatusSuccess">Synchronisiert • %1$s her</string>
   <string name="settingsSyncStatusFailure">Synchronisation fehlgeschlagen</string>
-  <string name="settingSyncLabel">Sync</string>
+  <string name="settingSyncLabel">Synchronisieren</string>
   <string name="settingsSyncSignIn">Anmelden</string>
   <string name="settingsSyncSignOut">Abmelden</string>
   <string name="settingsCustomisations">Anpassungen</string>
