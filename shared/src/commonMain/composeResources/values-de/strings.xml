@@ -305,7 +305,7 @@
   <string name="accountSelectionLocal">Lokal</string>
   <string name="accountSelectionLocalAccount">Auf dem Gerät</string>
   <string name="accountSelectionCloudSync">Cloud-Synchronisation</string>
-  <string name="unit_seconds">&lt;1 Sek.</string>
+  <string name="unit_seconds">&lt;1 Min.</string>
   <string name="unit_minutes">%1$d Min.</string>
   <string name="unit_hours">%1$d Std.</string>
   <string name="unit_days">%1$d T.</string>
