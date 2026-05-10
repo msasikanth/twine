@@ -46,6 +46,8 @@ class IosNotifier : Notifier {
     groupId: String?,
     isSummary: Boolean,
   ) {
+    if (isSummary) return
+
     val notificationContent =
       UNMutableNotificationContent().apply {
         setTitle(title)
