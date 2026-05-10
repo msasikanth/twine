@@ -26,11 +26,11 @@ import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -74,23 +74,29 @@ class NewArticleNotifier(
             .first()
 
         if (unreadSinceLastSyncPerFeed.isNotEmpty()) {
-          unreadSinceLastSyncPerFeed.forEach { unread ->
-            notifier.show(
-              title = perFeedTitle(unread.feedName, unread.newArticleCount.toInt()),
-              content = content(),
-              notificationId = nameBasedUuidOf(unread.feedId).hashCode(),
-              groupId = NOTIFICATION_GROUP_ID,
-            )
-          }
+          coroutineScope {
+            unreadSinceLastSyncPerFeed.forEach { unread ->
+              launch {
+                notifier.show(
+                  title = perFeedTitle(unread.feedName, unread.newArticleCount.toInt()),
+                  content = content(),
+                  notificationId = nameBasedUuidOf(unread.feedId).hashCode(),
+                  groupId = NOTIFICATION_GROUP_ID,
+                )
+              }
+            }
 
-          val totalNewArticles = unreadSinceLastSyncPerFeed.sumOf { it.newArticleCount }
-          notifier.show(
-            title = title(totalNewArticles.toInt()),
-            content = content(),
-            notificationId = 1,
-            groupId = NOTIFICATION_GROUP_ID,
-            isSummary = true,
-          )
+            val totalNewArticles = unreadSinceLastSyncPerFeed.sumOf { it.newArticleCount }
+            launch {
+              notifier.show(
+                title = title(totalNewArticles.toInt()),
+                content = content(),
+                notificationId = 1,
+                groupId = NOTIFICATION_GROUP_ID,
+                isSummary = true,
+              )
+            }
+          }
         }
       } else {
         val unreadSinceLastSync =
