@@ -15,7 +15,7 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 class JvmNotifier : Notifier {
-  override fun show(
+  override suspend fun show(
     title: String,
     content: String,
     notificationId: Int,

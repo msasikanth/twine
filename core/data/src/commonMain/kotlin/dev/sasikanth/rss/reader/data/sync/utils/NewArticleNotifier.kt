@@ -24,12 +24,13 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.notifications.Notifier
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -58,8 +59,7 @@ class NewArticleNotifier(
       val now = Clock.System.now()
       val tz = TimeZone.currentSystemDefault()
 
-      val today = now.toLocalDateTime(tz).date
-      val startOfDay = today.atStartOfDayIn(tz)
+      val postsAfter = now.minus(24.hours)
 
       val postsUpperBound = lastRefreshedAtInstant
 
@@ -68,36 +68,42 @@ class NewArticleNotifier(
           rssRepository
             .unreadSinceLastSyncPerFeed(
               sources = emptyList(),
-              postsAfter = startOfDay,
+              postsAfter = postsAfter,
               postsUpperBound = postsUpperBound,
             )
             .first()
 
         if (unreadSinceLastSyncPerFeed.isNotEmpty()) {
-          unreadSinceLastSyncPerFeed.forEach { unread ->
-            notifier.show(
-              title = perFeedTitle(unread.feedName, unread.newArticleCount.toInt()),
-              content = content(),
-              notificationId = nameBasedUuidOf(unread.feedId).hashCode(),
-              groupId = NOTIFICATION_GROUP_ID,
-            )
-          }
+          coroutineScope {
+            unreadSinceLastSyncPerFeed.forEach { unread ->
+              launch {
+                notifier.show(
+                  title = perFeedTitle(unread.feedName, unread.newArticleCount.toInt()),
+                  content = content(),
+                  notificationId = nameBasedUuidOf(unread.feedId).hashCode(),
+                  groupId = NOTIFICATION_GROUP_ID,
+                )
+              }
+            }
 
-          val totalNewArticles = unreadSinceLastSyncPerFeed.sumOf { it.newArticleCount }
-          notifier.show(
-            title = title(totalNewArticles.toInt()),
-            content = content(),
-            notificationId = 1,
-            groupId = NOTIFICATION_GROUP_ID,
-            isSummary = true,
-          )
+            val totalNewArticles = unreadSinceLastSyncPerFeed.sumOf { it.newArticleCount }
+            launch {
+              notifier.show(
+                title = title(totalNewArticles.toInt()),
+                content = content(),
+                notificationId = 1,
+                groupId = NOTIFICATION_GROUP_ID,
+                isSummary = true,
+              )
+            }
+          }
         }
       } else {
         val unreadSinceLastSync =
           rssRepository
             .unreadSinceLastSync(
               sources = emptyList(),
-              postsAfter = startOfDay,
+              postsAfter = postsAfter,
               postsUpperBound = postsUpperBound,
             )
             .first()

@@ -39,13 +39,15 @@ import platform.UserNotifications.UNUserNotificationCenter
 @AppScope
 class IosNotifier : Notifier {
 
-  override fun show(
+  override suspend fun show(
     title: String,
     content: String,
     notificationId: Int,
     groupId: String?,
     isSummary: Boolean,
   ) {
+    if (isSummary) return
+
     val notificationContent =
       UNMutableNotificationContent().apply {
         setTitle(title)
@@ -63,9 +65,13 @@ class IosNotifier : Notifier {
         trigger = null,
       )
 
-    UNUserNotificationCenter.currentNotificationCenter().addNotificationRequest(request) { error ->
-      if (error != null) {
-        // no-op
+    return suspendCancellableCoroutine { continuation ->
+      UNUserNotificationCenter.currentNotificationCenter().addNotificationRequest(request) { error
+        ->
+        if (error != null) {
+          // no-op
+        }
+        continuation.resume(Unit)
       }
     }
   }

@@ -49,7 +49,7 @@ class AndroidNotifier(private val context: Context) : Notifier {
     notificationManager.createNotificationChannel(channel)
   }
 
-  override fun show(
+  override suspend fun show(
     title: String,
     content: String,
     notificationId: Int,

@@ -18,7 +18,7 @@
 package dev.sasikanth.rss.reader.notifications
 
 interface Notifier {
-  fun show(
+  suspend fun show(
     title: String,
     content: String,
     notificationId: Int = 1,
