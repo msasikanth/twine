@@ -63,6 +63,7 @@
   <string name="settingsAppInfoAndFeedback">App info &amp; feedback</string>
   <string name="moreMenuOptions">More menu options</string>
   <string name="settingsHeaderBehaviour">Behavior</string>
+  <string name="settingsHeaderReadingAndBrowsing">Reading &amp; browsing</string>
   <string name="settingsHeaderFeedback">Feedback &amp; bug reports</string>
   <string name="settingsHeaderTheme">Theme</string>
   <string name="settingsBrowserTypeTitle">Use in-app browser</string>
@@ -127,6 +128,7 @@
   <string name="delete">Delete</string>
   <string name="removeFeedDesc">Do you want to remove <b>"%1$s"</b>?</string>
   <string name="alwaysFetchSourceArticle">Always fetch full articles in reader view</string>
+  <string name="enableNotifications">Enable notifications</string>
   <string name="getFeedInfo">Get Info</string>
   <string name="newTag">New tag</string>
   <string name="tags">Tags</string>
@@ -154,6 +156,7 @@
   <string name="feedsBottomBarNewFeed">New feed</string>
   <string name="actionPin">Pin</string>
   <string name="actionUnpin">Unpin</string>
+  <string name="actionSelect">Select</string>
   <string name="actionDelete">Delete</string>
   <string name="actionAddTo">Add to</string>
   <string name="actionMoveTo">Move to</string>
@@ -177,6 +180,8 @@
   <string name="enableAutoSyncDesc">When turned-on, feeds will be updated in the background</string>
   <string name="showFeedFavIconTitle">Show feed fav icon</string>
   <string name="showFeedFavIconDesc">When turned-off, the feed icon will be displayed instead of the website's favicon</string>
+  <string name="settingsShowFeaturedSectionTitle">Show featured section</string>
+  <string name="settingsShowFeaturedSectionSubtitle">Displays a carousel with the most recent articles</string>
   <string name="hidePostsFromHome">Hide from "Home"</string>
   <string name="blockedWords">Blocked words</string>
   <string name="blockedWordsHint">Enter a word</string>
@@ -187,6 +192,12 @@
   <string name="markArticleAsRead">Mark article as read</string>
   <string name="markArticleAsReadOnOpen">On Open</string>
   <string name="markArticleAsReadOnScroll">On Scroll</string>
+  <string name="audioMarkAsReadThresholdTitle">Auto mark audio as read at</string>
+  <string name="audioMarkAsReadThreshold25">25%</string>
+  <string name="audioMarkAsReadThreshold50">50%</string>
+  <string name="audioMarkAsReadThreshold75">75%</string>
+  <string name="audioMarkAsReadThreshold90">90%</string>
+  <string name="audioMarkAsReadThreshold100">100%</string>
   <string name="noReaderContent">No content to display in the reader, please try fetching article or visiting the website.</string>
   <string name="pullToClose">Pull down to close</string>
   <string name="readerSettings">Reader screen settings</string>
@@ -201,6 +212,7 @@
   <string name="readerCustomisationsTypeface">Typeface</string>
   <string name="themeVariantColorScheme">Color scheme</string>
   <string name="themeVariantDynamic">Dynamic</string>
+  <string name="themeVariantSystemDynamic">Material You</string>
   <string name="postsFilter">Filtre des publications</string>
   <string name="postsSortBy">Trier par</string>
   <string name="postsSortByPostDate">Date de publication</string>
@@ -211,6 +223,8 @@
   <string name="screenHome">Accueil</string>
   <string name="settingsEnableNotificationsTitle">Activer les notifications</string>
   <string name="settingsEnableNotificationsSubtitle">Une fois activé, vous recevrez des notifications lorsque de nouveaux articles seront trouvés lors de la synchronisation en arrière-plan</string>
+  <string name="settingsGroupByFeedNotificationsTitle">Group notifications by feed</string>
+  <string name="settingsGroupByFeedNotificationsSubtitle">When enabled, you will receive individual notifications for each feed</string>
   <string name="settingsDownloadFullContentTitle">Télécharger les articles complets</string>
   <string name="settingsDownloadFullContentSubtitle">Une fois activé, l'application tentera de télécharger les articles complets pendant la synchronisation.</string>
   <string name="settingsDownloadFullContentWarning">Attention ! : cela peut augmenter le temps de chargement des flux, l'utilisation des données, la consommation de mémoire et de stockage. Cela peut potentiellement affecter votre expérience utilisateur.</string>
@@ -221,6 +235,7 @@
   <string name="settingsSyncStatusSyncing">Synchronisation...</string>
   <string name="settingsSyncStatusSuccess">Synced • %1$s ago</string>
   <string name="settingsSyncStatusFailure">Sync failed</string>
+  <string name="settingSyncLabel">Sync</string>
   <string name="settingsSyncSignIn">Se connecter</string>
   <string name="settingsSyncSignOut">Se déconnecter</string>
   <string name="settingsCustomisations">Personnalisations</string>
@@ -245,6 +260,8 @@
   <string name="minifluxClearDataPositive">Clear and Login</string>
   <string name="minifluxErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
   <string name="minifluxErrorUnknown">An unknown error occurred</string>
+  <string name="switchServiceTitle">Sign in with %1$s?</string>
+  <string name="switchServiceDescription">Twine will remove all %1$s data before proceeding. This includes all articles and bookmarks associated with %1$s.</string>
   <string name="settingsNotificationWarningAndroid">Des problèmes de notification ? Votre appareil ferme peut-être l'application en arrière-plan. Appuyez ici pour savoir comment y remédier.</string>
   <string name="onboardingGetStarted">Get started</string>
   <string name="onboardingSubtitle">Build your feed</string>
@@ -262,16 +279,24 @@
   <string name="readerPageCount">%1$d sur %2$d</string>
   <string name="statistics">Statistics</string>
   <string name="statisticsNoData">No reading data available yet</string>
+  <string name="statisticsOverview">Overview</string>
   <string name="statisticsTotalRead">Total Articles Read</string>
+  <string name="statisticsDailyAverage">Daily average</string>
   <string name="statisticsTopFeeds">Top 10 Feeds</string>
+  <string name="statisticsYourTopFeeds">Your top feeds</string>
+  <string name="statisticsFirstPlace">1st place</string>
   <string name="statisticsReadingTrends">Reading Trends</string>
   <string name="statisticsLess">Less</string>
   <string name="statisticsMore">More</string>
   <string name="settingsStatisticsTitle">Statistics</string>
   <string name="settingsStatisticsSubtitle">View your reading habits and insights</string>
+  <string name="settingsDangerZone">Danger zone</string>
+  <string name="changelogTitle">What's new</string>
+  <string name="changelogVersion">version: %1$s</string>
   <string name="sourcesCount">%1$d sources</string>
   <string name="discoveryTitle">Discover</string>
   <string name="discoverySearchHint">Search for feeds</string>
+  <string name="discoveryOnboardingHint">Please select at least 3 feeds to continue.</string>
   <string name="discoveryAddFeed">Add</string>
   <string name="discoveryAdded">Added</string>
   <string name="discoveryRefresh">Refresh</string>
@@ -296,6 +321,7 @@
   <string name="month_oct">Oct</string>
   <string name="month_nov">Nov</string>
   <string name="month_dec">Dec</string>
+  <string name="other">Other</string>
   <!-- Plurals -->
   <plurals name="searchResultsCount">
     <item quantity="one">%1$d result</item>
@@ -308,5 +334,9 @@
   <plurals name="feedGroupFeeds">
     <item quantity="one">%1$d source</item>
     <item quantity="other">%1$d sources</item>
+  </plurals>
+  <plurals name="blockedWordsCount">
+    <item quantity="one">%1$d word blocked</item>
+    <item quantity="other">%1$d words blocked</item>
   </plurals>
 </resources>
