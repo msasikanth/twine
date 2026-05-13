@@ -40,6 +40,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.app.AppPlatform
 import dev.sasikanth.rss.reader.components.AlertDialog
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.SubHeader
@@ -276,29 +277,33 @@ private fun SettingsServicesContent(
           )
         }
 
-        item {
-          SettingsSwitchItem(
-            title = stringResource(Res.string.settingsEnableNotificationsTitle),
-            subtitle = stringResource(Res.string.settingsEnableNotificationsSubtitle),
-            checked = state.enableNotifications,
-            onValueChanged = { newValue -> dispatch(SettingsEvent.ToggleNotifications(newValue)) },
-          )
-        }
-
-        item {
-          AnimatedVisibility(
-            visible = state.enableNotifications,
-            enter = expandVertically(),
-            exit = shrinkVertically(),
-          ) {
+        if (state.appInfo.platform != AppPlatform.iOS) {
+          item {
             SettingsSwitchItem(
-              title = stringResource(Res.string.settingsGroupByFeedNotificationsTitle),
-              subtitle = stringResource(Res.string.settingsGroupByFeedNotificationsSubtitle),
-              checked = state.groupByFeedNotifications,
+              title = stringResource(Res.string.settingsEnableNotificationsTitle),
+              subtitle = stringResource(Res.string.settingsEnableNotificationsSubtitle),
+              checked = state.enableNotifications,
               onValueChanged = { newValue ->
-                dispatch(SettingsEvent.ToggleGroupByFeedNotifications(newValue))
+                dispatch(SettingsEvent.ToggleNotifications(newValue))
               },
             )
+          }
+
+          item {
+            AnimatedVisibility(
+              visible = state.enableNotifications,
+              enter = expandVertically(),
+              exit = shrinkVertically(),
+            ) {
+              SettingsSwitchItem(
+                title = stringResource(Res.string.settingsGroupByFeedNotificationsTitle),
+                subtitle = stringResource(Res.string.settingsGroupByFeedNotificationsSubtitle),
+                checked = state.groupByFeedNotifications,
+                onValueChanged = { newValue ->
+                  dispatch(SettingsEvent.ToggleGroupByFeedNotifications(newValue))
+                },
+              )
+            }
           }
         }
 
@@ -352,6 +357,7 @@ private fun SettingsServicesPreview() {
               isDebugBuild = true,
               isFoss = false,
               cachePath = { "" },
+              platform = AppPlatform.Android,
             )
         ),
       dispatch = {},

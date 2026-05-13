@@ -17,6 +17,7 @@
 package dev.sasikanth.rss.reader.di
 
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.app.AppPlatform
 import dev.sasikanth.rss.reader.app.isFoss
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.base.widget.di.WidgetPlatformComponent
@@ -68,6 +69,7 @@ abstract class ApplicationComponent(
       isDebugBuild = Platform.isDebugBinary,
       isFoss = isFoss,
       cachePath = { NSFileManager.defaultManager.cacheDir },
+      platform = AppPlatform.iOS,
     )
 
   @Provides

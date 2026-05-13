@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE
 import android.os.Build
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.app.AppPlatform
 import dev.sasikanth.rss.reader.app.isFoss
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.base.widget.di.WidgetPlatformComponent
@@ -74,6 +75,7 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
       isDebugBuild = (applicationInfo.flags and FLAG_DEBUGGABLE) != 0,
       isFoss = isFoss,
       cachePath = { context.cacheDir.absolutePath },
+      platform = AppPlatform.Android,
     )
   }
 
