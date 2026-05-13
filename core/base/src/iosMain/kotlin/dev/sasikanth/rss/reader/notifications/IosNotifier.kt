@@ -46,62 +46,11 @@ class IosNotifier : Notifier {
     groupId: String?,
     isSummary: Boolean,
   ) {
-    if (isSummary) return
-
-    val notificationContent =
-      UNMutableNotificationContent().apply {
-        setTitle(title)
-        setBody(content)
-        setSound(UNNotificationSound.defaultSound())
-        if (groupId != null) {
-          setThreadIdentifier(groupId)
-        }
-      }
-
-    val request =
-      UNNotificationRequest.requestWithIdentifier(
-        identifier = notificationId.toString(),
-        content = notificationContent,
-        trigger = null,
-      )
-
-    return suspendCancellableCoroutine { continuation ->
-      UNUserNotificationCenter.currentNotificationCenter().addNotificationRequest(request) { error
-        ->
-        if (error != null) {
-          // no-op
-        }
-        continuation.resume(Unit)
-      }
-    }
+    // no-op
   }
 
   override suspend fun requestPermission(): Boolean {
-    return suspendCancellableCoroutine { continuation ->
-      val container = UNUserNotificationCenter.currentNotificationCenter()
-      container.getNotificationSettingsWithCompletionHandler { settings ->
-        when (settings?.authorizationStatus) {
-          UNAuthorizationStatusAuthorized,
-          UNAuthorizationStatusProvisional -> {
-            continuation.resume(true)
-          }
-          UNAuthorizationStatusDenied -> {
-            openSettings()
-            continuation.resume(false)
-          }
-          else -> {
-            container.requestAuthorizationWithOptions(
-              options =
-                UNAuthorizationOptionAlert or
-                  UNAuthorizationOptionBadge or
-                  UNAuthorizationOptionSound
-            ) { granted, _ ->
-              continuation.resume(granted)
-            }
-          }
-        }
-      }
-    }
+    return false
   }
 
   override fun openSettings() {

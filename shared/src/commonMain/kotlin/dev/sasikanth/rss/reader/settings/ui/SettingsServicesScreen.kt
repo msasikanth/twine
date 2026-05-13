@@ -277,29 +277,33 @@ private fun SettingsServicesContent(
           )
         }
 
-        item {
-          SettingsSwitchItem(
-            title = stringResource(Res.string.settingsEnableNotificationsTitle),
-            subtitle = stringResource(Res.string.settingsEnableNotificationsSubtitle),
-            checked = state.enableNotifications,
-            onValueChanged = { newValue -> dispatch(SettingsEvent.ToggleNotifications(newValue)) },
-          )
-        }
-
-        item {
-          AnimatedVisibility(
-            visible = state.enableNotifications,
-            enter = expandVertically(),
-            exit = shrinkVertically(),
-          ) {
+        if (state.appInfo.platform != AppPlatform.iOS) {
+          item {
             SettingsSwitchItem(
-              title = stringResource(Res.string.settingsGroupByFeedNotificationsTitle),
-              subtitle = stringResource(Res.string.settingsGroupByFeedNotificationsSubtitle),
-              checked = state.groupByFeedNotifications,
+              title = stringResource(Res.string.settingsEnableNotificationsTitle),
+              subtitle = stringResource(Res.string.settingsEnableNotificationsSubtitle),
+              checked = state.enableNotifications,
               onValueChanged = { newValue ->
-                dispatch(SettingsEvent.ToggleGroupByFeedNotifications(newValue))
+                dispatch(SettingsEvent.ToggleNotifications(newValue))
               },
             )
+          }
+
+          item {
+            AnimatedVisibility(
+              visible = state.enableNotifications,
+              enter = expandVertically(),
+              exit = shrinkVertically(),
+            ) {
+              SettingsSwitchItem(
+                title = stringResource(Res.string.settingsGroupByFeedNotificationsTitle),
+                subtitle = stringResource(Res.string.settingsGroupByFeedNotificationsSubtitle),
+                checked = state.groupByFeedNotifications,
+                onValueChanged = { newValue ->
+                  dispatch(SettingsEvent.ToggleGroupByFeedNotifications(newValue))
+                },
+              )
+            }
           }
         }
 
