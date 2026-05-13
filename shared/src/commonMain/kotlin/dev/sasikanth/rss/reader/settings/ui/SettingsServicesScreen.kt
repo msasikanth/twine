@@ -40,6 +40,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.app.AppPlatform
 import dev.sasikanth.rss.reader.components.AlertDialog
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.SubHeader
@@ -352,6 +353,7 @@ private fun SettingsServicesPreview() {
               isDebugBuild = true,
               isFoss = false,
               cachePath = { "" },
+              platform = AppPlatform.Android,
             )
         ),
       dispatch = {},

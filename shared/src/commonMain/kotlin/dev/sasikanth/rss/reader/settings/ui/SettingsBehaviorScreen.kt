@@ -45,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.app.AppPlatform
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.data.repository.BrowserType
@@ -259,6 +260,7 @@ private fun SettingsBehaviorPreview() {
               isDebugBuild = true,
               isFoss = false,
               cachePath = { "" },
+              platform = AppPlatform.Android,
             )
         ),
       dispatch = {},

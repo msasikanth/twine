@@ -23,4 +23,11 @@ data class AppInfo(
   val isDebugBuild: Boolean,
   val isFoss: Boolean,
   val cachePath: () -> String,
+  val platform: AppPlatform,
 )
+
+enum class AppPlatform {
+  Android,
+  iOS,
+  Desktop
+}

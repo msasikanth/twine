@@ -61,6 +61,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.app.AppPlatform
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
@@ -507,6 +508,7 @@ private fun SettingsAppearancePreview() {
               isDebugBuild = true,
               isFoss = false,
               cachePath = { "" },
+              platform = AppPlatform.Android,
             )
         ),
       dispatch = {},
