@@ -63,6 +63,7 @@
   <string name="settingsAppInfoAndFeedback">App info &amp; feedback</string>
   <string name="moreMenuOptions">Дополнительные опции меню</string>
   <string name="settingsHeaderBehaviour">Настройки приложения</string>
+  <string name="settingsHeaderReadingAndBrowsing">Reading &amp; browsing</string>
   <string name="settingsHeaderFeedback">Обратная связь и сообщения об ошибках</string>
   <string name="settingsHeaderTheme">Тема</string>
   <string name="settingsBrowserTypeTitle">Использовать встроенный браузер приложения</string>
@@ -127,6 +128,7 @@
   <string name="delete">Удалить</string>
   <string name="removeFeedDesc">Вы хотите удалить <b>"%1$s"</b>?</string>
   <string name="alwaysFetchSourceArticle">Всегда загружать полные статьи в режиме чтения</string>
+  <string name="enableNotifications">Enable notifications</string>
   <string name="getFeedInfo">Получить информацию</string>
   <string name="newTag">Новый тег</string>
   <string name="tags">Теги</string>
@@ -154,6 +156,7 @@
   <string name="feedsBottomBarNewFeed">Новый канал</string>
   <string name="actionPin">Закрепить</string>
   <string name="actionUnpin">Открепить</string>
+  <string name="actionSelect">Select</string>
   <string name="actionDelete">Удалить</string>
   <string name="actionAddTo">Добавить к</string>
   <string name="actionMoveTo">Перейти к</string>
@@ -177,6 +180,8 @@
   <string name="enableAutoSyncDesc">Если функция включена, каналы будут обновляться в фоновом режиме</string>
   <string name="showFeedFavIconTitle">Показывать значок ленты новостей</string>
   <string name="showFeedFavIconDesc">Если функция отключена вместо значка веб-сайта будет отображаться значок ленты</string>
+  <string name="settingsShowFeaturedSectionTitle">Show featured section</string>
+  <string name="settingsShowFeaturedSectionSubtitle">Displays a carousel with the most recent articles</string>
   <string name="hidePostsFromHome">Hide from "Home"</string>
   <string name="blockedWords">Заблокированные слова</string>
   <string name="blockedWordsHint">Введите слово</string>
@@ -187,6 +192,12 @@
   <string name="markArticleAsRead">Отметить статью как прочитанную</string>
   <string name="markArticleAsReadOnOpen">При открытии</string>
   <string name="markArticleAsReadOnScroll">При прокрутке</string>
+  <string name="audioMarkAsReadThresholdTitle">Auto mark audio as read at</string>
+  <string name="audioMarkAsReadThreshold25">25%</string>
+  <string name="audioMarkAsReadThreshold50">50%</string>
+  <string name="audioMarkAsReadThreshold75">75%</string>
+  <string name="audioMarkAsReadThreshold90">90%</string>
+  <string name="audioMarkAsReadThreshold100">100%</string>
   <string name="noReaderContent">В программе чтения нет контента для отображения, пожалуйста, попробуйте найти статью или посетить веб-сайт.</string>
   <string name="pullToClose">Потяните вниз, чтобы закрыть</string>
   <string name="readerSettings">Настройки экрана программы чтения</string>
@@ -201,6 +212,7 @@
   <string name="readerCustomisationsTypeface">Шрифт</string>
   <string name="themeVariantColorScheme">Color scheme</string>
   <string name="themeVariantDynamic">Dynamic</string>
+  <string name="themeVariantSystemDynamic">Material You</string>
   <string name="postsFilter">Фильтр постов</string>
   <string name="postsSortBy">Сортировать по</string>
   <string name="postsSortByPostDate">Дата публикации</string>
@@ -211,6 +223,8 @@
   <string name="screenHome">Главная</string>
   <string name="settingsEnableNotificationsTitle">Включить уведомления</string>
   <string name="settingsEnableNotificationsSubtitle">Если функция включена, вы будете получать уведомления при обнаружении новых статей во время фоновой синхронизации</string>
+  <string name="settingsGroupByFeedNotificationsTitle">Group notifications by feed</string>
+  <string name="settingsGroupByFeedNotificationsSubtitle">When enabled, you will receive individual notifications for each feed</string>
   <string name="settingsDownloadFullContentTitle">Скачивать полные статьи</string>
   <string name="settingsDownloadFullContentSubtitle">Если функция включена, приложение будет пытаться скачивать полные статьи во время синхронизации.</string>
   <string name="settingsDownloadFullContentWarning">Внимание!: это может увеличить время загрузки фида, использование данных, потребление памяти и хранилища. Это может потенциально повлиять на ваш пользовательский опыт.</string>
@@ -221,6 +235,7 @@
   <string name="settingsSyncStatusSyncing">Синхронизация...</string>
   <string name="settingsSyncStatusSuccess">Synced • %1$s ago</string>
   <string name="settingsSyncStatusFailure">Sync failed</string>
+  <string name="settingSyncLabel">Sync</string>
   <string name="settingsSyncSignIn">Войти</string>
   <string name="settingsSyncSignOut">Выйти</string>
   <string name="settingsCustomisations">Настройки внешнего вида</string>
@@ -245,6 +260,8 @@
   <string name="minifluxClearDataPositive">Clear and Login</string>
   <string name="minifluxErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
   <string name="minifluxErrorUnknown">An unknown error occurred</string>
+  <string name="switchServiceTitle">Sign in with %1$s?</string>
+  <string name="switchServiceDescription">Twine will remove all %1$s data before proceeding. This includes all articles and bookmarks associated with %1$s.</string>
   <string name="settingsNotificationWarningAndroid">Проблемы с уведомлениями? Ваше устройство может закрывать приложение в фоновом режиме. Нажмите здесь, чтобы узнать, как это исправить.</string>
   <string name="onboardingGetStarted">Get started</string>
   <string name="onboardingSubtitle">Build your feed</string>
@@ -262,16 +279,24 @@
   <string name="readerPageCount">%1$d из %2$d</string>
   <string name="statistics">Statistics</string>
   <string name="statisticsNoData">No reading data available yet</string>
+  <string name="statisticsOverview">Overview</string>
   <string name="statisticsTotalRead">Total Articles Read</string>
+  <string name="statisticsDailyAverage">Daily average</string>
   <string name="statisticsTopFeeds">Top 10 Feeds</string>
+  <string name="statisticsYourTopFeeds">Your top feeds</string>
+  <string name="statisticsFirstPlace">1st place</string>
   <string name="statisticsReadingTrends">Reading Trends</string>
   <string name="statisticsLess">Less</string>
   <string name="statisticsMore">More</string>
   <string name="settingsStatisticsTitle">Statistics</string>
   <string name="settingsStatisticsSubtitle">View your reading habits and insights</string>
+  <string name="settingsDangerZone">Danger zone</string>
+  <string name="changelogTitle">What's new</string>
+  <string name="changelogVersion">version: %1$s</string>
   <string name="sourcesCount">%1$d sources</string>
   <string name="discoveryTitle">Discovery</string>
   <string name="discoverySearchHint">Search for feeds</string>
+  <string name="discoveryOnboardingHint">Please select at least 3 feeds to continue.</string>
   <string name="discoveryAddFeed">Add</string>
   <string name="discoveryAdded">Added</string>
   <string name="discoveryRefresh">Refresh</string>
@@ -296,6 +321,7 @@
   <string name="month_oct">Oct</string>
   <string name="month_nov">Nov</string>
   <string name="month_dec">Dec</string>
+  <string name="other">Other</string>
   <!-- Plurals -->
   <plurals name="searchResultsCount">
     <item quantity="one">Один</item>
@@ -314,5 +340,11 @@
     <item quantity="few">Несколько</item>
     <item quantity="many">Много</item>
     <item quantity="other">Другое</item>
+  </plurals>
+  <plurals name="blockedWordsCount">
+    <item quantity="one">%1$d word blocked</item>
+    <item quantity="few">%1$d words blocked</item>
+    <item quantity="many">%1$d words blocked</item>
+    <item quantity="other">%1$d words blocked</item>
   </plurals>
 </resources>
