@@ -328,8 +328,8 @@
     <item quantity="other">%1$d Ergebnisse</item>
   </plurals>
   <plurals name="numberOfUnreadPostsInFeed">
-    <item quantity="one">%d ungelesener Beitrag</item>
-    <item quantity="other">%d ungelesene Beiträge</item>
+    <item quantity="one">%1$d ungelesener Beitrag</item>
+    <item quantity="other">%1$d ungelesene Beiträge</item>
   </plurals>
   <plurals name="feedGroupFeeds">
     <item quantity="one">%1$d Quelle</item>
