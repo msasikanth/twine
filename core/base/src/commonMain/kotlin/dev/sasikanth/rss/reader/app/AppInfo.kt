@@ -29,5 +29,5 @@ data class AppInfo(
 enum class AppPlatform {
   Android,
   iOS,
-  Desktop
+  Desktop,
 }

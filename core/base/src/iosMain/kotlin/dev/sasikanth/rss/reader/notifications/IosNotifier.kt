@@ -18,22 +18,10 @@
 package dev.sasikanth.rss.reader.notifications
 
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import kotlin.coroutines.resume
-import kotlinx.coroutines.suspendCancellableCoroutine
 import me.tatarka.inject.annotations.Inject
 import platform.Foundation.NSURL
 import platform.UIKit.UIApplication
 import platform.UIKit.UIApplicationOpenNotificationSettingsURLString
-import platform.UserNotifications.UNAuthorizationOptionAlert
-import platform.UserNotifications.UNAuthorizationOptionBadge
-import platform.UserNotifications.UNAuthorizationOptionSound
-import platform.UserNotifications.UNAuthorizationStatusAuthorized
-import platform.UserNotifications.UNAuthorizationStatusDenied
-import platform.UserNotifications.UNAuthorizationStatusProvisional
-import platform.UserNotifications.UNMutableNotificationContent
-import platform.UserNotifications.UNNotificationRequest
-import platform.UserNotifications.UNNotificationSound
-import platform.UserNotifications.UNUserNotificationCenter
 
 @Inject
 @AppScope
