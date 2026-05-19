@@ -283,9 +283,7 @@ private fun SettingsServicesContent(
               title = stringResource(Res.string.settingsEnableNotificationsTitle),
               subtitle = stringResource(Res.string.settingsEnableNotificationsSubtitle),
               checked = state.enableNotifications,
-              onValueChanged = { newValue ->
-                dispatch(SettingsEvent.ToggleNotifications(newValue))
-              },
+              onValueChanged = { newValue -> dispatch(SettingsEvent.ToggleNotifications(newValue)) },
             )
           }
 
