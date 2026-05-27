@@ -22,6 +22,7 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.FeedHealthInfo
 import dev.sasikanth.rss.reader.data.database.FeedQueries
 import dev.sasikanth.rss.reader.data.database.FeedSearchFTSQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -327,5 +328,66 @@ class FeedRepository(
       hideFromAllFeeds = hideFromAllFeeds,
       enableNotifications = enableNotifications,
     )
+  }
+
+  fun staleFeeds(sixMonthsAgo: Instant): Flow<List<FeedHealthInfo>> {
+    return feedQueries
+      .staleFeeds(
+        sixMonthsAgo = sixMonthsAgo,
+        mapper = { id, name, icon, homepageLink, showFeedFavIcon, lastPostDate, totalPostsCount ->
+          FeedHealthInfo(
+            id = id,
+            name = name,
+            icon = icon,
+            homepageLink = homepageLink,
+            showFeedFavIcon = showFeedFavIcon,
+            lastPostDate = lastPostDate,
+            totalPostsCount = totalPostsCount,
+          )
+        },
+      )
+      .asFlow()
+      .mapToList(dispatchersProvider.databaseRead)
+  }
+
+  fun highVolumeFeeds(limit: Long): Flow<List<FeedHealthInfo>> {
+    return feedQueries
+      .highVolumeFeeds(
+        limit = limit,
+        mapper = { id, name, icon, homepageLink, showFeedFavIcon, totalPostsCount ->
+          FeedHealthInfo(
+            id = id,
+            name = name,
+            icon = icon,
+            homepageLink = homepageLink,
+            showFeedFavIcon = showFeedFavIcon,
+            lastPostDate = null,
+            totalPostsCount = totalPostsCount,
+          )
+        },
+      )
+      .asFlow()
+      .mapToList(dispatchersProvider.databaseRead)
+  }
+
+  fun leastReadFeeds(limit: Long): Flow<List<FeedHealthInfo>> {
+    return feedQueries
+      .leastReadFeeds(
+        limit = limit,
+        mapper = { id, name, icon, homepageLink, showFeedFavIcon, totalPostsCount, readPostsCount ->
+          FeedHealthInfo(
+            id = id,
+            name = name,
+            icon = icon,
+            homepageLink = homepageLink,
+            showFeedFavIcon = showFeedFavIcon,
+            lastPostDate = null,
+            totalPostsCount = totalPostsCount,
+            readPostsCount = readPostsCount,
+          )
+        },
+      )
+      .asFlow()
+      .mapToList(dispatchersProvider.databaseRead)
   }
 }

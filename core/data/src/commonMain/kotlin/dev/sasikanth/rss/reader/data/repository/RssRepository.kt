@@ -24,6 +24,7 @@ import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.core.model.local.FeedHealthInfo
 import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.local.PostFlag
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
@@ -432,6 +433,18 @@ class RssRepository(
 
   fun numberOfFeeds(): Flow<Long> {
     return feedRepository.numberOfFeeds()
+  }
+
+  fun staleFeeds(sixMonthsAgo: Instant): Flow<List<FeedHealthInfo>> {
+    return feedRepository.staleFeeds(sixMonthsAgo)
+  }
+
+  fun highVolumeFeeds(limit: Long): Flow<List<FeedHealthInfo>> {
+    return feedRepository.highVolumeFeeds(limit)
+  }
+
+  fun leastReadFeeds(limit: Long): Flow<List<FeedHealthInfo>> {
+    return feedRepository.leastReadFeeds(limit)
   }
 
   /** Search feeds, returns all feeds if [searchQuery] is empty */

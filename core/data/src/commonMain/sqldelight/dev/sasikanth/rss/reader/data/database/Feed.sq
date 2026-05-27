@@ -189,3 +189,52 @@ UPDATE SET
     enableNotifications = excluded.enableNotifications,
     remoteId = excluded.remoteId
 WHERE excluded.lastUpdatedAt > feed.lastUpdatedAt OR feed.lastUpdatedAt IS NULL OR feed.remoteId IS NULL;
+
+staleFeeds:
+SELECT
+  f.id,
+  f.name,
+  f.icon,
+  f.homepageLink,
+  f.showFeedFavIcon,
+  MAX(p.postDate) AS lastPostDate,
+  COUNT(p.id) AS totalPostsCount
+FROM feed f
+LEFT JOIN post p ON f.id = p.sourceId
+WHERE f.isDeleted = 0
+GROUP BY f.id
+HAVING lastPostDate < :sixMonthsAgo OR lastPostDate IS NULL
+ORDER BY lastPostDate ASC;
+
+highVolumeFeeds:
+SELECT
+  f.id,
+  f.name,
+  f.icon,
+  f.homepageLink,
+  f.showFeedFavIcon,
+  COUNT(p.id) AS totalPostsCount
+FROM feed f
+INNER JOIN post p ON f.id = p.sourceId
+WHERE f.isDeleted = 0
+GROUP BY f.id
+ORDER BY totalPostsCount DESC
+LIMIT :limit;
+
+leastReadFeeds:
+SELECT
+  f.id,
+  f.name,
+  f.icon,
+  f.homepageLink,
+  f.showFeedFavIcon,
+  COUNT(p.id) AS totalPostsCount,
+  COUNT(CASE WHEN (p.flags & 2) != 0 THEN 1 ELSE NULL END) AS readPostsCount
+FROM feed f
+INNER JOIN post p ON f.id = p.sourceId
+WHERE f.isDeleted = 0
+GROUP BY f.id
+HAVING COUNT(p.id) >= 3 AND (CAST(COUNT(CASE WHEN (p.flags & 2) != 0 THEN 1 ELSE NULL END) AS REAL) / COUNT(p.id)) < 0.8
+ORDER BY (CAST(COUNT(CASE WHEN (p.flags & 2) != 0 THEN 1 ELSE NULL END) AS REAL) / COUNT(p.id)) ASC, totalPostsCount DESC
+LIMIT :limit;
+
