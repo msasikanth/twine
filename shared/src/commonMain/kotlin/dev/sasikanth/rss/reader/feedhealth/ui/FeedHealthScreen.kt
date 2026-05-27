@@ -17,8 +17,6 @@
 
 package dev.sasikanth.rss.reader.feedhealth.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -30,21 +28,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
@@ -54,6 +54,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +62,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
@@ -72,22 +74,19 @@ import dev.sasikanth.rss.reader.feedhealth.FeedHealthViewModel
 import dev.sasikanth.rss.reader.resources.icons.RemoveFeed
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.formatReadingTrendDate
 import kotlin.time.Instant
+import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonCancel
-import twine.shared.generated.resources.feedHealthHighVolumeDesc
 import twine.shared.generated.resources.feedHealthLastPostDate
-import twine.shared.generated.resources.feedHealthLeastReadDesc
 import twine.shared.generated.resources.feedHealthNeverUpdated
 import twine.shared.generated.resources.feedHealthNoHighVolumeFeeds
 import twine.shared.generated.resources.feedHealthNoLeastReadFeeds
 import twine.shared.generated.resources.feedHealthNoStaleFeeds
 import twine.shared.generated.resources.feedHealthReadRatio
-import twine.shared.generated.resources.feedHealthStaleDesc
 import twine.shared.generated.resources.feedHealthTabHighVolume
 import twine.shared.generated.resources.feedHealthTabLeastRead
 import twine.shared.generated.resources.feedHealthTabStale
@@ -121,13 +120,18 @@ private fun FeedHealthContent(
   modifier: Modifier = Modifier,
 ) {
   val layoutDirection = LocalLayoutDirection.current
-  var selectedTabIndex by remember { mutableStateOf(0) }
+  val pagerState = rememberPagerState(pageCount = { 3 })
+  val coroutineScope = rememberCoroutineScope()
   var feedToUnsubscribe by remember { mutableStateOf<FeedHealthInfo?>(null) }
 
   Scaffold(
     modifier = modifier,
     topBar = {
-      SimpleTopAppBar(title = stringResource(Res.string.feedHealthTitle), onBackClick = goBack)
+      SimpleTopAppBar(
+        title = stringResource(Res.string.feedHealthTitle),
+        onBackClick = goBack,
+        showDivider = false,
+      )
     },
     content = { padding ->
       if (state.isLoading) {
@@ -155,23 +159,25 @@ private fun FeedHealthContent(
                 stringResource(Res.string.feedHealthTabLeastRead),
               )
 
-            TabRow(
-              selectedTabIndex = selectedTabIndex,
-              containerColor = AppTheme.colorScheme.surfaceContainerLow,
+            SecondaryTabRow(
+              selectedTabIndex = pagerState.currentPage,
+              modifier = Modifier,
+              containerColor = AppTheme.colorScheme.backdrop,
               contentColor = AppTheme.colorScheme.onSurface,
-              indicator = { tabPositions ->
-                if (selectedTabIndex < tabPositions.size) {
-                  TabRowDefaults.SecondaryIndicator(
-                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                    color = AppTheme.colorScheme.primary,
-                  )
-                }
+              indicator = {
+                TabRowDefaults.SecondaryIndicator(
+                  modifier = Modifier.tabIndicatorOffset(pagerState.currentPage),
+                  color = AppTheme.colorScheme.primary,
+                )
               },
+              divider =
+                @Composable { HorizontalDivider(color = AppTheme.colorScheme.outlineVariant) },
             ) {
               tabs.forEachIndexed { index, title ->
                 Tab(
-                  selected = selectedTabIndex == index,
-                  onClick = { selectedTabIndex = index },
+                  modifier = Modifier.height(56.dp),
+                  selected = pagerState.currentPage == index,
+                  onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
                   text = {
                     Text(
                       text = title,
@@ -183,67 +189,54 @@ private fun FeedHealthContent(
               }
             }
 
-            val currentTabFeeds =
-              when (selectedTabIndex) {
-                0 -> healthData.staleFeeds
-                1 -> healthData.highVolumeFeeds
-                else -> healthData.leastReadFeeds
-              }
+            HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+              val currentTabFeeds =
+                when (page) {
+                  0 -> healthData.staleFeeds
+                  1 -> healthData.highVolumeFeeds
+                  else -> healthData.leastReadFeeds
+                }
 
-            val tabDescription =
-              when (selectedTabIndex) {
-                0 -> stringResource(Res.string.feedHealthStaleDesc)
-                1 -> stringResource(Res.string.feedHealthHighVolumeDesc)
-                else -> stringResource(Res.string.feedHealthLeastReadDesc)
-              }
+              val emptyMessage =
+                when (page) {
+                  0 -> stringResource(Res.string.feedHealthNoStaleFeeds)
+                  1 -> stringResource(Res.string.feedHealthNoHighVolumeFeeds)
+                  else -> stringResource(Res.string.feedHealthNoLeastReadFeeds)
+                }
 
-            val emptyMessage =
-              when (selectedTabIndex) {
-                0 -> stringResource(Res.string.feedHealthNoStaleFeeds)
-                1 -> stringResource(Res.string.feedHealthNoHighVolumeFeeds)
-                else -> stringResource(Res.string.feedHealthNoLeastReadFeeds)
-              }
-
-            LazyColumn(
-              modifier = Modifier.fillMaxSize(),
-              contentPadding =
-                PaddingValues(
-                  start = padding.calculateStartPadding(layoutDirection) + 24.dp,
-                  top = 16.dp,
-                  end = padding.calculateEndPadding(layoutDirection) + 24.dp,
-                  bottom = padding.calculateBottomPadding() + 80.dp,
-                ),
-            ) {
-              item {
-                Text(
-                  text = tabDescription,
-                  style = MaterialTheme.typography.bodyMedium,
-                  color = AppTheme.colorScheme.onSurfaceVariant,
-                  modifier = Modifier.padding(bottom = 16.dp),
-                )
-              }
-
-              if (currentTabFeeds.isEmpty()) {
-                item {
-                  Box(
-                    modifier = Modifier.fillMaxWidth().requiredHeight(200.dp),
-                    contentAlignment = Alignment.Center,
-                  ) {
-                    Text(
-                      text = emptyMessage,
-                      style = MaterialTheme.typography.bodyLarge,
-                      color = AppTheme.colorScheme.onSurfaceVariant,
+              LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding =
+                  PaddingValues(
+                    start = padding.calculateStartPadding(layoutDirection) + 24.dp,
+                    top = 16.dp,
+                    end = padding.calculateEndPadding(layoutDirection) + 24.dp,
+                    bottom = padding.calculateBottomPadding() + 80.dp,
+                  ),
+              ) {
+                if (currentTabFeeds.isNotEmpty()) {
+                  items(currentTabFeeds) { feed ->
+                    FeedHealthItem(
+                      feed = feed,
+                      tabIndex = page,
+                      onUnsubscribeClick = { feedToUnsubscribe = feed },
+                      modifier = Modifier.padding(vertical = 8.dp),
                     )
                   }
-                }
-              } else {
-                items(currentTabFeeds) { feed ->
-                  FeedHealthItem(
-                    feed = feed,
-                    tabIndex = selectedTabIndex,
-                    onUnsubscribeClick = { feedToUnsubscribe = feed },
-                    modifier = Modifier.padding(vertical = 8.dp),
-                  )
+                } else {
+                  item {
+                    Box(
+                      modifier = Modifier.fillParentMaxHeight(0.7f).fillMaxWidth(),
+                      contentAlignment = Alignment.Center,
+                    ) {
+                      Text(
+                        text = emptyMessage,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = AppTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                      )
+                    }
+                  }
                 }
               }
             }
@@ -363,5 +356,5 @@ private fun FeedHealthItem(
 private fun formatInstant(instant: Instant): String {
   val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
   val month = localDateTime.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
-  return "$month ${localDateTime.dayOfMonth}, ${localDateTime.year}"
+  return "$month ${localDateTime.day}, ${localDateTime.year}"
 }

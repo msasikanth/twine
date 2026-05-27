@@ -23,7 +23,7 @@ import dev.sasikanth.rss.reader.core.model.local.FeedSubscriptionHealth
 @Immutable
 data class FeedHealthState(
   val healthData: FeedSubscriptionHealth? = null,
-  val isLoading: Boolean = true
+  val isLoading: Boolean = true,
 ) {
   companion object {
     val Default = FeedHealthState()

@@ -19,5 +19,6 @@ package dev.sasikanth.rss.reader.feedhealth
 
 sealed interface FeedHealthEvent {
   data object LoadHealthData : FeedHealthEvent
+
   data class UnsubscribeFeed(val feedId: String) : FeedHealthEvent
 }

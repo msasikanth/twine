@@ -62,6 +62,9 @@ import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.FeedReadCount
 import dev.sasikanth.rss.reader.core.model.local.ReadingStatistics
 import dev.sasikanth.rss.reader.core.model.local.ReadingTrend
+import dev.sasikanth.rss.reader.resources.icons.DataUsageRoundedFilled
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.settings.ui.items.SettingsNavigationItem
 import dev.sasikanth.rss.reader.statistics.StatisticsState
 import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -78,6 +81,8 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.settingsFeedHealthSubtitle
+import twine.shared.generated.resources.settingsFeedHealthTitle
 import twine.shared.generated.resources.settingsYourInsights
 import twine.shared.generated.resources.statisticsDailyAverage
 import twine.shared.generated.resources.statisticsFirstPlace
@@ -91,17 +96,24 @@ import twine.shared.generated.resources.statisticsYourTopFeeds
 internal fun SettingsDataScreen(
   statisticsViewModel: StatisticsViewModel,
   goBack: () -> Unit,
+  openFeedHealth: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val state by statisticsViewModel.state.collectAsStateWithLifecycle()
 
-  SettingsDataContent(state = state, goBack = goBack, modifier = modifier)
+  SettingsDataContent(
+    state = state,
+    goBack = goBack,
+    openFeedHealth = openFeedHealth,
+    modifier = modifier,
+  )
 }
 
 @Composable
 private fun SettingsDataContent(
   state: StatisticsState,
   goBack: () -> Unit,
+  openFeedHealth: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val layoutDirection = LocalLayoutDirection.current
@@ -178,6 +190,18 @@ private fun SettingsDataContent(
                   modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
                 )
               }
+            }
+
+            item { SettingsDivider(horizontalInsets = 24.dp) }
+
+            item {
+              SettingsNavigationItem(
+                title = stringResource(Res.string.settingsFeedHealthTitle),
+                subtitle = stringResource(Res.string.settingsFeedHealthSubtitle),
+                icon = TwineIcons.DataUsageRoundedFilled,
+                onClick = openFeedHealth,
+                modifier = Modifier.padding(horizontal = settingsItemHorizontalPadding),
+              )
             }
           }
         }
@@ -516,6 +540,7 @@ private fun SettingsDataPreview() {
     SettingsDataContent(
       state = StatisticsState(statistics = mockStatistics, isLoading = false),
       goBack = {},
+      openFeedHealth = {},
     )
   }
 }

@@ -56,6 +56,7 @@ import dev.sasikanth.rss.reader.feeds.ui.FeedGroupItem
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
 import dev.sasikanth.rss.reader.resources.icons.Add
 import dev.sasikanth.rss.reader.resources.icons.Check
+import dev.sasikanth.rss.reader.resources.icons.DataUsageRoundedFilled
 import dev.sasikanth.rss.reader.resources.icons.Edit
 import dev.sasikanth.rss.reader.resources.icons.MarkAllAsRead
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
@@ -71,6 +72,7 @@ import twine.shared.generated.resources.actionSelect
 import twine.shared.generated.resources.allFeeds
 import twine.shared.generated.resources.buttonAddFeed
 import twine.shared.generated.resources.edit
+import twine.shared.generated.resources.feedHealthTitle
 import twine.shared.generated.resources.feedOptionRemove
 import twine.shared.generated.resources.feedsSortAlphabetical
 import twine.shared.generated.resources.feedsSortLatest
@@ -298,6 +300,7 @@ internal fun AllFeedsHeader(
   modifier: Modifier = Modifier,
   showAddButton: Boolean = true,
   onAddNewFeedClick: (() -> Unit)? = null,
+  onFeedHealthClick: (() -> Unit)? = null,
 ) {
   Row(
     modifier = Modifier.then(modifier).padding(horizontal = 24.dp, vertical = 16.dp),
@@ -327,6 +330,14 @@ internal fun AllFeedsHeader(
     }
 
     Spacer(Modifier.requiredWidth(12.dp))
+
+    CircularIconButton(
+      icon = TwineIcons.DataUsageRoundedFilled,
+      label = stringResource(Res.string.feedHealthTitle),
+      onClick = { onFeedHealthClick?.invoke() },
+    )
+
+    Spacer(Modifier.width(12.dp))
 
     Box {
       CircularIconButton(

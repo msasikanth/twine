@@ -130,27 +130,29 @@ private fun DiscoveryContent(
           title = stringResource(Res.string.discoveryTitle),
           behavior = appBarBehavior,
           onBackClick = goBack,
-        ) {
-          val refreshButtonPaddingEnd = if (showDoneButton) 0.dp else 12.dp
-          CircularIconButton(
-            modifier = Modifier.padding(end = refreshButtonPaddingEnd),
-            icon = TwineIcons.Refresh,
-            label = stringResource(Res.string.discoveryRefresh),
-            onClick = { dispatch(DiscoveryEvent.Refresh) },
-          )
-
-          if (showDoneButton) {
-            Spacer(Modifier.width(8.dp))
-
+          showDivider = false,
+          actions = {
+            val refreshButtonPaddingEnd = if (showDoneButton) 0.dp else 12.dp
             CircularIconButton(
-              modifier = Modifier.padding(end = 12.dp),
-              icon = TwineIcons.Check,
-              label = stringResource(Res.string.buttonChange),
-              enabled = state.addedFeedLinks.size >= 3,
-              onClick = onDone,
+              modifier = Modifier.padding(end = refreshButtonPaddingEnd),
+              icon = TwineIcons.Refresh,
+              label = stringResource(Res.string.discoveryRefresh),
+              onClick = { dispatch(DiscoveryEvent.Refresh) },
             )
-          }
-        }
+
+            if (showDoneButton) {
+              Spacer(Modifier.width(8.dp))
+
+              CircularIconButton(
+                modifier = Modifier.padding(end = 12.dp),
+                icon = TwineIcons.Check,
+                label = stringResource(Res.string.buttonChange),
+                enabled = state.addedFeedLinks.size >= 3,
+                onClick = onDone,
+              )
+            }
+          },
+        )
 
         Column(modifier = Modifier.background(AppTheme.colorScheme.backdrop)) {
           TextField(
