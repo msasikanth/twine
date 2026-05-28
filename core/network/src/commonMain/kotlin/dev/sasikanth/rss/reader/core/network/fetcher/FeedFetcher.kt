@@ -31,10 +31,12 @@ import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import io.ktor.client.request.headers
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.BadContentTypeFormatException
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
@@ -83,7 +85,15 @@ class FeedFetcher(
 
     return try {
       val transformedUrl = buildFeedUrl(url)
-      val response = httpClient.get(transformedUrl.toString())
+      val response =
+        httpClient.get(transformedUrl.toString()) {
+          headers {
+            append(
+              HttpHeaders.Accept,
+              "text/html,application/xhtml+xml,application/xml;q=0.9,application/rss+xml,application/atom+xml,application/json;q=0.8,*/*;q=0.5",
+            )
+          }
+        }
 
       when (response.status) {
         HttpStatusCode.OK -> {
