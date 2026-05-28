@@ -46,6 +46,7 @@ fun SimpleTopAppBar(
   modifier: Modifier = Modifier,
   behavior: TopAppBarScrollBehavior? = null,
   actions: @Composable RowScope.() -> Unit = {},
+  showDivider: Boolean = true,
 ) {
   Box(modifier = modifier) {
     TopAppBar(
@@ -78,9 +79,11 @@ fun SimpleTopAppBar(
         ),
     )
 
-    HorizontalDivider(
-      modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-      color = AppTheme.colorScheme.outlineVariant,
-    )
+    if (showDivider) {
+      HorizontalDivider(
+        modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
+        color = AppTheme.colorScheme.outlineVariant,
+      )
+    }
   }
 }

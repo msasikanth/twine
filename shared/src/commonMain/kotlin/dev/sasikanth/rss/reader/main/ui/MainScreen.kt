@@ -79,6 +79,7 @@ internal fun MainScreen(
   openGroupSelectionSheet: () -> Unit,
   openAddFeedScreen: () -> Unit,
   openPaywall: () -> Unit,
+  openFeedHealth: () -> Unit,
   modifier: Modifier = Modifier,
   canHandleBack: Boolean = true,
   startTab: String? = null,
@@ -219,6 +220,7 @@ internal fun MainScreen(
         openGroupSelectionSheet = openGroupSelectionSheet,
         openAddFeedScreen = openAddFeedScreen,
         openPaywall = openPaywall,
+        openFeedHealth = openFeedHealth,
         closeDrawer = {
           when {
             sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> {

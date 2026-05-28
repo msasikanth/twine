@@ -46,6 +46,8 @@ import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
 import dev.sasikanth.rss.reader.discovery.ui.DiscoveryScreen
 import dev.sasikanth.rss.reader.feed.FeedViewModel
 import dev.sasikanth.rss.reader.feed.ui.FeedInfoBottomSheet
+import dev.sasikanth.rss.reader.feedhealth.FeedHealthViewModel
+import dev.sasikanth.rss.reader.feedhealth.ui.FeedHealthScreen
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.freshrss.FreshRssLoginViewModel
@@ -314,6 +316,7 @@ fun NavGraphBuilder.mainScreen(
       openGroupSelectionSheet = { feedsViewModel.dispatch(FeedsEvent.OnAddToGroupClicked) },
       openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
       openPaywall = { navController.navigate(Screen.Paywall) },
+      openFeedHealth = { navController.navigate(Screen.FeedHealth) },
       canHandleBack = isMainActive,
     )
   }
@@ -380,6 +383,22 @@ fun NavGraphBuilder.settingsDataScreen(
       modifier = modifier,
       statisticsViewModel = statisticsViewModel,
       goBack = { navController.popBackStack() },
+      openFeedHealth = { navController.navigate(Screen.FeedHealth) },
+    )
+  }
+}
+
+fun NavGraphBuilder.feedHealthScreen(
+  feedHealthViewModel: () -> FeedHealthViewModel,
+  navController: NavHostController,
+  modifier: Modifier = Modifier,
+) {
+  composable<Screen.FeedHealth> {
+    val viewModel = viewModel { feedHealthViewModel() }
+    FeedHealthScreen(
+      viewModel = viewModel,
+      goBack = { navController.popBackStack() },
+      modifier = modifier,
     )
   }
 }
