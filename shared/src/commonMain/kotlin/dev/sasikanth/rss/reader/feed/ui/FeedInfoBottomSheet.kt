@@ -85,8 +85,10 @@ import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Check
 import dev.sasikanth.rss.reader.resources.icons.CopyLink
 import dev.sasikanth.rss.reader.resources.icons.DeleteOutline
+import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.Website
+import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.KeyboardState
@@ -190,15 +192,17 @@ fun FeedInfoBottomSheet(
             },
           )
 
-          Divider(horizontalInsets = HORIZONTAL_PADDING)
+          if (platform != Platform.Apple) {
+            Divider(horizontalInsets = HORIZONTAL_PADDING)
 
-          EnableNotificationsSwitch(
-            feed = feed,
-            globalNotificationsEnabled = state.globalNotificationsEnabled,
-            onValueChanged = { newValue, feedId ->
-              feedViewModel.dispatch(FeedEvent.OnEnableNotificationsChanged(newValue, feedId))
-            },
-          )
+            EnableNotificationsSwitch(
+              feed = feed,
+              globalNotificationsEnabled = state.globalNotificationsEnabled,
+              onValueChanged = { newValue, feedId ->
+                feedViewModel.dispatch(FeedEvent.OnEnableNotificationsChanged(newValue, feedId))
+              },
+            )
+          }
 
           Divider()
 

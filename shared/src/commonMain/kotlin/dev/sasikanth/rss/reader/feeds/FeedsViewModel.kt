@@ -47,6 +47,7 @@ import dev.sasikanth.rss.reader.utils.Constants.MINIMUM_REQUIRED_SEARCH_CHARACTE
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,11 +84,56 @@ class FeedsViewModel(
   var searchQuery by mutableStateOf(TextFieldValue())
     private set
 
+  @OptIn(ExperimentalCoroutinesApi::class)
+  private val allSourcesFlow =
+    combine(
+        settingsRepository.postsType,
+        settingsRepository.feedsSortOrder,
+        refreshPolicy.lastRefreshedAtFlow,
+      ) { postsType, feedsSortOrder, dateTime ->
+        Triple(postsType, feedsSortOrder, dateTime)
+      }
+      .flatMapLatest { (postsType, feedsSortOrder, dateTime) ->
+        val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
+        val sources =
+          sources(
+            postsAfter = postsAfter,
+            postsUpperBound = dateTime,
+            feedsSortOrder = feedsSortOrder,
+          )
+
+        addSourcesSeparator(sources)
+      }
+      .cachedIn(viewModelScope)
+
+  @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+  private val feedsSearchResultsFlow =
+    combine(
+        snapshotFlow { searchQuery }.debounce(500.milliseconds).distinctUntilChangedBy { it.text },
+        settingsRepository.postsType,
+        refreshPolicy.lastRefreshedAtFlow,
+      ) { searchQuery, postsType, dateTime ->
+        Triple(searchQuery, postsType, dateTime)
+      }
+      .flatMapLatest { (searchQuery, postsType, dateTime) ->
+        val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
+        if (searchQuery.text.length >= MINIMUM_REQUIRED_SEARCH_CHARACTERS) {
+          feedsSearchResultsPager(
+            transformedSearchQuery = searchQuery.text,
+            postsAfter = postsAfter,
+          )
+        } else {
+          flowOf(PagingData.empty())
+        }
+      }
+      .cachedIn(viewModelScope)
+
   private val _state = MutableStateFlow(FeedsState.DEFAULT)
   val state: StateFlow<FeedsState>
     get() = _state
 
   init {
+    _state.update { it.copy(sources = allSourcesFlow, feedsSearchResults = feedsSearchResultsFlow) }
     init()
   }
 
@@ -172,7 +218,6 @@ class FeedsViewModel(
     observeSources()
     observePreferences()
     observeShowUnreadCountPreference()
-    observeSearchQuery()
   }
 
   private fun onPinnedSourcePositionChanged(newSourcesList: List<Source>) {
@@ -324,41 +369,13 @@ class FeedsViewModel(
     }
   }
 
-  @OptIn(FlowPreview::class)
-  private fun observeSearchQuery() {
-    val searchQueryFlow =
-      snapshotFlow { searchQuery }.debounce(500.milliseconds).distinctUntilChangedBy { it.text }
-
-    combine(searchQueryFlow, settingsRepository.postsType, refreshPolicy.lastRefreshedAtFlow) {
-        searchQuery,
-        postsType,
-        dateTime ->
-        Triple(searchQuery, postsType, dateTime)
-      }
-      .onEach { (searchQuery, postsType, dateTime) ->
-        val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
-        val searchResults =
-          if (searchQuery.text.length >= MINIMUM_REQUIRED_SEARCH_CHARACTERS) {
-            feedsSearchResultsPager(
-              transformedSearchQuery = searchQuery.text,
-              postsAfter = postsAfter,
-            )
-          } else {
-            flowOf(PagingData.empty())
-          }
-
-        _state.update { it.copy(feedsSearchResults = searchResults) }
-      }
-      .launchIn(viewModelScope)
-  }
-
   private fun observePreferences() {
     settingsRepository.feedsSortOrder
       .onEach { feedsSortOrder -> _state.update { it.copy(feedsSortOrder = feedsSortOrder) } }
       .launchIn(viewModelScope)
   }
 
-  @OptIn(FlowPreview::class)
+  @OptIn(ExperimentalCoroutinesApi::class)
   private fun observeSources() {
     val activeSourceFlow = observableActiveSource.activeSource
     val postsTypeFlow = settingsRepository.postsType
@@ -403,46 +420,19 @@ class FeedsViewModel(
       }
       .launchIn(viewModelScope)
 
-    val pinnedSourcesFlow =
-      combine(settingsRepository.postsType, refreshPolicy.lastRefreshedAtFlow) { postsType, dateTime
-          ->
-          Pair(postsType, dateTime)
-        }
-        .flatMapLatest { (postsType, dateTime) ->
-          val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
-          rssRepository.pinnedSources(
-            postsAfter = postsAfter,
-            postsUpperBound = dateTime.toInstant(TimeZone.currentSystemDefault()),
-          )
-        }
-        .map { it.toImmutableList() }
-
-    val allSourcesFlow =
-      combine(
-          settingsRepository.postsType,
-          settingsRepository.feedsSortOrder,
-          refreshPolicy.lastRefreshedAtFlow,
-        ) { postsType, feedsSortOrder, dateTime ->
-          Triple(postsType, feedsSortOrder, dateTime)
-        }
-        .map { (postsType, feedsSortOrder, dateTime) ->
-          val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
-          val sources =
-            sources(
-              postsAfter = postsAfter,
-              postsUpperBound = dateTime,
-              feedsSortOrder = feedsSortOrder,
-            )
-
-          addSourcesSeparator(sources).cachedIn(viewModelScope)
-        }
-
-    combine(pinnedSourcesFlow, allSourcesFlow) { pinnedSources, allSources ->
-        Pair(pinnedSources, allSources)
+    combine(settingsRepository.postsType, refreshPolicy.lastRefreshedAtFlow) { postsType, dateTime
+        ->
+        Pair(postsType, dateTime)
       }
-      .onEach { (pinnedSources, allSources) ->
-        _state.update { it.copy(pinnedSources = pinnedSources, sources = allSources) }
+      .flatMapLatest { (postsType, dateTime) ->
+        val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
+        rssRepository.pinnedSources(
+          postsAfter = postsAfter,
+          postsUpperBound = dateTime.toInstant(TimeZone.currentSystemDefault()),
+        )
       }
+      .map { it.toImmutableList() }
+      .onEach { pinnedSources -> _state.update { it.copy(pinnedSources = pinnedSources) } }
       .launchIn(viewModelScope)
   }
 

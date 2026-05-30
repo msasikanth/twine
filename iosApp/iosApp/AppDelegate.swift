@@ -10,7 +10,6 @@ import UIKit
 import shared
 import BackgroundTasks
 import Bugsnag
-import RevenueCat
 import WidgetKit
 import UserNotifications
 

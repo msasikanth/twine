@@ -17,8 +17,8 @@
 
 package dev.sasikanth.rss.reader.discovery.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,19 +34,18 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -54,10 +53,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -71,7 +69,6 @@ import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.TextField
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.DiscoveryFeed
-import dev.sasikanth.rss.reader.core.model.DiscoveryGroup
 import dev.sasikanth.rss.reader.discovery.DiscoveryEvent
 import dev.sasikanth.rss.reader.discovery.DiscoveryState
 import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
@@ -110,6 +107,7 @@ fun DiscoveryScreen(
   )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DiscoveryContent(
   state: DiscoveryState,
@@ -120,7 +118,6 @@ private fun DiscoveryContent(
   modifier: Modifier = Modifier,
 ) {
   val focusRequester = remember { FocusRequester() }
-  val appBarBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
   Scaffold(
     modifier = modifier,
@@ -128,7 +125,6 @@ private fun DiscoveryContent(
       Column {
         SimpleTopAppBar(
           title = stringResource(Res.string.discoveryTitle),
-          behavior = appBarBehavior,
           onBackClick = goBack,
           showDivider = false,
           actions = {
@@ -156,7 +152,10 @@ private fun DiscoveryContent(
 
         Column(modifier = Modifier.background(AppTheme.colorScheme.backdrop)) {
           TextField(
-            modifier = Modifier.fillMaxWidth().padding(16.dp).focusRequester(focusRequester),
+            modifier =
+              Modifier.fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .focusRequester(focusRequester),
             value = state.searchQuery,
             onValueChange = { dispatch(DiscoveryEvent.SearchQueryChanged(it)) },
             hint = stringResource(Res.string.discoverySearchHint),
@@ -192,17 +191,36 @@ private fun DiscoveryContent(
         }
       } else {
         LazyColumn(
-          modifier = Modifier.fillMaxSize().nestedScroll(appBarBehavior.nestedScrollConnection),
-          contentPadding = paddingValues,
+          modifier = Modifier.fillMaxSize().padding(top = paddingValues.calculateTopPadding()),
+          contentPadding = PaddingValues(bottom = paddingValues.calculateBottomPadding() + 80.dp),
         ) {
-          items(state.filteredGroups) { group ->
-            DiscoveryGroupItem(
-              group = group,
-              addedFeedLinks = state.addedFeedLinks,
-              inProgressFeedLinks = state.inProgressFeedLinks,
-              onAddFeed = { feed -> dispatch(DiscoveryEvent.AddFeedClicked(feed)) },
-              onFeedClick = { feed -> dispatch(DiscoveryEvent.ShowFeedInfo(feed)) },
-            )
+          state.filteredGroups.forEach { group ->
+            stickyHeader(key = group.name) {
+              DiscoveryGroupHeader(
+                name = group.name,
+                count = group.feeds.size,
+                modifier = Modifier.fillMaxWidth().background(AppTheme.colorScheme.backdrop),
+              )
+            }
+
+            itemsIndexed(items = group.feeds, key = { _, feed -> feed.link }) { index, feed ->
+              DiscoveryFeedItem(
+                feed = feed,
+                isAdded =
+                  state.addedFeedLinks.contains(feed.link) ||
+                    state.addedFeedLinks.contains(feed.link.removeSuffix("/")),
+                isLoading = state.inProgressFeedLinks.contains(feed.link),
+                onAddFeed = { dispatch(DiscoveryEvent.AddFeedClicked(feed)) },
+                onFeedClick = { dispatch(DiscoveryEvent.ShowFeedInfo(feed)) },
+              )
+
+              if (index < group.feeds.size - 1) {
+                HorizontalDivider(
+                  modifier = Modifier.padding(horizontal = 24.dp),
+                  color = AppTheme.colorScheme.outlineVariant,
+                )
+              }
+            }
           }
         }
       }
@@ -225,50 +243,23 @@ private fun DiscoveryContent(
 }
 
 @Composable
-private fun DiscoveryGroupItem(
-  group: DiscoveryGroup,
-  addedFeedLinks: Set<String>,
-  inProgressFeedLinks: Set<String>,
-  onAddFeed: (DiscoveryFeed) -> Unit,
-  onFeedClick: (DiscoveryFeed) -> Unit,
-  modifier: Modifier = Modifier,
-) {
-  Column(modifier = modifier.fillMaxWidth().padding(vertical = 16.dp)) {
-    Row(
-      modifier = Modifier.padding(horizontal = 24.dp),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-      Text(
-        text = group.name,
-        style = MaterialTheme.typography.titleMedium,
-        color = AppTheme.colorScheme.onSurface,
-      )
+private fun DiscoveryGroupHeader(name: String, count: Int, modifier: Modifier = Modifier) {
+  Row(
+    modifier = modifier.padding(horizontal = 24.dp, vertical = 12.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Text(
+      text = name,
+      style = MaterialTheme.typography.titleMedium,
+      color = AppTheme.colorScheme.onSurface,
+    )
 
-      Text(
-        text = group.feeds.size.toString(),
-        style = MaterialTheme.typography.titleMedium,
-        color = AppTheme.colorScheme.primary,
-      )
-    }
-
-    Spacer(Modifier.requiredHeight(12.dp))
-
-    LazyRow(
-      contentPadding = PaddingValues(horizontal = 24.dp),
-      horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-      items(group.feeds) { feed ->
-        DiscoveryFeedItem(
-          feed = feed,
-          isAdded =
-            addedFeedLinks.contains(feed.link) ||
-              addedFeedLinks.contains(feed.link.removeSuffix("/")),
-          isLoading = inProgressFeedLinks.contains(feed.link),
-          onAddFeed = { onAddFeed(feed) },
-          onFeedClick = { onFeedClick(feed) },
-        )
-      }
-    }
+    Text(
+      text = count.toString(),
+      style = MaterialTheme.typography.titleMedium,
+      color = AppTheme.colorScheme.primary,
+    )
   }
 }
 
@@ -281,15 +272,13 @@ private fun DiscoveryFeedItem(
   onFeedClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  Column(
+  Row(
     modifier =
       modifier
-        .requiredWidth(160.dp)
-        .clip(RoundedCornerShape(16.dp))
-        .background(AppTheme.colorScheme.surfaceContainerLowest)
+        .fillMaxWidth()
         .clickable { onFeedClick() }
-        .padding(horizontal = 16.dp, vertical = 12.dp),
-    horizontalAlignment = Alignment.CenterHorizontally,
+        .padding(horizontal = 24.dp, vertical = 12.dp),
+    verticalAlignment = Alignment.CenterVertically,
   ) {
     FeedIcon(
       icon = feed.icon,
@@ -299,70 +288,77 @@ private fun DiscoveryFeedItem(
       modifier = Modifier.requiredSize(48.dp),
     )
 
-    Spacer(Modifier.requiredHeight(8.dp))
+    Spacer(Modifier.requiredWidth(16.dp))
 
-    Text(
-      modifier = Modifier.basicMarquee(),
-      text = feed.name,
-      style = MaterialTheme.typography.titleSmall,
-      color = AppTheme.colorScheme.onSurface,
-      maxLines = 1,
-      overflow = TextOverflow.Ellipsis,
-    )
+    Column(modifier = Modifier.weight(1f)) {
+      Text(
+        text = feed.name,
+        style = MaterialTheme.typography.titleMedium,
+        color = AppTheme.colorScheme.onSurface,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+      )
 
-    Spacer(Modifier.requiredHeight(4.dp))
+      Spacer(Modifier.requiredHeight(4.dp))
 
-    Text(
-      text = feed.description,
-      style = MaterialTheme.typography.bodySmall,
-      color = AppTheme.colorScheme.onSurfaceVariant,
-      maxLines = 2,
-      overflow = TextOverflow.Ellipsis,
-      textAlign = TextAlign.Justify,
-      modifier = Modifier.requiredHeight(32.dp),
-    )
+      Text(
+        text = feed.description,
+        style = MaterialTheme.typography.bodyMedium,
+        color = AppTheme.colorScheme.onSurfaceVariant,
+        minLines = 2,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+      )
+    }
 
-    Spacer(Modifier.requiredHeight(12.dp))
+    Spacer(Modifier.requiredWidth(16.dp))
 
-    Button(
-      modifier = Modifier.fillMaxWidth().requiredHeight(32.dp),
-      onClick = onAddFeed,
-      enabled = !isAdded && !isLoading,
-      colors =
-        ButtonDefaults.buttonColors(
-          containerColor = AppTheme.colorScheme.primary,
-          contentColor = AppTheme.colorScheme.onPrimary,
-          disabledContainerColor = AppTheme.colorScheme.surfaceContainerHigh,
-          disabledContentColor = AppTheme.colorScheme.onSurfaceVariant,
-        ),
-    ) {
-      if (isAdded) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Icon(
-            imageVector = TwineIcons.Check,
-            contentDescription = null,
-            modifier = Modifier.requiredSize(16.dp),
-            tint = AppTheme.colorScheme.onSurfaceVariant,
-          )
-          Spacer(Modifier.requiredWidth(4.dp))
+    if (isAdded) {
+      Row(
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+      ) {
+        Icon(
+          imageVector = TwineIcons.Check,
+          contentDescription = null,
+          modifier = Modifier.requiredSize(16.dp),
+          tint = AppTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+          text = stringResource(Res.string.discoveryAdded),
+          style = MaterialTheme.typography.labelSmall,
+          color = AppTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+    } else {
+      Box(contentAlignment = Alignment.Center) {
+        Button(
+          onClick = onAddFeed,
+          modifier =
+            Modifier.requiredHeight(36.dp).graphicsLayer { alpha = if (isLoading) 0f else 1f },
+          enabled = !isLoading,
+          shape = MaterialTheme.shapes.large,
+          colors =
+            ButtonDefaults.buttonColors(
+              containerColor = AppTheme.colorScheme.primary,
+              contentColor = AppTheme.colorScheme.onPrimary,
+            ),
+        ) {
           Text(
-            text = stringResource(Res.string.discoveryAdded),
-            style = MaterialTheme.typography.labelSmall,
-            color = AppTheme.colorScheme.onSurfaceVariant,
+            text = stringResource(Res.string.discoveryAddFeed),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Medium,
           )
         }
-      } else if (isLoading) {
-        CircularProgressIndicator(
-          modifier = Modifier.requiredSize(16.dp),
-          color = AppTheme.colorScheme.onPrimary,
-          strokeWidth = 2.dp,
-        )
-      } else {
-        Text(
-          text = stringResource(Res.string.discoveryAddFeed),
-          style = MaterialTheme.typography.labelSmall,
-          fontWeight = FontWeight.Medium,
-        )
+
+        if (isLoading) {
+          CircularProgressIndicator(
+            modifier = Modifier.requiredSize(16.dp),
+            color = AppTheme.colorScheme.primary,
+            strokeWidth = 2.dp,
+          )
+        }
       }
     }
   }
