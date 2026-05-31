@@ -395,21 +395,24 @@ private fun HomeContent(
           }
 
           val saveVisibleItemIndex by rememberUpdatedState {
-            val firstVisibleItemInfoAfterOffset =
-              postsListState.layoutInfo.visibleItemsInfo.firstOrNull { itemInfo ->
-                itemInfo.offset >= topOffset || itemInfo.offset == 0
-              }
-            val firstVisibleItemIndexAfterOffset = firstVisibleItemInfoAfterOffset?.index ?: 0
-            val firstVisibleItemKey = firstVisibleItemInfoAfterOffset?.key as? String
-            val settledPage = featuredPostsPagerState.settledPage
+            val visibleItemsInfo = postsListState.layoutInfo.visibleItemsInfo
+            if (visibleItemsInfo.isNotEmpty()) {
+              val firstVisibleItemInfoAfterOffset =
+                visibleItemsInfo.firstOrNull { itemInfo ->
+                  itemInfo.offset >= topOffset || itemInfo.offset == 0
+                }
+              val firstVisibleItemIndexAfterOffset = firstVisibleItemInfoAfterOffset?.index ?: 0
+              val firstVisibleItemKey = firstVisibleItemInfoAfterOffset?.key as? String
+              val settledPage = featuredPostsPagerState.settledPage
 
-            dispatch(
-              HomeEvent.OnScreenStopped(
-                firstVisibleItemIndex = firstVisibleItemIndexAfterOffset,
-                firstVisibleItemKey = firstVisibleItemKey,
-                settledPage = settledPage,
+              dispatch(
+                HomeEvent.OnScreenStopped(
+                  firstVisibleItemIndex = firstVisibleItemIndexAfterOffset,
+                  firstVisibleItemKey = firstVisibleItemKey,
+                  settledPage = settledPage,
+                )
               )
-            )
+            }
           }
 
           LifecycleEventEffect(event = Lifecycle.Event.ON_STOP) { saveVisibleItemIndex() }
