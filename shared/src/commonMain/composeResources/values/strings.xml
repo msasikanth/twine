@@ -31,7 +31,8 @@
   <string name="scrollToTop">Scroll to top</string>
   <string name="newArticles">New articles</string>
   <string name="noFeeds">No feeds present!</string>
-  <string name="swipeUpGetStarted">Swipe up to get started</string>
+  <string name="swipeRightGetStarted">Swipe right to get started</string>
+  <string name="swipeLeftGetStarted">Swipe left to get started</string>
   <string name="feedsLetsStart">You will see all your feeds here, let's start by adding a feed.</string>
   <string name="feedNameHint">Feed name</string>
   <string name="editFeedName">Edit</string>

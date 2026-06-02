@@ -30,7 +30,8 @@
   <string name="scrollToTop">回到顶部</string>
   <string name="newArticles">新文章</string>
   <string name="noFeeds">没有可呈现的来源！</string>
-  <string name="swipeUpGetStarted">上滑以开始</string>
+  <string name="swipeRightGetStarted">右滑以开始</string>
+  <string name="swipeLeftGetStarted">左滑以开始</string>
   <string name="feedsLetsStart">你将在这里看到所有内容，不妨从添加一个订阅源开始吧。</string>
   <string name="feedNameHint">来源名称</string>
   <string name="editFeedName">编辑</string>
