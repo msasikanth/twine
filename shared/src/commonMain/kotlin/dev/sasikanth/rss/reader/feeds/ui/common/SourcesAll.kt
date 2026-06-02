@@ -17,6 +17,9 @@
 
 package dev.sasikanth.rss.reader.feeds.ui.common
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -303,7 +306,8 @@ internal fun AllFeedsHeader(
   onFeedHealthClick: (() -> Unit)? = null,
 ) {
   Row(
-    modifier = Modifier.then(modifier).padding(horizontal = 24.dp, vertical = 16.dp),
+    modifier =
+      Modifier.then(modifier).padding(horizontal = 24.dp).padding(top = 8.dp, bottom = 16.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
     var showSortDropdown by remember { mutableStateOf(false) }
@@ -329,52 +333,56 @@ internal fun AllFeedsHeader(
       )
     }
 
-    Spacer(Modifier.requiredWidth(12.dp))
+    AnimatedVisibility(visible = feedsCount > 0, enter = fadeIn(), exit = fadeOut()) {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Spacer(Modifier.requiredWidth(12.dp))
 
-    CircularIconButton(
-      icon = TwineIcons.DataUsageRoundedFilled,
-      label = stringResource(Res.string.feedHealthTitle),
-      onClick = { onFeedHealthClick?.invoke() },
-    )
+        CircularIconButton(
+          icon = TwineIcons.DataUsageRoundedFilled,
+          label = stringResource(Res.string.feedHealthTitle),
+          onClick = { onFeedHealthClick?.invoke() },
+        )
 
-    Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(12.dp))
 
-    Box {
-      CircularIconButton(
-        icon = TwineIcons.Sort,
-        label = stringResource(Res.string.sort),
-        onClick = { showSortDropdown = true },
-      )
+        Box {
+          CircularIconButton(
+            icon = TwineIcons.Sort,
+            label = stringResource(Res.string.sort),
+            onClick = { showSortDropdown = true },
+          )
 
-      DropdownMenu(
-        modifier = Modifier.widthIn(min = 132.dp),
-        expanded = showSortDropdown,
-        onDismissRequest = { showSortDropdown = false },
-      ) {
-        FeedsOrderBy.entries
-          .filter { it != FeedsOrderBy.Pinned }
-          .forEach { sortOrder ->
-            val label =
-              when (sortOrder) {
-                FeedsOrderBy.Latest -> stringResource(Res.string.feedsSortLatest)
-                FeedsOrderBy.Oldest -> stringResource(Res.string.feedsSortOldest)
-                FeedsOrderBy.Alphabetical -> stringResource(Res.string.feedsSortAlphabetical)
-                FeedsOrderBy.Pinned -> {
-                  throw IllegalStateException(
-                    "Cannot use the following feed sort order here: $feedsSortOrder"
-                  )
-                }
+          DropdownMenu(
+            modifier = Modifier.widthIn(min = 132.dp),
+            expanded = showSortDropdown,
+            onDismissRequest = { showSortDropdown = false },
+          ) {
+            FeedsOrderBy.entries
+              .filter { it != FeedsOrderBy.Pinned }
+              .forEach { sortOrder ->
+                val label =
+                  when (sortOrder) {
+                    FeedsOrderBy.Latest -> stringResource(Res.string.feedsSortLatest)
+                    FeedsOrderBy.Oldest -> stringResource(Res.string.feedsSortOldest)
+                    FeedsOrderBy.Alphabetical -> stringResource(Res.string.feedsSortAlphabetical)
+                    FeedsOrderBy.Pinned -> {
+                      throw IllegalStateException(
+                        "Cannot use the following feed sort order here: $feedsSortOrder"
+                      )
+                    }
+                  }
+
+                DropdownMenuItem(
+                  selected = feedsSortOrder == sortOrder,
+                  text = label,
+                  onClick = {
+                    onFeedsSortChanged(sortOrder)
+                    showSortDropdown = false
+                  },
+                )
               }
-
-            DropdownMenuItem(
-              selected = feedsSortOrder == sortOrder,
-              text = label,
-              onClick = {
-                onFeedsSortChanged(sortOrder)
-                showSortDropdown = false
-              },
-            )
           }
+        }
       }
     }
 
