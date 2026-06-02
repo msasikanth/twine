@@ -30,7 +30,8 @@
   <string name="scrollToTop">Scroll to top</string>
   <string name="newArticles">New articles</string>
   <string name="noFeeds">No feeds present!</string>
-  <string name="swipeUpGetStarted">Swipe up to get started</string>
+  <string name="swipeRightGetStarted">शुरू करने के लिए दाएँ स्वाइप करें</string>
+  <string name="swipeLeftGetStarted">शुरू करने के लिए बाएँ स्वाइप करें</string>
   <string name="feedsLetsStart">आप यहाँ अपने सभी फीड्स देखेंगे, चलिए एक फीड जोड़कर शुरुआत करते हैं।\n\nबटन पर क्लिक करें।</string>
   <string name="feedNameHint">Feed name</string>
   <string name="editFeedName">Edit</string>
