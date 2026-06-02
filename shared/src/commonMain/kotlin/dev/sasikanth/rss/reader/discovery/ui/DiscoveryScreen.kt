@@ -50,7 +50,11 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -72,6 +76,8 @@ import dev.sasikanth.rss.reader.core.model.DiscoveryFeed
 import dev.sasikanth.rss.reader.discovery.DiscoveryEvent
 import dev.sasikanth.rss.reader.discovery.DiscoveryState
 import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
+import dev.sasikanth.rss.reader.resources.icons.ArrowDown
+import dev.sasikanth.rss.reader.resources.icons.ArrowUp
 import dev.sasikanth.rss.reader.resources.icons.Check
 import dev.sasikanth.rss.reader.resources.icons.Close
 import dev.sasikanth.rss.reader.resources.icons.Refresh
@@ -118,6 +124,13 @@ private fun DiscoveryContent(
   modifier: Modifier = Modifier,
 ) {
   val focusRequester = remember { FocusRequester() }
+  var collapsedGroups by
+    rememberSaveable(
+      stateSaver =
+        Saver<Set<String>, List<String>>(save = { it.toList() }, restore = { it.toSet() })
+    ) {
+      mutableStateOf(emptySet<String>())
+    }
 
   Scaffold(
     modifier = modifier,
@@ -195,30 +208,43 @@ private fun DiscoveryContent(
           contentPadding = PaddingValues(bottom = paddingValues.calculateBottomPadding() + 80.dp),
         ) {
           state.filteredGroups.forEach { group ->
+            val isCollapsed = collapsedGroups.contains(group.name)
+
             stickyHeader(key = group.name) {
               DiscoveryGroupHeader(
                 name = group.name,
                 count = group.feeds.size,
+                isCollapsed = isCollapsed,
+                onClick = {
+                  collapsedGroups =
+                    if (isCollapsed) {
+                      collapsedGroups - group.name
+                    } else {
+                      collapsedGroups + group.name
+                    }
+                },
                 modifier = Modifier.fillMaxWidth().background(AppTheme.colorScheme.backdrop),
               )
             }
 
-            itemsIndexed(items = group.feeds, key = { _, feed -> feed.link }) { index, feed ->
-              DiscoveryFeedItem(
-                feed = feed,
-                isAdded =
-                  state.addedFeedLinks.contains(feed.link) ||
-                    state.addedFeedLinks.contains(feed.link.removeSuffix("/")),
-                isLoading = state.inProgressFeedLinks.contains(feed.link),
-                onAddFeed = { dispatch(DiscoveryEvent.AddFeedClicked(feed)) },
-                onFeedClick = { dispatch(DiscoveryEvent.ShowFeedInfo(feed)) },
-              )
-
-              if (index < group.feeds.size - 1) {
-                HorizontalDivider(
-                  modifier = Modifier.padding(horizontal = 24.dp),
-                  color = AppTheme.colorScheme.outlineVariant,
+            if (!isCollapsed) {
+              itemsIndexed(items = group.feeds, key = { _, feed -> feed.link }) { index, feed ->
+                DiscoveryFeedItem(
+                  feed = feed,
+                  isAdded =
+                    state.addedFeedLinks.contains(feed.link) ||
+                      state.addedFeedLinks.contains(feed.link.removeSuffix("/")),
+                  isLoading = state.inProgressFeedLinks.contains(feed.link),
+                  onAddFeed = { dispatch(DiscoveryEvent.AddFeedClicked(feed)) },
+                  onFeedClick = { dispatch(DiscoveryEvent.ShowFeedInfo(feed)) },
                 )
+
+                if (index < group.feeds.size - 1) {
+                  HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    color = AppTheme.colorScheme.outlineVariant,
+                  )
+                }
               }
             }
           }
@@ -243,9 +269,15 @@ private fun DiscoveryContent(
 }
 
 @Composable
-private fun DiscoveryGroupHeader(name: String, count: Int, modifier: Modifier = Modifier) {
+private fun DiscoveryGroupHeader(
+  name: String,
+  count: Int,
+  isCollapsed: Boolean,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
   Row(
-    modifier = modifier.padding(horizontal = 24.dp, vertical = 12.dp),
+    modifier = modifier.clickable { onClick() }.padding(horizontal = 24.dp, vertical = 16.dp),
     horizontalArrangement = Arrangement.spacedBy(8.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
@@ -259,6 +291,15 @@ private fun DiscoveryGroupHeader(name: String, count: Int, modifier: Modifier = 
       text = count.toString(),
       style = MaterialTheme.typography.titleMedium,
       color = AppTheme.colorScheme.primary,
+    )
+
+    Spacer(Modifier.weight(1f))
+
+    Icon(
+      imageVector = if (isCollapsed) TwineIcons.ArrowDown else TwineIcons.ArrowUp,
+      contentDescription = null,
+      tint = AppTheme.colorScheme.onSurfaceVariant,
+      modifier = Modifier.requiredSize(20.dp),
     )
   }
 }
