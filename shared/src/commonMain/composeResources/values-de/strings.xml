@@ -30,7 +30,8 @@
   <string name="scrollToTop">Nach oben scrollen</string>
   <string name="newArticles">Neue Beiträge</string>
   <string name="noFeeds">Keine Feeds vorhanden!</string>
-  <string name="swipeUpGetStarted">Wischen Sie nach oben, um zu beginnen</string>
+  <string name="swipeRightGetStarted">Wischen Sie nach rechts, um zu beginnen</string>
+  <string name="swipeLeftGetStarted">Wischen Sie nach links, um zu beginnen</string>
   <string name="feedsLetsStart">Hier siehst du alle deine Feeds. Fangen wir damit an, einen Feed hinzuzufügen.</string>
   <string name="feedNameHint">Feed-Name</string>
   <string name="editFeedName">Bearbeiten</string>
