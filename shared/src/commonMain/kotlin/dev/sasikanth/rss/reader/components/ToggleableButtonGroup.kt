@@ -33,8 +33,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -42,10 +42,11 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.ui.AppTheme
-import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @Composable
 fun ToggleableButtonGroup(
@@ -65,9 +66,10 @@ fun ToggleableButtonGroup(
         .border(width = 1.dp, color = AppTheme.colorScheme.outline, shape = CircleShape)
   ) {
     val backgroundColor = AppTheme.colorScheme.inverseSurface
-    val initialIndex = items.indexOfFirst { it.isSelected }.coerceAtLeast(0).toFloat()
-    val selectedItemIndex = remember { Animatable(initialIndex) }
-    val coroutineScope = rememberCoroutineScope()
+    val selectedIndex = items.indexOfFirst { it.isSelected }.coerceAtLeast(0)
+    val selectedItemIndex = remember { Animatable(selectedIndex.toFloat()) }
+
+    LaunchedEffect(selectedIndex) { selectedItemIndex.animateTo(selectedIndex.toFloat()) }
 
     Row(
       modifier =
@@ -95,16 +97,21 @@ fun ToggleableButtonGroup(
         val isFirst = index == 0
         val isPreviousSelected = if (index > 0) items[index - 1].isSelected else false
 
+        val distance = abs(selectedItemIndex.value - index)
+        val selectionFraction = (1f - distance).coerceIn(0f, 1f)
+        val contentColor =
+          lerp(
+            start = AppTheme.colorScheme.onSurfaceVariant,
+            stop = AppTheme.colorScheme.inverseOnSurface,
+            fraction = selectionFraction,
+          )
+
         ToggleableButton(
           modifier = Modifier.weight(1f),
           item = item,
+          contentColor = contentColor,
           showDivider = !isFirst && !isSelected && !isPreviousSelected,
-          onClick = {
-            coroutineScope.launch {
-              selectedItemIndex.animateTo(index.toFloat())
-              onItemSelected(item)
-            }
-          },
+          onClick = { onItemSelected(item) },
         )
       }
     }
@@ -114,6 +121,7 @@ fun ToggleableButtonGroup(
 @Composable
 private fun ToggleableButton(
   item: ToggleableButtonItem,
+  contentColor: Color,
   showDivider: Boolean,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
@@ -132,13 +140,6 @@ private fun ToggleableButton(
       color = Color.Transparent,
       onClick = onClick,
     ) {
-      val contentColor =
-        if (item.isSelected) {
-          AppTheme.colorScheme.inverseOnSurface
-        } else {
-          AppTheme.colorScheme.onSurfaceVariant
-        }
-
       Box(contentAlignment = Alignment.Center) {
         Text(
           item.label,
