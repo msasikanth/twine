@@ -30,7 +30,8 @@
   <string name="scrollToTop">Başa dön</string>
   <string name="newArticles">Yeni yazılar</string>
   <string name="noFeeds">Henüz bir akış eklenmemiş!</string>
-  <string name="swipeUpGetStarted">Başlamak için yukarı kaydır</string>
+  <string name="swipeRightGetStarted">Başlamak için sağa kaydır</string>
+  <string name="swipeLeftGetStarted">Başlamak için sola kaydır</string>
   <string name="feedsLetsStart">Tüm akışların burada toplanacak, hadi ilk akışını ekleyerek başlayalım.</string>
   <string name="feedNameHint">Akış adı</string>
   <string name="editFeedName">Düzenle</string>
