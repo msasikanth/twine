@@ -30,7 +30,8 @@
   <string name="scrollToTop">Наверх</string>
   <string name="newArticles">Новые статьи</string>
   <string name="noFeeds">Никаких каналов нет!</string>
-  <string name="swipeUpGetStarted">Проведите пальцем вверх, чтобы начать</string>
+  <string name="swipeRightGetStarted">Проведите пальцем вправо, чтобы начать</string>
+  <string name="swipeLeftGetStarted">Проведите пальцем влево, чтобы начать</string>
   <string name="feedsLetsStart">Вы увидите все свои фиды здесь, давайте начнем с добавления фида.\n\nНажмите кнопку.</string>
   <string name="feedNameHint">Название канала</string>
   <string name="editFeedName">Редактировать</string>

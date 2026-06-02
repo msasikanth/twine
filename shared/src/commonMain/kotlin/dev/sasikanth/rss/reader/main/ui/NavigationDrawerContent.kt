@@ -14,11 +14,13 @@
  * limitations under the License.
  *
  */
-
 package dev.sasikanth.rss.reader.main.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -372,6 +374,13 @@ private fun ExpandedDrawerContent(
         }
 
         item {
+          HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+            color = colorScheme.outlineVariant,
+          )
+        }
+
+        item {
           AllFeedsHeader(
             feedsCount = state.numberOfFeeds,
             feedsSortOrder = state.feedsSortOrder,
@@ -389,12 +398,19 @@ private fun ExpandedDrawerContent(
           onPinnedSourceOrderChanged = { dispatch(FeedsEvent.OnPinnedSourcePositionChanged(it)) },
         )
 
+        val hasSources = state.numberOfFeeds > 0 || state.numberOfFeedGroups > 0
         item {
-          SearchBar(
-            query = searchQuery,
-            onQueryChange = { dispatch(FeedsEvent.SearchQueryChanged(it)) },
-            onClearClick = { dispatch(FeedsEvent.ClearSearchQuery) },
-          )
+          androidx.compose.animation.AnimatedVisibility(
+            visible = hasSources,
+            enter = fadeIn(),
+            exit = fadeOut(),
+          ) {
+            SearchBar(
+              query = searchQuery,
+              onQueryChange = { dispatch(FeedsEvent.SearchQueryChanged(it)) },
+              onClearClick = { dispatch(FeedsEvent.ClearSearchQuery) },
+            )
+          }
         }
 
         if (state.numberOfFeeds == 0 && state.numberOfFeedGroups == 0 && !isInSearchMode) {

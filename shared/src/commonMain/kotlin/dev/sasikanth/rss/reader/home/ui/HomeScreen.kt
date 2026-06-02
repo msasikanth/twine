@@ -68,8 +68,10 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -104,6 +106,7 @@ import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalInAppRating
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
+import kotlin.math.abs
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.FlowPreview
@@ -114,7 +117,8 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.noFeeds
 import twine.shared.generated.resources.noNewPosts
 import twine.shared.generated.resources.noNewPostsSubtitle
-import twine.shared.generated.resources.swipeUpGetStarted
+import twine.shared.generated.resources.swipeLeftGetStarted
+import twine.shared.generated.resources.swipeRightGetStarted
 
 @OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
 @Composable
@@ -596,14 +600,23 @@ private fun PullToRefreshContent(
 }
 
 @Composable
-private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
+private fun NoFeeds(onNoFeedsSwipe: () -> Unit) {
+  val layoutDirection = LocalLayoutDirection.current
+  val isRtl = layoutDirection == LayoutDirection.Rtl
+
   Column(
     modifier =
       Modifier.padding(horizontal = 16.dp).fillMaxSize().pointerInput(Unit) {
         detectDragGestures { change, dragAmount ->
           change.consume()
-          if (dragAmount.y < 0) {
-            onNoFeedsSwipeUp()
+          if (isRtl) {
+            if (dragAmount.x < 0 && abs(dragAmount.x) > abs(dragAmount.y)) {
+              onNoFeedsSwipe()
+            }
+          } else {
+            if (dragAmount.x > 0 && dragAmount.x > abs(dragAmount.y)) {
+              onNoFeedsSwipe()
+            }
           }
         }
       },
@@ -620,7 +633,12 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
     Spacer(Modifier.requiredHeight(8.dp))
 
     Text(
-      text = stringResource(Res.string.swipeUpGetStarted),
+      text =
+        if (isRtl) {
+          stringResource(Res.string.swipeLeftGetStarted)
+        } else {
+          stringResource(Res.string.swipeRightGetStarted)
+        },
       style = MaterialTheme.typography.labelLarge,
       color = AppTheme.colorScheme.onSurfaceVariant,
       textAlign = TextAlign.Center,
@@ -632,6 +650,7 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
       imageVector = TwineIcons.ArrowUp,
       contentDescription = null,
       tint = AppTheme.colorScheme.primary,
+      modifier = Modifier.graphicsLayer { rotationZ = if (isRtl) -90f else 90f },
     )
   }
 }

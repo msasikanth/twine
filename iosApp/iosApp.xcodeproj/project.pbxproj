@@ -34,12 +34,8 @@
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
 		CD6AEE242C51E57700486A95 /* Bugsnag in Frameworks */ = {isa = PBXBuildFile; productRef = CD6AEE232C51E57700486A95 /* Bugsnag */; };
 		CD6AEE262C51E57700486A95 /* BugsnagNetworkRequestPlugin in Frameworks */ = {isa = PBXBuildFile; productRef = CD6AEE252C51E57700486A95 /* BugsnagNetworkRequestPlugin */; };
-		CD6DFBF82E0466AF0048A870 /* PurchasesHybridCommon in Frameworks */ = {isa = PBXBuildFile; productRef = CD6DFBF72E0466AF0048A870 /* PurchasesHybridCommon */; };
-		CD6DFBFA2E0466AF0048A870 /* PurchasesHybridCommonUI in Frameworks */ = {isa = PBXBuildFile; productRef = CD6DFBF92E0466AF0048A870 /* PurchasesHybridCommonUI */; };
 		CD87EC132E12AFC900E516A7 /* Bugsnag in Frameworks */ = {isa = PBXBuildFile; productRef = CD87EC122E12AFC900E516A7 /* Bugsnag */; };
 		CD87EC152E12AFC900E516A7 /* BugsnagNetworkRequestPlugin in Frameworks */ = {isa = PBXBuildFile; productRef = CD87EC142E12AFC900E516A7 /* BugsnagNetworkRequestPlugin */; };
-		CD87EC172E12AFC900E516A7 /* PurchasesHybridCommon in Frameworks */ = {isa = PBXBuildFile; productRef = CD87EC162E12AFC900E516A7 /* PurchasesHybridCommon */; };
-		CD87EC192E12AFC900E516A7 /* PurchasesHybridCommonUI in Frameworks */ = {isa = PBXBuildFile; productRef = CD87EC182E12AFC900E516A7 /* PurchasesHybridCommonUI */; };
 		CD9827922E13C8E400D17D40 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = CD9827912E13C8E400D17D40 /* Localizable.xcstrings */; };
 		CD9827932E13C8E400D17D40 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = CD9827912E13C8E400D17D40 /* Localizable.xcstrings */; };
 		CDBE05C42E129DDB00CC593E /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDBE05C32E129DDB00CC593E /* WidgetKit.framework */; };
@@ -117,11 +113,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CD87EC172E12AFC900E516A7 /* PurchasesHybridCommon in Frameworks */,
 				CD87EC152E12AFC900E516A7 /* BugsnagNetworkRequestPlugin in Frameworks */,
 				CD87EC132E12AFC900E516A7 /* Bugsnag in Frameworks */,
 				CDBE05C62E129DDB00CC593E /* SwiftUI.framework in Frameworks */,
-				CD87EC192E12AFC900E516A7 /* PurchasesHybridCommonUI in Frameworks */,
 				CDBE05C42E129DDB00CC593E /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -131,8 +125,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CD6AEE262C51E57700486A95 /* BugsnagNetworkRequestPlugin in Frameworks */,
-				CD6DFBF82E0466AF0048A870 /* PurchasesHybridCommon in Frameworks */,
-				CD6DFBFA2E0466AF0048A870 /* PurchasesHybridCommonUI in Frameworks */,
 				CD6AEE242C51E57700486A95 /* Bugsnag in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -234,8 +226,6 @@
 			packageProductDependencies = (
 				CD6AEE232C51E57700486A95 /* Bugsnag */,
 				CD6AEE252C51E57700486A95 /* BugsnagNetworkRequestPlugin */,
-				CD6DFBF72E0466AF0048A870 /* PurchasesHybridCommon */,
-				CD6DFBF92E0466AF0048A870 /* PurchasesHybridCommonUI */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* Twine (Debug).app */;
@@ -261,8 +251,6 @@
 			packageProductDependencies = (
 				CD87EC122E12AFC900E516A7 /* Bugsnag */,
 				CD87EC142E12AFC900E516A7 /* BugsnagNetworkRequestPlugin */,
-				CD87EC162E12AFC900E516A7 /* PurchasesHybridCommon */,
-				CD87EC182E12AFC900E516A7 /* PurchasesHybridCommonUI */,
 			);
 			productName = TwineWidgetExtension;
 			productReference = CDBE05C22E129DDB00CC593E /* TwineWidgetExtension.appex */;
@@ -297,7 +285,6 @@
 			mainGroup = 7555FF72242A565900829871;
 			packageReferences = (
 				CD6AEE222C51E57700486A95 /* XCRemoteSwiftPackageReference "bugsnag-cocoa" */,
-				CD6DFBF62E0466AF0048A870 /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -767,14 +754,6 @@
 				version = 6.32.0;
 			};
 		};
-		CD6DFBF62E0466AF0048A870 /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/RevenueCat/purchases-hybrid-common";
-			requirement = {
-				kind = exactVersion;
-				version = 17.55.1;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -788,16 +767,6 @@
 			package = CD6AEE222C51E57700486A95 /* XCRemoteSwiftPackageReference "bugsnag-cocoa" */;
 			productName = BugsnagNetworkRequestPlugin;
 		};
-		CD6DFBF72E0466AF0048A870 /* PurchasesHybridCommon */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CD6DFBF62E0466AF0048A870 /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */;
-			productName = PurchasesHybridCommon;
-		};
-		CD6DFBF92E0466AF0048A870 /* PurchasesHybridCommonUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CD6DFBF62E0466AF0048A870 /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */;
-			productName = PurchasesHybridCommonUI;
-		};
 		CD87EC122E12AFC900E516A7 /* Bugsnag */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CD6AEE222C51E57700486A95 /* XCRemoteSwiftPackageReference "bugsnag-cocoa" */;
@@ -807,16 +776,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CD6AEE222C51E57700486A95 /* XCRemoteSwiftPackageReference "bugsnag-cocoa" */;
 			productName = BugsnagNetworkRequestPlugin;
-		};
-		CD87EC162E12AFC900E516A7 /* PurchasesHybridCommon */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CD6DFBF62E0466AF0048A870 /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */;
-			productName = PurchasesHybridCommon;
-		};
-		CD87EC182E12AFC900E516A7 /* PurchasesHybridCommonUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CD6DFBF62E0466AF0048A870 /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */;
-			productName = PurchasesHybridCommonUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
