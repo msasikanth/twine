@@ -9,6 +9,7 @@ CREATE VIRTUAL TABLE IF NOT EXISTS post_search USING FTS5(
 CREATE TRIGGER IF NOT EXISTS
 post_search_fts_BEFORE_DELETE
 BEFORE DELETE ON post
+WHEN (SELECT COUNT(*) FROM post WHERE id = old.id) = 1
 BEGIN DELETE FROM post_search WHERE id = old.id;
 END;
 
@@ -21,23 +22,29 @@ END;
 CREATE TRIGGER IF NOT EXISTS
 post_search_fts_AFTER_INSERT
 AFTER INSERT ON post
-BEGIN INSERT OR IGNORE INTO post_search(id, title, description, link) VALUES (new.id, new.title, new.description, new.link);
+BEGIN
+  INSERT INTO post_search(id, title, description, link)
+  SELECT new.id, new.title, new.description, new.link
+  WHERE NOT EXISTS (SELECT 1 FROM post_search WHERE id = new.id);
 END;
 
 countSearchResults:
-SELECT COUNT(*) FROM post_search ps
-INNER JOIN post p ON p.id = ps.id
-INNER JOIN feed f ON p.sourceId = f.id
-WHERE ps.post_search MATCH :searchQuery 
-  AND f.isDeleted = 0 
-  AND (p.flags & 4) == 0
-  AND (:isSourceIdsEmpty OR p.sourceId IN :sourceIds)
-  AND (:onlyBookmarked = 0 OR (p.flags & 1) != 0)
-  AND (
-    :onlyUnread = 0 
-    OR (p.flags & 2) == 0 
-    OR p.id IN :sessionPostIds
-  );
+SELECT COUNT(*) FROM (
+  SELECT DISTINCT p.id, p.sourceId
+  FROM post_search ps
+  INNER JOIN post p ON p.id = ps.id
+  INNER JOIN feed f ON p.sourceId = f.id
+  WHERE ps.post_search MATCH :searchQuery 
+    AND f.isDeleted = 0 
+    AND (p.flags & 4) == 0
+    AND (:isSourceIdsEmpty OR p.sourceId IN :sourceIds)
+    AND (:onlyBookmarked = 0 OR (p.flags & 1) != 0)
+    AND (
+      :onlyUnread = 0 
+      OR (p.flags & 2) == 0 
+      OR p.id IN :sessionPostIds
+    )
+);
 
 search:
 SELECT
@@ -76,6 +83,7 @@ WHERE post_search MATCH :searchQuery
     OR (post.flags & 2) == 0 
     OR post.id IN :sessionPostIds
   )
+GROUP BY post.id, post.sourceId
 ORDER BY
   CASE WHEN :sortOrder = 'oldest' THEN post.postDate END ASC,
   CASE WHEN :sortOrder = 'newest' THEN post.postDate END DESC

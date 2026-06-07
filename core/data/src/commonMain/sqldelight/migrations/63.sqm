@@ -1,0 +1,27 @@
+-- Clean up existing duplicates in post_search
+DELETE FROM post_search
+WHERE rowid NOT IN (
+  SELECT MIN(rowid)
+  FROM post_search
+  GROUP BY id
+);
+
+-- Drop old triggers
+DROP TRIGGER IF EXISTS post_search_fts_BEFORE_DELETE;
+DROP TRIGGER IF EXISTS post_search_fts_AFTER_INSERT;
+
+-- Recreate triggers with updated logic
+CREATE TRIGGER post_search_fts_BEFORE_DELETE
+BEFORE DELETE ON post
+WHEN (SELECT COUNT(*) FROM post WHERE id = old.id) = 1
+BEGIN
+  DELETE FROM post_search WHERE id = old.id;
+END;
+
+CREATE TRIGGER post_search_fts_AFTER_INSERT
+AFTER INSERT ON post
+BEGIN
+  INSERT INTO post_search(id, title, description, link)
+  SELECT new.id, new.title, new.description, new.link
+  WHERE NOT EXISTS (SELECT 1 FROM post_search WHERE id = new.id);
+END;
