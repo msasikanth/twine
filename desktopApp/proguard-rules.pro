@@ -1,3 +1,4 @@
+-ignorewarnings
 -dontwarn okhttp3.**
 -dontwarn okio.**
 -dontwarn javax.servlet.**
