@@ -34,8 +34,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -62,7 +65,11 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.appBarAllFeeds
+import twine.shared.generated.resources.buttonCancel
+import twine.shared.generated.resources.buttonConfirm
 import twine.shared.generated.resources.markAllAsRead
+import twine.shared.generated.resources.markAllAsReadDialogDesc
+import twine.shared.generated.resources.markAllAsReadDialogTitle
 import twine.shared.generated.resources.moreMenuOptions
 import twine.shared.generated.resources.postsAll
 import twine.shared.generated.resources.postsLast24Hours
@@ -95,6 +102,7 @@ internal fun HomeTopAppBar(
       }
     }
   var hasUnreadPosts by remember(hasUnreadPosts) { mutableStateOf(hasUnreadPosts) }
+  var showConfirmDialog by remember { mutableStateOf(false) }
 
   val backgroundColor = AppTheme.colorScheme.surface
   TopAppBar(
@@ -135,10 +143,7 @@ internal fun HomeTopAppBar(
                 backgroundColor = AppTheme.colorScheme.inverseSurface,
                 contentColor = AppTheme.colorScheme.inverseOnSurface,
                 borderColor = Color.Transparent,
-                onClick = {
-                  hasUnreadPosts = false
-                  onMarkPostsAsRead(source)
-                },
+                onClick = { showConfirmDialog = true },
               )
             }
           }
@@ -151,6 +156,43 @@ internal fun HomeTopAppBar(
         scrolledContainerColor = Color.Transparent,
       ),
   )
+
+  if (showConfirmDialog) {
+    AlertDialog(
+      onDismissRequest = { showConfirmDialog = false },
+      title = { Text(text = stringResource(Res.string.markAllAsReadDialogTitle)) },
+      text = {
+        Text(
+          text = stringResource(Res.string.markAllAsReadDialogDesc),
+          color = AppTheme.colorScheme.onSurfaceVariant,
+        )
+      },
+      confirmButton = {
+        TextButton(
+          onClick = {
+            showConfirmDialog = false
+            hasUnreadPosts = false
+            onMarkPostsAsRead(source)
+          },
+          colors = ButtonDefaults.textButtonColors(contentColor = AppTheme.colorScheme.primary),
+        ) {
+          Text(text = stringResource(Res.string.buttonConfirm))
+        }
+      },
+      dismissButton = {
+        TextButton(
+          onClick = { showConfirmDialog = false },
+          colors =
+            ButtonDefaults.textButtonColors(contentColor = AppTheme.colorScheme.onSurfaceVariant),
+        ) {
+          Text(text = stringResource(Res.string.buttonCancel))
+        }
+      },
+      containerColor = AppTheme.colorScheme.surfaceContainerLow,
+      titleContentColor = AppTheme.colorScheme.onSurface,
+      textContentColor = AppTheme.colorScheme.onSurfaceVariant,
+    )
+  }
 }
 
 @Composable

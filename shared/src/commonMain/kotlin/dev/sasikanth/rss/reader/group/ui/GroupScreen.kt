@@ -78,6 +78,7 @@ import dev.sasikanth.rss.reader.resources.icons.RemoveFeed
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.UnGroup
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.removeLineBreaks
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
@@ -294,7 +295,7 @@ fun GroupNameTextField(
     OutlinedTextField(
       modifier = modifier.padding(horizontal = 16.dp),
       value = input.copy(selection = TextRange(input.text.length)),
-      onValueChange = { input = it },
+      onValueChange = { input = it.copy(text = it.text.removeLineBreaks()) },
       placeholder = {
         Text(
           text = stringResource(Res.string.groupNameHint),

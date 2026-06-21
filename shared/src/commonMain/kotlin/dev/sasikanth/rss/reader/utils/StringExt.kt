@@ -24,3 +24,9 @@ val String?.asJSString: String
     val data = Json.encodeToString(this.orEmpty())
     return data
   }
+
+private val lineBreakRegex = Regex("[\\r\\n]+")
+
+fun String.removeLineBreaks(): String {
+  return this.replace(lineBreakRegex, " ")
+}

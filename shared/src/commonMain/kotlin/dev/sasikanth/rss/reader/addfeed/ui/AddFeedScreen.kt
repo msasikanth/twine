@@ -98,6 +98,7 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalInAppRating
 import dev.sasikanth.rss.reader.utils.ignoreHorizontalParentPadding
+import dev.sasikanth.rss.reader.utils.removeLineBreaks
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -298,7 +299,7 @@ private fun AddFeedContent(
                 previous = feedLinkFocus
               },
             value = feedTitle,
-            onValueChange = { feedTitle = it },
+            onValueChange = { feedTitle = it.copy(text = it.text.removeLineBreaks()) },
             hint = stringResource(Res.string.feedEntryTitleHint),
             keyboardOptions =
               KeyboardOptions(
