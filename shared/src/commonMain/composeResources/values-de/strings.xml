@@ -116,6 +116,8 @@
   <string name="allFeedsCount">%1$s: %2$d</string>
   <string name="pinnedFeeds">Angepinnt</string>
   <string name="markAllAsRead">Als gelesen markieren</string>
+  <string name="markAllAsReadDialogTitle">Mark all as read?</string>
+  <string name="markAllAsReadDialogDesc">Are you sure you want to mark all articles as read?</string>
   <string name="openWebsite">Website öffnen</string>
   <string name="noNewPosts">Keine neuen Beiträge</string>
   <string name="noNewPostsSubtitle">Schauen Sie später wieder vorbei oder ziehen Sie nach unten, um jetzt nach neuen Inhalten zu suchen</string>
