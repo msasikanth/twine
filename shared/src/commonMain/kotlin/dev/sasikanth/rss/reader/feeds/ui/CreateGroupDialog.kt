@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.removeLineBreaks
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonAdd
@@ -98,7 +99,7 @@ internal fun CreateGroupDialog(
       TextField(
         modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
         value = groupName,
-        onValueChange = { groupName = it },
+        onValueChange = { groupName = it.removeLineBreaks() },
         maxLines = 1,
         keyboardOptions =
           KeyboardOptions(

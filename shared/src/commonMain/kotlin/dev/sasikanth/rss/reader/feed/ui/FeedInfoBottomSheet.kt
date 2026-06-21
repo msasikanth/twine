@@ -93,6 +93,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
+import dev.sasikanth.rss.reader.utils.removeLineBreaks
 import dev.sasikanth.rss.reader.utils.toClipEntry
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
@@ -338,7 +339,7 @@ private fun FeedLabelInput(
         BasicTextField(
           modifier = Modifier.fillMaxWidth(),
           value = input,
-          onValueChange = { input = it },
+          onValueChange = { input = it.removeLineBreaks() },
           keyboardOptions = KeyboardOptions(autoCorrectEnabled = false, imeAction = ImeAction.Done),
           keyboardActions =
             KeyboardActions(
