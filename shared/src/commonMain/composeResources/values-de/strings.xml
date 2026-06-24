@@ -349,7 +349,7 @@
   <string name="feedHealthTabHighVolume">Hohe Lautstärke</string>
   <string name="feedHealthTabLeastRead">Zuletzt gelesen</string>
   <string name="feedHealthNoStaleFeeds">Keine veralteten Feeds gefunden!</string>
-  <string name="feedHealthNoHighVolumeFeeds">No bloated feeds found.</string>
+  <string name="feedHealthNoHighVolumeFeeds">Keine aufgeblähten Feeds gefunden.</string>
   <string name="feedHealthNoLeastReadFeeds">Lesen Sie weiter, um Einblicke zu sehen.</string>
   <string name="feedHealthStaleDesc">Feeds ohne neue Artikel in den letzten 6 Monaten.</string>
   <string name="feedHealthHighVolumeDesc">Feeds mit der höchsten Gesamtzahl gespeicherter Artikel.</string>
