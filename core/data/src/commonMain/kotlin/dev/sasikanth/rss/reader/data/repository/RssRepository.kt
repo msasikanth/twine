@@ -665,18 +665,14 @@ class RssRepository(
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
         val now = Clock.System.now()
-        val postIds =
-          postQueries.markAllPostsAsRead(after = postsAfter, updatedAt = now).executeAsList()
-        postIds.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
-          readingHistoryQueries.insertReadingHistoryForPosts(readAt = now, postIds = chunk)
-        }
+        postQueries.markAllPostsAsRead(after = postsAfter, updatedAt = now)
       }
     }
     widgetUpdater.updateUnreadWidget()
   }
 
   suspend fun markPostsAsRead(postIds: Set<String>) {
-    updatePostReadStatus(postIds, read = true)
+    updatePostReadStatus(postIds, read = true, recordHistory = false)
   }
 
   suspend fun updatePostReadStatus(
@@ -721,13 +717,7 @@ class RssRepository(
       transactionRunner.invoke {
         val now = Clock.System.now()
         feedIdsSnapshot.forEach { feedId ->
-          val postIds =
-            postQueries
-              .markPostsAsReadForFeed(sourceId = feedId, after = postsAfter, updatedAt = now)
-              .executeAsList()
-          postIds.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
-            readingHistoryQueries.insertReadingHistoryForPosts(readAt = now, postIds = chunk)
-          }
+          postQueries.markPostsAsReadForFeed(sourceId = feedId, after = postsAfter, updatedAt = now)
         }
       }
     }
