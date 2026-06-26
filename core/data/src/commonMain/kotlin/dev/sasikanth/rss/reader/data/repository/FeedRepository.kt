@@ -350,9 +350,10 @@ class FeedRepository(
       .mapToList(dispatchersProvider.databaseRead)
   }
 
-  fun highVolumeFeeds(limit: Long): Flow<List<FeedHealthInfo>> {
+  fun highVolumeFeeds(after: Instant, limit: Long): Flow<List<FeedHealthInfo>> {
     return feedQueries
       .highVolumeFeeds(
+        after = after,
         limit = limit,
         mapper = { id, name, icon, homepageLink, showFeedFavIcon, totalPostsCount ->
           FeedHealthInfo(
@@ -370,9 +371,10 @@ class FeedRepository(
       .mapToList(dispatchersProvider.databaseRead)
   }
 
-  fun leastReadFeeds(limit: Long): Flow<List<FeedHealthInfo>> {
+  fun leastReadFeeds(after: Instant, limit: Long): Flow<List<FeedHealthInfo>> {
     return feedQueries
       .leastReadFeeds(
+        after = after,
         limit = limit,
         mapper = { id, name, icon, homepageLink, showFeedFavIcon, totalPostsCount, readPostsCount ->
           FeedHealthInfo(

@@ -439,12 +439,12 @@ class RssRepository(
     return feedRepository.staleFeeds(sixMonthsAgo)
   }
 
-  fun highVolumeFeeds(limit: Long): Flow<List<FeedHealthInfo>> {
-    return feedRepository.highVolumeFeeds(limit)
+  fun highVolumeFeeds(after: Instant, limit: Long): Flow<List<FeedHealthInfo>> {
+    return feedRepository.highVolumeFeeds(after, limit)
   }
 
-  fun leastReadFeeds(limit: Long): Flow<List<FeedHealthInfo>> {
-    return feedRepository.leastReadFeeds(limit)
+  fun leastReadFeeds(after: Instant, limit: Long): Flow<List<FeedHealthInfo>> {
+    return feedRepository.leastReadFeeds(after, limit)
   }
 
   /** Search feeds, returns all feeds if [searchQuery] is empty */

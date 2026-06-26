@@ -59,7 +59,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -151,7 +156,15 @@ private fun FeedHealthContent(
             CircularProgressIndicator()
           }
         } else {
-          Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+          Column(
+            modifier =
+              Modifier.fillMaxSize()
+                .padding(
+                  top = padding.calculateTopPadding(),
+                  start = padding.calculateStartPadding(layoutDirection),
+                  end = padding.calculateEndPadding(layoutDirection),
+                )
+          ) {
             val tabs =
               listOf(
                 stringResource(Res.string.feedHealthTabStale),
@@ -205,7 +218,21 @@ private fun FeedHealthContent(
                 }
 
               LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier =
+                  Modifier.fillMaxSize()
+                    .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+                    .drawWithContent {
+                      drawContent()
+                      drawRect(
+                        brush =
+                          Brush.verticalGradient(
+                            0f to Color.Black,
+                            0.9f to Color.Black,
+                            1f to Color.Transparent,
+                          ),
+                        blendMode = BlendMode.DstIn,
+                      )
+                    },
                 contentPadding =
                   PaddingValues(
                     start = padding.calculateStartPadding(layoutDirection) + 24.dp,
@@ -220,7 +247,7 @@ private fun FeedHealthContent(
                       feed = feed,
                       tabIndex = page,
                       onUnsubscribeClick = { feedToUnsubscribe = feed },
-                      modifier = Modifier.padding(vertical = 8.dp),
+                      modifier = Modifier.padding(vertical = 12.dp),
                     )
                   }
                 } else {
@@ -313,32 +340,71 @@ private fun FeedHealthItem(
         overflow = TextOverflow.Ellipsis,
       )
 
-      val subtitle =
-        when (tabIndex) {
-          0 -> {
-            val dateStr = feed.lastPostDate?.let { formatInstant(it) }
+      when (tabIndex) {
+        0 -> {
+          val dateStr = feed.lastPostDate?.let { formatInstant(it) }
+          val subtitle =
             if (dateStr != null) {
               stringResource(Res.string.feedHealthLastPostDate, dateStr)
             } else {
               stringResource(Res.string.feedHealthNeverUpdated)
             }
-          }
-          1 -> stringResource(Res.string.feedHealthTotalPosts, feed.totalPostsCount.toInt())
-          else ->
-            stringResource(
-              Res.string.feedHealthReadRatio,
-              feed.readPostsCount.toInt(),
-              feed.totalPostsCount.toInt(),
-            )
+          Text(
+            text = subtitle,
+            style = MaterialTheme.typography.bodyMedium,
+            color = AppTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
         }
+        1 -> {
+          Text(
+            text = stringResource(Res.string.feedHealthTotalPosts, feed.totalPostsCount.toInt()),
+            style = MaterialTheme.typography.bodyMedium,
+            color = AppTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
+        else -> {
+          val readRatio =
+            if (feed.totalPostsCount > 0)
+              feed.readPostsCount.toFloat() / feed.totalPostsCount.toFloat()
+            else 0f
+          val percentage = (readRatio * 100).toInt()
+          val percentageColor =
+            if (readRatio < 0.2f) AppTheme.colorScheme.error else AppTheme.colorScheme.primary
 
-      Text(
-        text = subtitle,
-        style = MaterialTheme.typography.bodyMedium,
-        color = AppTheme.colorScheme.onSurfaceVariant,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-      )
+          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Text(
+              text = "$percentage% read",
+              style = MaterialTheme.typography.bodyMedium,
+              color = percentageColor,
+              fontWeight = FontWeight.Medium,
+              maxLines = 1,
+            )
+            Text(
+              text = " • ",
+              style = MaterialTheme.typography.bodyMedium,
+              color = AppTheme.colorScheme.onSurfaceVariant,
+              maxLines = 1,
+            )
+            Text(
+              text =
+                stringResource(
+                  Res.string.feedHealthReadRatio,
+                  feed.readPostsCount.toInt(),
+                  feed.totalPostsCount.toInt(),
+                ),
+              style = MaterialTheme.typography.bodyMedium,
+              color = AppTheme.colorScheme.onSurfaceVariant,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+              modifier = Modifier.weight(1f),
+            )
+          }
+        }
+      }
     }
 
     Spacer(modifier = Modifier.width(16.dp))

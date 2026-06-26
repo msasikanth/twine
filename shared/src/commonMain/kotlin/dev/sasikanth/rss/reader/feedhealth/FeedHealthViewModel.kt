@@ -56,11 +56,12 @@ class FeedHealthViewModel(private val rssRepository: RssRepository) : ViewModel(
       _state.update { it.copy(isLoading = true) }
 
       val sixMonthsAgo = Period.SIX_MONTHS.calculateInstantBeforePeriod()
+      val threeMonthsAgo = Period.THREE_MONTHS.calculateInstantBeforePeriod()
 
       combine(
           rssRepository.staleFeeds(sixMonthsAgo),
-          rssRepository.highVolumeFeeds(limit = 10),
-          rssRepository.leastReadFeeds(limit = 10),
+          rssRepository.highVolumeFeeds(threeMonthsAgo, limit = 10),
+          rssRepository.leastReadFeeds(threeMonthsAgo, limit = 10),
         ) { stale, highVolume, leastRead ->
           FeedSubscriptionHealth(
             staleFeeds = stale,
