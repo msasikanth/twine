@@ -439,12 +439,12 @@ class RssRepository(
     return feedRepository.staleFeeds(sixMonthsAgo)
   }
 
-  fun highVolumeFeeds(limit: Long): Flow<List<FeedHealthInfo>> {
-    return feedRepository.highVolumeFeeds(limit)
+  fun highVolumeFeeds(after: Instant, limit: Long): Flow<List<FeedHealthInfo>> {
+    return feedRepository.highVolumeFeeds(after, limit)
   }
 
-  fun leastReadFeeds(limit: Long): Flow<List<FeedHealthInfo>> {
-    return feedRepository.leastReadFeeds(limit)
+  fun leastReadFeeds(after: Instant, limit: Long): Flow<List<FeedHealthInfo>> {
+    return feedRepository.leastReadFeeds(after, limit)
   }
 
   /** Search feeds, returns all feeds if [searchQuery] is empty */
@@ -665,18 +665,14 @@ class RssRepository(
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
         val now = Clock.System.now()
-        val postIds =
-          postQueries.markAllPostsAsRead(after = postsAfter, updatedAt = now).executeAsList()
-        postIds.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
-          readingHistoryQueries.insertReadingHistoryForPosts(readAt = now, postIds = chunk)
-        }
+        postQueries.markAllPostsAsRead(after = postsAfter, updatedAt = now)
       }
     }
     widgetUpdater.updateUnreadWidget()
   }
 
   suspend fun markPostsAsRead(postIds: Set<String>) {
-    updatePostReadStatus(postIds, read = true)
+    updatePostReadStatus(postIds, read = true, recordHistory = false)
   }
 
   suspend fun updatePostReadStatus(
@@ -721,13 +717,7 @@ class RssRepository(
       transactionRunner.invoke {
         val now = Clock.System.now()
         feedIdsSnapshot.forEach { feedId ->
-          val postIds =
-            postQueries
-              .markPostsAsReadForFeed(sourceId = feedId, after = postsAfter, updatedAt = now)
-              .executeAsList()
-          postIds.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
-            readingHistoryQueries.insertReadingHistoryForPosts(readAt = now, postIds = chunk)
-          }
+          postQueries.markPostsAsReadForFeed(sourceId = feedId, after = postsAfter, updatedAt = now)
         }
       }
     }
