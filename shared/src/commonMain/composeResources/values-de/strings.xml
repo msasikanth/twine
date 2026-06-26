@@ -352,11 +352,11 @@
   <string name="feedHealthNoHighVolumeFeeds">Keine aufgeblähten Feeds gefunden.</string>
   <string name="feedHealthNoLeastReadFeeds">Lesen Sie weiter, um Einblicke zu sehen.</string>
   <string name="feedHealthStaleDesc">Feeds ohne neue Artikel in den letzten 6 Monaten.</string>
-  <string name="feedHealthHighVolumeDesc">Feeds mit der höchsten Gesamtzahl gespeicherter Artikel.</string>
-  <string name="feedHealthLeastReadDesc">Feeds mit dem niedrigsten Leseprozentsatz.</string>
+  <string name="feedHealthHighVolumeDesc">Feeds with the most articles published in the last 3 months.</string>
+  <string name="feedHealthLeastReadDesc">Feeds with the lowest percentage of opened articles in the last 3 months.</string>
   <string name="feedHealthLastPostDate">Letzter Artikel: %1$s</string>
-  <string name="feedHealthNeverUpdated">Nie aktualisiert</string>
-  <string name="feedHealthTotalPosts">%1$d Artikel gespeichert</string>
+  <string name="feedHealthNeverUpdated">Never updated in over 6 months</string>
+  <string name="feedHealthTotalPosts">%1$d articles</string>
   <string name="feedHealthReadRatio">%1$d von %2$d Artikeln gelesen</string>
   <string name="feedHealthUnsubscribeDialogTitle">Abbestellen?</string>
   <string name="feedHealthUnsubscribeDialogDesc">Möchten Sie sich wirklich von "%1$s" abmelden und alle gespeicherten Artikel löschen?</string>
