@@ -352,11 +352,11 @@
   <string name="feedHealthNoHighVolumeFeeds">No bloated feeds found.</string>
   <string name="feedHealthNoLeastReadFeeds">Keep reading to see engagement stats.</string>
   <string name="feedHealthStaleDesc">Feeds with no new articles in the last 6 months.</string>
-  <string name="feedHealthHighVolumeDesc">Feeds with the highest total article count stored.</string>
-  <string name="feedHealthLeastReadDesc">Feeds with the lowest read percentage.</string>
+  <string name="feedHealthHighVolumeDesc">Feeds with the most articles published in the last 3 months.</string>
+  <string name="feedHealthLeastReadDesc">Feeds with the lowest percentage of opened articles in the last 3 months.</string>
   <string name="feedHealthLastPostDate">Last article: %1$s</string>
-  <string name="feedHealthNeverUpdated">Never updated</string>
-  <string name="feedHealthTotalPosts">%1$d articles stored</string>
+  <string name="feedHealthNeverUpdated">Never updated in over 6 months</string>
+  <string name="feedHealthTotalPosts">%1$d articles</string>
   <string name="feedHealthReadRatio">%1$d read of %2$d articles</string>
   <string name="feedHealthUnsubscribeDialogTitle">Unsubscribe?</string>
   <string name="feedHealthUnsubscribeDialogDesc">Are you sure you want to unsubscribe from "%1$s" and delete all stored articles?</string>
