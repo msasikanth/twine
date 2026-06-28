@@ -122,10 +122,12 @@ fun NavGraphBuilder.placeholderScreen(
 fun NavGraphBuilder.onboardingScreen(
   onboardingViewModel: () -> OnboardingViewModel,
   navController: NavHostController,
+  modifier: Modifier = Modifier,
 ) {
   composable<Screen.Onboarding> {
     val viewModel = viewModel { onboardingViewModel() }
     OnboardingScreen(
+      modifier = modifier,
       viewModel = viewModel,
       onOnboardingDone = {
         navController.navigate(Screen.Main()) { popUpTo<Screen.Onboarding> { inclusive = true } }
