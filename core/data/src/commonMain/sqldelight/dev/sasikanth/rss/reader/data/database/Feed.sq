@@ -218,6 +218,7 @@ FROM feed f
 INNER JOIN post p ON f.id = p.sourceId AND p.postDate > :after
 WHERE f.isDeleted = 0
 GROUP BY f.id
+HAVING totalPostsCount >= :postsThreshold
 ORDER BY totalPostsCount DESC
 LIMIT :limit;
 
