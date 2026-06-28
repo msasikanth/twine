@@ -578,7 +578,6 @@
 					"-framework",
 					"\"shared\"",
 					"-lsqlite3",
-					"-ld_classic",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = dev.sasikanth.rss.reader.debug;
 				PRODUCT_NAME = "${APP_NAME}";
@@ -619,7 +618,6 @@
 					"-framework",
 					"\"shared\"",
 					"-lsqlite3",
-					"-ld_classic",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = dev.sasikanth.rss.reader;
 				PRODUCT_NAME = "${APP_NAME}";
@@ -659,7 +657,6 @@
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-lsqlite3",
-					"-ld_classic",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = dev.sasikanth.rss.reader.debug.TwineWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -701,7 +698,6 @@
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-lsqlite3",
-					"-ld_classic",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = dev.sasikanth.rss.reader.TwineWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
