@@ -96,6 +96,11 @@ import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
+import dev.sasikanth.rss.reader.markdown.SafeMarkdownCheckBox
+import dev.sasikanth.rss.reader.markdown.SafeMarkdownHeader
+import dev.sasikanth.rss.reader.markdown.SafeMarkdownParagraph
+import dev.sasikanth.rss.reader.markdown.SafeMarkdownText
+import dev.sasikanth.rss.reader.markdown.safeUnescapedTextInNode
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderViewModel
@@ -127,6 +132,7 @@ import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
+import org.intellij.markdown.MarkdownTokenTypes
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonGoBack
@@ -445,6 +451,85 @@ internal fun ReaderScreen(
                 }
               val markdownComponents = remember {
                 markdownComponents(
+                  text = { cm ->
+                    SafeMarkdownText(
+                      content = cm.node.safeUnescapedTextInNode(cm.content),
+                      node = cm.node,
+                      style = cm.typography.text,
+                    )
+                  },
+                  heading1 = { cm ->
+                    SafeMarkdownHeader(
+                      content = cm.content,
+                      node = cm.node,
+                      style = cm.typography.h1,
+                    )
+                  },
+                  heading2 = { cm ->
+                    SafeMarkdownHeader(
+                      content = cm.content,
+                      node = cm.node,
+                      style = cm.typography.h2,
+                    )
+                  },
+                  heading3 = { cm ->
+                    SafeMarkdownHeader(
+                      content = cm.content,
+                      node = cm.node,
+                      style = cm.typography.h3,
+                    )
+                  },
+                  heading4 = { cm ->
+                    SafeMarkdownHeader(
+                      content = cm.content,
+                      node = cm.node,
+                      style = cm.typography.h4,
+                    )
+                  },
+                  heading5 = { cm ->
+                    SafeMarkdownHeader(
+                      content = cm.content,
+                      node = cm.node,
+                      style = cm.typography.h5,
+                    )
+                  },
+                  heading6 = { cm ->
+                    SafeMarkdownHeader(
+                      content = cm.content,
+                      node = cm.node,
+                      style = cm.typography.h6,
+                    )
+                  },
+                  setextHeading1 = { cm ->
+                    SafeMarkdownHeader(
+                      content = cm.content,
+                      node = cm.node,
+                      style = cm.typography.h1,
+                      contentChildType = MarkdownTokenTypes.SETEXT_CONTENT,
+                    )
+                  },
+                  setextHeading2 = { cm ->
+                    SafeMarkdownHeader(
+                      content = cm.content,
+                      node = cm.node,
+                      style = cm.typography.h2,
+                      contentChildType = MarkdownTokenTypes.SETEXT_CONTENT,
+                    )
+                  },
+                  paragraph = { cm ->
+                    SafeMarkdownParagraph(
+                      content = cm.content,
+                      node = cm.node,
+                      style = cm.typography.paragraph,
+                    )
+                  },
+                  checkbox = { cm ->
+                    SafeMarkdownCheckBox(
+                      content = cm.content,
+                      node = cm.node,
+                      style = cm.typography.text,
+                    )
+                  },
                   codeBlock = { cm ->
                     MarkdownHighlightedCodeBlock(
                       content = cm.content,

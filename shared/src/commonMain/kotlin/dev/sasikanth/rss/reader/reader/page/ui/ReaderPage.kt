@@ -88,6 +88,7 @@ import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import kotlin.time.Instant
 import kotlinx.coroutines.launch
 import org.intellij.markdown.MarkdownElementTypes
+import org.intellij.markdown.ast.ASTNode
 
 @Composable
 internal fun ReaderPage(
@@ -313,7 +314,8 @@ private fun ReaderPageContent(
 
             when (markdownContentState) {
               is State.Success -> {
-                items(items = markdownContentState.node.children) { node ->
+                items(items = markdownContentState.node.children, key = { it.markdownNodeKey() }) {
+                  node ->
                   Box(modifier = Modifier.padding(horizontal = 24.dp)) {
                     MarkdownElement(
                       node = node,
@@ -357,6 +359,10 @@ private fun ProgressIndicator() {
       color = AppTheme.colorScheme.primary,
     )
   }
+}
+
+private fun ASTNode.markdownNodeKey(): String {
+  return "${type.name}:$startOffset:$endOffset"
 }
 
 @Preview(locale = "en")

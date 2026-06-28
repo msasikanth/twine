@@ -37,6 +37,10 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class FeedHealthViewModel(private val rssRepository: RssRepository) : ViewModel() {
 
+  private companion object {
+    private const val HIGH_VOLUME_POSTS_THRESHOLD = 150L
+  }
+
   private val _state = MutableStateFlow(FeedHealthState.Default)
   val state: StateFlow<FeedHealthState> = _state
 
@@ -60,7 +64,11 @@ class FeedHealthViewModel(private val rssRepository: RssRepository) : ViewModel(
 
       combine(
           rssRepository.staleFeeds(sixMonthsAgo),
-          rssRepository.highVolumeFeeds(threeMonthsAgo, limit = 10),
+          rssRepository.highVolumeFeeds(
+            after = threeMonthsAgo,
+            limit = 10,
+            postsThreshold = HIGH_VOLUME_POSTS_THRESHOLD,
+          ),
           rssRepository.leastReadFeeds(threeMonthsAgo, limit = 10),
         ) { stale, highVolume, leastRead ->
           FeedSubscriptionHealth(

@@ -350,11 +350,16 @@ class FeedRepository(
       .mapToList(dispatchersProvider.databaseRead)
   }
 
-  fun highVolumeFeeds(after: Instant, limit: Long): Flow<List<FeedHealthInfo>> {
+  fun highVolumeFeeds(
+    after: Instant,
+    limit: Long,
+    postsThreshold: Long,
+  ): Flow<List<FeedHealthInfo>> {
     return feedQueries
       .highVolumeFeeds(
         after = after,
         limit = limit,
+        postsThreshold = postsThreshold,
         mapper = { id, name, icon, homepageLink, showFeedFavIcon, totalPostsCount ->
           FeedHealthInfo(
             id = id,
