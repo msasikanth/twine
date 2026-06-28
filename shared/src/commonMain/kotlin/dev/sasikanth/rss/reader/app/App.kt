@@ -35,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
@@ -220,10 +221,12 @@ fun App(
     val screenModifier =
       Modifier.fillMaxSize().let {
         if (platform == Platform.Apple) {
-          it.dropShadow(shape = RoundedCornerShape(screenCornerRadius)) {
-            color = Color.Black.copy(alpha = 0.1f)
-            radius = 32.dp.toPx()
-          }
+          it
+            .dropShadow(shape = RoundedCornerShape(screenCornerRadius)) {
+              color = Color.Black.copy(alpha = 0.1f)
+              radius = 32.dp.toPx()
+            }
+            .clip(RoundedCornerShape(screenCornerRadius))
         } else {
           it
         }
@@ -322,7 +325,11 @@ fun App(
           navController = navController,
         )
 
-        onboardingScreen(onboardingViewModel = onboardingViewModel, navController = navController)
+        onboardingScreen(
+          modifier = screenModifier,
+          onboardingViewModel = onboardingViewModel,
+          navController = navController,
+        )
 
         accountSelectionScreen(
           modifier = screenModifier,
