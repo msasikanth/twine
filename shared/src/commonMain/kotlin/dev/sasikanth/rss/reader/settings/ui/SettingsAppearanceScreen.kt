@@ -88,6 +88,7 @@ import dev.sasikanth.rss.reader.settings.ui.items.AppIconSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.ThemeVariantSettingItem
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
+import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -185,7 +186,7 @@ private fun SettingsAppearanceContent(
       }
 
       LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().iosBottomSafeAreaPadding(),
         contentPadding =
           PaddingValues(
             start = padding.calculateStartPadding(layoutDirection) + settingsItemHorizontalPadding,
