@@ -54,6 +54,7 @@ import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.items.SettingsNavigationItem
 import dev.sasikanth.rss.reader.settings.ui.items.TwinePremiumBanner
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.settings
@@ -123,7 +124,7 @@ private fun SettingsContent(
     topBar = { SimpleTopAppBar(title = stringResource(Res.string.settings), onBackClick = goBack) },
     content = { padding ->
       LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().iosBottomSafeAreaPadding(),
         contentPadding =
           PaddingValues(
             start = padding.calculateStartPadding(layoutDirection) + settingsItemHorizontalPadding,

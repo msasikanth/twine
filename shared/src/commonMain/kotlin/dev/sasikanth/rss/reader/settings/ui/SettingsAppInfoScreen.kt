@@ -50,6 +50,7 @@ import dev.sasikanth.rss.reader.settings.ui.items.ReportIssueSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.SettingItem
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
+import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -112,7 +113,7 @@ private fun SettingsAppInfoContent(
     },
     content = { padding ->
       LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().iosBottomSafeAreaPadding(),
         contentPadding =
           PaddingValues(
             start = padding.calculateStartPadding(layoutDirection) + settingsItemHorizontalPadding,

@@ -106,6 +106,7 @@ import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalInAppRating
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
+import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import kotlin.math.abs
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -338,7 +339,12 @@ private fun HomeContent(
     },
   ) { scaffoldPadding ->
     val colorScheme = AppTheme.colorScheme
-    Box(modifier = Modifier.fillMaxSize().drawBehind { drawRect(colorScheme.backdrop) }) {
+    Box(
+      modifier =
+        Modifier.fillMaxSize()
+          .drawBehind { drawRect(colorScheme.backdrop) }
+          .iosBottomSafeAreaPadding()
+    ) {
       val nestedScrollModifier =
         if (platform !is Platform.Desktop) {
           Modifier.nestedScroll(homeScrollBehavior.nestedScrollConnection)

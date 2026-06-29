@@ -123,6 +123,7 @@ import dev.sasikanth.rss.reader.search.SearchViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.KeyboardState
+import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
@@ -237,7 +238,7 @@ private fun SearchContent(
       }
     },
     content = { padding ->
-      Box(modifier = Modifier.fillMaxSize()) {
+      Box(modifier = Modifier.fillMaxSize().iosBottomSafeAreaPadding()) {
         LaunchedEffect(searchSortOrder, state.selectedSource) { listState.animateScrollToItem(0) }
 
         LazyColumn(

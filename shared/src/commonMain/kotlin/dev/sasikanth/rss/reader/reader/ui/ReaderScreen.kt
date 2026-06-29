@@ -128,6 +128,7 @@ import dev.sasikanth.rss.reader.ui.typography
 import dev.sasikanth.rss.reader.utils.CollectItemTransition
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
+import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
 import kotlinx.coroutines.FlowPreview
@@ -292,7 +293,8 @@ internal fun ReaderScreen(
 
       Scaffold(
         modifier =
-          modifier.fillMaxSize().then(nestedScrollModifier).onKeyEvent { event ->
+          modifier.fillMaxSize().then(nestedScrollModifier).iosBottomSafeAreaPadding().onKeyEvent {
+            event ->
             return@onKeyEvent when (event.key) {
               Key.DirectionRight if event.type == KeyEventType.KeyUp -> {
                 coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }

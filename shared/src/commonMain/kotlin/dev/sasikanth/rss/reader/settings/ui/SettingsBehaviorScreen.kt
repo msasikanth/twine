@@ -59,6 +59,7 @@ import dev.sasikanth.rss.reader.settings.ui.items.MarkAsReadOnSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.OpmlFeedSelectionSheet
 import dev.sasikanth.rss.reader.settings.ui.items.PostsDeletionPeriodSettingItem
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -169,7 +170,7 @@ private fun SettingsBehaviorContent(
       }
 
       LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().iosBottomSafeAreaPadding(),
         contentPadding =
           PaddingValues(
             start = padding.calculateStartPadding(layoutDirection) + settingsItemHorizontalPadding,

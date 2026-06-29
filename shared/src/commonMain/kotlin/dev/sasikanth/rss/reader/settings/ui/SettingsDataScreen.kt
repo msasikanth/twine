@@ -70,6 +70,7 @@ import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.formatReadingTrendDate
+import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import kotlin.time.Clock
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -134,7 +135,7 @@ private fun SettingsDataContent(
       } else {
         val statistics = state.statistics
         LazyColumn(
-          modifier = Modifier.fillMaxSize(),
+          modifier = Modifier.fillMaxSize().iosBottomSafeAreaPadding(),
           contentPadding =
             PaddingValues(
               start = padding.calculateStartPadding(layoutDirection),
