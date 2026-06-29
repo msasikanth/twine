@@ -17,7 +17,11 @@
 package dev.sasikanth.rss.reader.utils
 
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
@@ -40,6 +45,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.graphics.shapes.Morph
 import co.touchlab.kermit.Logger
+import dev.sasikanth.rss.reader.resources.icons.Platform
+import dev.sasikanth.rss.reader.resources.icons.platform
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -251,4 +258,12 @@ fun Morph.toComposePath(progress: Float, scale: Float = 1f, path: Path = Path())
   }
   path.close()
   return path
+}
+
+fun Modifier.iosBottomSafeAreaPadding(): Modifier = composed {
+  if (platform is Platform.Apple) {
+    windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+  } else {
+    this
+  }
 }
