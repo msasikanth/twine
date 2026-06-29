@@ -83,6 +83,7 @@ import dev.sasikanth.rss.reader.resources.icons.Close
 import dev.sasikanth.rss.reader.resources.icons.Refresh
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonChange
@@ -197,14 +198,17 @@ private fun DiscoveryContent(
     content = { paddingValues ->
       if (state.isLoading) {
         Box(
-          modifier = Modifier.fillMaxSize().padding(paddingValues),
+          modifier = Modifier.fillMaxSize().padding(paddingValues).iosBottomSafeAreaPadding(),
           contentAlignment = Alignment.Center,
         ) {
           CircularProgressIndicator(color = AppTheme.colorScheme.primary)
         }
       } else {
         LazyColumn(
-          modifier = Modifier.fillMaxSize().padding(top = paddingValues.calculateTopPadding()),
+          modifier =
+            Modifier.fillMaxSize()
+              .padding(top = paddingValues.calculateTopPadding())
+              .iosBottomSafeAreaPadding(),
           contentPadding = PaddingValues(bottom = paddingValues.calculateBottomPadding() + 80.dp),
         ) {
           state.filteredGroups.forEach { group ->

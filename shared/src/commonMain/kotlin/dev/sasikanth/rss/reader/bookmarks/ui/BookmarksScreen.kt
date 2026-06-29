@@ -58,6 +58,7 @@ import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.BookmarkStacks
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -110,7 +111,7 @@ private fun BookmarksContent(
     },
     content = { padding ->
       if (bookmarks.itemCount > 0) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().iosBottomSafeAreaPadding()) {
           LazyColumn(
             contentPadding =
               PaddingValues(
@@ -166,7 +167,10 @@ private fun BookmarksContent(
           }
         }
       } else {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(
+          modifier = Modifier.fillMaxSize().iosBottomSafeAreaPadding(),
+          contentAlignment = Alignment.Center,
+        ) {
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
               imageVector = TwineIcons.BookmarkStacks,
