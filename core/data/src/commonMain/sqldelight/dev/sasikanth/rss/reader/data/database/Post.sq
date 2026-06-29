@@ -797,15 +797,13 @@ UPDATE post
 SET flags = flags | 2, updatedAt = :updatedAt
 WHERE sourceId = :sourceId
   AND postDate > :after
-  AND (flags & 2) == 0
-RETURNING id;
+  AND (flags & 2) == 0;
 
 markAllPostsAsRead:
 UPDATE post
 SET flags = flags | 2, updatedAt = :updatedAt
 WHERE postDate > :after
-  AND (flags & 2) == 0
-RETURNING id;
+  AND (flags & 2) == 0;
 
 postsByIds:
 SELECT * FROM post
