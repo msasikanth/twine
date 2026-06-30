@@ -293,8 +293,7 @@ internal fun ReaderScreen(
 
       Scaffold(
         modifier =
-          modifier.fillMaxSize().then(nestedScrollModifier).iosBottomSafeAreaPadding().onKeyEvent {
-            event ->
+          modifier.fillMaxSize().then(nestedScrollModifier).onKeyEvent { event ->
             return@onKeyEvent when (event.key) {
               Key.DirectionRight if event.type == KeyEventType.KeyUp -> {
                 coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
@@ -413,7 +412,7 @@ internal fun ReaderScreen(
         containerColor = AppTheme.colorScheme.backdrop,
         contentColor = Color.Unspecified,
       ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().iosBottomSafeAreaPadding()) {
           val layoutDirection = LocalLayoutDirection.current
           val sizeClass = LocalWindowSizeClass.current
           val readerContentMaxWidth =
