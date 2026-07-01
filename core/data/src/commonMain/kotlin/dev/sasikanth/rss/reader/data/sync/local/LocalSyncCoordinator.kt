@@ -167,7 +167,16 @@ class LocalSyncCoordinator(
     val fetchFullContent = settingsRepository.downloadFullContent.first()
     val feedFetchResult = feedFetcher.fetch(url = feed.link, fetchFullContent = fetchFullContent)
 
-    if (feedFetchResult !is FeedFetchResult.Success) return
+    if (feedFetchResult !is FeedFetchResult.Success) {
+      withContext(dispatchersProvider.databaseWrite) {
+        rssRepository.incrementFeedFetchErrors(feedId = feed.id)
+      }
+      return
+    }
+
+    withContext(dispatchersProvider.databaseWrite) {
+      rssRepository.resetFeedFetchErrors(feedId = feed.id)
+    }
 
     rssRepository.upsertFeedWithPosts(
       feedPayload = feedFetchResult.feedPayload,

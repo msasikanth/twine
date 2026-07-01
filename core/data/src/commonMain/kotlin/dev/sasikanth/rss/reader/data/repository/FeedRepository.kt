@@ -223,6 +223,7 @@ class FeedRepository(
     hideFromAllFeeds: Boolean,
     remoteId: String?,
     enableNotifications: Boolean,
+    consecutiveFetchErrors: Long,
   ): Feed {
     return Feed(
       id = id,
@@ -243,6 +244,7 @@ class FeedRepository(
       enableNotifications = enableNotifications,
       isDeleted = isDeleted,
       remoteId = remoteId,
+      consecutiveFetchErrors = consecutiveFetchErrors,
     )
   }
 
@@ -330,10 +332,16 @@ class FeedRepository(
     )
   }
 
-  fun staleFeeds(sixMonthsAgo: Instant): Flow<List<FeedHealthInfo>> {
+  fun staleFeeds(
+    sixMonthsAgo: Instant,
+    createdBefore: Instant,
+    limit: Long,
+  ): Flow<List<FeedHealthInfo>> {
     return feedQueries
       .staleFeeds(
         sixMonthsAgo = sixMonthsAgo,
+        createdBefore = createdBefore,
+        limit = limit,
         mapper = { id, name, icon, homepageLink, showFeedFavIcon, lastPostDate, totalPostsCount ->
           FeedHealthInfo(
             id = id,
@@ -396,5 +404,34 @@ class FeedRepository(
       )
       .asFlow()
       .mapToList(dispatchersProvider.databaseRead)
+  }
+
+  fun brokenFeeds(threshold: Long, limit: Long): Flow<List<FeedHealthInfo>> {
+    return feedQueries
+      .brokenFeeds(
+        threshold = threshold,
+        limit = limit,
+        mapper = { id, name, icon, homepageLink, showFeedFavIcon, totalPostsCount ->
+          FeedHealthInfo(
+            id = id,
+            name = name,
+            icon = icon,
+            homepageLink = homepageLink,
+            showFeedFavIcon = showFeedFavIcon,
+            lastPostDate = null,
+            totalPostsCount = totalPostsCount,
+          )
+        },
+      )
+      .asFlow()
+      .mapToList(dispatchersProvider.databaseRead)
+  }
+
+  suspend fun incrementFeedFetchErrors(feedId: String) {
+    feedQueries.incrementFetchErrors(id = feedId)
+  }
+
+  suspend fun resetFeedFetchErrors(feedId: String) {
+    feedQueries.resetFetchErrors(id = feedId)
   }
 }

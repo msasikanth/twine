@@ -192,18 +192,18 @@ private fun SettingsDataContent(
                 )
               }
             }
+          }
 
-            item { SettingsDivider(horizontalInsets = 24.dp) }
+          item { SettingsDivider(horizontalInsets = 24.dp) }
 
-            item {
-              SettingsNavigationItem(
-                title = stringResource(Res.string.settingsFeedHealthTitle),
-                subtitle = stringResource(Res.string.settingsFeedHealthSubtitle),
-                icon = TwineIcons.DataUsageRoundedFilled,
-                onClick = openFeedHealth,
-                modifier = Modifier.padding(horizontal = settingsItemHorizontalPadding),
-              )
-            }
+          item {
+            SettingsNavigationItem(
+              title = stringResource(Res.string.settingsFeedHealthTitle),
+              subtitle = stringResource(Res.string.settingsFeedHealthSubtitle),
+              icon = TwineIcons.DataUsageRoundedFilled,
+              onClick = openFeedHealth,
+              modifier = Modifier.padding(horizontal = settingsItemHorizontalPadding),
+            )
           }
         }
       }

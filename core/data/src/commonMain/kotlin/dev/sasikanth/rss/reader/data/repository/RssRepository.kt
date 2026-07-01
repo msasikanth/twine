@@ -435,8 +435,12 @@ class RssRepository(
     return feedRepository.numberOfFeeds()
   }
 
-  fun staleFeeds(sixMonthsAgo: Instant): Flow<List<FeedHealthInfo>> {
-    return feedRepository.staleFeeds(sixMonthsAgo)
+  fun staleFeeds(
+    sixMonthsAgo: Instant,
+    createdBefore: Instant,
+    limit: Long,
+  ): Flow<List<FeedHealthInfo>> {
+    return feedRepository.staleFeeds(sixMonthsAgo, createdBefore, limit)
   }
 
   fun highVolumeFeeds(
@@ -449,6 +453,18 @@ class RssRepository(
 
   fun leastReadFeeds(after: Instant, limit: Long): Flow<List<FeedHealthInfo>> {
     return feedRepository.leastReadFeeds(after, limit)
+  }
+
+  fun brokenFeeds(threshold: Long, limit: Long): Flow<List<FeedHealthInfo>> {
+    return feedRepository.brokenFeeds(threshold, limit)
+  }
+
+  suspend fun incrementFeedFetchErrors(feedId: String) {
+    feedRepository.incrementFeedFetchErrors(feedId)
+  }
+
+  suspend fun resetFeedFetchErrors(feedId: String) {
+    feedRepository.resetFeedFetchErrors(feedId)
   }
 
   /** Search feeds, returns all feeds if [searchQuery] is empty */
@@ -1180,6 +1196,7 @@ class RssRepository(
     hideFromAllFeeds: Boolean,
     remoteId: String?,
     enableNotifications: Boolean,
+    consecutiveFetchErrors: Long,
   ): Feed {
     return Feed(
       id = id,
@@ -1200,6 +1217,7 @@ class RssRepository(
       enableNotifications = enableNotifications,
       isDeleted = isDeleted,
       remoteId = remoteId,
+      consecutiveFetchErrors = consecutiveFetchErrors,
     )
   }
 

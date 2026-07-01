@@ -17,7 +17,6 @@
 
 package dev.sasikanth.rss.reader.group.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -67,7 +66,6 @@ import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.ui.DeleteConfirmationDialog
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
-import dev.sasikanth.rss.reader.feeds.ui.common.AllFeedsHeader
 import dev.sasikanth.rss.reader.group.GroupEvent
 import dev.sasikanth.rss.reader.group.GroupState
 import dev.sasikanth.rss.reader.group.GroupViewModel
@@ -160,14 +158,6 @@ private fun GroupContent(
                 titleContentColor = AppTheme.colorScheme.onSurface,
                 actionIconContentColor = AppTheme.colorScheme.onSurface,
               ),
-          )
-
-          AllFeedsHeader(
-            modifier = Modifier.background(AppTheme.colorScheme.backdrop),
-            feedsCount = feeds.itemCount,
-            feedsSortOrder = state.feedsOrderBy,
-            showAddButton = false,
-            onFeedsSortChanged = { dispatch(GroupEvent.OnFeedsSortOrderChanged(it)) },
           )
         }
 

@@ -1,0 +1,1 @@
+ALTER TABLE feed ADD COLUMN consecutiveFetchErrors INTEGER NOT NULL DEFAULT 0;
