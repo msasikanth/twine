@@ -20,10 +20,15 @@ package dev.sasikanth.rss.reader.feedhealth
 import androidx.compose.runtime.Immutable
 import dev.sasikanth.rss.reader.core.model.local.FeedSubscriptionHealth
 
+@Immutable data class PendingUnsubscribe(val feedId: String, val feedName: String)
+
 @Immutable
 data class FeedHealthState(
   val healthData: FeedSubscriptionHealth? = null,
   val isLoading: Boolean = true,
+  val selectedFeedIds: Set<String> = emptySet(),
+  val isSelectionMode: Boolean = false,
+  val pendingUnsubscribe: PendingUnsubscribe? = null,
 ) {
   companion object {
     val Default = FeedHealthState()

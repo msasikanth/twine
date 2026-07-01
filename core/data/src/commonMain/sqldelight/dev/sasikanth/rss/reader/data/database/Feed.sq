@@ -20,7 +20,8 @@ CREATE TABLE feed(
   isDeleted INTEGER AS Boolean NOT NULL DEFAULT 0,
   hideFromAllFeeds INTEGER AS Boolean NOT NULL DEFAULT 0,
   remoteId TEXT,
-  enableNotifications INTEGER AS Boolean NOT NULL DEFAULT 1
+  enableNotifications INTEGER AS Boolean NOT NULL DEFAULT 1,
+  consecutiveFetchErrors INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX feed_link_index ON feed(link);
@@ -201,10 +202,11 @@ SELECT
   COUNT(p.id) AS totalPostsCount
 FROM feed f
 LEFT JOIN post p ON f.id = p.sourceId
-WHERE f.isDeleted = 0 AND f.createdAt < :sixMonthsAgo
+WHERE f.isDeleted = 0 AND f.createdAt < :createdBefore
 GROUP BY f.id
 HAVING lastPostDate < :sixMonthsAgo OR lastPostDate IS NULL
-ORDER BY lastPostDate ASC;
+ORDER BY lastPostDate ASC
+LIMIT :limit;
 
 highVolumeFeeds:
 SELECT
@@ -239,3 +241,22 @@ GROUP BY f.id
 HAVING COUNT(p.id) >= 3 AND (CAST(COUNT(rh.postId) AS REAL) / COUNT(p.id)) < 0.8
 ORDER BY (CAST(COUNT(rh.postId) AS REAL) / COUNT(p.id)) ASC, totalPostsCount DESC
 LIMIT :limit;
+
+brokenFeeds:
+SELECT
+  f.id,
+  f.name,
+  f.icon,
+  f.homepageLink,
+  f.showFeedFavIcon,
+  f.consecutiveFetchErrors AS totalPostsCount
+FROM feed f
+WHERE f.isDeleted = 0 AND f.consecutiveFetchErrors >= :threshold
+ORDER BY f.consecutiveFetchErrors DESC
+LIMIT :limit;
+
+incrementFetchErrors:
+UPDATE feed SET consecutiveFetchErrors = consecutiveFetchErrors + 1 WHERE id = :id;
+
+resetFetchErrors:
+UPDATE feed SET consecutiveFetchErrors = 0 WHERE id = :id AND consecutiveFetchErrors > 0;

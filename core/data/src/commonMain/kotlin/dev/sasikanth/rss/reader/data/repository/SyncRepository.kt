@@ -238,6 +238,7 @@ class SyncRepository(
     hideFromAllFeeds: Boolean,
     remoteId: String?,
     enableNotifications: Boolean,
+    consecutiveFetchErrors: Long,
   ): Feed {
     return Feed(
       id = id,
@@ -258,6 +259,7 @@ class SyncRepository(
       enableNotifications = enableNotifications,
       isDeleted = isDeleted,
       remoteId = remoteId,
+      consecutiveFetchErrors = consecutiveFetchErrors,
     )
   }
 }

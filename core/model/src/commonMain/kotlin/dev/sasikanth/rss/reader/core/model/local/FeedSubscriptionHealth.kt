@@ -24,4 +24,5 @@ data class FeedSubscriptionHealth(
   val staleFeeds: List<FeedHealthInfo>,
   val highVolumeFeeds: List<FeedHealthInfo>,
   val leastReadFeeds: List<FeedHealthInfo>,
+  val brokenFeeds: List<FeedHealthInfo>,
 )
