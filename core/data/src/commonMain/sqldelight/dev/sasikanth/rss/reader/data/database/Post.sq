@@ -52,51 +52,25 @@ CREATE INDEX post_read_by_source_date_index ON post(sourceId, postDate) WHERE (f
 
 CREATE INDEX post_with_image_index ON post(postDate DESC) WHERE imageUrl IS NOT NULL;
 
-CREATE TRIGGER hide_post_if_blocked_word_is_present_AFTER_INSERT
-AFTER INSERT ON post
-FOR EACH ROW
-WHEN (
-  SELECT 1
-  FROM blockedWord
-  WHERE
-    (new.title LIKE '%' || blockedWord.content || '%' OR
-    new.description LIKE '%' || blockedWord.content || '%') AND
-    blockedWord.isDeleted = 0
-) IS NOT NULL
-BEGIN
-  UPDATE post SET flags = flags | 4 WHERE id = new.id;
-END;
+markPostAsBlocked:
+UPDATE post SET flags = flags | 4 WHERE id = :id;
 
-CREATE TRIGGER hide_post_if_blocked_word_is_present_BEFORE_UPDATE
-BEFORE UPDATE OF title, description ON post -- Removed rawContent
-FOR EACH ROW
-WHEN (
-  SELECT 1
-  FROM blockedWord
-  WHERE
-    (new.title LIKE '%' || blockedWord.content || '%' OR
-    new.description LIKE '%' || blockedWord.content || '%') AND
-    (new.flags & 4) == 0 AND
-    blockedWord.isDeleted = 0
-) IS NOT NULL
-BEGIN
-  UPDATE post SET flags = flags | 4 WHERE id = new.id;
-END;
+markPostAsUnblocked:
+UPDATE post SET flags = flags & ~4 WHERE id = :id;
 
-CREATE TRIGGER unhide_post_if_no_blocked_words_present_and_post_is_hidden_BEFORE_UPDATE
-UPDATE OF title, description ON post
-FOR EACH ROW
-WHEN (
-  SELECT 1
-  FROM blockedWord
-  WHERE
-    (new.title LIKE '%' || blockedWord.content || '%' OR
-    new.description LIKE '%' || blockedWord.content || '%') AND
-    blockedWord.isDeleted = 0
-) IS NULL AND (old.flags & 4) != 0
-BEGIN
-  UPDATE post SET flags = flags & ~4 WHERE id = new.id;
-END;
+blockPostsWithWord:
+UPDATE post
+SET flags = flags | 4
+WHERE (lower(title) LIKE '%' || :word || '%' OR lower(description) LIKE '%' || :word || '%')
+  AND (flags & 4) == 0;
+
+blockedPosts:
+SELECT id, title, description, flags FROM post WHERE (flags & 4) != 0;
+
+unblockPosts:
+UPDATE post
+SET flags = flags & ~4
+WHERE id IN :ids;
 
 CREATE TRIGGER inherit_flags_on_insert
 AFTER INSERT ON post

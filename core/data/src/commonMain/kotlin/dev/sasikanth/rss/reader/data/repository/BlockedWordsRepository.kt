@@ -23,6 +23,7 @@ import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import dev.sasikanth.rss.reader.core.model.local.BlockedWord
 import dev.sasikanth.rss.reader.data.database.BlockedWordsQueries
+import dev.sasikanth.rss.reader.data.database.PostQueries
 import dev.sasikanth.rss.reader.data.database.TransactionRunner
 import dev.sasikanth.rss.reader.data.sync.BlockedWordSyncEntity
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -38,23 +39,30 @@ import me.tatarka.inject.annotations.Inject
 class BlockedWordsRepository(
   private val transactionRunner: TransactionRunner,
   private val blockedWordsQueries: BlockedWordsQueries,
+  private val postQueries: PostQueries,
   private val dispatchersProvider: DispatchersProvider,
 ) {
 
   suspend fun addWord(word: String) {
     withContext(dispatchersProvider.databaseWrite) {
       val uuid = nameBasedUuidOf(word.lowercase())
-      blockedWordsQueries.insert(
-        id = uuid.toString(),
-        content = word,
-        updatedAt = Clock.System.now(),
-      )
+      transactionRunner.invoke {
+        blockedWordsQueries.insert(
+          id = uuid.toString(),
+          content = word,
+          updatedAt = Clock.System.now(),
+        )
+        retroactiveBlockAndUnblock()
+      }
     }
   }
 
   suspend fun removeWord(id: Uuid) {
     withContext(dispatchersProvider.databaseWrite) {
-      blockedWordsQueries.remove(id = id.toString(), updatedAt = Clock.System.now())
+      transactionRunner.invoke {
+        blockedWordsQueries.remove(id = id.toString(), updatedAt = Clock.System.now())
+        retroactiveBlockAndUnblock()
+      }
     }
   }
 
@@ -91,7 +99,35 @@ class BlockedWordsRepository(
             updatedAt = Instant.fromEpochMilliseconds(blockedWord.updatedAt),
           )
         }
+        retroactiveBlockAndUnblock()
       }
+    }
+  }
+
+  private fun retroactiveBlockAndUnblock() {
+    val activeBlockedWords =
+      blockedWordsQueries.words { _, content, _, _ -> content.lowercase() }.executeAsList()
+
+    // 1. Retroactively block matching posts for all active blocked words
+    activeBlockedWords.forEach { word -> postQueries.blockPostsWithWord(word) }
+
+    // 2. Retroactively unblock posts that no longer match any active blocked word
+    val blockedPosts =
+      postQueries
+        .blockedPosts { postId, title, description, _ -> Triple(postId, title, description) }
+        .executeAsList()
+
+    val postsToUnblock =
+      blockedPosts
+        .filter { (_, title, description) ->
+          val titleLower = title.lowercase()
+          val descLower = description.lowercase()
+          activeBlockedWords.none { word -> titleLower.contains(word) || descLower.contains(word) }
+        }
+        .map { it.first }
+
+    if (postsToUnblock.isNotEmpty()) {
+      postQueries.unblockPosts(postsToUnblock)
     }
   }
 }

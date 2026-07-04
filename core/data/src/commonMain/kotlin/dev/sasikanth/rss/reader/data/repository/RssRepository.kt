@@ -179,6 +179,9 @@ class RssRepository(
       }
 
     transactionRunner.invoke {
+      val activeBlockedWords =
+        blockedWordsQueries.words { _, content, _, _ -> content.lowercase() }.executeAsList()
+
       postsWithReadingTime.forEach { (postPayload, readingTimes) ->
         val postId = nameBasedUuidOf(postPayload.link).toString()
         postQueries.upsert(
@@ -197,6 +200,18 @@ class RssRepository(
           isDateParsedCorrectly = if (postPayload.isDateParsedCorrectly) 1 else 0,
           remoteId = postPayload.remoteId,
         )
+
+        val isBlocked =
+          activeBlockedWords.any { word ->
+            postPayload.title.lowercase().contains(word) ||
+              postPayload.description.orEmpty().lowercase().contains(word)
+          }
+
+        if (isBlocked) {
+          postQueries.markPostAsBlocked(postId)
+        } else {
+          postQueries.markPostAsUnblocked(postId)
+        }
 
         postContentQueries.upsert(
           id = postId,

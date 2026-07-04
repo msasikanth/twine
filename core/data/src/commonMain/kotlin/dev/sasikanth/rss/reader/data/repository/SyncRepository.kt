@@ -19,6 +19,8 @@ package dev.sasikanth.rss.reader.data.repository
 import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.Post
+import dev.sasikanth.rss.reader.core.model.local.PostFlag
+import dev.sasikanth.rss.reader.data.database.BlockedWordsQueries
 import dev.sasikanth.rss.reader.data.database.FeedQueries
 import dev.sasikanth.rss.reader.data.database.PostQueries
 import dev.sasikanth.rss.reader.data.database.TransactionRunner
@@ -35,6 +37,7 @@ import me.tatarka.inject.annotations.Inject
 class SyncRepository(
   private val feedQueries: FeedQueries,
   private val postQueries: PostQueries,
+  private val blockedWordsQueries: BlockedWordsQueries,
   private val transactionRunner: TransactionRunner,
   private val widgetUpdater: WidgetUpdater,
   private val dispatchersProvider: DispatchersProvider,
@@ -168,7 +171,21 @@ class SyncRepository(
     val postsSnapshot = posts.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
+        val activeBlockedWords =
+          blockedWordsQueries.words { _, content, _, _ -> content.lowercase() }.executeAsList()
+
         postsSnapshot.forEach { post ->
+          val isBlocked =
+            activeBlockedWords.any { word ->
+              post.title.lowercase().contains(word) || post.description.lowercase().contains(word)
+            }
+          val finalFlags =
+            if (isBlocked) {
+              post.flags + PostFlag.Hidden
+            } else {
+              post.flags - PostFlag.Hidden
+            }
+
           postQueries.upsertSyncPost(
             id = post.id,
             sourceId = post.sourceId,
@@ -182,7 +199,7 @@ class SyncRepository(
             syncedAt = post.syncedAt,
             link = post.link,
             commentsLink = post.commentsLink,
-            flags = post.flags,
+            flags = finalFlags,
             remoteId = post.remoteId,
           )
         }
