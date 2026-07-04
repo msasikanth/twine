@@ -1,0 +1,7 @@
+DROP TRIGGER IF EXISTS hide_post_if_blocked_word_is_present_AFTER_INSERT;
+DROP TRIGGER IF EXISTS hide_post_if_blocked_word_is_present_BEFORE_UPDATE;
+DROP TRIGGER IF EXISTS unhide_post_if_no_blocked_words_present_and_post_is_hidden_BEFORE_UPDATE;
+DROP TRIGGER IF EXISTS hide_posts_with_blocked_words_AFTER_INSERT;
+DROP TRIGGER IF EXISTS hide_posts_with_blocked_words_AFTER_UPDATE;
+DROP TRIGGER IF EXISTS unhide_posts_with_blocked_words_AFTER_UPDATE;
+DROP TRIGGER IF EXISTS unhide_posts_with_blocked_words_AFTER_DELETE;

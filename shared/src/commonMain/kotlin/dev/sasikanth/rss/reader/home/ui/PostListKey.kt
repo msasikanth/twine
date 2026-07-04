@@ -18,15 +18,10 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 
-private val json = Json
-
-@Serializable
 data class PostListKey(val postId: String, val feedId: String) {
 
-  fun encode(): String = json.encodeToString(this)
+  fun encode(): String = "post_key_${postId}_${feedId}"
 
   companion object {
 
@@ -34,14 +29,11 @@ data class PostListKey(val postId: String, val feedId: String) {
       return PostListKey(postId = post.id, feedId = post.sourceId)
     }
 
-    fun decode(key: String): PostListKey = json.decodeFromString(key)
-
     fun decodeSafe(key: String): PostListKey? {
-      return try {
-        decode(key)
-      } catch (e: Exception) {
-        null
-      }
+      if (!key.startsWith("post_key_")) return null
+      val parts = key.removePrefix("post_key_").split("_")
+      if (parts.size < 2) return null
+      return PostListKey(postId = parts[0], feedId = parts[1])
     }
   }
 }

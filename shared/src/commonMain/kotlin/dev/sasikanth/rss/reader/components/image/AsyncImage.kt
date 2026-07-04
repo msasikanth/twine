@@ -27,6 +27,8 @@ import coil3.request.crossfade
 import coil3.size.Dimension
 import coil3.size.Size
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 
 @Composable
 internal fun AsyncImage(
@@ -52,6 +54,7 @@ internal fun AsyncImage(
           .diskCacheKey(url)
           .memoryCacheKey(url)
           .crossfade(true)
+          .decoderCoroutineContext(Dispatchers.IO.limitedParallelism(4))
           .build(),
       contentDescription = contentDescription,
       modifier = modifier,

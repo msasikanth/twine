@@ -49,6 +49,7 @@ class RssRepositoryTest {
 
   private lateinit var database: ReaderDatabase
   private lateinit var repository: RssRepository
+  private lateinit var blockedWordsRepository: BlockedWordsRepository
 
   @OptIn(ExperimentalCoroutinesApi::class)
   private val testDispatchersProvider =
@@ -145,12 +146,20 @@ class RssRepositoryTest {
         postRepository = PostRepository(database.postQueries, testDispatchersProvider),
         syncRepository =
           SyncRepository(
-            database.feedQueries,
-            database.postQueries,
+            feedQueries = database.feedQueries,
+            postQueries = database.postQueries,
+            blockedWordsQueries = database.blockedWordsQueries,
             transactionRunner = TransactionRunner(database),
             widgetUpdater = NoopWidgetUpdater,
             dispatchersProvider = testDispatchersProvider,
           ),
+      )
+    blockedWordsRepository =
+      BlockedWordsRepository(
+        transactionRunner = TransactionRunner(database),
+        blockedWordsQueries = database.blockedWordsQueries,
+        postQueries = database.postQueries,
+        dispatchersProvider = testDispatchersProvider,
       )
   }
 
@@ -497,6 +506,189 @@ class RssRepositoryTest {
         }
       }
     }
+  }
+
+  @Test
+  fun blockedWordsRetroactiveBlock() = runTest {
+    // given
+    val feedId = "feed-1"
+    database.feedQueries.upsert(
+      id = feedId,
+      name = "Feed 1",
+      icon = "icon",
+      description = "description",
+      homepageLink = "homepage",
+      createdAt = Instant.fromEpochMilliseconds(0),
+      link = "link",
+      alwaysFetchSourceArticle = false,
+      showFeedFavIcon = false,
+      lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+      enableNotifications = true,
+    )
+
+    insertPost(id = "post-1", sourceId = feedId, postDate = Instant.fromEpochMilliseconds(0))
+    database.postQueries.upsert(
+      id = "post-2",
+      sourceId = feedId,
+      title = "Spam post title",
+      description = "Normal description",
+      imageUrl = null,
+      postDate = Instant.fromEpochMilliseconds(0),
+      createdAt = Instant.fromEpochMilliseconds(0),
+      updatedAt = Instant.fromEpochMilliseconds(0),
+      syncedAt = Instant.fromEpochMilliseconds(0),
+      link = "link-2",
+      commentsLink = null,
+      audioUrl = null,
+      remoteId = null,
+      isDateParsedCorrectly = 1L,
+    )
+
+    // when
+    blockedWordsRepository.addWord("spam")
+
+    // then
+    val post1 = repository.post("post-1")
+    val post2 = repository.post("post-2")
+
+    assertEquals(emptySet(), post1.flags)
+    assertEquals(setOf(dev.sasikanth.rss.reader.core.model.local.PostFlag.Hidden), post2.flags)
+  }
+
+  @Test
+  fun blockedWordsRetroactiveUnblock() = runTest {
+    // given
+    val feedId = "feed-1"
+    database.feedQueries.upsert(
+      id = feedId,
+      name = "Feed 1",
+      icon = "icon",
+      description = "description",
+      homepageLink = "homepage",
+      createdAt = Instant.fromEpochMilliseconds(0),
+      link = "link",
+      alwaysFetchSourceArticle = false,
+      showFeedFavIcon = false,
+      lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+      enableNotifications = true,
+    )
+
+    database.postQueries.upsert(
+      id = "post-1",
+      sourceId = feedId,
+      title = "Spam and promo post",
+      description = "Normal description",
+      imageUrl = null,
+      postDate = Instant.fromEpochMilliseconds(0),
+      createdAt = Instant.fromEpochMilliseconds(0),
+      updatedAt = Instant.fromEpochMilliseconds(0),
+      syncedAt = Instant.fromEpochMilliseconds(0),
+      link = "link-1",
+      commentsLink = null,
+      audioUrl = null,
+      remoteId = null,
+      isDateParsedCorrectly = 1L,
+    )
+
+    blockedWordsRepository.addWord("spam")
+    blockedWordsRepository.addWord("promo")
+
+    val postBefore = repository.post("post-1")
+    assertEquals(setOf(dev.sasikanth.rss.reader.core.model.local.PostFlag.Hidden), postBefore.flags)
+
+    val wordSpamId = blockedWordsRepository.words().first().first { it.content == "spam" }.id
+
+    // when - removing one matching word but another remains
+    blockedWordsRepository.removeWord(wordSpamId)
+
+    // then - should still be blocked because "promo" matches
+    val postAfterOneRemoval = repository.post("post-1")
+    assertEquals(
+      setOf(dev.sasikanth.rss.reader.core.model.local.PostFlag.Hidden),
+      postAfterOneRemoval.flags,
+    )
+
+    val wordPromoId = blockedWordsRepository.words().first().first { it.content == "promo" }.id
+
+    // when - removing the last matching word
+    blockedWordsRepository.removeWord(wordPromoId)
+
+    // then - should be unblocked
+    val postAfterBothRemovals = repository.post("post-1")
+    assertEquals(emptySet(), postAfterBothRemovals.flags)
+  }
+
+  @Test
+  fun blockedWordsFeedSyncCheck() = runTest {
+    // given
+    val feedId = "feed-1"
+    database.feedQueries.upsert(
+      id = feedId,
+      name = "Feed 1",
+      icon = "icon",
+      description = "description",
+      homepageLink = "homepage",
+      createdAt = Instant.fromEpochMilliseconds(0),
+      link = "link",
+      alwaysFetchSourceArticle = false,
+      showFeedFavIcon = false,
+      lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+      enableNotifications = true,
+    )
+
+    blockedWordsRepository.addWord("spam")
+
+    val syncedPosts =
+      listOf(
+        dev.sasikanth.rss.reader.core.model.local.Post(
+          id = "post-1",
+          sourceId = feedId,
+          title = "Normal post title",
+          description = "Normal description",
+          imageUrl = null,
+          audioUrl = null,
+          postDate = Instant.fromEpochMilliseconds(0),
+          createdAt = Instant.fromEpochMilliseconds(0),
+          updatedAt = Instant.fromEpochMilliseconds(0),
+          syncedAt = Instant.fromEpochMilliseconds(0),
+          link = "link-1",
+          commentsLink = null,
+          flags = emptySet(),
+          remoteId = null,
+          seedColor = null,
+          audioProgress = 0,
+          audioDuration = 0,
+        ),
+        dev.sasikanth.rss.reader.core.model.local.Post(
+          id = "post-2",
+          sourceId = feedId,
+          title = "Spam post title",
+          description = "Normal description",
+          imageUrl = null,
+          audioUrl = null,
+          postDate = Instant.fromEpochMilliseconds(0),
+          createdAt = Instant.fromEpochMilliseconds(0),
+          updatedAt = Instant.fromEpochMilliseconds(0),
+          syncedAt = Instant.fromEpochMilliseconds(0),
+          link = "link-2",
+          commentsLink = null,
+          flags = emptySet(),
+          remoteId = null,
+          seedColor = null,
+          audioProgress = 0,
+          audioDuration = 0,
+        ),
+      )
+
+    // when
+    repository.upsertPosts(syncedPosts)
+
+    // then
+    val post1 = repository.post("post-1")
+    val post2 = repository.post("post-2")
+
+    assertEquals(emptySet(), post1.flags)
+    assertEquals(setOf(dev.sasikanth.rss.reader.core.model.local.PostFlag.Hidden), post2.flags)
   }
 
   private fun insertPost(
