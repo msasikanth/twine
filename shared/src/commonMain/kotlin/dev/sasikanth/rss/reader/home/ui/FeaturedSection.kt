@@ -38,6 +38,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.BlurEffect
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.TileMode
@@ -47,8 +49,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
-import coil3.size.Dimension
-import coil3.size.Size
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.components.image.AsyncImage
@@ -102,7 +102,7 @@ internal fun FeaturedSection(
   val blurEffect =
     remember(density) {
       if (canBlurImage) {
-        val blurRadius = 100.dp
+        val blurRadius = 70.dp
         val blurRadiusPx = with(density) { blurRadius.toPx() }
         BlurEffect(radiusX = blurRadiusPx, radiusY = blurRadiusPx, edgeTreatment = TileMode.Decal)
       } else {
@@ -117,19 +117,6 @@ internal fun FeaturedSection(
         sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) -> 1.5f
         else -> 1f
       }
-    }
-
-  val targetHeightPx =
-    remember(sizeClass, density) {
-      val baseHeight =
-        when {
-          sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) ->
-            360.dp
-          sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) -> 250.dp
-          else -> 200.dp
-        }
-      val targetHeight = (baseHeight * 0.5f).coerceAtLeast(120.dp)
-      with(density) { targetHeight.roundToPx() }
     }
 
   Box(modifier) {
@@ -185,24 +172,16 @@ internal fun FeaturedSection(
             }
         ) {
           if (canBlurImage && blurEffect != null) {
+            val pageOffsetProvider =
+              remember(page) { { pagerState.getOffsetFractionForPage(page) } }
             FeaturedSectionBackground(
               imageUrl = postWithMetadata.imageUrl,
               imageAspectRatio = imageAspectRatio,
-              targetHeightPx = targetHeightPx,
-              modifier =
-                Modifier.ignoreHorizontalParentPadding(horizontal = 24.dp)
-                  .graphicsLayer { renderEffect = blurEffect }
-                  .graphicsLayer {
-                    val pageOffset = pagerState.getOffsetFractionForPage(page)
-
-                    translationX = size.width * pageOffset
-                    alpha =
-                      if (postsType == PostsType.UNREAD && markAsReadOn == MarkAsReadOn.Scroll) {
-                        calculateContentAlpha(pageOffset)
-                      } else {
-                        calculateBackgroundAlpha(pageOffset)
-                      }
-                  },
+              blurEffect = blurEffect,
+              pageOffsetProvider = pageOffsetProvider,
+              postsType = postsType,
+              markAsReadOn = markAsReadOn,
+              modifier = Modifier.ignoreHorizontalParentPadding(horizontal = 24.dp),
             )
           }
 
@@ -251,11 +230,15 @@ internal fun FeaturedSection(
 private fun FeaturedSectionBackground(
   imageUrl: String?,
   imageAspectRatio: Float,
-  targetHeightPx: Int,
   modifier: Modifier = Modifier,
+  blurEffect: BlurEffect? = null,
+  pageOffsetProvider: () -> Float = { 0f },
+  postsType: PostsType = PostsType.ALL,
+  markAsReadOn: MarkAsReadOn = MarkAsReadOn.Scroll,
   alignment: Alignment = Alignment.Center,
 ) {
   val overlayColor = AppTheme.colorScheme.inversePrimary
+  val backdropColor = AppTheme.colorScheme.backdrop
   val isDarkTheme = AppTheme.isDark
   val colorFilter =
     remember(isDarkTheme) {
@@ -269,22 +252,35 @@ private fun FeaturedSectionBackground(
 
   if (imageUrl == null) return
 
-  val backgroundImageSize = remember(targetHeightPx) { Size(Dimension.Undefined, targetHeightPx) }
-
   AsyncImage(
     url = imageUrl,
     modifier =
-      modifier.aspectRatio(imageAspectRatio).drawWithCache {
-        onDrawWithContent {
-          drawContent()
-          drawRect(color = overlayColor, blendMode = BlendMode.Luminosity)
+      modifier
+        .graphicsLayer {
+          val pageOffset = pageOffsetProvider()
+          translationX = size.width * pageOffset
+          alpha =
+            if (postsType == PostsType.UNREAD && markAsReadOn == MarkAsReadOn.Scroll) {
+              calculateContentAlpha(pageOffset)
+            } else {
+              calculateBackgroundAlpha(pageOffset)
+            }
+          if (blurEffect != null) {
+            renderEffect = blurEffect
+          }
         }
-      },
+        .aspectRatio(imageAspectRatio)
+        .drawWithCache {
+          onDrawWithContent {
+            drawContent()
+            drawRect(color = overlayColor, blendMode = BlendMode.Luminosity)
+            drawRect(brush = Brush.verticalGradient(0.7f to Color.Transparent, 1f to backdropColor))
+          }
+        },
     contentDescription = null,
     contentScale = widthBiasedScale,
     alignment = alignment,
     colorFilter = colorFilter,
-    size = backgroundImageSize,
   )
 }
 
