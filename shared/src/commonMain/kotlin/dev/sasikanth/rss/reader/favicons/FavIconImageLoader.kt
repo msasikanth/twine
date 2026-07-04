@@ -29,6 +29,7 @@ import kotlinx.atomicfu.updateAndGet
 object FavIconImageLoader {
 
   private val reference = atomic<ImageLoader?>(null)
+  private val httpClient = lazy { HttpClient() }
 
   fun get(context: PlatformContext): ImageLoader {
     return reference.value ?: newImageLoader(context)
@@ -37,6 +38,7 @@ object FavIconImageLoader {
   @OptIn(ExperimentalCoilApi::class)
   private fun newImageLoader(context: PlatformContext): ImageLoader {
     var imageLoader: ImageLoader? = null
+    val sharedHttpClient = httpClient
 
     return reference.updateAndGet { value ->
       when {
@@ -47,7 +49,7 @@ object FavIconImageLoader {
             .components {
               add(
                 FavIconFetcher.Factory(
-                  networkClient = { HttpClient().asNetworkClient() },
+                  networkClient = { sharedHttpClient.value.asNetworkClient() },
                   cacheStrategy = { CacheStrategy.DEFAULT },
                 )
               )
