@@ -55,16 +55,21 @@ class MediaService : MediaSessionService() {
         .setMediaSourceFactory(DefaultMediaSourceFactory(cacheDataSourceFactory))
         .build()
 
+    val sessionActivityIntent =
+      (packageManager.getLaunchIntentForPackage(packageName)
+          ?: Intent().apply { setPackage(packageName) })
+        .apply {
+          action = Intent.ACTION_VIEW
+          data = Uri.parse("twine://reader/currently-playing")
+        }
+
     mediaSession =
       MediaSession.Builder(this, player)
         .setSessionActivity(
           PendingIntent.getActivity(
             this,
             0,
-            packageManager.getLaunchIntentForPackage(packageName)!!.apply {
-              action = Intent.ACTION_VIEW
-              data = Uri.parse("twine://reader/currently-playing")
-            },
+            sessionActivityIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
           )
         )
