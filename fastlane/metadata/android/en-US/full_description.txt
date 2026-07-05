@@ -1,1 +1,37 @@
-<p><i>Twine</i> is a multiplatform RSS reader app built using Kotlin and Compose Multiplatform. It features an nice user interface and experience to browse through the feeds, and supports Material 3 content based dynamic theming.</p><p><br><b>Features:</b></p><ul><li>Supports RSS &amp; Atom feeds</li><li>Gorgeous home feed</li><li>Pin frequently visited feeds</li><li>Smart fetching: Twine looks for feeds when given any website homepage</li><li>Reading view with shortcut to fetch full article</li><li>Bookmark posts to read later</li><li>Search posts</li><li>Background sync</li><li>Feed management: Add, Edit & Pin feeds</li><li>Import and exports your feeds with OPML</li></ul>
+Take back control of your news. No algorithms. No ads. Just your feeds.
+
+Tired of social media and news apps deciding what you see? Meet Twine, a modern, open-source RSS reader designed to put you back in the driver’s seat. Twine combines a beautiful, distraction-free interface with powerful tools to help you stay informed on your own terms.
+
+Why Twine?
+
+✨ Beautifully Adaptive UI:
+
+Experience a reader that feels alive. Twine’s dynamic theming engine adjusts the app's ambient colors based on the content you’re reading, creating a truly immersive experience. Fully supports Light, Dark, and AMOLED modes.
+
+🚀 Smart & Simple Feed Discovery:
+
+Don’t hunt for RSS links. Simply enter a website homepage URL, and Twine’s smart fetching engine will find the feed for you.
+
+📖 Distraction-Free Reading:
+
+Read articles the way they were meant to be read. Use the "Article Shortcut" to fetch the full text of any post directly in the reader view, bypassing cluttered websites and paywalls.
+
+🔒 Privacy First, Always: 
+
+Your reading habits are your business. Twine has zero ads, no tracking, and collects no personal data. It’s just you and your news.
+
+Power Features for Feed Pros:
+
+* Universal Support: Works with RSS, Atom, RDF, and JSON feeds.
+* Stay Organised: Group, pin, and manage your feeds with ease. Use the customizable bottom bar for quick access to your favorite categories.
+* Filter the Noise: Use the "Blocked Words" feature to automatically hide posts containing specific keywords you want to avoid.
+* Seamless Syncing: Keep your feeds in sync with support for FreshRSS (GReader), Miniflux, and Dropbox (Alpha).
+* Import & Export: Moving from another reader? Import your existing feeds via OPML in seconds.
+* Search & Bookmark: Find specific posts across all your feeds or save them to your bookmarks to read later.
+* Home Screen Widgets: Stay updated at a glance with beautiful widgets that show your latest unread posts (Available via Twine Premium).
+
+Open Source & Community Driven:
+
+Twine is built with love using Kotlin and Compose Multiplatform. It is an open-source project, meaning the community helps keep it transparent, secure, and constantly improving.
+
+Stop scrolling and start reading. Download Twine today.

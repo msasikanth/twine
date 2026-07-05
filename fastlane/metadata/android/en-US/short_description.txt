@@ -1,1 +1,1 @@
-A Compose multiplatform (Android & iOS) RSS reader app
+Read news your way. No algorithms, just your favorite RSS feeds.
