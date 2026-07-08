@@ -49,6 +49,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
+import coil3.size.Dimension
+import coil3.size.Size
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.components.image.AsyncImage
@@ -254,6 +256,7 @@ private fun FeaturedSectionBackground(
 
   AsyncImage(
     url = imageUrl,
+    size = Size(Dimension.Undefined, height = 100), // Downscaled for blur
     modifier =
       modifier
         .graphicsLayer {
