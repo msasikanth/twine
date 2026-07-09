@@ -84,7 +84,7 @@ internal fun FeaturedPostItem(
         .padding(featuredItemPadding)
         .clip(MaterialTheme.shapes.extraLarge)
         .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
-        .graphicsLayer { this.alpha = alpha }
+        .graphicsLayer { this.alpha = alpha * contentAlphaProvider.invoke() }
   ) {
     val density = LocalDensity.current
     val titleTextStyle = MaterialTheme.typography.headlineMedium
@@ -99,7 +99,6 @@ internal fun FeaturedPostItem(
     Text(
       modifier =
         Modifier.graphicsLayer {
-          this.alpha = contentAlphaProvider.invoke()
           blendMode =
             if (isDarkTheme) {
               BlendMode.Screen
@@ -124,7 +123,6 @@ internal fun FeaturedPostItem(
     Spacer(Modifier.height(8.dp))
 
     Text(
-      modifier = Modifier.graphicsLayer { this.alpha = contentAlphaProvider.invoke() },
       text = item.description,
       style = MaterialTheme.typography.bodyMedium,
       color = AppTheme.colorScheme.outline,
@@ -137,14 +135,14 @@ internal fun FeaturedPostItem(
 
     Spacer(modifier = Modifier.requiredHeight(4.dp))
 
+    val relativeTimestamp = item.date.formatRelativeTime()
     PostActionBar(
-      modifier = Modifier.graphicsLayer { this.alpha = contentAlphaProvider.invoke() },
       feedName = item.feedName,
       feedIcon = item.feedIcon,
       feedHomepageLink = item.feedHomepageLink,
       showFeedFavIcon = item.showFeedFavIcon,
       postRead = readStatus,
-      postRelativeTimestamp = item.date.formatRelativeTime(),
+      postRelativeTimestamp = relativeTimestamp,
       postLink = item.link,
       postBookmarked = item.bookmarked,
       commentsLink = item.commentsLink,
