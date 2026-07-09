@@ -54,10 +54,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -455,6 +453,7 @@ private fun HomeContent(
                 paddingValues = paddingValues,
                 onRefresh = { dispatch(HomeEvent.OnSwipeToRefresh) },
               ) {
+                val backdropColor = AppTheme.colorScheme.backdrop
                 PostsList(
                   paddingValues = paddingValues,
                   featuredPosts = featuredPosts,
@@ -486,20 +485,13 @@ private fun HomeContent(
                     dispatch(HomeEvent.UpdatePostReadStatus(postId, updatedReadStatus))
                   },
                   modifier =
-                    Modifier.fillMaxSize()
-                      .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-                      .drawWithContent {
-                        drawContent()
-                        drawRect(
-                          brush =
-                            Brush.verticalGradient(
-                              0f to Color.Black,
-                              0.85f to Color.Black,
-                              1f to Color.Transparent,
-                            ),
-                          blendMode = BlendMode.DstIn,
-                        )
-                      },
+                    Modifier.fillMaxSize().drawWithContent {
+                      drawContent()
+                      drawRect(
+                        brush =
+                          Brush.verticalGradient(0.85f to Color.Transparent, 1f to backdropColor)
+                      )
+                    },
                 )
               }
             }
