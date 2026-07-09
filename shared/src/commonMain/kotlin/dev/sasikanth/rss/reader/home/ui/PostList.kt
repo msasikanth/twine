@@ -68,26 +68,27 @@ internal fun PostsList(
 
   LaunchedEffect(listState, featuredPosts, featuredPostsPagerState) {
     snapshotFlow {
+        listState.layoutInfo.visibleItemsInfo.map { it.key to it.index } to
+          listState.firstVisibleItemIndex
+      }
+      .distinctUntilChanged()
+      .onEach { (keyIndexPairs, firstVisibleItemIndex) ->
+        val currentPage = featuredPostsPagerState.currentPage
         val visibleItems =
-          listState.layoutInfo.visibleItemsInfo
-            .mapNotNull { item ->
-              val keyString = item.key as? String
-              if (keyString.isNullOrBlank()) {
-                null
-              } else if (keyString == "featured_items") {
-                val post = featuredPosts.getOrNull(featuredPostsPagerState.currentPage)
-                post?.resolvedPost?.id?.let { it to item.index }
-              } else {
-                PostListKey.decodeSafe(keyString)?.postId?.let { it to item.index }
+          keyIndexPairs
+            .mapNotNull { (key, index) ->
+              val keyString = key as? String
+              when {
+                keyString.isNullOrBlank() -> null
+                keyString == "featured_items" -> {
+                  val post = featuredPosts.getOrNull(currentPage)
+                  post?.resolvedPost?.id?.let { it to index }
+                }
+                else -> PostListKey.decodeSafe(keyString)?.postId?.let { it to index }
               }
             }
             .toMap()
-
-        visibleItems to listState.firstVisibleItemIndex
-      }
-      .distinctUntilChanged()
-      .onEach { (visiblePosts, firstVisibleItemIndex) ->
-        onVisiblePostsChanged(visiblePosts, firstVisibleItemIndex)
+        onVisiblePostsChanged(visibleItems, firstVisibleItemIndex)
       }
       .launchIn(this)
   }

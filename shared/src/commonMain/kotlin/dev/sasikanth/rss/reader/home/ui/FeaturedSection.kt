@@ -49,6 +49,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
+import coil3.size.Dimension
+import coil3.size.Size
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.components.image.AsyncImage
@@ -61,7 +63,6 @@ import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
-import dev.sasikanth.rss.reader.utils.ignoreHorizontalParentPadding
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
 import kotlinx.collections.immutable.ImmutableList
@@ -120,6 +121,28 @@ internal fun FeaturedSection(
     }
 
   Box(modifier) {
+    if (canBlurImage && blurEffect != null && featuredPosts.isNotEmpty()) {
+      featuredPosts.forEachIndexed { page, featuredPost ->
+        val alphaProvider =
+          remember(page, postsType, markAsReadOn) {
+            {
+              val pageOffset = pagerState.getOffsetFractionForPage(page)
+              if (postsType == PostsType.UNREAD && markAsReadOn == MarkAsReadOn.Scroll) {
+                calculateContentAlpha(pageOffset)
+              } else {
+                calculateBackgroundAlpha(pageOffset)
+              }
+            }
+          }
+        FeaturedSectionBackground(
+          imageUrl = featuredPost.resolvedPost.imageUrl,
+          imageAspectRatio = imageAspectRatio,
+          blurEffect = blurEffect,
+          alphaProvider = alphaProvider,
+        )
+      }
+    }
+
     val contentPadding =
       remember(systemBarsHorizontalPadding, featuredPosts.isNotEmpty()) {
         PaddingValues(
@@ -171,20 +194,6 @@ internal fun FeaturedSection(
               }
             }
         ) {
-          if (canBlurImage && blurEffect != null) {
-            val pageOffsetProvider =
-              remember(page) { { pagerState.getOffsetFractionForPage(page) } }
-            FeaturedSectionBackground(
-              imageUrl = postWithMetadata.imageUrl,
-              imageAspectRatio = imageAspectRatio,
-              blurEffect = blurEffect,
-              pageOffsetProvider = pageOffsetProvider,
-              postsType = postsType,
-              markAsReadOn = markAsReadOn,
-              modifier = Modifier.ignoreHorizontalParentPadding(horizontal = 24.dp),
-            )
-          }
-
           FeaturedPostItem(
             item = postWithMetadata,
             contentAlphaProvider = contentAlphaProvider,
@@ -230,11 +239,9 @@ internal fun FeaturedSection(
 private fun FeaturedSectionBackground(
   imageUrl: String?,
   imageAspectRatio: Float,
+  blurEffect: BlurEffect,
+  alphaProvider: () -> Float,
   modifier: Modifier = Modifier,
-  blurEffect: BlurEffect? = null,
-  pageOffsetProvider: () -> Float = { 0f },
-  postsType: PostsType = PostsType.ALL,
-  markAsReadOn: MarkAsReadOn = MarkAsReadOn.Scroll,
   alignment: Alignment = Alignment.Center,
 ) {
   val overlayColor = AppTheme.colorScheme.inversePrimary
@@ -254,20 +261,12 @@ private fun FeaturedSectionBackground(
 
   AsyncImage(
     url = imageUrl,
+    size = Size(Dimension.Undefined, height = 100), // Downscaled for blur
     modifier =
       modifier
         .graphicsLayer {
-          val pageOffset = pageOffsetProvider()
-          translationX = size.width * pageOffset
-          alpha =
-            if (postsType == PostsType.UNREAD && markAsReadOn == MarkAsReadOn.Scroll) {
-              calculateContentAlpha(pageOffset)
-            } else {
-              calculateBackgroundAlpha(pageOffset)
-            }
-          if (blurEffect != null) {
-            renderEffect = blurEffect
-          }
+          renderEffect = blurEffect
+          alpha = alphaProvider()
         }
         .aspectRatio(imageAspectRatio)
         .drawWithCache {

@@ -170,13 +170,14 @@ internal fun PostListItem(
 
     Spacer(Modifier.height(4.dp))
 
+    val relativeTimestamp = item.date.formatRelativeTime()
     PostActionBar(
       feedName = item.feedName,
       feedIcon = item.feedIcon,
       feedHomepageLink = item.feedHomepageLink,
       showFeedFavIcon = item.showFeedFavIcon,
       postRead = readStatus,
-      postRelativeTimestamp = item.date.formatRelativeTime(),
+      postRelativeTimestamp = relativeTimestamp,
       postLink = item.link,
       postBookmarked = item.bookmarked,
       commentsLink = item.commentsLink,
@@ -255,13 +256,14 @@ internal fun SimplePostListItem(
 
     Spacer(Modifier.height(4.dp))
 
+    val relativeTimestamp = item.date.formatRelativeTime()
     PostActionBar(
       feedName = item.feedName,
       feedIcon = item.feedIcon,
       feedHomepageLink = item.feedHomepageLink,
       showFeedFavIcon = item.showFeedFavIcon,
       postRead = readStatus,
-      postRelativeTimestamp = item.date.formatRelativeTime(),
+      postRelativeTimestamp = relativeTimestamp,
       postLink = item.link,
       postBookmarked = item.bookmarked,
       commentsLink = item.commentsLink,

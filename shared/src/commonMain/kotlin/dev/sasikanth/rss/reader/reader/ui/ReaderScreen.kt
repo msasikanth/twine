@@ -62,10 +62,8 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -425,23 +423,19 @@ internal fun ReaderScreen(
               700.dp
             }
 
+          val backdropColor = AppTheme.colorScheme.backdrop
           HorizontalPager(
             modifier =
               Modifier.widthIn(max = readerContentMaxWidth)
                 .fillMaxSize()
                 .align(Alignment.Center)
-                .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
                 .drawWithContent {
                   drawContent()
                   drawRect(
-                    brush =
-                      Brush.verticalGradient(
-                        0f to Color.Transparent,
-                        0.15f to Color.Black,
-                        0.85f to Color.Black,
-                        1f to Color.Transparent,
-                      ),
-                    blendMode = BlendMode.DstIn,
+                    brush = Brush.verticalGradient(0f to backdropColor, 0.15f to Color.Transparent)
+                  )
+                  drawRect(
+                    brush = Brush.verticalGradient(0.85f to Color.Transparent, 1f to backdropColor)
                   )
                 },
             state = pagerState,
@@ -469,105 +463,106 @@ internal fun ReaderScreen(
                 remember(isDarkTheme) {
                   Highlights.Builder().theme(SyntaxThemes.atom(darkMode = isDarkTheme))
                 }
-              val markdownComponents = remember {
-                markdownComponents(
-                  text = { cm ->
-                    SafeMarkdownText(
-                      content = cm.node.safeUnescapedTextInNode(cm.content),
-                      node = cm.node,
-                      style = cm.typography.text,
-                    )
-                  },
-                  heading1 = { cm ->
-                    SafeMarkdownHeader(
-                      content = cm.content,
-                      node = cm.node,
-                      style = cm.typography.h1,
-                    )
-                  },
-                  heading2 = { cm ->
-                    SafeMarkdownHeader(
-                      content = cm.content,
-                      node = cm.node,
-                      style = cm.typography.h2,
-                    )
-                  },
-                  heading3 = { cm ->
-                    SafeMarkdownHeader(
-                      content = cm.content,
-                      node = cm.node,
-                      style = cm.typography.h3,
-                    )
-                  },
-                  heading4 = { cm ->
-                    SafeMarkdownHeader(
-                      content = cm.content,
-                      node = cm.node,
-                      style = cm.typography.h4,
-                    )
-                  },
-                  heading5 = { cm ->
-                    SafeMarkdownHeader(
-                      content = cm.content,
-                      node = cm.node,
-                      style = cm.typography.h5,
-                    )
-                  },
-                  heading6 = { cm ->
-                    SafeMarkdownHeader(
-                      content = cm.content,
-                      node = cm.node,
-                      style = cm.typography.h6,
-                    )
-                  },
-                  setextHeading1 = { cm ->
-                    SafeMarkdownHeader(
-                      content = cm.content,
-                      node = cm.node,
-                      style = cm.typography.h1,
-                      contentChildType = MarkdownTokenTypes.SETEXT_CONTENT,
-                    )
-                  },
-                  setextHeading2 = { cm ->
-                    SafeMarkdownHeader(
-                      content = cm.content,
-                      node = cm.node,
-                      style = cm.typography.h2,
-                      contentChildType = MarkdownTokenTypes.SETEXT_CONTENT,
-                    )
-                  },
-                  paragraph = { cm ->
-                    SafeMarkdownParagraph(
-                      content = cm.content,
-                      node = cm.node,
-                      style = cm.typography.paragraph,
-                    )
-                  },
-                  checkbox = { cm ->
-                    SafeMarkdownCheckBox(
-                      content = cm.content,
-                      node = cm.node,
-                      style = cm.typography.text,
-                    )
-                  },
-                  codeBlock = { cm ->
-                    MarkdownHighlightedCodeBlock(
-                      content = cm.content,
-                      node = cm.node,
-                      highlightsBuilder = highlightsBuilder,
-                      showHeader = true,
-                    )
-                  },
-                  codeFence = { cm ->
-                    MarkdownHighlightedCodeFence(
-                      content = cm.content,
-                      node = cm.node,
-                      highlightsBuilder = highlightsBuilder,
-                      showHeader = true,
-                    )
-                  },
-                )
-              }
+              val markdownComponents =
+                remember(isDarkTheme) {
+                  markdownComponents(
+                    text = { cm ->
+                      SafeMarkdownText(
+                        content = cm.node.safeUnescapedTextInNode(cm.content),
+                        node = cm.node,
+                        style = cm.typography.text,
+                      )
+                    },
+                    heading1 = { cm ->
+                      SafeMarkdownHeader(
+                        content = cm.content,
+                        node = cm.node,
+                        style = cm.typography.h1,
+                      )
+                    },
+                    heading2 = { cm ->
+                      SafeMarkdownHeader(
+                        content = cm.content,
+                        node = cm.node,
+                        style = cm.typography.h2,
+                      )
+                    },
+                    heading3 = { cm ->
+                      SafeMarkdownHeader(
+                        content = cm.content,
+                        node = cm.node,
+                        style = cm.typography.h3,
+                      )
+                    },
+                    heading4 = { cm ->
+                      SafeMarkdownHeader(
+                        content = cm.content,
+                        node = cm.node,
+                        style = cm.typography.h4,
+                      )
+                    },
+                    heading5 = { cm ->
+                      SafeMarkdownHeader(
+                        content = cm.content,
+                        node = cm.node,
+                        style = cm.typography.h5,
+                      )
+                    },
+                    heading6 = { cm ->
+                      SafeMarkdownHeader(
+                        content = cm.content,
+                        node = cm.node,
+                        style = cm.typography.h6,
+                      )
+                    },
+                    setextHeading1 = { cm ->
+                      SafeMarkdownHeader(
+                        content = cm.content,
+                        node = cm.node,
+                        style = cm.typography.h1,
+                        contentChildType = MarkdownTokenTypes.SETEXT_CONTENT,
+                      )
+                    },
+                    setextHeading2 = { cm ->
+                      SafeMarkdownHeader(
+                        content = cm.content,
+                        node = cm.node,
+                        style = cm.typography.h2,
+                        contentChildType = MarkdownTokenTypes.SETEXT_CONTENT,
+                      )
+                    },
+                    paragraph = { cm ->
+                      SafeMarkdownParagraph(
+                        content = cm.content,
+                        node = cm.node,
+                        style = cm.typography.paragraph,
+                      )
+                    },
+                    checkbox = { cm ->
+                      SafeMarkdownCheckBox(
+                        content = cm.content,
+                        node = cm.node,
+                        style = cm.typography.text,
+                      )
+                    },
+                    codeBlock = { cm ->
+                      MarkdownHighlightedCodeBlock(
+                        content = cm.content,
+                        node = cm.node,
+                        highlightsBuilder = highlightsBuilder,
+                        showHeader = true,
+                      )
+                    },
+                    codeFence = { cm ->
+                      MarkdownHighlightedCodeFence(
+                        content = cm.content,
+                        node = cm.node,
+                        highlightsBuilder = highlightsBuilder,
+                        showHeader = true,
+                      )
+                    },
+                  )
+                }
               ReaderPage(
                 modifier =
                   Modifier.fillMaxSize().onVisibilityChanged(minDurationMs = 250L) {
