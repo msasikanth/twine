@@ -377,4 +377,23 @@
   <string name="feedHealthBulkUnsubscribeDialogDesc">This will unsubscribe and delete all articles from the selected feeds. This cannot be undone.</string>
   <string name="feedHealthSelectionCount">%1$d selected</string>
   <string name="feedHealthUnsubscribeSelectedAction">Unsubscribe</string>
+  <string name="premiumPaywallTitle">Unlock Twine Pro</string>
+  <string name="premiumPaywallSubtitle">Get access to all premium features and support the development of Twine.</string>
+  <string name="premiumPaywallFeature1Title">Unlimited feeds</string>
+  <string name="premiumPaywallFeature1Desc">Add more than 30 feeds, and enable OPML importing.</string>
+  <string name="premiumPaywallFeature2Title">Cloud sync</string>
+  <string name="premiumPaywallFeature2Desc">Unlock Miniflux, FreshRSS and other cloud integrations.</string>
+  <string name="premiumPaywallFeature3Title">Themes</string>
+  <string name="premiumPaywallFeature3Desc">Keep Twine dynamic or stick to your favorite color palette.</string>
+  <string name="premiumPaywallFeature4Title">Widgets</string>
+  <string name="premiumPaywallFeature4Desc">Get access to powerful home screen widgets.</string>
+  <string name="premiumPaywallPrivacyPolicy">Privacy policy</string>
+  <string name="premiumPaywallTermsOfService">Terms of service</string>
+  <string name="premiumPaywallRestorePurchase">Restore purchase</string>
+  <string name="premiumPaywallGetTwinePro">Get Twine Pro</string>
+  <string name="premiumPaywallYouArePro">You are a Pro member!</string>
+  <string name="premiumPaywallPackageMonthly">1 Month</string>
+  <string name="premiumPaywallPackageYearly">12 Months</string>
+  <string name="premiumPaywallPackageLifetime">Lifetime</string>
+  <string name="premiumPaywallBestValue">BEST VALUE</string>
 </resources>
