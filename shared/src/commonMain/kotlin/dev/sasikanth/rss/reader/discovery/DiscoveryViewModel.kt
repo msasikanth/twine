@@ -24,6 +24,7 @@ import dev.sasikanth.rss.reader.core.model.DiscoveryFeed
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +42,7 @@ class DiscoveryViewModel(
   private val discoveryRepository: DiscoveryRepository,
   private val rssRepository: RssRepository,
   private val feedFetcher: FeedFetcher,
+  private val settingsRepository: SettingsRepository,
   private val dispatchersProvider: DispatchersProvider,
 ) : ViewModel() {
 
@@ -107,5 +109,9 @@ class DiscoveryViewModel(
         _state.update { it.copy(inProgressFeedLinks = it.inProgressFeedLinks - link) }
       }
     }
+  }
+
+  fun completeOnboarding() {
+    viewModelScope.launch(dispatchersProvider.io) { settingsRepository.completeOnboarding() }
   }
 }

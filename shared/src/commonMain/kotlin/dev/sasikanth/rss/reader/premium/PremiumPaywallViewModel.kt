@@ -21,10 +21,14 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sasikanth.rss.reader.billing.BillingHandler
+import dev.sasikanth.rss.reader.billing.SubscriptionResult
+import dev.sasikanth.rss.reader.billing.TwinePackage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
 @Stable
@@ -41,7 +45,46 @@ class PremiumPaywallViewModel(private val billingHandler: BillingHandler) : View
         initialValue = false,
       )
 
+  private val _packages = MutableStateFlow<List<TwinePackage>>(emptyList())
+  val packages =
+    _packages
+      .onStart { loadPackages() }
+      .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = emptyList(),
+      )
+
+  private val _inProgress = MutableStateFlow(false)
+  val inProgress = _inProgress.asStateFlow()
+
   private suspend fun checkSubscription() {
     _hasPremium.value = billingHandler.isSubscribed()
+  }
+
+  private suspend fun loadPackages() {
+    _packages.value = billingHandler.getPackages()
+  }
+
+  fun purchasePackage(packageId: String) {
+    viewModelScope.launch {
+      _inProgress.value = true
+      val result = billingHandler.purchasePackage(packageId)
+      if (result is SubscriptionResult.Subscribed) {
+        _hasPremium.value = true
+      }
+      _inProgress.value = false
+    }
+  }
+
+  fun restorePurchases() {
+    viewModelScope.launch {
+      _inProgress.value = true
+      val result = billingHandler.restorePurchases()
+      if (result is SubscriptionResult.Subscribed) {
+        _hasPremium.value = true
+      }
+      _inProgress.value = false
+    }
   }
 }

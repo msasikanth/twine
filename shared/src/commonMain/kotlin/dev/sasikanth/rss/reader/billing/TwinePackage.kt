@@ -17,22 +17,16 @@
 
 package dev.sasikanth.rss.reader.billing
 
-import dev.sasikanth.rss.reader.di.scopes.AppScope
-import me.tatarka.inject.annotations.Inject
+data class TwinePackage(
+  val id: String,
+  val packageType: PackageType,
+  val priceString: String,
+  val period: String,
+)
 
-@Inject
-@AppScope
-expect class BillingHandler {
-
-  suspend fun isSubscribed(): Boolean
-
-  suspend fun canSubscribe(): Boolean
-
-  suspend fun customerResult(): SubscriptionResult
-
-  suspend fun getPackages(): List<TwinePackage>
-
-  suspend fun purchasePackage(packageId: String): SubscriptionResult
-
-  suspend fun restorePurchases(): SubscriptionResult
+enum class PackageType {
+  MONTHLY,
+  ANNUAL,
+  LIFETIME,
+  UNKNOWN,
 }
