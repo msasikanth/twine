@@ -540,6 +540,7 @@ fun NavGraphBuilder.discoveryScreen(
   composable<Screen.Discovery> {
     val viewModel = viewModel { discoveryViewModel() }
     val isFromOnboarding = it.toRoute<Screen.Discovery>().isFromOnboarding
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     DiscoveryScreen(
       viewModel = viewModel,
@@ -547,7 +548,13 @@ fun NavGraphBuilder.discoveryScreen(
       onDone = {
         if (isFromOnboarding) {
           viewModel.completeOnboarding()
-          navController.navigate(Screen.Paywall(isFromOnboarding = true))
+          if (!state.isSubscribed) {
+            navController.navigate(Screen.Paywall(isFromOnboarding = true))
+          } else {
+            navController.navigate(Screen.Main()) {
+              popUpTo<Screen.Onboarding> { inclusive = true }
+            }
+          }
         } else {
           navController.popBackStack()
         }
