@@ -25,12 +25,10 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import co.touchlab.kermit.Logger
-import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
@@ -54,7 +52,7 @@ class GroupViewModel(
   @Assisted savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-  private val groupId = savedStateHandle.toRoute<Screen.FeedGroup>().groupId
+  private val groupId = savedStateHandle.get<String>("id")!!
   private val _state = MutableStateFlow(GroupState.DEFAULT)
   val state: StateFlow<GroupState>
     get() = _state

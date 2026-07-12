@@ -17,13 +17,8 @@
 
 package dev.sasikanth.rss.reader.reader
 
-import androidx.navigation.NavType
-import androidx.savedstate.SavedState
-import androidx.savedstate.read
-import androidx.savedstate.write
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 
 @Serializable
 data class ReaderScreenArgs(val postIndex: Int, val postId: String, val fromScreen: FromScreen) {
@@ -41,26 +36,5 @@ data class ReaderScreenArgs(val postIndex: Int, val postId: String, val fromScre
     @Serializable data object UnreadWidget : FromScreen
 
     @Serializable data object AudioPlayer : FromScreen
-  }
-
-  companion object {
-    val navTypeMap =
-      object : NavType<ReaderScreenArgs>(isNullableAllowed = false) {
-        override fun put(bundle: SavedState, key: String, value: ReaderScreenArgs) {
-          bundle.write { putString(key, Json.encodeToString(value)) }
-        }
-
-        override fun get(bundle: SavedState, key: String): ReaderScreenArgs? {
-          return bundle.read { Json.decodeFromString(getString(key)) }
-        }
-
-        override fun parseValue(value: String): ReaderScreenArgs {
-          return Json.decodeFromString(value)
-        }
-
-        override fun serializeAsValue(value: ReaderScreenArgs): String {
-          return Json.encodeToString(value)
-        }
-      }
   }
 }

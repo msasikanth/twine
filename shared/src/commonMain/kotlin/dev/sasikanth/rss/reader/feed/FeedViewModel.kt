@@ -21,8 +21,6 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
-import dev.sasikanth.rss.reader.app.Modals
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
@@ -57,7 +55,7 @@ class FeedViewModel(
   @Assisted savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-  private val feedId = savedStateHandle.toRoute<Modals.FeedInfo>().feedId
+  private val feedId = savedStateHandle.get<String>("feedId")!!
   private val _state = MutableStateFlow(FeedState.DEFAULT)
   val state: StateFlow<FeedState>
     get() = _state

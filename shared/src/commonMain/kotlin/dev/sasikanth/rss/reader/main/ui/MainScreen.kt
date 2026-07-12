@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -46,25 +47,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationEventHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import androidx.savedstate.serialization.SavedStateConfiguration
 import androidx.window.core.layout.WindowSizeClass
+import dev.sasikanth.rss.reader.app.AppNavigator
 import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
-import dev.sasikanth.rss.reader.resources.icons.Home
-import dev.sasikanth.rss.reader.resources.icons.Settings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlinx.coroutines.launch
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclassesOfSealed
 
 @Composable
 internal fun MainScreen(
@@ -88,27 +89,33 @@ internal fun MainScreen(
   val drawerState = rememberDrawerState(DrawerValue.Closed)
   val scope = rememberCoroutineScope()
 
-  val navController = rememberNavController()
-  val navBackStackEntry by navController.currentBackStackEntryAsState()
-  val currentDestination = navBackStackEntry?.destination
+  val config = remember {
+    SavedStateConfiguration {
+      serializersModule = SerializersModule {
+        polymorphic(NavKey::class) { subclassesOfSealed<Screen>() }
+      }
+    }
+  }
+
+  val backStack = rememberNavBackStack(config, Screen.MainHome)
+  val navigator = remember { AppNavigator(backStack) }
+
+  val currentDestination = backStack.lastOrNull()
 
   val selectedDestination =
-    when {
-      currentDestination?.hasRoute(Screen.MainHome::class) == true -> MainDestination.Home
-      currentDestination?.hasRoute(Screen.MainSearch::class) == true -> MainDestination.Search
-      currentDestination?.hasRoute(Screen.MainBookmarks::class) == true -> MainDestination.Bookmarks
-      currentDestination?.hasRoute(Screen.MainSettings::class) == true -> MainDestination.Settings
-      currentDestination?.hasRoute(Screen.MainDiscovery::class) == true -> MainDestination.Discovery
+    when (currentDestination) {
+      is Screen.MainHome -> MainDestination.Home
+      is Screen.MainSearch -> MainDestination.Search
+      is Screen.MainBookmarks -> MainDestination.Bookmarks
+      is Screen.MainSettings -> MainDestination.Settings
+      is Screen.MainDiscovery -> MainDestination.Discovery
       else -> MainDestination.Home
     }
 
   LaunchedEffect(startTab) {
     if (startTab == Screen.Main.TAB_BOOKMARKS) {
-      navController.navigate(Screen.MainBookmarks) {
-        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-        launchSingleTop = true
-        restoreState = true
-      }
+      navigator.popUpTo(Screen.MainHome::class, inclusive = true)
+      navigator.navigate(Screen.MainBookmarks)
     }
   }
 
@@ -135,7 +142,7 @@ internal fun MainScreen(
         isSideNavigationExpanded = false
       }
       else -> {
-        navController.popBackStack<Screen.MainHome>(inclusive = false)
+        navigator.popUpTo(Screen.MainHome::class, inclusive = false)
       }
     }
   }
@@ -177,7 +184,7 @@ internal fun MainScreen(
 
   val goBackToHome = {
     if (selectedDestination != MainDestination.Home) {
-      navController.popBackStack<Screen.MainHome>(inclusive = false)
+      navigator.popUpTo(Screen.MainHome::class, inclusive = false)
     }
   }
 
@@ -204,10 +211,11 @@ internal fun MainScreen(
                 MainDestination.Discovery -> Screen.MainDiscovery
               }
 
-            navController.navigate(route) {
-              popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-              launchSingleTop = true
-              restoreState = true
+            // pop up to start destination, launch single top, restore state
+            // in navigation 3 with AppNavigator, we can simulate this:
+            navigator.popUpTo(Screen.MainHome::class, inclusive = false)
+            if (route != Screen.MainHome) {
+              navigator.navigate(route)
             }
           }
 
@@ -252,7 +260,7 @@ internal fun MainScreen(
         },
       ) {
         MainScreenContent(
-          navController = navController,
+          navigator = navigator,
           homeContent = { homeContent(openDrawer) },
           searchContent = { searchContent(goBackToHome) },
           bookmarksContent = { bookmarksContent(goBackToHome) },
@@ -271,7 +279,7 @@ internal fun MainScreen(
 
         Box(modifier = Modifier.weight(1f)) {
           MainScreenContent(
-            navController = navController,
+            navigator = navigator,
             homeContent = { homeContent(openDrawer) },
             searchContent = { searchContent(goBackToHome) },
             bookmarksContent = { bookmarksContent(goBackToHome) },
@@ -299,7 +307,7 @@ internal fun MainScreen(
         },
       ) {
         MainScreenContent(
-          navController = navController,
+          navigator = navigator,
           homeContent = { homeContent(openDrawer) },
           searchContent = { searchContent(goBackToHome) },
           bookmarksContent = { bookmarksContent(goBackToHome) },
@@ -313,18 +321,25 @@ internal fun MainScreen(
 
 @Composable
 private fun MainScreenContent(
-  navController: NavHostController,
+  navigator: AppNavigator,
   homeContent: @Composable () -> Unit,
   searchContent: @Composable () -> Unit,
   bookmarksContent: @Composable () -> Unit,
   settingsContent: @Composable () -> Unit,
   discoveryContent: @Composable () -> Unit,
 ) {
-  NavHost(navController = navController, startDestination = Screen.MainHome) {
-    composable<Screen.MainHome> { homeContent() }
-    composable<Screen.MainSearch> { searchContent() }
-    composable<Screen.MainBookmarks> { bookmarksContent() }
-    composable<Screen.MainSettings> { settingsContent() }
-    composable<Screen.MainDiscovery> { discoveryContent() }
-  }
+  val entryProvider =
+    entryProvider<NavKey> {
+      entry<Screen.MainHome> { homeContent() }
+      entry<Screen.MainSearch> { searchContent() }
+      entry<Screen.MainBookmarks> { bookmarksContent() }
+      entry<Screen.MainSettings> { settingsContent() }
+      entry<Screen.MainDiscovery> { discoveryContent() }
+    }
+
+  NavDisplay(
+    backStack = navigator.backStack,
+    entryProvider = entryProvider,
+    onBack = { navigator.goBack() },
+  )
 }
