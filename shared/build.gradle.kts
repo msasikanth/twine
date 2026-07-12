@@ -125,8 +125,8 @@ kotlin {
       implementation(libs.markdown.code)
       implementation(libs.viewmodel)
       implementation(libs.lifecycle.runtime.compose)
-      implementation(libs.navigation)
-      implementation(libs.navigation.event)
+      api(libs.jetbrains.navigation3.ui)
+      api(libs.jetbrains.lifecycle.viewmodelNavigation3)
       implementation(libs.material.kolor)
     }
     commonTest.dependencies {
