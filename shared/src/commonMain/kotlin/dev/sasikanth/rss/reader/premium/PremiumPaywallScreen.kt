@@ -76,6 +76,9 @@ import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.premiumPaywallBestValue
+import twine.shared.generated.resources.premiumPaywallBilledAnnually
+import twine.shared.generated.resources.premiumPaywallBilledMonthly
+import twine.shared.generated.resources.premiumPaywallCancelAnytime
 import twine.shared.generated.resources.premiumPaywallFeature1Desc
 import twine.shared.generated.resources.premiumPaywallFeature1Title
 import twine.shared.generated.resources.premiumPaywallFeature2Desc
@@ -85,6 +88,7 @@ import twine.shared.generated.resources.premiumPaywallFeature3Title
 import twine.shared.generated.resources.premiumPaywallFeature4Desc
 import twine.shared.generated.resources.premiumPaywallFeature4Title
 import twine.shared.generated.resources.premiumPaywallGetTwinePro
+import twine.shared.generated.resources.premiumPaywallPayOnce
 import twine.shared.generated.resources.premiumPaywallPrivacyPolicy
 import twine.shared.generated.resources.premiumPaywallRestorePurchase
 import twine.shared.generated.resources.premiumPaywallSubtitle
@@ -276,7 +280,17 @@ fun PremiumPaywallScreen(
           }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(8.dp))
+
+        Text(
+          text = stringResource(Res.string.premiumPaywallCancelAnytime),
+          style = MaterialTheme.typography.bodySmall,
+          color = AppTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.fillMaxWidth(),
+          textAlign = TextAlign.Center,
+        )
+
+        Spacer(Modifier.height(8.dp))
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
           TextButton(
@@ -379,6 +393,20 @@ private fun PackageCard(
           text = twinePackage.priceString,
           style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
           color = AppTheme.colorScheme.onSurface,
+          textAlign = TextAlign.Center,
+          maxLines = 1,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+          text =
+            when (twinePackage.packageType) {
+              PackageType.MONTHLY -> stringResource(Res.string.premiumPaywallBilledMonthly)
+              PackageType.ANNUAL -> stringResource(Res.string.premiumPaywallBilledAnnually)
+              PackageType.LIFETIME -> stringResource(Res.string.premiumPaywallPayOnce)
+              else -> ""
+            },
+          style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+          color = AppTheme.colorScheme.onSurfaceVariant,
           textAlign = TextAlign.Center,
           maxLines = 1,
         )
