@@ -69,7 +69,7 @@ class SettingsRepository(
   private val installDateKey = longPreferencesKey("install_date")
   private val userSessionCountKey = intPreferencesKey("user_session_count")
   private val appIconKey = stringPreferencesKey("app_icon")
-  private val isOnboardingDoneKey = booleanPreferencesKey("is_onboarding_done")
+  private val isOnboardingDoneKey = booleanPreferencesKey("is_onboarding_done_v2")
   private val discoveryFeedsLastFetchTimeKey = longPreferencesKey("discovery_feeds_last_fetch_time")
   private val discoveryFeedsCacheKey = stringPreferencesKey("discovery_feeds_cache")
   private val showPinnedSourcesKey = booleanPreferencesKey("show_pinned_sources")
