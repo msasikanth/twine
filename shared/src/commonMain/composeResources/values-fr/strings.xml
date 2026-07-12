@@ -388,4 +388,8 @@
   <string name="premiumPaywallPackageYearly">12 Months</string>
   <string name="premiumPaywallPackageLifetime">Lifetime</string>
   <string name="premiumPaywallBestValue">BEST VALUE</string>
+  <string name="premiumPaywallBilledMonthly">Billed monthly</string>
+  <string name="premiumPaywallBilledAnnually">Billed annually</string>
+  <string name="premiumPaywallPayOnce">Pay once</string>
+  <string name="premiumPaywallCancelAnytime">Cancel anytime. No commitment.</string>
 </resources>
