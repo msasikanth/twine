@@ -548,12 +548,9 @@ fun NavGraphBuilder.discoveryScreen(
       onDone = {
         if (isFromOnboarding) {
           viewModel.completeOnboarding()
+          navController.navigate(Screen.Main()) { popUpTo<Screen.Onboarding> { inclusive = true } }
           if (!state.isSubscribed) {
             navController.navigate(Screen.Paywall(isFromOnboarding = true))
-          } else {
-            navController.navigate(Screen.Main()) {
-              popUpTo<Screen.Onboarding> { inclusive = true }
-            }
           }
         } else {
           navController.popBackStack()
@@ -631,12 +628,7 @@ fun NavGraphBuilder.paywallScreen(
     LaunchedEffect(hasPremium) {
       if (hasPremium) {
         delay(1000.milliseconds)
-
-        if (isFromOnboarding) {
-          navController.navigate(Screen.Main()) { popUpTo<Screen.Onboarding> { inclusive = true } }
-        } else {
-          navController.popBackStack()
-        }
+        navController.popBackStack()
       }
     }
 
@@ -648,13 +640,7 @@ fun NavGraphBuilder.paywallScreen(
       isFromOnboarding = isFromOnboarding,
       onPurchase = viewModel::purchasePackage,
       onRestore = viewModel::restorePurchases,
-      goBack = {
-        if (isFromOnboarding) {
-          navController.navigate(Screen.Main()) { popUpTo<Screen.Onboarding> { inclusive = true } }
-        } else {
-          navController.popBackStack()
-        }
-      },
+      goBack = { navController.popBackStack() },
     )
   }
 }
