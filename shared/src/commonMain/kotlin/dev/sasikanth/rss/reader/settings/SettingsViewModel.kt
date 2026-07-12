@@ -259,6 +259,22 @@ class SettingsViewModel(
       SettingsEvent.MarkFreeFeedLimitWarningAsDone -> {
         _state.update { it.copy(showFreeFeedLimitWarning = false) }
       }
+      SettingsEvent.BlockedWordsClicked -> blockedWordsClicked()
+      SettingsEvent.ClearNavigateToBlockedWords -> {
+        _state.update { it.copy(navigateToBlockedWords = false) }
+      }
+    }
+  }
+
+  private fun blockedWordsClicked() {
+    viewModelScope.launch {
+      val isSubscribed = billingHandler.isSubscribed()
+
+      if (isSubscribed) {
+        _state.update { it.copy(navigateToBlockedWords = true) }
+      } else {
+        _state.update { it.copy(openPaywall = true) }
+      }
     }
   }
 

@@ -73,6 +73,7 @@ import dev.sasikanth.rss.reader.resources.icons.Palette
 import dev.sasikanth.rss.reader.resources.icons.StarShine
 import dev.sasikanth.rss.reader.resources.icons.Sync
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.VisibilityOff
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import org.jetbrains.compose.resources.stringResource
@@ -90,6 +91,8 @@ import twine.shared.generated.resources.premiumPaywallFeature3Desc
 import twine.shared.generated.resources.premiumPaywallFeature3Title
 import twine.shared.generated.resources.premiumPaywallFeature4Desc
 import twine.shared.generated.resources.premiumPaywallFeature4Title
+import twine.shared.generated.resources.premiumPaywallFeature5Desc
+import twine.shared.generated.resources.premiumPaywallFeature5Title
 import twine.shared.generated.resources.premiumPaywallGetTwinePro
 import twine.shared.generated.resources.premiumPaywallPayOnce
 import twine.shared.generated.resources.premiumPaywallPrivacyPolicy
@@ -229,6 +232,11 @@ fun PremiumPaywallScreen(
             icon = TwineIcons.LayoutSimple,
             title = stringResource(Res.string.premiumPaywallFeature4Title),
             description = stringResource(Res.string.premiumPaywallFeature4Desc),
+          )
+          FeatureItem(
+            icon = TwineIcons.VisibilityOff,
+            title = stringResource(Res.string.premiumPaywallFeature5Title),
+            description = stringResource(Res.string.premiumPaywallFeature5Desc),
           )
         }
 

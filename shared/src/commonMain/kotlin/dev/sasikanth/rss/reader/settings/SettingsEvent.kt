@@ -97,4 +97,8 @@ sealed interface SettingsEvent {
   data object ClearOpmlFeedsToSelect : SettingsEvent
 
   data object MarkFreeFeedLimitWarningAsDone : SettingsEvent
+
+  data object BlockedWordsClicked : SettingsEvent
+
+  data object ClearNavigateToBlockedWords : SettingsEvent
 }

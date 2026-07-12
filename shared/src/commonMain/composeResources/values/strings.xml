@@ -412,6 +412,8 @@
   <string name="premiumPaywallFeature3Desc">Keep Twine dynamic or stick to your favorite color palette.</string>
   <string name="premiumPaywallFeature4Title">Widgets</string>
   <string name="premiumPaywallFeature4Desc">Get access to powerful home screen widgets.</string>
+  <string name="premiumPaywallFeature5Title">Content Filtering</string>
+  <string name="premiumPaywallFeature5Desc">Mute keywords and hide posts you don\'t want to see.</string>
   <string name="premiumPaywallPrivacyPolicy">Privacy policy</string>
   <string name="premiumPaywallTermsOfService">Terms of service</string>
   <string name="premiumPaywallRestorePurchase">Restore purchase</string>

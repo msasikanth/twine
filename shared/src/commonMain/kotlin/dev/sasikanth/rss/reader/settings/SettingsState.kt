@@ -68,10 +68,14 @@ data class SettingsState(
   val opmlFeedsToSelect: List<OpmlFeed>?,
   val showFreeFeedLimitWarning: Boolean,
   val blockedWordsCount: Int,
+  val navigateToBlockedWords: Boolean,
 ) {
 
   val isSubscribed: Boolean
     get() = subscriptionResult == SubscriptionResult.Subscribed
+
+  val hasContentFilteringAccess: Boolean
+    get() = isSubscribed
 
   sealed interface SyncProgress {
     data object Idle : SyncProgress
@@ -121,6 +125,7 @@ data class SettingsState(
         opmlFeedsToSelect = null,
         showFreeFeedLimitWarning = false,
         blockedWordsCount = 0,
+        navigateToBlockedWords = false,
       )
   }
 }

@@ -101,6 +101,13 @@ internal fun SettingsBehaviorScreen(
     }
   }
 
+  LaunchedEffect(state.navigateToBlockedWords) {
+    if (state.navigateToBlockedWords) {
+      openBlockedWords()
+      viewModel.dispatch(SettingsEvent.ClearNavigateToBlockedWords)
+    }
+  }
+
   SettingsBehaviorContent(
     state = state,
     dispatch = viewModel::dispatch,
@@ -239,7 +246,7 @@ private fun SettingsBehaviorContent(
 
         item {
           BlockedWordsSettingItem(blockedWordsCount = state.blockedWordsCount) {
-            openBlockedWords()
+            dispatch(SettingsEvent.BlockedWordsClicked)
           }
         }
       }
