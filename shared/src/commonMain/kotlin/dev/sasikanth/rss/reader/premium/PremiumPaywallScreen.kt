@@ -227,7 +227,8 @@ fun PremiumPaywallScreen(
           Modifier.align(Alignment.BottomCenter)
             .fillMaxWidth()
             .background(AppTheme.colorScheme.surface)
-            .padding(horizontal = 24.dp, vertical = 24.dp)
+            .padding(horizontal = 24.dp)
+            .padding(top = 24.dp, bottom = 8.dp)
       ) {
         // Packages
         if (packages.isEmpty()) {
