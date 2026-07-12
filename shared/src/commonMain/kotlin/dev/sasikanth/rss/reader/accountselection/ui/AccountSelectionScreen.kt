@@ -51,10 +51,12 @@ import dev.sasikanth.rss.reader.accountselection.AccountSelectionEffect
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionEvent
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionState
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionViewModel
+import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Dropbox
 import dev.sasikanth.rss.reader.resources.icons.Freshrss
 import dev.sasikanth.rss.reader.resources.icons.Home
@@ -69,6 +71,7 @@ import twine.shared.generated.resources.accountSelectionLocal
 import twine.shared.generated.resources.accountSelectionLocalAccount
 import twine.shared.generated.resources.accountSelectionSubtitle
 import twine.shared.generated.resources.accountSelectionTitle
+import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.settingsSyncDropbox
 import twine.shared.generated.resources.settingsSyncFreshRSS
 import twine.shared.generated.resources.settingsSyncMiniflux
@@ -81,6 +84,7 @@ internal fun AccountSelectionScreen(
   openPaywall: () -> Unit,
   openFreshRssLogin: () -> Unit,
   openMinifluxLogin: () -> Unit,
+  goBack: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -118,6 +122,7 @@ internal fun AccountSelectionScreen(
     state = state,
     availableProviders = viewModel.availableProviders,
     dispatch = viewModel::dispatch,
+    goBack = goBack,
     modifier = modifier,
   )
 }
@@ -127,6 +132,7 @@ private fun AccountSelectionContent(
   state: AccountSelectionState,
   availableProviders: Set<CloudServiceProvider>,
   dispatch: (AccountSelectionEvent) -> Unit,
+  goBack: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Scaffold(
@@ -135,6 +141,13 @@ private fun AccountSelectionContent(
     contentColor = Color.Unspecified,
     topBar = {
       Column(modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(vertical = 16.dp)) {
+        CircularIconButton(
+          modifier = Modifier.padding(start = 12.dp, bottom = 16.dp),
+          icon = TwineIcons.ArrowBack,
+          label = stringResource(Res.string.buttonGoBack),
+          onClick = goBack,
+        )
+
         Text(
           modifier = Modifier.padding(horizontal = 24.dp),
           text = stringResource(Res.string.accountSelectionTitle),
@@ -250,6 +263,7 @@ private fun AccountSelectionPreview() {
       state = AccountSelectionState.DEFAULT,
       availableProviders = emptySet(),
       dispatch = {},
+      goBack = {},
     )
   }
 }

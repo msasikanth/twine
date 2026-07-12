@@ -132,16 +132,8 @@ fun NavGraphBuilder.onboardingScreen(
       onOnboardingDone = {
         navController.navigate(Screen.Main()) { popUpTo<Screen.Onboarding> { inclusive = true } }
       },
-      onNavigateToDiscovery = {
-        navController.navigate(Screen.Discovery(isFromOnboarding = true)) {
-          popUpTo<Screen.Onboarding> { inclusive = true }
-        }
-      },
-      onNavigateToAccountSelection = {
-        navController.navigate(Screen.AccountSelection) {
-          popUpTo<Screen.Onboarding> { inclusive = true }
-        }
-      },
+      onNavigateToDiscovery = { navController.navigate(Screen.Discovery(isFromOnboarding = true)) },
+      onNavigateToAccountSelection = { navController.navigate(Screen.AccountSelection) },
     )
   }
 }
@@ -162,14 +154,11 @@ fun NavGraphBuilder.accountSelectionScreen(
           popUpTo<Screen.AccountSelection> { inclusive = true }
         }
       },
-      onNavigateToDiscovery = {
-        navController.navigate(Screen.Discovery(isFromOnboarding = true)) {
-          popUpTo<Screen.AccountSelection> { inclusive = true }
-        }
-      },
-      openPaywall = { navController.navigate(Screen.Paywall) },
+      onNavigateToDiscovery = { navController.navigate(Screen.Discovery(isFromOnboarding = true)) },
+      openPaywall = { navController.navigate(Screen.Paywall()) },
       openFreshRssLogin = { navController.navigate(Screen.FreshRssLogin) },
       openMinifluxLogin = { navController.navigate(Screen.MinifluxLogin) },
+      goBack = { navController.popBackStack() },
     )
   }
 }
@@ -299,7 +288,7 @@ fun NavGraphBuilder.mainScreen(
           openServicesSettings = { navController.navigate(Screen.SettingsServices) },
           openDataSettings = { navController.navigate(Screen.SettingsData) },
           openAppInfoSettings = { navController.navigate(Screen.SettingsAppInfo) },
-          openPaywall = { navController.navigate(Screen.Paywall) },
+          openPaywall = { navController.navigate(Screen.Paywall()) },
           modifier = screenModifier,
         )
       },
@@ -317,7 +306,7 @@ fun NavGraphBuilder.mainScreen(
       openGroupScreen = { groupId -> navController.navigate(Screen.FeedGroup(groupId)) },
       openGroupSelectionSheet = { feedsViewModel.dispatch(FeedsEvent.OnAddToGroupClicked) },
       openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
-      openPaywall = { navController.navigate(Screen.Paywall) },
+      openPaywall = { navController.navigate(Screen.Paywall()) },
       openFeedHealth = { navController.navigate(Screen.FeedHealth) },
       canHandleBack = isMainActive,
     )
@@ -335,7 +324,7 @@ fun NavGraphBuilder.settingsAppearanceScreen(
       modifier = modifier,
       viewModel = viewModel,
       goBack = { navController.popBackStack() },
-      openPaywall = { navController.navigate(Screen.Paywall) },
+      openPaywall = { navController.navigate(Screen.Paywall()) },
     )
   }
 }
@@ -367,7 +356,7 @@ fun NavGraphBuilder.settingsServicesScreen(
       modifier = modifier,
       viewModel = viewModel,
       goBack = { navController.popBackStack() },
-      openPaywall = { navController.navigate(Screen.Paywall) },
+      openPaywall = { navController.navigate(Screen.Paywall()) },
       openFreshRssLogin = { navController.navigate(Screen.FreshRssLogin) },
       openMinifluxLogin = { navController.navigate(Screen.MinifluxLogin) },
     )
@@ -489,7 +478,7 @@ fun NavGraphBuilder.readerScreen(
       viewModel = viewModel,
       pageViewModelFactory = { post -> viewModel(key = post.id) { readerPageViewModel(post) } },
       onBack = { navController.popBackStack() },
-      openPaywall = { navController.navigate(Screen.Paywall) },
+      openPaywall = { navController.navigate(Screen.Paywall()) },
       onImageClick = { imageUrl -> navController.navigate(Screen.ImageViewer(imageUrl)) },
       toggleLightStatusBar = toggleLightStatusBar,
       toggleLightNavBar = toggleLightNavBar,
@@ -555,7 +544,8 @@ fun NavGraphBuilder.discoveryScreen(
       showDoneButton = isFromOnboarding,
       onDone = {
         if (isFromOnboarding) {
-          navController.navigate(Screen.Main()) { popUpTo<Screen.Discovery> { inclusive = true } }
+          viewModel.completeOnboarding()
+          navController.navigate(Screen.Paywall(isFromOnboarding = true))
         } else {
           navController.popBackStack()
         }
@@ -625,11 +615,24 @@ fun NavGraphBuilder.paywallScreen(
   composable<Screen.Paywall> {
     val viewModel = viewModel { premiumPaywallViewModel() }
     val hasPremium by viewModel.hasPremium.collectAsStateWithLifecycle()
+    val packages by viewModel.packages.collectAsStateWithLifecycle()
+    val inProgress by viewModel.inProgress.collectAsStateWithLifecycle()
+    val isFromOnboarding = it.toRoute<Screen.Paywall>().isFromOnboarding
 
     PremiumPaywallScreen(
       modifier = modifier,
+      packages = packages,
+      inProgress = inProgress,
       hasPremium = hasPremium,
-      goBack = { navController.popBackStack() },
+      onPurchase = viewModel::purchasePackage,
+      onRestore = viewModel::restorePurchases,
+      goBack = {
+        if (isFromOnboarding) {
+          navController.navigate(Screen.Main()) { popUpTo<Screen.Onboarding> { inclusive = true } }
+        } else {
+          navController.popBackStack()
+        }
+      },
     )
   }
 }

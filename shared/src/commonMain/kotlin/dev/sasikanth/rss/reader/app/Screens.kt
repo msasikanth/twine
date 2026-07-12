@@ -85,7 +85,7 @@ sealed interface Screen {
 
   @Serializable data object MinifluxLogin : Screen
 
-  @Serializable data object Paywall : Screen
+  @Serializable data class Paywall(val isFromOnboarding: Boolean = false) : Screen
 
   @Serializable data class ImageViewer(val imageUrl: String) : Screen
 

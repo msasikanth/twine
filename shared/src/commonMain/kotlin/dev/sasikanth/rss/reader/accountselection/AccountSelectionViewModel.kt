@@ -92,10 +92,7 @@ class AccountSelectionViewModel(
   }
 
   private fun localAccountClicked() {
-    viewModelScope.launch {
-      settingsRepository.completeOnboarding()
-      _effects.emit(AccountSelectionEffect.NavigateToDiscovery)
-    }
+    viewModelScope.launch { _effects.emit(AccountSelectionEffect.NavigateToDiscovery) }
   }
 
   private fun cloudServiceClicked(provider: CloudServiceProvider) {
