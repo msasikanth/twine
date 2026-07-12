@@ -20,6 +20,7 @@ package dev.sasikanth.rss.reader.discovery
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.model.DiscoveryFeed
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
@@ -44,6 +45,7 @@ class DiscoveryViewModel(
   private val feedFetcher: FeedFetcher,
   private val settingsRepository: SettingsRepository,
   private val dispatchersProvider: DispatchersProvider,
+  private val billingHandler: BillingHandler,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow(DiscoveryState.DEFAULT)
@@ -51,6 +53,11 @@ class DiscoveryViewModel(
 
   init {
     dispatch(DiscoveryEvent.LoadDiscoveryGroups)
+
+    viewModelScope.launch {
+      val isSubscribed = billingHandler.isSubscribed()
+      _state.update { it.copy(isSubscribed = isSubscribed) }
+    }
 
     rssRepository
       .allFeeds()

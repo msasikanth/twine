@@ -32,6 +32,7 @@ data class DiscoveryState(
   val addedFeedLinks: Set<String>,
   val inProgressFeedLinks: Set<String>,
   val selectedFeed: DiscoveryFeed?,
+  val isSubscribed: Boolean,
 ) {
   companion object {
     val DEFAULT =
@@ -42,6 +43,7 @@ data class DiscoveryState(
         addedFeedLinks = emptySet(),
         inProgressFeedLinks = emptySet(),
         selectedFeed = null,
+        isSubscribed = false,
       )
   }
 
