@@ -46,7 +46,11 @@ actual class BillingHandler(
   private val purchases by lazy { Purchases.sharedInstance }
 
   actual suspend fun isSubscribed(): Boolean {
-    return false
+    return if (!appInfo.isDebugBuild) {
+      customerResult() is SubscriptionResult.Subscribed
+    } else {
+      true
+    }
   }
 
   actual suspend fun canSubscribe(): Boolean {

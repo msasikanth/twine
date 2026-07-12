@@ -89,6 +89,8 @@ import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsServicesScreen
 import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
 import kotlin.reflect.typeOf
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
@@ -619,11 +621,24 @@ fun NavGraphBuilder.paywallScreen(
     val inProgress by viewModel.inProgress.collectAsStateWithLifecycle()
     val isFromOnboarding = it.toRoute<Screen.Paywall>().isFromOnboarding
 
+    LaunchedEffect(hasPremium) {
+      if (hasPremium) {
+        delay(1000.milliseconds)
+
+        if (isFromOnboarding) {
+          navController.navigate(Screen.Main()) { popUpTo<Screen.Onboarding> { inclusive = true } }
+        } else {
+          navController.popBackStack()
+        }
+      }
+    }
+
     PremiumPaywallScreen(
       modifier = modifier,
       packages = packages,
       inProgress = inProgress,
       hasPremium = hasPremium,
+      isFromOnboarding = isFromOnboarding,
       onPurchase = viewModel::purchasePackage,
       onRestore = viewModel::restorePurchases,
       goBack = {

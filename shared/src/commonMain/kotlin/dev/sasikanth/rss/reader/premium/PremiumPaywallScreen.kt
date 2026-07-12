@@ -53,6 +53,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
@@ -65,6 +66,7 @@ import dev.sasikanth.rss.reader.billing.PackageType
 import dev.sasikanth.rss.reader.billing.TwinePackage
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
+import dev.sasikanth.rss.reader.resources.icons.Close
 import dev.sasikanth.rss.reader.resources.icons.FormatLineSpacing
 import dev.sasikanth.rss.reader.resources.icons.LayoutSimple
 import dev.sasikanth.rss.reader.resources.icons.Palette
@@ -101,6 +103,7 @@ fun PremiumPaywallScreen(
   packages: List<TwinePackage>,
   inProgress: Boolean,
   hasPremium: Boolean,
+  isFromOnboarding: Boolean = false,
   onPurchase: (String) -> Unit,
   onRestore: () -> Unit,
   goBack: () -> Unit,
@@ -128,19 +131,28 @@ fun PremiumPaywallScreen(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
+        val icon =
+          if (isFromOnboarding) {
+            TwineIcons.Close
+          } else {
+            TwineIcons.ArrowBack
+          }
+
         CircularIconButton(
           modifier = Modifier.padding(start = 12.dp),
-          icon = TwineIcons.ArrowBack,
+          icon = icon,
           label = stringResource(Res.string.buttonGoBack),
           onClick = goBack,
         )
 
-        TextButton(onClick = onRestore, enabled = !inProgress) {
-          Text(
-            text = stringResource(Res.string.premiumPaywallRestorePurchase),
-            style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.primary,
-          )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          TextButton(onClick = onRestore, enabled = !inProgress) {
+            Text(
+              text = stringResource(Res.string.premiumPaywallRestorePurchase),
+              style = MaterialTheme.typography.labelLarge,
+              color = AppTheme.colorScheme.primary,
+            )
+          }
         }
       }
     },
@@ -222,98 +234,111 @@ fun PremiumPaywallScreen(
       }
 
       // Bottom Sticky Section
-      Column(
-        modifier =
-          Modifier.align(Alignment.BottomCenter)
-            .fillMaxWidth()
-            .background(AppTheme.colorScheme.surface)
-            .padding(horizontal = 24.dp, vertical = 24.dp)
-      ) {
-        // Packages
-        if (packages.isEmpty()) {
-          Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = AppTheme.colorScheme.primary)
+      Column(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
+        Box(
+          modifier =
+            Modifier.fillMaxWidth()
+              .height(40.dp)
+              .background(
+                Brush.verticalGradient(
+                  colors = listOf(Color.Transparent, AppTheme.colorScheme.surface)
+                )
+              )
+        )
+
+        Column(
+          modifier =
+            Modifier.fillMaxWidth()
+              .background(AppTheme.colorScheme.surface)
+              .padding(horizontal = 24.dp)
+              .padding(bottom = 24.dp)
+        ) {
+          // Packages
+          if (packages.isEmpty()) {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+              CircularProgressIndicator(color = AppTheme.colorScheme.primary)
+            }
+          } else {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+              packages.forEach { twinePackage ->
+                val isSelected = twinePackage.id == selectedPackageId
+                PackageCard(
+                  twinePackage = twinePackage,
+                  isSelected = isSelected,
+                  modifier = Modifier.weight(1f),
+                  onClick = { selectedPackageId = twinePackage.id },
+                )
+              }
+            }
           }
-        } else {
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+
+          Spacer(Modifier.height(24.dp))
+
+          Button(
+            onClick = { selectedPackageId?.let { onPurchase(it) } },
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors =
+              ButtonDefaults.buttonColors(
+                containerColor = AppTheme.colorScheme.primary,
+                contentColor = AppTheme.colorScheme.onPrimary,
+              ),
+            enabled = !inProgress && selectedPackageId != null,
           ) {
-            packages.forEach { twinePackage ->
-              val isSelected = twinePackage.id == selectedPackageId
-              PackageCard(
-                twinePackage = twinePackage,
-                isSelected = isSelected,
-                modifier = Modifier.weight(1f),
-                onClick = { selectedPackageId = twinePackage.id },
+            if (inProgress) {
+              CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                color = AppTheme.colorScheme.onPrimary,
+                strokeWidth = 2.dp,
+              )
+            } else {
+              Text(
+                text =
+                  if (hasPremium) stringResource(Res.string.premiumPaywallYouArePro)
+                  else stringResource(Res.string.premiumPaywallGetTwinePro),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
               )
             }
           }
-        }
 
-        Spacer(Modifier.height(24.dp))
+          Spacer(Modifier.height(8.dp))
 
-        Button(
-          onClick = { selectedPackageId?.let { onPurchase(it) } },
-          modifier = Modifier.fillMaxWidth().height(56.dp),
-          shape = RoundedCornerShape(16.dp),
-          colors =
-            ButtonDefaults.buttonColors(
-              containerColor = AppTheme.colorScheme.primary,
-              contentColor = AppTheme.colorScheme.onPrimary,
-            ),
-          enabled = !inProgress && selectedPackageId != null,
-        ) {
-          if (inProgress) {
-            CircularProgressIndicator(
-              modifier = Modifier.size(24.dp),
-              color = AppTheme.colorScheme.onPrimary,
-              strokeWidth = 2.dp,
-            )
-          } else {
-            Text(
-              text =
-                if (hasPremium) stringResource(Res.string.premiumPaywallYouArePro)
-                else stringResource(Res.string.premiumPaywallGetTwinePro),
-              style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            )
-          }
-        }
+          Text(
+            text = stringResource(Res.string.premiumPaywallCancelAnytime),
+            style = MaterialTheme.typography.bodySmall,
+            color = AppTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+          )
 
-        Spacer(Modifier.height(8.dp))
+          Spacer(Modifier.height(8.dp))
 
-        Text(
-          text = stringResource(Res.string.premiumPaywallCancelAnytime),
-          style = MaterialTheme.typography.bodySmall,
-          color = AppTheme.colorScheme.onSurfaceVariant,
-          modifier = Modifier.fillMaxWidth(),
-          textAlign = TextAlign.Center,
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-          TextButton(
-            colors = ButtonDefaults.textButtonColors(contentColor = AppTheme.colorScheme.primary),
-            onClick = { uriHandler.openUri("https://www.sasikanth.dev/reader-privacy-policy/") },
-          ) {
-            Text(
-              stringResource(Res.string.premiumPaywallPrivacyPolicy),
-              style = MaterialTheme.typography.labelMedium,
-            )
-          }
-          TextButton(
-            colors = ButtonDefaults.textButtonColors(contentColor = AppTheme.colorScheme.primary),
-            onClick = {
-              uriHandler.openUri(
-                "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+          Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            TextButton(
+              colors = ButtonDefaults.textButtonColors(contentColor = AppTheme.colorScheme.primary),
+              onClick = { uriHandler.openUri("https://www.sasikanth.dev/reader-privacy-policy/") },
+            ) {
+              Text(
+                stringResource(Res.string.premiumPaywallPrivacyPolicy),
+                style = MaterialTheme.typography.labelMedium,
               )
-            },
-          ) {
-            Text(
-              stringResource(Res.string.premiumPaywallTermsOfService),
-              style = MaterialTheme.typography.labelMedium,
-            )
+            }
+            TextButton(
+              colors = ButtonDefaults.textButtonColors(contentColor = AppTheme.colorScheme.primary),
+              onClick = {
+                uriHandler.openUri(
+                  "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+                )
+              },
+            ) {
+              Text(
+                stringResource(Res.string.premiumPaywallTermsOfService),
+                style = MaterialTheme.typography.labelMedium,
+              )
+            }
           }
         }
       }
