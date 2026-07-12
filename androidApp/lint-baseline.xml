@@ -1,0 +1,667 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 9.2.1" type="baseline" client="gradle" dependencies="false" name="AGP (9.2.1)" variant="all" version="9.2.1">
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 33 (current min is 26): `android.Manifest.permission#POST_NOTIFICATIONS`"
+        errorLine1="            shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)"
+        errorLine2="                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/sasikanth/rss/reader/MainActivity.kt"
+            line="50"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 33 (current min is 26): `android.Manifest.permission#POST_NOTIFICATIONS`"
+        errorLine1="      permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)"
+        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/sasikanth/rss/reader/MainActivity.kt"
+            line="69"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        message="A newer version of Gradle than 9.4.1 is available: 9.6.1"
+        errorLine1="distributionUrl=https\://services.gradle.org/distributions/gradle-9.4.1-bin.zip"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="$HOME/Projects/twine/gradle/wrapper/gradle-wrapper.properties"
+            line="20"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-collections-immutable than 0.5.0 is available: 0.5.1"
+        errorLine1="kotlinx_immutable_collections = &quot;0.5.0&quot;"
+        errorLine2="                                ~~~~~~~">
+        <location
+            file="$HOME/Projects/twine/gradle/libs.versions.toml"
+            line="16"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.diffplug.spotless than 8.7.0 is available: 8.8.0"
+        errorLine1="spotless = &quot;8.7.0&quot;"
+        errorLine2="           ~~~~~~~">
+        <location
+            file="$HOME/Projects/twine/gradle/libs.versions.toml"
+            line="30"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of io.github.pdvrieze.xmlutil:core than 0.91.3 is available: 1.0.1"
+        errorLine1="xmlutil = &quot;0.91.3&quot;"
+        errorLine2="          ~~~~~~~~">
+        <location
+            file="$HOME/Projects/twine/gradle/libs.versions.toml"
+            line="40"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of io.github.pdvrieze.xmlutil:serialization than 0.91.3 is available: 1.0.1"
+        errorLine1="xmlutil = &quot;0.91.3&quot;"
+        errorLine2="          ~~~~~~~~">
+        <location
+            file="$HOME/Projects/twine/gradle/libs.versions.toml"
+            line="40"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of io.github.vinceglb:filekit-core than 0.8.8 is available: 0.14.2"
+        errorLine1="filekit = &quot;0.8.8&quot;"
+        errorLine2="          ~~~~~~~">
+        <location
+            file="$HOME/Projects/twine/gradle/libs.versions.toml"
+            line="50"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.revenuecat.purchases:purchases-kmp-core than 3.1.0 is available: 3.2.1"
+        errorLine1="revenuecat = &quot;3.1.0&quot;"
+        errorLine2="             ~~~~~~~">
+        <location
+            file="$HOME/Projects/twine/gradle/libs.versions.toml"
+            line="53"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.revenuecat.purchases:purchases-kmp-ui than 3.1.0 is available: 3.2.1"
+        errorLine1="revenuecat = &quot;3.1.0&quot;"
+        errorLine2="             ~~~~~~~">
+        <location
+            file="$HOME/Projects/twine/gradle/libs.versions.toml"
+            line="53"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.github.skydoves:landscapist-coil3 than 2.10.0 is available: 2.11.0"
+        errorLine1="landscapist = &quot;2.10.0&quot;"
+        errorLine2="              ~~~~~~~~">
+        <location
+            file="$HOME/Projects/twine/gradle/libs.versions.toml"
+            line="54"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.github.skydoves:landscapist-image than 2.10.0 is available: 2.11.0"
+        errorLine1="landscapist = &quot;2.10.0&quot;"
+        errorLine2="              ~~~~~~~~">
+        <location
+            file="$HOME/Projects/twine/gradle/libs.versions.toml"
+            line="54"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.github.skydoves:landscapist-zoomable than 2.10.0 is available: 2.11.0"
+        errorLine1="landscapist = &quot;2.10.0&quot;"
+        errorLine2="              ~~~~~~~~">
+        <location
+            file="$HOME/Projects/twine/gradle/libs.versions.toml"
+            line="54"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="MissingQuantity"
+        message="For locale &quot;fr&quot; (French) the following quantity should also be defined: `many` (e.g. &quot;1000000 de jours&quot;)"
+        errorLine1="    &lt;plurals name=&quot;notification_new_articles_title&quot;>"
+        errorLine2="    ^">
+        <location
+            file="src/main/res/values-fr/strings.xml"
+            line="22"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;unit_seconds&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;unit_seconds&quot;>&amp;lt;1m&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="31"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;unit_minutes&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;unit_minutes&quot;>%1$dm&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="32"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;unit_hours&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;unit_hours&quot;>%1$dh&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="33"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;unit_days&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;unit_days&quot;>%1$dd&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="34"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;month_jan&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;month_jan&quot;>Jan&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="36"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;month_feb&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;month_feb&quot;>Feb&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="37"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;month_mar&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;month_mar&quot;>Mar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="38"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;month_apr&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;month_apr&quot;>Apr&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="39"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;month_may&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;month_may&quot;>May&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="40"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;month_jun&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;month_jun&quot;>Jun&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="41"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;month_jul&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;month_jul&quot;>Jul&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="42"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;month_aug&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;month_aug&quot;>Aug&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="43"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;month_sep&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;month_sep&quot;>Sep&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="44"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;month_oct&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;month_oct&quot;>Oct&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="45"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;month_nov&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;month_nov&quot;>Nov&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="46"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;month_dec&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;month_dec&quot;>Dec&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="47"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;notification_new_articles_per_feed_title&quot; is not translated in &quot;de&quot; (German), &quot;hi&quot; (Hindi), &quot;ru&quot; (Russian), &quot;fr&quot; (French), &quot;tr&quot; (Turkish), &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;plurals name=&quot;notification_new_articles_per_feed_title&quot;>"
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="53"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="Untranslatable"
+        message="The resource string &quot;widget_required_premium&quot; has been marked as translatable=&quot;false&quot; elsewhere (usually in the `values` folder), but is translated to &quot;de&quot; (German) here"
+        errorLine1="    &lt;string name=&quot;widget_required_premium&quot;>Widgets are only available for premium users. Please subscribe in the app.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-de/strings.xml"
+            line="20"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Untranslatable"
+        message="The resource string &quot;widget_required_premium&quot; has been marked as translatable=&quot;false&quot; elsewhere (usually in the `values` folder), but is translated to &quot;fr&quot; (French) here"
+        errorLine1="    &lt;string name=&quot;widget_required_premium&quot;>Widgets are only available for premium users. Please subscribe in the app.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-fr/strings.xml"
+            line="20"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Untranslatable"
+        message="The resource string &quot;widget_required_premium&quot; has been marked as translatable=&quot;false&quot; elsewhere (usually in the `values` folder), but is translated to &quot;hi&quot; (Hindi) here"
+        errorLine1="    &lt;string name=&quot;widget_required_premium&quot;>Widgets are only available for premium users. Please subscribe in the app.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-hi/strings.xml"
+            line="20"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Untranslatable"
+        message="The resource string &quot;widget_required_premium&quot; has been marked as translatable=&quot;false&quot; elsewhere (usually in the `values` folder), but is translated to &quot;ru&quot; (Russian) here"
+        errorLine1="    &lt;string name=&quot;widget_required_premium&quot;>Виджеты доступны только для премиум-пользователей. Пожалуйста, подпишитесь в приложении.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-ru/strings.xml"
+            line="20"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Untranslatable"
+        message="The resource string &quot;widget_required_premium&quot; has been marked as translatable=&quot;false&quot; elsewhere (usually in the `values` folder), but is translated to &quot;tr&quot; (Turkish) here"
+        errorLine1="    &lt;string name=&quot;widget_required_premium&quot;>Widget\&apos;lar sadece premium kullanıcılar için kullanılabilir. Lütfen uygulama içinden abone olun.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-tr/strings.xml"
+            line="20"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Untranslatable"
+        message="The resource string &quot;widget_required_premium&quot; has been marked as translatable=&quot;false&quot; elsewhere (usually in the `values` folder), but is translated to &quot;zh&quot; (Chinese) here"
+        errorLine1="    &lt;string name=&quot;widget_required_premium&quot;>微件仅面向高级版用户。请在应用内订阅。&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-zh/strings.xml"
+            line="20"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Untranslatable"
+        message="The resource string &quot;widget_no_posts&quot; has been marked as translatable=&quot;false&quot; elsewhere (usually in the `values` folder), but is translated to &quot;de&quot; (German) here"
+        errorLine1="    &lt;string name=&quot;widget_no_posts&quot;>No posts&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-de/strings.xml"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Untranslatable"
+        message="The resource string &quot;widget_no_posts&quot; has been marked as translatable=&quot;false&quot; elsewhere (usually in the `values` folder), but is translated to &quot;fr&quot; (French) here"
+        errorLine1="    &lt;string name=&quot;widget_no_posts&quot;>No posts&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-fr/strings.xml"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Untranslatable"
+        message="The resource string &quot;widget_no_posts&quot; has been marked as translatable=&quot;false&quot; elsewhere (usually in the `values` folder), but is translated to &quot;hi&quot; (Hindi) here"
+        errorLine1="    &lt;string name=&quot;widget_no_posts&quot;>No posts&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-hi/strings.xml"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Untranslatable"
+        message="The resource string &quot;widget_no_posts&quot; has been marked as translatable=&quot;false&quot; elsewhere (usually in the `values` folder), but is translated to &quot;ru&quot; (Russian) here"
+        errorLine1="    &lt;string name=&quot;widget_no_posts&quot;>Постов нет&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-ru/strings.xml"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Untranslatable"
+        message="The resource string &quot;widget_no_posts&quot; has been marked as translatable=&quot;false&quot; elsewhere (usually in the `values` folder), but is translated to &quot;tr&quot; (Turkish) here"
+        errorLine1="    &lt;string name=&quot;widget_no_posts&quot;>Gönderi yok&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-tr/strings.xml"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Untranslatable"
+        message="The resource string &quot;widget_no_posts&quot; has been marked as translatable=&quot;false&quot; elsewhere (usually in the `values` folder), but is translated to &quot;zh&quot; (Chinese) here"
+        errorLine1="    &lt;string name=&quot;widget_no_posts&quot;>没有文章&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-zh/strings.xml"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ImpliedQuantity"
+        message="The quantity `&apos;one&apos;` matches more than one specific number in this locale (0, 1), but the message did not include a formatting argument (such as `%d`). This is usually an internationalization error. See full issue explanation for more."
+        errorLine1="        &lt;item quantity=&quot;one&quot;>Vous avez un article non lu aujourd\&apos;hui&lt;/item>"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-fr/strings.xml"
+            line="23"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 26. Merge all the resources in this folder into `drawable`.">
+        <location
+            file="src/main/res/drawable-v26"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 26. Merge all the resources in this folder into `mipmap-anydpi`.">
+        <location
+            file="src/main/res/mipmap-anydpi-v26"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.ic_launcher_background` appears to be unused"
+        errorLine1="    &lt;color name=&quot;ic_launcher_background&quot;>#212121&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="20"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.ic_add` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/ic_add.xml"
+            line="18"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.ic_unread_tick` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/ic_unread_tick.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.month_jan` appears to be unused"
+        errorLine1="    &lt;string name=&quot;month_jan&quot;>Jan&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="36"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.month_feb` appears to be unused"
+        errorLine1="    &lt;string name=&quot;month_feb&quot;>Feb&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="37"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.month_mar` appears to be unused"
+        errorLine1="    &lt;string name=&quot;month_mar&quot;>Mar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="38"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.month_apr` appears to be unused"
+        errorLine1="    &lt;string name=&quot;month_apr&quot;>Apr&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="39"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.month_may` appears to be unused"
+        errorLine1="    &lt;string name=&quot;month_may&quot;>May&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="40"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.month_jun` appears to be unused"
+        errorLine1="    &lt;string name=&quot;month_jun&quot;>Jun&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="41"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.month_jul` appears to be unused"
+        errorLine1="    &lt;string name=&quot;month_jul&quot;>Jul&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="42"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.month_aug` appears to be unused"
+        errorLine1="    &lt;string name=&quot;month_aug&quot;>Aug&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="43"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.month_sep` appears to be unused"
+        errorLine1="    &lt;string name=&quot;month_sep&quot;>Sep&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="44"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.month_oct` appears to be unused"
+        errorLine1="    &lt;string name=&quot;month_oct&quot;>Oct&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="45"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.month_nov` appears to be unused"
+        errorLine1="    &lt;string name=&quot;month_nov&quot;>Nov&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="46"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.month_dec` appears to be unused"
+        errorLine1="    &lt;string name=&quot;month_dec&quot;>Dec&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="47"
+            column="13"/>
+    </issue>
+
+</issues>
