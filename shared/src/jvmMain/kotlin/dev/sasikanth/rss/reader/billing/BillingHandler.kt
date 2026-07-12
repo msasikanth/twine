@@ -29,4 +29,16 @@ actual class BillingHandler {
   actual suspend fun customerResult(): SubscriptionResult {
     return SubscriptionResult.Subscribed
   }
+
+  actual suspend fun getPackages(): List<TwinePackage> {
+    return emptyList()
+  }
+
+  actual suspend fun purchasePackage(packageId: String): SubscriptionResult {
+    return SubscriptionResult.Subscribed
+  }
+
+  actual suspend fun restorePurchases(): SubscriptionResult {
+    return SubscriptionResult.Subscribed
+  }
 }

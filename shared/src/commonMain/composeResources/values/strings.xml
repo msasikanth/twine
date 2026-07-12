@@ -406,7 +406,7 @@
   <string name="premiumPaywallTitle">Unlock Twine Pro</string>
   <string name="premiumPaywallSubtitle">Get access to all premium features and support the development of Twine.</string>
   <string name="premiumPaywallFeature1Title">Unlimited feeds</string>
-  <string name="premiumPaywallFeature1Desc">Add more than 30 feeds, and enable OPML importing.</string>
+  <string name="premiumPaywallFeature1Desc">Add more than %1$d feeds, and enable OPML importing.</string>
   <string name="premiumPaywallFeature2Title">Cloud sync</string>
   <string name="premiumPaywallFeature2Desc">Unlock Miniflux, FreshRSS and other cloud integrations.</string>
   <string name="premiumPaywallFeature3Title">Themes</string>

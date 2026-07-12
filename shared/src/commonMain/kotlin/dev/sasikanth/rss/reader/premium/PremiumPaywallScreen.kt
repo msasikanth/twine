@@ -74,6 +74,7 @@ import dev.sasikanth.rss.reader.resources.icons.StarShine
 import dev.sasikanth.rss.reader.resources.icons.Sync
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonGoBack
@@ -211,7 +212,8 @@ fun PremiumPaywallScreen(
           FeatureItem(
             icon = TwineIcons.FormatLineSpacing,
             title = stringResource(Res.string.premiumPaywallFeature1Title),
-            description = stringResource(Res.string.premiumPaywallFeature1Desc),
+            description =
+              stringResource(Res.string.premiumPaywallFeature1Desc, Constants.MAX_FREE_FEEDS),
           )
           FeatureItem(
             icon = TwineIcons.Sync,
