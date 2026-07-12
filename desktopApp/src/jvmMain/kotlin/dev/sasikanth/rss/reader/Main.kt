@@ -15,8 +15,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.DesktopComponent
 import dev.sasikanth.rss.reader.di.create
@@ -41,7 +44,11 @@ fun main() {
   }
 
   application {
-    Window(onCloseRequest = ::exitApplication, title = "") {
+    Window(
+      state = rememberWindowState(size = DpSize(1200.dp, 800.dp)),
+      onCloseRequest = ::exitApplication,
+      title = "",
+    ) {
       // macOS renders the transparent title bar with the window background; other
       // platforms ignore the client property.
       DisposableEffect(Unit) {
