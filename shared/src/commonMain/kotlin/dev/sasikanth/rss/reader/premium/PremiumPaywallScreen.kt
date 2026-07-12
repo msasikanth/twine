@@ -206,7 +206,7 @@ fun PremiumPaywallScreen(
         // Features List
         Column(
           verticalArrangement = Arrangement.spacedBy(24.dp),
-          modifier = Modifier.fillMaxWidth(),
+          modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
         ) {
           FeatureItem(
             icon = TwineIcons.FormatLineSpacing,
