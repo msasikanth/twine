@@ -80,6 +80,8 @@ import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import kotlin.time.Instant
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
@@ -104,13 +106,14 @@ internal fun ReaderPage(
   val markdownContentState by pageViewModel.contentState.collectAsStateWithLifecycle()
   val excerptState by pageViewModel.excerptState.collectAsStateWithLifecycle()
   val contentParsingProgress by pageViewModel.parsingProgress.collectAsStateWithLifecycle()
-  val playbackState by pageViewModel.audioPlayer.playbackState.collectAsStateWithLifecycle()
 
   ReaderPageContent(
     markdownContentState = markdownContentState,
     excerptState = excerptState,
     contentParsingProgress = contentParsingProgress,
-    playbackState = playbackState,
+    // Passed as a flow so the every-second playback position ticks only recompose
+    // the media controls item instead of the whole reader page.
+    playbackState = pageViewModel.audioPlayer.playbackState,
     readerPost = readerPost,
     showFullArticle = showFullArticle,
     page = page,
@@ -139,7 +142,7 @@ private fun ReaderPageContent(
   markdownContentState: State,
   excerptState: String?,
   contentParsingProgress: ReaderProcessingProgress,
-  playbackState: PlaybackState,
+  playbackState: StateFlow<PlaybackState>,
   readerPost: ResolvedPost,
   showFullArticle: Boolean,
   page: Int,
@@ -253,10 +256,11 @@ private fun ReaderPageContent(
 
             if (!readerPost.audioUrl.isNullOrBlank()) {
               item(key = "podcast-player") {
-                val isPostAudioPlaying = playbackState.playingUrl == readerPost.audioUrl
+                val currentPlaybackState by playbackState.collectAsStateWithLifecycle()
+                val isPostAudioPlaying = currentPlaybackState.playingUrl == readerPost.audioUrl
                 val postPlaybackState =
                   if (isPostAudioPlaying) {
-                    playbackState
+                    currentPlaybackState
                   } else {
                     PlaybackState.Idle
                   }
@@ -314,8 +318,9 @@ private fun ReaderPageContent(
       }
 
       if (showSleepTimerSheet) {
+        val currentPlaybackState by playbackState.collectAsStateWithLifecycle()
         SleepTimerBottomSheet(
-          playbackState = playbackState,
+          playbackState = currentPlaybackState,
           onOptionSelected = {
             onSleepTimerOptionSelected(it)
             showSleepTimerSheet = false
@@ -352,7 +357,7 @@ private fun ReaderPagePreview() {
       markdownContentState = State.Loading(),
       excerptState = null,
       contentParsingProgress = ReaderProcessingProgress.Idle,
-      playbackState = PlaybackState.Idle,
+      playbackState = remember { MutableStateFlow(PlaybackState.Idle) },
       readerPost =
         ResolvedPost(
           id = "",

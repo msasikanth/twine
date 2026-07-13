@@ -52,8 +52,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -177,6 +180,24 @@ internal fun ReaderScreen(
   }
   val pagerState = rememberPagerState(initialPage = state.activePostIndex) { posts.itemCount }
   val exitScreen by viewModel.exitScreen.collectAsStateWithLifecycle(false)
+
+  // If the pager lays out before paging delivers its first item count, the initial
+  // page gets clamped to 0 and the requested index is lost. Restore it exactly once,
+  // as soon as the count is available, unless the user has already started swiping.
+  val initialPostIndex = remember { state.activePostIndex }
+  var initialPageRestored by rememberSaveable { mutableStateOf(false) }
+  LaunchedEffect(posts.itemCount) {
+    if (!initialPageRestored && posts.itemCount > 0) {
+      if (
+        initialPostIndex in 0 until posts.itemCount &&
+          pagerState.currentPage != initialPostIndex &&
+          !pagerState.isScrollInProgress
+      ) {
+        pagerState.scrollToPage(initialPostIndex)
+      }
+      initialPageRestored = true
+    }
+  }
 
   pagerState.CollectItemTransition(
     posts.itemCount,

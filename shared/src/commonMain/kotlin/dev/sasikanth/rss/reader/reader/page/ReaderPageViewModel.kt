@@ -92,7 +92,12 @@ class ReaderPageViewModel(
 
   init {
     loadPostContent()
-    loadFullArticle()
+    // Only prefetch the full article when it will actually be shown; fetching it
+    // eagerly here costs a network request + DB write for every page the pager
+    // preloads. toggleFullArticle() fetches it on demand otherwise.
+    if (_showFullArticle.value) {
+      loadFullArticle()
+    }
     observePlaybackStateForAutoSave()
   }
 

@@ -158,7 +158,13 @@ class ReaderViewModel(
   private fun postPageChange(postIndex: Int, post: ResolvedPost) {
     _openedPostItems.update { it + post.id }
     _state.update { it.copy(activePostIndex = postIndex, activePostId = post.id) }
-    observableSelectedPost.updateSelectedPost(postIndex, post.id)
+
+    // Only readers backed by the home posts list publish the selection; indexes from
+    // Search/Bookmarks/Widget belong to a different list, and posts there may not even
+    // be in home's current filters, which would scroll home somewhere surprising.
+    if (readerScreenArgs.fromScreen == Home || readerScreenArgs.fromScreen == AudioPlayer) {
+      observableSelectedPost.updateSelectedPost(postIndex, post.id)
+    }
 
     coroutineScope.launch {
       val markAsReadOn = settingsRepository.markAsReadOn.first()
@@ -212,7 +218,9 @@ class ReaderViewModel(
         _state.update { it.copy(posts = allPostsPagingData) }
       } else {
         val posts =
-          Pager(config = PagingConfig(pageSize = 4, enablePlaceholders = true)) {
+          Pager(
+              config = PagingConfig(pageSize = 4, enablePlaceholders = true, jumpThreshold = 12)
+            ) {
               val sessionPostIds = _openedPostItems.value.toList()
               when (readerScreenArgs.fromScreen) {
                 is Search -> {

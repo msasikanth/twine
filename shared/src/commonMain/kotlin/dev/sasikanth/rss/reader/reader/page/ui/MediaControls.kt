@@ -70,7 +70,9 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -120,12 +122,17 @@ internal fun MediaControls(
 ) {
   val haptic = LocalHapticFeedback.current
   val isPlaying = playbackState.isPlaying || playbackState.buffering
-  val progress =
+  // While the user is scrubbing, the slider follows the drag instead of the player
+  // position. Seeking happens once on release; issuing a seek per drag tick fights
+  // async seeks (AVPlayer reports stale positions mid-seek, snapping the thumb back).
+  var scrubProgress by remember { mutableStateOf<Float?>(null) }
+  val playerProgress =
     if (playbackState.duration > 0) {
       (playbackState.currentPosition.toFloat() / playbackState.duration.toFloat()).coerceIn(0f, 1f)
     } else {
       0f
     }
+  val progress = scrubProgress ?: playerProgress
   val showExtendedControls = playbackState.duration > 0
   val extendedControlsAnimationSpec =
     spring<IntSize>(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioMediumBouncy)
@@ -154,11 +161,15 @@ internal fun MediaControls(
           value = progress,
           onValueChange = {
             val newPosition = (it * playbackState.duration).toLong()
-            val currentPosition = (progress * playbackState.duration).toLong()
-            if (newPosition / 1000 != currentPosition / 1000) {
+            val previousPosition = (progress * playbackState.duration).toLong()
+            if (newPosition / 1000 != previousPosition / 1000) {
               haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
             }
-            onSeek(newPosition)
+            scrubProgress = it
+          },
+          onValueChangeFinished = {
+            scrubProgress?.let { onSeek((it * playbackState.duration).toLong()) }
+            scrubProgress = null
           },
           thumb = {
             Box(
@@ -176,7 +187,7 @@ internal fun MediaControls(
 
         Row(modifier = Modifier.fillMaxWidth()) {
           Text(
-            text = formatDuration(playbackState.currentPosition),
+            text = formatDuration((progress * playbackState.duration).toLong()),
             style = MaterialTheme.typography.labelSmall,
             color = AppTheme.colorScheme.onSurfaceVariant,
           )
