@@ -130,4 +130,5 @@ dependencies {
   implementation(libs.glance.material3)
   implementation(libs.kotlinx.immutable.collections)
   implementation(libs.filekit.core)
+  implementation(libs.jetbrains.navigation3.ui)
 }

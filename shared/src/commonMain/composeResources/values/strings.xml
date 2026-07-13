@@ -273,6 +273,7 @@
   <string name="freshRssErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
   <string name="freshRssErrorUnknown">An unknown error occurred</string>
   <string name="settingsSyncMiniflux" translatable="false">Miniflux</string>
+  <string name="settingsSyncGoogleDrive" translatable="false">Google Drive</string>
   <string name="minifluxLoginTitle">Miniflux</string>
   <string name="minifluxServerUrl">Server URL</string>
   <string name="minifluxApiKey">API Key</string>

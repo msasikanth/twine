@@ -20,6 +20,8 @@ import dev.sasikanth.rss.reader.data.sync.dropbox.DropboxCloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.dropbox.DropboxSyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.freshrss.FreshRSSSyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.freshrss.FreshRssSyncProvider
+import dev.sasikanth.rss.reader.data.sync.google.GoogleDriveCloudServiceProvider
+import dev.sasikanth.rss.reader.data.sync.google.GoogleDriveSyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.local.LocalSyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.miniflux.MinifluxSyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.miniflux.MinifluxSyncProvider
@@ -42,6 +44,8 @@ class DefaultSyncCoordinator(
   private val localSyncCoordinator: LocalSyncCoordinator,
   private val dropboxSyncCoordinator: DropboxSyncCoordinator,
   private val dropboxSyncProvider: DropboxCloudServiceProvider,
+  private val googleDriveSyncCoordinator: GoogleDriveSyncCoordinator,
+  private val googleDriveSyncProvider: GoogleDriveCloudServiceProvider,
   private val freshRSSSyncCoordinator: FreshRSSSyncCoordinator,
   private val freshRssSyncProvider: FreshRssSyncProvider,
   private val minifluxSyncCoordinator: MinifluxSyncCoordinator,
@@ -55,13 +59,15 @@ class DefaultSyncCoordinator(
   override val syncState: StateFlow<SyncState> =
     combine(
         dropboxSyncProvider.isSignedIn(),
+        googleDriveSyncProvider.isSignedIn(),
         freshRssSyncProvider.isSignedIn(),
         minifluxSyncProvider.isSignedIn(),
-      ) { dropboxSignedIn, freshRssSignedIn, minifluxSignedIn ->
+      ) { dropboxSignedIn, googleDriveSignedIn, freshRssSignedIn, minifluxSignedIn ->
         when {
           freshRssSignedIn -> freshRSSSyncCoordinator
           minifluxSignedIn -> minifluxSyncCoordinator
           dropboxSignedIn -> dropboxSyncCoordinator
+          googleDriveSignedIn -> googleDriveSyncCoordinator
           else -> localSyncCoordinator
         }
       }
@@ -73,6 +79,7 @@ class DefaultSyncCoordinator(
       freshRssSyncProvider.isSignedInImmediate() -> freshRSSSyncCoordinator.pull()
       minifluxSyncProvider.isSignedInImmediate() -> minifluxSyncCoordinator.pull()
       dropboxSyncProvider.isSignedInImmediate() -> dropboxSyncCoordinator.pull()
+      googleDriveSyncProvider.isSignedInImmediate() -> googleDriveSyncCoordinator.pull()
       else -> localSyncCoordinator.pull()
     }
   }
@@ -86,6 +93,7 @@ class DefaultSyncCoordinator(
       freshRssSyncProvider.isSignedInImmediate() -> freshRSSSyncCoordinator.pull(feedIds)
       minifluxSyncProvider.isSignedInImmediate() -> minifluxSyncCoordinator.pull(feedIds)
       dropboxSyncProvider.isSignedInImmediate() -> dropboxSyncCoordinator.pull(feedIds)
+      googleDriveSyncProvider.isSignedInImmediate() -> googleDriveSyncCoordinator.pull(feedIds)
       else -> localSyncCoordinator.pull(feedIds)
     }
   }
@@ -99,6 +107,7 @@ class DefaultSyncCoordinator(
       freshRssSyncProvider.isSignedInImmediate() -> freshRSSSyncCoordinator.pull(feedId)
       minifluxSyncProvider.isSignedInImmediate() -> minifluxSyncCoordinator.pull(feedId)
       dropboxSyncProvider.isSignedInImmediate() -> dropboxSyncCoordinator.pull(feedId)
+      googleDriveSyncProvider.isSignedInImmediate() -> googleDriveSyncCoordinator.pull(feedId)
       else -> localSyncCoordinator.pull(feedId)
     }
   }
@@ -112,6 +121,7 @@ class DefaultSyncCoordinator(
       freshRssSyncProvider.isSignedInImmediate() -> freshRSSSyncCoordinator.push()
       minifluxSyncProvider.isSignedInImmediate() -> minifluxSyncCoordinator.push()
       dropboxSyncProvider.isSignedInImmediate() -> dropboxSyncCoordinator.push()
+      googleDriveSyncProvider.isSignedInImmediate() -> googleDriveSyncCoordinator.push()
       else -> localSyncCoordinator.push()
     }
   }

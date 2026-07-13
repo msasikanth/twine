@@ -89,6 +89,16 @@
             android:scheme="twine" />
       </intent-filter>
 
+      <!-- Google OAuth redirect: reversed client ID of the Android Google Drive OAuth client -->
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+
+        <data android:scheme="com.googleusercontent.apps.854893327148-oacdbvthcv76h5uge4trc36lu5t4o6m5" />
+      </intent-filter>
+
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
 

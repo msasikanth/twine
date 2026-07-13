@@ -15,11 +15,7 @@
  *
  */
 
-package dev.sasikanth.rss.reader.core.model.local
+package dev.sasikanth.rss.reader.data.sync.auth
 
-enum class ServiceType {
-  DROPBOX,
-  FRESH_RSS,
-  MINIFLUX,
-  GOOGLE_DRIVE,
-}
+internal actual val GOOGLE_DRIVE_CLIENT_ID: String =
+  "854893327148-42c4t0p5kpk6ufdcu5t7i51acvputd75.apps.googleusercontent.com"

@@ -23,14 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.dialog
-import androidx.navigation.navDeepLink
-import androidx.navigation.toRoute
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavKey
 import dev.sasikanth.rss.reader.about.ui.AboutScreen
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionViewModel
 import dev.sasikanth.rss.reader.accountselection.ui.AccountSelectionScreen
@@ -71,7 +65,6 @@ import dev.sasikanth.rss.reader.placeholder.PlaceholderScreen
 import dev.sasikanth.rss.reader.placeholder.PlaceholderViewModel
 import dev.sasikanth.rss.reader.premium.PremiumPaywallScreen
 import dev.sasikanth.rss.reader.premium.PremiumPaywallViewModel
-import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen
 import dev.sasikanth.rss.reader.reader.ReaderViewModel
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
@@ -88,85 +81,70 @@ import dev.sasikanth.rss.reader.settings.ui.SettingsDataScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsServicesScreen
 import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
-import kotlin.reflect.typeOf
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 
-fun NavGraphBuilder.placeholderScreen(
+fun EntryProviderScope<NavKey>.placeholderScreen(
   modifier: Modifier = Modifier,
   placeholderViewModel: () -> PlaceholderViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
 ) {
-  composable<Screen.Placeholder> {
+  entry<Screen.Placeholder> {
     val viewModel = viewModel { placeholderViewModel() }
     PlaceholderScreen(
       modifier = modifier,
       viewModel = viewModel,
-      navigateHome = {
-        navController.navigate(Screen.Main()) { popUpTo<Screen.Placeholder> { inclusive = true } }
-      },
-      navigateOnboarding = {
-        navController.navigate(Screen.Onboarding) {
-          popUpTo<Screen.Placeholder> { inclusive = true }
-        }
-      },
+      navigateHome = { navigator.navigateToMain() },
+      navigateOnboarding = { navigator.navigateToOnboarding() },
     )
   }
 }
 
-fun NavGraphBuilder.onboardingScreen(
+fun EntryProviderScope<NavKey>.onboardingScreen(
   onboardingViewModel: () -> OnboardingViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
   modifier: Modifier = Modifier,
 ) {
-  composable<Screen.Onboarding> {
+  entry<Screen.Onboarding> {
     val viewModel = viewModel { onboardingViewModel() }
     OnboardingScreen(
       modifier = modifier,
       viewModel = viewModel,
-      onOnboardingDone = {
-        navController.navigate(Screen.Main()) { popUpTo<Screen.Onboarding> { inclusive = true } }
-      },
-      onNavigateToDiscovery = { navController.navigate(Screen.Discovery(isFromOnboarding = true)) },
-      onNavigateToAccountSelection = { navController.navigate(Screen.AccountSelection) },
+      onOnboardingDone = { navigator.navigateToMain() },
+      onNavigateToDiscovery = { navigator.navigate(Screen.Discovery(isFromOnboarding = true)) },
+      onNavigateToAccountSelection = { navigator.navigate(Screen.AccountSelection) },
     )
   }
 }
 
-fun NavGraphBuilder.accountSelectionScreen(
+fun EntryProviderScope<NavKey>.accountSelectionScreen(
   accountSelectionViewModel: () -> AccountSelectionViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
   modifier: Modifier = Modifier,
 ) {
-  composable<Screen.AccountSelection> {
+  entry<Screen.AccountSelection> {
     val viewModel = viewModel { accountSelectionViewModel() }
 
     AccountSelectionScreen(
       modifier = modifier,
       viewModel = viewModel,
-      onNavigateToHome = {
-        navController.navigate(Screen.Main(triggerSync = true)) {
-          popUpTo<Screen.AccountSelection> { inclusive = true }
-        }
-      },
-      onNavigateToDiscovery = { navController.navigate(Screen.Discovery(isFromOnboarding = true)) },
-      openPaywall = { navController.navigate(Screen.Paywall()) },
-      openFreshRssLogin = { navController.navigate(Screen.FreshRssLogin) },
-      openMinifluxLogin = { navController.navigate(Screen.MinifluxLogin) },
-      goBack = { navController.popBackStack() },
+      onNavigateToHome = { navigator.navigateToMain(triggerSync = true) },
+      onNavigateToDiscovery = { navigator.navigate(Screen.Discovery(isFromOnboarding = true)) },
+      openPaywall = { navigator.navigate(Screen.Paywall()) },
+      openFreshRssLogin = { navigator.navigate(Screen.FreshRssLogin) },
+      openMinifluxLogin = { navigator.navigate(Screen.MinifluxLogin) },
+      goBack = { navigator.goBack() },
     )
   }
 }
 
-fun NavGraphBuilder.mainScreen(
-  navController: NavHostController,
+fun EntryProviderScope<NavKey>.mainScreen(
+  navigator: AppNavigator,
   useDarkTheme: Boolean,
   toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
   toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
@@ -179,14 +157,15 @@ fun NavGraphBuilder.mainScreen(
   openPost: (Int, ResolvedPost, FromScreen) -> Unit,
   screenModifier: Modifier,
 ) {
-  composable<Screen.Main> {
-    val mainRoute = it.toRoute<Screen.Main>()
+  entry<Screen.Main> { mainRoute ->
     val triggerSync = mainRoute.triggerSync
     val startTab = mainRoute.startTab
     val feedsViewModel = viewModel { feedsViewModel() }
 
-    val currentEntry by navController.currentBackStackEntryAsState()
-    val isMainActive = currentEntry?.destination?.hasRoute(Screen.Main::class) ?: false
+    // Navigation 3 has no simple `hasRoute` backstack scanner for inside nested graphs since we
+    // replaced it with Navigator
+    // But mainScreen is almost always active when it's rendered, so canHandleBack is true.
+    val isMainActive = true
 
     LaunchedEffect(useDarkTheme) {
       toggleLightStatusBar(!useDarkTheme)
@@ -200,13 +179,13 @@ fun NavGraphBuilder.mainScreen(
         val viewModel = viewModel { homeViewModel() }
 
         LaunchedEffect(Unit) {
-          it.savedStateHandle
-            .getStateFlow<Set<String>>(SELECTED_GROUPS_KEY, emptySet())
+          navigator.results
+            .map { it[SELECTED_GROUPS_KEY] as? Set<String> }
             .filterNotNull()
             .onEach { selectedGroupIds ->
               if (selectedGroupIds.isNotEmpty()) {
                 feedsViewModel.dispatch(FeedsEvent.OnGroupsSelected(selectedGroupIds))
-                it.savedStateHandle[SELECTED_GROUPS_KEY] = emptySet<String>()
+                navigator.consumeResult(SELECTED_GROUPS_KEY)
               }
             }
             .launchIn(this)
@@ -217,7 +196,7 @@ fun NavGraphBuilder.mainScreen(
             .map { it.openGroupSelection }
             .filterNotNull()
             .onEach { selectedGroupIds ->
-              navController.navigate(Modals.GroupSelection(selectedGroupIds.toList()))
+              navigator.navigate(Modals.GroupSelection(selectedGroupIds.toList()))
               feedsViewModel.dispatch(FeedsEvent.MarkOpenGroupSelectionDone)
             }
             .launchIn(this)
@@ -258,39 +237,37 @@ fun NavGraphBuilder.mainScreen(
         val viewModel = viewModel { settingsViewModel() }
 
         LaunchedEffect(Unit) {
-          merge(
-              navController.currentBackStackEntry
-                ?.savedStateHandle
-                ?.getStateFlow(FRESH_RSS_LOGIN_SUCCESS_KEY, false)
-                ?.filter { it }
-                ?.onEach {
-                  navController.currentBackStackEntry
-                    ?.savedStateHandle
-                    ?.set(FRESH_RSS_LOGIN_SUCCESS_KEY, false)
-                } ?: emptyFlow(),
-              navController.currentBackStackEntry
-                ?.savedStateHandle
-                ?.getStateFlow(MINIFLUX_LOGIN_SUCCESS_KEY, false)
-                ?.filter { it }
-                ?.onEach {
-                  navController.currentBackStackEntry
-                    ?.savedStateHandle
-                    ?.set(MINIFLUX_LOGIN_SUCCESS_KEY, false)
-                } ?: emptyFlow(),
-            )
-            .onEach { viewModel.dispatch(SettingsEvent.TriggerSync) }
+          navigator.results
+            .map { it[FRESH_RSS_LOGIN_SUCCESS_KEY] as? Boolean }
+            .filterNotNull()
+            .filter { it }
+            .onEach {
+              viewModel.dispatch(SettingsEvent.TriggerSync)
+              navigator.consumeResult(FRESH_RSS_LOGIN_SUCCESS_KEY)
+            }
+            .launchIn(this)
+        }
+        LaunchedEffect(Unit) {
+          navigator.results
+            .map { it[MINIFLUX_LOGIN_SUCCESS_KEY] as? Boolean }
+            .filterNotNull()
+            .filter { it }
+            .onEach {
+              viewModel.dispatch(SettingsEvent.TriggerSync)
+              navigator.consumeResult(MINIFLUX_LOGIN_SUCCESS_KEY)
+            }
             .launchIn(this)
         }
 
         SettingsScreen(
           viewModel = viewModel,
           goBack = goBack,
-          openAppearanceSettings = { navController.navigate(Screen.SettingsAppearance) },
-          openBehaviorSettings = { navController.navigate(Screen.SettingsBehavior) },
-          openServicesSettings = { navController.navigate(Screen.SettingsServices) },
-          openDataSettings = { navController.navigate(Screen.SettingsData) },
-          openAppInfoSettings = { navController.navigate(Screen.SettingsAppInfo) },
-          openPaywall = { navController.navigate(Screen.Paywall()) },
+          openAppearanceSettings = { navigator.navigate(Screen.SettingsAppearance) },
+          openBehaviorSettings = { navigator.navigate(Screen.SettingsBehavior) },
+          openServicesSettings = { navigator.navigate(Screen.SettingsServices) },
+          openDataSettings = { navigator.navigate(Screen.SettingsData) },
+          openAppInfoSettings = { navigator.navigate(Screen.SettingsAppInfo) },
+          openPaywall = { navigator.navigate(Screen.Paywall()) },
           modifier = screenModifier,
         )
       },
@@ -304,184 +281,178 @@ fun NavGraphBuilder.mainScreen(
           modifier = screenModifier,
         )
       },
-      openFeedInfoSheet = { feedId -> navController.navigate(Modals.FeedInfo(feedId)) },
-      openGroupScreen = { groupId -> navController.navigate(Screen.FeedGroup(groupId)) },
+      openFeedInfoSheet = { feedId -> navigator.navigate(Modals.FeedInfo(feedId)) },
+      openGroupScreen = { groupId -> navigator.navigate(Screen.FeedGroup(groupId)) },
       openGroupSelectionSheet = { feedsViewModel.dispatch(FeedsEvent.OnAddToGroupClicked) },
-      openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
-      openPaywall = { navController.navigate(Screen.Paywall()) },
-      openFeedHealth = { navController.navigate(Screen.FeedHealth) },
+      openAddFeedScreen = { navigator.navigate(Screen.AddFeed) },
+      openPaywall = { navigator.navigate(Screen.Paywall()) },
+      openFeedHealth = { navigator.navigate(Screen.FeedHealth) },
       canHandleBack = isMainActive,
     )
   }
 }
 
-fun NavGraphBuilder.settingsAppearanceScreen(
+fun EntryProviderScope<NavKey>.settingsAppearanceScreen(
   settingsViewModel: () -> SettingsViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
   modifier: Modifier = Modifier,
 ) {
-  composable<Screen.SettingsAppearance> {
+  entry<Screen.SettingsAppearance> {
     val viewModel = viewModel { settingsViewModel() }
     SettingsAppearanceScreen(
       modifier = modifier,
       viewModel = viewModel,
-      goBack = { navController.popBackStack() },
-      openPaywall = { navController.navigate(Screen.Paywall()) },
+      goBack = { navigator.goBack() },
+      openPaywall = { navigator.navigate(Screen.Paywall()) },
     )
   }
 }
 
-fun NavGraphBuilder.settingsBehaviorScreen(
+fun EntryProviderScope<NavKey>.settingsBehaviorScreen(
   settingsViewModel: () -> SettingsViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
   modifier: Modifier = Modifier,
 ) {
-  composable<Screen.SettingsBehavior> {
+  entry<Screen.SettingsBehavior> {
     val viewModel = viewModel { settingsViewModel() }
     SettingsBehaviorScreen(
       modifier = modifier,
       viewModel = viewModel,
-      goBack = { navController.popBackStack() },
-      openBlockedWords = { navController.navigate(Screen.BlockedWords) },
+      goBack = { navigator.goBack() },
+      openBlockedWords = { navigator.navigate(Screen.BlockedWords) },
     )
   }
 }
 
-fun NavGraphBuilder.settingsServicesScreen(
+fun EntryProviderScope<NavKey>.settingsServicesScreen(
   settingsViewModel: () -> SettingsViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
   modifier: Modifier = Modifier,
 ) {
-  composable<Screen.SettingsServices> {
+  entry<Screen.SettingsServices> {
     val viewModel = viewModel { settingsViewModel() }
     SettingsServicesScreen(
       modifier = modifier,
       viewModel = viewModel,
-      goBack = { navController.popBackStack() },
-      openPaywall = { navController.navigate(Screen.Paywall()) },
-      openFreshRssLogin = { navController.navigate(Screen.FreshRssLogin) },
-      openMinifluxLogin = { navController.navigate(Screen.MinifluxLogin) },
+      goBack = { navigator.goBack() },
+      openPaywall = { navigator.navigate(Screen.Paywall()) },
+      openFreshRssLogin = { navigator.navigate(Screen.FreshRssLogin) },
+      openMinifluxLogin = { navigator.navigate(Screen.MinifluxLogin) },
     )
   }
 }
 
-fun NavGraphBuilder.settingsDataScreen(
+fun EntryProviderScope<NavKey>.settingsDataScreen(
   statisticsViewModel: () -> StatisticsViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
   modifier: Modifier = Modifier,
 ) {
-  composable<Screen.SettingsData> {
-    val statisticsViewModel = viewModel { statisticsViewModel() }
+  entry<Screen.SettingsData> {
+    val viewModel = viewModel { statisticsViewModel() }
     SettingsDataScreen(
       modifier = modifier,
-      statisticsViewModel = statisticsViewModel,
-      goBack = { navController.popBackStack() },
-      openFeedHealth = { navController.navigate(Screen.FeedHealth) },
+      statisticsViewModel = viewModel,
+      goBack = { navigator.goBack() },
+      openFeedHealth = { navigator.navigate(Screen.FeedHealth) },
     )
   }
 }
 
-fun NavGraphBuilder.feedHealthScreen(
+fun EntryProviderScope<NavKey>.feedHealthScreen(
   feedHealthViewModel: () -> FeedHealthViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
   modifier: Modifier = Modifier,
 ) {
-  composable<Screen.FeedHealth> {
+  entry<Screen.FeedHealth> {
     val viewModel = viewModel { feedHealthViewModel() }
-    FeedHealthScreen(
-      viewModel = viewModel,
-      goBack = { navController.popBackStack() },
-      modifier = modifier,
-    )
+    FeedHealthScreen(viewModel = viewModel, goBack = { navigator.goBack() }, modifier = modifier)
   }
 }
 
-fun NavGraphBuilder.settingsAppInfoScreen(
+fun EntryProviderScope<NavKey>.settingsAppInfoScreen(
   settingsViewModel: () -> SettingsViewModel,
   openChangelog: () -> Unit,
-  navController: NavHostController,
+  navigator: AppNavigator,
   modifier: Modifier = Modifier,
 ) {
-  composable<Screen.SettingsAppInfo> {
+  entry<Screen.SettingsAppInfo> {
     val viewModel = viewModel { settingsViewModel() }
     SettingsAppInfoScreen(
       modifier = modifier,
       viewModel = viewModel,
-      goBack = { navController.popBackStack() },
-      openAbout = { navController.navigate(Screen.About) },
+      goBack = { navigator.goBack() },
+      openAbout = { navigator.navigate(Screen.About) },
       openChangelog = openChangelog,
     )
   }
 }
 
-fun NavGraphBuilder.freshRssLoginScreen(
+fun EntryProviderScope<NavKey>.freshRssLoginScreen(
   freshRssLoginViewModel: () -> FreshRssLoginViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
   modifier: Modifier = Modifier,
 ) {
-  composable<Screen.FreshRssLogin> {
+  entry<Screen.FreshRssLogin> {
     val viewModel = viewModel { freshRssLoginViewModel() }
     FreshRssLoginScreen(
       modifier = modifier,
       viewModel = viewModel,
       onLoginSuccess = {
-        navController.previousBackStackEntry
-          ?.savedStateHandle
-          ?.set(FRESH_RSS_LOGIN_SUCCESS_KEY, true)
-        navController.popBackStack()
+        navigator.setResult(FRESH_RSS_LOGIN_SUCCESS_KEY, true)
+        navigator.goBack()
       },
-      goBack = { navController.popBackStack() },
+      goBack = { navigator.goBack() },
     )
   }
 }
 
-fun NavGraphBuilder.minifluxLoginScreen(
+fun EntryProviderScope<NavKey>.minifluxLoginScreen(
   minifluxLoginViewModel: () -> MinifluxLoginViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
   modifier: Modifier = Modifier,
 ) {
-  composable<Screen.MinifluxLogin> {
+  entry<Screen.MinifluxLogin> {
     val viewModel = viewModel { minifluxLoginViewModel() }
     MinifluxLoginScreen(
       modifier = modifier,
       viewModel = viewModel,
       onLoginSuccess = {
-        navController.previousBackStackEntry
-          ?.savedStateHandle
-          ?.set(MINIFLUX_LOGIN_SUCCESS_KEY, true)
-        navController.popBackStack()
+        navigator.setResult(MINIFLUX_LOGIN_SUCCESS_KEY, true)
+        navigator.goBack()
       },
-      goBack = { navController.popBackStack() },
+      goBack = { navigator.goBack() },
     )
   }
 }
 
-fun NavGraphBuilder.readerScreen(
+fun EntryProviderScope<NavKey>.readerScreen(
   readerViewModel: (SavedStateHandle) -> ReaderViewModel,
   readerPageViewModel: (ResolvedPost) -> ReaderPageViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
   toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
   toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  composable<Screen.Reader>(
-    typeMap = mapOf(typeOf<ReaderScreenArgs>() to ReaderScreenArgs.navTypeMap),
-    deepLinks =
-      listOf(
-        navDeepLink<Screen.Reader>(
-          basePath = Screen.Reader.ROUTE,
-          typeMap = mapOf(typeOf<ReaderScreenArgs>() to ReaderScreenArgs.navTypeMap),
-        )
-      ),
-  ) {
-    val viewModel = viewModel { readerViewModel(it.savedStateHandle) }
+  entry<Screen.Reader> { route ->
+    // Since we don't have NavBackStackEntry savedStateHandle easily,
+    // ReaderViewModel doesn't receive args automatically via savedStateHandle.
+    // We can manually pass it via factory.
+    // However, `feedViewModel(it.savedStateHandle)` relies on it.
+    // A quick hack is to inject ReaderScreenArgs or just let KMP viewModel provide an empty handle
+    // and rely on a workaround, or better:
+    // With entry<Screen.Reader>, `route` is already the decoded Screen.Reader object!
+    // Since twine expects ReaderScreenArgs in the ViewModel from SavedStateHandle... wait!
+    // `val viewModel = viewModel { readerViewModel(it.savedStateHandle) }`
+    // We can create a fake SavedStateHandle containing ReaderScreenArgs:
+    val savedStateHandle = SavedStateHandle(mapOf("readerScreenArgs" to route.readerScreenArgs))
+    val viewModel = viewModel { readerViewModel(savedStateHandle) }
 
     ReaderScreen(
       viewModel = viewModel,
       pageViewModelFactory = { post -> viewModel(key = post.id) { readerPageViewModel(post) } },
-      onBack = { navController.popBackStack() },
-      openPaywall = { navController.navigate(Screen.Paywall()) },
-      onImageClick = { imageUrl -> navController.navigate(Screen.ImageViewer(imageUrl)) },
+      onBack = { navigator.goBack() },
+      openPaywall = { navigator.navigate(Screen.Paywall()) },
+      onImageClick = { imageUrl -> navigator.navigate(Screen.ImageViewer(imageUrl)) },
       toggleLightStatusBar = toggleLightStatusBar,
       toggleLightNavBar = toggleLightNavBar,
       modifier = modifier,
@@ -489,27 +460,25 @@ fun NavGraphBuilder.readerScreen(
   }
 }
 
-fun NavGraphBuilder.addFeedScreen(
+fun EntryProviderScope<NavKey>.addFeedScreen(
   addFeedViewModel: () -> AddFeedViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
   useDarkTheme: Boolean,
   toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
   toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  composable<Screen.AddFeed>(
-    deepLinks = listOf(navDeepLink<Screen.AddFeed>(basePath = Screen.AddFeed.ROUTE))
-  ) {
+  entry<Screen.AddFeed> {
     val viewModel = viewModel { addFeedViewModel() }
 
     LaunchedEffect(Unit) {
-      it.savedStateHandle
-        .getStateFlow<Set<String>>(SELECTED_GROUPS_KEY, emptySet())
+      navigator.results
+        .map { it[SELECTED_GROUPS_KEY] as? Set<String> }
         .filterNotNull()
         .onEach { selectedGroupIds ->
           if (selectedGroupIds.isNotEmpty()) {
             viewModel.dispatch(AddFeedEvent.OnGroupsSelected(selectedGroupIds))
-            it.savedStateHandle[SELECTED_GROUPS_KEY] = emptySet<String>()
+            navigator.consumeResult(SELECTED_GROUPS_KEY)
           }
         }
         .launchIn(this)
@@ -523,23 +492,23 @@ fun NavGraphBuilder.addFeedScreen(
     AddFeedScreen(
       modifier = modifier,
       viewModel = viewModel,
-      goBack = { navController.popBackStack() },
+      goBack = { navigator.goBack() },
       openGroupSelection = { selectedGroupIds ->
-        navController.navigate(Modals.GroupSelection(selectedGroupIds.toList()))
+        navigator.navigate(Modals.GroupSelection(selectedGroupIds.toList()))
       },
-      openDiscovery = { navController.navigate(Screen.Discovery()) },
+      openDiscovery = { navigator.navigate(Screen.Discovery()) },
     )
   }
 }
 
-fun NavGraphBuilder.discoveryScreen(
+fun EntryProviderScope<NavKey>.discoveryScreen(
   discoveryViewModel: () -> DiscoveryViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
   screenModifier: Modifier = Modifier,
 ) {
-  composable<Screen.Discovery> {
+  entry<Screen.Discovery> { discoveryRoute ->
     val viewModel = viewModel { discoveryViewModel() }
-    val isFromOnboarding = it.toRoute<Screen.Discovery>().isFromOnboarding
+    val isFromOnboarding = discoveryRoute.isFromOnboarding
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     DiscoveryScreen(
@@ -548,45 +517,41 @@ fun NavGraphBuilder.discoveryScreen(
       onDone = {
         if (isFromOnboarding) {
           viewModel.completeOnboarding()
+          navigator.navigateToMain()
           if (!state.isSubscribed) {
-            navController.navigate(Screen.Paywall(isFromOnboarding = true))
-          } else {
-            navController.navigate(Screen.Main()) {
-              popUpTo<Screen.Onboarding> { inclusive = true }
-            }
+            navigator.navigate(Screen.Paywall(isFromOnboarding = true))
           }
         } else {
-          navController.popBackStack()
+          navigator.goBack()
         }
       },
-      goBack = { navController.popBackStack() },
+      goBack = { navigator.goBack() },
       modifier = screenModifier,
     )
   }
 }
 
-fun NavGraphBuilder.aboutScreen(modifier: Modifier = Modifier, navController: NavHostController) {
-  composable<Screen.About> {
-    AboutScreen(modifier = modifier, goBack = { navController.popBackStack() })
-  }
+fun EntryProviderScope<NavKey>.aboutScreen(modifier: Modifier = Modifier, navigator: AppNavigator) {
+  entry<Screen.About> { AboutScreen(modifier = modifier, goBack = { navigator.goBack() }) }
 }
 
-fun NavGraphBuilder.feedGroupScreen(
+fun EntryProviderScope<NavKey>.feedGroupScreen(
   modifier: Modifier = Modifier,
   groupViewModel: (SavedStateHandle) -> GroupViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
 ) {
-  composable<Screen.FeedGroup> {
-    val viewModel = viewModel { groupViewModel(it.savedStateHandle) }
+  entry<Screen.FeedGroup> { feedGroupRoute ->
+    val savedStateHandle = SavedStateHandle(mapOf("id" to feedGroupRoute.groupId))
+    val viewModel = viewModel { groupViewModel(savedStateHandle) }
 
     LaunchedEffect(Unit) {
-      it.savedStateHandle
-        .getStateFlow<Set<String>>(SELECTED_GROUPS_KEY, emptySet())
+      navigator.results
+        .map { it[SELECTED_GROUPS_KEY] as? Set<String> }
         .filterNotNull()
         .onEach { selectedGroupIds ->
           if (selectedGroupIds.isNotEmpty()) {
             viewModel.dispatch(GroupEvent.OnGroupsSelected(selectedGroupIds))
-            it.savedStateHandle[SELECTED_GROUPS_KEY] = emptySet<String>()
+            navigator.consumeResult(SELECTED_GROUPS_KEY)
           }
         }
         .launchIn(this)
@@ -595,48 +560,39 @@ fun NavGraphBuilder.feedGroupScreen(
     GroupScreen(
       modifier = modifier,
       viewModel = viewModel,
-      goBack = { navController.popBackStack() },
-      openGroupSelection = { navController.navigate(Modals.GroupSelection()) },
+      goBack = { navigator.goBack() },
+      openGroupSelection = { navigator.navigate(Modals.GroupSelection()) },
     )
   }
 }
 
-fun NavGraphBuilder.blockedWordsScreen(
+fun EntryProviderScope<NavKey>.blockedWordsScreen(
   modifier: Modifier = Modifier,
   blockedWordsViewModel: () -> BlockedWordsViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
 ) {
-  composable<Screen.BlockedWords> {
+  entry<Screen.BlockedWords> {
     val viewModel = viewModel { blockedWordsViewModel() }
-    BlockedWordsScreen(
-      modifier = modifier,
-      viewModel = viewModel,
-      goBack = { navController.popBackStack() },
-    )
+    BlockedWordsScreen(modifier = modifier, viewModel = viewModel, goBack = { navigator.goBack() })
   }
 }
 
-fun NavGraphBuilder.paywallScreen(
+fun EntryProviderScope<NavKey>.paywallScreen(
   modifier: Modifier = Modifier,
   premiumPaywallViewModel: () -> PremiumPaywallViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
 ) {
-  composable<Screen.Paywall> {
+  entry<Screen.Paywall> { paywallRoute ->
     val viewModel = viewModel { premiumPaywallViewModel() }
     val hasPremium by viewModel.hasPremium.collectAsStateWithLifecycle()
     val packages by viewModel.packages.collectAsStateWithLifecycle()
     val inProgress by viewModel.inProgress.collectAsStateWithLifecycle()
-    val isFromOnboarding = it.toRoute<Screen.Paywall>().isFromOnboarding
+    val isFromOnboarding = paywallRoute.isFromOnboarding
 
     LaunchedEffect(hasPremium) {
       if (hasPremium) {
         delay(1000.milliseconds)
-
-        if (isFromOnboarding) {
-          navController.navigate(Screen.Main()) { popUpTo<Screen.Onboarding> { inclusive = true } }
-        } else {
-          navController.popBackStack()
-        }
+        navigator.goBack()
       }
     }
 
@@ -648,60 +604,54 @@ fun NavGraphBuilder.paywallScreen(
       isFromOnboarding = isFromOnboarding,
       onPurchase = viewModel::purchasePackage,
       onRestore = viewModel::restorePurchases,
-      goBack = {
-        if (isFromOnboarding) {
-          navController.navigate(Screen.Main()) { popUpTo<Screen.Onboarding> { inclusive = true } }
-        } else {
-          navController.popBackStack()
-        }
-      },
+      goBack = { navigator.goBack() },
     )
   }
 }
 
-fun NavGraphBuilder.imageViewerScreen(
-  navController: NavHostController,
+fun EntryProviderScope<NavKey>.imageViewerScreen(
+  navigator: AppNavigator,
   toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
   toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  composable<Screen.ImageViewer> {
-    val imageUrl = it.toRoute<Screen.ImageViewer>().imageUrl
+  entry<Screen.ImageViewer> { imageViewerRoute ->
+    val imageUrl = imageViewerRoute.imageUrl
     ImageViewerScreen(
       modifier = modifier,
       imageUrl = imageUrl,
-      onBack = { navController.popBackStack() },
+      onBack = { navigator.goBack() },
       toggleLightStatusBar = toggleLightStatusBar,
       toggleLightNavBar = toggleLightNavBar,
     )
   }
 }
 
-fun NavGraphBuilder.feedInfoDialog(
+fun EntryProviderScope<NavKey>.feedInfoDialog(
   feedViewModel: (SavedStateHandle) -> FeedViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
 ) {
-  dialog<Modals.FeedInfo> {
-    val viewModel = viewModel { feedViewModel(it.savedStateHandle) }
-    FeedInfoBottomSheet(feedViewModel = viewModel, dismiss = { navController.popBackStack() })
+  entry<Modals.FeedInfo> { modalRoute ->
+    val savedStateHandle = SavedStateHandle(mapOf("feedId" to modalRoute.feedId))
+    val viewModel = viewModel { feedViewModel(savedStateHandle) }
+    FeedInfoBottomSheet(feedViewModel = viewModel, dismiss = { navigator.goBack() })
   }
 }
 
-fun NavGraphBuilder.groupSelectionDialog(
+fun EntryProviderScope<NavKey>.groupSelectionDialog(
   groupSelectionViewModel: (SavedStateHandle) -> GroupSelectionViewModel,
-  navController: NavHostController,
+  navigator: AppNavigator,
 ) {
-  dialog<Modals.GroupSelection> {
-    val viewModel = viewModel { groupSelectionViewModel(it.savedStateHandle) }
+  entry<Modals.GroupSelection> { modalRoute ->
+    val savedStateHandle =
+      SavedStateHandle(mapOf("selectedGroupIds" to modalRoute.selectedGroupIds))
+    val viewModel = viewModel { groupSelectionViewModel(savedStateHandle) }
     GroupSelectionSheet(
       viewModel = viewModel,
-      dismiss = { navController.popBackStack() },
+      dismiss = { navigator.goBack() },
       onGroupsSelected = { selectedGroupIds ->
-        navController.previousBackStackEntry
-          ?.savedStateHandle
-          ?.set(SELECTED_GROUPS_KEY, selectedGroupIds)
-
-        navController.popBackStack()
+        navigator.setResult(SELECTED_GROUPS_KEY, selectedGroupIds)
+        navigator.goBack()
       },
     )
   }

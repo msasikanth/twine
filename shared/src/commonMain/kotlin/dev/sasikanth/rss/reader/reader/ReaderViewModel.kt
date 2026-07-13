@@ -20,11 +20,9 @@ package dev.sasikanth.rss.reader.reader
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.navigation.toRoute
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
@@ -44,7 +42,6 @@ import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Home
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Search
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.UnreadWidget
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import kotlin.reflect.typeOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -78,12 +75,7 @@ class ReaderViewModel(
 
   private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
   private val _openedPostItems = MutableStateFlow(emptySet<String>())
-  private val readerScreenArgs =
-    savedStateHandle
-      .toRoute<Screen.Reader>(
-        typeMap = mapOf(typeOf<ReaderScreenArgs>() to ReaderScreenArgs.navTypeMap)
-      )
-      .readerScreenArgs
+  private val readerScreenArgs = savedStateHandle.get<ReaderScreenArgs>("readerScreenArgs")!!
   private val defaultReaderState =
     ReaderState.default(
       initialPostIndex = readerScreenArgs.postIndex,
@@ -236,6 +228,7 @@ class ReaderViewModel(
                 UnreadWidget -> {
                   widgetDataRepository.unreadPostsPager(sessionPostIds = sessionPostIds)
                 }
+                else -> error("Unsupported screen")
               }
             }
             .flow

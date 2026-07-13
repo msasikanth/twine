@@ -27,16 +27,21 @@ class RealOAuthTokenProvider(private val userRepository: UserRepository) : OAuth
 
   override fun isSignedIn(serviceType: ServiceType): Flow<Boolean> {
     return when (serviceType) {
-      ServiceType.DROPBOX -> userRepository.user().map { it != null && it.serverUrl == null }
+      ServiceType.DROPBOX,
+      ServiceType.GOOGLE_DRIVE ->
+        userRepository.user().map {
+          it != null && it.serverUrl == null && it.serviceType == serviceType
+        }
       else -> flowOf(false)
     }
   }
 
   override suspend fun isSignedInImmediate(serviceType: ServiceType): Boolean {
     return when (serviceType) {
-      ServiceType.DROPBOX -> {
+      ServiceType.DROPBOX,
+      ServiceType.GOOGLE_DRIVE -> {
         val user = userRepository.currentUser()
-        user != null && user.serverUrl == null
+        user != null && user.serverUrl == null && user.serviceType == serviceType
       }
       else -> false
     }
@@ -44,14 +49,16 @@ class RealOAuthTokenProvider(private val userRepository: UserRepository) : OAuth
 
   override suspend fun getAccessToken(serviceType: ServiceType): String? {
     return when (serviceType) {
-      ServiceType.DROPBOX -> userRepository.currentUser()?.token
+      ServiceType.DROPBOX,
+      ServiceType.GOOGLE_DRIVE -> userRepository.currentUser()?.token
       else -> null
     }
   }
 
   override suspend fun saveAccessToken(serviceType: ServiceType, token: String?) {
     when (serviceType) {
-      ServiceType.DROPBOX -> {
+      ServiceType.DROPBOX,
+      ServiceType.GOOGLE_DRIVE -> {
         if (!(token.isNullOrBlank())) {
           userRepository.updateToken(token)
         }
@@ -64,14 +71,16 @@ class RealOAuthTokenProvider(private val userRepository: UserRepository) : OAuth
 
   override suspend fun getRefreshToken(serviceType: ServiceType): String? {
     return when (serviceType) {
-      ServiceType.DROPBOX -> userRepository.currentUser()?.refreshToken
+      ServiceType.DROPBOX,
+      ServiceType.GOOGLE_DRIVE -> userRepository.currentUser()?.refreshToken
       else -> null
     }
   }
 
   override suspend fun saveRefreshToken(serviceType: ServiceType, token: String?) {
     when (serviceType) {
-      ServiceType.DROPBOX -> {
+      ServiceType.DROPBOX,
+      ServiceType.GOOGLE_DRIVE -> {
         if (!(token.isNullOrBlank())) {
           userRepository.updateRefreshToken(token)
         }

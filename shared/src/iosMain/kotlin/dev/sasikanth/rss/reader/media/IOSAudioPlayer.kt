@@ -129,12 +129,20 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
           fileManager.moveItemAtURL(location, localUrl, null)
           dispatch_async(dispatch_get_main_queue()) {
             if (playingUrl == remoteUrl && _playbackState.value.isPlaying) {
-              playInternal(localUrl, title, artist, coverUrl, 0L)
+              val currentPos = _playbackState.value.currentPosition
+              playInternal(localUrl, title, artist, coverUrl, currentPos)
             }
           }
         }
       }
-    task.resume()
+    task.priority = 0.0f // NSURLSessionTaskPriorityLow
+
+    scope.launch {
+      delay(3000)
+      if (playingUrl == remoteUrl) {
+        task.resume()
+      }
+    }
 
     // While downloading, we can start playing from the remote URL if we want streaming + caching,
     // but AVPlayer can't easily switch from remote to local seamlessly or use a shared cache.

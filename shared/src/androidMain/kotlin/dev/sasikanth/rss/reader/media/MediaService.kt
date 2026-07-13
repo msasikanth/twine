@@ -41,7 +41,11 @@ class MediaService : MediaSessionService() {
     val cacheDataSourceFactory =
       CacheDataSource.Factory()
         .setCache(AudioCacheProvider.cache)
-        .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
+        .setUpstreamDataSourceFactory(
+          DefaultHttpDataSource.Factory()
+            .setAllowCrossProtocolRedirects(true)
+            .setUserAgent("Twine (https://github.com/msasikanth/twine)")
+        )
 
     val player =
       ExoPlayer.Builder(this)

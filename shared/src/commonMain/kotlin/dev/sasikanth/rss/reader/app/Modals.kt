@@ -17,11 +17,13 @@
 
 package dev.sasikanth.rss.reader.app
 
+import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
-internal sealed interface Modals {
+@Serializable
+internal sealed interface Modals : NavKey {
 
-  data object None : Modals
+  @Serializable data object None : Modals
 
   @Serializable data class FeedInfo(val feedId: String) : Modals
 

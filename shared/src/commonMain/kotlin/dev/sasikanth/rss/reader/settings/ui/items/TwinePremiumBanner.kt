@@ -49,7 +49,10 @@ internal fun TwinePremiumBanner(
 ) {
   Column(
     modifier =
-      modifier.fillMaxWidth().clickable { onClick() }.padding(horizontal = 24.dp, vertical = 16.dp),
+      modifier
+        .fillMaxWidth()
+        .clickable(enabled = subscriptionResult != SubscriptionResult.Subscribed) { onClick() }
+        .padding(horizontal = 24.dp, vertical = 16.dp),
     verticalArrangement = Arrangement.spacedBy(16.dp),
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {

@@ -76,6 +76,7 @@ import twine.shared.generated.resources.settingsHeaderSync
 import twine.shared.generated.resources.settingsServicesAndSync
 import twine.shared.generated.resources.settingsSyncDropbox
 import twine.shared.generated.resources.settingsSyncFreshRSS
+import twine.shared.generated.resources.settingsSyncGoogleDrive
 import twine.shared.generated.resources.settingsSyncMiniflux
 import twine.shared.generated.resources.settingsSyncStatusFailure
 import twine.shared.generated.resources.switchServiceDescription
@@ -338,6 +339,7 @@ private fun serviceName(serviceType: ServiceType?): String {
     ServiceType.DROPBOX -> stringResource(Res.string.settingsSyncDropbox)
     ServiceType.FRESH_RSS -> stringResource(Res.string.settingsSyncFreshRSS)
     ServiceType.MINIFLUX -> stringResource(Res.string.settingsSyncMiniflux)
+    ServiceType.GOOGLE_DRIVE -> stringResource(Res.string.settingsSyncGoogleDrive)
     null -> ""
   }
 }

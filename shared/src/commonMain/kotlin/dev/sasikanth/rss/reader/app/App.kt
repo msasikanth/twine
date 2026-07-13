@@ -16,13 +16,6 @@
  */
 package dev.sasikanth.rss.reader.app
 
-import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,16 +31,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavDeepLinkRequest
-import androidx.navigation.NavHostController
-import androidx.navigation.NavUri
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
+import androidx.savedstate.serialization.SavedStateConfiguration
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionViewModel
@@ -103,6 +95,9 @@ import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclassesOfSealed
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -194,11 +189,25 @@ fun App(
       remember(appState.themeVariant, useDarkTheme, systemDynamicColors) {
         systemDynamicColors ?: appState.themeVariant.getOverriddenColorScheme(useDarkTheme)
       }
-    val navController = rememberNavController()
+
+    val config = remember {
+      SavedStateConfiguration {
+        serializersModule = SerializersModule {
+          polymorphic(NavKey::class) {
+            subclassesOfSealed<Screen>()
+            subclassesOfSealed<Modals>()
+          }
+        }
+      }
+    }
+
+    val backStack = rememberNavBackStack(config, Screen.Placeholder)
+    val navigator = remember { AppNavigator(backStack) }
+
     val openPost: (Int, ResolvedPost, FromScreen) -> Unit =
-      remember(navController, linkHandler, appViewModel, coroutineScope) {
+      remember(navigator, linkHandler, appViewModel, coroutineScope) {
         { index, post, fromScreen ->
-          navController.navigateToReaderOrOpenLink(
+          navigator.navigateToReaderOrOpenLink(
             showReader = appState.showReaderView,
             index = index,
             post = post,
@@ -236,46 +245,29 @@ fun App(
 
     LaunchedEffect(Unit) {
       appViewModel.navigateToReader
-        .onEach { args ->
-          val route = Screen.Reader(args)
-          if (!navController.popBackStack(Screen.Main(), inclusive = false)) {
-            navController.navigate(Screen.Main()) {
-              popUpTo<Screen.Placeholder> { inclusive = true }
-              launchSingleTop = true
-            }
-          }
-          navController.navigate(route)
-        }
+        .onEach { args -> navigator.navigateToReader(args) }
         .launchIn(this)
     }
 
     LaunchedEffect(Unit) {
       ExternalUriHandler.uri.collect { uri ->
         if (uri != null) {
-          if (uri.startsWith("twine://oauth")) {
+          if (uri.startsWith("twine://oauth") || uri.startsWith("com.googleusercontent.apps.")) {
             appViewModel.onOAuthRedirect(uri, linkHandler)
           } else if (uri == "twine://bookmarks") {
-            navController.navigate(Screen.Main(startTab = Screen.Main.TAB_BOOKMARKS)) {
-              popUpTo<Screen.Placeholder> { inclusive = true }
-              launchSingleTop = true
-            }
+            navigator.navigateToMain(startTab = Screen.Main.TAB_BOOKMARKS)
           } else if (uri == "twine://reader/currently-playing") {
             val playingPostId = audioPlayer.playbackState.value.playingPostId
             if (playingPostId != null) {
               appViewModel.onCurrentlyPlayingDeepLink(playingPostId)
             }
           } else {
-            val deepLinkRequest =
-              NavDeepLinkRequest(uri = NavUri(uri), action = null, mimeType = null)
-            if (navController.graph.hasDeepLink(deepLinkRequest)) {
-              if (!navController.popBackStack(Screen.Main(), inclusive = false)) {
-                navController.navigate(Screen.Main()) {
-                  popUpTo<Screen.Placeholder> { inclusive = true }
-                  launchSingleTop = true
-                }
+            val screen = DeepLinkParser.parse(uri)
+            if (screen != null) {
+              if (!navigator.popUpTo(Screen.Main::class, inclusive = false)) {
+                navigator.navigateToMain()
               }
-
-              navController.navigate(NavUri(uri))
+              navigator.navigate(screen)
             }
           }
           ExternalUriHandler.consume()
@@ -284,181 +276,154 @@ fun App(
     }
 
     AppTheme(useDarkTheme = useDarkTheme, overriddenColorScheme = overriddenColorScheme) {
-      NavHost(
-        navController = navController,
-        startDestination = Screen.Placeholder,
-        popEnterTransition = {
-          if (platform == Platform.Apple) {
-            slideIntoContainer(
-              towards = SlideDirection.End,
-              animationSpec = tween(durationMillis = 200, easing = LinearEasing),
-              initialOffset = { fullOffset -> (fullOffset * 0.4f).toInt() },
-            )
-          } else {
-            fadeIn(
-              animationSpec =
-                spring(
-                  dampingRatio = 1.0f, // reflects material3 motionScheme.defaultEffectsSpec()
-                  stiffness = 1600.0f, // reflects material3 motionScheme.defaultEffectsSpec()
-                )
-            )
-          }
-        },
-        popExitTransition = {
-          if (platform == Platform.Apple) {
-            slideOutOfContainer(
-              towards = SlideDirection.End,
-              animationSpec = tween(durationMillis = 200, easing = LinearEasing),
-              targetOffset = { fullOffset -> fullOffset },
-            )
-          } else {
-            scaleOut(
-              targetScale = 0.7f,
-              transformOrigin = TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 0.5f),
-            ) + fadeOut()
-          }
-        },
-      ) {
-        placeholderScreen(
-          modifier = screenModifier,
-          placeholderViewModel = placeholderViewModel,
-          navController = navController,
-        )
+      val entryProvider =
+        entryProvider<NavKey> {
+          placeholderScreen(
+            modifier = screenModifier,
+            placeholderViewModel = placeholderViewModel,
+            navigator = navigator,
+          )
 
-        onboardingScreen(
-          modifier = screenModifier,
-          onboardingViewModel = onboardingViewModel,
-          navController = navController,
-        )
+          onboardingScreen(
+            modifier = screenModifier,
+            onboardingViewModel = onboardingViewModel,
+            navigator = navigator,
+          )
 
-        accountSelectionScreen(
-          modifier = screenModifier,
-          accountSelectionViewModel = accountSelectionViewModel,
-          navController = navController,
-        )
+          accountSelectionScreen(
+            modifier = screenModifier,
+            accountSelectionViewModel = accountSelectionViewModel,
+            navigator = navigator,
+          )
 
-        mainScreen(
-          navController = navController,
-          useDarkTheme = useDarkTheme,
-          toggleLightStatusBar = toggleLightStatusBar,
-          toggleLightNavBar = toggleLightNavBar,
-          homeViewModel = homeViewModel,
-          feedsViewModel = feedsViewModel,
-          searchViewModel = searchViewModel,
-          bookmarksViewModel = bookmarksViewModel,
-          settingsViewModel = settingsViewModel,
-          discoveryViewModel = discoveryViewModel,
-          openPost = openPost,
-          screenModifier = screenModifier,
-        )
+          mainScreen(
+            navigator = navigator,
+            useDarkTheme = useDarkTheme,
+            toggleLightStatusBar = toggleLightStatusBar,
+            toggleLightNavBar = toggleLightNavBar,
+            homeViewModel = homeViewModel,
+            feedsViewModel = feedsViewModel,
+            searchViewModel = searchViewModel,
+            bookmarksViewModel = bookmarksViewModel,
+            settingsViewModel = settingsViewModel,
+            discoveryViewModel = discoveryViewModel,
+            openPost = openPost,
+            screenModifier = screenModifier,
+          )
 
-        freshRssLoginScreen(
-          modifier = screenModifier,
-          freshRssLoginViewModel = freshRssLoginViewModel,
-          navController = navController,
-        )
+          freshRssLoginScreen(
+            modifier = screenModifier,
+            freshRssLoginViewModel = freshRssLoginViewModel,
+            navigator = navigator,
+          )
 
-        minifluxLoginScreen(
-          modifier = screenModifier,
-          minifluxLoginViewModel = minifluxLoginViewModel,
-          navController = navController,
-        )
+          minifluxLoginScreen(
+            modifier = screenModifier,
+            minifluxLoginViewModel = minifluxLoginViewModel,
+            navigator = navigator,
+          )
 
-        readerScreen(
-          readerViewModel = readerViewModel,
-          readerPageViewModel = readerPageViewModel,
-          navController = navController,
-          toggleLightStatusBar = toggleLightStatusBar,
-          toggleLightNavBar = toggleLightNavBar,
-          modifier = screenModifier,
-        )
+          readerScreen(
+            readerViewModel = readerViewModel,
+            readerPageViewModel = readerPageViewModel,
+            navigator = navigator,
+            toggleLightStatusBar = toggleLightStatusBar,
+            toggleLightNavBar = toggleLightNavBar,
+            modifier = screenModifier,
+          )
 
-        addFeedScreen(
-          modifier = screenModifier,
-          addFeedViewModel = addFeedViewModel,
-          navController = navController,
-          useDarkTheme = useDarkTheme,
-          toggleLightStatusBar = toggleLightStatusBar,
-          toggleLightNavBar = toggleLightNavBar,
-        )
+          addFeedScreen(
+            modifier = screenModifier,
+            addFeedViewModel = addFeedViewModel,
+            navigator = navigator,
+            useDarkTheme = useDarkTheme,
+            toggleLightStatusBar = toggleLightStatusBar,
+            toggleLightNavBar = toggleLightNavBar,
+          )
 
-        discoveryScreen(
-          discoveryViewModel = discoveryViewModel,
-          navController = navController,
-          screenModifier = screenModifier,
-        )
+          discoveryScreen(
+            discoveryViewModel = discoveryViewModel,
+            navigator = navigator,
+            screenModifier = screenModifier,
+          )
 
-        aboutScreen(modifier = screenModifier, navController = navController)
+          aboutScreen(modifier = screenModifier, navigator = navigator)
 
-        feedGroupScreen(
-          modifier = screenModifier,
-          groupViewModel = groupViewModel,
-          navController = navController,
-        )
+          feedGroupScreen(
+            modifier = screenModifier,
+            groupViewModel = groupViewModel,
+            navigator = navigator,
+          )
 
-        blockedWordsScreen(
-          modifier = screenModifier,
-          blockedWordsViewModel = blockedWordsViewModel,
-          navController = navController,
-        )
+          blockedWordsScreen(
+            modifier = screenModifier,
+            blockedWordsViewModel = blockedWordsViewModel,
+            navigator = navigator,
+          )
 
-        paywallScreen(
-          modifier = screenModifier,
-          premiumPaywallViewModel = premiumPaywallViewModel,
-          navController = navController,
-        )
+          paywallScreen(
+            modifier = screenModifier,
+            premiumPaywallViewModel = premiumPaywallViewModel,
+            navigator = navigator,
+          )
 
-        imageViewerScreen(
-          modifier = screenModifier,
-          navController = navController,
-          toggleLightStatusBar = toggleLightStatusBar,
-          toggleLightNavBar = toggleLightNavBar,
-        )
+          imageViewerScreen(
+            modifier = screenModifier,
+            navigator = navigator,
+            toggleLightStatusBar = toggleLightStatusBar,
+            toggleLightNavBar = toggleLightNavBar,
+          )
 
-        settingsAppearanceScreen(
-          modifier = screenModifier,
-          settingsViewModel = settingsViewModel,
-          navController = navController,
-        )
+          settingsAppearanceScreen(
+            modifier = screenModifier,
+            settingsViewModel = settingsViewModel,
+            navigator = navigator,
+          )
 
-        settingsBehaviorScreen(
-          modifier = screenModifier,
-          settingsViewModel = settingsViewModel,
-          navController = navController,
-        )
+          settingsBehaviorScreen(
+            modifier = screenModifier,
+            settingsViewModel = settingsViewModel,
+            navigator = navigator,
+          )
 
-        settingsServicesScreen(
-          modifier = screenModifier,
-          settingsViewModel = settingsViewModel,
-          navController = navController,
-        )
+          settingsServicesScreen(
+            modifier = screenModifier,
+            settingsViewModel = settingsViewModel,
+            navigator = navigator,
+          )
 
-        settingsDataScreen(
-          statisticsViewModel = statisticsViewModel,
-          navController = navController,
-          modifier = screenModifier,
-        )
+          settingsDataScreen(
+            statisticsViewModel = statisticsViewModel,
+            navigator = navigator,
+            modifier = screenModifier,
+          )
 
-        feedHealthScreen(
-          feedHealthViewModel = feedHealthViewModel,
-          navController = navController,
-          modifier = screenModifier,
-        )
+          feedHealthScreen(
+            feedHealthViewModel = feedHealthViewModel,
+            navigator = navigator,
+            modifier = screenModifier,
+          )
 
-        settingsAppInfoScreen(
-          modifier = screenModifier,
-          settingsViewModel = settingsViewModel,
-          openChangelog = { appViewModel.openChangelog() },
-          navController = navController,
-        )
+          settingsAppInfoScreen(
+            modifier = screenModifier,
+            settingsViewModel = settingsViewModel,
+            openChangelog = { appViewModel.openChangelog() },
+            navigator = navigator,
+          )
 
-        feedInfoDialog(feedViewModel = feedViewModel, navController = navController)
+          feedInfoDialog(feedViewModel = feedViewModel, navigator = navigator)
 
-        groupSelectionDialog(
-          groupSelectionViewModel = groupSelectionViewModel,
-          navController = navController,
-        )
-      }
+          groupSelectionDialog(
+            groupSelectionViewModel = groupSelectionViewModel,
+            navigator = navigator,
+          )
+        }
+
+      NavDisplay(
+        backStack = backStack,
+        entryProvider = entryProvider,
+        onBack = { navigator.goBack() },
+      )
 
       if (appState.showChangelog) {
         ChangelogSheet(
@@ -470,7 +435,7 @@ fun App(
   }
 }
 
-private fun NavHostController.navigateToReaderOrOpenLink(
+private fun AppNavigator.navigateToReaderOrOpenLink(
   showReader: Boolean,
   index: Int,
   post: ResolvedPost,
