@@ -31,7 +31,9 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -122,24 +124,39 @@ internal fun FeaturedSection(
 
   Box(modifier) {
     if (canBlurImage && blurEffect != null && featuredPosts.isNotEmpty()) {
-      featuredPosts.forEachIndexed { page, featuredPost ->
-        val alphaProvider =
-          remember(page, postsType, markAsReadOn) {
-            {
-              val pageOffset = pagerState.getOffsetFractionForPage(page)
-              if (postsType == PostsType.UNREAD && markAsReadOn == MarkAsReadOn.Scroll) {
-                calculateContentAlpha(pageOffset)
-              } else {
-                calculateBackgroundAlpha(pageOffset)
+      // Only the current page and its immediate neighbors can be visible during a swipe;
+      // composing a blurred background per featured post stacks fully opaque layers.
+      val backgroundPageRange by
+        remember(featuredPosts.size) {
+          derivedStateOf {
+            val currentPage = pagerState.currentPage
+            val firstPage = (currentPage - 1).coerceAtLeast(0)
+            val lastPage = (currentPage + 1).coerceAtMost(featuredPosts.lastIndex)
+            firstPage..lastPage
+          }
+        }
+
+      for (page in backgroundPageRange) {
+        key(page) {
+          val featuredPost = featuredPosts[page]
+          val alphaProvider =
+            remember(page, postsType, markAsReadOn) {
+              {
+                val pageOffset = pagerState.getOffsetFractionForPage(page)
+                if (postsType == PostsType.UNREAD && markAsReadOn == MarkAsReadOn.Scroll) {
+                  calculateContentAlpha(pageOffset)
+                } else {
+                  calculateBackgroundAlpha(pageOffset)
+                }
               }
             }
-          }
-        FeaturedSectionBackground(
-          imageUrl = featuredPost.resolvedPost.imageUrl,
-          imageAspectRatio = imageAspectRatio,
-          blurEffect = blurEffect,
-          alphaProvider = alphaProvider,
-        )
+          FeaturedSectionBackground(
+            imageUrl = featuredPost.resolvedPost.imageUrl,
+            imageAspectRatio = imageAspectRatio,
+            blurEffect = blurEffect,
+            alphaProvider = alphaProvider,
+          )
+        }
       }
     }
 
@@ -284,10 +301,12 @@ private fun FeaturedSectionBackground(
 }
 
 private fun calculateBackgroundAlpha(pageOffset: Float): Float {
-  return if (pageOffset >= 0f) {
-    1f
-  } else {
-    calculateContentAlpha(pageOffset)
+  return when {
+    // Fully swiped-past pages sit behind the current page's opaque background;
+    // hide them instead of drawing invisible blurred layers.
+    pageOffset >= 1f -> 0f
+    pageOffset >= 0f -> 1f
+    else -> calculateContentAlpha(pageOffset)
   }
 }
 

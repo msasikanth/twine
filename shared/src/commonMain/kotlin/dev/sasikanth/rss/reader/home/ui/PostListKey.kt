@@ -31,9 +31,15 @@ data class PostListKey(val postId: String, val feedId: String) {
 
     fun decodeSafe(key: String): PostListKey? {
       if (!key.startsWith("post_key_")) return null
-      val parts = key.removePrefix("post_key_").split("_")
-      if (parts.size < 2) return null
-      return PostListKey(postId = parts[0], feedId = parts[1])
+      val encoded = key.removePrefix("post_key_")
+      // feedId is the segment after the last underscore; splitting on every
+      // underscore would corrupt any id that itself contains one.
+      val separatorIndex = encoded.lastIndexOf('_')
+      if (separatorIndex <= 0 || separatorIndex == encoded.lastIndex) return null
+      return PostListKey(
+        postId = encoded.substring(0, separatorIndex),
+        feedId = encoded.substring(separatorIndex + 1),
+      )
     }
   }
 }

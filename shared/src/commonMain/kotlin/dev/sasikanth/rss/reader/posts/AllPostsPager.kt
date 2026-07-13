@@ -102,7 +102,7 @@ class AllPostsPager(
     sessionPostIds: () -> List<String> = { emptyList() }
   ): Flow<PagingData<ResolvedPost>> =
     baseParameters.flatMapLatest { params ->
-      Pager(config = PagingConfig(pageSize = 20, enablePlaceholders = true)) {
+      Pager(config = PagingConfig(pageSize = 20, enablePlaceholders = true, jumpThreshold = 60)) {
           rssRepository.allPosts(
             activeSourceIds = params.activeSourceIds,
             postsSortOrder = params.postsSortOrder,
@@ -119,7 +119,7 @@ class AllPostsPager(
     sessionPostIds: () -> List<String> = { emptyList() }
   ): Flow<PagingData<ResolvedPost>> =
     baseParameters.flatMapLatest { params ->
-      Pager(config = PagingConfig(pageSize = 20, enablePlaceholders = true)) {
+      Pager(config = PagingConfig(pageSize = 20, enablePlaceholders = true, jumpThreshold = 60)) {
           rssRepository.nonFeaturedPosts(
             activeSourceIds = params.activeSourceIds,
             postsSortOrder = params.postsSortOrder,
@@ -148,10 +148,13 @@ class AllPostsPager(
           sessionPostIds = sessionPostIds,
         )
         .onEach { posts ->
+          val postsNeedingSeedColor =
+            posts.filter { it.seedColor == null && !it.imageUrl.isNullOrBlank() }
+          if (postsNeedingSeedColor.isEmpty()) return@onEach
+
           coroutineScope.launch(dispatchersProvider.io) {
             val seedColorUpdates =
-              posts
-                .filter { it.seedColor == null && !it.imageUrl.isNullOrBlank() }
+              postsNeedingSeedColor
                 .map { post ->
                   async {
                     val seedColor = seedColorExtractor.calculateSeedColor(post.imageUrl)

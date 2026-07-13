@@ -168,13 +168,7 @@ internal fun HomeScreen(
   val postsProvider = remember(posts) { { posts } }
 
   val featuredPosts by
-    remember(
-        state.featuredPosts,
-        state.themeVariant,
-        sizeClass,
-        shouldBlockImage,
-        state.activeSource?.id,
-      ) {
+    remember(state.featuredPosts, sizeClass, shouldBlockImage) {
         if (
           shouldBlockImage ||
             sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)
@@ -392,9 +386,11 @@ private fun HomeContent(
               postsListState.scrollToItem(0)
               featuredPostsPagerState.scrollToPage(activePostIndex)
             } else {
-              // Since indexes start from 0, we are increasing the featured posts size by one
-              val featuredPostsLastIndex = (numberOfFeaturedPosts - 1).coerceAtLeast(0)
-              val adjustedIndex = (activePostIndex - featuredPostsLastIndex).coerceAtLeast(0)
+              // activePostIndex counts featured posts first, then list posts. In the
+              // LazyColumn the featured section always occupies item 0 (even when the
+              // featured list is empty), so the list index of a post is its position
+              // among non-featured posts plus one.
+              val adjustedIndex = (activePostIndex - numberOfFeaturedPosts + 1).coerceAtLeast(0)
 
               // Since we apply top content padding to the LazyColumn, we are offsetting
               // the scroll so that the actual item is visible at top of the page for user.

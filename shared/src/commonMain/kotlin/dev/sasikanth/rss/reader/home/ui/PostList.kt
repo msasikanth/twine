@@ -38,6 +38,14 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
+private data class VisibleWindow(
+  val firstIndex: Int,
+  val lastIndex: Int,
+  val firstKey: Any?,
+  val lastKey: Any?,
+  val firstVisibleItemIndex: Int,
+)
+
 @OptIn(FlowPreview::class)
 @Composable
 internal fun PostsList(
@@ -67,28 +75,37 @@ internal fun PostsList(
     }
 
   LaunchedEffect(listState, featuredPosts, featuredPostsPagerState) {
+    // Snapshot only the boundaries of the visible window; layoutInfo changes on every
+    // scrolled pixel, and mapping every visible item per frame allocates heavily. The
+    // full key -> index map is built only when the visible item set actually changes.
     snapshotFlow {
-        listState.layoutInfo.visibleItemsInfo.map { it.key to it.index } to
-          listState.firstVisibleItemIndex
+        val visibleItemsInfo = listState.layoutInfo.visibleItemsInfo
+        VisibleWindow(
+          firstIndex = visibleItemsInfo.firstOrNull()?.index ?: -1,
+          lastIndex = visibleItemsInfo.lastOrNull()?.index ?: -1,
+          firstKey = visibleItemsInfo.firstOrNull()?.key,
+          lastKey = visibleItemsInfo.lastOrNull()?.key,
+          firstVisibleItemIndex = listState.firstVisibleItemIndex,
+        )
       }
       .distinctUntilChanged()
-      .onEach { (keyIndexPairs, firstVisibleItemIndex) ->
+      .onEach { window ->
         val currentPage = featuredPostsPagerState.currentPage
         val visibleItems =
-          keyIndexPairs
-            .mapNotNull { (key, index) ->
-              val keyString = key as? String
+          listState.layoutInfo.visibleItemsInfo
+            .mapNotNull { itemInfo ->
+              val keyString = itemInfo.key as? String
               when {
                 keyString.isNullOrBlank() -> null
                 keyString == "featured_items" -> {
                   val post = featuredPosts.getOrNull(currentPage)
-                  post?.resolvedPost?.id?.let { it to index }
+                  post?.resolvedPost?.id?.let { it to itemInfo.index }
                 }
-                else -> PostListKey.decodeSafe(keyString)?.postId?.let { it to index }
+                else -> PostListKey.decodeSafe(keyString)?.postId?.let { it to itemInfo.index }
               }
             }
             .toMap()
-        onVisiblePostsChanged(visibleItems, firstVisibleItemIndex)
+        onVisiblePostsChanged(visibleItems, window.firstVisibleItemIndex)
       }
       .launchIn(this)
   }

@@ -48,6 +48,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
@@ -57,6 +58,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
@@ -259,16 +261,25 @@ class HomeViewModel(
     val allPostsPagingData = allPostsPager.allPostsPagingData().cachedIn(viewModelScope)
     val feedPostsPagingData = allPostsPager.nonFeaturedPostsPagingData().cachedIn(viewModelScope)
 
+    // Hot flow: keeps a single shared DB subscription so UI re-collection and the
+    // `.first()` reads in calculateHomeIndex/onScreenStopped don't re-run the query.
+    // Started lazily (not WhileSubscribed) so the value stays fresh while the reader
+    // screen is on top of home; calculateHomeIndex depends on it to map indices.
     val featuredPosts =
       combine(allPostsPager.featuredPosts(), settingsRepository.showFeaturedSection) {
-        featuredPosts,
-        showFeaturedSection ->
-        if (showFeaturedSection) {
-          featuredPosts
-        } else {
-          persistentListOf()
+          featuredPosts,
+          showFeaturedSection ->
+          if (showFeaturedSection) {
+            featuredPosts
+          } else {
+            persistentListOf()
+          }
         }
-      }
+        .stateIn(
+          scope = viewModelScope,
+          started = SharingStarted.Lazily,
+          initialValue = persistentListOf(),
+        )
 
     _state.update {
       it.copy(
