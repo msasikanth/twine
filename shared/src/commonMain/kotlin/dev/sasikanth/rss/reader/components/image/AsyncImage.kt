@@ -17,6 +17,7 @@
 package dev.sasikanth.rss.reader.components.image
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -29,6 +30,10 @@ import coil3.size.Size
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+
+// Shared across all image requests so the parallelism limit is global instead of
+// allocating a new limited dispatcher per request.
+private val imageDecoderDispatcher = Dispatchers.IO.limitedParallelism(4)
 
 @Composable
 internal fun AsyncImage(
@@ -46,16 +51,19 @@ internal fun AsyncImage(
   if (shouldBlockImage) {
     // no-op
   } else {
-    coil3.compose.AsyncImage(
-      model =
+    val model =
+      remember(context, url, size) {
         ImageRequest.Builder(context)
           .data(url)
           .size(size)
           .diskCacheKey(url)
           .memoryCacheKey(url)
           .crossfade(true)
-          .decoderCoroutineContext(Dispatchers.IO.limitedParallelism(4))
-          .build(),
+          .decoderCoroutineContext(imageDecoderDispatcher)
+          .build()
+      }
+    coil3.compose.AsyncImage(
+      model = model,
       contentDescription = contentDescription,
       modifier = modifier,
       contentScale = contentScale,
