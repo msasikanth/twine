@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.data.di
 import app.cash.sqldelight.EnumColumnAdapter
 import app.cash.sqldelight.db.AfterVersion
 import app.cash.sqldelight.db.SqlDriver
+import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.data.database.BlockedWord
 import dev.sasikanth.rss.reader.data.database.Feed
 import dev.sasikanth.rss.reader.data.database.FeedGroup
@@ -171,13 +172,16 @@ interface DataComponent :
     googleDriveSyncProvider: GoogleDriveCloudServiceProvider,
     freshRssSyncProvider: FreshRssSyncProvider,
     minifluxSyncProvider: MinifluxSyncProvider,
+    appInfo: AppInfo,
   ): Set<CloudServiceProvider> {
-    return setOf(
-      minifluxSyncProvider,
-      freshRssSyncProvider,
-      cloudServiceProvider,
-      googleDriveSyncProvider,
-    )
+    return buildSet {
+      add(minifluxSyncProvider)
+      add(freshRssSyncProvider)
+      add(cloudServiceProvider)
+      if (!appInfo.isFoss) {
+        add(googleDriveSyncProvider)
+      }
+    }
   }
 
   @Provides fun providesPostContentQueries(database: ReaderDatabase) = database.postContentQueries
