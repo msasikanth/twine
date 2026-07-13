@@ -40,6 +40,7 @@ import dev.sasikanth.rss.reader.data.sync.auth.RealOAuthManager
 import dev.sasikanth.rss.reader.data.sync.auth.RealOAuthTokenProvider
 import dev.sasikanth.rss.reader.data.sync.dropbox.DropboxCloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.freshrss.FreshRssSyncProvider
+import dev.sasikanth.rss.reader.data.sync.google.GoogleDriveCloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.miniflux.MinifluxSyncProvider
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import io.ktor.client.HttpClient
@@ -152,12 +153,31 @@ interface DataComponent :
 
   @Provides
   @AppScope
+  fun providesGoogleDriveSyncProvider(
+    httpClient: HttpClient,
+    tokenProvider: OAuthTokenProvider,
+    userRepository: UserRepository,
+  ): GoogleDriveCloudServiceProvider =
+    GoogleDriveCloudServiceProvider(
+      httpClient = httpClient,
+      tokenProvider = tokenProvider,
+      onSignOut = { userRepository.deleteUser() },
+    )
+
+  @Provides
+  @AppScope
   fun providesSyncProviders(
     cloudServiceProvider: DropboxCloudServiceProvider,
+    googleDriveSyncProvider: GoogleDriveCloudServiceProvider,
     freshRssSyncProvider: FreshRssSyncProvider,
     minifluxSyncProvider: MinifluxSyncProvider,
   ): Set<CloudServiceProvider> {
-    return setOf(minifluxSyncProvider, freshRssSyncProvider, cloudServiceProvider)
+    return setOf(
+      minifluxSyncProvider,
+      freshRssSyncProvider,
+      cloudServiceProvider,
+      googleDriveSyncProvider,
+    )
   }
 
   @Provides fun providesPostContentQueries(database: ReaderDatabase) = database.postContentQueries
