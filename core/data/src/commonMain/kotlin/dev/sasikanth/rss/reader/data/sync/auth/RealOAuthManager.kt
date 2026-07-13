@@ -35,6 +35,17 @@ import okio.ByteString.Companion.encodeUtf8
 
 internal const val DROPBOX_CLIENT_ID = "qtxdwxyzi69tuxp"
 
+// Google requires one OAuth client per platform, so each platform supplies its own client ID
+internal expect val GOOGLE_DRIVE_CLIENT_ID: String
+
+// Google only accepts the reversed-client-ID custom scheme as the redirect for
+// native app clients, unlike Dropbox which allows arbitrary schemes.
+internal val GOOGLE_DRIVE_REDIRECT_URI: String
+  get() =
+    "com.googleusercontent.apps." +
+      GOOGLE_DRIVE_CLIENT_ID.removeSuffix(".apps.googleusercontent.com") +
+      ":/oauth2redirect"
+
 class RealOAuthManager(
   private val httpClient: HttpClient,
   private val tokenProvider: OAuthTokenProvider,
@@ -63,6 +74,22 @@ class RealOAuthManager(
           }
           .buildString()
       }
+      ServiceType.GOOGLE_DRIVE -> {
+        codeVerifier = generateCodeVerifier()
+        val codeChallenge = generateCodeChallenge(codeVerifier!!)
+        URLBuilder("https://accounts.google.com/o/oauth2/v2/auth")
+          .apply {
+            parameters.append("client_id", GOOGLE_DRIVE_CLIENT_ID)
+            parameters.append("redirect_uri", GOOGLE_DRIVE_REDIRECT_URI)
+            parameters.append("response_type", "code")
+            parameters.append("scope", "https://www.googleapis.com/auth/drive.appdata")
+            parameters.append("access_type", "offline")
+            parameters.append("prompt", "consent")
+            parameters.append("code_challenge", codeChallenge)
+            parameters.append("code_challenge_method", "S256")
+          }
+          .buildString()
+      }
       else -> ""
     }
   }
@@ -78,35 +105,63 @@ class RealOAuthManager(
       val serviceType = pendingServiceType!!
       val verifier = codeVerifier!!
       try {
-        val response: DropboxTokenResponse =
-          httpClient
-            .submitForm(
-              url = "https://api.dropboxapi.com/oauth2/token",
-              formParameters =
-                Parameters.build {
-                  append("code", code)
-                  append("grant_type", "authorization_code")
-                  append("client_id", DROPBOX_CLIENT_ID)
-                  append("redirect_uri", redirectUri)
-                  append("code_verifier", verifier)
-                },
-            )
-            .body()
+        val (accessToken, refreshToken) =
+          when (serviceType) {
+            ServiceType.GOOGLE_DRIVE -> {
+              val response: GoogleTokenResponse =
+                httpClient
+                  .submitForm(
+                    url = "https://oauth2.googleapis.com/token",
+                    formParameters =
+                      Parameters.build {
+                        append("code", code)
+                        append("grant_type", "authorization_code")
+                        append("client_id", GOOGLE_DRIVE_CLIENT_ID)
+                        append("redirect_uri", GOOGLE_DRIVE_REDIRECT_URI)
+                        append("code_verifier", verifier)
+                      },
+                  )
+                  .body()
+              response.accessToken to response.refreshToken
+            }
+            else -> {
+              val response: DropboxTokenResponse =
+                httpClient
+                  .submitForm(
+                    url = "https://api.dropboxapi.com/oauth2/token",
+                    formParameters =
+                      Parameters.build {
+                        append("code", code)
+                        append("grant_type", "authorization_code")
+                        append("client_id", DROPBOX_CLIENT_ID)
+                        append("redirect_uri", redirectUri)
+                        append("code_verifier", verifier)
+                      },
+                  )
+                  .body()
+              response.accessToken to response.refreshToken
+            }
+          }
 
-        // Placeholder user data, replace if Dropbox approves getting user info via API
+        // Placeholder user data, replace if providers approve getting user info via API
+        val (placeholderName, placeholderEmail) =
+          when (serviceType) {
+            ServiceType.GOOGLE_DRIVE -> "Google Drive User" to "user@googledrive"
+            else -> "Dropbox User" to "user@dropbox"
+          }
         userRepository.saveUser(
           id = "1",
-          name = "Dropbox User",
-          email = "user@dropbox",
+          name = placeholderName,
+          email = placeholderEmail,
           avatarUrl = "",
-          token = response.accessToken,
-          refreshToken = response.refreshToken ?: "",
+          token = accessToken,
+          refreshToken = refreshToken ?: "",
           serviceType = serviceType,
         )
 
-        tokenProvider.saveAccessToken(serviceType, response.accessToken)
-        if (response.refreshToken != null) {
-          tokenProvider.saveRefreshToken(serviceType, response.refreshToken)
+        tokenProvider.saveAccessToken(serviceType, accessToken)
+        if (refreshToken != null) {
+          tokenProvider.saveRefreshToken(serviceType, refreshToken)
         }
         pendingServiceType = null
         codeVerifier = null
@@ -140,3 +195,9 @@ internal data class DropboxTokenResponse(
 )
 
 @Serializable internal data class DropboxName(@SerialName("display_name") val displayName: String)
+
+@Serializable
+internal data class GoogleTokenResponse(
+  @SerialName("access_token") val accessToken: String,
+  @SerialName("refresh_token") val refreshToken: String? = null,
+)
