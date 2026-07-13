@@ -21,4 +21,5 @@ enum class ServiceType {
   DROPBOX,
   FRESH_RSS,
   MINIFLUX,
+  GOOGLE_DRIVE,
 }
