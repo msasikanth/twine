@@ -59,6 +59,7 @@ import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Dropbox
 import dev.sasikanth.rss.reader.resources.icons.Freshrss
+import dev.sasikanth.rss.reader.resources.icons.GoogleDrive
 import dev.sasikanth.rss.reader.resources.icons.Home
 import dev.sasikanth.rss.reader.resources.icons.Miniflux
 import dev.sasikanth.rss.reader.resources.icons.StarShine
@@ -74,6 +75,7 @@ import twine.shared.generated.resources.accountSelectionTitle
 import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.settingsSyncDropbox
 import twine.shared.generated.resources.settingsSyncFreshRSS
+import twine.shared.generated.resources.settingsSyncGoogleDrive
 import twine.shared.generated.resources.settingsSyncMiniflux
 
 @Composable
@@ -192,6 +194,7 @@ private fun AccountSelectionContent(
             ServiceType.DROPBOX -> stringResource(Res.string.settingsSyncDropbox)
             ServiceType.FRESH_RSS -> stringResource(Res.string.settingsSyncFreshRSS)
             ServiceType.MINIFLUX -> stringResource(Res.string.settingsSyncMiniflux)
+            ServiceType.GOOGLE_DRIVE -> stringResource(Res.string.settingsSyncGoogleDrive)
           }
 
         val icon =
@@ -199,6 +202,7 @@ private fun AccountSelectionContent(
             ServiceType.DROPBOX -> TwineIcons.Dropbox
             ServiceType.FRESH_RSS -> TwineIcons.Freshrss
             ServiceType.MINIFLUX -> TwineIcons.Miniflux
+            ServiceType.GOOGLE_DRIVE -> TwineIcons.GoogleDrive
           }
 
         AccountItem(

@@ -252,7 +252,7 @@ fun App(
     LaunchedEffect(Unit) {
       ExternalUriHandler.uri.collect { uri ->
         if (uri != null) {
-          if (uri.startsWith("twine://oauth")) {
+          if (uri.startsWith("twine://oauth") || uri.startsWith("com.googleusercontent.apps.")) {
             appViewModel.onOAuthRedirect(uri, linkHandler)
           } else if (uri == "twine://bookmarks") {
             navigator.navigateToMain(startTab = Screen.Main.TAB_BOOKMARKS)
