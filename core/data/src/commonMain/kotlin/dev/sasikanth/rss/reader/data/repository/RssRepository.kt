@@ -545,6 +545,10 @@ class RssRepository(
     feedRepository.updateFeedRefreshInterval(feedId, refreshInterval)
   }
 
+  suspend fun applyFeedsSyncMetadata(updates: List<FeedSyncMetadataUpdate>) {
+    feedRepository.applyFeedsSyncMetadata(updates)
+  }
+
   fun search(
     searchQuery: String,
     sortOrder: SearchSortOrder,
