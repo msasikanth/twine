@@ -416,11 +416,21 @@ class SettingsRepository(
   }
 
   private fun mapToThemeVariant(pref: String?): ThemeVariant {
-    if (pref.isNullOrBlank()) return ThemeVariant.Dynamic
-    return try {
-      ThemeVariant.valueOf(pref)
-    } catch (e: Exception) {
-      ThemeVariant.Dynamic
+    val defaultThemeVariant =
+      if (isDynamicThemeSupported) ThemeVariant.Dynamic else ThemeVariant.Forest
+    if (pref.isNullOrBlank()) return defaultThemeVariant
+    val themeVariant =
+      try {
+        ThemeVariant.valueOf(pref)
+      } catch (e: Exception) {
+        defaultThemeVariant
+      }
+    val isDynamicVariant =
+      themeVariant == ThemeVariant.Dynamic || themeVariant == ThemeVariant.SystemDynamic
+    return if (isDynamicVariant && !isDynamicThemeSupported) {
+      ThemeVariant.Forest
+    } else {
+      themeVariant
     }
   }
 
