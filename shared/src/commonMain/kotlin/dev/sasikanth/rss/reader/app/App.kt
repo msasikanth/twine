@@ -16,30 +16,43 @@
  */
 package dev.sasikanth.rss.reader.app
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
+import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
+import androidx.window.core.layout.WindowSizeClass
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionViewModel
@@ -90,8 +103,10 @@ import dev.sasikanth.rss.reader.utils.InAppRating
 import dev.sasikanth.rss.reader.utils.LocalAmoledSetting
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalInAppRating
+import dev.sasikanth.rss.reader.utils.LocalRootWindowSizeClass
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
+import dev.sasikanth.rss.reader.utils.updateWindowBackdropColor
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -111,7 +126,7 @@ typealias App =
 
 @Inject
 @Composable
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class, ExperimentalMaterial3AdaptiveApi::class)
 fun App(
   audioPlayer: AudioPlayer,
   shareHandler: ShareHandler,
@@ -159,6 +174,7 @@ fun App(
 
   CompositionLocalProvider(
     LocalWindowSizeClass provides windowInfo.windowSizeClass,
+    LocalRootWindowSizeClass provides windowInfo.windowSizeClass,
     LocalShareHandler provides shareHandler,
     LocalLinkHandler provides linkHandler,
     LocalInAppRating provides inAppRating,
@@ -203,6 +219,25 @@ fun App(
 
     val backStack = rememberNavBackStack(config, Screen.Placeholder)
     val navigator = remember { AppNavigator(backStack) }
+
+    // Read as MutableState inside entry content; NavDisplay caches entry composables, so
+    // plain value captures go stale until the back stack changes.
+    val isReaderPaneExpanded = rememberSaveable { mutableStateOf(false) }
+    val isSideNavigationExpanded = rememberSaveable {
+      mutableStateOf(
+        windowInfo.windowSizeClass.isWidthAtLeastBreakpoint(
+          WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND
+        )
+      )
+    }
+    LaunchedEffect(Unit) {
+      snapshotFlow { backStack.none { it is Screen.Reader } }
+        .collect { noReader ->
+          if (noReader) {
+            isReaderPaneExpanded.value = false
+          }
+        }
+    }
 
     val openPost: (Int, ResolvedPost, FromScreen) -> Unit =
       remember(navigator, linkHandler, appViewModel, coroutineScope) {
@@ -276,6 +311,9 @@ fun App(
     }
 
     AppTheme(useDarkTheme = useDarkTheme, overriddenColorScheme = overriddenColorScheme) {
+      val windowBackdropColor = AppTheme.colorScheme.backdrop
+      LaunchedEffect(windowBackdropColor) { updateWindowBackdropColor(windowBackdropColor) }
+
       val entryProvider =
         entryProvider<NavKey> {
           placeholderScreen(
@@ -309,6 +347,7 @@ fun App(
             discoveryViewModel = discoveryViewModel,
             openPost = openPost,
             screenModifier = screenModifier,
+            isSideNavigationExpanded = isSideNavigationExpanded,
           )
 
           freshRssLoginScreen(
@@ -330,6 +369,7 @@ fun App(
             toggleLightStatusBar = toggleLightStatusBar,
             toggleLightNavBar = toggleLightNavBar,
             modifier = screenModifier,
+            isReaderPaneExpanded = isReaderPaneExpanded,
           )
 
           addFeedScreen(
@@ -419,9 +459,44 @@ fun App(
           )
         }
 
+      val density = LocalDensity.current
+      val windowWidth = with(density) { LocalWindowInfo.current.containerSize.width.toDp() }
+      val paneScaffoldDirective =
+        remember(
+          windowInfo,
+          windowWidth,
+          isReaderPaneExpanded.value,
+          isSideNavigationExpanded.value,
+        ) {
+          val directive = calculatePaneScaffoldDirective(windowInfo)
+          // The list pane hosts the side navigation (rail or expanded drawer) in front of
+          // the posts list, so it needs the navigation's width on top of the list's own.
+          val navigationWidth = if (isSideNavigationExpanded.value) 360.dp else 80.dp
+          val listPaneWidth = navigationWidth + 420.dp
+          val minReaderPaneWidth = 360.dp
+          when {
+            isReaderPaneExpanded.value -> directive.copy(maxHorizontalPartitions = 1)
+            windowWidth < listPaneWidth + minReaderPaneWidth ->
+              directive.copy(maxHorizontalPartitions = 1)
+            else -> directive.copy(defaultPanePreferredWidth = listPaneWidth)
+          }
+        }
+      val listDetailSceneStrategy =
+        rememberListDetailSceneStrategy<NavKey>(directive = paneScaffoldDirective)
+
       NavDisplay(
+        // Paints the split's partition spacer with the app backdrop.
+        modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.backdrop),
         backStack = backStack,
         entryProvider = entryProvider,
+        // Not part of NavDisplay defaults; without it entry view models scope to the
+        // window and are never recreated for new arguments.
+        entryDecorators =
+          listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator(),
+          ),
+        sceneStrategies = listOf(listDetailSceneStrategy),
         onBack = { navigator.goBack() },
       )
 

@@ -114,6 +114,8 @@ internal fun ReaderPage(
     // Passed as a flow so the every-second playback position ticks only recompose
     // the media controls item instead of the whole reader page.
     playbackState = pageViewModel.audioPlayer.playbackState,
+    isAudioPlayerAvailable = pageViewModel.audioPlayer.isAvailable,
+    audioPlayerInstallationHint = pageViewModel.audioPlayer.installationHint,
     readerPost = readerPost,
     showFullArticle = showFullArticle,
     page = page,
@@ -143,6 +145,8 @@ private fun ReaderPageContent(
   excerptState: String?,
   contentParsingProgress: ReaderProcessingProgress,
   playbackState: StateFlow<PlaybackState>,
+  isAudioPlayerAvailable: Boolean,
+  audioPlayerInstallationHint: String?,
   readerPost: ResolvedPost,
   showFullArticle: Boolean,
   page: Int,
@@ -254,7 +258,16 @@ private fun ReaderPageContent(
               )
             }
 
-            if (!readerPost.audioUrl.isNullOrBlank()) {
+            if (!readerPost.audioUrl.isNullOrBlank() && !isAudioPlayerAvailable) {
+              item(key = "podcast-player-unavailable") {
+                DisableSelection {
+                  MediaUnavailableBanner(
+                    installationHint = audioPlayerInstallationHint,
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 40.dp),
+                  )
+                }
+              }
+            } else if (!readerPost.audioUrl.isNullOrBlank()) {
               item(key = "podcast-player") {
                 val currentPlaybackState by playbackState.collectAsStateWithLifecycle()
                 val isPostAudioPlaying = currentPlaybackState.playingUrl == readerPost.audioUrl
@@ -395,6 +408,8 @@ private fun ReaderPagePreview() {
       onSeekBackward = {},
       onPlaybackSpeedChange = {},
       onSleepTimerOptionSelected = {},
+      isAudioPlayerAvailable = true,
+      audioPlayerInstallationHint = null,
     )
   }
 }

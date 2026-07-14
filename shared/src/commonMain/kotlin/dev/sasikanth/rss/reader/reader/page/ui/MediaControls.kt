@@ -72,6 +72,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,7 +80,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.Morph
@@ -94,9 +97,15 @@ import dev.sasikanth.rss.reader.resources.icons.Replay30
 import dev.sasikanth.rss.reader.resources.icons.Timer
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.toClipEntry
 import dev.sasikanth.rss.reader.utils.toShape
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.media_player_unavailable_copied
+import twine.shared.generated.resources.media_player_unavailable_message
+import twine.shared.generated.resources.media_player_unavailable_title
 import twine.shared.generated.resources.pause
 import twine.shared.generated.resources.play
 import twine.shared.generated.resources.playback_speed
@@ -497,5 +506,68 @@ internal fun SleepTimerOptionItem(label: String, isSelected: Boolean, onClick: (
       style = MaterialTheme.typography.bodyLarge,
       color = if (isSelected) AppTheme.colorScheme.primary else AppTheme.colorScheme.onSurface,
     )
+  }
+}
+
+@Composable
+internal fun MediaUnavailableBanner(installationHint: String?, modifier: Modifier = Modifier) {
+  val clipboard = LocalClipboard.current
+  val coroutineScope = rememberCoroutineScope()
+  var copied by remember { mutableStateOf(false) }
+
+  Column(
+    modifier =
+      modifier
+        .fillMaxWidth()
+        .background(AppTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+        .padding(16.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp),
+  ) {
+    Text(
+      text = stringResource(Res.string.media_player_unavailable_title),
+      style = MaterialTheme.typography.titleMedium,
+      color = AppTheme.colorScheme.onSurface,
+    )
+
+    Text(
+      text = stringResource(Res.string.media_player_unavailable_message),
+      style = MaterialTheme.typography.bodyMedium,
+      color = AppTheme.colorScheme.onSurfaceVariant,
+    )
+
+    if (!installationHint.isNullOrBlank()) {
+      Row(
+        modifier =
+          Modifier.fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(AppTheme.colorScheme.surfaceContainerHigh)
+            .clickable {
+              coroutineScope.launch {
+                clipboard.setClipEntry(installationHint.toClipEntry())
+                copied = true
+                delay(2000)
+                copied = false
+              }
+            }
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        Text(
+          modifier = Modifier.weight(1f),
+          text = installationHint,
+          style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+          color = AppTheme.colorScheme.onSurface,
+        )
+
+        if (copied) {
+          Text(
+            text = stringResource(Res.string.media_player_unavailable_copied),
+            style = MaterialTheme.typography.labelMedium,
+            color = AppTheme.colorScheme.primary,
+          )
+        }
+      }
+    }
   }
 }

@@ -17,14 +17,28 @@
 
 package dev.sasikanth.rss.reader.app
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import androidx.window.core.layout.WindowSizeClass
 import dev.sasikanth.rss.reader.about.ui.AboutScreen
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionViewModel
 import dev.sasikanth.rss.reader.accountselection.ui.AccountSelectionScreen
@@ -81,13 +95,21 @@ import dev.sasikanth.rss.reader.settings.ui.SettingsDataScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsServicesScreen
 import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
+import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.LocalRootWindowSizeClass
+import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.readerPanePlaceholder
 
 fun EntryProviderScope<NavKey>.placeholderScreen(
   modifier: Modifier = Modifier,
@@ -143,6 +165,7 @@ fun EntryProviderScope<NavKey>.accountSelectionScreen(
   }
 }
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 fun EntryProviderScope<NavKey>.mainScreen(
   navigator: AppNavigator,
   useDarkTheme: Boolean,
@@ -156,8 +179,11 @@ fun EntryProviderScope<NavKey>.mainScreen(
   discoveryViewModel: () -> DiscoveryViewModel,
   openPost: (Int, ResolvedPost, FromScreen) -> Unit,
   screenModifier: Modifier,
+  isSideNavigationExpanded: MutableState<Boolean>,
 ) {
-  entry<Screen.Main> { mainRoute ->
+  entry<Screen.Main>(
+    metadata = ListDetailSceneStrategy.listPane(detailPlaceholder = { ReaderPanePlaceholder() })
+  ) { mainRoute ->
     val triggerSync = mainRoute.triggerSync
     val startTab = mainRoute.startTab
     val feedsViewModel = viewModel { feedsViewModel() }
@@ -172,123 +198,153 @@ fun EntryProviderScope<NavKey>.mainScreen(
       toggleLightNavBar(!useDarkTheme)
     }
 
-    MainScreen(
-      feedsViewModel = feedsViewModel,
-      startTab = startTab,
-      homeContent = { openDrawer ->
-        val viewModel = viewModel { homeViewModel() }
+    PaneSizeClassProvider {
+      MainScreen(
+        feedsViewModel = feedsViewModel,
+        startTab = startTab,
+        homeContent = { openDrawer ->
+          val viewModel = viewModel { homeViewModel() }
 
-        LaunchedEffect(Unit) {
-          navigator.results
-            .map { it[SELECTED_GROUPS_KEY] as? Set<String> }
-            .filterNotNull()
-            .onEach { selectedGroupIds ->
-              if (selectedGroupIds.isNotEmpty()) {
-                feedsViewModel.dispatch(FeedsEvent.OnGroupsSelected(selectedGroupIds))
-                navigator.consumeResult(SELECTED_GROUPS_KEY)
+          // In a split the reader stays visible across feed switches; close the stale one.
+          LaunchedEffect(Unit) {
+            viewModel.state
+              .map { it.activeSource?.id }
+              .distinctUntilChanged()
+              .drop(1)
+              .collect {
+                if (navigator.backStack.lastOrNull() is Screen.Reader) {
+                  navigator.goBack()
+                }
               }
-            }
-            .launchIn(this)
-        }
+          }
 
-        LaunchedEffect(Unit) {
-          feedsViewModel.state
-            .map { it.openGroupSelection }
-            .filterNotNull()
-            .onEach { selectedGroupIds ->
-              navigator.navigate(Modals.GroupSelection(selectedGroupIds.toList()))
-              feedsViewModel.dispatch(FeedsEvent.MarkOpenGroupSelectionDone)
-            }
-            .launchIn(this)
-        }
+          LaunchedEffect(Unit) {
+            navigator.results
+              .map { it[SELECTED_GROUPS_KEY] as? Set<String> }
+              .filterNotNull()
+              .onEach { selectedGroupIds ->
+                if (selectedGroupIds.isNotEmpty()) {
+                  feedsViewModel.dispatch(FeedsEvent.OnGroupsSelected(selectedGroupIds))
+                  navigator.consumeResult(SELECTED_GROUPS_KEY)
+                }
+              }
+              .launchIn(this)
+          }
 
-        HomeScreen(
-          viewModel = viewModel,
-          feedsViewModel = feedsViewModel,
-          triggerSync = triggerSync,
-          openPost = { index, post -> openPost(index, post, FromScreen.Home) },
-          onMenuClicked = openDrawer,
-          modifier = screenModifier,
-        )
-      },
-      searchContent = { goBack ->
-        val viewModel = viewModel { searchViewModel() }
+          LaunchedEffect(Unit) {
+            feedsViewModel.state
+              .map { it.openGroupSelection }
+              .filterNotNull()
+              .onEach { selectedGroupIds ->
+                navigator.navigate(Modals.GroupSelection(selectedGroupIds.toList()))
+                feedsViewModel.dispatch(FeedsEvent.MarkOpenGroupSelectionDone)
+              }
+              .launchIn(this)
+          }
 
-        SearchScreen(
-          searchViewModel = viewModel,
-          goBack = goBack,
-          openPost = { searchQuery, sortOrder, index, post ->
-            openPost(index, post, FromScreen.Search(searchQuery, sortOrder))
-          },
-          modifier = screenModifier,
-        )
-      },
-      bookmarksContent = { goBack ->
-        val viewModel = viewModel { bookmarksViewModel() }
+          HomeScreen(
+            viewModel = viewModel,
+            feedsViewModel = feedsViewModel,
+            triggerSync = triggerSync,
+            openPost = { index, post -> openPost(index, post, FromScreen.Home) },
+            onMenuClicked = openDrawer,
+            modifier = screenModifier,
+          )
+        },
+        searchContent = { goBack ->
+          val viewModel = viewModel { searchViewModel() }
 
-        BookmarksScreen(
-          bookmarksViewModel = viewModel,
-          goBack = goBack,
-          openPost = { index, post -> openPost(index, post, FromScreen.Bookmarks) },
-          modifier = screenModifier,
-        )
-      },
-      settingsContent = { goBack ->
-        val viewModel = viewModel { settingsViewModel() }
+          SearchScreen(
+            searchViewModel = viewModel,
+            goBack = goBack,
+            openPost = { searchQuery, sortOrder, index, post ->
+              openPost(index, post, FromScreen.Search(searchQuery, sortOrder))
+            },
+            modifier = screenModifier,
+          )
+        },
+        bookmarksContent = { goBack ->
+          val viewModel = viewModel { bookmarksViewModel() }
 
-        LaunchedEffect(Unit) {
-          navigator.results
-            .map { it[FRESH_RSS_LOGIN_SUCCESS_KEY] as? Boolean }
-            .filterNotNull()
-            .filter { it }
-            .onEach {
-              viewModel.dispatch(SettingsEvent.TriggerSync)
-              navigator.consumeResult(FRESH_RSS_LOGIN_SUCCESS_KEY)
-            }
-            .launchIn(this)
-        }
-        LaunchedEffect(Unit) {
-          navigator.results
-            .map { it[MINIFLUX_LOGIN_SUCCESS_KEY] as? Boolean }
-            .filterNotNull()
-            .filter { it }
-            .onEach {
-              viewModel.dispatch(SettingsEvent.TriggerSync)
-              navigator.consumeResult(MINIFLUX_LOGIN_SUCCESS_KEY)
-            }
-            .launchIn(this)
-        }
+          BookmarksScreen(
+            bookmarksViewModel = viewModel,
+            goBack = goBack,
+            openPost = { index, post -> openPost(index, post, FromScreen.Bookmarks) },
+            modifier = screenModifier,
+          )
+        },
+        settingsContent = { goBack ->
+          val viewModel = viewModel { settingsViewModel() }
 
-        SettingsScreen(
-          viewModel = viewModel,
-          goBack = goBack,
-          openAppearanceSettings = { navigator.navigate(Screen.SettingsAppearance) },
-          openBehaviorSettings = { navigator.navigate(Screen.SettingsBehavior) },
-          openServicesSettings = { navigator.navigate(Screen.SettingsServices) },
-          openDataSettings = { navigator.navigate(Screen.SettingsData) },
-          openAppInfoSettings = { navigator.navigate(Screen.SettingsAppInfo) },
-          openPaywall = { navigator.navigate(Screen.Paywall()) },
-          modifier = screenModifier,
-        )
-      },
-      discoveryContent = { goBack ->
-        val viewModel = viewModel { discoveryViewModel() }
+          LaunchedEffect(Unit) {
+            navigator.results
+              .map { it[FRESH_RSS_LOGIN_SUCCESS_KEY] as? Boolean }
+              .filterNotNull()
+              .filter { it }
+              .onEach {
+                viewModel.dispatch(SettingsEvent.TriggerSync)
+                navigator.consumeResult(FRESH_RSS_LOGIN_SUCCESS_KEY)
+              }
+              .launchIn(this)
+          }
+          LaunchedEffect(Unit) {
+            navigator.results
+              .map { it[MINIFLUX_LOGIN_SUCCESS_KEY] as? Boolean }
+              .filterNotNull()
+              .filter { it }
+              .onEach {
+                viewModel.dispatch(SettingsEvent.TriggerSync)
+                navigator.consumeResult(MINIFLUX_LOGIN_SUCCESS_KEY)
+              }
+              .launchIn(this)
+          }
 
-        DiscoveryScreen(
-          viewModel = viewModel,
-          showDoneButton = false,
-          goBack = goBack,
-          modifier = screenModifier,
-        )
-      },
-      openFeedInfoSheet = { feedId -> navigator.navigate(Modals.FeedInfo(feedId)) },
-      openGroupScreen = { groupId -> navigator.navigate(Screen.FeedGroup(groupId)) },
-      openGroupSelectionSheet = { feedsViewModel.dispatch(FeedsEvent.OnAddToGroupClicked) },
-      openAddFeedScreen = { navigator.navigate(Screen.AddFeed) },
-      openPaywall = { navigator.navigate(Screen.Paywall()) },
-      openFeedHealth = { navigator.navigate(Screen.FeedHealth) },
-      canHandleBack = isMainActive,
-    )
+          SettingsScreen(
+            viewModel = viewModel,
+            goBack = goBack,
+            openAppearanceSettings = { navigator.navigate(Screen.SettingsAppearance) },
+            openBehaviorSettings = { navigator.navigate(Screen.SettingsBehavior) },
+            openServicesSettings = { navigator.navigate(Screen.SettingsServices) },
+            openDataSettings = { navigator.navigate(Screen.SettingsData) },
+            openAppInfoSettings = { navigator.navigate(Screen.SettingsAppInfo) },
+            openPaywall = { navigator.navigate(Screen.Paywall()) },
+            modifier = screenModifier,
+          )
+        },
+        discoveryContent = { goBack ->
+          val viewModel = viewModel { discoveryViewModel() }
+
+          DiscoveryScreen(
+            viewModel = viewModel,
+            showDoneButton = false,
+            goBack = goBack,
+            modifier = screenModifier,
+          )
+        },
+        openFeedInfoSheet = { feedId -> navigator.navigate(Modals.FeedInfo(feedId)) },
+        openGroupScreen = { groupId -> navigator.navigate(Screen.FeedGroup(groupId)) },
+        openGroupSelectionSheet = { feedsViewModel.dispatch(FeedsEvent.OnAddToGroupClicked) },
+        openAddFeedScreen = { navigator.navigate(Screen.AddFeed) },
+        openPaywall = { navigator.navigate(Screen.Paywall()) },
+        openFeedHealth = { navigator.navigate(Screen.FeedHealth) },
+        canHandleBack = isMainActive,
+        isSideNavigationExpanded = isSideNavigationExpanded.value,
+        setSideNavigationExpanded = { isSideNavigationExpanded.value = it },
+      )
+    }
+  }
+}
+
+// Inside a list-detail split the Main entry only gets the list pane, so screens under it
+// must adapt to the pane's size rather than the window's.
+@Composable
+private fun PaneSizeClassProvider(content: @Composable () -> Unit) {
+  BoxWithConstraints {
+    val paneSizeClass =
+      remember(maxWidth, maxHeight) {
+        WindowSizeClass(widthDp = maxWidth.value, heightDp = maxHeight.value)
+      }
+    CompositionLocalProvider(LocalWindowSizeClass provides paneSizeClass) { content() }
   }
 }
 
@@ -425,6 +481,7 @@ fun EntryProviderScope<NavKey>.minifluxLoginScreen(
   }
 }
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 fun EntryProviderScope<NavKey>.readerScreen(
   readerViewModel: (SavedStateHandle) -> ReaderViewModel,
   readerPageViewModel: (ResolvedPost) -> ReaderPageViewModel,
@@ -432,8 +489,9 @@ fun EntryProviderScope<NavKey>.readerScreen(
   toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
   toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
   modifier: Modifier = Modifier,
+  isReaderPaneExpanded: MutableState<Boolean>,
 ) {
-  entry<Screen.Reader> { route ->
+  entry<Screen.Reader>(metadata = ListDetailSceneStrategy.detailPane()) { route ->
     // Since we don't have NavBackStackEntry savedStateHandle easily,
     // ReaderViewModel doesn't receive args automatically via savedStateHandle.
     // We can manually pass it via factory.
@@ -447,6 +505,11 @@ fun EntryProviderScope<NavKey>.readerScreen(
     val savedStateHandle = SavedStateHandle(mapOf("readerScreenArgs" to route.readerScreenArgs))
     val viewModel = viewModel { readerViewModel(savedStateHandle) }
 
+    val isSplitCapableWindow =
+      LocalRootWindowSizeClass.current.isWidthAtLeastBreakpoint(
+        WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
+      )
+
     ReaderScreen(
       viewModel = viewModel,
       pageViewModelFactory = { post -> viewModel(key = post.id) { readerPageViewModel(post) } },
@@ -456,6 +519,14 @@ fun EntryProviderScope<NavKey>.readerScreen(
       toggleLightStatusBar = toggleLightStatusBar,
       toggleLightNavBar = toggleLightNavBar,
       modifier = modifier,
+      showCloseNavIcon = isSplitCapableWindow && !isReaderPaneExpanded.value,
+      isReaderPaneExpanded = isReaderPaneExpanded.value,
+      toggleReaderPaneExpanded =
+        if (isSplitCapableWindow) {
+          { isReaderPaneExpanded.value = !isReaderPaneExpanded.value }
+        } else {
+          null
+        },
     )
   }
 }
@@ -635,6 +706,20 @@ fun EntryProviderScope<NavKey>.feedInfoDialog(
     val savedStateHandle = SavedStateHandle(mapOf("feedId" to modalRoute.feedId))
     val viewModel = viewModel { feedViewModel(savedStateHandle) }
     FeedInfoBottomSheet(feedViewModel = viewModel, dismiss = { navigator.goBack() })
+  }
+}
+
+@Composable
+private fun ReaderPanePlaceholder(modifier: Modifier = Modifier) {
+  Box(
+    modifier = modifier.fillMaxSize().background(AppTheme.colorScheme.backdrop),
+    contentAlignment = Alignment.Center,
+  ) {
+    Text(
+      text = stringResource(Res.string.readerPanePlaceholder),
+      style = MaterialTheme.typography.labelLarge,
+      color = AppTheme.colorScheme.onSurfaceVariant,
+    )
   }
 }
 

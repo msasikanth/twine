@@ -103,6 +103,7 @@ import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.utils.CollectItemTransition
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalInAppRating
+import dev.sasikanth.rss.reader.utils.LocalRootWindowSizeClass
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
 import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
@@ -146,9 +147,12 @@ internal fun HomeScreen(
 
   LaunchedEffect(Unit) { viewModel.openPost.collect { (index, post) -> openPost(index, post) } }
 
+  // Keyed to the window, not the pane, so the featured section stays hidden when this
+  // screen is squeezed into a split's list pane.
+  val rootSizeClass = LocalRootWindowSizeClass.current
   val forceShowAllPosts =
     shouldBlockImage ||
-      sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)
+      rootSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
 
   val posts =
     remember(
@@ -194,6 +198,8 @@ internal fun HomeScreen(
     }
   }
 
+  val activeReaderPostId by viewModel.activeReaderPostId.collectAsStateWithLifecycle()
+
   HomeContent(
     state = state,
     feedsState = feedsState,
@@ -203,6 +209,7 @@ internal fun HomeScreen(
     feedsDispatch = feedsViewModel::dispatch,
     onMenuClicked = onMenuClicked,
     modifier = modifier,
+    activeReaderPostId = activeReaderPostId,
   )
 }
 
@@ -217,6 +224,7 @@ private fun HomeContent(
   feedsDispatch: (FeedsEvent) -> Unit,
   onMenuClicked: (() -> Unit)?,
   modifier: Modifier = Modifier,
+  activeReaderPostId: String? = null,
 ) {
   val linkHandler = LocalLinkHandler.current
   val coroutineScope = rememberCoroutineScope()
@@ -484,6 +492,7 @@ private fun HomeContent(
                   updateReadStatus = { postId, updatedReadStatus ->
                     dispatch(HomeEvent.UpdatePostReadStatus(postId, updatedReadStatus))
                   },
+                  activeReaderPostId = activeReaderPostId,
                   modifier =
                     Modifier.fillMaxSize().drawWithContent {
                       drawContent()

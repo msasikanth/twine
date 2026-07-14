@@ -33,6 +33,7 @@ import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
+import dev.sasikanth.rss.reader.data.repository.ObservableActiveReaderPost
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.ObservableSelectedPost
 import dev.sasikanth.rss.reader.data.repository.RssRepository
@@ -76,7 +77,10 @@ class HomeViewModel(
   private val allPostsPager: AllPostsPager,
   private val syncCoordinator: SyncCoordinator,
   private val observableSelectedPost: ObservableSelectedPost,
+  observableActiveReaderPost: ObservableActiveReaderPost,
 ) : ViewModel() {
+
+  val activeReaderPostId: StateFlow<String?> = observableActiveReaderPost.activePostId
 
   private val defaultState = HomeState.default()
   private val _state = MutableStateFlow(defaultState)

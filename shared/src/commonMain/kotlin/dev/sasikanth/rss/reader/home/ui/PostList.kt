@@ -66,6 +66,7 @@ internal fun PostsList(
   onPostSourceClick: (String) -> Unit,
   updateReadStatus: (String, Boolean) -> Unit,
   modifier: Modifier = Modifier,
+  activeReaderPostId: String? = null,
 ) {
   val topContentPadding =
     if (featuredPosts.isEmpty()) {
@@ -150,11 +151,13 @@ internal fun PostsList(
       contentType = { "post_item" },
     ) { index ->
       val post = posts[index] ?: return@items
+      val highlighted = post.id == activeReaderPostId
 
       when (homeViewMode) {
         HomeViewMode.Default -> {
           PostListItem(
             item = post,
+            highlighted = highlighted,
             onClick = { onPostClicked(post, index) },
             onPostBookmarkClick = { onPostBookmarkClick(post) },
             onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
@@ -168,6 +171,7 @@ internal fun PostsList(
         HomeViewMode.Simple -> {
           SimplePostListItem(
             item = post,
+            highlighted = highlighted,
             onClick = { onPostClicked(post, index) },
             onPostBookmarkClick = { onPostBookmarkClick(post) },
             onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
@@ -181,6 +185,7 @@ internal fun PostsList(
         HomeViewMode.Compact -> {
           CompactPostListItem(
             item = post,
+            highlighted = highlighted,
             onClick = { onPostClicked(post, index) },
             onPostBookmarkClick = { onPostBookmarkClick(post) },
             onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },

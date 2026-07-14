@@ -14,30 +14,32 @@
  * limitations under the License.
  *
  */
+
 package dev.sasikanth.rss.reader.data.repository
 
-import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import me.tatarka.inject.annotations.Inject
 
+/**
+ * Post currently open in the reader, if any. Unlike [ObservableSelectedPost] this is not updated by
+ * list scrolling, so lists beside the reader in a split layout can highlight the open post.
+ */
 @Inject
 @AppScope
-class ObservableActiveSource {
+class ObservableActiveReaderPost {
 
-  private val _activeSources = MutableStateFlow<Source?>(null)
-  val activeSource: Flow<Source?>
-    get() = _activeSources
+  private val _activePostId = MutableStateFlow<String?>(null)
+  val activePostId: StateFlow<String?> = _activePostId
 
-  val currentActiveSource: Source?
-    get() = _activeSources.value
-
-  fun changeActiveSource(source: Source) {
-    _activeSources.value = source
+  fun updateActivePost(postId: String?) {
+    _activePostId.value = postId
   }
 
-  fun clearSelection() {
-    _activeSources.value = null
+  // A replaced reader can be cleared after its replacement has already published, so only
+  // the owner may clear.
+  fun clearIfActive(postId: String?) {
+    _activePostId.compareAndSet(postId, null)
   }
 }

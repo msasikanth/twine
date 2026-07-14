@@ -44,6 +44,7 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,6 +63,7 @@ import dev.sasikanth.rss.reader.data.repository.ReaderFont.Lora
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.Merriweather
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.Outfit
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.RobotoSerif
+import dev.sasikanth.rss.reader.data.repository.isDynamicThemeSupported
 import dev.sasikanth.rss.reader.data.repository.isPremium
 import dev.sasikanth.rss.reader.resources.icons.CustomTypography
 import dev.sasikanth.rss.reader.resources.icons.FormatLineSpacing
@@ -103,9 +105,13 @@ internal fun ReaderCustomizationsContent(
   ) {
     ColorSchemeHeader()
 
+    val availableThemeVariants = remember {
+      ThemeVariant.entries.filter { it != ThemeVariant.Dynamic || isDynamicThemeSupported }
+    }
     val themeVariantListState =
       rememberLazyListState(
-        initialFirstVisibleItemIndex = ThemeVariant.entries.indexOf(selectedThemeVariant)
+        initialFirstVisibleItemIndex =
+          availableThemeVariants.indexOf(selectedThemeVariant).coerceAtLeast(0)
       )
 
     LazyRow(
@@ -114,7 +120,7 @@ internal fun ReaderCustomizationsContent(
       horizontalArrangement = Arrangement.spacedBy(16.dp),
       verticalAlignment = Alignment.Top,
     ) {
-      items(ThemeVariant.entries) { themeVariant ->
+      items(availableThemeVariants) { themeVariant ->
         ThemeVariantIconButton(
           themeVariant = themeVariant,
           selected = themeVariant == selectedThemeVariant,

@@ -53,6 +53,10 @@
   <string name="unBookmark">Un-bookmark</string>
   <string name="bookmarks">Bookmarks</string>
   <string name="bookmarksPlaceholder">Bookmarked posts will appear here 🔖</string>
+  <string name="readerPanePlaceholder">Select a post to read</string>
+  <string name="buttonClose">Close</string>
+  <string name="readerExpandScreen">Expand reader</string>
+  <string name="readerCollapseScreen">Collapse reader</string>
   <string name="settings">Settings</string>
   <string name="settingsAppearanceAndLayout">Appearance &amp; layout</string>
   <string name="settingsAppearanceAndLayoutSubtitle">Customize how Twine looks</string>
@@ -301,6 +305,9 @@
   <string name="sleep_timer_off">Off</string>
   <string name="sleep_timer_end_of_track">End of track</string>
   <string name="sleep_timer_minutes">%1$d minutes</string>
+  <string name="media_player_unavailable_title">Audio playback requires VLC</string>
+  <string name="media_player_unavailable_message">Install VLC and restart Twine to play this episode.</string>
+  <string name="media_player_unavailable_copied">Copied</string>
   <string name="readerPageCount">%1$d of %2$d</string>
   <string name="statistics">Statistics</string>
   <string name="statisticsNoData">No reading data available yet</string>
