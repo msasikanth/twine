@@ -42,7 +42,11 @@ object ReaderHTML {
           <script>$readerJS</script>
           <script>
             window.onload = function() {
-              window.webkit.messageHandlers.readabilityMessageHandler.postMessage("READY");
+              // READY handshake is only used by the iOS runner; Android and
+              // desktop trigger parsing from the page load callback instead.
+              if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.readabilityMessageHandler) {
+                window.webkit.messageHandlers.readabilityMessageHandler.postMessage("READY");
+              }
             };
           </script>
         </head>
