@@ -92,6 +92,9 @@ class HomeViewModel(
 
   private var previousVisibleItems = emptyMap<String, Int>()
 
+  private val isFeaturedSectionVisible = MutableStateFlow(true)
+  private val selectedPostResolveTrigger = MutableStateFlow(0)
+
   init {
     init()
   }
@@ -113,7 +116,9 @@ class HomeViewModel(
         onVisiblePostsChanged(event.visiblePosts, event.firstVisibleItemIndex)
       is HomeEvent.ChangeHomeViewMode -> changeHomeViewMode(event.homeViewMode)
       is HomeEvent.UpdateVisibleItemIndex -> updateVisibleItemIndex(event.index, event.postId)
+      HomeEvent.OnScreenStarted -> onScreenStarted()
       is HomeEvent.OnScreenStopped -> onScreenStopped(event)
+      is HomeEvent.UpdateFeaturedSectionVisibility -> updateFeaturedSectionVisibility(event.visible)
       HomeEvent.LoadNewArticlesClick -> loadNewArticles()
       is HomeEvent.UpdatePrevActiveSource -> updatePrevActiveSource(event)
       is HomeEvent.OnPostsSortFilterApplied -> onPostsSortFilterApplied(event)
@@ -122,23 +127,43 @@ class HomeViewModel(
     }
   }
 
-  private fun onScreenStopped(event: HomeEvent.OnScreenStopped) {
-    viewModelScope.launch {
-      val featuredPosts = _state.value.featuredPosts.first()
-      val postId =
-        if (featuredPosts.isNotEmpty() && event.firstVisibleItemIndex == 0) {
-          featuredPosts.getOrNull(event.settledPage)?.resolvedPost?.id
-        } else {
-          event.firstVisibleItemKey?.let { PostListKey.decodeSafe(it)?.postId }
-        }
+  private fun onScreenStarted() {
+    selectedPostResolveTrigger.update { it + 1 }
+  }
 
-      if (postId != null) {
-        val homeIndex = calculateHomeIndex(postId, event.firstVisibleItemIndex)
-        observableSelectedPost.updateSelectedPost(homeIndex, postId)
-      } else {
-        observableSelectedPost.updateSelectedPost(event.firstVisibleItemIndex, null)
-      }
+  private fun updateFeaturedSectionVisibility(visible: Boolean) {
+    isFeaturedSectionVisible.value = visible
+  }
+
+  private fun effectiveFeaturedPosts() =
+    if (isFeaturedSectionVisible.value) {
+      _state.value.featuredPosts.value
+    } else {
+      persistentListOf()
     }
+
+  private fun onScreenStopped(event: HomeEvent.OnScreenStopped) {
+    val featuredPosts = effectiveFeaturedPosts()
+    val isFeaturedItem = featuredPosts.isNotEmpty() && event.firstVisibleItemIndex == 0
+    val postId =
+      if (isFeaturedItem) {
+        featuredPosts.getOrNull(event.settledPage)?.resolvedPost?.id
+      } else {
+        event.firstVisibleItemKey?.let { PostListKey.decodeSafe(it)?.postId }
+      }
+
+    val fallbackIndex =
+      if (event.firstVisibleItemIndex == 0) {
+        if (isFeaturedItem) event.settledPage else 0
+      } else {
+        featuredPosts.size + event.firstVisibleItemIndex - 1
+      }
+
+    observableSelectedPost.updateSelectedPost(
+      index = fallbackIndex,
+      postId = postId,
+      scrollOffset = event.firstVisibleItemOffset,
+    )
   }
 
   private fun onVisiblePostsChanged(visiblePosts: Map<String, Int>, firstVisibleItemIndex: Int) {
@@ -202,7 +227,7 @@ class HomeViewModel(
     }
 
   private suspend fun calculateHomeIndex(postId: String, index: Int): Int {
-    val featuredPosts = _state.value.featuredPosts.first()
+    val featuredPosts = effectiveFeaturedPosts()
     val postsAfter = postsThresholdTime(_state.value.postsType)
     val activeSourceIds = activeSourceIds(_state.value.activeSource)
     val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(_state.value.postsType)
@@ -289,17 +314,29 @@ class HomeViewModel(
       )
     }
 
-    observableSelectedPost.selectedPost
+    combine(
+        observableSelectedPost.selectedPost,
+        selectedPostResolveTrigger,
+        isFeaturedSectionVisible,
+      ) { selectedPost, _, _ ->
+        selectedPost
+      }
       .mapLatest { selectedPost ->
         val postId = selectedPost?.id
-        if (postId != null) {
-          calculateHomeIndex(postId, selectedPost.index)
-        } else {
-          selectedPost?.index ?: 0
-        }
+        val homeIndex =
+          if (postId != null) {
+            calculateHomeIndex(postId, selectedPost.index)
+          } else {
+            selectedPost?.index ?: 0
+          }
+        ActivePostPosition(index = homeIndex, scrollOffset = selectedPost?.scrollOffset)
       }
       .distinctUntilChanged()
-      .onEach { homeIndex -> _state.update { it.copy(activePostIndex = homeIndex) } }
+      .onEach { position ->
+        _state.update {
+          it.copy(activePostIndex = position.index, activePostScrollOffset = position.scrollOffset)
+        }
+      }
       .launchIn(viewModelScope)
 
     syncCoordinator.syncState
@@ -374,15 +411,7 @@ class HomeViewModel(
   }
 
   private fun updateVisibleItemIndex(index: Int, postId: String?) {
-    viewModelScope.launch {
-      if (postId != null) {
-        val homeIndex = calculateHomeIndex(postId, index)
-        _state.update { it.copy(activePostIndex = homeIndex) }
-        observableSelectedPost.updateSelectedPost(homeIndex, postId)
-      } else {
-        observableSelectedPost.updateSelectedPost(index, null)
-      }
-    }
+    observableSelectedPost.updateSelectedPost(index, postId)
   }
 
   private fun changeHomeViewMode(homeViewMode: HomeViewMode) {
@@ -475,6 +504,8 @@ class HomeViewModel(
     }
   }
 }
+
+private data class ActivePostPosition(val index: Int, val scrollOffset: Int?)
 
 private data class HomeSelectionFiltersCombined(
   val homeViewMode: HomeViewMode,

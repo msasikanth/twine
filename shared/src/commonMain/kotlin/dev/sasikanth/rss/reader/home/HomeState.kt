@@ -60,6 +60,7 @@ data class HomeState(
   val unreadSinceLastSync: UnreadSinceLastSync?,
   val prevActiveSource: Source?,
   val activePostIndex: Int,
+  val activePostScrollOffset: Int?,
   val showPostsSortFilter: Boolean,
   val showPinnedSources: Boolean,
 ) {
@@ -86,6 +87,7 @@ data class HomeState(
         unreadSinceLastSync = null,
         prevActiveSource = null,
         activePostIndex = 0,
+        activePostScrollOffset = null,
         showPostsSortFilter = false,
         showPinnedSources = true,
       )

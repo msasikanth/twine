@@ -285,6 +285,13 @@ class ReaderViewModel(
   }
 
   override fun onCleared() {
+    if (readerScreenArgs.fromScreen == Home || readerScreenArgs.fromScreen == AudioPlayer) {
+      observableSelectedPost.updateSelectedPost(
+        index = _state.value.activePostIndex,
+        postId = _state.value.activePostId,
+      )
+    }
+
     markPostsAsRead().invokeOnCompletion { super.onCleared() }
   }
 }

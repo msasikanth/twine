@@ -29,8 +29,8 @@ class ObservableSelectedPost {
   private val _selectedPost = MutableStateFlow<SelectedPost?>(null)
   val selectedPost: StateFlow<SelectedPost?> = _selectedPost
 
-  fun updateSelectedPost(index: Int, postId: String?) {
-    _selectedPost.value = SelectedPost(index, postId)
+  fun updateSelectedPost(index: Int, postId: String?, scrollOffset: Int? = null) {
+    _selectedPost.value = SelectedPost(index, postId, scrollOffset)
   }
 
   fun clear() {
@@ -38,4 +38,8 @@ class ObservableSelectedPost {
   }
 }
 
-data class SelectedPost(val index: Int, val id: String?)
+/**
+ * [index] is in home list order: featured pager pages first, then list posts. [scrollOffset] is the
+ * anchor item's saved pixel offset; null when the selection came from the reader.
+ */
+data class SelectedPost(val index: Int, val id: String?, val scrollOffset: Int? = null)
