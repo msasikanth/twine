@@ -24,11 +24,6 @@ struct ContentView: View {
 	
     let homeViewControllerComponent: InjectHomeViewControllerComponent
     
-    @Environment(\.scenePhase)
-    private var scenePhase
-    
-    @State private var wasInBackground = false
-	
     init(homeViewControllerComponent: InjectHomeViewControllerComponent) {
         self.homeViewControllerComponent = homeViewControllerComponent
 	}
@@ -40,16 +35,10 @@ struct ContentView: View {
             .onOpenURL { url in
                 ExternalUriHandler.shared.onNewUri(uri: url.absoluteString)
             }
-            .onChange(of: scenePhase) { oldPhase, newPhase in
-                if newPhase == .background {
-                    wasInBackground = true
-                }
-
-                if newPhase == .active && wasInBackground {
-                    ExternalUriHandler.shared.onNewUri(uri: "twine://reader/currently-playing")
-                    wasInBackground = false
-                }
-            }
+            // Note: iOS provides no signal for "app opened from the system Now Playing
+            // controls", so we intentionally don't synthesize the currently-playing
+            // deep link here. Doing it on scenePhase changes navigated to the reader on
+            // *every* foreground (recents, app icon) while audio was playing.
             .onReceive(NotificationCenter.default.publisher(for: UIScene.didEnterBackgroundNotification)) { output in
                 // Handled by RssRepository
             }

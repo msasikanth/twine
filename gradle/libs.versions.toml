@@ -71,6 +71,7 @@ compose_ui_util = { module = "org.jetbrains.compose.ui:ui-util", version.ref = "
 compose_material = { module = "org.jetbrains.compose.material:material", version.ref = "compose" }
 compose_material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
 compose_material3_adaptive = { module = "org.jetbrains.compose.material3.adaptive:adaptive", version.ref = "compose_material3_adaptive" }
+compose_material3_adaptive_navigation3 = { module = "org.jetbrains.compose.material3.adaptive:adaptive-navigation3", version.ref = "compose_material3_adaptive" }
 compose_resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
 compose_material3_windowsizeclass = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "compose-material3" }
 compose_ui_tooling_preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose" }

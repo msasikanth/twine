@@ -49,6 +49,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -102,6 +103,7 @@ import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.utils.CollectItemTransition
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalInAppRating
+import dev.sasikanth.rss.reader.utils.LocalRootWindowSizeClass
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
 import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
@@ -109,7 +111,7 @@ import kotlin.math.abs
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -145,19 +147,21 @@ internal fun HomeScreen(
 
   LaunchedEffect(Unit) { viewModel.openPost.collect { (index, post) -> openPost(index, post) } }
 
+  // Keyed to the window, not the pane, so the featured section stays hidden when this
+  // screen is squeezed into a split's list pane.
+  val rootSizeClass = LocalRootWindowSizeClass.current
+  val forceShowAllPosts =
+    shouldBlockImage ||
+      rootSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
+
   val posts =
     remember(
         state.allPosts,
         state.feedPosts,
         state.showFeaturedSection,
-        shouldBlockImage,
-        sizeClass,
+        forceShowAllPosts,
         state.activeSource?.id,
       ) {
-        val forceShowAllPosts =
-          shouldBlockImage ||
-            sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)
-
         if (state.showFeaturedSection && !forceShowAllPosts) {
           state.feedPosts
         } else {
@@ -167,24 +171,19 @@ internal fun HomeScreen(
       ?.collectAsLazyPagingItems()
   val postsProvider = remember(posts) { { posts } }
 
-  val featuredPosts by
-    remember(
-        state.featuredPosts,
-        state.themeVariant,
-        sizeClass,
-        shouldBlockImage,
-        state.activeSource?.id,
-      ) {
-        if (
-          shouldBlockImage ||
-            sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)
-        ) {
-          flowOf(persistentListOf())
-        } else {
-          state.featuredPosts
-        }
+  val allFeaturedPosts by state.featuredPosts.collectAsStateWithLifecycle()
+  val featuredPosts =
+    remember(allFeaturedPosts, forceShowAllPosts) {
+      if (forceShowAllPosts) {
+        persistentListOf()
+      } else {
+        allFeaturedPosts
       }
-      .collectAsStateWithLifecycle(initialValue = persistentListOf())
+    }
+
+  LaunchedEffect(forceShowAllPosts) {
+    viewModel.dispatch(HomeEvent.UpdateFeaturedSectionVisibility(visible = !forceShowAllPosts))
+  }
 
   LaunchedEffect(triggerSync) {
     if (triggerSync) {
@@ -199,6 +198,8 @@ internal fun HomeScreen(
     }
   }
 
+  val activeReaderPostId by viewModel.activeReaderPostId.collectAsStateWithLifecycle()
+
   HomeContent(
     state = state,
     feedsState = feedsState,
@@ -208,6 +209,7 @@ internal fun HomeScreen(
     feedsDispatch = feedsViewModel::dispatch,
     onMenuClicked = onMenuClicked,
     modifier = modifier,
+    activeReaderPostId = activeReaderPostId,
   )
 }
 
@@ -222,6 +224,7 @@ private fun HomeContent(
   feedsDispatch: (FeedsEvent) -> Unit,
   onMenuClicked: (() -> Unit)?,
   modifier: Modifier = Modifier,
+  activeReaderPostId: String? = null,
 ) {
   val linkHandler = LocalLinkHandler.current
   val coroutineScope = rememberCoroutineScope()
@@ -375,52 +378,57 @@ private fun HomeContent(
           val posts = latestPosts
 
           val topOffset =
-            remember(paddingValues, featuredPosts) {
-              val topPaddingPx = with(density) { paddingValues.calculateTopPadding().roundToPx() }
-              if (featuredPosts.isEmpty()) {
-                postsListState.layoutInfo.beforeContentPadding
-              } else {
-                topPaddingPx
-              }
+            remember(paddingValues) {
+              with(density) { paddingValues.calculateTopPadding().roundToPx() }
             }
 
-          LaunchedEffect(state.activePostIndex, featuredPosts.isNotEmpty()) {
+          LaunchedEffect(
+            state.activePostIndex,
+            state.activePostScrollOffset,
+            featuredPosts.isNotEmpty(),
+          ) {
             val activePostIndex = state.activePostIndex
+            val savedScrollOffset = state.activePostScrollOffset
             val numberOfFeaturedPosts = featuredPosts.size
 
+            snapshotFlow { (latestPosts?.itemCount ?: 0) > 0 || numberOfFeaturedPosts > 0 }
+              .first { it }
+
+            if (postsListState.isScrollInProgress) return@LaunchedEffect
+
             if (activePostIndex < numberOfFeaturedPosts && numberOfFeaturedPosts > 0) {
-              postsListState.scrollToItem(0)
+              postsListState.scrollToItem(0, scrollOffset = -(savedScrollOffset ?: 0))
               featuredPostsPagerState.scrollToPage(activePostIndex)
             } else {
-              // Since indexes start from 0, we are increasing the featured posts size by one
-              val featuredPostsLastIndex = (numberOfFeaturedPosts - 1).coerceAtLeast(0)
-              val adjustedIndex = (activePostIndex - featuredPostsLastIndex).coerceAtLeast(0)
+              // activePostIndex counts featured posts first, then list posts. In the
+              // LazyColumn the featured section always occupies item 0 (even when the
+              // featured list is empty), so the list index of a post is its position
+              // among non-featured posts plus one.
+              val adjustedIndex = (activePostIndex - numberOfFeaturedPosts + 1).coerceAtLeast(0)
 
-              // Since we apply top content padding to the LazyColumn, we are offsetting
-              // the scroll so that the actual item is visible at top of the page for user.
-              postsListState.scrollToItem(adjustedIndex, scrollOffset = topOffset.unaryMinus())
+              postsListState.scrollToItem(
+                adjustedIndex,
+                scrollOffset = -(savedScrollOffset ?: topOffset),
+              )
             }
           }
 
           val saveVisibleItemIndex by rememberUpdatedState {
-            val visibleItemsInfo = postsListState.layoutInfo.visibleItemsInfo
-            if (visibleItemsInfo.isNotEmpty()) {
-              val firstVisibleItemInfoAfterOffset =
-                visibleItemsInfo.firstOrNull { itemInfo ->
-                  itemInfo.offset >= topOffset || itemInfo.offset == 0
-                }
-              val firstVisibleItemIndexAfterOffset = firstVisibleItemInfoAfterOffset?.index ?: 0
-              val firstVisibleItemKey = firstVisibleItemInfoAfterOffset?.key as? String
-              val settledPage = featuredPostsPagerState.settledPage
-
+            val firstVisibleItem = postsListState.layoutInfo.visibleItemsInfo.firstOrNull()
+            if (firstVisibleItem != null) {
               dispatch(
                 HomeEvent.OnScreenStopped(
-                  firstVisibleItemIndex = firstVisibleItemIndexAfterOffset,
-                  firstVisibleItemKey = firstVisibleItemKey,
-                  settledPage = settledPage,
+                  firstVisibleItemIndex = firstVisibleItem.index,
+                  firstVisibleItemKey = firstVisibleItem.key as? String,
+                  firstVisibleItemOffset = firstVisibleItem.offset,
+                  settledPage = featuredPostsPagerState.settledPage,
                 )
               )
             }
+          }
+
+          LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
+            dispatch(HomeEvent.OnScreenStarted)
           }
 
           LifecycleEventEffect(event = Lifecycle.Event.ON_STOP) { saveVisibleItemIndex() }
@@ -484,6 +492,7 @@ private fun HomeContent(
                   updateReadStatus = { postId, updatedReadStatus ->
                     dispatch(HomeEvent.UpdatePostReadStatus(postId, updatedReadStatus))
                   },
+                  activeReaderPostId = activeReaderPostId,
                   modifier =
                     Modifier.fillMaxSize().drawWithContent {
                       drawContent()

@@ -19,5 +19,12 @@ package dev.sasikanth.rss.reader.utils
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.window.core.layout.WindowSizeClass
 
+// Size class of the container the current screen is laid out in. Inside a list-detail
+// split this is the pane, not the window, so screens adapt to the space they actually have.
 internal val LocalWindowSizeClass =
+  staticCompositionLocalOf<WindowSizeClass> { WindowSizeClass(widthDp = 412f, heightDp = 892f) }
+
+// Size class of the whole window, unaffected by pane overrides. Use for decisions tied to
+// the window itself, like whether the reader can open in a split pane.
+internal val LocalRootWindowSizeClass =
   staticCompositionLocalOf<WindowSizeClass> { WindowSizeClass(widthDp = 412f, heightDp = 892f) }

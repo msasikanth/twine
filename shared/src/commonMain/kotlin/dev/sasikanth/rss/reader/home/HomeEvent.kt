@@ -57,11 +57,16 @@ sealed interface HomeEvent {
 
   data class UpdateVisibleItemIndex(val index: Int, val postId: String? = null) : HomeEvent
 
+  data object OnScreenStarted : HomeEvent
+
   data class OnScreenStopped(
     val firstVisibleItemIndex: Int,
     val firstVisibleItemKey: String?,
+    val firstVisibleItemOffset: Int,
     val settledPage: Int,
   ) : HomeEvent
+
+  data class UpdateFeaturedSectionVisibility(val visible: Boolean) : HomeEvent
 
   data object LoadNewArticlesClick : HomeEvent
 

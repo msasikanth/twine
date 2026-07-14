@@ -27,6 +27,8 @@ import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
+import dev.sasikanth.rss.reader.data.repository.ObservableActiveReaderPost
+import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.ObservableSelectedPost
 import dev.sasikanth.rss.reader.data.repository.PostRepository
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
@@ -70,8 +72,19 @@ class ReaderViewModel(
   private val settingsRepository: SettingsRepository,
   private val billingHandler: BillingHandler,
   private val observableSelectedPost: ObservableSelectedPost,
+  private val observableActiveReaderPost: ObservableActiveReaderPost,
+  private val observableActiveSource: ObservableActiveSource,
   @Assisted private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+
+  // A reader opened under a previous source must not publish its position, or it would
+  // scroll the new source's list to a stale index.
+  private val initialActiveSourceId = observableActiveSource.currentActiveSource?.id
+
+  private val canPublishSelectedPost: Boolean
+    get() =
+      (readerScreenArgs.fromScreen == Home || readerScreenArgs.fromScreen == AudioPlayer) &&
+        observableActiveSource.currentActiveSource?.id == initialActiveSourceId
 
   private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
   private val _openedPostItems = MutableStateFlow(emptySet<String>())
@@ -91,6 +104,7 @@ class ReaderViewModel(
     get() = _exitScreen
 
   init {
+    observableActiveReaderPost.updateActivePost(readerScreenArgs.postId)
     init()
   }
 
@@ -158,7 +172,14 @@ class ReaderViewModel(
   private fun postPageChange(postIndex: Int, post: ResolvedPost) {
     _openedPostItems.update { it + post.id }
     _state.update { it.copy(activePostIndex = postIndex, activePostId = post.id) }
-    observableSelectedPost.updateSelectedPost(postIndex, post.id)
+
+    // Only readers backed by the home posts list publish the selection; indexes from
+    // Search/Bookmarks/Widget belong to a different list, and posts there may not even
+    // be in home's current filters, which would scroll home somewhere surprising.
+    if (canPublishSelectedPost) {
+      observableSelectedPost.updateSelectedPost(postIndex, post.id)
+    }
+    observableActiveReaderPost.updateActivePost(post.id)
 
     coroutineScope.launch {
       val markAsReadOn = settingsRepository.markAsReadOn.first()
@@ -212,7 +233,9 @@ class ReaderViewModel(
         _state.update { it.copy(posts = allPostsPagingData) }
       } else {
         val posts =
-          Pager(config = PagingConfig(pageSize = 4, enablePlaceholders = true)) {
+          Pager(
+              config = PagingConfig(pageSize = 4, enablePlaceholders = true, jumpThreshold = 12)
+            ) {
               val sessionPostIds = _openedPostItems.value.toList()
               when (readerScreenArgs.fromScreen) {
                 is Search -> {
@@ -277,6 +300,15 @@ class ReaderViewModel(
   }
 
   override fun onCleared() {
+    observableActiveReaderPost.clearIfActive(_state.value.activePostId)
+
+    if (canPublishSelectedPost) {
+      observableSelectedPost.updateSelectedPost(
+        index = _state.value.activePostIndex,
+        postId = _state.value.activePostId,
+      )
+    }
+
     markPostsAsRead().invokeOnCompletion { super.onCleared() }
   }
 }

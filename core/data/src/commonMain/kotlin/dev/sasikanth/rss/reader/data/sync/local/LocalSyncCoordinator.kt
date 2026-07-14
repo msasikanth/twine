@@ -24,6 +24,7 @@ import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
+import dev.sasikanth.rss.reader.data.repository.FeedSyncMetadataUpdate
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -33,16 +34,18 @@ import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -85,9 +88,13 @@ class LocalSyncCoordinator(
           val feedsChunks = feedsToRefresh.chunked(SYNC_CHUNK_SIZE)
 
           feedsChunks.forEachIndexed { index, feeds ->
-            val jobs = feeds.map { feed -> launch { pullFeed(feed, now) } }
+            val metadataUpdates = coroutineScope {
+              feeds.map { feed -> async { pullFeed(feed, now) } }.awaitAll()
+            }
+            // Feed metadata commits invalidate every UI query that joins the feed
+            // table; batching them keeps the pagers from re-querying per feed.
+            rssRepository.applyFeedsSyncMetadata(metadataUpdates)
 
-            jobs.joinAll()
             updateSyncState(SyncState.InProgress((index + 1).toFloat() / feedsChunks.size))
           }
         }
@@ -114,7 +121,10 @@ class LocalSyncCoordinator(
             withContext(dispatchersProvider.databaseRead) { rssRepository.feed(feedId = feedId) }
 
           if (feed != null) {
-            checkAndRefreshLastRefreshTime { pullFeed(feed, now) }
+            checkAndRefreshLastRefreshTime {
+              val metadataUpdate = pullFeed(feed, now)
+              rssRepository.applyFeedsSyncMetadata(listOf(metadataUpdate))
+            }
           }
 
           updateSyncState(SyncState.InProgress((index + 1).toFloat() / feedIds.size))
@@ -143,7 +153,8 @@ class LocalSyncCoordinator(
         if (feed != null) {
           checkAndRefreshLastRefreshTime {
             updateSyncState(SyncState.InProgress(0.5f))
-            pullFeed(feed, now)
+            val metadataUpdate = pullFeed(feed, now)
+            rssRepository.applyFeedsSyncMetadata(listOf(metadataUpdate))
           }
         }
 
@@ -162,20 +173,18 @@ class LocalSyncCoordinator(
     return false
   }
 
-  private suspend fun pullFeed(feed: Feed, now: Instant) {
+  /**
+   * Fetches the feed and upserts its posts. Feed metadata changes (fetch errors, last updated,
+   * refresh interval) are returned instead of written so callers can commit them for a whole chunk
+   * in a single transaction.
+   */
+  private suspend fun pullFeed(feed: Feed, now: Instant): FeedSyncMetadataUpdate {
     val initialPostCount = rssRepository.postsCountForFeed(feed.id)
     val fetchFullContent = settingsRepository.downloadFullContent.first()
     val feedFetchResult = feedFetcher.fetch(url = feed.link, fetchFullContent = fetchFullContent)
 
     if (feedFetchResult !is FeedFetchResult.Success) {
-      withContext(dispatchersProvider.databaseWrite) {
-        rssRepository.incrementFeedFetchErrors(feedId = feed.id)
-      }
-      return
-    }
-
-    withContext(dispatchersProvider.databaseWrite) {
-      rssRepository.resetFeedFetchErrors(feedId = feed.id)
+      return FeedSyncMetadataUpdate(feedId = feed.id, fetchSucceeded = false)
     }
 
     rssRepository.upsertFeedWithPosts(
@@ -188,11 +197,12 @@ class LocalSyncCoordinator(
     val finalPostCount = rssRepository.postsCountForFeed(feed.id)
     val hasNewContent = finalPostCount > initialPostCount
 
-    withContext(dispatchersProvider.databaseWrite) {
-      rssRepository.updateFeedLastUpdatedAt(feedId = feed.id, lastUpdatedAt = now)
-    }
-
-    adjustRefreshInterval(feed, hasNewContent)
+    return FeedSyncMetadataUpdate(
+      feedId = feed.id,
+      fetchSucceeded = true,
+      lastUpdatedAt = now,
+      refreshInterval = adjustedRefreshInterval(feed, hasNewContent),
+    )
   }
 
   private suspend fun checkAndRefreshLastRefreshTime(block: suspend () -> Unit) {
@@ -241,7 +251,8 @@ class LocalSyncCoordinator(
     return timeSinceLastUpdate >= feed.refreshInterval
   }
 
-  private suspend fun adjustRefreshInterval(feed: Feed, hasNewContent: Boolean) {
+  /** Returns the adjusted refresh interval, or null when it is unchanged. */
+  private fun adjustedRefreshInterval(feed: Feed, hasNewContent: Boolean): Duration? {
     val currentRefreshInterval = feed.refreshInterval
 
     val adjustmentFactor = if (hasNewContent) 0.8 else 1.2
@@ -252,13 +263,6 @@ class LocalSyncCoordinator(
         minOf(1.days, (currentRefreshInterval * adjustmentFactor))
       }
 
-    if (newRefreshInterval != currentRefreshInterval) {
-      withContext(dispatchersProvider.databaseWrite) {
-        rssRepository.updateFeedRefreshInterval(
-          feedId = feed.id,
-          refreshInterval = newRefreshInterval,
-        )
-      }
-    }
+    return newRefreshInterval.takeIf { it != currentRefreshInterval }
   }
 }

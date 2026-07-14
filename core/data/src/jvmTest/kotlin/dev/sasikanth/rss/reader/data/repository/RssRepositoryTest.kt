@@ -141,6 +141,7 @@ class RssRepositoryTest {
           FeedRepository(
             database.feedQueries,
             database.feedSearchFTSQueries,
+            TransactionRunner(database),
             testDispatchersProvider,
           ),
         postRepository = PostRepository(database.postQueries, testDispatchersProvider),

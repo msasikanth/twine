@@ -22,6 +22,14 @@ import kotlinx.coroutines.flow.StateFlow
 interface AudioPlayer {
   val playbackState: StateFlow<PlaybackState>
 
+  /** False when a native playback dependency is missing (e.g. VLC on desktop). */
+  val isAvailable: Boolean
+    get() = true
+
+  /** Install command or URL shown to the user when [isAvailable] is false. */
+  val installationHint: String?
+    get() = null
+
   fun play(
     url: String,
     title: String,

@@ -12,6 +12,7 @@
 package dev.sasikanth.rss.reader
 
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.window.Window
@@ -19,7 +20,9 @@ import androidx.compose.ui.window.application
 import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.DesktopComponent
 import dev.sasikanth.rss.reader.di.create
+import dev.sasikanth.rss.reader.utils.DesktopWindowChrome
 import dev.sasikanth.rss.reader.utils.ExternalUriHandler
+import java.awt.Color
 import java.awt.Desktop
 import java.awt.Toolkit
 
@@ -39,6 +42,14 @@ fun main() {
 
   application {
     Window(onCloseRequest = ::exitApplication, title = "") {
+      // macOS renders the transparent title bar with the window background; other
+      // platforms ignore the client property.
+      DisposableEffect(Unit) {
+        window.rootPane.putClientProperty("apple.awt.transparentTitleBar", true)
+        DesktopWindowChrome.listener = { argb -> window.background = Color(argb, true) }
+        onDispose { DesktopWindowChrome.listener = null }
+      }
+
       val systemDpi = Toolkit.getDefaultToolkit().screenResolution
       val screenSize = Toolkit.getDefaultToolkit().screenSize
 

@@ -17,12 +17,7 @@
 
 package dev.sasikanth.rss.reader.main.ui
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -33,15 +28,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
@@ -61,7 +53,7 @@ import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
+import dev.sasikanth.rss.reader.utils.LocalRootWindowSizeClass
 import kotlinx.coroutines.launch
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -81,11 +73,15 @@ internal fun MainScreen(
   openAddFeedScreen: () -> Unit,
   openPaywall: () -> Unit,
   openFeedHealth: () -> Unit,
+  isSideNavigationExpanded: Boolean,
+  setSideNavigationExpanded: (Boolean) -> Unit,
   modifier: Modifier = Modifier,
   canHandleBack: Boolean = true,
   startTab: String? = null,
 ) {
-  val sizeClass = LocalWindowSizeClass.current
+  // Navigation (rail/drawer) tiers follow the window, not the pane, so in a list-detail
+  // split the side navigation stays inline in a row instead of overlaying the posts list.
+  val sizeClass = LocalRootWindowSizeClass.current
   val drawerState = rememberDrawerState(DrawerValue.Closed)
   val scope = rememberCoroutineScope()
 
@@ -119,10 +115,6 @@ internal fun MainScreen(
     }
   }
 
-  var isSideNavigationExpanded by rememberSaveable {
-    mutableStateOf(sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND))
-  }
-
   NavigationEventHandler(
     state = rememberNavigationEventState(NavigationEventInfo.None),
     isBackEnabled =
@@ -139,7 +131,7 @@ internal fun MainScreen(
       }
       isSideNavigationExpanded &&
         !sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND) -> {
-        isSideNavigationExpanded = false
+        setSideNavigationExpanded(false)
       }
       else -> {
         navigator.popUpTo(Screen.MainHome::class, inclusive = false)
@@ -173,7 +165,7 @@ internal fun MainScreen(
     focusManager.clearFocus()
     when {
       sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> {
-        isSideNavigationExpanded = !isSideNavigationExpanded
+        setSideNavigationExpanded(!isSideNavigationExpanded)
       }
       else -> {
         scope.launch { drawerState.open() }
@@ -232,7 +224,7 @@ internal fun MainScreen(
         closeDrawer = {
           when {
             sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> {
-              isSideNavigationExpanded = false
+              setSideNavigationExpanded(false)
             }
             else -> {
               scope.launch { drawerState.close() }
@@ -246,29 +238,6 @@ internal fun MainScreen(
     }
 
   when {
-    sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND) -> {
-      PermanentNavigationDrawer(
-        modifier = modifier,
-        drawerContent = {
-          AnimatedVisibility(
-            visible = isSideNavigationExpanded,
-            enter = slideInHorizontally(initialOffsetX = { -it }) + expandHorizontally(),
-            exit = slideOutHorizontally(targetOffsetX = { -it }) + shrinkHorizontally(),
-          ) {
-            Box(modifier = Modifier.requiredWidth(360.dp)) { drawerContent(true) }
-          }
-        },
-      ) {
-        MainScreenContent(
-          navigator = navigator,
-          homeContent = { homeContent(openDrawer) },
-          searchContent = { searchContent(goBackToHome) },
-          bookmarksContent = { bookmarksContent(goBackToHome) },
-          settingsContent = { settingsContent(goBackToHome) },
-          discoveryContent = { discoveryContent(goBackToHome) },
-        )
-      }
-    }
     sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> {
       Row(modifier = modifier.fillMaxSize()) {
         val sideNavigationWidth by animateDpAsState(if (isSideNavigationExpanded) 360.dp else 80.dp)

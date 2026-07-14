@@ -52,8 +52,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -108,6 +111,9 @@ import dev.sasikanth.rss.reader.reader.ReaderViewModel
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
 import dev.sasikanth.rss.reader.reader.page.ui.ReaderPage
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
+import dev.sasikanth.rss.reader.resources.icons.Close
+import dev.sasikanth.rss.reader.resources.icons.CollapseContent
+import dev.sasikanth.rss.reader.resources.icons.ExpandContent
 import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.platform
@@ -137,7 +143,10 @@ import kotlinx.coroutines.launch
 import org.intellij.markdown.MarkdownTokenTypes
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.buttonClose
 import twine.shared.generated.resources.buttonGoBack
+import twine.shared.generated.resources.readerCollapseScreen
+import twine.shared.generated.resources.readerExpandScreen
 import twine.shared.generated.resources.readerPageCount
 
 @OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
@@ -151,6 +160,9 @@ internal fun ReaderScreen(
   toggleLightStatusBar: (Boolean) -> Unit,
   toggleLightNavBar: (Boolean) -> Unit,
   modifier: Modifier = Modifier,
+  showCloseNavIcon: Boolean = false,
+  isReaderPaneExpanded: Boolean = false,
+  toggleReaderPaneExpanded: (() -> Unit)? = null,
 ) {
   val coroutineScope = rememberCoroutineScope()
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -178,14 +190,43 @@ internal fun ReaderScreen(
   val pagerState = rememberPagerState(initialPage = state.activePostIndex) { posts.itemCount }
   val exitScreen by viewModel.exitScreen.collectAsStateWithLifecycle(false)
 
+  // If the pager lays out before paging delivers its first item count, the initial
+  // page gets clamped to 0 and the requested index is lost. Restore it exactly once,
+  // as soon as the count is available, unless the user has already started swiping.
+  val initialPostIndex = remember { state.activePostIndex }
+  var initialPageRestored by rememberSaveable { mutableStateOf(false) }
+  LaunchedEffect(posts.itemCount) {
+    if (!initialPageRestored && posts.itemCount > 0) {
+      if (
+        initialPostIndex in 0 until posts.itemCount &&
+          pagerState.currentPage != initialPostIndex &&
+          !pagerState.isScrollInProgress
+      ) {
+        pagerState.scrollToPage(initialPostIndex)
+      }
+      initialPageRestored = true
+    }
+  }
+
+  // In a split layout the list pane keeps the app theme, so article-based dynamic colors
+  // in the reader pane would clash with it.
+  val isDynamicColorEnabled =
+    state.selectedThemeVariant == ThemeVariant.Dynamic && !showCloseNavIcon
+
+  LaunchedEffect(isDynamicColorEnabled) {
+    if (!isDynamicColorEnabled) {
+      articleDynamicColorState.reset()
+    }
+  }
+
   pagerState.CollectItemTransition(
     posts.itemCount,
-    state.selectedThemeVariant,
+    isDynamicColorEnabled,
     itemProvider = { index ->
       if (shouldBlockImage || posts.itemCount == 0) null else posts.peek(index)
     },
   ) { fromItem, toItem, offset ->
-    if (state.selectedThemeVariant == ThemeVariant.Dynamic) {
+    if (isDynamicColorEnabled) {
       val fromSeedColor = seedColorExtractor.calculateSeedColor(url = fromItem?.imageUrl)
       val toSeedColor = seedColorExtractor.calculateSeedColor(url = toItem?.imageUrl)
 
@@ -328,8 +369,11 @@ internal fun ReaderScreen(
             navigationIcon = {
               CircularIconButton(
                 modifier = Modifier.padding(start = 12.dp),
-                icon = TwineIcons.ArrowBack,
-                label = stringResource(Res.string.buttonGoBack),
+                icon = if (showCloseNavIcon) TwineIcons.Close else TwineIcons.ArrowBack,
+                label =
+                  stringResource(
+                    if (showCloseNavIcon) Res.string.buttonClose else Res.string.buttonGoBack
+                  ),
                 onClick = onBack,
               )
             },
@@ -365,6 +409,28 @@ internal fun ReaderScreen(
 
                   HorizontalPageIndicators(pageIndicatorState = pageIndicatorState)
                 }
+              }
+            },
+            actions = {
+              if (toggleReaderPaneExpanded != null) {
+                CircularIconButton(
+                  modifier = Modifier.padding(end = 12.dp),
+                  icon =
+                    if (isReaderPaneExpanded) {
+                      TwineIcons.CollapseContent
+                    } else {
+                      TwineIcons.ExpandContent
+                    },
+                  label =
+                    stringResource(
+                      if (isReaderPaneExpanded) {
+                        Res.string.readerCollapseScreen
+                      } else {
+                        Res.string.readerExpandScreen
+                      }
+                    ),
+                  onClick = toggleReaderPaneExpanded,
+                )
               }
             },
           )

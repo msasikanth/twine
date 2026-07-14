@@ -56,7 +56,7 @@ allprojects {
     }
     format("xml") {
       target("src/**/*.xml")
-      targetExclude("**/build/", ".idea/")
+      targetExclude("**/build/**", "**/.idea/**")
       trimTrailingWhitespace()
       endWithNewline()
     }

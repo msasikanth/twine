@@ -20,6 +20,7 @@ package dev.sasikanth.rss.reader.reader.page
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import com.mikepenz.markdown.model.State
 import com.mikepenz.markdown.model.parseMarkdownFlow
 import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
@@ -92,7 +93,12 @@ class ReaderPageViewModel(
 
   init {
     loadPostContent()
-    loadFullArticle()
+    // Only prefetch the full article when it will actually be shown; fetching it
+    // eagerly here costs a network request + DB write for every page the pager
+    // preloads. toggleFullArticle() fetches it on demand otherwise.
+    if (_showFullArticle.value) {
+      loadFullArticle()
+    }
     observePlaybackStateForAutoSave()
   }
 
@@ -244,11 +250,16 @@ class ReaderPageViewModel(
       .distinctUntilChanged()
       .onEach { content ->
         val readabilityResult =
-          readabilityRunner.parseHtml(
-            link = readerPost.link,
-            content = content ?: "",
-            image = readerPost.imageUrl,
-          )
+          try {
+            readabilityRunner.parseHtml(
+              link = readerPost.link,
+              content = content ?: "",
+              image = readerPost.imageUrl,
+            )
+          } catch (e: Exception) {
+            Logger.e(e) { "Failed to parse reader content" }
+            ReadabilityResult()
+          }
 
         onParsingComplete(readabilityResult)
       }

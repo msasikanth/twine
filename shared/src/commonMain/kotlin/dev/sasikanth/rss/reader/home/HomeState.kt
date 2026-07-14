@@ -33,7 +33,10 @@ import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.sync.SyncState
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.datetime.LocalDateTime
 
@@ -41,7 +44,7 @@ import kotlinx.datetime.LocalDateTime
 data class HomeState(
   val allPosts: Flow<PagingData<ResolvedPost>>,
   val feedPosts: Flow<PagingData<ResolvedPost>>?,
-  val featuredPosts: Flow<ImmutableList<FeaturedPostItem>>,
+  val featuredPosts: StateFlow<ImmutableList<FeaturedPostItem>>,
   val syncState: SyncState,
   val feedsSheetState: SheetValue,
   val activeSource: Source?,
@@ -57,6 +60,7 @@ data class HomeState(
   val unreadSinceLastSync: UnreadSinceLastSync?,
   val prevActiveSource: Source?,
   val activePostIndex: Int,
+  val activePostScrollOffset: Int?,
   val showPostsSortFilter: Boolean,
   val showPinnedSources: Boolean,
 ) {
@@ -67,7 +71,7 @@ data class HomeState(
       HomeState(
         allPosts = emptyFlow(),
         feedPosts = null,
-        featuredPosts = emptyFlow(),
+        featuredPosts = MutableStateFlow(persistentListOf()),
         syncState = SyncState.Idle,
         feedsSheetState = SheetValue.PartiallyExpanded,
         activeSource = null,
@@ -83,6 +87,7 @@ data class HomeState(
         unreadSinceLastSync = null,
         prevActiveSource = null,
         activePostIndex = 0,
+        activePostScrollOffset = null,
         showPostsSortFilter = false,
         showPinnedSources = true,
       )

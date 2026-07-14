@@ -51,6 +51,19 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     }
   private val mediaPlayer: MediaPlayer? = mediaPlayerFactory?.mediaPlayers()?.newMediaPlayer()
 
+  override val isAvailable: Boolean
+    get() = mediaPlayer != null
+
+  override val installationHint: String
+    get() {
+      val os = System.getProperty("os.name").orEmpty().lowercase()
+      return when {
+        "mac" in os -> "brew install --cask vlc"
+        "win" in os -> "https://www.videolan.org/vlc/"
+        else -> "sudo apt install vlc"
+      }
+    }
+
   private var progressJob: Job? = null
   private var playingUrl: String? = null
   private var playingPostId: String? = null

@@ -52,6 +52,7 @@ import kotlin.time.Instant
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format.DateTimeFormat
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
@@ -85,6 +86,10 @@ fun Modifier.ignoreHorizontalParentPadding(horizontal: Dp): Modifier {
   }
 }
 
+// Formatter construction is relatively expensive and this runs per list item; cache it
+// keyed on the localized month names so a locale change still produces a fresh formatter.
+private val relativeTimeFormatterCache = mutableMapOf<List<String>, DateTimeFormat<LocalDateTime>>()
+
 @Composable
 fun Instant.formatRelativeTime(): String {
   val now = Clock.System.now()
@@ -114,12 +119,14 @@ fun Instant.formatRelativeTime(): String {
           stringResource(Res.string.month_dec),
         )
       val numericDateFormatter =
-        LocalDateTime.Format {
-          day(Padding.ZERO)
-          char(' ')
-          monthName(MonthNames(monthNames))
-          char(' ')
-          yearTwoDigits(baseYear = 1950)
+        relativeTimeFormatterCache.getOrPut(monthNames) {
+          LocalDateTime.Format {
+            day(Padding.ZERO)
+            char(' ')
+            monthName(MonthNames(monthNames))
+            char(' ')
+            yearTwoDigits(baseYear = 1950)
+          }
         }
 
       numericDateFormatter.format(this.toLocalDateTime(TimeZone.currentSystemDefault()))
@@ -175,7 +182,7 @@ fun <T> PagerState.CollectItemTransition(
   val currentItemProvider by rememberUpdatedState(itemProvider)
   val currentOnTransition by rememberUpdatedState(onTransition)
 
-  LaunchedEffect(this, key) {
+  LaunchedEffect(this, *key) {
     snapshotFlow {
         val page = currentPage
         val offset = currentPageOffsetFraction

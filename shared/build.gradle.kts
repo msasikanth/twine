@@ -48,6 +48,16 @@ kotlin {
   // spotless:on
 
   listOf(iosArm64(), iosSimulatorArm64()).forEach { iOSTarget ->
+    iOSTarget.binaries.all {
+      val platform =
+        if (iOSTarget.name.contains("simulator", ignoreCase = true)) "iphonesimulator"
+        else "iphoneos"
+      linkerOpts(
+        "-L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$platform",
+        "-L/usr/lib/swift",
+      )
+    }
+
     iOSTarget.binaries.framework {
       baseName = "shared"
       isStatic = true
@@ -126,6 +136,7 @@ kotlin {
       implementation(libs.viewmodel)
       implementation(libs.lifecycle.runtime.compose)
       api(libs.jetbrains.navigation3.ui)
+      api(libs.compose.material3.adaptive.navigation3)
       api(libs.jetbrains.lifecycle.viewmodelNavigation3)
       implementation(libs.material.kolor)
     }

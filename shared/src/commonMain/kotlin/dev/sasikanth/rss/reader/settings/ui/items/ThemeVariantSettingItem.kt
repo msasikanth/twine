@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.ThemeVariantIconButton
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
+import dev.sasikanth.rss.reader.data.repository.isDynamicThemeSupported
 import dev.sasikanth.rss.reader.settings.ui.settingsItemHorizontalPadding
 import dev.sasikanth.rss.reader.ui.isSystemDynamicColorSupported
 import dev.sasikanth.rss.reader.utils.ignoreHorizontalParentPadding
@@ -44,11 +45,15 @@ internal fun ThemeVariantSettingItem(
 ) {
   val availableThemeVariants =
     remember(isSystemDynamicColorSupported) {
-      ThemeVariant.entries.filter { !it.isAndroidOnly || isSystemDynamicColorSupported }
+      ThemeVariant.entries.filter {
+        (!it.isAndroidOnly || isSystemDynamicColorSupported) &&
+          (it != ThemeVariant.Dynamic || isDynamicThemeSupported)
+      }
     }
   val themeVariantListState =
     rememberLazyListState(
-      initialFirstVisibleItemIndex = availableThemeVariants.indexOf(selectedThemeVariant)
+      initialFirstVisibleItemIndex =
+        availableThemeVariants.indexOf(selectedThemeVariant).coerceAtLeast(0)
     )
 
   LazyRow(

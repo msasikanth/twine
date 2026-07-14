@@ -22,24 +22,24 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import me.tatarka.inject.annotations.Inject
 
+/**
+ * Post currently open in the reader, if any. Unlike [ObservableSelectedPost] this is not updated by
+ * list scrolling, so lists beside the reader in a split layout can highlight the open post.
+ */
 @Inject
 @AppScope
-class ObservableSelectedPost {
+class ObservableActiveReaderPost {
 
-  private val _selectedPost = MutableStateFlow<SelectedPost?>(null)
-  val selectedPost: StateFlow<SelectedPost?> = _selectedPost
+  private val _activePostId = MutableStateFlow<String?>(null)
+  val activePostId: StateFlow<String?> = _activePostId
 
-  fun updateSelectedPost(index: Int, postId: String?, scrollOffset: Int? = null) {
-    _selectedPost.value = SelectedPost(index, postId, scrollOffset)
+  fun updateActivePost(postId: String?) {
+    _activePostId.value = postId
   }
 
-  fun clear() {
-    _selectedPost.value = null
+  // A replaced reader can be cleared after its replacement has already published, so only
+  // the owner may clear.
+  fun clearIfActive(postId: String?) {
+    _activePostId.compareAndSet(postId, null)
   }
 }
-
-/**
- * [index] is in home list order: featured pager pages first, then list posts. [scrollOffset] is the
- * anchor item's saved pixel offset; null when the selection came from the reader.
- */
-data class SelectedPost(val index: Int, val id: String?, val scrollOffset: Int? = null)

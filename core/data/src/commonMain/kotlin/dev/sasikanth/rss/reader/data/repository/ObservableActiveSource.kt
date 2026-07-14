@@ -30,6 +30,9 @@ class ObservableActiveSource {
   val activeSource: Flow<Source?>
     get() = _activeSources
 
+  val currentActiveSource: Source?
+    get() = _activeSources.value
+
   fun changeActiveSource(source: Source) {
     _activeSources.value = source
   }

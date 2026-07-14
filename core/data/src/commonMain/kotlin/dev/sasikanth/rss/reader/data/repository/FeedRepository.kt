@@ -25,6 +25,7 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedHealthInfo
 import dev.sasikanth.rss.reader.data.database.FeedQueries
 import dev.sasikanth.rss.reader.data.database.FeedSearchFTSQueries
+import dev.sasikanth.rss.reader.data.database.TransactionRunner
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.time.Clock
@@ -40,6 +41,7 @@ import me.tatarka.inject.annotations.Inject
 class FeedRepository(
   private val feedQueries: FeedQueries,
   private val feedSearchFTSQueries: FeedSearchFTSQueries,
+  private val transactionRunner: TransactionRunner,
   private val dispatchersProvider: DispatchersProvider,
 ) {
 
@@ -434,4 +436,41 @@ class FeedRepository(
   suspend fun resetFeedFetchErrors(feedId: String) {
     feedQueries.resetFetchErrors(id = feedId)
   }
+
+  /**
+   * Applies post-sync feed metadata (fetch error counters, last updated timestamp, refresh
+   * interval) for a batch of feeds in a single transaction. Feed metadata writes invalidate every
+   * query that joins the feed table, so committing them one-by-one during a sync causes repeated
+   * requery storms in the UI.
+   */
+  suspend fun applyFeedsSyncMetadata(updates: List<FeedSyncMetadataUpdate>) {
+    if (updates.isEmpty()) return
+
+    withContext(dispatchersProvider.databaseWrite) {
+      transactionRunner.invoke {
+        updates.forEach { update ->
+          if (update.fetchSucceeded) {
+            feedQueries.resetFetchErrors(id = update.feedId)
+          } else {
+            feedQueries.incrementFetchErrors(id = update.feedId)
+          }
+
+          update.lastUpdatedAt?.let {
+            feedQueries.updateLastUpdatedAt(lastUpdatedAt = it, id = update.feedId)
+          }
+
+          update.refreshInterval?.let {
+            feedQueries.updateRefreshInterval(refreshInterval = it.toString(), id = update.feedId)
+          }
+        }
+      }
+    }
+  }
 }
+
+data class FeedSyncMetadataUpdate(
+  val feedId: String,
+  val fetchSucceeded: Boolean,
+  val lastUpdatedAt: Instant? = null,
+  val refreshInterval: Duration? = null,
+)

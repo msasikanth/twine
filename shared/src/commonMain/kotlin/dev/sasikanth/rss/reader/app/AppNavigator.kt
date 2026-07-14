@@ -37,9 +37,14 @@ class AppNavigator(val backStack: NavBackStack<NavKey>) {
   }
 
   fun navigate(route: NavKey) {
-    if (backStack.lastOrNull() != route) {
-      backStack.add(route)
+    if (backStack.lastOrNull() == route) return
+
+    // In split mode the list stays interactive beside the reader; opening another post
+    // swaps the detail pane instead of stacking reader entries.
+    if (route is Screen.Reader && backStack.lastOrNull() is Screen.Reader) {
+      backStack.removeLastOrNull()
     }
+    backStack.add(route)
   }
 
   fun goBack(): Boolean {

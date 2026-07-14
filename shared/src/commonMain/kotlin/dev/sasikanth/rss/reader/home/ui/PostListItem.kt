@@ -19,6 +19,7 @@
 
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -107,6 +108,7 @@ internal fun PostListItem(
   updatePostReadStatus: (updatedReadStatus: Boolean) -> Unit,
   modifier: Modifier = Modifier,
   reduceReadItemAlpha: Boolean = false,
+  highlighted: Boolean = false,
   postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
 ) {
   var readStatus by remember(item.read) { mutableStateOf(item.read) }
@@ -118,6 +120,10 @@ internal fun PostListItem(
   var showDropdown by remember { mutableStateOf(false) }
   val showImage = !(item.imageUrl.isNullOrBlank())
   val shouldBlockImage = LocalBlockImage.current
+  val highlightColor by
+    animateColorAsState(
+      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest else Color.Transparent
+    )
 
   Column(
     modifier =
@@ -125,6 +131,7 @@ internal fun PostListItem(
         .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
         .padding(postListPadding)
+        .background(highlightColor, RoundedCornerShape(24.dp))
         .graphicsLayer { this.alpha = alpha }
         .semantics { contentDescription = item.title.ifBlank { item.description } }
         .padding(horizontal = 24.dp, vertical = 8.dp)
@@ -206,6 +213,7 @@ internal fun SimplePostListItem(
   updatePostReadStatus: (updatedReadStatus: Boolean) -> Unit,
   modifier: Modifier = Modifier,
   reduceReadItemAlpha: Boolean = false,
+  highlighted: Boolean = false,
   postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
 ) {
   var readStatus by remember(item.read) { mutableStateOf(item.read) }
@@ -217,6 +225,10 @@ internal fun SimplePostListItem(
   var showDropdown by remember { mutableStateOf(false) }
   val showImage = !(item.imageUrl.isNullOrBlank())
   val shouldBlockImage = LocalBlockImage.current
+  val highlightColor by
+    animateColorAsState(
+      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest else Color.Transparent
+    )
 
   Column(
     modifier =
@@ -224,6 +236,7 @@ internal fun SimplePostListItem(
         .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
         .padding(postListPadding)
+        .background(highlightColor, RoundedCornerShape(24.dp))
         .graphicsLayer { this.alpha = alpha }
         .semantics { contentDescription = item.title.ifBlank { item.description } }
         .padding(horizontal = 24.dp, vertical = 4.dp)
@@ -291,6 +304,7 @@ internal fun CompactPostListItem(
   updatePostReadStatus: (updatedReadStatus: Boolean) -> Unit,
   modifier: Modifier = Modifier,
   reduceReadItemAlpha: Boolean = false,
+  highlighted: Boolean = false,
   postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
 ) {
   var readStatus by remember(item.read) { mutableStateOf(item.read) }
@@ -300,12 +314,17 @@ internal fun CompactPostListItem(
       else Constants.ITEM_UNREAD_ALPHA
     )
   var showDropdown by remember { mutableStateOf(false) }
+  val highlightColor by
+    animateColorAsState(
+      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest else Color.Transparent
+    )
 
   Row(
     verticalAlignment = Alignment.CenterVertically,
     modifier =
       Modifier.then(modifier)
         .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
+        .background(highlightColor)
         .padding(compactPostListPadding)
         .graphicsLayer { this.alpha = alpha },
   ) {
