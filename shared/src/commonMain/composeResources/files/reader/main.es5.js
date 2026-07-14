@@ -14,7 +14,8 @@
 var JUNK_SELECTORS = [
   ".share", ".social", ".ad", ".promo", ".related", ".newsletter-widget",
   ".sharedaddy", ".jp-relatedposts", ".share-links", ".share-tools",
-  ".social-share", ".share-container"
+  ".social-share", ".share-container", ".entry-utility", ".post-tags",
+  ".post-categories", ".subscription-widget-container", ".sub-button-container"
 ].join(",");
 
 
@@ -57,41 +58,12 @@ function processNoScriptImages(doc) {
 }
 
 /**
- * Removes common non-content elements that might escape Readability's filtering.
+ * Removes "Read More" links that are likely internal and redundant.
  */
-function cleanContent(doc) {
-  var junkSelectors = [
-    ".share",
-    ".social",
-    ".ad",
-    ".promo",
-    ".related",
-    ".entry-utility",
-    ".post-tags",
-    ".post-categories",
-    ".subscription-widget-container",
-    ".sub-button-container",
-    ".newsletter-widget",
-    ".sharedaddy",
-    ".jp-relatedposts",
-    ".share-links",
-    ".share-tools",
-    ".social-share",
-    ".share-container",
-  ];
-
-  for (var i = 0; i < junkSelectors.length; i++) {
-    var selector = junkSelectors[i];
-    var elements = doc.querySelectorAll(selector);
-    for (var j = 0; j < elements.length; j++) {
-      elements[j].remove();
-    }
-  }
-
-  // Remove "Read More" links that are likely internal and redundant
+function removeReadMoreLinks(doc) {
   var links = doc.querySelectorAll("a");
-  for (var k = 0; k < links.length; k++) {
-    var a = links[k];
+  for (var i = 0; i < links.length; i++) {
+    var a = links[i];
     var text = a.textContent.toLowerCase().trim();
     if (text === "read more" || text === "continue reading" || text === "read more...") {
       var p = a.closest("p");
@@ -284,16 +256,24 @@ function getBestSrc(node) {
   );
 }
 
+function urlPath(url, baseURI) {
+  try {
+    return new URL(url, baseURI).pathname;
+  } catch (e) {
+    return url;
+  }
+}
+
 function removeFirstImageTagByUrl(doc, imageUrl) {
   if (!imageUrl) return;
 
-  var normalizedBannerUrl = normalizeUrl(imageUrl, doc.baseURI);
+  var bannerPath = urlPath(imageUrl, doc.baseURI);
   var imgs = Array.prototype.slice.call(doc.querySelectorAll("img"));
 
   for (var i = 0; i < imgs.length; i++) {
     var img = imgs[i];
-    var src = img.getAttribute("src") || img.getAttribute("data-src");
-    if (src && normalizeUrl(src, doc.baseURI) === normalizedBannerUrl) {
+    var src = getBestSrc(img);
+    if (src && urlPath(src, doc.baseURI) === bannerPath) {
       var figure = img.closest("figure");
       if (figure) {
         figure.remove();
@@ -345,7 +325,7 @@ function deduplicateImages(doc) {
 }
 
 function getImageCaption(markdown) {
-  var captionPattern = /!\[.*\]\(.*\]\(.*\s+"(.*)"\)/;
+  var captionPattern = /!\[[^\]]*\]\([^\s)]+\s+"([^"]*)"\)/;
   var match = markdown.match(captionPattern);
   if (match && match[1]) {
     return match[1];
@@ -407,7 +387,10 @@ function parseReaderContent(link, bannerImage, html) {
 
         if (isXkcdUrl(link)) {
           var markdown = turndownService.turndown(doc.body.innerHTML);
-          resolve({ content: getImageCaption(markdown), excerpt: null });
+          // The comic itself is shown as the post's banner image, so the
+          // hover-text caption is all we need; fall back to the full
+          // markdown instead of showing an empty reader page.
+          resolve({ content: getImageCaption(markdown) || markdown, excerpt: null });
           return;
         }
 
@@ -426,6 +409,7 @@ function parseReaderContent(link, bannerImage, html) {
             junkElements[i].remove();
         }
 
+        removeReadMoreLinks(doc);
         deduplicateImages(doc);
 
         var reader = new Readability(doc, {
@@ -450,7 +434,13 @@ function parseReaderContent(link, bannerImage, html) {
 
       } catch (error) {
         console.error("Reader Error:", error);
-        resolve({ content: "Error parsing content: " + error, excerpt: null });
+        // Never surface error text as article content; fall back to a plain
+        // conversion of the original HTML, or nothing if even that fails.
+        try {
+          resolve({ content: turndownService.turndown(html), excerpt: null });
+        } catch (fallbackError) {
+          resolve({ content: null, excerpt: null });
+        }
       }
   });
 }
