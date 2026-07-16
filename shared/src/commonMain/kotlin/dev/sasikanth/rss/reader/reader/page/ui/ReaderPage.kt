@@ -51,6 +51,7 @@ import com.mikepenz.markdown.compose.LocalImageTransformer
 import com.mikepenz.markdown.compose.LocalMarkdownAnimations
 import com.mikepenz.markdown.compose.LocalMarkdownAnnotator
 import com.mikepenz.markdown.compose.LocalMarkdownColors
+import com.mikepenz.markdown.compose.LocalMarkdownComponents
 import com.mikepenz.markdown.compose.LocalMarkdownDimens
 import com.mikepenz.markdown.compose.LocalMarkdownPadding
 import com.mikepenz.markdown.compose.LocalMarkdownTypography
@@ -186,6 +187,7 @@ private fun ReaderPageContent(
       Box(modifier = modifier) {
         CompositionLocalProvider(
           LocalOnImageClick provides onImageClick,
+          LocalMarkdownComponents provides markdownComponents,
           LocalReferenceLinkHandler provides ReferenceLinkHandlerImpl(),
           LocalMarkdownPadding provides markdownPadding(block = 12.dp),
           LocalMarkdownDimens provides markdownDimens(),
