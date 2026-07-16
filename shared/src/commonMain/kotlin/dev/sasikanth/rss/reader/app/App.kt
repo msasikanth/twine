@@ -315,10 +315,15 @@ fun App(
       val windowBackdropColor = AppTheme.colorScheme.backdrop
       LaunchedEffect(windowBackdropColor) { updateWindowBackdropColor(windowBackdropColor) }
 
-      // The list pane hosts the side navigation (rail or expanded drawer) in front of
-      // the posts list, so it needs the navigation's width on top of the list's own.
+      // Inline side navigation (rail or expanded drawer) only exists at large widths;
+      // below that the navigation is a modal drawer overlaying content, so the list
+      // pane only needs the posts list's own width.
+      val hasInlineNavigation =
+        windowInfo.windowSizeClass.isWidthAtLeastBreakpoint(
+          WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND
+        )
       val navigationWidth = if (isSideNavigationExpanded.value) 360.dp else 80.dp
-      val listPaneWidth = navigationWidth + 420.dp
+      val listPaneWidth = if (hasInlineNavigation) navigationWidth + 420.dp else 420.dp
 
       val entryProvider =
         entryProvider<NavKey> {

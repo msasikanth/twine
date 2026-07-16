@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -92,9 +93,12 @@ internal fun MainScreen(
   canHandleBack: Boolean = true,
   startTab: String? = null,
 ) {
-  // Navigation (rail/drawer) tiers follow the window, not the pane, so in a list-detail
-  // split the side navigation stays inline in a row instead of overlaying the posts list.
+  // Inline side navigation (rail/expanded drawer) is reserved for large widths; on
+  // expanded widths (foldables) the navigation is a modal drawer overlaying the
+  // list-detail split, keeping the content panes stable when it opens.
   val sizeClass = LocalRootWindowSizeClass.current
+  val hasInlineNavigation =
+    sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)
   val drawerState = rememberDrawerState(DrawerValue.Closed)
   val scope = rememberCoroutineScope()
 
@@ -131,20 +135,11 @@ internal fun MainScreen(
   NavigationEventHandler(
     state = rememberNavigationEventState(NavigationEventInfo.None),
     isBackEnabled =
-      canHandleBack &&
-        (selectedDestination != MainDestination.Home ||
-          (sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) &&
-            isSideNavigationExpanded &&
-            !sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)) ||
-          (drawerState.isOpen)),
+      canHandleBack && (selectedDestination != MainDestination.Home || drawerState.isOpen),
   ) {
     when {
       drawerState.isOpen -> {
         scope.launch { drawerState.close() }
-      }
-      isSideNavigationExpanded &&
-        !sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND) -> {
-        setSideNavigationExpanded(false)
       }
       else -> {
         navigator.popUpTo(Screen.MainHome::class, inclusive = false)
@@ -177,7 +172,7 @@ internal fun MainScreen(
   val openDrawer = {
     focusManager.clearFocus()
     when {
-      sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> {
+      hasInlineNavigation -> {
         setSideNavigationExpanded(!isSideNavigationExpanded)
       }
       else -> {
@@ -265,10 +260,8 @@ internal fun MainScreen(
 
   val drawerContent =
     @Composable { isExpanded: Boolean ->
-      val showCloseIcon =
-        !sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
-      val dismissOnSelection =
-        !sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)
+      val showCloseIcon = !hasInlineNavigation
+      val dismissOnSelection = !hasInlineNavigation
 
       NavigationDrawerContent(
         feedsViewModel = feedsViewModel,
@@ -306,7 +299,7 @@ internal fun MainScreen(
         openFeedHealth = openFeedHealth,
         closeDrawer = {
           when {
-            sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> {
+            hasInlineNavigation -> {
               setSideNavigationExpanded(false)
             }
             else -> {
@@ -321,7 +314,7 @@ internal fun MainScreen(
     }
 
   when {
-    sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> {
+    hasInlineNavigation -> {
       Row(modifier = modifier.fillMaxSize().then(keyboardShortcutsModifier)) {
         val sideNavigationWidth by animateDpAsState(if (isSideNavigationExpanded) 360.dp else 80.dp)
 
@@ -347,7 +340,8 @@ internal fun MainScreen(
         drawerState = drawerState,
         drawerContent = {
           ModalDrawerSheet(
-            modifier = Modifier.fillMaxWidth(),
+            // Full-width on phones; partial overlay (Gmail-style) on foldables/expanded.
+            modifier = Modifier.fillMaxWidth().widthIn(max = 400.dp),
             drawerContainerColor = AppTheme.colorScheme.backdrop,
             drawerContentColor = AppTheme.colorScheme.onSurface,
             drawerShape = RectangleShape,
