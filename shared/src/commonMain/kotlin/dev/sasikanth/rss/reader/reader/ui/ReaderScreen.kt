@@ -79,6 +79,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.layout.onVisibilityChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -490,6 +491,7 @@ internal fun ReaderScreen(
             }
 
           val backdropColor = AppTheme.colorScheme.backdrop
+          val scrimHeightPx = with(LocalDensity.current) { 96.dp.toPx() }
           HorizontalPager(
             modifier =
               Modifier.widthIn(max = readerContentMaxWidth)
@@ -498,10 +500,20 @@ internal fun ReaderScreen(
                 .drawWithContent {
                   drawContent()
                   drawRect(
-                    brush = Brush.verticalGradient(0f to backdropColor, 0.15f to Color.Transparent)
+                    brush =
+                      Brush.verticalGradient(
+                        colors = listOf(backdropColor, Color.Transparent),
+                        startY = 0f,
+                        endY = scrimHeightPx,
+                      )
                   )
                   drawRect(
-                    brush = Brush.verticalGradient(0.85f to Color.Transparent, 1f to backdropColor)
+                    brush =
+                      Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, backdropColor),
+                        startY = size.height - scrimHeightPx,
+                        endY = size.height,
+                      )
                   )
                 },
             state = pagerState,
