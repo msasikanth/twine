@@ -128,9 +128,10 @@ internal fun PostListItem(
   Column(
     modifier =
       Modifier.then(modifier)
-        .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
         .padding(postListPadding)
+        .clip(RoundedCornerShape(24.dp))
+        .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
         .background(highlightColor, RoundedCornerShape(24.dp))
         .graphicsLayer { this.alpha = alpha }
         .semantics { contentDescription = item.title.ifBlank { item.description } }
@@ -233,9 +234,10 @@ internal fun SimplePostListItem(
   Column(
     modifier =
       Modifier.then(modifier)
-        .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
         .padding(postListPadding)
+        .clip(RoundedCornerShape(24.dp))
+        .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
         .background(highlightColor, RoundedCornerShape(24.dp))
         .graphicsLayer { this.alpha = alpha }
         .semantics { contentDescription = item.title.ifBlank { item.description } }
@@ -323,8 +325,9 @@ internal fun CompactPostListItem(
     verticalAlignment = Alignment.CenterVertically,
     modifier =
       Modifier.then(modifier)
+        .clip(RoundedCornerShape(24.dp))
         .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
-        .background(highlightColor)
+        .background(highlightColor, RoundedCornerShape(24.dp))
         .padding(compactPostListPadding)
         .graphicsLayer { this.alpha = alpha },
   ) {
