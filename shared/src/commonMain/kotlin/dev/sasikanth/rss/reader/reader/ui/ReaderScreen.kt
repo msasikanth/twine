@@ -22,6 +22,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.animateBounds
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,6 +65,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -190,6 +193,11 @@ internal fun ReaderScreen(
   }
   val pagerState = rememberPagerState(initialPage = state.activePostIndex) { posts.itemCount }
   val exitScreen by viewModel.exitScreen.collectAsStateWithLifecycle(false)
+
+  val readerFocusRequester = remember { FocusRequester() }
+  if (platform is Platform.Desktop) {
+    LaunchedEffect(Unit) { readerFocusRequester.requestFocus() }
+  }
 
   // If the pager lays out before paging delivers its first item count, the initial
   // page gets clamped to 0 and the requested index is lost. Restore it exactly once,
@@ -336,21 +344,30 @@ internal fun ReaderScreen(
 
       Scaffold(
         modifier =
-          modifier.fillMaxSize().then(nestedScrollModifier).onKeyEvent { event ->
-            return@onKeyEvent when (event.key) {
-              Key.DirectionRight if event.type == KeyEventType.KeyUp -> {
-                coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+          modifier
+            .fillMaxSize()
+            .then(nestedScrollModifier)
+            .focusRequester(readerFocusRequester)
+            .focusable()
+            .onKeyEvent { event ->
+              return@onKeyEvent when (event.key) {
+                Key.DirectionRight if event.type == KeyEventType.KeyUp -> {
+                  coroutineScope.launch {
+                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                  }
 
-                true
-              }
-              Key.DirectionLeft if event.type == KeyEventType.KeyUp -> {
-                coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
+                  true
+                }
+                Key.DirectionLeft if event.type == KeyEventType.KeyUp -> {
+                  coroutineScope.launch {
+                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                  }
 
-                true
+                  true
+                }
+                else -> false
               }
-              else -> false
-            }
-          },
+            },
         topBar = {
           val scrollBehavior =
             if (platform !is Platform.Desktop) {
