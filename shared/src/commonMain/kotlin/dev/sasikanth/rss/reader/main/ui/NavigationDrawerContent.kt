@@ -65,6 +65,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -181,6 +182,12 @@ internal fun NavigationDrawerContent(
     expanded = expanded,
     showCloseIcon = showCloseIcon,
     dismissOnSelection = dismissOnSelection,
+    scrollIndex = feedsViewModel.drawerListScrollIndex,
+    scrollOffset = feedsViewModel.drawerListScrollOffset,
+    onScrollPositionChanged = { index, offset ->
+      feedsViewModel.drawerListScrollIndex = index
+      feedsViewModel.drawerListScrollOffset = offset
+    },
   )
 }
 
@@ -200,6 +207,9 @@ internal fun NavigationDrawerContent(
   expanded: Boolean = true,
   showCloseIcon: Boolean = true,
   dismissOnSelection: Boolean = true,
+  scrollIndex: Int = 0,
+  scrollOffset: Int = 0,
+  onScrollPositionChanged: (index: Int, offset: Int) -> Unit = { _, _ -> },
 ) {
   Crossfade(targetState = expanded, modifier = modifier) { isExpanded ->
     if (isExpanded) {
@@ -216,6 +226,9 @@ internal fun NavigationDrawerContent(
         closeDrawer = closeDrawer,
         showCloseIcon = showCloseIcon,
         dismissOnSelection = dismissOnSelection,
+        scrollIndex = scrollIndex,
+        scrollOffset = scrollOffset,
+        onScrollPositionChanged = onScrollPositionChanged,
       )
     } else {
       CollapsedDrawerContent(
@@ -244,6 +257,9 @@ private fun ExpandedDrawerContent(
   closeDrawer: () -> Unit,
   showCloseIcon: Boolean,
   dismissOnSelection: Boolean,
+  scrollIndex: Int,
+  scrollOffset: Int,
+  onScrollPositionChanged: (index: Int, offset: Int) -> Unit,
 ) {
   var showNewGroupDialog by remember { mutableStateOf(false) }
 
@@ -278,8 +294,19 @@ private fun ExpandedDrawerContent(
       }
 
       val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
-      val lazyListState = rememberLazyListState()
+      val lazyListState =
+        rememberLazyListState(
+          initialFirstVisibleItemIndex = scrollIndex,
+          initialFirstVisibleItemScrollOffset = scrollOffset,
+        )
       val translucentStyle = LocalTranslucentStyles.current
+
+      LaunchedEffect(lazyListState) {
+        snapshotFlow {
+            lazyListState.firstVisibleItemIndex to lazyListState.firstVisibleItemScrollOffset
+          }
+          .collect { (index, offset) -> onScrollPositionChanged(index, offset) }
+      }
 
       LazyColumn(
         modifier =
