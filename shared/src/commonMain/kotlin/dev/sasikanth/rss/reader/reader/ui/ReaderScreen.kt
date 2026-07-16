@@ -350,18 +350,47 @@ internal fun ReaderScreen(
             .focusRequester(readerFocusRequester)
             .focusable()
             .onKeyEvent { event ->
+              if (event.type != KeyEventType.KeyUp) return@onKeyEvent false
+
+              val currentReaderPost = runCatching { posts.peek(pagerState.settledPage) }.getOrNull()
+
               return@onKeyEvent when (event.key) {
-                Key.DirectionRight if event.type == KeyEventType.KeyUp -> {
+                Key.DirectionRight -> {
                   coroutineScope.launch {
                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
                   }
 
                   true
                 }
-                Key.DirectionLeft if event.type == KeyEventType.KeyUp -> {
+                Key.DirectionLeft -> {
                   coroutineScope.launch {
                     pagerState.animateScrollToPage(pagerState.currentPage - 1)
                   }
+
+                  true
+                }
+                Key.B if currentReaderPost != null -> {
+                  viewModel.dispatch(
+                    ReaderEvent.TogglePostBookmark(
+                      postId = currentReaderPost.id,
+                      currentBookmarkStatus = currentReaderPost.bookmarked,
+                    )
+                  )
+
+                  true
+                }
+                Key.U if currentReaderPost != null -> {
+                  viewModel.dispatch(ReaderEvent.OnMarkAsUnread(postId = currentReaderPost.id))
+
+                  true
+                }
+                Key.V if currentReaderPost != null -> {
+                  coroutineScope.launch { linkHandler.openLink(currentReaderPost.link) }
+
+                  true
+                }
+                Key.Escape -> {
+                  onBack()
 
                   true
                 }

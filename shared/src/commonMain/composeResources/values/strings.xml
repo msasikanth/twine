@@ -433,4 +433,18 @@
   <string name="premiumPaywallBilledAnnually">Billed annually</string>
   <string name="premiumPaywallPayOnce">Pay once</string>
   <string name="premiumPaywallCancelAnytime">Cancel anytime. No commitment.</string>
+  <string name="keyboardShortcutsTitle">Keyboard shortcuts</string>
+  <string name="keyboardShortcutsSectionGlobal">Global</string>
+  <string name="keyboardShortcutsSectionReader">Reader</string>
+  <string name="keyboardShortcutsRefresh">Refresh feeds</string>
+  <string name="keyboardShortcutsSearch">Search</string>
+  <string name="keyboardShortcutsSettings">Settings</string>
+  <string name="keyboardShortcutsAddFeed">Add feed</string>
+  <string name="keyboardShortcutsShowShortcuts">Show this dialog</string>
+  <string name="keyboardShortcutsNextPost">Next article</string>
+  <string name="keyboardShortcutsPreviousPost">Previous article</string>
+  <string name="keyboardShortcutsToggleBookmark">Toggle bookmark</string>
+  <string name="keyboardShortcutsMarkAsUnread">Mark as unread</string>
+  <string name="keyboardShortcutsOpenInBrowser">Open in browser</string>
+  <string name="keyboardShortcutsClose">Close reader</string>
 </resources>
