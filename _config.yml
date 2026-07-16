@@ -1,0 +1,4 @@
+title: Twine
+description: A multiplatform RSS reader app
+exclude:
+  - AGENTS.md
