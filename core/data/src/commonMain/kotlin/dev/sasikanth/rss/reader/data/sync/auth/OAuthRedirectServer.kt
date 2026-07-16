@@ -17,7 +17,16 @@
 
 package dev.sasikanth.rss.reader.data.sync.auth
 
-internal actual val GOOGLE_DRIVE_CLIENT_ID: String =
-  "854893327148-42c4t0p5kpk6ufdcu5t7i51acvputd75.apps.googleusercontent.com"
+// Desktop browsers can't deliver custom-scheme redirects back to the JVM process, so the
+// JVM actual captures the OAuth redirect on a loopback HTTP server (RFC 8252 section 7.3)
+// instead. Android and iOS receive redirects as deep links and don't start a server.
+internal expect class OAuthRedirectServer() {
 
-internal actual val GOOGLE_DRIVE_CLIENT_SECRET: String? = null
+  /**
+   * Starts listening for the OAuth redirect and returns the redirect URI to use in the
+   * authorization request, or null when this platform receives redirects via deep links.
+   */
+  fun start(onRedirect: (String) -> Unit): String?
+
+  fun stop()
+}

@@ -171,6 +171,7 @@ private fun SettingsAppInfoPreview() {
               versionName = "1.0.0",
               isDebugBuild = true,
               isFoss = false,
+              isGoogleDriveSupported = true,
               cachePath = { "" },
               platform = AppPlatform.Android,
             )

@@ -22,6 +22,7 @@ data class AppInfo(
   val versionName: String,
   val isDebugBuild: Boolean,
   val isFoss: Boolean,
+  val isGoogleDriveSupported: Boolean,
   val cachePath: () -> String,
   val platform: AppPlatform,
 )
