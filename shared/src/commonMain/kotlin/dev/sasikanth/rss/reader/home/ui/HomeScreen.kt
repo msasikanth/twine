@@ -384,6 +384,7 @@ private fun HomeContent(
             postsType = latestState.postsType,
             listState = postsListState,
             hasUnreadPosts = latestState.hasUnreadPosts,
+            confirmMarkAllAsRead = latestState.confirmMarkAllAsRead,
             scrollBehavior = if (platform !is Platform.Desktop) appBarScrollBehaviour else null,
             onMenuClicked = onMenuClicked,
             onShowPostsSortFilter = { dispatch(HomeEvent.ShowPostsSortFilter(true)) },

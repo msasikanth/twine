@@ -123,6 +123,7 @@ class SettingsViewModel(
         combine(
           settingsRepository.enableNotifications,
           settingsRepository.groupByFeedNotifications,
+          settingsRepository.confirmMarkAllAsRead,
           refreshPolicy.lastSyncedAtFlow,
           userRepository.user(),
           ::SettingsGroup4,
@@ -142,6 +143,7 @@ class SettingsViewModel(
           showPinnedSources = combinedGroup.showPinnedSources,
           markAsReadOn = group1.markAsReadOn,
           audioMarkAsReadThreshold = group3.audioMarkAsReadThreshold,
+          confirmMarkAllAsRead = group4.confirmMarkAllAsRead,
           homeViewMode = group3.homeViewMode,
           blockImages = group3.blockImages,
           enableNotifications = group4.enableNotifications,
@@ -169,6 +171,7 @@ class SettingsViewModel(
             showPinnedSources = settings.showPinnedSources,
             markAsReadOn = settings.markAsReadOn,
             audioMarkAsReadThreshold = settings.audioMarkAsReadThreshold,
+            confirmMarkAllAsRead = settings.confirmMarkAllAsRead,
             homeViewMode = settings.homeViewMode,
             blockImages = settings.blockImages,
             enableNotifications = settings.enableNotifications,
@@ -231,6 +234,7 @@ class SettingsViewModel(
       is SettingsEvent.OnThemeVariantChanged -> onThemeVariantChanged(event.themeVariant)
       is SettingsEvent.ToggleAmoled -> toggleAmoled(event.value)
       is SettingsEvent.MarkAsReadOnChanged -> markAsReadOnChanged(event.newMarkAsReadOn)
+      is SettingsEvent.ToggleConfirmMarkAllAsRead -> toggleConfirmMarkAllAsRead(event.value)
       is SettingsEvent.AudioMarkAsReadThresholdChanged ->
         audioMarkAsReadThresholdChanged(event.threshold)
       is SettingsEvent.LoadSubscriptionStatus -> loadSubscriptionStatus()
@@ -347,6 +351,10 @@ class SettingsViewModel(
 
   private fun markAsReadOnChanged(markAsReadOn: MarkAsReadOn) {
     viewModelScope.launch { settingsRepository.updateMarkAsReadOn(markAsReadOn) }
+  }
+
+  private fun toggleConfirmMarkAllAsRead(value: Boolean) {
+    viewModelScope.launch { settingsRepository.toggleConfirmMarkAllAsRead(value) }
   }
 
   private fun audioMarkAsReadThresholdChanged(threshold: AudioMarkAsReadThreshold) {
@@ -468,6 +476,7 @@ private data class Settings(
   val showPinnedSources: Boolean,
   val markAsReadOn: MarkAsReadOn,
   val audioMarkAsReadThreshold: AudioMarkAsReadThreshold,
+  val confirmMarkAllAsRead: Boolean,
   val homeViewMode: HomeViewMode,
   val blockImages: Boolean,
   val enableNotifications: Boolean,
@@ -516,6 +525,7 @@ private data class SettingsGroup3(
 private data class SettingsGroup4(
   val enableNotifications: Boolean,
   val groupByFeedNotifications: Boolean,
+  val confirmMarkAllAsRead: Boolean,
   val lastSyncedAt: Instant?,
   val user: User?,
 )

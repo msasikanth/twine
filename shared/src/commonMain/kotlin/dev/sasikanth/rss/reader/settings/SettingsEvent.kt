@@ -59,6 +59,8 @@ sealed interface SettingsEvent {
 
   data class MarkAsReadOnChanged(val newMarkAsReadOn: MarkAsReadOn) : SettingsEvent
 
+  data class ToggleConfirmMarkAllAsRead(val value: Boolean) : SettingsEvent
+
   data class AudioMarkAsReadThresholdChanged(val threshold: AudioMarkAsReadThreshold) :
     SettingsEvent
 
