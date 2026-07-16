@@ -408,9 +408,10 @@ private fun HomeContent(
             val activePostIndex = state.activePostIndex
             val savedScrollOffset = state.activePostScrollOffset
             val numberOfFeaturedPosts = featuredPosts.size
+            val targetIsFeatured =
+              activePostIndex < numberOfFeaturedPosts && numberOfFeaturedPosts > 0
 
-            snapshotFlow { (latestPosts?.itemCount ?: 0) > 0 || numberOfFeaturedPosts > 0 }
-              .first { it }
+            snapshotFlow { targetIsFeatured || (latestPosts?.itemCount ?: 0) > 0 }.first { it }
 
             snapshotFlow { postsListState.isScrollInProgress }.first { !it }
 
