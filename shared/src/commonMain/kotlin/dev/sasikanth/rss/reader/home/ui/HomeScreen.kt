@@ -17,6 +17,7 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.core.animate
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,15 +47,19 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -252,6 +257,12 @@ private fun HomeContent(
     rememberPinnedSourcesBottomBarScrollBehavior(canScroll = { canShowBottomBar })
   val homeScrollBehavior = rememberHomeScrollBehavior(appBarScrollBehaviour, bottomBarScrollState)
 
+  val homeFocusRequester = remember { FocusRequester() }
+  if (platform == Platform.Desktop) {
+    LaunchedEffect(Unit) { homeFocusRequester.requestFocus() }
+  }
+  var refreshShortcutArmed by remember { mutableStateOf(false) }
+
   val onSourceClick =
     remember(feedsDispatch) { { feed: Source -> feedsDispatch(FeedsEvent.OnSourceClick(feed)) } }
   val onHomeSelected = remember(feedsDispatch) { { feedsDispatch(FeedsEvent.OnHomeSelected) } }
@@ -299,11 +310,18 @@ private fun HomeContent(
 
   Scaffold(
     modifier =
-      modifier.onPreviewKeyEvent { event ->
+      modifier.focusRequester(homeFocusRequester).focusable().onPreviewKeyEvent { event ->
         when {
-          event.isMetaPressed && event.key == Key.R && event.type == KeyEventType.KeyUp -> {
-            dispatch(HomeEvent.OnSwipeToRefresh)
+          event.key == Key.R && event.type == KeyEventType.KeyDown && event.isMetaPressed -> {
+            if (!refreshShortcutArmed) {
+              refreshShortcutArmed = true
+              dispatch(HomeEvent.OnSwipeToRefresh)
+            }
             true
+          }
+          event.key == Key.R && event.type == KeyEventType.KeyUp -> {
+            refreshShortcutArmed = false
+            false
           }
           else -> false
         }
@@ -394,7 +412,7 @@ private fun HomeContent(
             snapshotFlow { (latestPosts?.itemCount ?: 0) > 0 || numberOfFeaturedPosts > 0 }
               .first { it }
 
-            if (postsListState.isScrollInProgress) return@LaunchedEffect
+            snapshotFlow { postsListState.isScrollInProgress }.first { !it }
 
             if (activePostIndex < numberOfFeaturedPosts && numberOfFeaturedPosts > 0) {
               postsListState.scrollToItem(0, scrollOffset = -(savedScrollOffset ?: 0))

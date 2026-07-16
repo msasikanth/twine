@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -179,6 +180,7 @@ private fun AddFeedContent(
   val (feedLinkFocus, feedTitleFocus) = remember { FocusRequester.createRefs() }
   var feedLink by remember { mutableStateOf(TextFieldValue()) }
   var feedTitle by remember { mutableStateOf(TextFieldValue()) }
+  val maxContentWidth = 640.dp
 
   LaunchedEffect(Unit) { feedLinkFocus.requestFocus() }
 
@@ -229,131 +231,137 @@ private fun AddFeedContent(
       }
     },
     bottomBar = {
-      Button(
-        modifier =
-          Modifier.background(AppTheme.colorScheme.backdrop)
-            .padding(horizontal = 24.dp, vertical = 8.dp)
-            .navigationBarsPadding()
-            .imePadding()
-            .fillMaxWidth()
-            .requiredHeight(56.dp),
-        colors =
-          ButtonDefaults.buttonColors(
-            containerColor = AppTheme.colorScheme.inverseSurface,
-            contentColor = AppTheme.colorScheme.inverseOnSurface,
-          ),
-        enabled =
-          feedLink.text.isNotBlank() && state.feedFetchingState != FeedFetchingState.Loading,
-        shape = MaterialTheme.shapes.extraLarge,
-        onClick = {
-          dispatch(AddFeedEvent.AddFeedClicked(feedLink = feedLink.text, name = feedTitle.text))
-        },
-      ) {
-        if (state.feedFetchingState == FeedFetchingState.Loading) {
-          CircularProgressIndicator(
-            color = AppTheme.colorScheme.primary,
-            modifier = Modifier.requiredSize(24.dp),
-            strokeWidth = 2.dp,
-          )
-        } else {
-          Text(
-            text = stringResource(Res.string.buttonAddFeed).uppercase(),
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Medium,
-          )
+      Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Button(
+          modifier =
+            Modifier.background(AppTheme.colorScheme.backdrop)
+              .padding(horizontal = 24.dp, vertical = 8.dp)
+              .navigationBarsPadding()
+              .imePadding()
+              .widthIn(max = maxContentWidth)
+              .fillMaxWidth()
+              .requiredHeight(56.dp),
+          colors =
+            ButtonDefaults.buttonColors(
+              containerColor = AppTheme.colorScheme.inverseSurface,
+              contentColor = AppTheme.colorScheme.inverseOnSurface,
+            ),
+          enabled =
+            feedLink.text.isNotBlank() && state.feedFetchingState != FeedFetchingState.Loading,
+          shape = MaterialTheme.shapes.extraLarge,
+          onClick = {
+            dispatch(AddFeedEvent.AddFeedClicked(feedLink = feedLink.text, name = feedTitle.text))
+          },
+        ) {
+          if (state.feedFetchingState == FeedFetchingState.Loading) {
+            CircularProgressIndicator(
+              color = AppTheme.colorScheme.primary,
+              modifier = Modifier.requiredSize(24.dp),
+              strokeWidth = 2.dp,
+            )
+          } else {
+            Text(
+              text = stringResource(Res.string.buttonAddFeed).uppercase(),
+              style = MaterialTheme.typography.labelLarge,
+              fontWeight = FontWeight.Medium,
+            )
+          }
         }
       }
     },
     content = { paddingValues ->
-      LazyVerticalGrid(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp),
-        columns = GridCells.Adaptive(minSize = 64.dp),
-        contentPadding = paddingValues,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-      ) {
-        item(span = { GridItemSpan(maxLineSpan) }) { Spacer(Modifier.requiredHeight(16.dp)) }
+      Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        LazyVerticalGrid(
+          modifier =
+            Modifier.widthIn(max = maxContentWidth).fillMaxSize().padding(horizontal = 24.dp),
+          columns = GridCells.Adaptive(minSize = 64.dp),
+          contentPadding = paddingValues,
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+          item(span = { GridItemSpan(maxLineSpan) }) { Spacer(Modifier.requiredHeight(16.dp)) }
 
-        item(span = { GridItemSpan(maxLineSpan) }) {
-          TextField(
-            modifier =
-              Modifier.fillMaxWidth().focusRequester(feedLinkFocus).focusProperties {
-                next = feedTitleFocus
-              },
-            value = feedLink,
-            onValueChange = { feedLink = it },
-            hint = stringResource(Res.string.feedEntryLinkHint),
-            keyboardOptions =
-              KeyboardOptions(
-                autoCorrectEnabled = false,
-                keyboardType = KeyboardType.Uri,
-                imeAction = ImeAction.Next,
-              ),
-          )
-        }
-
-        item(span = { GridItemSpan(maxLineSpan) }) {
-          TextField(
-            modifier =
-              Modifier.fillMaxWidth().focusRequester(feedTitleFocus).focusProperties {
-                previous = feedLinkFocus
-              },
-            value = feedTitle,
-            onValueChange = { feedTitle = it.copy(text = it.text.removeLineBreaks()) },
-            hint = stringResource(Res.string.feedEntryTitleHint),
-            keyboardOptions =
-              KeyboardOptions(
-                autoCorrectEnabled = false,
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done,
-              ),
-          )
-        }
-
-        item(span = { GridItemSpan(maxLineSpan) }) {
-          Column {
-            HorizontalDivider(
-              modifier = Modifier.padding(vertical = 12.dp).ignoreHorizontalParentPadding(24.dp),
-              color = AppTheme.colorScheme.outlineVariant,
-            )
-
-            FeedOptionSwitch(
-              modifier = Modifier.ignoreHorizontalParentPadding(24.dp),
-              title = stringResource(Res.string.alwaysFetchSourceArticle),
-              checked = state.alwaysFetchSourceArticle,
-              onValueChanged = { newValue ->
-                dispatch(AddFeedEvent.OnAlwaysFetchSourceArticleChanged(newValue))
-              },
-            )
-
-            HorizontalDivider(color = AppTheme.colorScheme.outlineVariant)
-
-            FeedOptionSwitch(
-              modifier = Modifier.ignoreHorizontalParentPadding(24.dp),
-              title = stringResource(Res.string.showFeedFavIconTitle),
-              checked = state.showFeedFavIcon,
-              onValueChanged = { newValue ->
-                dispatch(AddFeedEvent.OnShowFeedFavIconChanged(newValue))
-              },
-            )
-
-            HorizontalDivider(
-              modifier = Modifier.padding(vertical = 12.dp).ignoreHorizontalParentPadding(24.dp),
-              color = AppTheme.colorScheme.outlineVariant,
+          item(span = { GridItemSpan(maxLineSpan) }) {
+            TextField(
+              modifier =
+                Modifier.fillMaxWidth().focusRequester(feedLinkFocus).focusProperties {
+                  next = feedTitleFocus
+                },
+              value = feedLink,
+              onValueChange = { feedLink = it },
+              hint = stringResource(Res.string.feedEntryLinkHint),
+              keyboardOptions =
+                KeyboardOptions(
+                  autoCorrectEnabled = false,
+                  keyboardType = KeyboardType.Uri,
+                  imeAction = ImeAction.Next,
+                ),
             )
           }
-        }
 
-        item(span = { GridItemSpan(maxLineSpan) }) {
-          TranslucentButton(
-            text = stringResource(Res.string.addToGroup),
-            leadingIcon = TwineIcons.NewGroup,
-            onClick = { openGroupSelection(state.selectedFeedGroups.map { it.id }.toSet()) },
-          )
-        }
+          item(span = { GridItemSpan(maxLineSpan) }) {
+            TextField(
+              modifier =
+                Modifier.fillMaxWidth().focusRequester(feedTitleFocus).focusProperties {
+                  previous = feedLinkFocus
+                },
+              value = feedTitle,
+              onValueChange = { feedTitle = it.copy(text = it.text.removeLineBreaks()) },
+              hint = stringResource(Res.string.feedEntryTitleHint),
+              keyboardOptions =
+                KeyboardOptions(
+                  autoCorrectEnabled = false,
+                  keyboardType = KeyboardType.Text,
+                  imeAction = ImeAction.Done,
+                ),
+            )
+          }
 
-        items(state.selectedFeedGroups.toList()) { group ->
-          GroupItem(group) { dispatch(AddFeedEvent.OnRemoveGroupClicked(group)) }
+          item(span = { GridItemSpan(maxLineSpan) }) {
+            Column {
+              HorizontalDivider(
+                modifier = Modifier.padding(vertical = 12.dp).ignoreHorizontalParentPadding(24.dp),
+                color = AppTheme.colorScheme.outlineVariant,
+              )
+
+              FeedOptionSwitch(
+                modifier = Modifier.ignoreHorizontalParentPadding(24.dp),
+                title = stringResource(Res.string.alwaysFetchSourceArticle),
+                checked = state.alwaysFetchSourceArticle,
+                onValueChanged = { newValue ->
+                  dispatch(AddFeedEvent.OnAlwaysFetchSourceArticleChanged(newValue))
+                },
+              )
+
+              HorizontalDivider(color = AppTheme.colorScheme.outlineVariant)
+
+              FeedOptionSwitch(
+                modifier = Modifier.ignoreHorizontalParentPadding(24.dp),
+                title = stringResource(Res.string.showFeedFavIconTitle),
+                checked = state.showFeedFavIcon,
+                onValueChanged = { newValue ->
+                  dispatch(AddFeedEvent.OnShowFeedFavIconChanged(newValue))
+                },
+              )
+
+              HorizontalDivider(
+                modifier = Modifier.padding(vertical = 12.dp).ignoreHorizontalParentPadding(24.dp),
+                color = AppTheme.colorScheme.outlineVariant,
+              )
+            }
+          }
+
+          item(span = { GridItemSpan(maxLineSpan) }) {
+            TranslucentButton(
+              text = stringResource(Res.string.addToGroup),
+              leadingIcon = TwineIcons.NewGroup,
+              onClick = { openGroupSelection(state.selectedFeedGroups.map { it.id }.toSet()) },
+            )
+          }
+
+          items(state.selectedFeedGroups.toList()) { group ->
+            GroupItem(group) { dispatch(AddFeedEvent.OnRemoveGroupClicked(group)) }
+          }
         }
       }
     },

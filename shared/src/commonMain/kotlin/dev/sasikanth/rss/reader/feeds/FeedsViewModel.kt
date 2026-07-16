@@ -84,6 +84,9 @@ class FeedsViewModel(
   var searchQuery by mutableStateOf(TextFieldValue())
     private set
 
+  var drawerListScrollIndex by mutableStateOf(0)
+  var drawerListScrollOffset by mutableStateOf(0)
+
   @OptIn(ExperimentalCoroutinesApi::class)
   private val allSourcesFlow =
     combine(
