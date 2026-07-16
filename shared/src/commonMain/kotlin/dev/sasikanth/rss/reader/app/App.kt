@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
+import androidx.compose.material3.adaptive.layout.rememberPaneExpansionState
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
@@ -314,6 +315,11 @@ fun App(
       val windowBackdropColor = AppTheme.colorScheme.backdrop
       LaunchedEffect(windowBackdropColor) { updateWindowBackdropColor(windowBackdropColor) }
 
+      // The list pane hosts the side navigation (rail or expanded drawer) in front of
+      // the posts list, so it needs the navigation's width on top of the list's own.
+      val navigationWidth = if (isSideNavigationExpanded.value) 360.dp else 80.dp
+      val listPaneWidth = navigationWidth + 420.dp
+
       val entryProvider =
         entryProvider<NavKey> {
           placeholderScreen(
@@ -469,20 +475,26 @@ fun App(
           isSideNavigationExpanded.value,
         ) {
           val directive = calculatePaneScaffoldDirective(windowInfo)
-          // The list pane hosts the side navigation (rail or expanded drawer) in front of
-          // the posts list, so it needs the navigation's width on top of the list's own.
-          val navigationWidth = if (isSideNavigationExpanded.value) 360.dp else 80.dp
-          val listPaneWidth = navigationWidth + 420.dp
           val minReaderPaneWidth = 360.dp
+          // The list pane's width is fixed via paneExpansionState below; collapse to a
+          // single pane whenever the reader pane would drop below its minimum.
+          val requiredTwoPaneWidth =
+            listPaneWidth + directive.horizontalPartitionSpacerSize + minReaderPaneWidth
           when {
             isReaderPaneExpanded.value -> directive.copy(maxHorizontalPartitions = 1)
-            windowWidth < listPaneWidth + minReaderPaneWidth ->
-              directive.copy(maxHorizontalPartitions = 1)
-            else -> directive.copy(defaultPanePreferredWidth = listPaneWidth)
+            windowWidth < requiredTwoPaneWidth -> directive.copy(maxHorizontalPartitions = 1)
+            else -> directive
           }
         }
+      val paneExpansionState = rememberPaneExpansionState()
+      LaunchedEffect(listPaneWidth, density) {
+        paneExpansionState.setFirstPaneWidth(with(density) { listPaneWidth.roundToPx() })
+      }
       val listDetailSceneStrategy =
-        rememberListDetailSceneStrategy<NavKey>(directive = paneScaffoldDirective)
+        rememberListDetailSceneStrategy<NavKey>(
+          directive = paneScaffoldDirective,
+          paneExpansionState = paneExpansionState,
+        )
 
       NavDisplay(
         // Paints the split's partition spacer with the app backdrop.
