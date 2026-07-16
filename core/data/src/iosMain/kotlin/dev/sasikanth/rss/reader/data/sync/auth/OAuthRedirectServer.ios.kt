@@ -17,7 +17,11 @@
 
 package dev.sasikanth.rss.reader.data.sync.auth
 
-internal actual val GOOGLE_DRIVE_CLIENT_ID: String =
-  "854893327148-42c4t0p5kpk6ufdcu5t7i51acvputd75.apps.googleusercontent.com"
+internal actual class OAuthRedirectServer {
 
-internal actual val GOOGLE_DRIVE_CLIENT_SECRET: String? = null
+  actual fun start(onRedirect: (String) -> Unit): String? = null
+
+  actual fun stop() {
+    // no-op
+  }
+}

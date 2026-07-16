@@ -55,6 +55,7 @@ class SettingsRepository(
   private val enableAutoSyncKey = booleanPreferencesKey("enable_auto_sync")
   private val showFeedFavIconKey = booleanPreferencesKey("show_feed_fav_icon")
   private val markPostsAsReadOnKey = stringPreferencesKey("mark_posts_as_read_on")
+  private val confirmMarkAllAsReadKey = booleanPreferencesKey("confirm_mark_all_as_read")
   private val audioMarkAsReadThresholdKey = stringPreferencesKey("audio_mark_as_read_threshold")
   private val homeViewModeKey = stringPreferencesKey("home_view_mode")
   private val readerFontScaleFactorKey = floatPreferencesKey("reader_font_scale")
@@ -131,6 +132,9 @@ class SettingsRepository(
 
   val markAsReadOn: Flow<MarkAsReadOn> =
     dataStore.data.map { preferences -> mapToMarkAsReadOnType(preferences[markPostsAsReadOnKey]) }
+
+  val confirmMarkAllAsRead: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[confirmMarkAllAsReadKey] ?: true }
 
   val audioMarkAsReadThreshold: Flow<AudioMarkAsReadThreshold> =
     dataStore.data.map { preferences ->
@@ -269,6 +273,10 @@ class SettingsRepository(
 
   suspend fun updateMarkAsReadOn(value: MarkAsReadOn) {
     dataStore.edit { preferences -> preferences[markPostsAsReadOnKey] = value.name }
+  }
+
+  suspend fun toggleConfirmMarkAllAsRead(value: Boolean) {
+    dataStore.edit { preferences -> preferences[confirmMarkAllAsReadKey] = value }
   }
 
   suspend fun updateAudioMarkAsReadThreshold(value: AudioMarkAsReadThreshold) {

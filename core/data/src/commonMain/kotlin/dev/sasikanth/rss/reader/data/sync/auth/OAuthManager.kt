@@ -18,8 +18,15 @@
 package dev.sasikanth.rss.reader.data.sync.auth
 
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
+import kotlinx.coroutines.flow.SharedFlow
 
 interface OAuthManager {
+  /**
+   * Redirect URIs captured by the loopback server on platforms that can't receive custom-scheme
+   * deep links (desktop). Never emits on Android/iOS.
+   */
+  val loopbackRedirects: SharedFlow<String>
+
   fun getAuthUrl(serviceType: ServiceType): String
 
   fun setPendingProvider(serviceType: ServiceType)

@@ -107,3 +107,38 @@ sqldelight {
     }
   }
 }
+
+val googleDesktopClientSecret =
+  providers
+    .gradleProperty("GOOGLE_DESKTOP_CLIENT_SECRET")
+    .orElse(providers.environmentVariable("GOOGLE_DESKTOP_CLIENT_SECRET"))
+    .orElse("")
+
+val generateGoogleDriveClientSecret =
+  tasks.register("generateGoogleDriveClientSecret") {
+    description = "Generate Google Drive Client Secret"
+    val secret = googleDesktopClientSecret
+    val outputDir = layout.buildDirectory.dir("generated/googleDriveClientSecret/kotlin")
+    inputs.property("secret", secret)
+    outputs.dir(outputDir)
+    doLast {
+      val literal = secret.get().takeIf { it.isNotEmpty() }?.let { "\"$it\"" } ?: "null"
+      val file =
+        outputDir
+          .get()
+          .file("dev/sasikanth/rss/reader/data/sync/auth/GoogleDriveClientSecret.jvm.kt")
+          .asFile
+      file.parentFile.mkdirs()
+      file.writeText(
+        """
+        |package dev.sasikanth.rss.reader.data.sync.auth
+        |
+        |internal actual val GOOGLE_DRIVE_CLIENT_SECRET: String? = $literal
+        |
+        """
+          .trimMargin()
+      )
+    }
+  }
+
+kotlin.sourceSets.named("jvmMain") { kotlin.srcDir(generateGoogleDriveClientSecret) }

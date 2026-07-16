@@ -21,6 +21,7 @@ import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.data.sync.FileCloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.auth.GOOGLE_DRIVE_CLIENT_ID
+import dev.sasikanth.rss.reader.data.sync.auth.GOOGLE_DRIVE_CLIENT_SECRET
 import dev.sasikanth.rss.reader.data.sync.auth.GoogleTokenResponse
 import dev.sasikanth.rss.reader.data.sync.auth.OAuthTokenProvider
 import io.ktor.client.HttpClient
@@ -87,6 +88,7 @@ class GoogleDriveCloudServiceProvider(
                 append("refresh_token", refreshToken)
                 append("grant_type", "refresh_token")
                 append("client_id", GOOGLE_DRIVE_CLIENT_ID)
+                GOOGLE_DRIVE_CLIENT_SECRET?.let { append("client_secret", it) }
               },
           )
           .body()

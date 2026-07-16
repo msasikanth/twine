@@ -384,6 +384,7 @@ private fun HomeContent(
             postsType = latestState.postsType,
             listState = postsListState,
             hasUnreadPosts = latestState.hasUnreadPosts,
+            confirmMarkAllAsRead = latestState.confirmMarkAllAsRead,
             scrollBehavior = if (platform !is Platform.Desktop) appBarScrollBehaviour else null,
             onMenuClicked = onMenuClicked,
             onShowPostsSortFilter = { dispatch(HomeEvent.ShowPostsSortFilter(true)) },
@@ -408,9 +409,10 @@ private fun HomeContent(
             val activePostIndex = state.activePostIndex
             val savedScrollOffset = state.activePostScrollOffset
             val numberOfFeaturedPosts = featuredPosts.size
+            val targetIsFeatured =
+              activePostIndex < numberOfFeaturedPosts && numberOfFeaturedPosts > 0
 
-            snapshotFlow { (latestPosts?.itemCount ?: 0) > 0 || numberOfFeaturedPosts > 0 }
-              .first { it }
+            snapshotFlow { targetIsFeatured || (latestPosts?.itemCount ?: 0) > 0 }.first { it }
 
             snapshotFlow { postsListState.isScrollInProgress }.first { !it }
 

@@ -49,7 +49,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.TranslucentButton
@@ -85,6 +87,7 @@ internal fun HomeTopAppBar(
   postsType: PostsType,
   listState: LazyListState,
   hasUnreadPosts: Boolean,
+  confirmMarkAllAsRead: Boolean,
   scrollBehavior: TopAppBarScrollBehavior?,
   modifier: Modifier = Modifier,
   onMenuClicked: (() -> Unit)? = null,
@@ -104,10 +107,26 @@ internal fun HomeTopAppBar(
   var hasUnreadPosts by remember(hasUnreadPosts) { mutableStateOf(hasUnreadPosts) }
   var showConfirmDialog by remember { mutableStateOf(false) }
 
-  val backgroundColor = AppTheme.colorScheme.surface
+  val backgroundColor = AppTheme.colorScheme.backdrop
+  val gradientFadeHeight = with(LocalDensity.current) { 40.dp.toPx() }
   TopAppBar(
     modifier =
-      modifier.drawBehind { drawRect(backgroundColor.copy(alpha = backgroundAlphaProvider())) },
+      modifier.drawBehind {
+        // Extends past the toolbar bounds so scrolled content fades out
+        // smoothly instead of getting cut off at the toolbar's bottom edge
+        val gradientHeight = size.height + gradientFadeHeight
+        drawRect(
+          brush =
+            Brush.verticalGradient(
+              0f to backgroundColor,
+              size.height / gradientHeight to backgroundColor,
+              1f to Color.Transparent,
+              endY = gradientHeight,
+            ),
+          size = size.copy(height = gradientHeight),
+          alpha = backgroundAlphaProvider(),
+        )
+      },
     scrollBehavior = scrollBehavior,
     contentPadding = PaddingValues(start = 0.dp, top = 8.dp, end = 12.dp, bottom = 8.dp),
     title = { SourceInfo(source = source) },
@@ -143,7 +162,14 @@ internal fun HomeTopAppBar(
                 backgroundColor = AppTheme.colorScheme.inverseSurface,
                 contentColor = AppTheme.colorScheme.inverseOnSurface,
                 borderColor = Color.Transparent,
-                onClick = { showConfirmDialog = true },
+                onClick = {
+                  if (confirmMarkAllAsRead) {
+                    showConfirmDialog = true
+                  } else {
+                    hasUnreadPosts = false
+                    onMarkPostsAsRead(source)
+                  }
+                },
               )
             }
           }

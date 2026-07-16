@@ -12,10 +12,12 @@
 package dev.sasikanth.rss.reader.data.database
 
 import app.cash.sqldelight.db.AfterVersion
+import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import java.io.File
+import java.util.Properties
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -24,17 +26,41 @@ actual class DriverFactory(private val codeMigrations: Array<AfterVersion>) {
 
   actual fun createDriver(): SqlDriver {
     val databasePath = File(System.getProperty("user.home"), ".twine/${DB_NAME}")
-    val isNewDatabase = !databasePath.exists()
     databasePath.parentFile.mkdirs()
 
-    val driver = JdbcSqliteDriver(url = "jdbc:sqlite:${databasePath.absolutePath}")
-
-    if (isNewDatabase) {
-      ReaderDatabase.Schema.create(driver)
+    if (databasePath.exists() && readUserVersion(databasePath) == 0L) {
+      val backupPath = File(databasePath.parentFile, "$DB_NAME.bak")
+      backupPath.delete()
+      databasePath.renameTo(backupPath)
     }
+
+    val driver =
+      JdbcSqliteDriver(
+        url = "jdbc:sqlite:${databasePath.absolutePath}",
+        properties = Properties(),
+        schema = ReaderDatabase.Schema,
+        callbacks = *codeMigrations,
+      )
 
     driver.execute(null, "PRAGMA foreign_keys = ON;", 0)
 
     return driver
+  }
+
+  private fun readUserVersion(databasePath: File): Long {
+    val driver = JdbcSqliteDriver(url = "jdbc:sqlite:${databasePath.absolutePath}")
+    driver.use { driver ->
+      return driver
+        .executeQuery(
+          identifier = null,
+          sql = "PRAGMA user_version",
+          mapper = { cursor ->
+            QueryResult.Value(if (cursor.next().value) cursor.getLong(0) else null)
+          },
+          parameters = 0,
+          binders = null,
+        )
+        .value ?: 0L
+    }
   }
 }

@@ -15,9 +15,8 @@
  *
  */
 
-package dev.sasikanth.rss.reader.data.sync.auth
+package dev.sasikanth.rss.reader.utils
 
-internal actual val GOOGLE_DRIVE_CLIENT_ID: String =
-  "854893327148-42c4t0p5kpk6ufdcu5t7i51acvputd75.apps.googleusercontent.com"
+import androidx.compose.ui.input.pointer.PointerIcon
 
-internal actual val GOOGLE_DRIVE_CLIENT_SECRET: String? = null
+internal actual val horizontalResizePointerIcon: PointerIcon = PointerIcon.Default

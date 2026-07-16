@@ -22,6 +22,7 @@ import android.os.Build
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.app.AppPlatform
 import dev.sasikanth.rss.reader.app.isFoss
+import dev.sasikanth.rss.reader.app.isGoogleDriveSupported
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.base.widget.di.WidgetPlatformComponent
 import dev.sasikanth.rss.reader.data.repository.RssRepository
@@ -74,6 +75,7 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
       versionCode = versionCode,
       isDebugBuild = (applicationInfo.flags and FLAG_DEBUGGABLE) != 0,
       isFoss = isFoss,
+      isGoogleDriveSupported = isGoogleDriveSupported,
       cachePath = { context.cacheDir.absolutePath },
       platform = AppPlatform.Android,
     )

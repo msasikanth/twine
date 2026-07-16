@@ -18,4 +18,4 @@
 package dev.sasikanth.rss.reader.data.sync.auth
 
 internal actual val GOOGLE_DRIVE_CLIENT_ID: String =
-  "REPLACE_WITH_DESKTOP_GOOGLE_OAUTH_CLIENT_ID.apps.googleusercontent.com"
+  "854893327148-aeq8uh4loip2anl5uhhp1onpjbv3tnoi.apps.googleusercontent.com"

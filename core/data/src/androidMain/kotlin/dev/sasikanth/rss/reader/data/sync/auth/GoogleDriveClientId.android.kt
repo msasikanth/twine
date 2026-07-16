@@ -19,3 +19,5 @@ package dev.sasikanth.rss.reader.data.sync.auth
 
 internal actual val GOOGLE_DRIVE_CLIENT_ID: String =
   "854893327148-oacdbvthcv76h5uge4trc36lu5t4o6m5.apps.googleusercontent.com"
+
+internal actual val GOOGLE_DRIVE_CLIENT_SECRET: String? = null

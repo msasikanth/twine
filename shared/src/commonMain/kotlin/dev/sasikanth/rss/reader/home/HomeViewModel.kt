@@ -353,6 +353,11 @@ class HomeViewModel(
       .onEach { hasFeeds -> _state.update { it.copy(hasFeeds = hasFeeds) } }
       .launchIn(viewModelScope)
 
+    settingsRepository.confirmMarkAllAsRead
+      .distinctUntilChanged()
+      .onEach { confirm -> _state.update { it.copy(confirmMarkAllAsRead = confirm) } }
+      .launchIn(viewModelScope)
+
     combine(
         combine(
           combine(activeSourceFlow, postsTypeFlow, settingsRepository.postsSortOrder, ::Triple),

@@ -178,7 +178,7 @@ interface DataComponent :
       add(minifluxSyncProvider)
       add(freshRssSyncProvider)
       add(cloudServiceProvider)
-      if (!appInfo.isFoss) {
+      if (appInfo.isGoogleDriveSupported) {
         add(googleDriveSyncProvider)
       }
     }

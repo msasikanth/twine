@@ -17,9 +17,14 @@
 package dev.sasikanth.rss.reader.app
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DragHandleColors
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
+import androidx.compose.material3.VerticalDragHandle
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
@@ -30,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,6 +46,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
@@ -107,6 +116,7 @@ import dev.sasikanth.rss.reader.utils.LocalInAppRating
 import dev.sasikanth.rss.reader.utils.LocalRootWindowSizeClass
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
+import dev.sasikanth.rss.reader.utils.horizontalResizePointerIcon
 import dev.sasikanth.rss.reader.utils.updateWindowBackdropColor
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -315,10 +325,15 @@ fun App(
       val windowBackdropColor = AppTheme.colorScheme.backdrop
       LaunchedEffect(windowBackdropColor) { updateWindowBackdropColor(windowBackdropColor) }
 
-      // The list pane hosts the side navigation (rail or expanded drawer) in front of
-      // the posts list, so it needs the navigation's width on top of the list's own.
+      // Inline side navigation (rail or expanded drawer) only exists at large widths;
+      // below that the navigation is a modal drawer overlaying content, so the list
+      // pane only needs the posts list's own width.
+      val hasInlineNavigation =
+        windowInfo.windowSizeClass.isWidthAtLeastBreakpoint(
+          WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND
+        )
       val navigationWidth = if (isSideNavigationExpanded.value) 360.dp else 80.dp
-      val listPaneWidth = navigationWidth + 420.dp
+      val listPaneWidth = if (hasInlineNavigation) navigationWidth + 420.dp else 420.dp
 
       val entryProvider =
         entryProvider<NavKey> {
@@ -467,6 +482,8 @@ fun App(
 
       val density = LocalDensity.current
       val windowWidth = with(density) { LocalWindowInfo.current.containerSize.width.toDp() }
+      val minReaderPaneWidth = 360.dp
+      val minListPaneContentWidth = 320.dp
       val paneScaffoldDirective =
         remember(
           windowInfo,
@@ -475,9 +492,6 @@ fun App(
           isSideNavigationExpanded.value,
         ) {
           val directive = calculatePaneScaffoldDirective(windowInfo)
-          val minReaderPaneWidth = 360.dp
-          // The list pane's width is fixed via paneExpansionState below; collapse to a
-          // single pane whenever the reader pane would drop below its minimum.
           val requiredTwoPaneWidth =
             listPaneWidth + directive.horizontalPartitionSpacerSize + minReaderPaneWidth
           when {
@@ -486,14 +500,74 @@ fun App(
             else -> directive
           }
         }
-      val paneExpansionState = rememberPaneExpansionState()
-      LaunchedEffect(listPaneWidth, density) {
-        paneExpansionState.setFirstPaneWidth(with(density) { listPaneWidth.roundToPx() })
+
+      var listPaneContentWidth by rememberSaveable { mutableStateOf(420f) }
+      val navigationPaneWidth = if (hasInlineNavigation) navigationWidth else 0.dp
+      val listPaneWidthLimits =
+        with(density) {
+          val min = (navigationPaneWidth + minListPaneContentWidth).roundToPx()
+          val max =
+            (windowWidth - paneScaffoldDirective.horizontalPartitionSpacerSize - minReaderPaneWidth)
+              .roundToPx()
+              .coerceAtLeast(min)
+          min..max
+        }
+      val halfSpacerPx =
+        with(density) { paneScaffoldDirective.horizontalPartitionSpacerSize.roundToPx() } / 2
+      val dividerCenterPx = remember { mutableFloatStateOf(Float.NaN) }
+      val paneExpansionState =
+        rememberPaneExpansionState(
+          consumeDragDelta = { delta ->
+            val currentOffset = dividerCenterPx.floatValue
+            if (currentOffset.isNaN()) {
+              delta
+            } else {
+              val target =
+                (currentOffset + delta).coerceIn(
+                  (listPaneWidthLimits.first + halfSpacerPx).toFloat(),
+                  (listPaneWidthLimits.last + halfSpacerPx).toFloat(),
+                )
+              target - currentOffset
+            }
+          }
+        )
+      LaunchedEffect(navigationPaneWidth, listPaneWidthLimits, density) {
+        val paneWidthPx =
+          with(density) { (navigationPaneWidth + listPaneContentWidth.dp).roundToPx() }
+        paneExpansionState.setFirstPaneWidth(paneWidthPx.coerceIn(listPaneWidthLimits))
       }
       val listDetailSceneStrategy =
         rememberListDetailSceneStrategy<NavKey>(
           directive = paneScaffoldDirective,
           paneExpansionState = paneExpansionState,
+          paneExpansionDragHandle = { state ->
+            val interactionSource = remember { MutableInteractionSource() }
+            val isDragged by interactionSource.collectIsDraggedAsState()
+            VerticalDragHandle(
+              modifier =
+                Modifier.pointerHoverIcon(horizontalResizePointerIcon)
+                  .onGloballyPositioned { coordinates ->
+                    val center = coordinates.positionInParent().x + coordinates.size.width / 2f
+                    dividerCenterPx.floatValue = center
+                    if (isDragged) {
+                      val paneWidth = with(density) { (center - halfSpacerPx).toDp() }
+                      listPaneContentWidth = (paneWidth - navigationPaneWidth).value
+                    }
+                  }
+                  .paneExpansionDraggable(
+                    state = state,
+                    minTouchTargetSize = LocalMinimumInteractiveComponentSize.current,
+                    interactionSource = interactionSource,
+                  ),
+              colors =
+                DragHandleColors(
+                  color = AppTheme.colorScheme.outlineVariant,
+                  pressedColor = AppTheme.colorScheme.primary,
+                  draggedColor = AppTheme.colorScheme.primary,
+                ),
+              interactionSource = interactionSource,
+            )
+          },
         )
       val bottomSheetSceneStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
 

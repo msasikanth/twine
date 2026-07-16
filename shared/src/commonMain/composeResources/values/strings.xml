@@ -103,6 +103,8 @@
   <string name="settingsPostsDeletionPeriodNever">Never</string>
   <string name="settingsShowReaderViewTitle">Enable reader view</string>
   <string name="settingsShowReaderViewSubtitle">Articles will be displayed in a simplified format</string>
+  <string name="settingsConfirmMarkAllAsReadTitle">Confirm mark all as read</string>
+  <string name="settingsConfirmMarkAllAsReadSubtitle">Ask for confirmation before marking all articles as read</string>
   <string name="settingsThemeAuto">Auto</string>
   <string name="settingsThemeLight">Light</string>
   <string name="settingsThemeDark">Dark</string>

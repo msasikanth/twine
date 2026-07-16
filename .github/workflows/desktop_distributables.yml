@@ -11,6 +11,9 @@ on:
       - '.github/workflows/desktop_distributables.yml'
   workflow_dispatch:
 
+env:
+  ORG_GRADLE_PROJECT_GOOGLE_DESKTOP_CLIENT_SECRET: ${{ secrets.GOOGLE_DESKTOP_CLIENT_SECRET }}
+
 jobs:
   build-macos:
     name: Build macOS DMG

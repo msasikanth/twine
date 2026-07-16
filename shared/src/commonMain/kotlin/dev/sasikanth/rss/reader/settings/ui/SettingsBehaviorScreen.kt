@@ -67,6 +67,8 @@ import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.settingsBrowserTypeSubtitle
 import twine.shared.generated.resources.settingsBrowserTypeTitle
+import twine.shared.generated.resources.settingsConfirmMarkAllAsReadSubtitle
+import twine.shared.generated.resources.settingsConfirmMarkAllAsReadTitle
 import twine.shared.generated.resources.settingsFeaturesAndBehaviors
 import twine.shared.generated.resources.settingsFreeFeedLimitReached
 import twine.shared.generated.resources.settingsHeaderBehaviour
@@ -229,6 +231,17 @@ private fun SettingsBehaviorContent(
         }
 
         item {
+          SettingsSwitchItem(
+            title = stringResource(Res.string.settingsConfirmMarkAllAsReadTitle),
+            subtitle = stringResource(Res.string.settingsConfirmMarkAllAsReadSubtitle),
+            checked = state.confirmMarkAllAsRead,
+            onValueChanged = { newValue ->
+              dispatch(SettingsEvent.ToggleConfirmMarkAllAsRead(newValue))
+            },
+          )
+        }
+
+        item {
           PostsDeletionPeriodSettingItem(
             postsDeletionPeriod = state.postsDeletionPeriod,
             onValueChanged = { newValue ->
@@ -260,6 +273,7 @@ private fun SettingsBehaviorPreview() {
               versionName = "1.0.0",
               isDebugBuild = true,
               isFoss = false,
+              isGoogleDriveSupported = true,
               cachePath = { "" },
               platform = AppPlatform.Android,
             )

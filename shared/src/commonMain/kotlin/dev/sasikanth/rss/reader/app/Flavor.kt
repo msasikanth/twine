@@ -18,3 +18,5 @@
 package dev.sasikanth.rss.reader.app
 
 expect val isFoss: Boolean
+
+expect val isGoogleDriveSupported: Boolean

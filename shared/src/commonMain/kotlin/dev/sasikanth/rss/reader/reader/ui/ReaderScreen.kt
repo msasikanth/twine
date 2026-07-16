@@ -58,6 +58,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -81,7 +82,6 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LookaheadScope
-import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
@@ -142,7 +142,9 @@ import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.intellij.markdown.MarkdownTokenTypes
 import org.jetbrains.compose.resources.stringResource
@@ -215,6 +217,23 @@ internal fun ReaderScreen(
       }
       initialPageRestored = true
     }
+  }
+
+  // Publish the active post from the settled page rather than per-page visibility:
+  // onVisibilityChanged ignores parent clipping, so in a split layout the pager's
+  // beyond-viewport neighbor overlaps the list pane and falsely reports as visible.
+  // The debounce keeps the initial page-restore scroll from publishing page 0.
+  LaunchedEffect(pagerState, posts) {
+    snapshotFlow { pagerState.settledPage to posts.itemCount }
+      .debounce(250.milliseconds)
+      .collect { (page, itemCount) ->
+        if (page in 0 until itemCount) {
+          val readerPost = runCatching { posts.peek(page) }.getOrNull()
+          if (readerPost != null) {
+            viewModel.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
+          }
+        }
+      }
   }
 
   // In a split layout the list pane keeps the app theme, so article-based dynamic colors
@@ -688,12 +707,7 @@ internal fun ReaderScreen(
                   )
                 }
               ReaderPage(
-                modifier =
-                  Modifier.fillMaxSize().onVisibilityChanged(minDurationMs = 250L) {
-                    if (it) {
-                      viewModel.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
-                    }
-                  },
+                modifier = Modifier.fillMaxSize(),
                 contentPaddingValues = paddingValues,
                 pageViewModel = pageViewModel,
                 readerPost = readerPost,

@@ -79,6 +79,8 @@ class AppViewModel(
     refreshFeedsIfExpired()
     setupSessionTracking()
 
+    viewModelScope.launch { oAuthManager.loopbackRedirects.collect { uri -> completeSignIn(uri) } }
+
     viewModelScope.launch {
       val isOnboardingDone = settingsRepository.isOnboardingDone.first()
       val lastSeenChangelogVersion = settingsRepository.lastSeenChangelogVersion.first()
@@ -231,11 +233,15 @@ class AppViewModel(
 
   fun onOAuthRedirect(uri: String, linkHandler: LinkHandler) {
     viewModelScope.launch {
-      val signInSucceeded = oAuthManager.handleRedirect(uri)
-      if (signInSucceeded) {
-        syncCoordinator.triggerPush()
-      }
+      completeSignIn(uri)
       linkHandler.close()
+    }
+  }
+
+  private suspend fun completeSignIn(uri: String) {
+    val signInSucceeded = oAuthManager.handleRedirect(uri)
+    if (signInSucceeded) {
+      syncCoordinator.triggerPush()
     }
   }
 

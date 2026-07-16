@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.di
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.app.AppPlatform
 import dev.sasikanth.rss.reader.app.isFoss
+import dev.sasikanth.rss.reader.app.isGoogleDriveSupported
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.base.widget.di.WidgetPlatformComponent
 import dev.sasikanth.rss.reader.data.repository.RssRepository
@@ -68,6 +69,7 @@ abstract class ApplicationComponent(
         NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String ?: "",
       isDebugBuild = Platform.isDebugBinary,
       isFoss = isFoss,
+      isGoogleDriveSupported = isGoogleDriveSupported,
       cachePath = { NSFileManager.defaultManager.cacheDir },
       platform = AppPlatform.iOS,
     )

@@ -12,3 +12,5 @@
 package dev.sasikanth.rss.reader.app
 
 actual val isFoss: Boolean = true
+
+actual val isGoogleDriveSupported: Boolean = true
