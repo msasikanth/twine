@@ -107,7 +107,7 @@ internal fun HomeTopAppBar(
   var hasUnreadPosts by remember(hasUnreadPosts) { mutableStateOf(hasUnreadPosts) }
   var showConfirmDialog by remember { mutableStateOf(false) }
 
-  val backgroundColor = AppTheme.colorScheme.surface
+  val backgroundColor = AppTheme.colorScheme.backdrop
   val gradientFadeHeight = with(LocalDensity.current) { 40.dp.toPx() }
   TopAppBar(
     modifier =
