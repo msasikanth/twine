@@ -495,6 +495,7 @@ fun App(
           directive = paneScaffoldDirective,
           paneExpansionState = paneExpansionState,
         )
+      val bottomSheetSceneStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
 
       NavDisplay(
         // Paints the split's partition spacer with the app backdrop.
@@ -508,7 +509,9 @@ fun App(
             rememberSaveableStateHolderNavEntryDecorator(),
             rememberViewModelStoreNavEntryDecorator(),
           ),
-        sceneStrategies = listOf(listDetailSceneStrategy),
+        // Overlay strategies (bottom sheet) must come before the replace-style
+        // list-detail strategy so modals render above the underlying entries.
+        sceneStrategies = listOf(bottomSheetSceneStrategy, listDetailSceneStrategy),
         onBack = { navigator.goBack() },
       )
 

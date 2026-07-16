@@ -92,7 +92,6 @@ fun GroupSelectionSheet(
           .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
       },
       sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-      scrimColor = Color.Transparent,
     ) {
       val state by viewModel.state.collectAsStateWithLifecycle()
       val groups = state.groups.collectAsLazyPagingItems()

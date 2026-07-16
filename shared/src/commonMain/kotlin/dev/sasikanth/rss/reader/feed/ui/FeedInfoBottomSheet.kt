@@ -143,7 +143,6 @@ fun FeedInfoBottomSheet(
           .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
       },
       sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-      scrimColor = Color.Transparent,
     ) {
       Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
         val feed = state.feed
