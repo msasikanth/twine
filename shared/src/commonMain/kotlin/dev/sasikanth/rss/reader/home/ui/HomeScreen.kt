@@ -412,7 +412,7 @@ private fun HomeContent(
             snapshotFlow { (latestPosts?.itemCount ?: 0) > 0 || numberOfFeaturedPosts > 0 }
               .first { it }
 
-            if (postsListState.isScrollInProgress) return@LaunchedEffect
+            snapshotFlow { postsListState.isScrollInProgress }.first { !it }
 
             if (activePostIndex < numberOfFeaturedPosts && numberOfFeaturedPosts > 0) {
               postsListState.scrollToItem(0, scrollOffset = -(savedScrollOffset ?: 0))
