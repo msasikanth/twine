@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
@@ -115,6 +116,7 @@ import dev.sasikanth.rss.reader.utils.LocalInAppRating
 import dev.sasikanth.rss.reader.utils.LocalRootWindowSizeClass
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
+import dev.sasikanth.rss.reader.utils.horizontalResizePointerIcon
 import dev.sasikanth.rss.reader.utils.updateWindowBackdropColor
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -543,7 +545,8 @@ fun App(
             val isDragged by interactionSource.collectIsDraggedAsState()
             VerticalDragHandle(
               modifier =
-                Modifier.onGloballyPositioned { coordinates ->
+                Modifier.pointerHoverIcon(horizontalResizePointerIcon)
+                  .onGloballyPositioned { coordinates ->
                     val center = coordinates.positionInParent().x + coordinates.size.width / 2f
                     dividerCenterPx.floatValue = center
                     if (isDragged) {
