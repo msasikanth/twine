@@ -22,7 +22,6 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -56,6 +55,7 @@ import dev.sasikanth.rss.reader.settings.ui.items.OPMLSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.OpmlFeedSelectionSheet
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
+import dev.sasikanth.rss.reader.utils.restrictContentWidth
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonCancel
@@ -201,12 +201,12 @@ private fun SettingsServicesContent(
       }
 
       LazyColumn(
-        modifier = Modifier.fillMaxSize().iosBottomSafeAreaPadding(),
+        modifier = Modifier.restrictContentWidth().iosBottomSafeAreaPadding(),
         contentPadding =
           PaddingValues(
-            start = padding.calculateStartPadding(layoutDirection) + settingsItemHorizontalPadding,
+            start = padding.calculateStartPadding(layoutDirection),
             top = padding.calculateTopPadding() + 8.dp,
-            end = padding.calculateEndPadding(layoutDirection) + settingsItemHorizontalPadding,
+            end = padding.calculateEndPadding(layoutDirection),
             bottom = padding.calculateBottomPadding() + 80.dp,
           ),
       ) {

@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -56,6 +57,7 @@ import dev.sasikanth.rss.reader.onboarding.OnboardingViewModel
 import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -124,7 +126,8 @@ private fun OnboardingContent(
 
         Button(
           onClick = { onEvent(OnboardingEvent.GetStartedClicked) },
-          modifier = Modifier.fillMaxWidth().height(56.dp),
+          modifier =
+            Modifier.widthIn(max = Constants.MAX_CONTENT_WIDTH).fillMaxWidth().height(56.dp),
           enabled = !state.isPrePopulating,
           shape = MaterialTheme.shapes.extraLarge,
           colors =

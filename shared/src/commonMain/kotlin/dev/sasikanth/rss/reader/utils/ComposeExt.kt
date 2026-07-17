@@ -18,10 +18,14 @@ package dev.sasikanth.rss.reader.utils
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Outline
@@ -77,6 +82,16 @@ import twine.shared.generated.resources.unit_minutes
 import twine.shared.generated.resources.unit_seconds
 
 expect fun String.toClipEntry(): ClipEntry
+
+/**
+ * Fills the available space while capping the content width to [Constants.MAX_CONTENT_WIDTH] and
+ * centering it, so full-window screens don't stretch on wide windows.
+ */
+fun Modifier.restrictContentWidth(): Modifier =
+  fillMaxSize()
+    .wrapContentWidth(Alignment.CenterHorizontally)
+    .widthIn(max = Constants.MAX_CONTENT_WIDTH)
+    .fillMaxWidth()
 
 fun Modifier.ignoreHorizontalParentPadding(horizontal: Dp): Modifier {
   return this.layout { measurable, constraints ->
