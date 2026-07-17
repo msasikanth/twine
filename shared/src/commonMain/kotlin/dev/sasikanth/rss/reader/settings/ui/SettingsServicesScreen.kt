@@ -19,11 +19,17 @@ package dev.sasikanth.rss.reader.settings.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -71,8 +77,11 @@ import twine.shared.generated.resources.settingsEnableNotificationsSubtitle
 import twine.shared.generated.resources.settingsEnableNotificationsTitle
 import twine.shared.generated.resources.settingsGroupByFeedNotificationsSubtitle
 import twine.shared.generated.resources.settingsGroupByFeedNotificationsTitle
+import twine.shared.generated.resources.settingsHeaderCloudStorage
+import twine.shared.generated.resources.settingsHeaderCloudStorageSubtitle
 import twine.shared.generated.resources.settingsHeaderData
-import twine.shared.generated.resources.settingsHeaderSync
+import twine.shared.generated.resources.settingsHeaderFeedServices
+import twine.shared.generated.resources.settingsHeaderFeedServicesSubtitle
 import twine.shared.generated.resources.settingsServicesAndSync
 import twine.shared.generated.resources.settingsSyncDropbox
 import twine.shared.generated.resources.settingsSyncFreshRSS
@@ -209,51 +218,83 @@ private fun SettingsServicesContent(
             bottom = padding.calculateBottomPadding() + 80.dp,
           ),
       ) {
-        item { SubHeader(text = stringResource(Res.string.settingsHeaderSync)) }
+        val cloudStorageProviders = availableProviders.filter { it !is APIServiceProvider }
+        val feedServiceProviders = availableProviders.filterIsInstance<APIServiceProvider>()
 
-        item {
-          CloudSyncSettingItem(
-            syncProgress = state.syncProgress,
-            lastSyncedAt = state.lastSyncedAt,
-            availableProviders = availableProviders,
-            isSubscribed = state.isSubscribed,
-            onSyncClicked = { provider ->
-              if (provider.isPremium && !state.isSubscribed) {
-                openPaywall()
-              } else {
-                if (
-                  state.hasCloudServiceSignedIn && state.signedInService != provider.cloudService
-                ) {
-                  showSwitchServiceDialog = provider
-                } else {
-                  dispatch(SettingsEvent.SyncClicked(provider))
+        val onSyncClicked: (CloudServiceProvider) -> Unit = { provider ->
+          if (provider.isPremium && !state.isSubscribed) {
+            openPaywall()
+          } else {
+            if (state.hasCloudServiceSignedIn && state.signedInService != provider.cloudService) {
+              showSwitchServiceDialog = provider
+            } else {
+              dispatch(SettingsEvent.SyncClicked(provider))
+            }
+          }
+        }
+
+        val onAPIServiceClicked: (APIServiceProvider) -> Unit = { provider ->
+          if (provider.isPremium && !state.isSubscribed) {
+            openPaywall()
+          } else {
+            if (state.hasCloudServiceSignedIn && state.signedInService != provider.cloudService) {
+              showSwitchServiceDialog = provider
+            } else {
+              when (provider.cloudService) {
+                ServiceType.FRESH_RSS -> openFreshRssLogin()
+                ServiceType.MINIFLUX -> openMinifluxLogin()
+                else -> {
+                  throw IllegalStateException(
+                    "Unknown cloud service type: ${provider.cloudService}"
+                  )
                 }
               }
-            },
-            onAPIServiceClicked = { provider ->
-              if (provider.isPremium && !state.isSubscribed) {
-                openPaywall()
-              } else {
-                if (
-                  state.hasCloudServiceSignedIn && state.signedInService != provider.cloudService
-                ) {
-                  showSwitchServiceDialog = provider
-                } else {
-                  when (provider.cloudService) {
-                    ServiceType.FRESH_RSS -> openFreshRssLogin()
-                    ServiceType.MINIFLUX -> openMinifluxLogin()
-                    else -> {
-                      throw IllegalStateException(
-                        "Unknown cloud service type: ${provider.cloudService}"
-                      )
-                    }
-                  }
-                }
-              }
-            },
-            onSignOutClicked = { dispatch(SettingsEvent.SignOutClicked) },
-            onSyncErrorClicked = { showSyncErrorDialog = it },
-          )
+            }
+          }
+        }
+
+        if (cloudStorageProviders.isNotEmpty()) {
+          item {
+            ServiceGroupHeader(
+              title = stringResource(Res.string.settingsHeaderCloudStorage),
+              subtitle = stringResource(Res.string.settingsHeaderCloudStorageSubtitle),
+            )
+          }
+
+          item {
+            CloudSyncSettingItem(
+              syncProgress = state.syncProgress,
+              lastSyncedAt = state.lastSyncedAt,
+              availableProviders = cloudStorageProviders,
+              isSubscribed = state.isSubscribed,
+              onSyncClicked = onSyncClicked,
+              onAPIServiceClicked = onAPIServiceClicked,
+              onSignOutClicked = { dispatch(SettingsEvent.SignOutClicked) },
+              onSyncErrorClicked = { showSyncErrorDialog = it },
+            )
+          }
+        }
+
+        if (feedServiceProviders.isNotEmpty()) {
+          item {
+            ServiceGroupHeader(
+              title = stringResource(Res.string.settingsHeaderFeedServices),
+              subtitle = stringResource(Res.string.settingsHeaderFeedServicesSubtitle),
+            )
+          }
+
+          item {
+            CloudSyncSettingItem(
+              syncProgress = state.syncProgress,
+              lastSyncedAt = state.lastSyncedAt,
+              availableProviders = feedServiceProviders,
+              isSubscribed = state.isSubscribed,
+              onSyncClicked = onSyncClicked,
+              onAPIServiceClicked = onAPIServiceClicked,
+              onSignOutClicked = { dispatch(SettingsEvent.SignOutClicked) },
+              onSyncErrorClicked = { showSyncErrorDialog = it },
+            )
+          }
         }
 
         item { SettingsDivider(24.dp) }
@@ -330,6 +371,25 @@ private fun SettingsServicesContent(
       }
     },
   )
+}
+
+@Composable
+private fun ServiceGroupHeader(title: String, subtitle: String, modifier: Modifier = Modifier) {
+  Column(modifier = modifier.padding(horizontal = 24.dp).padding(top = 24.dp, bottom = 12.dp)) {
+    Text(
+      text = title,
+      style = MaterialTheme.typography.titleSmall,
+      color = AppTheme.colorScheme.onSurfaceVariant,
+    )
+
+    Spacer(Modifier.height(4.dp))
+
+    Text(
+      text = subtitle,
+      style = MaterialTheme.typography.bodySmall,
+      color = AppTheme.colorScheme.onSurfaceVariant,
+    )
+  }
 }
 
 @Composable

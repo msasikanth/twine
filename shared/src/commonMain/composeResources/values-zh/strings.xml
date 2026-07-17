@@ -232,7 +232,6 @@
   <string name="settingsDownloadFullContentSubtitle">启用后，应用将在同步期间尝试下载完整文章。</string>
   <string name="settingsDownloadFullContentWarning">警告！：这可能会增加订阅源加载时间、数据使用量、内存和存储消耗。它可能会影响您的用户体验。</string>
   <string name="sort">排序</string>
-  <string name="settingsHeaderSync">服务集成（Alpha）</string>
   <string name="settingsSyncDropboxDesc">一致的跨平台同步</string>
   <string name="settingsSyncStatusIdle">未同步</string>
   <string name="settingsSyncStatusSyncing">正在同步</string>

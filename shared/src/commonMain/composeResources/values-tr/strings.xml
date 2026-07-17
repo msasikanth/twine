@@ -232,7 +232,6 @@
   <string name="settingsDownloadFullContentSubtitle">Uygulama, eşitleme sırasında yazının (sadece özetini değil) tamamını indirmeye çalışır.</string>
   <string name="settingsDownloadFullContentWarning">Uyarı: Bu ayar akışların yüklenme süresini uzatabilir; cihazında daha fazla veri, bellek ve depolama alanı tüketebilir. Uygulama deneyimini yavaşlatma ihtimali vardır.</string>
   <string name="sort">Sırala</string>
-  <string name="settingsHeaderSync">Hizmetler (Alpha)</string>
   <string name="settingsSyncDropboxDesc">Farklı cihazlar arası kesintisiz eşitleme</string>
   <string name="settingsSyncStatusIdle">Eşitlenmedi</string>
   <string name="settingsSyncStatusSyncing">Eşitleniyor</string>

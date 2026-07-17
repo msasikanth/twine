@@ -232,7 +232,6 @@
   <string name="settingsDownloadFullContentSubtitle">Wenn aktiviert, versucht die App, während der Synchronisierung vollständige Artikel herunterzuladen.</string>
   <string name="settingsDownloadFullContentWarning">Achtung!: Dies kann die Ladezeiten der Feeds, den Datenverbrauch, den Arbeitsspeicher und den Speicherplatzbedarf erhöhen. Es kann potenziell Ihr Nutzererlebnis beeinträchtigen.</string>
   <string name="sort">Sortieren</string>
-  <string name="settingsHeaderSync">Dienste (Alpha)</string>
   <string name="settingsSyncDropboxDesc">Konsistente plattformübergreifende Synchronisierung</string>
   <string name="settingsSyncStatusIdle">Nicht synchronisiert</string>
   <string name="settingsSyncStatusSyncing">Synchronisation läuft</string>

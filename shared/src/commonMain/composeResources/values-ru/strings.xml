@@ -232,7 +232,6 @@
   <string name="settingsDownloadFullContentSubtitle">Если функция включена, приложение будет пытаться скачивать полные статьи во время синхронизации.</string>
   <string name="settingsDownloadFullContentWarning">Внимание!: это может увеличить время загрузки фида, использование данных, потребление памяти и хранилища. Это может потенциально повлиять на ваш пользовательский опыт.</string>
   <string name="sort">Сортировка</string>
-  <string name="settingsHeaderSync">Облачная синхронизация (Альфа ⚠)</string>
   <string name="settingsSyncDropboxDesc">Согласованная кроссплатформенная синхронизация</string>
   <string name="settingsSyncStatusIdle">Не синхронизировано</string>
   <string name="settingsSyncStatusSyncing">Синхронизация...</string>

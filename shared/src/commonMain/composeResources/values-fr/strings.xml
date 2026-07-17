@@ -232,7 +232,6 @@
   <string name="settingsDownloadFullContentSubtitle">Une fois activé, l'application tentera de télécharger les articles complets pendant la synchronisation.</string>
   <string name="settingsDownloadFullContentWarning">Attention ! : cela peut augmenter le temps de chargement des flux, l'utilisation des données, la consommation de mémoire et de stockage. Cela peut potentiellement affecter votre expérience utilisateur.</string>
   <string name="sort">Trier</string>
-  <string name="settingsHeaderSync">Synchronisation cloud (Alpha ⚠)</string>
   <string name="settingsSyncDropboxDesc">Synchronisation multiplateforme cohérente</string>
   <string name="settingsSyncStatusIdle">Non synchronisé</string>
   <string name="settingsSyncStatusSyncing">Synchronisation...</string>

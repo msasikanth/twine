@@ -82,7 +82,7 @@ import twine.shared.generated.resources.settingsSyncStatusSyncing
 internal fun CloudSyncSettingItem(
   syncProgress: SettingsState.SyncProgress,
   lastSyncedAt: Instant?,
-  availableProviders: Set<CloudServiceProvider>,
+  availableProviders: List<CloudServiceProvider>,
   isSubscribed: Boolean,
   onSyncClicked: (CloudServiceProvider) -> Unit,
   onAPIServiceClicked: (APIServiceProvider) -> Unit,

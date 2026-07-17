@@ -172,7 +172,7 @@ interface DataComponent :
   @Provides
   @AppScope
   fun providesSyncProviders(
-    cloudServiceProvider: DropboxCloudServiceProvider,
+    dropboxSyncProvider: DropboxCloudServiceProvider,
     googleDriveSyncProvider: GoogleDriveCloudServiceProvider,
     freshRssSyncProvider: FreshRssSyncProvider,
     minifluxSyncProvider: MinifluxSyncProvider,
@@ -181,10 +181,10 @@ interface DataComponent :
     return buildSet {
       add(minifluxSyncProvider)
       add(freshRssSyncProvider)
-      add(cloudServiceProvider)
       if (appInfo.isGoogleDriveSupported) {
         add(googleDriveSyncProvider)
       }
+      add(dropboxSyncProvider)
     }
   }
 
