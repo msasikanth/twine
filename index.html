@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Twine — A simple &amp; modern feed reader</title>
+  <meta name="description" content="Twine is a modern cross-platform RSS reader for Android and iOS, built with Kotlin and Compose Multiplatform. Free and open source.">
+  <link rel="icon" type="image/png" href="fastlane/metadata/android/en-US/images/icon.png">
+  <link rel="apple-touch-icon" href="fastlane/metadata/android/en-US/images/icon.png">
+  <meta property="og:title" content="Twine — A simple &amp; modern feed reader">
+  <meta property="og:description" content="A modern cross-platform RSS reader for Android and iOS, built with Kotlin and Compose Multiplatform. Free and open source.">
+  <meta property="og:image" content="https://twine.sasikanth.dev/readme_images/banner.png">
+  <meta property="og:url" content="https://twine.sasikanth.dev/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#EDEEE4" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#131811" media="(prefers-color-scheme: dark)">
+  <style>
+    :root {
+      --bg: #EDEEE4;
+      --bg-raised: #F7F8F1;
+      --ink: #1C2B1F;
+      --ink-soft: #4A5A4C;
+      --accent: #1F6D59;
+      --accent-ink: #FFFFFF;
+      --line: rgba(28, 43, 31, 0.12);
+      --shadow: 0 24px 60px -24px rgba(28, 43, 31, 0.35);
+      color-scheme: light dark;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #131811;
+        --bg-raised: #1C231A;
+        --ink: #E9EDE2;
+        --ink-soft: #A7B3A3;
+        --accent: #7FC9B2;
+        --accent-ink: #0F1F19;
+        --line: rgba(233, 237, 226, 0.14);
+        --shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.7);
+      }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 0;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 20px; color: var(--ink); }
+    .brand:hover { text-decoration: none; }
+    .brand img { width: 36px; height: 36px; border-radius: 10px; }
+    nav { display: flex; gap: 24px; align-items: center; }
+    nav a { color: var(--ink-soft); font-size: 15px; font-weight: 500; }
+    nav a:hover { color: var(--ink); text-decoration: none; }
+
+    .hero { text-align: center; padding: 56px 0 40px; }
+    .hero h1 {
+      font-size: clamp(42px, 7vw, 72px);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      font-weight: 800;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero p.tagline {
+      margin: 20px auto 0;
+      max-width: 560px;
+      font-size: clamp(17px, 2.4vw, 21px);
+      color: var(--ink-soft);
+    }
+    .hero p.oss { margin-top: 10px; font-size: 14px; color: var(--ink-soft); }
+
+    .badges {
+      display: flex; flex-wrap: wrap; gap: 4px 12px;
+      justify-content: center; align-items: center;
+      margin-top: 28px;
+    }
+    .badges a:hover { opacity: 0.85; text-decoration: none; }
+    .badges img { height: 78px; width: auto; }
+    .badges .appstore img { height: 54px; margin: 12px; }
+
+    .banner { margin: 48px 0 0; }
+    .banner img { border-radius: 24px; box-shadow: var(--shadow); }
+
+    section { padding: 72px 0 0; }
+    .section-title { font-size: clamp(28px, 4vw, 38px); font-weight: 800; letter-spacing: -0.02em; }
+    .section-sub { margin-top: 8px; color: var(--ink-soft); max-width: 620px; }
+
+    .features {
+      margin-top: 36px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+    .feature {
+      background: var(--bg-raised);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px;
+    }
+    .feature .icon {
+      width: 40px; height: 40px; border-radius: 12px;
+      display: grid; place-items: center;
+      background: var(--accent); color: var(--accent-ink);
+      margin-bottom: 14px;
+    }
+    .feature .icon svg { width: 22px; height: 22px; }
+    .feature h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .feature p { font-size: 14.5px; color: var(--ink-soft); }
+
+    .shots {
+      margin-top: 36px;
+      display: flex; gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      scroll-snap-type: x mandatory;
+    }
+    .shots img {
+      height: 480px; width: auto;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      scroll-snap-align: start;
+      flex-shrink: 0;
+    }
+
+    .sync {
+      margin-top: 36px;
+      background: var(--bg-raised);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 32px;
+      display: flex; flex-wrap: wrap; gap: 20px 40px;
+      align-items: center; justify-content: space-between;
+    }
+    .sync h3 { font-size: 22px; font-weight: 800; }
+    .sync p { color: var(--ink-soft); max-width: 480px; margin-top: 6px; font-size: 15px; }
+    .sync .providers { display: flex; gap: 10px; flex-wrap: wrap; }
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 14px; font-weight: 600;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    .cta { text-align: center; padding-bottom: 8px; }
+    .cta .btn {
+      display: inline-block;
+      margin-top: 24px;
+      background: var(--accent); color: var(--accent-ink);
+      font-weight: 700; font-size: 16px;
+      padding: 14px 28px; border-radius: 999px;
+    }
+    .cta .btn:hover { text-decoration: none; filter: brightness(1.08); }
+
+    footer {
+      margin-top: 80px;
+      border-top: 1px solid var(--line);
+      padding: 32px 0 48px;
+      font-size: 14.5px; color: var(--ink-soft);
+    }
+    footer .cols { display: flex; flex-wrap: wrap; gap: 16px 40px; justify-content: space-between; }
+    footer .links { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+    @media (max-width: 640px) {
+      .shots img { height: 400px; }
+      nav { gap: 16px; }
+      .brand span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+    <header>
+      <a class="brand" href="#">
+        <img src="fastlane/metadata/android/en-US/images/icon.png" alt="Twine app icon">
+        <span>Twine</span>
+      </a>
+      <nav>
+        <a href="#features">Features</a>
+        <a href="#download">Download</a>
+        <a href="https://github.com/msasikanth/twine">GitHub</a>
+      </nav>
+    </header>
+
+    <section class="hero" id="download">
+      <h1>Meet <em>Twine.</em></h1>
+      <p class="tagline">A simple &amp; modern feed reader for Android and iOS, with a beautiful reading experience and dynamic theming that adapts to your content.</p>
+      <p class="oss">Free &amp; open source · Built with Kotlin and Compose Multiplatform</p>
+      <div class="badges">
+        <a href="https://play.google.com/store/apps/details?id=dev.sasikanth.rss.reader"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"></a>
+        <a class="appstore" href="https://apps.apple.com/us/app/twine-rss-reader/id6465694958"><img alt="Download on the App Store" src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us"></a>
+      </div>
+      <div class="banner">
+        <img src="readme_images/banner.png" alt="Twine app shown on multiple phones" fetchpriority="high">
+      </div>
+    </section>
+
+    <section id="features">
+      <h2 class="section-title">Everything a feed reader should be</h2>
+      <p class="section-sub">Twine supports RDF, RSS, Atom and JSON feeds, and stays out of your way while you read.</p>
+      <div class="features">
+        <div class="feature">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg></div>
+          <h3>Smart feed fetching</h3>
+          <p>Paste any website homepage and Twine finds its feeds for you. Add, edit, pin and group them however you like.</p>
+        </div>
+        <div class="feature">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+          <h3>Reader view</h3>
+          <p>Fetch full articles in a clean reader view, and customize fonts and colors to your taste.</p>
+        </div>
+        <div class="feature">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg></div>
+          <h3>Podcast player</h3>
+          <p>A built-in audio player for podcast feeds and HTML audio, right inside your reading flow.</p>
+        </div>
+        <div class="feature">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9c0-.5-.05-1-.13-1.45A5.5 5.5 0 0 1 13.45 3.13C13 3.05 12.5 3 12 3z"/></svg></div>
+          <h3>Dynamic theming</h3>
+          <p>The app's ambient color adapts to what you're reading. Light, dark and AMOLED themes included.</p>
+        </div>
+        <div class="feature">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></div>
+          <h3>Bookmarks &amp; search</h3>
+          <p>Save posts to read later and search across everything. Filter out noise with blocked words.</p>
+        </div>
+        <div class="feature">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></div>
+          <h3>Widgets &amp; OPML</h3>
+          <p>Home screen widgets, background sync, app icon customization, and OPML import/export.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="screenshots">
+      <h2 class="section-title">Designed for reading</h2>
+      <div class="shots">
+        <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/01_screenshot.jpg" alt="Twine home screen" loading="lazy">
+        <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/02_screenshot.jpg" alt="Instant feed access from the home bar" loading="lazy">
+        <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/03_screenshot.jpg" alt="Reader view" loading="lazy">
+        <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/04_screenshot.jpg" alt="Feed management" loading="lazy">
+        <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/05_screenshot.jpg" alt="Customization options" loading="lazy">
+      </div>
+    </section>
+
+    <section>
+      <div class="sync">
+        <div>
+          <h3>Bring your own sync</h3>
+          <p>Keep your feeds in step across devices with cloud sync support.</p>
+        </div>
+        <div class="providers">
+          <span class="pill">FreshRSS</span>
+          <span class="pill">Miniflux</span>
+          <span class="pill">Dropbox <small>(alpha)</small></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <h2 class="section-title">Start reading with Twine</h2>
+      <a class="btn" href="#download">Get the app</a>
+    </section>
+
+    <footer>
+      <div class="cols">
+        <div class="links">
+          <a href="https://github.com/msasikanth/twine">Source code</a>
+          <a href="https://www.sasikanth.dev/reader-privacy-policy/">Privacy policy</a>
+          <a href="https://github.com/msasikanth/twine/blob/main/LICENSE.txt">GPLv3 license</a>
+          <a href="https://crowdin.com/project/twine-rss-reader">Help translate</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+</body>
+</html>
