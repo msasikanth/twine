@@ -21,10 +21,13 @@ import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.utils.NewArticleNotifier
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.initializers.Initializer
 import dev.sasikanth.rss.reader.reader.readability.HtmlReadabilityRunner
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
+import dev.sasikanth.rss.reader.refresh.FeedsRefreshInitializer
 import java.io.File
 import me.tatarka.inject.annotations.Component
+import me.tatarka.inject.annotations.IntoSet
 import me.tatarka.inject.annotations.Provides
 
 @AppScope
@@ -40,6 +43,11 @@ abstract class ApplicationComponent : SharedApplicationComponent(), WidgetPlatfo
   abstract val newArticleNotifier: NewArticleNotifier
 
   abstract val billingHandler: BillingHandler
+
+  @IntoSet
+  @Provides
+  @AppScope
+  fun providesFeedsRefreshInitializer(bind: FeedsRefreshInitializer): Initializer = bind
 
   @Provides
   @AppScope
