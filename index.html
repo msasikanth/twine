@@ -88,6 +88,19 @@
     .badges a:hover { opacity: 0.85; text-decoration: none; }
     .badges img { height: 78px; width: auto; }
     .badges .appstore img { height: 54px; margin: 12px; }
+    .badges .appstore img { height: 54px; margin: 12px; }
+    .badges .desktop-badge {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      height: 54px; padding: 0 22px 0 16px; margin: 12px;
+      border-radius: 7px;
+      background: #000; color: #fff;
+      text-decoration: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .badges .desktop-badge svg { width: 30px; height: 30px; fill: currentColor; }
+    .badges .desktop-badge .text { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
+    .badges .desktop-badge .sub { font-size: 11px; line-height: 1; margin-bottom: 3px; font-weight: 500; }
+    .badges .desktop-badge .main { font-size: 19px; line-height: 1; font-weight: 600; letter-spacing: -0.3px; }
 
     .banner { margin: 48px 0 0; }
     .banner img { border-radius: 24px; box-shadow: var(--shadow); }
@@ -201,6 +214,13 @@
       <div class="badges">
         <a href="https://play.google.com/store/apps/details?id=dev.sasikanth.rss.reader"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"></a>
         <a class="appstore" href="https://apps.apple.com/us/app/twine-rss-reader/id6465694958"><img alt="Download on the App Store" src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us"></a>
+        <a class="desktop-badge" href="https://github.com/msasikanth/twine/releases">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          <div class="text">
+            <span class="sub">Download for</span>
+            <span class="main">Desktop</span>
+          </div>
+        </a>
       </div>
       <div class="banner">
         <img src="readme_images/banner.png" alt="Twine app shown on multiple phones" fetchpriority="high">
