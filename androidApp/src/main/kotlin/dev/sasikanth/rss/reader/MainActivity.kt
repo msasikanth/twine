@@ -34,7 +34,6 @@ import dev.sasikanth.rss.reader.platform.PlatformComponent
 import dev.sasikanth.rss.reader.share.ShareComponent
 import dev.sasikanth.rss.reader.utils.ExternalUriHandler
 import dev.sasikanth.rss.reader.widget.GlanceWidgetUpdater
-import io.github.vinceglb.filekit.core.FileKit
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
@@ -68,8 +67,6 @@ class MainActivity : ComponentActivity() {
       currentPermissionDeferred = deferred
       permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
-
-    FileKit.init(this)
 
     enableEdgeToEdge(
       statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
