@@ -58,6 +58,7 @@ class RealOAuthManager(
   private val httpClient: HttpClient,
   private val tokenProvider: OAuthTokenProvider,
   private val userRepository: UserRepository,
+  private val signOutFromService: suspend (ServiceType) -> Unit,
 ) : OAuthManager {
 
   private val redirectServer = OAuthRedirectServer()
@@ -164,6 +165,11 @@ class RealOAuthManager(
               response.accessToken to response.refreshToken
             }
           }
+
+        val previousServiceType = userRepository.currentUser()?.serviceType
+        if (previousServiceType != null && previousServiceType != serviceType) {
+          signOutFromService(previousServiceType)
+        }
 
         // Placeholder user data, replace if providers approve getting user info via API
         val (placeholderName, placeholderEmail) =

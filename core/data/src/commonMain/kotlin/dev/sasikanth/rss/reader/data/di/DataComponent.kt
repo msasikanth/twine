@@ -137,7 +137,11 @@ interface DataComponent :
     httpClient: HttpClient,
     tokenProvider: OAuthTokenProvider,
     userRepository: UserRepository,
-  ): OAuthManager = RealOAuthManager(httpClient, tokenProvider, userRepository)
+    providers: Set<CloudServiceProvider>,
+  ): OAuthManager =
+    RealOAuthManager(httpClient, tokenProvider, userRepository) { serviceType ->
+      providers.firstOrNull { it.cloudService == serviceType }?.signOut()
+    }
 
   @Provides
   @AppScope
