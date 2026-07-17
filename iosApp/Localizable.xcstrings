@@ -12,7 +12,7 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : " • %@"
           }
         },
@@ -53,8 +53,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : " • %dm read"
+            "state" : "translated",
+            "value" : " • %dm de lecture"
           }
         },
         "hi" : {
@@ -94,8 +94,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Next Post"
+            "state" : "translated",
+            "value" : "Entrée suivante"
           }
         },
         "hi" : {
@@ -349,14 +349,14 @@
             "plural" : {
               "one" : {
                 "stringUnit" : {
-                  "state" : "new",
-                  "value" : "%@: 1 new article"
+                  "state" : "translated",
+                  "value" : "%@: 1 nouvel article"
                 }
               },
               "other" : {
                 "stringUnit" : {
-                  "state" : "new",
-                  "value" : "%@: %lld new articles"
+                  "state" : "translated",
+                  "value" : "%@: %lld nouveaux articles"
                 }
               }
             }
@@ -453,8 +453,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Previous Post"
+            "state" : "translated",
+            "value" : "Article précédent"
           }
         },
         "hi" : {
@@ -494,8 +494,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Refresh"
+            "state" : "translated",
+            "value" : "Rafraîchir"
           }
         },
         "hi" : {
@@ -634,8 +634,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Latest"
+            "state" : "translated",
+            "value" : "Dernières"
           }
         },
         "hi" : {
@@ -728,8 +728,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Shows 5 recent unread in a carousel"
+            "state" : "translated",
+            "value" : "Montre 5 non lue récente"
           }
         },
         "hi" : {
@@ -774,8 +774,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Shows a list of recent unread articles"
+            "state" : "translated",
+            "value" : "Affiche une liste des derniers articles non lus"
           }
         },
         "hi" : {
@@ -820,8 +820,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Recent unread (Large)"
+            "state" : "translated",
+            "value" : "Derniers non lus (Grand)"
           }
         },
         "hi" : {
@@ -866,8 +866,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Shows recent unread articles with more details"
+            "state" : "translated",
+            "value" : "Affiche les articles récents non lus avec plus de détails"
           }
         },
         "hi" : {
@@ -912,8 +912,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Recent unread (Medium)"
+            "state" : "translated",
+            "value" : "Derniers non lus (Moyen)"
           }
         },
         "hi" : {
@@ -958,8 +958,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Recent unread (Small)"
+            "state" : "translated",
+            "value" : "Derniers non lus (petit)"
           }
         },
         "hi" : {
