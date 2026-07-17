@@ -76,22 +76,3 @@ jobs:
       - name: Clean secrets
         run: |
           rm -f release/reader.jks
-
-      - name: Update version.properties
-        run: |
-          sed -i -E "s/VERSION_CODE=.*/VERSION_CODE=$ORG_GRADLE_PROJECT_VERSION_CODE/" version.properties
-          sed -i -E "s/VERSION_NAME=.*/VERSION_NAME=$ORG_GRADLE_PROJECT_VERSION_NAME/" version.properties
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v8
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "Update version to ${{ env.ORG_GRADLE_PROJECT_VERSION_NAME }} (${{ env.ORG_GRADLE_PROJECT_VERSION_CODE }})"
-          title: "Update version to ${{ env.ORG_GRADLE_PROJECT_VERSION_NAME }} (${{ env.ORG_GRADLE_PROJECT_VERSION_CODE }})"
-          body: |
-            This PR updates the version code and version name in `version.properties` to match the latest release built from Tramline:
-            
-            - **Version Name**: ${{ env.ORG_GRADLE_PROJECT_VERSION_NAME }}
-            - **Version Code**: ${{ env.ORG_GRADLE_PROJECT_VERSION_CODE }}
-          branch: "update-version-${{ env.ORG_GRADLE_PROJECT_VERSION_NAME }}-${{ env.ORG_GRADLE_PROJECT_VERSION_CODE }}"
-          base: main
