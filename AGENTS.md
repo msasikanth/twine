@@ -50,3 +50,7 @@ The project follows a modular Kotlin Multiplatform structure:
 ## PR instructions
 - Title format: <Title>. Title should not include any emojis
 - Always run `./gradlew spotlessApply` before committing.
+
+## Commenting Policy
+- Do NOT add redundant, obvious, or unnecessary code comments.
+- Keep comments strictly to high-level architectural documentation when requested.
