@@ -64,6 +64,7 @@ import dev.sasikanth.rss.reader.resources.icons.Twitter
 import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
+import dev.sasikanth.rss.reader.utils.restrictContentWidth
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -147,13 +148,14 @@ private fun AboutContent(persons: List<Person>, goBack: () -> Unit, modifier: Mo
     content = { padding ->
       Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
+          modifier = Modifier.restrictContentWidth(),
           contentPadding =
             PaddingValues(
               start = padding.calculateStartPadding(layoutDirection),
               top = padding.calculateTopPadding() + 8.dp,
               end = padding.calculateEndPadding(layoutDirection),
               bottom = padding.calculateBottomPadding() + 80.dp,
-            )
+            ),
         ) {
           items(persons) { person -> AboutListItem(person) }
         }

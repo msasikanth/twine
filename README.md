@@ -80,6 +80,10 @@ This project uses ktfmt, provided via the spotless gradle plugin, and the bundle
 You can help translate project on [Crowdin](https://crowdin.com/project/twine-rss-reader). We use Compose resources
 for strings, you can read more about it [here](https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-usage.html#strings).
 
+## Privacy Policy 🔒
+
+You can read the privacy policy [here](https://www.sasikanth.dev/reader-privacy-policy/).
+
 ## Made with 💖 by
 
 - [Sasikanth Miriyampalli](https://www.sasikanth.dev) / Development

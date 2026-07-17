@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -75,6 +76,7 @@ import dev.sasikanth.rss.reader.resources.icons.Sync
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
+import dev.sasikanth.rss.reader.utils.restrictContentWidth
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonGoBack
@@ -161,7 +163,7 @@ fun PremiumPaywallScreen(
     Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
       Column(
         modifier =
-          Modifier.fillMaxSize()
+          Modifier.restrictContentWidth()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
             .padding(bottom = 280.dp), // Space for tall bottom sticky section
@@ -236,7 +238,10 @@ fun PremiumPaywallScreen(
       }
 
       // Bottom Sticky Section
-      Column(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
+      Column(
+        modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+      ) {
         Box(
           modifier =
             Modifier.fillMaxWidth()
@@ -250,7 +255,8 @@ fun PremiumPaywallScreen(
 
         Column(
           modifier =
-            Modifier.fillMaxWidth()
+            Modifier.widthIn(max = Constants.MAX_CONTENT_WIDTH)
+              .fillMaxWidth()
               .background(AppTheme.colorScheme.surface)
               .padding(horizontal = 24.dp)
               .padding(bottom = 24.dp)

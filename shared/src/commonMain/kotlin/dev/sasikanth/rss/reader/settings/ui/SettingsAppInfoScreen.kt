@@ -19,7 +19,6 @@ package dev.sasikanth.rss.reader.settings.ui
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
@@ -51,6 +50,7 @@ import dev.sasikanth.rss.reader.settings.ui.items.SettingItem
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
+import dev.sasikanth.rss.reader.utils.restrictContentWidth
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -113,12 +113,12 @@ private fun SettingsAppInfoContent(
     },
     content = { padding ->
       LazyColumn(
-        modifier = Modifier.fillMaxSize().iosBottomSafeAreaPadding(),
+        modifier = Modifier.restrictContentWidth().iosBottomSafeAreaPadding(),
         contentPadding =
           PaddingValues(
-            start = padding.calculateStartPadding(layoutDirection) + settingsItemHorizontalPadding,
+            start = padding.calculateStartPadding(layoutDirection),
             top = padding.calculateTopPadding() + 8.dp,
-            end = padding.calculateEndPadding(layoutDirection) + settingsItemHorizontalPadding,
+            end = padding.calculateEndPadding(layoutDirection),
             bottom = padding.calculateBottomPadding() + 80.dp,
           ),
       ) {

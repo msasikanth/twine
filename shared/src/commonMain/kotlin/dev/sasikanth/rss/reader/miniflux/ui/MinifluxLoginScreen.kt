@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.miniflux.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -65,6 +67,7 @@ import dev.sasikanth.rss.reader.miniflux.MinifluxLoginEvent
 import dev.sasikanth.rss.reader.miniflux.MinifluxLoginState
 import dev.sasikanth.rss.reader.miniflux.MinifluxLoginViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.Constants
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -171,89 +174,100 @@ private fun MinifluxLoginContent(
       }
     },
     bottomBar = {
-      Button(
-        modifier =
-          Modifier.background(AppTheme.colorScheme.backdrop)
-            .padding(horizontal = 24.dp, vertical = 8.dp)
-            .navigationBarsPadding()
-            .imePadding()
-            .fillMaxWidth()
-            .requiredHeight(56.dp),
-        colors =
-          ButtonDefaults.buttonColors(
-            containerColor = AppTheme.colorScheme.inverseSurface,
-            contentColor = AppTheme.colorScheme.inverseOnSurface,
-          ),
-        enabled = !state.isLoading && state.url.isNotBlank() && state.apiKey.isNotBlank(),
-        shape = MaterialTheme.shapes.extraLarge,
-        onClick = { onEvent(MinifluxLoginEvent.OnLoginClicked) },
-      ) {
-        if (state.isLoading) {
-          CircularProgressIndicator(
-            color = AppTheme.colorScheme.primary,
-            modifier = Modifier.requiredSize(24.dp),
-            strokeWidth = 2.dp,
-          )
-        } else {
-          Text(
-            text = stringResource(Res.string.minifluxLoginButton).uppercase(),
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Medium,
-          )
+      Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Button(
+          modifier =
+            Modifier.background(AppTheme.colorScheme.backdrop)
+              .padding(horizontal = 24.dp, vertical = 8.dp)
+              .navigationBarsPadding()
+              .imePadding()
+              .widthIn(max = Constants.MAX_CONTENT_WIDTH)
+              .fillMaxWidth()
+              .requiredHeight(56.dp),
+          colors =
+            ButtonDefaults.buttonColors(
+              containerColor = AppTheme.colorScheme.inverseSurface,
+              contentColor = AppTheme.colorScheme.inverseOnSurface,
+            ),
+          enabled = !state.isLoading && state.url.isNotBlank() && state.apiKey.isNotBlank(),
+          shape = MaterialTheme.shapes.extraLarge,
+          onClick = { onEvent(MinifluxLoginEvent.OnLoginClicked) },
+        ) {
+          if (state.isLoading) {
+            CircularProgressIndicator(
+              color = AppTheme.colorScheme.primary,
+              modifier = Modifier.requiredSize(24.dp),
+              strokeWidth = 2.dp,
+            )
+          } else {
+            Text(
+              text = stringResource(Res.string.minifluxLoginButton).uppercase(),
+              style = MaterialTheme.typography.labelLarge,
+              fontWeight = FontWeight.Medium,
+            )
+          }
         }
       }
     },
     containerColor = AppTheme.colorScheme.backdrop,
     contentColor = Color.Unspecified,
   ) { padding ->
-    LazyColumn(
-      modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 24.dp),
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-      item { Spacer(Modifier.requiredHeight(8.dp)) }
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+      LazyColumn(
+        modifier =
+          Modifier.widthIn(max = Constants.MAX_CONTENT_WIDTH)
+            .fillMaxSize()
+            .padding(padding)
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+      ) {
+        item { Spacer(Modifier.requiredHeight(8.dp)) }
 
-      item {
-        TextField(
-          modifier =
-            Modifier.fillMaxWidth().focusRequester(urlFocus).focusProperties { next = apiKeyFocus },
-          value = state.url,
-          onValueChange = { onEvent(MinifluxLoginEvent.OnUrlChanged(it)) },
-          hint = stringResource(Res.string.minifluxServerUrl),
-          enabled = !state.isLoading,
-          keyboardOptions =
-            KeyboardOptions(
-              autoCorrectEnabled = false,
-              keyboardType = KeyboardType.Uri,
-              imeAction = ImeAction.Next,
-            ),
-        )
-      }
+        item {
+          TextField(
+            modifier =
+              Modifier.fillMaxWidth().focusRequester(urlFocus).focusProperties {
+                next = apiKeyFocus
+              },
+            value = state.url,
+            onValueChange = { onEvent(MinifluxLoginEvent.OnUrlChanged(it)) },
+            hint = stringResource(Res.string.minifluxServerUrl),
+            enabled = !state.isLoading,
+            keyboardOptions =
+              KeyboardOptions(
+                autoCorrectEnabled = false,
+                keyboardType = KeyboardType.Uri,
+                imeAction = ImeAction.Next,
+              ),
+          )
+        }
 
-      item {
-        TextField(
-          modifier = Modifier.fillMaxWidth().focusRequester(apiKeyFocus),
-          value = state.apiKey,
-          onValueChange = { onEvent(MinifluxLoginEvent.OnApiKeyChanged(it)) },
-          hint = stringResource(Res.string.minifluxApiKey),
-          enabled = !state.isLoading,
-          visualTransformation = PasswordVisualTransformation(),
-          keyboardOptions =
-            KeyboardOptions(
-              autoCorrectEnabled = false,
-              keyboardType = KeyboardType.Password,
-              imeAction = ImeAction.Done,
-            ),
-          keyboardActions =
-            KeyboardActions(onDone = { onEvent(MinifluxLoginEvent.OnLoginClicked) }),
-          supportingText = {
-            Text(
-              text = stringResource(Res.string.minifluxAPIKeyHint),
-              style = MaterialTheme.typography.labelMedium,
-              color = AppTheme.colorScheme.onSurfaceVariant,
-            )
-          },
-        )
+        item {
+          TextField(
+            modifier = Modifier.fillMaxWidth().focusRequester(apiKeyFocus),
+            value = state.apiKey,
+            onValueChange = { onEvent(MinifluxLoginEvent.OnApiKeyChanged(it)) },
+            hint = stringResource(Res.string.minifluxApiKey),
+            enabled = !state.isLoading,
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions =
+              KeyboardOptions(
+                autoCorrectEnabled = false,
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done,
+              ),
+            keyboardActions =
+              KeyboardActions(onDone = { onEvent(MinifluxLoginEvent.OnLoginClicked) }),
+            supportingText = {
+              Text(
+                text = stringResource(Res.string.minifluxAPIKeyHint),
+                style = MaterialTheme.typography.labelMedium,
+                color = AppTheme.colorScheme.onSurfaceVariant,
+              )
+            },
+          )
+        }
       }
     }
   }

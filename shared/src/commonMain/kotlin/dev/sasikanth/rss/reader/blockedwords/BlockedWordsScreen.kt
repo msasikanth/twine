@@ -74,6 +74,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
+import dev.sasikanth.rss.reader.utils.restrictContentWidth
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.blockedWords
@@ -113,7 +114,7 @@ fun BlockedWordsScreen(
       }
     }
 
-    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = innerPadding) {
+    LazyColumn(modifier = Modifier.restrictContentWidth(), contentPadding = innerPadding) {
       item { Spacer(Modifier.requiredHeight(16.dp)) }
 
       item {

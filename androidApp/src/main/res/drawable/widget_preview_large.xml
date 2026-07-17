@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2026 Sasikanth Miriyampalli
+  ~
+  ~ Licensed under the GPL, Version 3.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     https://www.gnu.org/licenses/gpl-3.0.en.html
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item>
+        <shape android:shape="rectangle">
+            <size
+                android:width="340dp"
+                android:height="160dp" />
+            <corners android:radius="28dp" />
+            <solid android:color="#FFFFFF" />
+        </shape>
+    </item>
+
+    <!-- "Latest" header -->
+    <item
+        android:gravity="top|left"
+        android:height="11dp"
+        android:left="16dp"
+        android:top="18dp"
+        android:width="52dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="99dp" />
+            <solid android:color="#333A35" />
+        </shape>
+    </item>
+
+    <!-- Refresh and bookmarks buttons -->
+    <item
+        android:gravity="top|right"
+        android:height="32dp"
+        android:right="48dp"
+        android:top="8dp"
+        android:width="32dp">
+        <shape android:shape="oval">
+            <solid android:color="#E1E7E1" />
+        </shape>
+    </item>
+    <item
+        android:gravity="top|right"
+        android:height="32dp"
+        android:right="8dp"
+        android:top="8dp"
+        android:width="32dp">
+        <shape android:shape="oval">
+            <solid android:color="#E1E7E1" />
+        </shape>
+    </item>
+
+    <!-- Post row 1 -->
+    <item
+        android:gravity="top|left"
+        android:height="9dp"
+        android:left="16dp"
+        android:top="62dp"
+        android:width="184dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="99dp" />
+            <solid android:color="#333A35" />
+        </shape>
+    </item>
+    <item
+        android:gravity="top|left"
+        android:height="7dp"
+        android:left="16dp"
+        android:top="78dp"
+        android:width="120dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="99dp" />
+            <solid android:color="#9AA69D" />
+        </shape>
+    </item>
+    <item
+        android:gravity="top|right"
+        android:height="44dp"
+        android:right="16dp"
+        android:top="54dp"
+        android:width="44dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="12dp" />
+            <solid android:color="#E1E7E1" />
+        </shape>
+    </item>
+
+    <!-- Post row 2 -->
+    <item
+        android:gravity="top|left"
+        android:height="9dp"
+        android:left="16dp"
+        android:top="114dp"
+        android:width="204dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="99dp" />
+            <solid android:color="#333A35" />
+        </shape>
+    </item>
+    <item
+        android:gravity="top|left"
+        android:height="7dp"
+        android:left="16dp"
+        android:top="130dp"
+        android:width="100dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="99dp" />
+            <solid android:color="#9AA69D" />
+        </shape>
+    </item>
+    <item
+        android:gravity="top|right"
+        android:height="44dp"
+        android:right="16dp"
+        android:top="106dp"
+        android:width="44dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="12dp" />
+            <solid android:color="#E1E7E1" />
+        </shape>
+    </item>
+</layer-list>

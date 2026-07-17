@@ -97,6 +97,7 @@ import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.Newsstand
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalInAppRating
 import dev.sasikanth.rss.reader.utils.ignoreHorizontalParentPadding
 import dev.sasikanth.rss.reader.utils.removeLineBreaks
@@ -180,7 +181,7 @@ private fun AddFeedContent(
   val (feedLinkFocus, feedTitleFocus) = remember { FocusRequester.createRefs() }
   var feedLink by remember { mutableStateOf(TextFieldValue()) }
   var feedTitle by remember { mutableStateOf(TextFieldValue()) }
-  val maxContentWidth = 640.dp
+  val maxContentWidth = Constants.MAX_CONTENT_WIDTH
 
   LaunchedEffect(Unit) { feedLinkFocus.requestFocus() }
 

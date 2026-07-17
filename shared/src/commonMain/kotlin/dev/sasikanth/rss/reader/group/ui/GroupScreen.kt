@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
@@ -77,6 +76,7 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.UnGroup
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.removeLineBreaks
+import dev.sasikanth.rss.reader.utils.restrictContentWidth
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
@@ -199,7 +199,7 @@ private fun GroupContent(
     containerColor = AppTheme.colorScheme.backdrop,
   ) { innerPadding ->
     LazyColumn(
-      modifier = Modifier.fillMaxSize(),
+      modifier = Modifier.restrictContentWidth(),
       contentPadding =
         PaddingValues(
           start = innerPadding.calculateStartPadding(layoutDirection),

@@ -1,6 +1,8 @@
 name: Desktop Distributables
 
 on:
+  release:
+    types: [published]
   push:
     branches:
       - main
@@ -10,6 +12,9 @@ on:
       - 'core/**'
       - '.github/workflows/desktop_distributables.yml'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 env:
   ORG_GRADLE_PROJECT_GOOGLE_DESKTOP_CLIENT_SECRET: ${{ secrets.GOOGLE_DESKTOP_CLIENT_SECRET }}
@@ -33,6 +38,11 @@ jobs:
         with:
           name: Twine-macOS
           path: desktopApp/build/compose/binaries/main-release/dmg/*.dmg
+      - name: Upload DMG to GitHub Release
+        if: github.event_name == 'release'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.event.release.tag_name }} desktopApp/build/compose/binaries/main-release/dmg/*.dmg --clobber
 
   build-windows:
     name: Build Windows MSI
@@ -52,6 +62,11 @@ jobs:
         with:
           name: Twine-Windows
           path: desktopApp/build/compose/binaries/main-release/msi/*.msi
+      - name: Upload MSI to GitHub Release
+        if: github.event_name == 'release'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.event.release.tag_name }} desktopApp/build/compose/binaries/main-release/msi/*.msi --clobber
 
   build-linux:
     name: Build Linux DEB
@@ -71,3 +86,8 @@ jobs:
         with:
           name: Twine-Linux
           path: desktopApp/build/compose/binaries/main-release/deb/*.deb
+      - name: Upload DEB to GitHub Release
+        if: github.event_name == 'release'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.event.release.tag_name }} desktopApp/build/compose/binaries/main-release/deb/*.deb --clobber

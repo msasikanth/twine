@@ -16,10 +16,15 @@
  */
 package dev.sasikanth.rss.reader.utils
 
+import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.data.utils.Constants
 
 object Constants {
   const val EPSILON = 1e-6f
+
+  // Keeps forms and lists readable on wide windows; full-window screens center
+  // their content within this width.
+  val MAX_CONTENT_WIDTH = 640.dp
   const val REPORT_ISSUE_LINK = "https://github.com/msasikanth/twine/issues"
 
   const val ABOUT_SASI_NAME = "Sasikanth Miriyampalli"

@@ -99,6 +99,7 @@ import dev.sasikanth.rss.reader.resources.icons.RemoveFeed
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
+import dev.sasikanth.rss.reader.utils.restrictContentWidth
 import kotlin.math.abs
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -235,7 +236,7 @@ private fun FeedHealthContent(
         } else {
           Column(
             modifier =
-              Modifier.fillMaxSize()
+              Modifier.restrictContentWidth()
                 .padding(
                   top = padding.calculateTopPadding(),
                   start = padding.calculateStartPadding(layoutDirection),

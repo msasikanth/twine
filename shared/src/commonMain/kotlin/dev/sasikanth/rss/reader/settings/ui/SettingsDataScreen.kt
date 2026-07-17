@@ -71,6 +71,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.formatReadingTrendDate
 import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
+import dev.sasikanth.rss.reader.utils.restrictContentWidth
 import kotlin.time.Clock
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -135,7 +136,7 @@ private fun SettingsDataContent(
       } else {
         val statistics = state.statistics
         LazyColumn(
-          modifier = Modifier.fillMaxSize().iosBottomSafeAreaPadding(),
+          modifier = Modifier.restrictContentWidth().iosBottomSafeAreaPadding(),
           contentPadding =
             PaddingValues(
               start = padding.calculateStartPadding(layoutDirection),
@@ -147,10 +148,7 @@ private fun SettingsDataContent(
           if (statistics == null || statistics.totalReadCount == 0L) {
             item {
               Box(
-                modifier =
-                  Modifier.fillMaxWidth()
-                    .requiredHeight(120.dp)
-                    .padding(horizontal = settingsItemHorizontalPadding),
+                modifier = Modifier.fillMaxWidth().requiredHeight(120.dp),
                 contentAlignment = Alignment.Center,
               ) {
                 Text(
@@ -202,7 +200,6 @@ private fun SettingsDataContent(
               subtitle = stringResource(Res.string.settingsFeedHealthSubtitle),
               icon = TwineIcons.DataUsageRoundedFilled,
               onClick = openFeedHealth,
-              modifier = Modifier.padding(horizontal = settingsItemHorizontalPadding),
             )
           }
         }

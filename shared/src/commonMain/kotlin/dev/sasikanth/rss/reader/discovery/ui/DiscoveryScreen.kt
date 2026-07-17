@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -83,7 +84,9 @@ import dev.sasikanth.rss.reader.resources.icons.Close
 import dev.sasikanth.rss.reader.resources.icons.Refresh
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
+import dev.sasikanth.rss.reader.utils.restrictContentWidth
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonChange
@@ -164,10 +167,14 @@ private fun DiscoveryContent(
           },
         )
 
-        Column(modifier = Modifier.background(AppTheme.colorScheme.backdrop)) {
+        Column(
+          modifier = Modifier.fillMaxWidth().background(AppTheme.colorScheme.backdrop),
+          horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
           TextField(
             modifier =
-              Modifier.fillMaxWidth()
+              Modifier.widthIn(max = Constants.MAX_CONTENT_WIDTH)
+                .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
                 .focusRequester(focusRequester),
             value = state.searchQuery,
@@ -188,7 +195,10 @@ private fun DiscoveryContent(
               style = MaterialTheme.typography.bodyMedium,
               color = AppTheme.colorScheme.onSurfaceVariant,
               modifier =
-                Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 16.dp),
+                Modifier.widthIn(max = Constants.MAX_CONTENT_WIDTH)
+                  .fillMaxWidth()
+                  .padding(horizontal = 24.dp)
+                  .padding(bottom = 16.dp),
               textAlign = TextAlign.Center,
             )
           }
@@ -206,7 +216,7 @@ private fun DiscoveryContent(
       } else {
         LazyColumn(
           modifier =
-            Modifier.fillMaxSize()
+            Modifier.restrictContentWidth()
               .padding(top = paddingValues.calculateTopPadding())
               .iosBottomSafeAreaPadding(),
           contentPadding = PaddingValues(bottom = paddingValues.calculateBottomPadding() + 80.dp),

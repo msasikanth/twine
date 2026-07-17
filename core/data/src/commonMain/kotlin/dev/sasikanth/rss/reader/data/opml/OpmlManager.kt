@@ -27,9 +27,12 @@ import dev.sasikanth.rss.reader.data.utils.Constants.BACKUP_FILE_NAME
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.logging.CrashReporter
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import io.github.vinceglb.filekit.core.FileKit
-import io.github.vinceglb.filekit.core.PickerMode
-import io.github.vinceglb.filekit.core.PickerType
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.openFilePicker
+import io.github.vinceglb.filekit.dialogs.openFileSaver
+import io.github.vinceglb.filekit.readBytes
+import io.github.vinceglb.filekit.write
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
@@ -78,13 +81,7 @@ class OpmlManager(
     return try {
       coroutineScope
         .async {
-          val file =
-            FileKit.pickFile(
-              title = "Import OPML",
-              type = PickerType.File(),
-              mode = PickerMode.Single,
-              initialDirectory = "downloads",
-            )
+          val file = FileKit.openFilePicker(type = FileKitType.File())
 
           val opmlXmlContent =
             withContext(dispatchersProvider.io) { file?.readBytes()?.decodeToString() }
@@ -167,11 +164,12 @@ class OpmlManager(
       _result.emit(OpmlResult.InProgress.Exporting(50))
 
       coroutineScope.launch {
-        FileKit.saveFile(
-          bytes = opmlString.encodeToByteArray(),
-          baseName = BACKUP_FILE_NAME,
-          extension = BACKUP_FILE_EXTENSION,
-        )
+        val file =
+          FileKit.openFileSaver(
+            suggestedName = BACKUP_FILE_NAME,
+            defaultExtension = BACKUP_FILE_EXTENSION,
+          )
+        file?.write(opmlString.encodeToByteArray())
       }
 
       _result.emit(OpmlResult.Idle)

@@ -22,7 +22,6 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ButtonDefaults
@@ -60,6 +59,7 @@ import dev.sasikanth.rss.reader.settings.ui.items.OpmlFeedSelectionSheet
 import dev.sasikanth.rss.reader.settings.ui.items.PostsDeletionPeriodSettingItem
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
+import dev.sasikanth.rss.reader.utils.restrictContentWidth
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -172,12 +172,12 @@ private fun SettingsBehaviorContent(
       }
 
       LazyColumn(
-        modifier = Modifier.fillMaxSize().iosBottomSafeAreaPadding(),
+        modifier = Modifier.restrictContentWidth().iosBottomSafeAreaPadding(),
         contentPadding =
           PaddingValues(
-            start = padding.calculateStartPadding(layoutDirection) + settingsItemHorizontalPadding,
+            start = padding.calculateStartPadding(layoutDirection),
             top = padding.calculateTopPadding() + 8.dp,
-            end = padding.calculateEndPadding(layoutDirection) + settingsItemHorizontalPadding,
+            end = padding.calculateEndPadding(layoutDirection),
             bottom = padding.calculateBottomPadding() + 80.dp,
           ),
       ) {

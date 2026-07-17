@@ -11,10 +11,7 @@
 
 package dev.sasikanth.rss.reader
 
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -27,7 +24,6 @@ import dev.sasikanth.rss.reader.utils.DesktopWindowChrome
 import dev.sasikanth.rss.reader.utils.ExternalUriHandler
 import java.awt.Color
 import java.awt.Desktop
-import java.awt.Toolkit
 
 fun main() {
   val applicationComponent = ApplicationComponent::class.create()
@@ -57,27 +53,11 @@ fun main() {
         onDispose { DesktopWindowChrome.listener = null }
       }
 
-      val systemDpi = Toolkit.getDefaultToolkit().screenResolution
-      val screenSize = Toolkit.getDefaultToolkit().screenSize
-
-      val multiplier =
-        when {
-          systemDpi > 96 && screenSize.width >= 1728 -> 1.45f // High-density large screens
-          systemDpi > 96 && screenSize.width >= 1512 -> 1.3f // High-density smaller screens
-          systemDpi > 96 -> 1.25f // Other HiDPI screens
-          screenSize.width >= 1920 -> 1.2f // Large standard-density screens (e.g. 1080p/1440p)
-          else -> 1.15f // Smaller standard-density screens (e.g. 720p)
-        }
-      val scaleFactor = (systemDpi / 96f) * multiplier
-      val density = Density(density = scaleFactor, fontScale = 1f)
-
-      CompositionLocalProvider(LocalDensity provides density) {
-        desktopComponent.app(
-          { /* Handle theme change if needed */ },
-          { /* No-op on desktop */ },
-          { /* No-op on desktop */ },
-        )
-      }
+      desktopComponent.app(
+        { /* Handle theme change if needed */ },
+        { /* No-op on desktop */ },
+        { /* No-op on desktop */ },
+      )
     }
   }
 }

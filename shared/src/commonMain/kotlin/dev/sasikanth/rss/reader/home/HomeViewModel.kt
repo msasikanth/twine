@@ -83,16 +83,14 @@ class HomeViewModel(
   val activeReaderPostId: StateFlow<String?> = observableActiveReaderPost.activePostId
 
   private val defaultState = HomeState.default()
-  private val _state = MutableStateFlow(defaultState)
   val state: StateFlow<HomeState>
-    get() = _state
+    field = MutableStateFlow(defaultState)
 
   private val _effects = MutableSharedFlow<HomeEffect>()
   val effects: SharedFlow<HomeEffect> = _effects.asSharedFlow()
 
-  private val _openPost = MutableSharedFlow<Pair<Int, ResolvedPost>>()
   val openPost: SharedFlow<Pair<Int, ResolvedPost>>
-    get() = _openPost
+    field = MutableSharedFlow<Pair<Int, ResolvedPost>>()
 
   private var previousVisibleItems = emptyMap<String, Int>()
 
@@ -141,7 +139,7 @@ class HomeViewModel(
 
   private fun effectiveFeaturedPosts() =
     if (isFeaturedSectionVisible.value) {
-      _state.value.featuredPosts.value
+      state.value.featuredPosts.value
     } else {
       persistentListOf()
     }
@@ -199,11 +197,11 @@ class HomeViewModel(
 
   private fun onPostClicked(post: ResolvedPost) {
     viewModelScope.launch {
-      val postsAfter = postsThresholdTime(_state.value.postsType)
-      val activeSourceIds = activeSourceIds(_state.value.activeSource)
-      val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(_state.value.postsType)
+      val postsAfter = postsThresholdTime(state.value.postsType)
+      val activeSourceIds = activeSourceIds(state.value.activeSource)
+      val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(state.value.postsType)
       val postsUpperBound =
-        _state.value.lastRefreshedAt?.toInstant(TimeZone.currentSystemDefault())
+        state.value.lastRefreshedAt?.toInstant(TimeZone.currentSystemDefault())
           ?: Clock.System.now()
 
       val position =
@@ -211,14 +209,14 @@ class HomeViewModel(
           postId = post.id,
           sourceId = post.sourceId,
           activeSourceIds = activeSourceIds,
-          postsSortOrder = _state.value.postsSortOrder,
+          postsSortOrder = state.value.postsSortOrder,
           unreadOnly = unreadOnly,
           after = postsAfter,
           postsUpperBound = postsUpperBound,
         )
 
       if (position != null) {
-        _openPost.emit(position to post)
+        openPost.emit(position to post)
       }
     }
   }
@@ -232,17 +230,17 @@ class HomeViewModel(
 
   private suspend fun calculateHomeIndex(postId: String, index: Int): Int {
     val featuredPosts = effectiveFeaturedPosts()
-    val postsAfter = postsThresholdTime(_state.value.postsType)
-    val activeSourceIds = activeSourceIds(_state.value.activeSource)
-    val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(_state.value.postsType)
+    val postsAfter = postsThresholdTime(state.value.postsType)
+    val activeSourceIds = activeSourceIds(state.value.activeSource)
+    val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(state.value.postsType)
     val lastRefreshedAt =
-      _state.value.lastRefreshedAt?.toInstant(TimeZone.currentSystemDefault()) ?: Clock.System.now()
+      state.value.lastRefreshedAt?.toInstant(TimeZone.currentSystemDefault()) ?: Clock.System.now()
 
     if (featuredPosts.isEmpty()) {
       return rssRepository.postPosition(
         postId = postId,
         activeSourceIds = activeSourceIds,
-        postsSortOrder = _state.value.postsSortOrder,
+        postsSortOrder = state.value.postsSortOrder,
         unreadOnly = unreadOnly,
         after = postsAfter,
         postsUpperBound = lastRefreshedAt,
@@ -255,11 +253,29 @@ class HomeViewModel(
     }
 
     val featuredPostsAfter = lastRefreshedAt.minus(24.hours)
+
+    if (unreadOnly == true) {
+      val featuredWithSelectedPost =
+        rssRepository.featuredPostsBlocking(
+          activeSourceIds = activeSourceIds,
+          postsSortOrder = state.value.postsSortOrder,
+          unreadOnly = unreadOnly,
+          after = postsAfter,
+          featuredPostsAfter = featuredPostsAfter,
+          postsUpperBound = lastRefreshedAt,
+          sessionPostIds = listOf(postId),
+        )
+      val previousFeaturedIndex = featuredWithSelectedPost.indexOfFirst { it.id == postId }
+      if (previousFeaturedIndex != -1) {
+        return previousFeaturedIndex.coerceAtMost(featuredPosts.lastIndex)
+      }
+    }
+
     val position =
       rssRepository.nonFeaturedPostPosition(
         postId = postId,
         activeSourceIds = activeSourceIds,
-        postsSortOrder = _state.value.postsSortOrder,
+        postsSortOrder = state.value.postsSortOrder,
         unreadOnly = unreadOnly,
         after = postsAfter,
         featuredPostsAfter = featuredPostsAfter,
@@ -274,7 +290,7 @@ class HomeViewModel(
   }
 
   private fun showPostsSortFilter(show: Boolean) {
-    _state.update { it.copy(showPostsSortFilter = show) }
+    state.update { it.copy(showPostsSortFilter = show) }
   }
 
   private fun onPostsSortFilterApplied(event: HomeEvent.OnPostsSortFilterApplied) {
@@ -310,7 +326,7 @@ class HomeViewModel(
           initialValue = persistentListOf(),
         )
 
-    _state.update {
+    state.update {
       it.copy(
         allPosts = allPostsPagingData,
         feedPosts = feedPostsPagingData,
@@ -337,25 +353,25 @@ class HomeViewModel(
       }
       .distinctUntilChanged()
       .onEach { position ->
-        _state.update {
+        state.update {
           it.copy(activePostIndex = position.index, activePostScrollOffset = position.scrollOffset)
         }
       }
       .launchIn(viewModelScope)
 
     syncCoordinator.syncState
-      .onEach { syncState -> _state.update { it.copy(syncState = syncState) } }
+      .onEach { syncState -> state.update { it.copy(syncState = syncState) } }
       .launchIn(viewModelScope)
 
     rssRepository
       .hasFeeds()
       .distinctUntilChanged()
-      .onEach { hasFeeds -> _state.update { it.copy(hasFeeds = hasFeeds) } }
+      .onEach { hasFeeds -> state.update { it.copy(hasFeeds = hasFeeds) } }
       .launchIn(viewModelScope)
 
     settingsRepository.confirmMarkAllAsRead
       .distinctUntilChanged()
-      .onEach { confirm -> _state.update { it.copy(confirmMarkAllAsRead = confirm) } }
+      .onEach { confirm -> state.update { it.copy(confirmMarkAllAsRead = confirm) } }
       .launchIn(viewModelScope)
 
     combine(
@@ -388,7 +404,7 @@ class HomeViewModel(
           ::HomeUnreadStatus,
         ),
       ) { selectionFilters, unreadStatus ->
-        _state.update {
+        state.update {
           it.copy(
             activeSource = selectionFilters.activeSource,
             postsType = selectionFilters.postsType,
@@ -408,12 +424,12 @@ class HomeViewModel(
   }
 
   private fun updatePrevActiveSource(event: HomeEvent.UpdatePrevActiveSource) {
-    _state.update { it.copy(prevActiveSource = event.source) }
+    state.update { it.copy(prevActiveSource = event.source) }
   }
 
   private fun loadNewArticles() {
     viewModelScope.launch {
-      _state.update { it.copy(unreadSinceLastSync = null) }
+      state.update { it.copy(unreadSinceLastSync = null) }
       refreshPolicy.updateLastRefreshedAt()
       _effects.emit(HomeEffect.RequestInAppRating)
     }
@@ -439,7 +455,7 @@ class HomeViewModel(
 
   private fun markPostsAsRead(source: Source?) {
     viewModelScope.launch {
-      val postsAfter = postsThresholdTime(_state.value.postsType)
+      val postsAfter = postsThresholdTime(state.value.postsType)
 
       when (source) {
         is Feed -> {
@@ -479,7 +495,7 @@ class HomeViewModel(
   }
 
   private fun postsThresholdTime(postsType: PostsType): Instant {
-    val lastRefreshedAt = _state.value.lastRefreshedAt
+    val lastRefreshedAt = state.value.lastRefreshedAt
     return if (lastRefreshedAt != null) {
       PostsFilterUtils.postsThresholdTime(postsType, lastRefreshedAt)
     } else {
@@ -492,7 +508,7 @@ class HomeViewModel(
   }
 
   private fun feedsSheetStateChanged(feedsSheetState: SheetValue) {
-    _state.update { it.copy(feedsSheetState = feedsSheetState) }
+    state.update { it.copy(feedsSheetState = feedsSheetState) }
   }
 
   private fun onHomeSelected() {
@@ -503,10 +519,10 @@ class HomeViewModel(
   }
 
   private fun refreshContent() {
-    if (_state.value.unreadSinceLastSync?.hasNewArticles == true) {
+    if (state.value.unreadSinceLastSync?.hasNewArticles == true) {
       loadNewArticles()
     }
-    when (val selectedSource = _state.value.activeSource) {
+    when (val selectedSource = state.value.activeSource) {
       is FeedGroup -> syncCoordinator.triggerPull(selectedSource.feedIds)
       is Feed -> syncCoordinator.triggerPull(selectedSource.id)
       else -> syncCoordinator.triggerPull()
