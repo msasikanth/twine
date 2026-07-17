@@ -121,19 +121,6 @@ class TwineUnreadMediumWidget : GlanceAppWidget() {
     }
   }
 
-  override suspend fun providePreview(context: Context, widgetCategory: Int) {
-    val applicationComponent = (context.applicationContext as ReaderApplication).appComponent
-    val imageLoader = applicationComponent.imageLoader
-
-    provideContent {
-      setSingletonImageLoaderFactory { imageLoader }
-
-      GlanceTheme {
-        WidgetContent(unreadPosts = WidgetMockData.posts, currentIndex = 0, isSubscribed = true)
-      }
-    }
-  }
-
   @Composable
   private fun WidgetContent(
     unreadPosts: List<WidgetPost>,

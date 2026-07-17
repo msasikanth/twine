@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2026 Sasikanth Miriyampalli
+  ~
+  ~ Licensed under the GPL, Version 3.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     https://www.gnu.org/licenses/gpl-3.0.en.html
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item>
+        <shape android:shape="rectangle">
+            <size
+                android:width="340dp"
+                android:height="160dp" />
+            <corners android:radius="28dp" />
+            <solid android:color="#FFFFFF" />
+        </shape>
+    </item>
+
+    <!-- "Latest" header -->
+    <item
+        android:gravity="top|left"
+        android:height="11dp"
+        android:left="16dp"
+        android:top="18dp"
+        android:width="52dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="99dp" />
+            <solid android:color="#333A35" />
+        </shape>
+    </item>
+
+    <!-- Pagination dots -->
+    <item
+        android:gravity="top|left"
+        android:height="5dp"
+        android:left="84dp"
+        android:top="21dp"
+        android:width="5dp">
+        <shape android:shape="oval">
+            <solid android:color="#333A35" />
+        </shape>
+    </item>
+    <item
+        android:gravity="top|left"
+        android:height="5dp"
+        android:left="93dp"
+        android:top="21dp"
+        android:width="5dp">
+        <shape android:shape="oval">
+            <solid android:color="#C6CFC8" />
+        </shape>
+    </item>
+    <item
+        android:gravity="top|left"
+        android:height="5dp"
+        android:left="102dp"
+        android:top="21dp"
+        android:width="5dp">
+        <shape android:shape="oval">
+            <solid android:color="#C6CFC8" />
+        </shape>
+    </item>
+    <item
+        android:gravity="top|left"
+        android:height="5dp"
+        android:left="111dp"
+        android:top="21dp"
+        android:width="5dp">
+        <shape android:shape="oval">
+            <solid android:color="#C6CFC8" />
+        </shape>
+    </item>
+    <item
+        android:gravity="top|left"
+        android:height="5dp"
+        android:left="120dp"
+        android:top="21dp"
+        android:width="5dp">
+        <shape android:shape="oval">
+            <solid android:color="#C6CFC8" />
+        </shape>
+    </item>
+
+    <!-- Navigation buttons -->
+    <item
+        android:gravity="top|right"
+        android:height="28dp"
+        android:right="46dp"
+        android:top="10dp"
+        android:width="28dp">
+        <shape android:shape="oval">
+            <solid android:color="#E1E7E1" />
+        </shape>
+    </item>
+    <item
+        android:gravity="top|right"
+        android:height="28dp"
+        android:right="12dp"
+        android:top="10dp"
+        android:width="28dp">
+        <shape android:shape="oval">
+            <solid android:color="#E1E7E1" />
+        </shape>
+    </item>
+
+    <!-- Post title -->
+    <item
+        android:gravity="top|left"
+        android:height="10dp"
+        android:left="16dp"
+        android:top="76dp"
+        android:width="170dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="99dp" />
+            <solid android:color="#333A35" />
+        </shape>
+    </item>
+    <item
+        android:gravity="top|left"
+        android:height="10dp"
+        android:left="16dp"
+        android:top="92dp"
+        android:width="136dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="99dp" />
+            <solid android:color="#333A35" />
+        </shape>
+    </item>
+
+    <!-- Post description -->
+    <item
+        android:gravity="top|left"
+        android:height="8dp"
+        android:left="16dp"
+        android:top="110dp"
+        android:width="152dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="99dp" />
+            <solid android:color="#9AA69D" />
+        </shape>
+    </item>
+
+    <!-- Feed icon and name -->
+    <item
+        android:bottom="14dp"
+        android:gravity="bottom|left"
+        android:height="12dp"
+        android:left="16dp"
+        android:width="12dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="3dp" />
+            <solid android:color="#9AA69D" />
+        </shape>
+    </item>
+    <item
+        android:bottom="16dp"
+        android:gravity="bottom|left"
+        android:height="8dp"
+        android:left="34dp"
+        android:width="56dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="99dp" />
+            <solid android:color="#9AA69D" />
+        </shape>
+    </item>
+
+    <!-- Post image -->
+    <item
+        android:bottom="8dp"
+        android:gravity="right|fill_vertical"
+        android:right="8dp"
+        android:top="48dp"
+        android:width="124dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="20dp" />
+            <solid android:color="#E1E7E1" />
+        </shape>
+    </item>
+</layer-list>
