@@ -136,6 +136,7 @@ kotlin {
       implementation(libs.viewmodel)
       implementation(libs.lifecycle.runtime.compose)
       api(libs.jetbrains.navigation3.ui)
+      api(libs.androidx.navigationevent.compose)
       api(libs.compose.material3.adaptive.navigation3)
       api(libs.jetbrains.lifecycle.viewmodelNavigation3)
       implementation(libs.material.kolor)
