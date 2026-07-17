@@ -291,12 +291,14 @@ private fun SettingsAppearanceContent(
           )
         }
 
-        item {
-          AppIconSettingItem(
-            appIcon = state.appIcon,
-            isSubscribed = state.isSubscribed,
-            onClick = { dispatch(SettingsEvent.AppIconClicked) },
-          )
+        if (platform !is Platform.Desktop) {
+          item {
+            AppIconSettingItem(
+              appIcon = state.appIcon,
+              isSubscribed = state.isSubscribed,
+              onClick = { dispatch(SettingsEvent.AppIconClicked) },
+            )
+          }
         }
       }
     },

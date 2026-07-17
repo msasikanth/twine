@@ -319,7 +319,7 @@ private fun SettingsServicesContent(
           )
         }
 
-        if (state.appInfo.platform != AppPlatform.iOS) {
+        if (state.appInfo.platform == AppPlatform.Android) {
           item {
             SettingsSwitchItem(
               title = stringResource(Res.string.settingsEnableNotificationsTitle),
