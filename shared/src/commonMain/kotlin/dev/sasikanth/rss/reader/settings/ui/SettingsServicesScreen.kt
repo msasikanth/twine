@@ -162,7 +162,6 @@ private fun SettingsServicesContent(
         dismissText = stringResource(Res.string.buttonCancel),
         onConfirm = {
           showSwitchServiceDialog = null
-          dispatch(SettingsEvent.SignOutClicked)
 
           if (toProvider is APIServiceProvider) {
             when (toProvider.cloudService) {
