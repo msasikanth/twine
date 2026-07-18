@@ -146,6 +146,24 @@
       flex-shrink: 0;
     }
 
+    .reviews {
+      margin-top: 36px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .review {
+      background: var(--bg-raised);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+    }
+    .review .stars { color: #F5A623; font-size: 14px; letter-spacing: 2px; margin-bottom: 12px; }
+    .review p { font-size: 14.5px; color: var(--ink); flex-grow: 1; }
+    .review .author { margin-top: 16px; font-size: 13.5px; font-weight: 600; color: var(--ink-soft); }
+
     .sync {
       margin-top: 36px;
       background: var(--bg-raised);
@@ -159,6 +177,7 @@
     .sync p { color: var(--ink-soft); max-width: 480px; margin-top: 6px; font-size: 15px; }
     .sync .providers { display: flex; gap: 10px; flex-wrap: wrap; }
     .pill {
+      display: inline-flex; align-items: center; gap: 8px;
       border: 1px solid var(--line);
       border-radius: 999px;
       padding: 8px 16px;
@@ -166,6 +185,7 @@
       color: var(--ink);
       background: var(--bg);
     }
+    .pill svg { width: 18px; height: 18px; flex-shrink: 0; }
 
     .cta { text-align: center; padding-bottom: 8px; }
     .cta .btn {
@@ -274,6 +294,42 @@
       </div>
     </section>
 
+    <section id="reviews">
+      <h2 class="section-title">Loved by readers</h2>
+      <div class="reviews">
+        <div class="review">
+          <div class="stars">★★★★★</div>
+          <p>Hands down the best RSS reader out there. It's clean, user friendly, light weight and ad-free. Thanks for releasing this for free.</p>
+          <div class="author">Isuru Thilakarathne</div>
+        </div>
+        <div class="review">
+          <div class="stars">★★★★★</div>
+          <p>The perfect and the most beautiful rss reader I've came across. I love using it to get up to the speed with all my interests.</p>
+          <div class="author">Anubhav Tiwari</div>
+        </div>
+        <div class="review">
+          <div class="stars">★★★★★</div>
+          <p>I have used many RSS apps in Google Play, and Twine is the best one I have ever used. Thanks to the developer for bringing such a good app!</p>
+          <div class="author">JiaHui Dong (Daiki)</div>
+        </div>
+        <div class="review">
+          <div class="stars">★★★★★</div>
+          <p>Just downloaded this app. Stunning work. The parallax, edge-to-edge, predictive back animations and shape shifting action buttons don't go unnoticed.</p>
+          <div class="author">Marvin Bernal</div>
+        </div>
+        <div class="review">
+          <div class="stars">★★★★★</div>
+          <p>Amazing app — great UI, no ads, no data collection, updated regularly. Highly recommended.</p>
+          <div class="author">Stephen</div>
+        </div>
+        <div class="review">
+          <div class="stars">★★★★★</div>
+          <p>This seems the best RSS reader app on the market. It's open source, works flawless and has such a nice design!</p>
+          <div class="author">Guney Esendemir</div>
+        </div>
+      </div>
+    </section>
+
     <section>
       <div class="sync">
         <div>
@@ -281,22 +337,22 @@
           <p>Keep your feeds in step across devices with cloud sync support.</p>
         </div>
         <div class="providers">
-          <span class="pill">FreshRSS</span>
-          <span class="pill">Miniflux</span>
-          <span class="pill">Google Drive</span>
-          <span class="pill">Dropbox</span>
+          <span class="pill"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <clipPath id="frss-l"><rect x="0" y="0" width="12" height="24"/></clipPath>
+              <clipPath id="frss-r"><rect x="12" y="0" width="12" height="24"/></clipPath>
+            </defs>
+            <circle cx="12" cy="12" r="11" fill="#AFC9EA" clip-path="url(#frss-l)"/>
+            <circle cx="12" cy="12" r="11" fill="#3465A4" clip-path="url(#frss-r)"/>
+            <circle cx="12" cy="12" r="8.25" fill="none" stroke="#fff" stroke-width="1.6"/>
+            <circle cx="12" cy="12" r="5.25" fill="none" stroke="#fff" stroke-width="1.6"/>
+            <circle cx="12" cy="12" r="2.1" fill="#3465A4"/>
+          </svg>FreshRSS</span>
+          <span class="pill"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="5" fill="currentColor"/><path d="M5.5 17.5V7.5l3 4.5h1l3-4.5v10" fill="none" stroke="var(--bg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(3 -0.5)"/></svg>Miniflux</span>
+          <span class="pill"><svg viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066DA"/><path d="M43.65 25L29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0-1.2 4.5h27.5z" fill="#00AC47"/><path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75L86.1 57.5c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 11.5z" fill="#EA4335"/><path d="M43.65 25L57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#00832D"/><path d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684FC"/><path d="M73.4 26.5l-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25l16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#FFBA00"/></svg>Google Drive</span>
+          <span class="pill"><svg viewBox="0 0 24 24" fill="#0061FF" xmlns="http://www.w3.org/2000/svg"><path d="M6 2l6 3.75L6 9.5 0 5.75 6 2zm12 0l6 3.75-6 3.75-6-3.75L18 2zM0 13.25L6 9.5l6 3.75L6 17l-6-3.75zM18 9.5l6 3.75L18 17l-6-3.75 6-3.75zM6 18.25l6-3.75 6 3.75L12 22l-6-3.75z"/></svg>Dropbox</span>
         </div>
       </div>
-    </section>
-
-    <section id="data-usage" style="padding-top: 36px;">
-      <details class="sync" style="display: block; margin-top: 0;">
-        <summary style="font-size: 18px; font-weight: 700; cursor: pointer; outline: none;">App Purpose &amp; Data Usage</summary>
-        <div style="margin-top: 16px;">
-          <p style="max-width: 100%; margin-bottom: 12px;"><strong>Purpose of the app:</strong> Twine is a feed reader application that allows users to subscribe to their favorite websites, blogs, and podcasts using RSS, Atom, and JSON feeds, and read them in a clean, customizable interface.</p>
-          <p style="max-width: 100%;"><strong>Why we request user data:</strong> To provide features like cloud sync and backups, Twine may request access to your cloud storage or sync services (such as Google Drive or Dropbox). This access is used <strong>solely to synchronize your feeds, bookmarks, and app preferences</strong> across your devices. We do not sell your data, use it for advertising, or access it for any other reason. For full details, please review our <a href="https://www.sasikanth.dev/reader-privacy-policy/">Privacy Policy</a>.</p>
-        </div>
-      </details>
     </section>
 
     <section class="cta">
