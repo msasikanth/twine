@@ -17,7 +17,11 @@
 
 package dev.sasikanth.rss.reader.onboarding.ui
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseOutCubic
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -38,12 +42,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,6 +64,7 @@ import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
+import dev.sasikanth.rss.reader.utils.restrictContentWidth
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -98,6 +105,14 @@ private fun OnboardingContent(
 ) {
   val backgroundColor = AppTheme.colorScheme.primary
 
+  val entranceProgress = remember { Animatable(0f) }
+  LaunchedEffect(Unit) {
+    entranceProgress.animateTo(
+      1f,
+      animationSpec = tween(durationMillis = 500, easing = EaseOutCubic),
+    )
+  }
+
   Scaffold(
     modifier =
       modifier
@@ -120,6 +135,7 @@ private fun OnboardingContent(
           style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.onSurfaceVariant,
           textAlign = TextAlign.Center,
+          modifier = Modifier.widthIn(max = Constants.MAX_CONTENT_WIDTH).fillMaxWidth(),
         )
 
         Spacer(Modifier.height(16.dp))
@@ -161,11 +177,8 @@ private fun OnboardingContent(
     },
   ) { paddingValues ->
     Column(
-      modifier =
-        Modifier.fillMaxSize()
-          .padding(paddingValues)
-          .padding(horizontal = 24.dp)
-          .padding(top = 88.dp),
+      modifier = Modifier.restrictContentWidth().padding(paddingValues).padding(horizontal = 24.dp),
+      verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally,
     ) {
       val backgroundBrush =
@@ -177,7 +190,14 @@ private fun OnboardingContent(
 
       Box(
         modifier =
-          Modifier.requiredSize(128.dp).background(backgroundBrush, RoundedCornerShape(32.dp)),
+          Modifier.requiredSize(128.dp)
+            .graphicsLayer {
+              val scale = 0.85f + 0.15f * entranceProgress.value
+              scaleX = scale
+              scaleY = scale
+              alpha = entranceProgress.value
+            }
+            .background(backgroundBrush, RoundedCornerShape(32.dp)),
         contentAlignment = Alignment.Center,
       ) {
         Icon(
@@ -195,12 +215,14 @@ private fun OnboardingContent(
         style = MaterialTheme.typography.displayLarge,
         fontWeight = FontWeight.Bold,
         color = AppTheme.colorScheme.onSurface,
+        modifier = Modifier.graphicsLayer { alpha = entranceProgress.value },
       )
 
       Text(
         text = stringResource(Res.string.onboardingSubtitle),
         style = MaterialTheme.typography.bodyLarge,
         color = AppTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.graphicsLayer { alpha = entranceProgress.value },
       )
     }
   }
