@@ -122,9 +122,12 @@ import twine.shared.generated.resources.themeVariantAmber
 import twine.shared.generated.resources.themeVariantCoral
 import twine.shared.generated.resources.themeVariantDynamic
 import twine.shared.generated.resources.themeVariantForest
+import twine.shared.generated.resources.themeVariantLavender
 import twine.shared.generated.resources.themeVariantParchment
 import twine.shared.generated.resources.themeVariantRaspberry
+import twine.shared.generated.resources.themeVariantSepia
 import twine.shared.generated.resources.themeVariantSkyline
+import twine.shared.generated.resources.themeVariantSlate
 import twine.shared.generated.resources.themeVariantSolarized
 import twine.shared.generated.resources.themeVariantSystemDynamic
 
@@ -291,12 +294,14 @@ private fun SettingsAppearanceContent(
           )
         }
 
-        item {
-          AppIconSettingItem(
-            appIcon = state.appIcon,
-            isSubscribed = state.isSubscribed,
-            onClick = { dispatch(SettingsEvent.AppIconClicked) },
-          )
+        if (platform !is Platform.Desktop) {
+          item {
+            AppIconSettingItem(
+              appIcon = state.appIcon,
+              isSubscribed = state.isSubscribed,
+              onClick = { dispatch(SettingsEvent.AppIconClicked) },
+            )
+          }
         }
       }
     },
@@ -495,6 +500,9 @@ private fun ThemeVariant.displayName(): String {
     ThemeVariant.Raspberry -> stringResource(Res.string.themeVariantRaspberry)
     ThemeVariant.Skyline -> stringResource(Res.string.themeVariantSkyline)
     ThemeVariant.Parchment -> stringResource(Res.string.themeVariantParchment)
+    ThemeVariant.Sepia -> stringResource(Res.string.themeVariantSepia)
+    ThemeVariant.Slate -> stringResource(Res.string.themeVariantSlate)
+    ThemeVariant.Lavender -> stringResource(Res.string.themeVariantLavender)
   }
 }
 

@@ -237,6 +237,7 @@
   <string name="themeVariantCoral" translatable="false">Coral</string>
   <string name="themeVariantRaspberry" translatable="false">Raspberry</string>
   <string name="themeVariantSkyline" translatable="false">Skyline</string>
+  <string name="themeVariantLavender" translatable="false">Lavender</string>
   <string name="postsFilter">Posts filter</string>
   <string name="postsSortBy">Sort by</string>
   <string name="postsSortByPostDate">Post date</string>
@@ -254,9 +255,7 @@
   <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience</string>
   <string name="sort">Sort</string>
   <string name="settingsHeaderCloudStorage">Cloud storage</string>
-  <string name="settingsHeaderCloudStorageSubtitle">Sync your Twine data using your own storage</string>
   <string name="settingsHeaderFeedServices">Feed services</string>
-  <string name="settingsHeaderFeedServicesSubtitle">Use a feed reader service as your source of feeds and read state</string>
   <string name="settingsSyncDropbox" translatable="false">Dropbox</string>
   <string name="settingsSyncFreshRSS" translatable="false">FreshRSS (GReader)</string>
   <string name="settingsSyncDropboxDesc">Consistent cross-platform sync</string>

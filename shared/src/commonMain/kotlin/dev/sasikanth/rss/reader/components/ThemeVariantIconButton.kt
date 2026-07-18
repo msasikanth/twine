@@ -58,9 +58,12 @@ import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.amberColorScheme
 import dev.sasikanth.rss.reader.ui.coralColorScheme
 import dev.sasikanth.rss.reader.ui.forestColorScheme
+import dev.sasikanth.rss.reader.ui.lavenderColorScheme
 import dev.sasikanth.rss.reader.ui.parchmentColorScheme
 import dev.sasikanth.rss.reader.ui.raspberryColorScheme
+import dev.sasikanth.rss.reader.ui.sepiaColorScheme
 import dev.sasikanth.rss.reader.ui.skylineColorScheme
+import dev.sasikanth.rss.reader.ui.slateColorScheme
 import dev.sasikanth.rss.reader.ui.solarizedColorScheme
 import dev.sasikanth.rss.reader.ui.systemDynamicColorScheme
 import dev.sasikanth.rss.reader.util.canBlurImage
@@ -70,9 +73,12 @@ import twine.shared.generated.resources.themeVariantAmber
 import twine.shared.generated.resources.themeVariantCoral
 import twine.shared.generated.resources.themeVariantDynamic
 import twine.shared.generated.resources.themeVariantForest
+import twine.shared.generated.resources.themeVariantLavender
 import twine.shared.generated.resources.themeVariantParchment
 import twine.shared.generated.resources.themeVariantRaspberry
+import twine.shared.generated.resources.themeVariantSepia
 import twine.shared.generated.resources.themeVariantSkyline
+import twine.shared.generated.resources.themeVariantSlate
 import twine.shared.generated.resources.themeVariantSolarized
 import twine.shared.generated.resources.themeVariantSystemDynamic
 
@@ -103,6 +109,9 @@ fun ThemeVariantIconButton(
       ThemeVariant.Raspberry -> raspberryColorScheme(isDark)
       ThemeVariant.Skyline -> skylineColorScheme(isDark)
       ThemeVariant.Parchment -> parchmentColorScheme(isDark)
+      ThemeVariant.Sepia -> sepiaColorScheme(isDark)
+      ThemeVariant.Slate -> slateColorScheme(isDark)
+      ThemeVariant.Lavender -> lavenderColorScheme(isDark)
     }
 
   val (backgroundColor, contentColor) =
@@ -115,7 +124,8 @@ fun ThemeVariantIconButton(
         Pair(colorScheme.primaryContainer, colorScheme.onPrimaryContainer)
       }
 
-      ThemeVariant.Solarized -> {
+      ThemeVariant.Solarized,
+      ThemeVariant.Sepia -> {
         Pair(colorScheme.surfaceContainerHighest, colorScheme.onSurface)
       }
 
@@ -123,11 +133,13 @@ fun ThemeVariantIconButton(
       ThemeVariant.Amber,
       ThemeVariant.Coral,
       ThemeVariant.Raspberry,
-      ThemeVariant.Skyline -> {
+      ThemeVariant.Skyline,
+      ThemeVariant.Lavender -> {
         Pair(colorScheme.primary, colorScheme.onPrimary)
       }
 
-      ThemeVariant.Parchment -> {
+      ThemeVariant.Parchment,
+      ThemeVariant.Slate -> {
         Pair(colorScheme.surface, colorScheme.onSurface)
       }
     }
@@ -251,6 +263,9 @@ fun ThemeVariantIconButton(
           ThemeVariant.Raspberry -> stringResource(Res.string.themeVariantRaspberry)
           ThemeVariant.Skyline -> stringResource(Res.string.themeVariantSkyline)
           ThemeVariant.Parchment -> stringResource(Res.string.themeVariantParchment)
+          ThemeVariant.Sepia -> stringResource(Res.string.themeVariantSepia)
+          ThemeVariant.Slate -> stringResource(Res.string.themeVariantSlate)
+          ThemeVariant.Lavender -> stringResource(Res.string.themeVariantLavender)
         }
 
       Text(

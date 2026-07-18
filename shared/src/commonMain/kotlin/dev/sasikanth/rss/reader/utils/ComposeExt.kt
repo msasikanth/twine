@@ -16,6 +16,9 @@
  */
 package dev.sasikanth.rss.reader.utils
 
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,14 +37,20 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isSecondaryPressed
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalDensity
@@ -55,6 +64,7 @@ import dev.sasikanth.rss.reader.resources.icons.platform
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.DateTimeFormat
@@ -285,6 +295,61 @@ fun Morph.toComposePath(progress: Float, scale: Float = 1f, path: Path = Path())
 fun Modifier.iosBottomSafeAreaPadding(): Modifier = composed {
   if (platform is Platform.Apple) {
     windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+  } else {
+    this
+  }
+}
+
+// Desktop delivers wheel notches as small deltas (~1f); scale them up so a single notch
+// moves the list a noticeable amount.
+private const val MOUSE_WHEEL_SCROLL_MULTIPLIER = 80f
+
+/**
+ * On desktop, [androidx.compose.foundation.lazy.LazyRow]/horizontally scrollable containers only
+ * respond to horizontal drag/trackpad gestures by default, not the vertical mouse scroll wheel.
+ * This forwards vertical wheel scroll input to [scrollState] so such lists remain scrollable with a
+ * regular mouse.
+ */
+fun Modifier.scrollOnMouseWheel(scrollState: ScrollableState): Modifier = composed {
+  if (platform is Platform.Desktop) {
+    val coroutineScope = rememberCoroutineScope()
+    pointerInput(scrollState) {
+      awaitPointerEventScope {
+        while (true) {
+          val event = awaitPointerEvent(PointerEventPass.Main)
+          if (event.type == PointerEventType.Scroll) {
+            val scrollDelta = event.changes.first().scrollDelta
+            val delta = if (scrollDelta.x != 0f) scrollDelta.x else scrollDelta.y
+            if (delta != 0f) {
+              event.changes.forEach { it.consume() }
+              coroutineScope.launch { scrollState.scrollBy(delta * MOUSE_WHEEL_SCROLL_MULTIPLIER) }
+            }
+          }
+        }
+      }
+    }
+  } else {
+    this
+  }
+}
+
+/**
+ * Reports the position of a right-click/secondary-click on desktop, so callers can show a context
+ * menu anchored where the user actually clicked instead of at a fixed icon.
+ */
+fun Modifier.onDesktopContextMenu(onContextMenu: (Offset) -> Unit): Modifier = composed {
+  if (platform is Platform.Desktop) {
+    pointerInput(Unit) {
+      awaitEachGesture {
+        // Intercept on the Initial pass (outside-in) and consume immediately, before the event
+        // reaches child Text composables' own built-in text-selection context menu.
+        val event = awaitPointerEvent(PointerEventPass.Initial)
+        if (event.type == PointerEventType.Press && event.buttons.isSecondaryPressed) {
+          event.changes.forEach { it.consume() }
+          onContextMenu(event.changes.first().position)
+        }
+      }
+    }
   } else {
     this
   }

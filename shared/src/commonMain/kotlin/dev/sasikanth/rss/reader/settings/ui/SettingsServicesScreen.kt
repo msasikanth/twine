@@ -21,10 +21,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
@@ -78,10 +76,8 @@ import twine.shared.generated.resources.settingsEnableNotificationsTitle
 import twine.shared.generated.resources.settingsGroupByFeedNotificationsSubtitle
 import twine.shared.generated.resources.settingsGroupByFeedNotificationsTitle
 import twine.shared.generated.resources.settingsHeaderCloudStorage
-import twine.shared.generated.resources.settingsHeaderCloudStorageSubtitle
 import twine.shared.generated.resources.settingsHeaderData
 import twine.shared.generated.resources.settingsHeaderFeedServices
-import twine.shared.generated.resources.settingsHeaderFeedServicesSubtitle
 import twine.shared.generated.resources.settingsServicesAndSync
 import twine.shared.generated.resources.settingsSyncDropbox
 import twine.shared.generated.resources.settingsSyncFreshRSS
@@ -254,12 +250,7 @@ private fun SettingsServicesContent(
         }
 
         if (cloudStorageProviders.isNotEmpty()) {
-          item {
-            ServiceGroupHeader(
-              title = stringResource(Res.string.settingsHeaderCloudStorage),
-              subtitle = stringResource(Res.string.settingsHeaderCloudStorageSubtitle),
-            )
-          }
+          item { ServiceGroupHeader(title = stringResource(Res.string.settingsHeaderCloudStorage)) }
 
           item {
             CloudSyncSettingItem(
@@ -276,12 +267,7 @@ private fun SettingsServicesContent(
         }
 
         if (feedServiceProviders.isNotEmpty()) {
-          item {
-            ServiceGroupHeader(
-              title = stringResource(Res.string.settingsHeaderFeedServices),
-              subtitle = stringResource(Res.string.settingsHeaderFeedServicesSubtitle),
-            )
-          }
+          item { ServiceGroupHeader(title = stringResource(Res.string.settingsHeaderFeedServices)) }
 
           item {
             CloudSyncSettingItem(
@@ -319,7 +305,7 @@ private fun SettingsServicesContent(
           )
         }
 
-        if (state.appInfo.platform != AppPlatform.iOS) {
+        if (state.appInfo.platform == AppPlatform.Android) {
           item {
             SettingsSwitchItem(
               title = stringResource(Res.string.settingsEnableNotificationsTitle),
@@ -374,19 +360,11 @@ private fun SettingsServicesContent(
 }
 
 @Composable
-private fun ServiceGroupHeader(title: String, subtitle: String, modifier: Modifier = Modifier) {
+private fun ServiceGroupHeader(title: String, modifier: Modifier = Modifier) {
   Column(modifier = modifier.padding(horizontal = 24.dp).padding(top = 24.dp, bottom = 12.dp)) {
     Text(
       text = title,
       style = MaterialTheme.typography.titleSmall,
-      color = AppTheme.colorScheme.onSurfaceVariant,
-    )
-
-    Spacer(Modifier.height(4.dp))
-
-    Text(
-      text = subtitle,
-      style = MaterialTheme.typography.bodySmall,
       color = AppTheme.colorScheme.onSurfaceVariant,
     )
   }

@@ -28,9 +28,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.AdaptiveSheet
 import dev.sasikanth.rss.reader.components.ToggleableButtonGroup
 import dev.sasikanth.rss.reader.components.ToggleableButtonItem
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
@@ -71,12 +70,11 @@ internal fun PostsPreferencesSheet(
   onDismiss: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  ModalBottomSheet(
+  AdaptiveSheet(
     modifier = modifier,
     onDismissRequest = onDismiss,
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = AppTheme.colorScheme.onSurface,
-    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
   ) {
     var selectedPostsType by remember(postsType) { mutableStateOf(postsType) }
     var selectedSortBy by

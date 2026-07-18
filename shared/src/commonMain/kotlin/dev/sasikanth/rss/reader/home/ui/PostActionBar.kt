@@ -79,6 +79,7 @@ import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -410,69 +411,129 @@ internal fun PostActions(
         expanded = showDropdown,
         onDismissRequest = { onDropdownChange(false) },
       ) {
-        if (config.showToggleReadUnreadOption && !hideMarkAsOptions) {
-          val markAsReadLabel =
-            if (alwaysShowMarkAsUnread || postRead) {
-              stringResource(Res.string.markAsUnRead)
-            } else {
-              stringResource(Res.string.markAsRead)
-            }
-
-          DropdownMenuItem(
-            modifier = Modifier.fillMaxWidth(),
-            leadingIcon =
-              if (alwaysShowMarkAsUnread || postRead) {
-                TwineIcons.VisibilityOff
-              } else {
-                TwineIcons.Visibility
-              },
-            text = markAsReadLabel,
-            contentDescription = markAsReadLabel,
-            onClick = {
-              coroutineScope.launch {
-                onDropdownChange(false)
-                togglePostReadClick()
-              }
-            },
-          )
-        }
-
-        val linkHandler = LocalLinkHandler.current
-        val openWebsiteLabel = stringResource(Res.string.openWebsite)
-
-        DropdownMenuItem(
-          modifier = Modifier.fillMaxWidth(),
-          leadingIcon = TwineIcons.Website,
-          text = openWebsiteLabel,
-          contentDescription = openWebsiteLabel,
-          onClick = {
-            coroutineScope.launch {
-              onDropdownChange(false)
-              delay(150)
-              linkHandler.openLink(postLink)
-            }
-          },
-        )
-
-        val shareHandler = LocalShareHandler.current
-        val shareLabel = stringResource(Res.string.share)
-
-        DropdownMenuItem(
-          modifier = Modifier.fillMaxWidth(),
-          leadingIcon = TwineIcons.Share,
-          text = shareLabel,
-          contentDescription = shareLabel,
-          onClick = {
-            coroutineScope.launch {
-              onDropdownChange(false)
-              delay(150)
-              shareHandler.share(postLink)
-            }
-          },
+        PostActionsMenuItems(
+          postLink = postLink,
+          postRead = postRead,
+          config = config,
+          alwaysShowMarkAsUnread = alwaysShowMarkAsUnread,
+          hideMarkAsOptions = hideMarkAsOptions,
+          coroutineScope = coroutineScope,
+          onDropdownChange = onDropdownChange,
+          togglePostReadClick = togglePostReadClick,
         )
       }
     }
   }
+}
+
+/**
+ * A context menu with the same options as [PostActions]'s overflow menu, anchored at an arbitrary
+ * [offset] (in px, relative to the current layout position) rather than a fixed icon. Used to show
+ * a right-click context menu on desktop.
+ */
+@Composable
+internal fun PostActionsContextMenu(
+  postLink: String,
+  postRead: Boolean,
+  config: PostMetadataConfig,
+  expanded: Boolean,
+  onDismissRequest: () -> Unit,
+  togglePostReadClick: () -> Unit,
+  modifier: Modifier = Modifier,
+  alwaysShowMarkAsUnread: Boolean = false,
+  hideMarkAsOptions: Boolean = false,
+) {
+  val coroutineScope = rememberCoroutineScope()
+
+  DropdownMenu(
+    modifier = modifier.width(IntrinsicSize.Min),
+    expanded = expanded,
+    onDismissRequest = onDismissRequest,
+  ) {
+    PostActionsMenuItems(
+      postLink = postLink,
+      postRead = postRead,
+      config = config,
+      alwaysShowMarkAsUnread = alwaysShowMarkAsUnread,
+      hideMarkAsOptions = hideMarkAsOptions,
+      coroutineScope = coroutineScope,
+      onDropdownChange = { if (!it) onDismissRequest() },
+      togglePostReadClick = togglePostReadClick,
+    )
+  }
+}
+
+@Composable
+private fun PostActionsMenuItems(
+  postLink: String,
+  postRead: Boolean,
+  config: PostMetadataConfig,
+  alwaysShowMarkAsUnread: Boolean,
+  hideMarkAsOptions: Boolean,
+  coroutineScope: CoroutineScope,
+  onDropdownChange: (Boolean) -> Unit,
+  togglePostReadClick: () -> Unit,
+) {
+  if (config.showToggleReadUnreadOption && !hideMarkAsOptions) {
+    val markAsReadLabel =
+      if (alwaysShowMarkAsUnread || postRead) {
+        stringResource(Res.string.markAsUnRead)
+      } else {
+        stringResource(Res.string.markAsRead)
+      }
+
+    DropdownMenuItem(
+      modifier = Modifier.fillMaxWidth(),
+      leadingIcon =
+        if (alwaysShowMarkAsUnread || postRead) {
+          TwineIcons.VisibilityOff
+        } else {
+          TwineIcons.Visibility
+        },
+      text = markAsReadLabel,
+      contentDescription = markAsReadLabel,
+      onClick = {
+        coroutineScope.launch {
+          onDropdownChange(false)
+          togglePostReadClick()
+        }
+      },
+    )
+  }
+
+  val linkHandler = LocalLinkHandler.current
+  val openWebsiteLabel = stringResource(Res.string.openWebsite)
+
+  DropdownMenuItem(
+    modifier = Modifier.fillMaxWidth(),
+    leadingIcon = TwineIcons.Website,
+    text = openWebsiteLabel,
+    contentDescription = openWebsiteLabel,
+    onClick = {
+      coroutineScope.launch {
+        onDropdownChange(false)
+        delay(150)
+        linkHandler.openLink(postLink)
+      }
+    },
+  )
+
+  val shareHandler = LocalShareHandler.current
+  val shareLabel = stringResource(Res.string.share)
+
+  DropdownMenuItem(
+    modifier = Modifier.fillMaxWidth(),
+    leadingIcon = TwineIcons.Share,
+    text = shareLabel,
+    contentDescription = shareLabel,
+    onClick = {
+      coroutineScope.launch {
+        onDropdownChange(false)
+        delay(150)
+        shareHandler.share(postLink)
+      }
+    },
+  )
 }
 
 @Immutable

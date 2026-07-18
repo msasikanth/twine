@@ -49,6 +49,8 @@ import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
+import dev.sasikanth.rss.reader.resources.icons.Platform
+import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsState
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
@@ -192,24 +194,37 @@ private fun SettingsBehaviorContent(
           )
         }
 
-        item {
-          SettingsSwitchItem(
-            title = stringResource(Res.string.settingsBrowserTypeTitle),
-            subtitle = stringResource(Res.string.settingsBrowserTypeSubtitle),
-            checked = state.browserType == BrowserType.InApp,
-            onValueChanged = { useInAppBrowser ->
-              val newBrowserType =
-                if (useInAppBrowser) {
-                  BrowserType.InApp
-                } else {
-                  BrowserType.Default
-                }
-              dispatch(SettingsEvent.UpdateBrowserType(newBrowserType))
-            },
-          )
+        if (platform !is Platform.Desktop) {
+          item {
+            SettingsSwitchItem(
+              title = stringResource(Res.string.settingsBrowserTypeTitle),
+              subtitle = stringResource(Res.string.settingsBrowserTypeSubtitle),
+              checked = state.browserType == BrowserType.InApp,
+              onValueChanged = { useInAppBrowser ->
+                val newBrowserType =
+                  if (useInAppBrowser) {
+                    BrowserType.InApp
+                  } else {
+                    BrowserType.Default
+                  }
+                dispatch(SettingsEvent.UpdateBrowserType(newBrowserType))
+              },
+            )
+          }
         }
 
         item { SubHeader(text = stringResource(Res.string.settingsHeaderBehaviour)) }
+
+        item {
+          SettingsSwitchItem(
+            title = stringResource(Res.string.settingsConfirmMarkAllAsReadTitle),
+            subtitle = stringResource(Res.string.settingsConfirmMarkAllAsReadSubtitle),
+            checked = state.confirmMarkAllAsRead,
+            onValueChanged = { newValue ->
+              dispatch(SettingsEvent.ToggleConfirmMarkAllAsRead(newValue))
+            },
+          )
+        }
 
         item {
           MarkAsReadOnSettingItem(articleMarkAsReadOn = state.markAsReadOn) {
@@ -228,17 +243,6 @@ private fun SettingsBehaviorContent(
               onThresholdChanged = { dispatch(SettingsEvent.AudioMarkAsReadThresholdChanged(it)) },
             )
           }
-        }
-
-        item {
-          SettingsSwitchItem(
-            title = stringResource(Res.string.settingsConfirmMarkAllAsReadTitle),
-            subtitle = stringResource(Res.string.settingsConfirmMarkAllAsReadSubtitle),
-            checked = state.confirmMarkAllAsRead,
-            onValueChanged = { newValue ->
-              dispatch(SettingsEvent.ToggleConfirmMarkAllAsRead(newValue))
-            },
-          )
         }
 
         item {

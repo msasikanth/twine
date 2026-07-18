@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -55,6 +56,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy.Companion.Offscreen
@@ -63,6 +65,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import dev.sasikanth.rss.reader.components.image.AsyncImage
@@ -73,6 +76,8 @@ import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.formatRelativeTime
+import dev.sasikanth.rss.reader.utils.onDesktopContextMenu
+import kotlin.math.roundToInt
 
 private val postListPadding: PaddingValues
   @Composable
@@ -118,89 +123,115 @@ internal fun PostListItem(
       else Constants.ITEM_UNREAD_ALPHA
     )
   var showDropdown by remember { mutableStateOf(false) }
+  var contextMenuOffset by remember { mutableStateOf<Offset?>(null) }
   val showImage = !(item.imageUrl.isNullOrBlank())
   val shouldBlockImage = LocalBlockImage.current
   val highlightColor by
     animateColorAsState(
-      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest else Color.Transparent
+      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest
+      else AppTheme.colorScheme.backdrop
     )
 
-  Column(
-    modifier =
-      Modifier.then(modifier)
-        .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-        .padding(postListPadding)
-        .clip(RoundedCornerShape(24.dp))
-        .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
-        .background(highlightColor, RoundedCornerShape(24.dp))
-        .graphicsLayer { this.alpha = alpha }
-        .semantics { contentDescription = item.title.ifBlank { item.description } }
-        .padding(horizontal = 24.dp, vertical = 8.dp)
-  ) {
-    Row(modifier = Modifier.padding(top = 8.dp)) {
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
-          style = MaterialTheme.typography.titleMedium,
-          text = item.title.ifBlank { item.description },
-          color = AppTheme.colorScheme.onSurface,
-          maxLines = 2,
-          overflow = TextOverflow.Ellipsis,
-        )
-
-        if (item.description.isNotBlank()) {
-          Spacer(Modifier.requiredHeight(4.dp))
-
+  Box(modifier = Modifier.then(modifier)) {
+    Column(
+      modifier =
+        Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+          .padding(postListPadding)
+          .clip(RoundedCornerShape(24.dp))
+          .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
+          .onDesktopContextMenu { offset ->
+            contextMenuOffset = offset
+            showDropdown = true
+          }
+          .background(highlightColor, RoundedCornerShape(24.dp))
+          .graphicsLayer { this.alpha = alpha }
+          .semantics { contentDescription = item.title.ifBlank { item.description } }
+          .padding(horizontal = 24.dp, vertical = 8.dp)
+    ) {
+      Row(modifier = Modifier.padding(top = 8.dp)) {
+        Column(modifier = Modifier.weight(1f)) {
           Text(
             modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            text = item.description,
-            color = AppTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.titleMedium,
+            text = item.title.ifBlank { item.description },
+            color = AppTheme.colorScheme.onSurface,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
           )
-        }
-      }
 
-      if (!shouldBlockImage) {
-        item.imageUrl?.let { url ->
-          Box(modifier = Modifier.requiredSize(64.dp), contentAlignment = Alignment.Center) {
-            AsyncImage(
-              url = url,
-              modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(25)),
-              contentDescription = null,
-              contentScale = ContentScale.Crop,
+          if (item.description.isNotBlank()) {
+            Spacer(Modifier.requiredHeight(4.dp))
+
+            Text(
+              modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
+              style = MaterialTheme.typography.bodyMedium,
+              text = item.description,
+              color = AppTheme.colorScheme.onSurfaceVariant,
+              maxLines = 2,
+              overflow = TextOverflow.Ellipsis,
             )
           }
         }
+
+        if (!shouldBlockImage) {
+          item.imageUrl?.let { url ->
+            Box(modifier = Modifier.requiredSize(64.dp), contentAlignment = Alignment.Center) {
+              AsyncImage(
+                url = url,
+                modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(25)),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+              )
+            }
+          }
+        }
       }
+
+      Spacer(Modifier.height(4.dp))
+
+      val relativeTimestamp = item.date.formatRelativeTime()
+      PostActionBar(
+        feedName = item.feedName,
+        feedIcon = item.feedIcon,
+        feedHomepageLink = item.feedHomepageLink,
+        showFeedFavIcon = item.showFeedFavIcon,
+        postRead = readStatus,
+        postRelativeTimestamp = relativeTimestamp,
+        postLink = item.link,
+        postBookmarked = item.bookmarked,
+        commentsLink = item.commentsLink,
+        postReadingTimeEstimate = item.feedContentReadingTime ?: 0,
+        onBookmarkClick = onPostBookmarkClick,
+        onCommentsClick = onPostCommentsClick,
+        onTogglePostReadClick = {
+          readStatus = !readStatus
+          updatePostReadStatus(readStatus)
+        },
+        showDropdown = contextMenuOffset == null && showDropdown,
+        onDropdownChange = { showDropdown = it },
+        config = postMetadataConfig,
+        onSourceClick = onPostSourceClick,
+      )
     }
 
-    Spacer(Modifier.height(4.dp))
-
-    val relativeTimestamp = item.date.formatRelativeTime()
-    PostActionBar(
-      feedName = item.feedName,
-      feedIcon = item.feedIcon,
-      feedHomepageLink = item.feedHomepageLink,
-      showFeedFavIcon = item.showFeedFavIcon,
-      postRead = readStatus,
-      postRelativeTimestamp = relativeTimestamp,
-      postLink = item.link,
-      postBookmarked = item.bookmarked,
-      commentsLink = item.commentsLink,
-      postReadingTimeEstimate = item.feedContentReadingTime ?: 0,
-      onBookmarkClick = onPostBookmarkClick,
-      onCommentsClick = onPostCommentsClick,
-      onTogglePostReadClick = {
-        readStatus = !readStatus
-        updatePostReadStatus(readStatus)
-      },
-      showDropdown = showDropdown,
-      onDropdownChange = { showDropdown = it },
-      config = postMetadataConfig,
-      onSourceClick = onPostSourceClick,
-    )
+    contextMenuOffset?.let { offset ->
+      Box(modifier = Modifier.offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }) {
+        PostActionsContextMenu(
+          postLink = item.link,
+          postRead = readStatus,
+          config = postMetadataConfig,
+          expanded = showDropdown,
+          onDismissRequest = {
+            showDropdown = false
+            contextMenuOffset = null
+          },
+          togglePostReadClick = {
+            readStatus = !readStatus
+            updatePostReadStatus(readStatus)
+          },
+        )
+      }
+    }
   }
 }
 
@@ -224,76 +255,102 @@ internal fun SimplePostListItem(
       else Constants.ITEM_UNREAD_ALPHA
     )
   var showDropdown by remember { mutableStateOf(false) }
+  var contextMenuOffset by remember { mutableStateOf<Offset?>(null) }
   val showImage = !(item.imageUrl.isNullOrBlank())
   val shouldBlockImage = LocalBlockImage.current
   val highlightColor by
     animateColorAsState(
-      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest else Color.Transparent
+      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest
+      else AppTheme.colorScheme.backdrop
     )
 
-  Column(
-    modifier =
-      Modifier.then(modifier)
-        .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-        .padding(postListPadding)
-        .clip(RoundedCornerShape(24.dp))
-        .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
-        .background(highlightColor, RoundedCornerShape(24.dp))
-        .graphicsLayer { this.alpha = alpha }
-        .semantics { contentDescription = item.title.ifBlank { item.description } }
-        .padding(horizontal = 24.dp, vertical = 4.dp)
-  ) {
-    Row(modifier = Modifier.padding(top = 8.dp)) {
-      Column(modifier = Modifier.padding(vertical = 4.dp).weight(1f)) {
-        Text(
-          modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
-          style = MaterialTheme.typography.titleMedium,
-          text = item.title.ifBlank { item.description },
-          color = AppTheme.colorScheme.onSurface,
-          maxLines = 2,
-          overflow = TextOverflow.Ellipsis,
-        )
-      }
+  Box(modifier = Modifier.then(modifier)) {
+    Column(
+      modifier =
+        Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+          .padding(postListPadding)
+          .clip(RoundedCornerShape(24.dp))
+          .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
+          .onDesktopContextMenu { offset ->
+            contextMenuOffset = offset
+            showDropdown = true
+          }
+          .background(highlightColor, RoundedCornerShape(24.dp))
+          .graphicsLayer { this.alpha = alpha }
+          .semantics { contentDescription = item.title.ifBlank { item.description } }
+          .padding(horizontal = 24.dp, vertical = 4.dp)
+    ) {
+      Row(modifier = Modifier.padding(top = 8.dp)) {
+        Column(modifier = Modifier.padding(vertical = 4.dp).weight(1f)) {
+          Text(
+            modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
+            style = MaterialTheme.typography.titleMedium,
+            text = item.title.ifBlank { item.description },
+            color = AppTheme.colorScheme.onSurface,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
 
-      if (!shouldBlockImage) {
-        item.imageUrl?.let { url ->
-          Box(modifier = Modifier.requiredSize(48.dp), contentAlignment = Alignment.Center) {
-            AsyncImage(
-              url = url,
-              modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(25)),
-              contentDescription = null,
-              contentScale = ContentScale.Crop,
-            )
+        if (!shouldBlockImage) {
+          item.imageUrl?.let { url ->
+            Box(modifier = Modifier.requiredSize(48.dp), contentAlignment = Alignment.Center) {
+              AsyncImage(
+                url = url,
+                modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(25)),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+              )
+            }
           }
         }
       }
+
+      Spacer(Modifier.height(4.dp))
+
+      val relativeTimestamp = item.date.formatRelativeTime()
+      PostActionBar(
+        feedName = item.feedName,
+        feedIcon = item.feedIcon,
+        feedHomepageLink = item.feedHomepageLink,
+        showFeedFavIcon = item.showFeedFavIcon,
+        postRead = readStatus,
+        postRelativeTimestamp = relativeTimestamp,
+        postLink = item.link,
+        postBookmarked = item.bookmarked,
+        commentsLink = item.commentsLink,
+        postReadingTimeEstimate = item.feedContentReadingTime ?: 0,
+        onBookmarkClick = onPostBookmarkClick,
+        onCommentsClick = onPostCommentsClick,
+        onTogglePostReadClick = {
+          readStatus = !readStatus
+          updatePostReadStatus(readStatus)
+        },
+        showDropdown = contextMenuOffset == null && showDropdown,
+        onDropdownChange = { showDropdown = it },
+        config = postMetadataConfig,
+        onSourceClick = onPostSourceClick,
+      )
     }
 
-    Spacer(Modifier.height(4.dp))
-
-    val relativeTimestamp = item.date.formatRelativeTime()
-    PostActionBar(
-      feedName = item.feedName,
-      feedIcon = item.feedIcon,
-      feedHomepageLink = item.feedHomepageLink,
-      showFeedFavIcon = item.showFeedFavIcon,
-      postRead = readStatus,
-      postRelativeTimestamp = relativeTimestamp,
-      postLink = item.link,
-      postBookmarked = item.bookmarked,
-      commentsLink = item.commentsLink,
-      postReadingTimeEstimate = item.feedContentReadingTime ?: 0,
-      onBookmarkClick = onPostBookmarkClick,
-      onCommentsClick = onPostCommentsClick,
-      onTogglePostReadClick = {
-        readStatus = !readStatus
-        updatePostReadStatus(readStatus)
-      },
-      showDropdown = showDropdown,
-      onDropdownChange = { showDropdown = it },
-      config = postMetadataConfig,
-      onSourceClick = onPostSourceClick,
-    )
+    contextMenuOffset?.let { offset ->
+      Box(modifier = Modifier.offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }) {
+        PostActionsContextMenu(
+          postLink = item.link,
+          postRead = readStatus,
+          config = postMetadataConfig,
+          expanded = showDropdown,
+          onDismissRequest = {
+            showDropdown = false
+            contextMenuOffset = null
+          },
+          togglePostReadClick = {
+            readStatus = !readStatus
+            updatePostReadStatus(readStatus)
+          },
+        )
+      }
+    }
   }
 }
 
@@ -316,74 +373,100 @@ internal fun CompactPostListItem(
       else Constants.ITEM_UNREAD_ALPHA
     )
   var showDropdown by remember { mutableStateOf(false) }
+  var contextMenuOffset by remember { mutableStateOf<Offset?>(null) }
   val highlightColor by
     animateColorAsState(
-      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest else Color.Transparent
+      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest
+      else AppTheme.colorScheme.backdrop
     )
 
-  Row(
-    verticalAlignment = Alignment.CenterVertically,
-    modifier =
-      Modifier.then(modifier)
-        .clip(RoundedCornerShape(24.dp))
-        .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
-        .background(highlightColor, RoundedCornerShape(24.dp))
-        .padding(compactPostListPadding)
-        .graphicsLayer { this.alpha = alpha },
-  ) {
-    Box(modifier = Modifier.requiredSize(24.dp).graphicsLayer(compositingStrategy = Offscreen)) {
-      FeedIcon(
-        icon = item.feedIcon,
-        homepageLink = item.feedHomepageLink,
-        showFeedFavIcon = item.showFeedFavIcon,
-        contentDescription = null,
-        modifier =
-          Modifier.requiredSize(20.dp)
-            .border(1.dp, AppTheme.colorScheme.outlineVariant, RoundedCornerShape(25))
-            .align(Alignment.Center),
+  Box(modifier = Modifier.then(modifier)) {
+    Row(
+      verticalAlignment = Alignment.CenterVertically,
+      modifier =
+        Modifier.clip(RoundedCornerShape(24.dp))
+          .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
+          .onDesktopContextMenu { offset ->
+            contextMenuOffset = offset
+            showDropdown = true
+          }
+          .background(highlightColor, RoundedCornerShape(24.dp))
+          .padding(compactPostListPadding)
+          .graphicsLayer { this.alpha = alpha },
+    ) {
+      Box(modifier = Modifier.requiredSize(24.dp).graphicsLayer(compositingStrategy = Offscreen)) {
+        FeedIcon(
+          icon = item.feedIcon,
+          homepageLink = item.feedHomepageLink,
+          showFeedFavIcon = item.showFeedFavIcon,
+          contentDescription = null,
+          modifier =
+            Modifier.requiredSize(20.dp)
+              .border(1.dp, AppTheme.colorScheme.outlineVariant, RoundedCornerShape(25))
+              .align(Alignment.Center),
+        )
+
+        if (!item.read) {
+          Box(
+            modifier =
+              Modifier.align(Alignment.TopEnd)
+                .requiredSize(8.dp)
+                .dropShadow(CircleShape) {
+                  color = Color.Black
+                  spread = 1.dp.toPx()
+                  blendMode = BlendMode.DstOut
+                }
+                .background(MaterialTheme.colorScheme.error, CircleShape)
+          )
+        }
+      }
+
+      Spacer(Modifier.requiredWidth(16.dp))
+
+      Text(
+        text = item.title.ifBlank { item.description },
+        style = MaterialTheme.typography.titleMedium,
+        color = AppTheme.colorScheme.onSurface,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.weight(1f),
       )
 
-      if (!item.read) {
-        Box(
-          modifier =
-            Modifier.align(Alignment.TopEnd)
-              .requiredSize(8.dp)
-              .dropShadow(CircleShape) {
-                color = Color.Black
-                spread = 1.dp.toPx()
-                blendMode = BlendMode.DstOut
-              }
-              .background(MaterialTheme.colorScheme.error, CircleShape)
-        )
+      Spacer(Modifier.requiredWidth(16.dp))
+
+      PostActions(
+        postLink = item.link,
+        postBookmarked = item.bookmarked,
+        postRead = readStatus,
+        config = postMetadataConfig,
+        commentsLink = item.commentsLink,
+        showDropdown = contextMenuOffset == null && showDropdown,
+        onDropdownChange = { showDropdown = it },
+        onBookmarkClick = onPostBookmarkClick,
+        onCommentsClick = onPostCommentsClick,
+      ) {
+        readStatus = !readStatus
+        updatePostReadStatus(readStatus)
       }
     }
 
-    Spacer(Modifier.requiredWidth(16.dp))
-
-    Text(
-      text = item.title.ifBlank { item.description },
-      style = MaterialTheme.typography.titleMedium,
-      color = AppTheme.colorScheme.onSurface,
-      maxLines = 2,
-      overflow = TextOverflow.Ellipsis,
-      modifier = Modifier.weight(1f),
-    )
-
-    Spacer(Modifier.requiredWidth(16.dp))
-
-    PostActions(
-      postLink = item.link,
-      postBookmarked = item.bookmarked,
-      postRead = readStatus,
-      config = postMetadataConfig,
-      commentsLink = item.commentsLink,
-      showDropdown = showDropdown,
-      onDropdownChange = { showDropdown = it },
-      onBookmarkClick = onPostBookmarkClick,
-      onCommentsClick = onPostCommentsClick,
-    ) {
-      readStatus = !readStatus
-      updatePostReadStatus(readStatus)
+    contextMenuOffset?.let { offset ->
+      Box(modifier = Modifier.offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }) {
+        PostActionsContextMenu(
+          postLink = item.link,
+          postRead = readStatus,
+          config = postMetadataConfig,
+          expanded = showDropdown,
+          onDismissRequest = {
+            showDropdown = false
+            contextMenuOffset = null
+          },
+          togglePostReadClick = {
+            readStatus = !readStatus
+            updatePostReadStatus(readStatus)
+          },
+        )
+      }
     }
   }
 }
