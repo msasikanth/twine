@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
@@ -42,11 +43,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.IconButton
@@ -59,6 +62,8 @@ import dev.sasikanth.rss.reader.resources.icons.PinFilled
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
+import dev.sasikanth.rss.reader.utils.onDesktopContextMenu
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -84,6 +89,8 @@ internal fun FeedListItem(
         Color.Transparent
       }
     )
+  var showDropdownMenu by remember { mutableStateOf(false) }
+  var contextMenuOffset by remember { mutableStateOf<Offset?>(null) }
 
   Box(
     modifier =
@@ -107,6 +114,16 @@ internal fun FeedListItem(
             onFeedSelected(feed)
           },
         )
+        .let { base ->
+          if (dropdownMenuContent != null && !isInMultiSelectMode) {
+            base.onDesktopContextMenu { offset ->
+              contextMenuOffset = offset
+              showDropdownMenu = true
+            }
+          } else {
+            base
+          }
+        }
   ) {
     Row(
       modifier = Modifier.padding(start = 12.dp, top = 8.dp, end = 8.dp, bottom = 8.dp),
@@ -155,19 +172,44 @@ internal fun FeedListItem(
 
       if (!isInMultiSelectMode && dropdownMenuContent != null) {
         Box {
-          var showDropdownMenu by remember { mutableStateOf(false) }
-
           IconButton(
             icon = TwineIcons.MoreVert,
             contentDescription = null,
-            onClick = { showDropdownMenu = true },
+            onClick = {
+              contextMenuOffset = null
+              showDropdownMenu = true
+            },
           )
 
+          if (contextMenuOffset == null) {
+            DropdownMenu(
+              expanded = showDropdownMenu,
+              onDismissRequest = { showDropdownMenu = false },
+            ) {
+              dropdownMenuContent { showDropdownMenu = false }
+            }
+          }
+        }
+      }
+    }
+
+    val contextMenu = dropdownMenuContent
+    if (contextMenu != null) {
+      contextMenuOffset?.let { offset ->
+        Box(
+          modifier = Modifier.offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
+        ) {
           DropdownMenu(
             expanded = showDropdownMenu,
-            onDismissRequest = { showDropdownMenu = false },
+            onDismissRequest = {
+              showDropdownMenu = false
+              contextMenuOffset = null
+            },
           ) {
-            dropdownMenuContent { showDropdownMenu = false }
+            contextMenu {
+              showDropdownMenu = false
+              contextMenuOffset = null
+            }
           }
         }
       }
