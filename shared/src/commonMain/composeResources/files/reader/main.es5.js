@@ -324,6 +324,25 @@ function deduplicateImages(doc) {
   }
 }
 
+/**
+ * Readability treats any aria-hidden="true" node as invisible and deletes
+ * it outright (see its _isProbablyVisible check), but aria-hidden only
+ * affects the accessibility tree, never visual rendering. Sites commonly
+ * mark a duplicate icon-only link (e.g. an image wrapped in a link) as
+ * aria-hidden next to a more descriptive link, for screen readers -
+ * content that is fully visible to sighted users. Stripping the attribute
+ * before Readability runs avoids losing that visible content, while
+ * Readability's separate display/visibility/hidden-attribute checks still
+ * catch content that is actually hidden.
+ */
+function stripAriaHidden(doc) {
+  var hiddenNodes = doc.querySelectorAll("[aria-hidden]");
+  for (var i = 0; i < hiddenNodes.length; i++) {
+    hiddenNodes[i].removeAttribute("aria-hidden");
+  }
+}
+
+
 function getImageCaption(markdown) {
   var captionPattern = /!\[[^\]]*\]\([^\s)]+\s+"([^"]*)"\)/;
   var match = markdown.match(captionPattern);
@@ -399,6 +418,7 @@ function parseReaderContent(link, bannerImage, html) {
         }
 
         removeFirstH1(doc);
+        stripAriaHidden(doc);
         processIFrames(doc);
         processNoScriptImages(doc);
         transformShredditElements(doc);
