@@ -237,6 +237,7 @@
   <string name="themeVariantCoral" translatable="false">Coral</string>
   <string name="themeVariantRaspberry" translatable="false">Raspberry</string>
   <string name="themeVariantSkyline" translatable="false">Skyline</string>
+  <string name="themeVariantLavender" translatable="false">Lavender</string>
   <string name="postsFilter">Posts filter</string>
   <string name="postsSortBy">Sort by</string>
   <string name="postsSortByPostDate">Post date</string>
