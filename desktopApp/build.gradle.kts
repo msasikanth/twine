@@ -38,6 +38,10 @@ compose.desktop {
   application {
     mainClass = "dev.sasikanth.rss.reader.MainKt"
 
+    if (System.getProperty("os.name").contains("Mac")) {
+      jvmArgs("-Xdock:name=Twine")
+    }
+
     nativeDistributions {
       targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
       packageName = "Twine"
