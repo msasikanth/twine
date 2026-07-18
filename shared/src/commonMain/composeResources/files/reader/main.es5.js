@@ -210,7 +210,12 @@ function normalizeUrl(url, baseURI) {
 
 function getBestSrcFromSrcset(srcset) {
   if (!srcset) return null;
-  var parts = srcset.split(",");
+  // Split on ", " rather than any comma: some CDNs (e.g. Wired's image
+  // transforms) put literal commas inside the URL itself
+  // (".../w_640,c_limit/photo.jpg"), and a bare comma-split shreds those
+  // URLs apart. Candidates are conventionally comma+whitespace separated,
+  // while in-URL commas are never followed by whitespace.
+  var parts = srcset.split(/,\s+/);
   var bestSrc = null;
   var maxVal = -1;
 
@@ -386,10 +391,15 @@ function parseReaderContent(link, bannerImage, html) {
             var titlePart = title ? ' "' + title + '"' : "";
             var markdown = "![" + alt + "](" + src + titlePart + ")";
 
-            if (node.parentNode && node.parentNode.nodeName !== "A") {
-              return "\n\n" + markdown + "\n\n";
+            // Check the whole ancestor chain, not just the direct parent:
+            // sites commonly wrap the img in <picture> or a similar tag
+            // before the enclosing <a>. Forcing blank lines around the
+            // image here would break the "linked-image" rule's
+            // surrounding [...](href) brackets.
+            if (node.closest("a")) {
+              return markdown;
             }
-            return markdown;
+            return "\n\n" + markdown + "\n\n";
           }
         });
 
