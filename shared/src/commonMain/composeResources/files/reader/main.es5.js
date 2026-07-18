@@ -210,7 +210,12 @@ function normalizeUrl(url, baseURI) {
 
 function getBestSrcFromSrcset(srcset) {
   if (!srcset) return null;
-  var parts = srcset.split(",");
+  // Split on ", " rather than any comma: some CDNs (e.g. Wired's image
+  // transforms) put literal commas inside the URL itself
+  // (".../w_640,c_limit/photo.jpg"), and a bare comma-split shreds those
+  // URLs apart. Candidates are conventionally comma+whitespace separated,
+  // while in-URL commas are never followed by whitespace.
+  var parts = srcset.split(/,\s+/);
   var bestSrc = null;
   var maxVal = -1;
 
@@ -324,6 +329,95 @@ function deduplicateImages(doc) {
   }
 }
 
+/**
+ * Readability treats any aria-hidden="true" node as invisible and deletes
+ * it outright (see its _isProbablyVisible check), but aria-hidden only
+ * affects the accessibility tree, never visual rendering. Sites commonly
+ * mark a duplicate icon-only link (e.g. an image wrapped in a link) as
+ * aria-hidden next to a more descriptive link, for screen readers -
+ * content that is fully visible to sighted users. Stripping the attribute
+ * before Readability runs avoids losing that visible content, while
+ * Readability's separate display/visibility/hidden-attribute checks still
+ * catch content that is actually hidden.
+ */
+function stripAriaHidden(doc) {
+  var hiddenNodes = doc.querySelectorAll("[aria-hidden]");
+  for (var i = 0; i < hiddenNodes.length; i++) {
+    hiddenNodes[i].removeAttribute("aria-hidden");
+  }
+}
+
+function normalizeHeadingText(text) {
+  return (text || "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+/**
+ * True when every node between two sibling headings is empty/whitespace
+ * text or a non-media element with no text content (e.g. an empty anchor
+ * permalink icon). Used to distinguish a stray duplicate heading from a
+ * legitimately repeated section title that has real content in between.
+ */
+function siblingContentIsInsubstantial(previous, current) {
+  if (previous.parentNode !== current.parentNode) return false;
+
+  var node = previous.nextSibling;
+  while (node && node !== current) {
+    if (node.nodeType === 1) {
+      var tagName = node.tagName;
+      if (
+        tagName === "IMG" || tagName === "IFRAME" || tagName === "VIDEO" ||
+        tagName === "AUDIO" || tagName === "TABLE" || tagName === "PICTURE"
+      ) {
+        return false;
+      }
+      if (node.textContent && node.textContent.replace(/\s+/g, "") !== "") {
+        return false;
+      }
+    } else if (node.nodeType === 3 && node.textContent.replace(/\s+/g, "") !== "") {
+      return false;
+    }
+    node = node.nextSibling;
+  }
+
+  return node === current;
+}
+
+/**
+ * Collapses a heading that is an immediate sibling duplicate of the
+ * previously kept heading (same normalized text, nothing substantial in
+ * between). Deliberately scoped to direct siblings only, so legitimately
+ * repeated section titles elsewhere in the article (FAQ/digest-style
+ * posts) are left untouched.
+ */
+function dedupeAdjacentHeadings(doc) {
+  var headings = Array.prototype.slice.call(
+    doc.querySelectorAll("h1, h2, h3, h4, h5, h6")
+  );
+
+  var lastKept = null;
+  for (var i = 0; i < headings.length; i++) {
+    var heading = headings[i];
+    if (!heading.parentNode) continue;
+
+    if (lastKept) {
+      var headingText = normalizeHeadingText(heading.textContent);
+      var lastKeptText = normalizeHeadingText(lastKept.textContent);
+
+      if (
+        headingText &&
+        headingText === lastKeptText &&
+        siblingContentIsInsubstantial(lastKept, heading)
+      ) {
+        heading.remove();
+        continue;
+      }
+    }
+
+    lastKept = heading;
+  }
+}
+
+
 function getImageCaption(markdown) {
   var captionPattern = /!\[[^\]]*\]\([^\s)]+\s+"([^"]*)"\)/;
   var match = markdown.match(captionPattern);
@@ -367,10 +461,15 @@ function parseReaderContent(link, bannerImage, html) {
             var titlePart = title ? ' "' + title + '"' : "";
             var markdown = "![" + alt + "](" + src + titlePart + ")";
 
-            if (node.parentNode && node.parentNode.nodeName !== "A") {
-              return "\n\n" + markdown + "\n\n";
+            // Check the whole ancestor chain, not just the direct parent:
+            // sites commonly wrap the img in <picture> or a similar tag
+            // before the enclosing <a>. Forcing blank lines around the
+            // image here would break the "linked-image" rule's
+            // surrounding [...](href) brackets.
+            if (node.closest("a")) {
+              return markdown;
             }
-            return markdown;
+            return "\n\n" + markdown + "\n\n";
           }
         });
 
@@ -399,6 +498,7 @@ function parseReaderContent(link, bannerImage, html) {
         }
 
         removeFirstH1(doc);
+        stripAriaHidden(doc);
         processIFrames(doc);
         processNoScriptImages(doc);
         transformShredditElements(doc);
@@ -411,6 +511,7 @@ function parseReaderContent(link, bannerImage, html) {
 
         removeReadMoreLinks(doc);
         deduplicateImages(doc);
+        dedupeAdjacentHeadings(doc);
 
         var reader = new Readability(doc, {
             charThreshold: 0,
