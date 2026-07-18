@@ -347,6 +347,76 @@ function stripAriaHidden(doc) {
   }
 }
 
+function normalizeHeadingText(text) {
+  return (text || "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+/**
+ * True when every node between two sibling headings is empty/whitespace
+ * text or a non-media element with no text content (e.g. an empty anchor
+ * permalink icon). Used to distinguish a stray duplicate heading from a
+ * legitimately repeated section title that has real content in between.
+ */
+function siblingContentIsInsubstantial(previous, current) {
+  if (previous.parentNode !== current.parentNode) return false;
+
+  var node = previous.nextSibling;
+  while (node && node !== current) {
+    if (node.nodeType === 1) {
+      var tagName = node.tagName;
+      if (
+        tagName === "IMG" || tagName === "IFRAME" || tagName === "VIDEO" ||
+        tagName === "AUDIO" || tagName === "TABLE" || tagName === "PICTURE"
+      ) {
+        return false;
+      }
+      if (node.textContent && node.textContent.replace(/\s+/g, "") !== "") {
+        return false;
+      }
+    } else if (node.nodeType === 3 && node.textContent.replace(/\s+/g, "") !== "") {
+      return false;
+    }
+    node = node.nextSibling;
+  }
+
+  return node === current;
+}
+
+/**
+ * Collapses a heading that is an immediate sibling duplicate of the
+ * previously kept heading (same normalized text, nothing substantial in
+ * between). Deliberately scoped to direct siblings only, so legitimately
+ * repeated section titles elsewhere in the article (FAQ/digest-style
+ * posts) are left untouched.
+ */
+function dedupeAdjacentHeadings(doc) {
+  var headings = Array.prototype.slice.call(
+    doc.querySelectorAll("h1, h2, h3, h4, h5, h6")
+  );
+
+  var lastKept = null;
+  for (var i = 0; i < headings.length; i++) {
+    var heading = headings[i];
+    if (!heading.parentNode) continue;
+
+    if (lastKept) {
+      var headingText = normalizeHeadingText(heading.textContent);
+      var lastKeptText = normalizeHeadingText(lastKept.textContent);
+
+      if (
+        headingText &&
+        headingText === lastKeptText &&
+        siblingContentIsInsubstantial(lastKept, heading)
+      ) {
+        heading.remove();
+        continue;
+      }
+    }
+
+    lastKept = heading;
+  }
+}
+
 
 function getImageCaption(markdown) {
   var captionPattern = /!\[[^\]]*\]\([^\s)]+\s+"([^"]*)"\)/;
@@ -441,6 +511,7 @@ function parseReaderContent(link, bannerImage, html) {
 
         removeReadMoreLinks(doc);
         deduplicateImages(doc);
+        dedupeAdjacentHeadings(doc);
 
         var reader = new Readability(doc, {
             charThreshold: 0,
