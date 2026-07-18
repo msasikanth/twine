@@ -16,6 +16,7 @@
  */
 package dev.sasikanth.rss.reader.utils
 
+import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,9 +40,14 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isSecondaryPressed
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalDensity
@@ -285,6 +291,26 @@ fun Morph.toComposePath(progress: Float, scale: Float = 1f, path: Path = Path())
 fun Modifier.iosBottomSafeAreaPadding(): Modifier = composed {
   if (platform is Platform.Apple) {
     windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+  } else {
+    this
+  }
+}
+
+/**
+ * Reports the position of a right-click/secondary-click on desktop, so callers can show a context
+ * menu anchored where the user actually clicked instead of at a fixed icon.
+ */
+fun Modifier.onDesktopContextMenu(onContextMenu: (Offset) -> Unit): Modifier = composed {
+  if (platform is Platform.Desktop) {
+    pointerInput(Unit) {
+      awaitEachGesture {
+        val event = awaitPointerEvent(PointerEventPass.Main)
+        if (event.type == PointerEventType.Press && event.buttons.isSecondaryPressed) {
+          event.changes.forEach { it.consume() }
+          onContextMenu(event.changes.first().position)
+        }
+      }
+    }
   } else {
     this
   }
