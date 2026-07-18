@@ -216,6 +216,17 @@ private fun SettingsBehaviorContent(
         item { SubHeader(text = stringResource(Res.string.settingsHeaderBehaviour)) }
 
         item {
+          SettingsSwitchItem(
+            title = stringResource(Res.string.settingsConfirmMarkAllAsReadTitle),
+            subtitle = stringResource(Res.string.settingsConfirmMarkAllAsReadSubtitle),
+            checked = state.confirmMarkAllAsRead,
+            onValueChanged = { newValue ->
+              dispatch(SettingsEvent.ToggleConfirmMarkAllAsRead(newValue))
+            },
+          )
+        }
+
+        item {
           MarkAsReadOnSettingItem(articleMarkAsReadOn = state.markAsReadOn) {
             dispatch(SettingsEvent.MarkAsReadOnChanged(it))
           }
@@ -232,17 +243,6 @@ private fun SettingsBehaviorContent(
               onThresholdChanged = { dispatch(SettingsEvent.AudioMarkAsReadThresholdChanged(it)) },
             )
           }
-        }
-
-        item {
-          SettingsSwitchItem(
-            title = stringResource(Res.string.settingsConfirmMarkAllAsReadTitle),
-            subtitle = stringResource(Res.string.settingsConfirmMarkAllAsReadSubtitle),
-            checked = state.confirmMarkAllAsRead,
-            onValueChanged = { newValue ->
-              dispatch(SettingsEvent.ToggleConfirmMarkAllAsRead(newValue))
-            },
-          )
         }
 
         item {
