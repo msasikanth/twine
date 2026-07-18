@@ -122,7 +122,8 @@ internal fun PostListItem(
   val shouldBlockImage = LocalBlockImage.current
   val highlightColor by
     animateColorAsState(
-      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest else Color.Transparent
+      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest
+      else AppTheme.colorScheme.backdrop
     )
 
   Column(
@@ -228,7 +229,8 @@ internal fun SimplePostListItem(
   val shouldBlockImage = LocalBlockImage.current
   val highlightColor by
     animateColorAsState(
-      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest else Color.Transparent
+      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest
+      else AppTheme.colorScheme.backdrop
     )
 
   Column(
@@ -318,7 +320,8 @@ internal fun CompactPostListItem(
   var showDropdown by remember { mutableStateOf(false) }
   val highlightColor by
     animateColorAsState(
-      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest else Color.Transparent
+      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest
+      else AppTheme.colorScheme.backdrop
     )
 
   Row(
