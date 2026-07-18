@@ -37,6 +37,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -103,6 +106,34 @@ internal fun PinnedSourcesBottomBar(
         .drawBehind { drawRect(colorScheme.bottomSheet) }
         .drawWithContent {
           drawContent()
+
+          val fadeWidth = 24.dp.toPx()
+          if (lazyListState.canScrollBackward) {
+            drawRect(
+              brush =
+                Brush.horizontalGradient(
+                  0f to colorScheme.bottomSheet,
+                  1f to Color.Transparent,
+                  endX = fadeWidth,
+                ),
+              size = size.copy(width = fadeWidth),
+            )
+          }
+
+          if (lazyListState.canScrollForward) {
+            drawRect(
+              brush =
+                Brush.horizontalGradient(
+                  0f to Color.Transparent,
+                  1f to colorScheme.bottomSheet,
+                  startX = size.width - fadeWidth,
+                  endX = size.width,
+                ),
+              topLeft = Offset(size.width - fadeWidth, 0f),
+              size = size.copy(width = fadeWidth),
+            )
+          }
+
           val outline = shape.createOutline(size, layoutDirection, this)
           drawOutline(
             outline = outline,
