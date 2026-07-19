@@ -127,6 +127,13 @@ jobs:
             -Pcompose.desktop.mac.signing.keychain="$HOME/Library/Keychains/mas-build.keychain-db" \
             -Ptwine.macVersion="$MAC_VERSION" \
             -Ptwine.macBuildVersion="$MAC_BUILD_VERSION"
+      - name: Print jpackage logs on failure
+        if: failure()
+        run: |
+          for f in desktopApp/build/compose/logs/packageReleasePkg/*.txt; do
+            echo "== $f =="
+            cat "$f"
+          done
       - name: Upload App Store package
         uses: actions/upload-artifact@v7
         with:
