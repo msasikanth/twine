@@ -4,6 +4,8 @@
 <dict>
 	<key>application-identifier</key>
 	<string>V9V8885383.dev.sasikanth.rss.reader</string>
+	<key>com.apple.developer.team-identifier</key>
+	<string>V9V8885383</string>
 	<key>com.apple.security.app-sandbox</key>
 	<true/>
 	<key>com.apple.security.network.client</key>
