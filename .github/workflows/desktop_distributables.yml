@@ -130,6 +130,8 @@ jobs:
           MAS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MAS_PROVISIONING_PROFILE_BASE64 }}
         run: echo "$MAS_PROVISIONING_PROFILE_BASE64" | base64 --decode > desktopApp/embedded.provisionprofile
       - name: Build Mac App Store package
+        id: build_mas_pkg
+        continue-on-error: true
         env:
           MAS_SIGNING_IDENTITY: ${{ secrets.MAS_SIGNING_IDENTITY }}
         run: |
@@ -140,6 +142,22 @@ jobs:
             -Pcompose.desktop.mac.signing.keychain="$HOME/Library/Keychains/mas-build.keychain-db" \
             -Ptwine.macVersion="$MAC_VERSION" \
             -Ptwine.macBuildVersion="$MAC_BUILD_VERSION"
+      - name: Debug certificate lookup (post-build)
+        env:
+          MAS_SIGNING_IDENTITY: ${{ secrets.MAS_SIGNING_IDENTITY }}
+        run: |
+          KEYCHAIN_PATH="$HOME/Library/Keychains/mas-build.keychain-db"
+          echo "== security find-certificate -c <identity> -a \"$KEYCHAIN_PATH\" =="
+          security find-certificate -c "$MAS_SIGNING_IDENTITY" -a "$KEYCHAIN_PATH"; echo "exit code: $?"
+          echo "== security find-identity -v -p codesigning \"$KEYCHAIN_PATH\" =="
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"; echo "exit code: $?"
+          echo "== security default-keychain =="
+          security default-keychain
+          echo "== security list-keychains =="
+          security list-keychains
+      - name: Fail job if package build failed
+        if: steps.build_mas_pkg.outcome == 'failure'
+        run: exit 1
       - name: Upload App Store package
         uses: actions/upload-artifact@v7
         with:
