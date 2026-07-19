@@ -125,6 +125,7 @@ jobs:
             -Pcompose.desktop.mac.sign=true \
             -Pcompose.desktop.mac.signing.identity="$MAS_SIGNING_IDENTITY" \
             -Pcompose.desktop.mac.signing.keychain="$HOME/Library/Keychains/mas-build.keychain-db" \
+            -Pcompose.desktop.verbose=true \
             -Ptwine.macVersion="$MAC_VERSION" \
             -Ptwine.macBuildVersion="$MAC_BUILD_VERSION"
       - name: Print jpackage logs on failure
