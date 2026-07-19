@@ -117,6 +117,8 @@ jobs:
           MAS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MAS_PROVISIONING_PROFILE_BASE64 }}
         run: echo "$MAS_PROVISIONING_PROFILE_BASE64" | base64 --decode > desktopApp/embedded.provisionprofile
       - name: Build Mac App Store package
+        id: build_mas_pkg
+        continue-on-error: true
         env:
           MAS_SIGNING_IDENTITY: ${{ secrets.MAS_SIGNING_IDENTITY }}
         run: |
@@ -125,9 +127,49 @@ jobs:
             -Pcompose.desktop.mac.sign=true \
             -Pcompose.desktop.mac.signing.identity="$MAS_SIGNING_IDENTITY" \
             -Pcompose.desktop.mac.signing.keychain="$HOME/Library/Keychains/mas-build.keychain-db" \
-            -Pcompose.desktop.verbose=true \
             -Ptwine.macVersion="$MAC_VERSION" \
             -Ptwine.macBuildVersion="$MAC_BUILD_VERSION"
+      - name: Re-sign PKG with installer identity
+        if: steps.build_mas_pkg.outcome == 'failure'
+        env:
+          MAS_SIGNING_IDENTITY: ${{ secrets.MAS_SIGNING_IDENTITY }}
+        run: |
+          MAS_INSTALLER_IDENTITY="${MAS_SIGNING_IDENTITY/Application/Installer}"
+          ARGS_FILE="desktopApp/build/compose/tmp/packageReleasePkg.args.txt"
+
+          # Compose Desktop's jpackage invocation for the PKG bundler passes a
+          # single --mac-signing-key-user-name that gets reused verbatim for both
+          # codesigning the .app (needs an Application-type identity, already
+          # correct) and productbuild's installer signing (needs a distinct
+          # Installer-type identity). There's no Gradle property to supply two
+          # different identities for these two purposes, so patch the already
+          # -generated jpackage args file to use the installer identity for this
+          # remaining step and invoke jpackage directly - the app image is already
+          # correctly signed from the earlier createReleaseDistributable run.
+          python3 - "$ARGS_FILE" "$MAS_SIGNING_IDENTITY" "$MAS_INSTALLER_IDENTITY" <<'PYEOF'
+          import re
+          import sys
+
+          path, old_identity, new_identity = sys.argv[1], sys.argv[2], sys.argv[3]
+
+          with open(path) as f:
+              content = f.read()
+
+          pattern = re.compile(
+              r"(--mac-signing-key-user-name\s+)(\"?)" + re.escape(old_identity) + r"(\"?)"
+          )
+          new_content, count = pattern.subn(
+              lambda m: f"{m.group(1)}{m.group(2)}{new_identity}{m.group(3)}",
+              content,
+          )
+          if count != 1:
+              sys.exit(f"ERROR: expected exactly 1 replacement of the signing identity, found {count}")
+
+          with open(path, "w") as f:
+              f.write(new_content)
+          PYEOF
+
+          "$JAVA_HOME/bin/jpackage" "@$ARGS_FILE"
       - name: Print jpackage logs on failure
         if: failure()
         run: |
