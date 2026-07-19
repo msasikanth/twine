@@ -31,6 +31,10 @@ jobs:
           java-version: 21
           distribution: zulu
           cache: 'gradle'
+      - name: Compute macOS package version
+        run: |
+          echo "MAC_VERSION=$(date -u +%Y.%m.%d)" >> "$GITHUB_ENV"
+          echo "MAC_BUILD_VERSION=${{ github.run_number }}" >> "$GITHUB_ENV"
       - name: Import Developer ID signing certificate
         env:
           MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
@@ -56,7 +60,9 @@ jobs:
             -Pcompose.desktop.mac.signing.identity="$MACOS_SIGNING_IDENTITY" \
             -Pcompose.desktop.mac.notarization.appleID="$MACOS_NOTARIZATION_APPLE_ID" \
             -Pcompose.desktop.mac.notarization.password="$MACOS_NOTARIZATION_PASSWORD" \
-            -Pcompose.desktop.mac.notarization.teamID="$MACOS_NOTARIZATION_TEAM_ID"
+            -Pcompose.desktop.mac.notarization.teamID="$MACOS_NOTARIZATION_TEAM_ID" \
+            -Ptwine.macVersion="$MAC_VERSION" \
+            -Ptwine.macBuildVersion="$MAC_BUILD_VERSION"
       - name: Upload DMG
         uses: actions/upload-artifact@v7
         with:
@@ -71,7 +77,6 @@ jobs:
   build-macos-appstore:
     name: Build macOS App Store package
     runs-on: macos-latest
-    if: github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v6
       - name: Setup JDK 21
@@ -80,6 +85,10 @@ jobs:
           java-version: 21
           distribution: zulu
           cache: 'gradle'
+      - name: Compute macOS package version
+        run: |
+          echo "MAC_VERSION=$(date -u +%Y.%m.%d)" >> "$GITHUB_ENV"
+          echo "MAC_BUILD_VERSION=${{ github.run_number }}" >> "$GITHUB_ENV"
       - name: Import Mac App Store signing certificate
         env:
           MAS_CERTIFICATE_P12: ${{ secrets.MAS_CERTIFICATE_P12 }}
@@ -104,7 +113,9 @@ jobs:
           ./gradlew :desktopApp:packageReleasePkg --no-daemon \
             -Ptwine.macAppStore=true \
             -Pcompose.desktop.mac.sign=true \
-            -Pcompose.desktop.mac.signing.identity="$MAS_SIGNING_IDENTITY"
+            -Pcompose.desktop.mac.signing.identity="$MAS_SIGNING_IDENTITY" \
+            -Ptwine.macVersion="$MAC_VERSION" \
+            -Ptwine.macBuildVersion="$MAC_BUILD_VERSION"
       - name: Upload App Store package
         uses: actions/upload-artifact@v7
         with:

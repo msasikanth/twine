@@ -9,6 +9,7 @@
  *
  */
 
+import java.time.LocalDate
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -57,9 +58,13 @@ compose.desktop {
 
         infoPlist { extraKeysRawXml = macExtraPlistKeys }
 
+        dmgPackageVersion = macPackageVersion
+        dmgPackageBuildVersion = macPackageBuildVersion
+
         if (isMacAppStoreBuild) {
           appStore = true
-          pkgPackageVersion = "1.0.0"
+          pkgPackageVersion = macPackageVersion
+          pkgPackageBuildVersion = macPackageBuildVersion
           entitlementsFile.set(project.file("appstore.entitlements"))
           runtimeEntitlementsFile.set(project.file("appstore-runtime.entitlements"))
           provisioningProfile.set(project.file("embedded.provisionprofile"))
@@ -79,6 +84,16 @@ compose.desktop {
 
 val isMacAppStoreBuild: Boolean
   get() = providers.gradleProperty("twine.macAppStore").getOrElse("false").toBoolean()
+
+val macPackageVersion: String
+  get() {
+    val today = LocalDate.now()
+    val defaultVersion = "%d.%02d.%02d".format(today.year, today.monthValue, today.dayOfMonth)
+    return providers.gradleProperty("twine.macVersion").getOrElse(defaultVersion)
+  }
+
+val macPackageBuildVersion: String
+  get() = providers.gradleProperty("twine.macBuildVersion").getOrElse("1")
 
 val macExtraPlistKeys: String
   get() =
