@@ -124,7 +124,7 @@ jobs:
             -Ptwine.macAppStore=true \
             -Pcompose.desktop.mac.sign=true \
             -Pcompose.desktop.mac.signing.identity="$MAS_SIGNING_IDENTITY" \
-            -Pcompose.desktop.mac.signing.keychain=mas-build.keychain \
+            -Pcompose.desktop.mac.signing.keychain="$HOME/Library/Keychains/mas-build.keychain-db" \
             -Ptwine.macVersion="$MAC_VERSION" \
             -Ptwine.macBuildVersion="$MAC_BUILD_VERSION"
       - name: Upload App Store package
