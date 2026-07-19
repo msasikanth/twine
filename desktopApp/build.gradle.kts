@@ -43,7 +43,7 @@ compose.desktop {
     }
 
     nativeDistributions {
-      targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+      targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Pkg)
       packageName = "Twine"
       packageVersion = "1.0.0"
       modules("java.sql")
@@ -56,6 +56,15 @@ compose.desktop {
         iconFile.set(project.file("icon.icns"))
 
         infoPlist { extraKeysRawXml = macExtraPlistKeys }
+
+        if (isMacAppStoreBuild) {
+          appStore = true
+          pkgPackageVersion = "1.0.0"
+          entitlementsFile.set(project.file("appstore.entitlements"))
+          runtimeEntitlementsFile.set(project.file("appstore-runtime.entitlements"))
+          provisioningProfile.set(project.file("embedded.provisionprofile"))
+          runtimeProvisioningProfile.set(project.file("embedded.provisionprofile"))
+        }
       }
 
       windows { iconFile.set(project.file("icon.ico")) }
@@ -67,6 +76,9 @@ compose.desktop {
     }
   }
 }
+
+val isMacAppStoreBuild: Boolean
+  get() = providers.gradleProperty("twine.macAppStore").getOrElse("false").toBoolean()
 
 val macExtraPlistKeys: String
   get() =

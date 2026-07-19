@@ -31,7 +31,36 @@ jobs:
           java-version: 21
           distribution: zulu
           cache: 'gradle'
-      - name: Build DMG
+      - name: Import Developer ID signing certificate
+        if: github.event_name == 'release'
+        env:
+          MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          KEYCHAIN_PASSWORD=$(uuidgen)
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          echo "$MACOS_CERTIFICATE_P12" | base64 --decode > certificate.p12
+          security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          rm certificate.p12
+      - name: Build and notarize DMG
+        if: github.event_name == 'release'
+        env:
+          MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+          MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+          MACOS_NOTARIZATION_PASSWORD: ${{ secrets.MACOS_NOTARIZATION_PASSWORD }}
+          MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+        run: |
+          ./gradlew :desktopApp:notarizeReleaseDmg --no-daemon \
+            -Pcompose.desktop.mac.sign=true \
+            -Pcompose.desktop.mac.signing.identity="$MACOS_SIGNING_IDENTITY" \
+            -Pcompose.desktop.mac.notarization.appleID="$MACOS_NOTARIZATION_APPLE_ID" \
+            -Pcompose.desktop.mac.notarization.password="$MACOS_NOTARIZATION_PASSWORD" \
+            -Pcompose.desktop.mac.notarization.teamID="$MACOS_NOTARIZATION_TEAM_ID"
+      - name: Build DMG (unsigned)
+        if: github.event_name != 'release'
         run: ./gradlew :desktopApp:packageReleaseDmg --no-daemon
       - name: Upload DMG
         uses: actions/upload-artifact@v7
@@ -43,6 +72,49 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ github.event.release.tag_name }} desktopApp/build/compose/binaries/main-release/dmg/*.dmg --clobber
+
+  build-macos-appstore:
+    name: Build macOS App Store package
+    runs-on: macos-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: 21
+          distribution: zulu
+          cache: 'gradle'
+      - name: Import Mac App Store signing certificate
+        env:
+          MAS_CERTIFICATE_P12: ${{ secrets.MAS_CERTIFICATE_P12 }}
+          MAS_CERTIFICATE_PASSWORD: ${{ secrets.MAS_CERTIFICATE_PASSWORD }}
+        run: |
+          KEYCHAIN_PASSWORD=$(uuidgen)
+          security create-keychain -p "$KEYCHAIN_PASSWORD" mas-build.keychain
+          security default-keychain -s mas-build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" mas-build.keychain
+          echo "$MAS_CERTIFICATE_P12" | base64 --decode > mas-certificate.p12
+          security import mas-certificate.p12 -k mas-build.keychain -P "$MAS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -T /usr/bin/productsign
+          security set-key-partition-list -S apple-tool:,apple:,codesign:,productsign: -s -k "$KEYCHAIN_PASSWORD" mas-build.keychain
+          rm mas-certificate.p12
+      - name: Decode provisioning profile
+        env:
+          MAS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MAS_PROVISIONING_PROFILE_BASE64 }}
+        run: echo "$MAS_PROVISIONING_PROFILE_BASE64" | base64 --decode > desktopApp/embedded.provisionprofile
+      - name: Build Mac App Store package
+        env:
+          MAS_SIGNING_IDENTITY: ${{ secrets.MAS_SIGNING_IDENTITY }}
+        run: |
+          ./gradlew :desktopApp:packageReleasePkg --no-daemon \
+            -Ptwine.macAppStore=true \
+            -Pcompose.desktop.mac.sign=true \
+            -Pcompose.desktop.mac.signing.identity="$MAS_SIGNING_IDENTITY"
+      - name: Upload App Store package
+        uses: actions/upload-artifact@v7
+        with:
+          name: Twine-MacAppStore
+          path: desktopApp/build/compose/binaries/main-release/pkg/*.pkg
 
   build-windows:
     name: Build Windows MSI
