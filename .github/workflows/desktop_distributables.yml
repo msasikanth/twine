@@ -32,7 +32,6 @@ jobs:
           distribution: zulu
           cache: 'gradle'
       - name: Import Developer ID signing certificate
-        if: github.event_name == 'release'
         env:
           MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
           MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
@@ -46,7 +45,6 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
           rm certificate.p12
       - name: Build and notarize DMG
-        if: github.event_name == 'release'
         env:
           MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
           MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
@@ -59,9 +57,6 @@ jobs:
             -Pcompose.desktop.mac.notarization.appleID="$MACOS_NOTARIZATION_APPLE_ID" \
             -Pcompose.desktop.mac.notarization.password="$MACOS_NOTARIZATION_PASSWORD" \
             -Pcompose.desktop.mac.notarization.teamID="$MACOS_NOTARIZATION_TEAM_ID"
-      - name: Build DMG (unsigned)
-        if: github.event_name != 'release'
-        run: ./gradlew :desktopApp:packageReleaseDmg --no-daemon
       - name: Upload DMG
         uses: actions/upload-artifact@v7
         with:
