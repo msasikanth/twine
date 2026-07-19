@@ -58,13 +58,15 @@ compose.desktop {
 
         infoPlist { extraKeysRawXml = macExtraPlistKeys }
 
-        dmgPackageVersion = macPackageVersion
-        dmgPackageBuildVersion = macPackageBuildVersion
+        // Covers every macOS target format (app image, dmg, pkg) - dmg/pkg-specific
+        // version properties don't exist for the app-image format, so the app's own
+        // Info.plist (baked in during createReleaseDistributable) would otherwise fall
+        // back to the shared top-level packageVersion instead of picking up CalVer.
+        packageVersion = macPackageVersion
+        packageBuildVersion = macPackageBuildVersion
 
         if (isMacAppStoreBuild) {
           appStore = true
-          pkgPackageVersion = macPackageVersion
-          pkgPackageBuildVersion = macPackageBuildVersion
           entitlementsFile.set(project.file("appstore.entitlements"))
           runtimeEntitlementsFile.set(project.file("appstore-runtime.entitlements"))
           provisioningProfile.set(project.file("embedded.provisionprofile"))
