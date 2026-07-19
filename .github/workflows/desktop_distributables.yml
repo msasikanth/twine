@@ -47,11 +47,13 @@ jobs:
         run: |
           KEYCHAIN_PASSWORD=$(uuidgen)
           security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security list-keychains -s build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security set-keychain-settings build.keychain
           echo "$MACOS_CERTIFICATE_P12" | base64 --decode > certificate.p12
-          security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -A
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" build.keychain
           rm certificate.p12
       - name: Build and notarize DMG
         env:
@@ -102,11 +104,13 @@ jobs:
         run: |
           KEYCHAIN_PASSWORD=$(uuidgen)
           security create-keychain -p "$KEYCHAIN_PASSWORD" mas-build.keychain
+          security list-keychains -s mas-build.keychain
           security default-keychain -s mas-build.keychain
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" mas-build.keychain
+          security set-keychain-settings mas-build.keychain
           echo "$MAS_CERTIFICATE_P12" | base64 --decode > mas-certificate.p12
-          security import mas-certificate.p12 -k mas-build.keychain -P "$MAS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -T /usr/bin/productsign
-          security set-key-partition-list -S apple-tool:,apple:,codesign:,productsign: -s -k "$KEYCHAIN_PASSWORD" mas-build.keychain
+          security import mas-certificate.p12 -k mas-build.keychain -P "$MAS_CERTIFICATE_PASSWORD" -A
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" mas-build.keychain
           rm mas-certificate.p12
       - name: Decode provisioning profile
         env:
