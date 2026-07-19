@@ -112,8 +112,6 @@ jobs:
           security import mas-certificate.p12 -k mas-build.keychain -P "$MAS_CERTIFICATE_PASSWORD" -A
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" mas-build.keychain
           rm mas-certificate.p12
-      - name: List imported identities (debug)
-        run: security find-identity -v -p codesigning mas-build.keychain
       - name: Decode provisioning profile
         env:
           MAS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MAS_PROVISIONING_PROFILE_BASE64 }}
@@ -126,6 +124,7 @@ jobs:
             -Ptwine.macAppStore=true \
             -Pcompose.desktop.mac.sign=true \
             -Pcompose.desktop.mac.signing.identity="$MAS_SIGNING_IDENTITY" \
+            -Pcompose.desktop.mac.signing.keychain=mas-build.keychain \
             -Ptwine.macVersion="$MAC_VERSION" \
             -Ptwine.macBuildVersion="$MAC_BUILD_VERSION"
       - name: Upload App Store package
