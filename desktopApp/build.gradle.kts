@@ -9,6 +9,7 @@
  *
  */
 
+import java.time.LocalDate
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -43,7 +44,7 @@ compose.desktop {
     }
 
     nativeDistributions {
-      targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+      targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Pkg)
       packageName = "Twine"
       packageVersion = "1.0.0"
       modules("java.sql")
@@ -56,6 +57,23 @@ compose.desktop {
         iconFile.set(project.file("icon.icns"))
 
         infoPlist { extraKeysRawXml = macExtraPlistKeys }
+
+        // Covers every macOS target format (app image, dmg, pkg) - dmg/pkg-specific
+        // version properties don't exist for the app-image format, so the app's own
+        // Info.plist (baked in during createReleaseDistributable) would otherwise fall
+        // back to the shared top-level packageVersion instead of picking up CalVer.
+        packageVersion = macPackageVersion
+        packageBuildVersion = macPackageBuildVersion
+
+        minimumSystemVersion = "12.0"
+
+        if (isMacAppStoreBuild) {
+          appStore = true
+          entitlementsFile.set(project.file("appstore.entitlements"))
+          runtimeEntitlementsFile.set(project.file("appstore-runtime.entitlements"))
+          provisioningProfile.set(project.file("embedded.provisionprofile"))
+          runtimeProvisioningProfile.set(project.file("embedded.provisionprofile"))
+        }
       }
 
       windows { iconFile.set(project.file("icon.ico")) }
@@ -67,6 +85,19 @@ compose.desktop {
     }
   }
 }
+
+val isMacAppStoreBuild: Boolean
+  get() = providers.gradleProperty("twine.macAppStore").getOrElse("false").toBoolean()
+
+val macPackageVersion: String
+  get() {
+    val today = LocalDate.now()
+    val defaultVersion = "%d.%02d.%02d".format(today.year, today.monthValue, today.dayOfMonth)
+    return providers.gradleProperty("twine.macVersion").getOrElse(defaultVersion)
+  }
+
+val macPackageBuildVersion: String
+  get() = providers.gradleProperty("twine.macBuildVersion").getOrElse("1")
 
 val macExtraPlistKeys: String
   get() =

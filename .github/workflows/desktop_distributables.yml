@@ -13,6 +13,10 @@ on:
       - '.github/workflows/desktop_distributables.yml'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -23,6 +27,7 @@ jobs:
   build-macos:
     name: Build macOS DMG
     runs-on: macos-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
       - name: Setup JDK 21
@@ -31,8 +36,40 @@ jobs:
           java-version: 21
           distribution: zulu
           cache: 'gradle'
-      - name: Build DMG
-        run: ./gradlew :desktopApp:packageReleaseDmg --no-daemon
+      - name: Compute macOS package version
+        run: |
+          echo "MAC_VERSION=$(date -u +%Y.%m.%d)" >> "$GITHUB_ENV"
+          echo "MAC_BUILD_VERSION=${{ github.run_number }}" >> "$GITHUB_ENV"
+      - name: Import Developer ID signing certificate
+        env:
+          MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          KEYCHAIN_PASSWORD=$(uuidgen)
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security list-keychains -s build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security set-keychain-settings build.keychain
+          echo "$MACOS_CERTIFICATE_P12" | base64 --decode > certificate.p12
+          security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -A
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          rm certificate.p12
+      - name: Build and notarize DMG
+        env:
+          MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+          MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+          MACOS_NOTARIZATION_PASSWORD: ${{ secrets.MACOS_NOTARIZATION_PASSWORD }}
+          MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+        run: |
+          ./gradlew :desktopApp:notarizeReleaseDmg --no-daemon \
+            -Pcompose.desktop.mac.sign=true \
+            -Pcompose.desktop.mac.signing.identity="$MACOS_SIGNING_IDENTITY" \
+            -Pcompose.desktop.mac.notarization.appleID="$MACOS_NOTARIZATION_APPLE_ID" \
+            -Pcompose.desktop.mac.notarization.password="$MACOS_NOTARIZATION_PASSWORD" \
+            -Pcompose.desktop.mac.notarization.teamID="$MACOS_NOTARIZATION_TEAM_ID" \
+            -Ptwine.macVersion="$MAC_VERSION" \
+            -Ptwine.macBuildVersion="$MAC_BUILD_VERSION"
       - name: Upload DMG
         uses: actions/upload-artifact@v7
         with:
@@ -43,6 +80,108 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ github.event.release.tag_name }} desktopApp/build/compose/binaries/main-release/dmg/*.dmg --clobber
+
+  build-macos-appstore:
+    name: Build macOS App Store package
+    runs-on: macos-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: 21
+          distribution: zulu
+          cache: 'gradle'
+      - name: Compute macOS package version
+        run: |
+          echo "MAC_VERSION=$(date -u +%Y.%m.%d)" >> "$GITHUB_ENV"
+          echo "MAC_BUILD_VERSION=${{ github.run_number }}" >> "$GITHUB_ENV"
+      - name: Import Mac App Store signing certificate
+        env:
+          MAS_CERTIFICATE_P12: ${{ secrets.MAS_CERTIFICATE_P12 }}
+          MAS_CERTIFICATE_PASSWORD: ${{ secrets.MAS_CERTIFICATE_PASSWORD }}
+        run: |
+          KEYCHAIN_PASSWORD=$(uuidgen)
+          security create-keychain -p "$KEYCHAIN_PASSWORD" mas-build.keychain
+          security list-keychains -s mas-build.keychain
+          security default-keychain -s mas-build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" mas-build.keychain
+          security set-keychain-settings mas-build.keychain
+          echo "$MAS_CERTIFICATE_P12" | base64 --decode > mas-certificate.p12
+          security import mas-certificate.p12 -k mas-build.keychain -P "$MAS_CERTIFICATE_PASSWORD" -A
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" mas-build.keychain
+          rm mas-certificate.p12
+      - name: Decode provisioning profile
+        env:
+          MAS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MAS_PROVISIONING_PROFILE_BASE64 }}
+        run: echo "$MAS_PROVISIONING_PROFILE_BASE64" | base64 --decode > desktopApp/embedded.provisionprofile
+      - name: Build Mac App Store package
+        id: build_mas_pkg
+        continue-on-error: true
+        env:
+          MAS_SIGNING_IDENTITY: ${{ secrets.MAS_SIGNING_IDENTITY }}
+        run: |
+          ./gradlew :desktopApp:packageReleasePkg --no-daemon \
+            -Ptwine.macAppStore=true \
+            -Pcompose.desktop.mac.sign=true \
+            -Pcompose.desktop.mac.signing.identity="$MAS_SIGNING_IDENTITY" \
+            -Pcompose.desktop.mac.signing.keychain="$HOME/Library/Keychains/mas-build.keychain-db" \
+            -Ptwine.macVersion="$MAC_VERSION" \
+            -Ptwine.macBuildVersion="$MAC_BUILD_VERSION"
+      - name: Re-sign PKG with installer identity
+        if: steps.build_mas_pkg.outcome == 'failure'
+        env:
+          MAS_SIGNING_IDENTITY: ${{ secrets.MAS_SIGNING_IDENTITY }}
+        run: |
+          MAS_INSTALLER_IDENTITY="${MAS_SIGNING_IDENTITY/Application/Installer}"
+          ARGS_FILE="desktopApp/build/compose/tmp/packageReleasePkg.args.txt"
+
+          # Compose Desktop's jpackage invocation for the PKG bundler passes a
+          # single --mac-signing-key-user-name that gets reused verbatim for both
+          # codesigning the .app (needs an Application-type identity, already
+          # correct) and productbuild's installer signing (needs a distinct
+          # Installer-type identity). There's no Gradle property to supply two
+          # different identities for these two purposes, so patch the already
+          # -generated jpackage args file to use the installer identity for this
+          # remaining step and invoke jpackage directly - the app image is already
+          # correctly signed from the earlier createReleaseDistributable run.
+          python3 - "$ARGS_FILE" "$MAS_SIGNING_IDENTITY" "$MAS_INSTALLER_IDENTITY" <<'PYEOF'
+          import re
+          import sys
+
+          path, old_identity, new_identity = sys.argv[1], sys.argv[2], sys.argv[3]
+
+          with open(path) as f:
+              content = f.read()
+
+          pattern = re.compile(
+              r"(--mac-signing-key-user-name\s+)(\"?)" + re.escape(old_identity) + r"(\"?)"
+          )
+          new_content, count = pattern.subn(
+              lambda m: f"{m.group(1)}{m.group(2)}{new_identity}{m.group(3)}",
+              content,
+          )
+          if count != 1:
+              sys.exit(f"ERROR: expected exactly 1 replacement of the signing identity, found {count}")
+
+          with open(path, "w") as f:
+              f.write(new_content)
+          PYEOF
+
+          "$JAVA_HOME/bin/jpackage" "@$ARGS_FILE"
+      - name: Print jpackage logs on failure
+        if: failure()
+        run: |
+          for f in desktopApp/build/compose/logs/packageReleasePkg/*.txt; do
+            echo "== $f =="
+            cat "$f"
+          done
+      - name: Upload App Store package
+        uses: actions/upload-artifact@v7
+        with:
+          name: Twine-MacAppStore
+          path: desktopApp/build/compose/binaries/main-release/pkg/*.pkg
 
   build-windows:
     name: Build Windows MSI
