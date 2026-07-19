@@ -65,6 +65,8 @@ compose.desktop {
         packageVersion = macPackageVersion
         packageBuildVersion = macPackageBuildVersion
 
+        minimumSystemVersion = "12.0"
+
         if (isMacAppStoreBuild) {
           appStore = true
           entitlementsFile.set(project.file("appstore.entitlements"))
