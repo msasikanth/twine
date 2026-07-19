@@ -112,6 +112,19 @@ jobs:
           security import mas-certificate.p12 -k mas-build.keychain -P "$MAS_CERTIFICATE_PASSWORD" -A
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" mas-build.keychain
           rm mas-certificate.p12
+      - name: Debug certificate lookup
+        env:
+          MAS_SIGNING_IDENTITY: ${{ secrets.MAS_SIGNING_IDENTITY }}
+        run: |
+          KEYCHAIN_PATH="$HOME/Library/Keychains/mas-build.keychain-db"
+          echo "== security find-certificate -c <identity> -a \"$KEYCHAIN_PATH\" =="
+          security find-certificate -c "$MAS_SIGNING_IDENTITY" -a "$KEYCHAIN_PATH"; echo "exit code: $?"
+          echo "== security find-identity -v -p codesigning \"$KEYCHAIN_PATH\" =="
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"; echo "exit code: $?"
+          echo "== security default-keychain =="
+          security default-keychain
+          echo "== security list-keychains =="
+          security list-keychains
       - name: Decode provisioning profile
         env:
           MAS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MAS_PROVISIONING_PROFILE_BASE64 }}
