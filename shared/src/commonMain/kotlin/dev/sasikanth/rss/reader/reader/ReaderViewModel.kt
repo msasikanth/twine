@@ -175,9 +175,11 @@ class ReaderViewModel(
 
     // Only readers backed by the home posts list publish the selection; indexes from
     // Search/Bookmarks/Widget belong to a different list, and posts there may not even
-    // be in home's current filters, which would scroll home somewhere surprising.
+    // be in home's current filters, which would scroll home somewhere surprising. Same
+    // reasoning applies to which posts the home list should keep pinned while read.
     if (canPublishSelectedPost) {
       observableSelectedPost.updateSelectedPost(postIndex, post.id)
+      observableActiveReaderPost.addOpenedPost(post.id)
     }
     observableActiveReaderPost.updateActivePost(post.id)
 

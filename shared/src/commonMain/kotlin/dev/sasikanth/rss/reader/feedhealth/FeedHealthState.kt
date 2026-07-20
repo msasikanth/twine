@@ -29,6 +29,7 @@ data class FeedHealthState(
   val selectedFeedIds: Set<String> = emptySet(),
   val isSelectionMode: Boolean = false,
   val pendingUnsubscribe: PendingUnsubscribe? = null,
+  val retryFeedName: String? = null,
 ) {
   companion object {
     val Default = FeedHealthState()

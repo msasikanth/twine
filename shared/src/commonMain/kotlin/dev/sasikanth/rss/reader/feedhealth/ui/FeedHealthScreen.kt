@@ -95,6 +95,7 @@ import dev.sasikanth.rss.reader.feedhealth.FeedHealthState
 import dev.sasikanth.rss.reader.feedhealth.FeedHealthViewModel
 import dev.sasikanth.rss.reader.feeds.ui.SelectedCheckIndicator
 import dev.sasikanth.rss.reader.resources.icons.Delete
+import dev.sasikanth.rss.reader.resources.icons.Refresh
 import dev.sasikanth.rss.reader.resources.icons.RemoveFeed
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -104,9 +105,11 @@ import kotlin.math.abs
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonCancel
+import twine.shared.generated.resources.feedHealthAllHealthy
 import twine.shared.generated.resources.feedHealthBrokenDesc
 import twine.shared.generated.resources.feedHealthBrokenFetchErrors
 import twine.shared.generated.resources.feedHealthBulkUnsubscribeDialogDesc
@@ -120,7 +123,11 @@ import twine.shared.generated.resources.feedHealthNoHighVolumeFeeds
 import twine.shared.generated.resources.feedHealthNoLeastReadFeeds
 import twine.shared.generated.resources.feedHealthNoStaleFeeds
 import twine.shared.generated.resources.feedHealthReadRatio
+import twine.shared.generated.resources.feedHealthRetryAction
+import twine.shared.generated.resources.feedHealthRetryingSnackbar
+import twine.shared.generated.resources.feedHealthSelectionCount
 import twine.shared.generated.resources.feedHealthStaleDesc
+import twine.shared.generated.resources.feedHealthSummary
 import twine.shared.generated.resources.feedHealthTabBroken
 import twine.shared.generated.resources.feedHealthTabHighVolume
 import twine.shared.generated.resources.feedHealthTabLeastRead
@@ -184,6 +191,17 @@ private fun FeedHealthContent(
     }
   }
 
+  // Retrying feed snackbar
+  val retryFeedName = state.retryFeedName
+  val retryingMessage =
+    retryFeedName?.let { stringResource(Res.string.feedHealthRetryingSnackbar, it) }
+  LaunchedEffect(retryFeedName) {
+    if (retryFeedName != null && retryingMessage != null) {
+      snackbarHostState.showSnackbar(message = retryingMessage, duration = SnackbarDuration.Short)
+      dispatch(FeedHealthEvent.ClearRetryMessage)
+    }
+  }
+
   Scaffold(
     modifier = modifier,
     topBar = {
@@ -205,7 +223,14 @@ private fun FeedHealthContent(
         enter = slideInVertically { it } + fadeIn(),
         exit = slideOutVertically { it } + fadeOut(),
       ) {
-        ContextActionsBottomBar(onCancel = { dispatch(FeedHealthEvent.ClearSelection) }) {
+        ContextActionsBottomBar(
+          onCancel = { dispatch(FeedHealthEvent.ClearSelection) },
+          tooltip = {
+            Text(
+              text = stringResource(Res.string.feedHealthSelectionCount, state.selectedFeedIds.size)
+            )
+          },
+        ) {
           ContextActionItem(
             modifier = Modifier.weight(1f),
             icon = TwineIcons.Delete,
@@ -243,6 +268,33 @@ private fun FeedHealthContent(
                   end = padding.calculateEndPadding(layoutDirection),
                 )
           ) {
+            val attentionFeedCount =
+              remember(healthData) {
+                (healthData.staleFeeds.asSequence() +
+                    healthData.highVolumeFeeds.asSequence() +
+                    healthData.leastReadFeeds.asSequence() +
+                    healthData.brokenFeeds.asSequence())
+                  .map { it.id }
+                  .toSet()
+                  .size
+              }
+
+            Text(
+              text =
+                if (attentionFeedCount > 0) {
+                  pluralStringResource(
+                    Res.plurals.feedHealthSummary,
+                    attentionFeedCount,
+                    attentionFeedCount,
+                  )
+                } else {
+                  stringResource(Res.string.feedHealthAllHealthy)
+                },
+              style = MaterialTheme.typography.bodyMedium,
+              color = AppTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.padding(start = 24.dp, top = 12.dp, end = 24.dp, bottom = 4.dp),
+            )
+
             val tabs =
               listOf(
                 stringResource(Res.string.feedHealthTabStale) to healthData.staleFeeds.size,
@@ -362,6 +414,7 @@ private fun FeedHealthContent(
                         }
                       },
                       onUnsubscribeClick = { dispatch(FeedHealthEvent.UnsubscribeFeed(feed.id)) },
+                      onRetryClick = { dispatch(FeedHealthEvent.RetryFeed(feed.id)) },
                       modifier = Modifier.padding(vertical = 12.dp).animateItem(),
                     )
                   }
@@ -440,6 +493,7 @@ private fun FeedHealthItem(
   onLongClick: () -> Unit,
   onItemClick: () -> Unit,
   onUnsubscribeClick: () -> Unit,
+  onRetryClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val translucentStyle = LocalTranslucentStyles.current
@@ -518,11 +572,13 @@ private fun FeedHealthItem(
               feed.readPostsCount.toFloat() / feed.totalPostsCount.toFloat()
             else 0f
           val percentage = (readRatio * 100).toInt()
+          // All feeds in this tab are already below the 80% read-ratio cutoff, so none of these
+          // colours should read as "healthy" — the mildest bucket is neutral, not primary/green.
           val percentageColor =
             when {
               readRatio < 0.2f -> AppTheme.colorScheme.error
               readRatio < 0.5f -> Color(0xFFFFA000) // Amber
-              else -> AppTheme.colorScheme.primary
+              else -> AppTheme.colorScheme.onSurfaceVariant
             }
 
           Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -571,6 +627,17 @@ private fun FeedHealthItem(
     if (isSelectionMode) {
       SelectedCheckIndicator(selected = isSelected, modifier = Modifier.requiredSize(40.dp))
     } else {
+      if (tabIndex == 3) {
+        IconButton(onClick = onRetryClick, modifier = Modifier.requiredSize(40.dp)) {
+          Icon(
+            imageVector = TwineIcons.Refresh,
+            contentDescription = stringResource(Res.string.feedHealthRetryAction),
+            tint = AppTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.requiredSize(20.dp),
+          )
+        }
+      }
+
       IconButton(onClick = onUnsubscribeClick, modifier = Modifier.requiredSize(40.dp)) {
         Icon(
           imageVector = TwineIcons.RemoveFeed,

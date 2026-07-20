@@ -386,6 +386,11 @@
     <item quantity="other">%1$d words blocked</item>
   </plurals>
 
+  <plurals name="feedHealthSummary">
+    <item quantity="one">%1$d feed needs your attention</item>
+    <item quantity="other">%1$d feeds need your attention</item>
+  </plurals>
+
   <string name="settingsFeedHealthTitle">Subscription health</string>
   <string name="settingsFeedHealthSubtitle">Review and clean up your feed subscriptions</string>
   <string name="feedHealthTitle">Subscription Health</string>
@@ -393,6 +398,7 @@
   <string name="feedHealthTabHighVolume">High Volume</string>
   <string name="feedHealthTabLeastRead">Least Read</string>
   <string name="feedHealthTabBroken">Broken</string>
+  <string name="feedHealthAllHealthy">All your feeds are healthy</string>
   <string name="feedHealthNoStaleFeeds">All caught up! No stale feeds found.</string>
   <string name="feedHealthNoHighVolumeFeeds">No high-volume feeds found.</string>
   <string name="feedHealthNoLeastReadFeeds">Keep reading to see engagement stats.</string>
@@ -406,6 +412,8 @@
   <string name="feedHealthTotalPosts">%1$d articles</string>
   <string name="feedHealthReadRatio">%1$d read of %2$d articles</string>
   <string name="feedHealthBrokenFetchErrors">Failed %1$d times in a row</string>
+  <string name="feedHealthRetryAction">Retry</string>
+  <string name="feedHealthRetryingSnackbar">Retrying %1$s…</string>
   <string name="feedHealthUnsubscribeConfirm">Unsubscribe</string>
   <string name="feedHealthUnsubscribedSnackbar">Unsubscribed from %1$s</string>
   <string name="feedHealthUndoAction">Undo</string>

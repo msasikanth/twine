@@ -22,6 +22,10 @@ sealed interface FeedHealthEvent {
 
   data class UnsubscribeFeed(val feedId: String) : FeedHealthEvent
 
+  data class RetryFeed(val feedId: String) : FeedHealthEvent
+
+  data object ClearRetryMessage : FeedHealthEvent
+
   data object UndoUnsubscribe : FeedHealthEvent
 
   data class ToggleFeedSelection(val feedId: String) : FeedHealthEvent

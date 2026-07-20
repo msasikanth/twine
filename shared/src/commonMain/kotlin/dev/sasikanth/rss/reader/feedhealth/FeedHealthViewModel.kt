@@ -23,6 +23,7 @@ import androidx.lifecycle.viewModelScope
 import dev.sasikanth.rss.reader.core.model.local.FeedSubscriptionHealth
 import dev.sasikanth.rss.reader.data.repository.Period
 import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.utils.calculateInstantBeforePeriod
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
@@ -40,7 +41,10 @@ import me.tatarka.inject.annotations.Inject
 
 @Stable
 @Inject
-class FeedHealthViewModel(private val rssRepository: RssRepository) : ViewModel() {
+class FeedHealthViewModel(
+  private val rssRepository: RssRepository,
+  private val syncCoordinator: SyncCoordinator,
+) : ViewModel() {
 
   private companion object {
     private const val HIGH_VOLUME_POSTS_THRESHOLD = 150L
@@ -65,6 +69,8 @@ class FeedHealthViewModel(private val rssRepository: RssRepository) : ViewModel(
     when (event) {
       FeedHealthEvent.LoadHealthData -> loadHealthData()
       is FeedHealthEvent.UnsubscribeFeed -> scheduleDeferredUnsubscribe(event.feedId)
+      is FeedHealthEvent.RetryFeed -> retryFeed(event.feedId)
+      FeedHealthEvent.ClearRetryMessage -> _state.update { it.copy(retryFeedName = null) }
       FeedHealthEvent.UndoUnsubscribe -> undoUnsubscribe()
       is FeedHealthEvent.ToggleFeedSelection -> toggleFeedSelection(event.feedId)
       FeedHealthEvent.ClearSelection -> clearSelection()
@@ -110,16 +116,23 @@ class FeedHealthViewModel(private val rssRepository: RssRepository) : ViewModel(
     }
   }
 
+  private fun findFeedName(feedId: String): String =
+    _state.value.healthData?.let { data ->
+      (data.staleFeeds + data.highVolumeFeeds + data.leastReadFeeds + data.brokenFeeds)
+        .find { it.id == feedId }
+        ?.name
+    } ?: ""
+
+  private fun retryFeed(feedId: String) {
+    syncCoordinator.triggerPull(feedId)
+    _state.update { it.copy(retryFeedName = findFeedName(feedId)) }
+  }
+
   private fun scheduleDeferredUnsubscribe(feedId: String) {
     // If there's already a pending unsubscribe for a different feed, flush it immediately
     flushAllPendingUnsubscribes(except = feedId)
 
-    val feedName =
-      _state.value.healthData?.let { data ->
-        (data.staleFeeds + data.highVolumeFeeds + data.leastReadFeeds + data.brokenFeeds)
-          .find { it.id == feedId }
-          ?.name
-      } ?: ""
+    val feedName = findFeedName(feedId)
 
     _state.update { it.copy(pendingUnsubscribe = PendingUnsubscribe(feedId, feedName)) }
 
