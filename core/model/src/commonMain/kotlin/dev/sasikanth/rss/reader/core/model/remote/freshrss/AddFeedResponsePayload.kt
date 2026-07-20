@@ -21,8 +21,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AddFeedResponsePayload(
-  val numResults: Int,
-  val query: String,
-  val streamId: String,
-  val streamName: String,
+  val numResults: Int = 0,
+  val query: String = "",
+  val streamId: String = "",
+  val streamName: String = "",
 )

@@ -26,4 +26,6 @@ sealed interface AccountSelectionEffect {
   data object OpenFreshRssLogin : AccountSelectionEffect
 
   data object OpenMinifluxLogin : AccountSelectionEffect
+
+  data object OpenBazQuxLogin : AccountSelectionEffect
 }

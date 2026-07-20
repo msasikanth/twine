@@ -39,6 +39,7 @@ import dev.sasikanth.rss.reader.data.sync.auth.OAuthManager
 import dev.sasikanth.rss.reader.data.sync.auth.OAuthTokenProvider
 import dev.sasikanth.rss.reader.data.sync.auth.RealOAuthManager
 import dev.sasikanth.rss.reader.data.sync.auth.RealOAuthTokenProvider
+import dev.sasikanth.rss.reader.data.sync.bazqux.BazQuxSyncProvider
 import dev.sasikanth.rss.reader.data.sync.dropbox.DropboxCloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.freshrss.FreshRssSyncProvider
 import dev.sasikanth.rss.reader.data.sync.google.GoogleDriveCloudServiceProvider
@@ -176,11 +177,13 @@ interface DataComponent :
     googleDriveSyncProvider: GoogleDriveCloudServiceProvider,
     freshRssSyncProvider: FreshRssSyncProvider,
     minifluxSyncProvider: MinifluxSyncProvider,
+    bazQuxSyncProvider: BazQuxSyncProvider,
     appInfo: AppInfo,
   ): Set<CloudServiceProvider> {
     return buildSet {
       add(minifluxSyncProvider)
       add(freshRssSyncProvider)
+      add(bazQuxSyncProvider)
       if (appInfo.isGoogleDriveSupported) {
         add(googleDriveSyncProvider)
       }

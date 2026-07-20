@@ -87,6 +87,8 @@ sealed interface Screen : NavKey {
 
   @Serializable data object MinifluxLogin : Screen
 
+  @Serializable data object BazQuxLogin : Screen
+
   @Serializable data class Paywall(val isFromOnboarding: Boolean = false) : Screen
 
   @Serializable data class ImageViewer(val imageUrl: String) : Screen

@@ -41,7 +41,7 @@ class Reader {
     @SerialName("xt") val excludeState: String? = null,
     @SerialName("n") val limit: Int = 1000,
     @SerialName("ot") val newerThan: Long? = null,
-    @SerialName("c") val continuation: String = "",
+    @SerialName("c") val continuation: String? = null,
     val output: String = "json",
   )
 
@@ -63,5 +63,6 @@ class Reader {
     @SerialName("s") val state: String,
     @SerialName("xt") val excludeState: String? = null,
     @SerialName("n") val limit: Int = 50000,
+    val output: String = "json",
   )
 }

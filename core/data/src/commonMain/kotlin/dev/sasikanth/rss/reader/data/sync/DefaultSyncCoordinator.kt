@@ -16,6 +16,7 @@
  */
 package dev.sasikanth.rss.reader.data.sync
 
+import dev.sasikanth.rss.reader.data.sync.bazqux.BazQuxSyncProvider
 import dev.sasikanth.rss.reader.data.sync.dropbox.DropboxCloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.dropbox.DropboxSyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.freshrss.FreshRSSSyncCoordinator
@@ -50,6 +51,7 @@ class DefaultSyncCoordinator(
   private val freshRssSyncProvider: FreshRssSyncProvider,
   private val minifluxSyncCoordinator: MinifluxSyncCoordinator,
   private val minifluxSyncProvider: MinifluxSyncProvider,
+  private val bazQuxSyncProvider: BazQuxSyncProvider,
   dispatchersProvider: DispatchersProvider,
 ) : SyncCoordinator {
 
@@ -62,9 +64,12 @@ class DefaultSyncCoordinator(
         googleDriveSyncProvider.isSignedIn(),
         freshRssSyncProvider.isSignedIn(),
         minifluxSyncProvider.isSignedIn(),
-      ) { dropboxSignedIn, googleDriveSignedIn, freshRssSignedIn, minifluxSignedIn ->
+        bazQuxSyncProvider.isSignedIn(),
+      ) { dropboxSignedIn, googleDriveSignedIn, freshRssSignedIn, minifluxSignedIn, bazQuxSignedIn
+        ->
         when {
-          freshRssSignedIn -> freshRSSSyncCoordinator
+          // BazQux speaks the GReader protocol, so it shares the FreshRSS coordinator
+          freshRssSignedIn || bazQuxSignedIn -> freshRSSSyncCoordinator
           minifluxSignedIn -> minifluxSyncCoordinator
           dropboxSignedIn -> dropboxSyncCoordinator
           googleDriveSignedIn -> googleDriveSyncCoordinator
@@ -76,7 +81,8 @@ class DefaultSyncCoordinator(
 
   override suspend fun pull(): Boolean {
     return when {
-      freshRssSyncProvider.isSignedInImmediate() -> freshRSSSyncCoordinator.pull()
+      freshRssSyncProvider.isSignedInImmediate() || bazQuxSyncProvider.isSignedInImmediate() ->
+        freshRSSSyncCoordinator.pull()
       minifluxSyncProvider.isSignedInImmediate() -> minifluxSyncCoordinator.pull()
       dropboxSyncProvider.isSignedInImmediate() -> dropboxSyncCoordinator.pull()
       googleDriveSyncProvider.isSignedInImmediate() -> googleDriveSyncCoordinator.pull()
@@ -90,7 +96,8 @@ class DefaultSyncCoordinator(
 
   override suspend fun pull(feedIds: List<String>): Boolean {
     return when {
-      freshRssSyncProvider.isSignedInImmediate() -> freshRSSSyncCoordinator.pull(feedIds)
+      freshRssSyncProvider.isSignedInImmediate() || bazQuxSyncProvider.isSignedInImmediate() ->
+        freshRSSSyncCoordinator.pull(feedIds)
       minifluxSyncProvider.isSignedInImmediate() -> minifluxSyncCoordinator.pull(feedIds)
       dropboxSyncProvider.isSignedInImmediate() -> dropboxSyncCoordinator.pull(feedIds)
       googleDriveSyncProvider.isSignedInImmediate() -> googleDriveSyncCoordinator.pull(feedIds)
@@ -104,7 +111,8 @@ class DefaultSyncCoordinator(
 
   override suspend fun pull(feedId: String): Boolean {
     return when {
-      freshRssSyncProvider.isSignedInImmediate() -> freshRSSSyncCoordinator.pull(feedId)
+      freshRssSyncProvider.isSignedInImmediate() || bazQuxSyncProvider.isSignedInImmediate() ->
+        freshRSSSyncCoordinator.pull(feedId)
       minifluxSyncProvider.isSignedInImmediate() -> minifluxSyncCoordinator.pull(feedId)
       dropboxSyncProvider.isSignedInImmediate() -> dropboxSyncCoordinator.pull(feedId)
       googleDriveSyncProvider.isSignedInImmediate() -> googleDriveSyncCoordinator.pull(feedId)
@@ -118,7 +126,8 @@ class DefaultSyncCoordinator(
 
   override suspend fun push(): Boolean {
     return when {
-      freshRssSyncProvider.isSignedInImmediate() -> freshRSSSyncCoordinator.push()
+      freshRssSyncProvider.isSignedInImmediate() || bazQuxSyncProvider.isSignedInImmediate() ->
+        freshRSSSyncCoordinator.push()
       minifluxSyncProvider.isSignedInImmediate() -> minifluxSyncCoordinator.push()
       dropboxSyncProvider.isSignedInImmediate() -> dropboxSyncCoordinator.push()
       googleDriveSyncProvider.isSignedInImmediate() -> googleDriveSyncCoordinator.push()

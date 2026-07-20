@@ -52,6 +52,7 @@ import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.data.sync.APIServiceProvider
 import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
+import dev.sasikanth.rss.reader.resources.icons.Bazqux
 import dev.sasikanth.rss.reader.resources.icons.Dropbox
 import dev.sasikanth.rss.reader.resources.icons.Freshrss
 import dev.sasikanth.rss.reader.resources.icons.GoogleDrive
@@ -67,6 +68,7 @@ import kotlin.time.Instant
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.settingSyncLabel
+import twine.shared.generated.resources.settingsSyncBazQux
 import twine.shared.generated.resources.settingsSyncDropbox
 import twine.shared.generated.resources.settingsSyncFreshRSS
 import twine.shared.generated.resources.settingsSyncGoogleDrive
@@ -96,6 +98,7 @@ internal fun CloudSyncSettingItem(
         ServiceType.FRESH_RSS -> stringResource(Res.string.settingsSyncFreshRSS)
         ServiceType.MINIFLUX -> stringResource(Res.string.settingsSyncMiniflux)
         ServiceType.GOOGLE_DRIVE -> stringResource(Res.string.settingsSyncGoogleDrive)
+        ServiceType.BAZQUX -> stringResource(Res.string.settingsSyncBazQux)
       }
     val isSignedIn by provider.isSignedIn().collectAsStateWithLifecycle(false)
     val verticalPadding by animateDpAsState(if (isSignedIn) 16.dp else 12.dp)
@@ -122,6 +125,7 @@ internal fun CloudSyncSettingItem(
             ServiceType.MINIFLUX -> TwineIcons.Miniflux
             ServiceType.DROPBOX -> TwineIcons.Dropbox
             ServiceType.GOOGLE_DRIVE -> TwineIcons.GoogleDrive
+            ServiceType.BAZQUX -> TwineIcons.Bazqux
           }
 
         Box(modifier = Modifier.size(40.dp), contentAlignment = Alignment.Center) {

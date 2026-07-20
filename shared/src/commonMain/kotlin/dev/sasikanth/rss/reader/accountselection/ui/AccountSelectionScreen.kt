@@ -56,6 +56,7 @@ import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
+import dev.sasikanth.rss.reader.resources.icons.Bazqux
 import dev.sasikanth.rss.reader.resources.icons.Dropbox
 import dev.sasikanth.rss.reader.resources.icons.Freshrss
 import dev.sasikanth.rss.reader.resources.icons.GoogleDrive
@@ -73,6 +74,7 @@ import twine.shared.generated.resources.accountSelectionLocalAccount
 import twine.shared.generated.resources.accountSelectionSubtitle
 import twine.shared.generated.resources.accountSelectionTitle
 import twine.shared.generated.resources.buttonGoBack
+import twine.shared.generated.resources.settingsSyncBazQux
 import twine.shared.generated.resources.settingsSyncDropbox
 import twine.shared.generated.resources.settingsSyncFreshRSS
 import twine.shared.generated.resources.settingsSyncGoogleDrive
@@ -86,6 +88,7 @@ internal fun AccountSelectionScreen(
   openPaywall: () -> Unit,
   openFreshRssLogin: () -> Unit,
   openMinifluxLogin: () -> Unit,
+  openBazQuxLogin: () -> Unit,
   goBack: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
@@ -103,6 +106,7 @@ internal fun AccountSelectionScreen(
         AccountSelectionEffect.OpenPaywall -> openPaywall()
         AccountSelectionEffect.OpenFreshRssLogin -> openFreshRssLogin()
         AccountSelectionEffect.OpenMinifluxLogin -> openMinifluxLogin()
+        AccountSelectionEffect.OpenBazQuxLogin -> openBazQuxLogin()
       }
     }
   }
@@ -195,6 +199,7 @@ private fun AccountSelectionContent(
             ServiceType.FRESH_RSS -> stringResource(Res.string.settingsSyncFreshRSS)
             ServiceType.MINIFLUX -> stringResource(Res.string.settingsSyncMiniflux)
             ServiceType.GOOGLE_DRIVE -> stringResource(Res.string.settingsSyncGoogleDrive)
+            ServiceType.BAZQUX -> stringResource(Res.string.settingsSyncBazQux)
           }
 
         val icon =
@@ -203,6 +208,7 @@ private fun AccountSelectionContent(
             ServiceType.FRESH_RSS -> TwineIcons.Freshrss
             ServiceType.MINIFLUX -> TwineIcons.Miniflux
             ServiceType.GOOGLE_DRIVE -> TwineIcons.GoogleDrive
+            ServiceType.BAZQUX -> TwineIcons.Bazqux
           }
 
         AccountItem(

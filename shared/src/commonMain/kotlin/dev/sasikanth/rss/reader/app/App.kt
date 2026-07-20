@@ -71,6 +71,7 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionViewModel
 import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
+import dev.sasikanth.rss.reader.bazqux.BazQuxLoginViewModel
 import dev.sasikanth.rss.reader.blockedwords.BlockedWordsViewModel
 import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
 import dev.sasikanth.rss.reader.changelog.ui.ChangelogSheet
@@ -169,6 +170,7 @@ fun App(
   accountSelectionViewModel: () -> AccountSelectionViewModel,
   freshRssLoginViewModel: () -> FreshRssLoginViewModel,
   minifluxLoginViewModel: () -> MinifluxLoginViewModel,
+  bazQuxLoginViewModel: () -> BazQuxLoginViewModel,
   groupViewModel: (SavedStateHandle) -> GroupViewModel,
   blockedWordsViewModel: () -> BlockedWordsViewModel,
   statisticsViewModel: () -> StatisticsViewModel,
@@ -387,6 +389,12 @@ fun App(
         minifluxLoginScreen(
           modifier = screenModifier,
           minifluxLoginViewModel = minifluxLoginViewModel,
+          navigator = navigator,
+        )
+
+        bazQuxLoginScreen(
+          modifier = screenModifier,
+          bazQuxLoginViewModel = bazQuxLoginViewModel,
           navigator = navigator,
         )
 

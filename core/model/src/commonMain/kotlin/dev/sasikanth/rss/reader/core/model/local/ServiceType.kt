@@ -22,4 +22,5 @@ enum class ServiceType {
   FRESH_RSS,
   MINIFLUX,
   GOOGLE_DRIVE,
+  BAZQUX,
 }
