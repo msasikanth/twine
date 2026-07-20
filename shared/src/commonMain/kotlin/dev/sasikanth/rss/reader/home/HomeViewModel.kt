@@ -57,6 +57,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -77,7 +78,7 @@ class HomeViewModel(
   private val allPostsPager: AllPostsPager,
   private val syncCoordinator: SyncCoordinator,
   private val observableSelectedPost: ObservableSelectedPost,
-  observableActiveReaderPost: ObservableActiveReaderPost,
+  private val observableActiveReaderPost: ObservableActiveReaderPost,
 ) : ViewModel() {
 
   val activeReaderPostId: StateFlow<String?> = observableActiveReaderPost.activePostId
@@ -303,17 +304,26 @@ class HomeViewModel(
   private fun init() {
     val activeSourceFlow = observableActiveSource.activeSource
     val postsTypeFlow = settingsRepository.postsType
-    val allPostsPagingData = allPostsPager.allPostsPagingData().cachedIn(viewModelScope)
-    val feedPostsPagingData = allPostsPager.nonFeaturedPostsPagingData().cachedIn(viewModelScope)
+    // Posts opened in the reader this session stay in the unread-filtered list instead of
+    // vanishing the instant they're marked read, so a split-layout reader doesn't yank the
+    // article the user is looking at out from under them. Cleared when the reader closes.
+    val sessionPostIds = { observableActiveReaderPost.openedPostIds.value.toList() }
+    val allPostsPagingData =
+      allPostsPager.allPostsPagingData(sessionPostIds = sessionPostIds).cachedIn(viewModelScope)
+    val feedPostsPagingData =
+      allPostsPager
+        .nonFeaturedPostsPagingData(sessionPostIds = sessionPostIds)
+        .cachedIn(viewModelScope)
 
     // Hot flow: keeps a single shared DB subscription so UI re-collection and the
     // `.first()` reads in calculateHomeIndex/onScreenStopped don't re-run the query.
     // Started lazily (not WhileSubscribed) so the value stays fresh while the reader
     // screen is on top of home; calculateHomeIndex depends on it to map indices.
     val featuredPosts =
-      combine(allPostsPager.featuredPosts(), settingsRepository.showFeaturedSection) {
-          featuredPosts,
-          showFeaturedSection ->
+      combine(
+          allPostsPager.featuredPosts(observableActiveReaderPost.openedPostIds.map { it.toList() }),
+          settingsRepository.showFeaturedSection,
+        ) { featuredPosts, showFeaturedSection ->
           if (showFeaturedSection) {
             featuredPosts
           } else {
