@@ -77,10 +77,10 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
 ) {
   if (unreadSinceLastSync != null) {
     val coroutineScope = rememberCoroutineScope()
-    val colorScheme = AppTheme.colorScheme
     val shape = CircleShape
 
     AppTheme(useDarkTheme = true) {
+      val colorScheme = AppTheme.colorScheme
       AnimatedVisibility(
         visible = unreadSinceLastSync.hasNewArticles || canShowScrollToTop,
         enter = fadeIn() + expandIn(expandFrom = Alignment.Center, clip = false),
