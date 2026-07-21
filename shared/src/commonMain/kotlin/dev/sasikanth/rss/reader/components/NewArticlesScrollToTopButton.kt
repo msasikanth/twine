@@ -88,7 +88,7 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
         modifier =
           modifier
             .align(Alignment.BottomCenter)
-            .padding(bottom = 16.dp)
+            .padding(bottom = 20.dp)
             .dropShadow(shape = CircleShape) {
               color = Color.Black.copy(alpha = 0.4f)
               offset = Offset(0f, 16.dp.toPx())
