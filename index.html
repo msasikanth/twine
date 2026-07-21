@@ -13,12 +13,12 @@
   <meta property="og:url" content="https://twine.sasikanth.dev/">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="theme-color" content="#EDEEE4" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#F2EAE2" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#131811" media="(prefers-color-scheme: dark)">
   <style>
     :root {
-      --bg: #EDEEE4;
-      --bg-raised: #F7F8F1;
+      --bg: #F2EAE2;
+      --bg-raised: #FAF5EF;
       --ink: #1C2B1F;
       --ink-soft: #4A5A4C;
       --accent: #1F6D59;
@@ -40,7 +40,7 @@
       }
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; scroll-padding-top: 88px; }
     body {
       background: var(--bg);
       color: var(--ink);
@@ -54,8 +54,16 @@
     .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
 
     header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: color-mix(in srgb, var(--bg) 85%, transparent);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+    }
+    header .wrap {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 0;
+      padding-top: 20px; padding-bottom: 20px;
     }
     .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 20px; color: var(--ink); }
     .brand:hover { text-decoration: none; }
@@ -214,8 +222,8 @@
 </head>
 <body>
 
-  <div class="wrap">
-    <header>
+  <header>
+    <div class="wrap">
       <a class="brand" href="#">
         <img src="fastlane/metadata/android/en-US/images/icon.png" alt="Twine app icon">
         <span>Twine</span>
@@ -225,8 +233,10 @@
         <a href="#download">Download</a>
         <a href="https://github.com/msasikanth/twine">GitHub</a>
       </nav>
-    </header>
+    </div>
+  </header>
 
+  <div class="wrap">
     <section class="hero" id="download">
       <h1>Meet <em>Twine.</em></h1>
       <p class="tagline">A simple &amp; modern feed reader for Android and iOS, with a beautiful reading experience and dynamic theming that adapts to your content.</p>
