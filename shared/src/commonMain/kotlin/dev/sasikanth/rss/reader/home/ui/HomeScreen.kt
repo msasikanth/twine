@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -532,12 +533,14 @@ private fun HomeContent(
         unreadSinceLastSync = unreadSinceLastSync,
         canShowScrollToTop = showScrollToTop,
         modifier =
-          Modifier.graphicsLayer {
-            translationY =
-              bottomBarScrollState.state.heightOffset
-                .unaryMinus()
-                .coerceAtMost(PINNED_SOURCES_BOTTOM_BAR_HEIGHT.toPx())
-          },
+          Modifier.navigationBarsPadding()
+            .padding(bottom = if (canShowBottomBar) PINNED_SOURCES_BOTTOM_BAR_HEIGHT else 0.dp)
+            .graphicsLayer {
+              translationY =
+                bottomBarScrollState.state.heightOffset
+                  .unaryMinus()
+                  .coerceAtMost(PINNED_SOURCES_BOTTOM_BAR_HEIGHT.toPx())
+            },
         onLoadNewArticlesClick = {
           coroutineScope.launch {
             launch {
