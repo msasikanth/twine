@@ -151,7 +151,7 @@ purchases-ui = { module = "com.revenuecat.purchases:purchases-kmp-ui", version.r
 viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "viewmodel" }
 lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "viewmodel" }
 jetbrains-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "multiplatform-nav3-ui" }
-androidx-navigationevent-compose = { module = "androidx.navigationevent:navigationevent-compose", version = "1.1.1" }
+androidx-navigationevent-compose = { module = "androidx.navigationevent:navigationevent-compose", version = "1.1.2" }
 jetbrains-lifecycle-viewmodelNavigation3 = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "viewmodel" }
 glance = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
 glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
