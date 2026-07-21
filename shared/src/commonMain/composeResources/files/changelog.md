@@ -1,21 +1,19 @@
 ## Features
 
-- **Full Screen Image Viewer**: Tap on images in articles to view them in full screen, complete with seamless navigation.
-- **Bookmarks Sync**: Keep your saved articles perfectly in sync with new support for syncing bookmarks to FreshRSS and Miniflux.
-- **Pinned Sources Enhancements**: You can now pin all source types, effortlessly reorder pinned sources in the bottom bar via drag-and-drop, and quickly view source names.
-- **Compact Post List Layout**: Introduced a new compact layout for post lists that conditionally hides images to save space, and includes clear unread indicators.
-- **Toggle Featured Section**: Added a new setting to show or hide the featured section on the home screen.
+- **Split-Pane Layout**: On large screens, tablets, and desktop windows, browse your posts and read articles side-by-side in a new list-detail layout.
+- **Google Drive & BazQux Sync**: Sync your feeds and articles with two new providers — Google Drive and BazQux — alongside existing FreshRSS, Miniflux, and Feedbin support.
+- **New Theme Variants**: Choose from three new premium themes — Sepia, Slate, and Lavender — to further personalize your reading experience.
+- **Confirm Mark All as Read**: Added an optional confirmation dialog before marking all articles as read, to help prevent accidental taps.
 
 ## Changes
 
-- **Fresh New Look**: Adopted the elegant Outfit font family as the new default typography and introduced the Forest color scheme as the default theme, bringing a cleaner, modern aesthetic to the entire app.
-- **Settings Redesign**: The settings screen has been completely refactored with categorized sub-screens and a dedicated App Info & Feedback section for much easier navigation.
-- **Reader Enhancements**: Images in the reader view now intelligently fill the maximum width and automatically load in the highest quality available. The reader also now smartly exits when no more posts are available to read.
-- **Beautiful UI Polish**: Enjoy smooth new animations (like the app bar and bottom bar animating simultaneously on scroll), refined translucent backgrounds in the navigation drawer, gradient selections, and standardized feed icons.
-- **Faster Initial Sync**: Considerably improved sync performance by optimizing history recording during the initial setup for FreshRSS and Miniflux.
+- **Read Posts Stay Visible**: Articles you've opened no longer instantly disappear from the unread list while reading in split-pane view.
+- **Smarter Reader Parsing**: Improved article parsing to avoid crashes on pages with embedded iframes, collapse duplicate headings, and better handle linked images.
+- **Performance Improvements**: Optimized Home and Reader screen rendering, post pagination, image loading, and sync to make browsing and reading feel noticeably snappier.
 
 ## Fixes
 
-- Fixed focus management and back navigation issues inside the navigation drawer.
-- Fixed the logic for blocked word triggers to ensure your content filters work accurately.
-- Resolved dynamic color issues for bottom sheet backgrounds to guarantee proper visual contrast.
+- Fixed a crash in the article parser on pages containing iframe tags.
+- Fixed active post tracking issues while paging through articles in the reader.
+- Fixed audio playback to resume from the last position and handle cross-protocol redirects correctly.
+- Fixed sign-out behavior when switching between sync service providers.
