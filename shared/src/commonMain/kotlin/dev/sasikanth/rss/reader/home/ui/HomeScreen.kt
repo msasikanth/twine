@@ -532,7 +532,7 @@ private fun HomeContent(
         unreadSinceLastSync = unreadSinceLastSync,
         canShowScrollToTop = showScrollToTop,
         modifier =
-          Modifier.padding(scaffoldPadding).graphicsLayer {
+          Modifier.graphicsLayer {
             translationY =
               bottomBarScrollState.state.heightOffset
                 .unaryMinus()

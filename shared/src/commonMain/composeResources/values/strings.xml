@@ -293,6 +293,17 @@
   <string name="minifluxErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
   <string name="minifluxErrorUnknown">An unknown error occurred</string>
   <string name="minifluxAPIKeyHint" translatable="false">Miniflux settings > API Keys > Create a new API key</string>
+  <string name="settingsSyncBazQux" translatable="false">BazQux Reader</string>
+  <string name="bazQuxLoginTitle" translatable="false">BazQux Reader</string>
+  <string name="bazQuxUsername">Username</string>
+  <string name="bazQuxPassword">Password</string>
+  <string name="bazQuxLoginButton">Login</string>
+  <string name="bazQuxPasswordHint">If you signed up with Google or Facebook, set a password on bazqux.com first</string>
+  <string name="bazQuxClearDataTitle">Sign in with BazQux?</string>
+  <string name="bazQuxClearDataDesc">Twine will remove all data before proceeding. This includes all feeds, articles and bookmarks.</string>
+  <string name="bazQuxClearDataPositive">Proceed</string>
+  <string name="bazQuxErrorLoginFailed">Login failed. Please check your username and password, and make sure your BazQux subscription is active.</string>
+  <string name="bazQuxErrorUnknown">An unknown error occurred</string>
   <string name="switchServiceTitle">Sign in with %1$s?</string>
   <string name="switchServiceDescription">Twine will remove all %1$s data before proceeding. This includes all articles and bookmarks associated with %1$s.</string>
   <string name="settingsNotificationWarningAndroid">Having notification issues? Your device may be closing the app in background. Tap here to find out how to fix it.</string>

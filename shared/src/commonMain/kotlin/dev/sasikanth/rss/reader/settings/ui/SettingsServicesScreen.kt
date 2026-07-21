@@ -79,6 +79,7 @@ import twine.shared.generated.resources.settingsHeaderCloudStorage
 import twine.shared.generated.resources.settingsHeaderData
 import twine.shared.generated.resources.settingsHeaderFeedServices
 import twine.shared.generated.resources.settingsServicesAndSync
+import twine.shared.generated.resources.settingsSyncBazQux
 import twine.shared.generated.resources.settingsSyncDropbox
 import twine.shared.generated.resources.settingsSyncFreshRSS
 import twine.shared.generated.resources.settingsSyncGoogleDrive
@@ -94,6 +95,7 @@ internal fun SettingsServicesScreen(
   openPaywall: () -> Unit,
   openFreshRssLogin: () -> Unit,
   openMinifluxLogin: () -> Unit,
+  openBazQuxLogin: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -125,6 +127,7 @@ internal fun SettingsServicesScreen(
     openPaywall = openPaywall,
     openFreshRssLogin = openFreshRssLogin,
     openMinifluxLogin = openMinifluxLogin,
+    openBazQuxLogin = openBazQuxLogin,
     modifier = modifier,
   )
 }
@@ -138,6 +141,7 @@ private fun SettingsServicesContent(
   openPaywall: () -> Unit,
   openFreshRssLogin: () -> Unit,
   openMinifluxLogin: () -> Unit,
+  openBazQuxLogin: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val layoutDirection = LocalLayoutDirection.current
@@ -172,6 +176,7 @@ private fun SettingsServicesContent(
             when (toProvider.cloudService) {
               ServiceType.FRESH_RSS -> openFreshRssLogin()
               ServiceType.MINIFLUX -> openMinifluxLogin()
+              ServiceType.BAZQUX -> openBazQuxLogin()
               else -> {
                 // Unknown service type
               }
@@ -239,6 +244,7 @@ private fun SettingsServicesContent(
               when (provider.cloudService) {
                 ServiceType.FRESH_RSS -> openFreshRssLogin()
                 ServiceType.MINIFLUX -> openMinifluxLogin()
+                ServiceType.BAZQUX -> openBazQuxLogin()
                 else -> {
                   throw IllegalStateException(
                     "Unknown cloud service type: ${provider.cloudService}"
@@ -377,6 +383,7 @@ private fun serviceName(serviceType: ServiceType?): String {
     ServiceType.FRESH_RSS -> stringResource(Res.string.settingsSyncFreshRSS)
     ServiceType.MINIFLUX -> stringResource(Res.string.settingsSyncMiniflux)
     ServiceType.GOOGLE_DRIVE -> stringResource(Res.string.settingsSyncGoogleDrive)
+    ServiceType.BAZQUX -> stringResource(Res.string.settingsSyncBazQux)
     null -> ""
   }
 }
@@ -405,6 +412,7 @@ private fun SettingsServicesPreview() {
       openPaywall = {},
       openFreshRssLogin = {},
       openMinifluxLogin = {},
+      openBazQuxLogin = {},
     )
   }
 }

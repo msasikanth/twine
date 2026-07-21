@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,10 +35,7 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
@@ -96,6 +92,7 @@ import dev.sasikanth.rss.reader.resources.icons.Close
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.Newsstand
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.settings.ui.items.SettingItem
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalInAppRating
@@ -272,17 +269,15 @@ private fun AddFeedContent(
     },
     content = { paddingValues ->
       Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-        LazyVerticalGrid(
+        LazyColumn(
           modifier =
             Modifier.widthIn(max = maxContentWidth).fillMaxSize().padding(horizontal = 24.dp),
-          columns = GridCells.Adaptive(minSize = 64.dp),
           contentPadding = paddingValues,
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
           verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-          item(span = { GridItemSpan(maxLineSpan) }) { Spacer(Modifier.requiredHeight(16.dp)) }
+          item { Spacer(Modifier.requiredHeight(16.dp)) }
 
-          item(span = { GridItemSpan(maxLineSpan) }) {
+          item {
             TextField(
               modifier =
                 Modifier.fillMaxWidth().focusRequester(feedLinkFocus).focusProperties {
@@ -300,7 +295,7 @@ private fun AddFeedContent(
             )
           }
 
-          item(span = { GridItemSpan(maxLineSpan) }) {
+          item {
             TextField(
               modifier =
                 Modifier.fillMaxWidth().focusRequester(feedTitleFocus).focusProperties {
@@ -318,30 +313,44 @@ private fun AddFeedContent(
             )
           }
 
-          item(span = { GridItemSpan(maxLineSpan) }) {
+          item {
             Column {
               HorizontalDivider(
                 modifier = Modifier.padding(vertical = 12.dp).ignoreHorizontalParentPadding(24.dp),
                 color = AppTheme.colorScheme.outlineVariant,
               )
 
-              FeedOptionSwitch(
+              SettingItem(
                 modifier = Modifier.ignoreHorizontalParentPadding(24.dp),
                 title = stringResource(Res.string.alwaysFetchSourceArticle),
-                checked = state.alwaysFetchSourceArticle,
-                onValueChanged = { newValue ->
-                  dispatch(AddFeedEvent.OnAlwaysFetchSourceArticleChanged(newValue))
+                action = {
+                  Switch(
+                    checked = state.alwaysFetchSourceArticle,
+                    onCheckedChange = {
+                      dispatch(AddFeedEvent.OnAlwaysFetchSourceArticleChanged(it))
+                    },
+                  )
+                },
+                onClick = {
+                  dispatch(
+                    AddFeedEvent.OnAlwaysFetchSourceArticleChanged(!state.alwaysFetchSourceArticle)
+                  )
                 },
               )
 
               HorizontalDivider(color = AppTheme.colorScheme.outlineVariant)
 
-              FeedOptionSwitch(
+              SettingItem(
                 modifier = Modifier.ignoreHorizontalParentPadding(24.dp),
                 title = stringResource(Res.string.showFeedFavIconTitle),
-                checked = state.showFeedFavIcon,
-                onValueChanged = { newValue ->
-                  dispatch(AddFeedEvent.OnShowFeedFavIconChanged(newValue))
+                action = {
+                  Switch(
+                    checked = state.showFeedFavIcon,
+                    onCheckedChange = { dispatch(AddFeedEvent.OnShowFeedFavIconChanged(it)) },
+                  )
+                },
+                onClick = {
+                  dispatch(AddFeedEvent.OnShowFeedFavIconChanged(!state.showFeedFavIcon))
                 },
               )
 
@@ -352,16 +361,21 @@ private fun AddFeedContent(
             }
           }
 
-          item(span = { GridItemSpan(maxLineSpan) }) {
-            TranslucentButton(
-              text = stringResource(Res.string.addToGroup),
-              leadingIcon = TwineIcons.NewGroup,
-              onClick = { openGroupSelection(state.selectedFeedGroups.map { it.id }.toSet()) },
-            )
-          }
-
-          items(state.selectedFeedGroups.toList()) { group ->
-            GroupItem(group) { dispatch(AddFeedEvent.OnRemoveGroupClicked(group)) }
+          item {
+            val selectedGroup = state.selectedFeedGroups.firstOrNull()
+            if (selectedGroup == null) {
+              TranslucentButton(
+                text = stringResource(Res.string.addToGroup),
+                leadingIcon = TwineIcons.NewGroup,
+                onClick = { openGroupSelection(emptySet()) },
+              )
+            } else {
+              GroupItem(
+                group = selectedGroup,
+                onChangeClick = { openGroupSelection(setOf(selectedGroup.id)) },
+                onRemoveClick = { dispatch(AddFeedEvent.OnRemoveGroupClicked(selectedGroup)) },
+              )
+            }
           }
         }
       }
@@ -373,35 +387,12 @@ private fun AddFeedContent(
 }
 
 @Composable
-private fun FeedOptionSwitch(
-  title: String,
-  checked: Boolean,
-  onValueChanged: (Boolean) -> Unit,
-  modifier: Modifier = Modifier,
-) {
-  Row(
-    modifier =
-      modifier.clickable { onValueChanged(!checked) }.padding(vertical = 16.dp, horizontal = 24.dp),
-    verticalAlignment = Alignment.CenterVertically,
-  ) {
-    Text(
-      modifier = Modifier.weight(1f),
-      text = title,
-      color = AppTheme.colorScheme.onSurface,
-      style = MaterialTheme.typography.titleMedium,
-    )
-
-    Spacer(Modifier.requiredSize(16.dp))
-
-    Switch(checked = checked, onCheckedChange = onValueChanged)
-  }
-}
-
-@Composable
-private fun GroupItem(group: FeedGroup, onClick: () -> Unit) {
+private fun GroupItem(group: FeedGroup, onChangeClick: () -> Unit, onRemoveClick: () -> Unit) {
   Column(
     modifier =
-      Modifier.clip(MaterialTheme.shapes.small).clickable { onClick() }.padding(bottom = 4.dp),
+      Modifier.clip(MaterialTheme.shapes.small)
+        .clickable { onChangeClick() }
+        .padding(bottom = 4.dp),
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     Box {
@@ -413,7 +404,8 @@ private fun GroupItem(group: FeedGroup, onClick: () -> Unit) {
             .clip(CircleShape)
             .requiredSize(24.dp)
             .background(AppTheme.colorScheme.primary, CircleShape)
-            .border(2.dp, AppTheme.colorScheme.backdrop, CircleShape),
+            .border(2.dp, AppTheme.colorScheme.backdrop, CircleShape)
+            .clickable { onRemoveClick() },
         contentAlignment = Alignment.Center,
       ) {
         Icon(

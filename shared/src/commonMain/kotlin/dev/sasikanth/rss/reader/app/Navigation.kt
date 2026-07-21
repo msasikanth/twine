@@ -45,6 +45,9 @@ import dev.sasikanth.rss.reader.accountselection.ui.AccountSelectionScreen
 import dev.sasikanth.rss.reader.addfeed.AddFeedEvent
 import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
 import dev.sasikanth.rss.reader.addfeed.ui.AddFeedScreen
+import dev.sasikanth.rss.reader.bazqux.BazQuxLoginViewModel
+import dev.sasikanth.rss.reader.bazqux.ui.BAZQUX_LOGIN_SUCCESS_KEY
+import dev.sasikanth.rss.reader.bazqux.ui.BazQuxLoginScreen
 import dev.sasikanth.rss.reader.blockedwords.BlockedWordsScreen
 import dev.sasikanth.rss.reader.blockedwords.BlockedWordsViewModel
 import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
@@ -160,6 +163,7 @@ fun EntryProviderScope<NavKey>.accountSelectionScreen(
       openPaywall = { navigator.navigate(Screen.Paywall()) },
       openFreshRssLogin = { navigator.navigate(Screen.FreshRssLogin) },
       openMinifluxLogin = { navigator.navigate(Screen.MinifluxLogin) },
+      openBazQuxLogin = { navigator.navigate(Screen.BazQuxLogin) },
       goBack = { navigator.goBack() },
     )
   }
@@ -298,6 +302,17 @@ fun EntryProviderScope<NavKey>.mainScreen(
               }
               .launchIn(this)
           }
+          LaunchedEffect(Unit) {
+            navigator.results
+              .map { it[BAZQUX_LOGIN_SUCCESS_KEY] as? Boolean }
+              .filterNotNull()
+              .filter { it }
+              .onEach {
+                viewModel.dispatch(SettingsEvent.TriggerSync)
+                navigator.consumeResult(BAZQUX_LOGIN_SUCCESS_KEY)
+              }
+              .launchIn(this)
+          }
 
           SettingsScreen(
             viewModel = viewModel,
@@ -394,6 +409,7 @@ fun EntryProviderScope<NavKey>.settingsServicesScreen(
       openPaywall = { navigator.navigate(Screen.Paywall()) },
       openFreshRssLogin = { navigator.navigate(Screen.FreshRssLogin) },
       openMinifluxLogin = { navigator.navigate(Screen.MinifluxLogin) },
+      openBazQuxLogin = { navigator.navigate(Screen.BazQuxLogin) },
     )
   }
 }
@@ -474,6 +490,25 @@ fun EntryProviderScope<NavKey>.minifluxLoginScreen(
       viewModel = viewModel,
       onLoginSuccess = {
         navigator.setResult(MINIFLUX_LOGIN_SUCCESS_KEY, true)
+        navigator.goBack()
+      },
+      goBack = { navigator.goBack() },
+    )
+  }
+}
+
+fun EntryProviderScope<NavKey>.bazQuxLoginScreen(
+  bazQuxLoginViewModel: () -> BazQuxLoginViewModel,
+  navigator: AppNavigator,
+  modifier: Modifier = Modifier,
+) {
+  entry<Screen.BazQuxLogin> {
+    val viewModel = viewModel { bazQuxLoginViewModel() }
+    BazQuxLoginScreen(
+      modifier = modifier,
+      viewModel = viewModel,
+      onLoginSuccess = {
+        navigator.setResult(BAZQUX_LOGIN_SUCCESS_KEY, true)
         navigator.goBack()
       },
       goBack = { navigator.goBack() },

@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.reader.readability
 
+import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
@@ -48,30 +49,50 @@ class HtmlReadabilityRunner(private val dispatchersProvider: DispatchersProvider
     image: String?,
   ): ReadabilityResult =
     withContext(dispatchersProvider.io) {
-      // Use CHROME as it is generally the most compatible, but Rhino is the engine.
-      WebClient(BrowserVersion.CHROME).use { webClient ->
-        webClient.options.isCssEnabled = false
-        webClient.options.isDownloadImages = false
-        webClient.options.isGeolocationEnabled = false
-        // We want to catch errors to know if our ES5 transpilation failed
-        webClient.options.isThrowExceptionOnScriptError = true
-        webClient.options.isThrowExceptionOnFailingStatusCode = false
+      try {
+        parseHtmlOrThrow(link, content, image)
+      } catch (e: Exception) {
+        // HtmlUnit is a best-effort HTML engine, not a real browser: it can throw on
+        // content it can't model correctly (e.g. it NPEs building a live frame window
+        // for <iframe> tags parsed into a windowless document). Never let a parsing
+        // quirk take down the reader — show the original content instead.
+        Logger.e(e) { "Failed to run readability pipeline, falling back to raw content" }
+        ReadabilityResult(content = content)
+      }
+    }
 
-        val htmlShell = ReaderHTML.createOrGet()
-        val page: HtmlPage = webClient.loadHtmlCodeIntoCurrentWindow(htmlShell)
+  private suspend fun parseHtmlOrThrow(
+    link: String?,
+    content: String,
+    image: String?,
+  ): ReadabilityResult {
+    // Fetch the shell HTML before opening the WebClient so no suspension point
+    // (and potential dispatcher thread hop) happens while the client/page is live.
+    val htmlShell = ReaderHTML.createOrGet()
 
-        val script =
-          """
+    // Use CHROME as it is generally the most compatible, but Rhino is the engine.
+    WebClient(BrowserVersion.CHROME).use { webClient ->
+      webClient.options.isCssEnabled = false
+      webClient.options.isDownloadImages = false
+      webClient.options.isGeolocationEnabled = false
+      // We want to catch errors to know if our ES5 transpilation failed
+      webClient.options.isThrowExceptionOnScriptError = true
+      webClient.options.isThrowExceptionOnFailingStatusCode = false
+
+      val page: HtmlPage = webClient.loadHtmlCodeIntoCurrentWindow(htmlShell)
+
+      val script =
+        """
         var parsingResult = null;
         var parsingError = null;
-        
+
         if (typeof parseReaderContent === 'undefined') {
           parsingError = "parseReaderContent is undefined. Scripts not loaded?";
         } else {
           try {
             parseReaderContent(
-              ${link.asJSString}, 
-              ${image.asJSString}, 
+              ${link.asJSString},
+              ${image.asJSString},
               ${content.asJSString}
             ).then(function(res) {
               parsingResult = JSON.stringify(res);
@@ -83,38 +104,38 @@ class HtmlReadabilityRunner(private val dispatchersProvider: DispatchersProvider
           }
         }
       """
-            .trimIndent()
+          .trimIndent()
 
-        try {
-          page.executeJavaScript(script)
-        } catch (e: Exception) {
-          throw RuntimeException("Failed to execute initial script: ${e.message}", e)
-        }
-
-        // Wait for result
-        val maxRetries = 100 // 10 seconds
-        var result: String? = null
-
-        for (i in 0 until maxRetries) {
-          webClient.waitForBackgroundJavaScript(100)
-
-          val errorObj = page.executeJavaScript("parsingError").javaScriptResult
-          if (errorObj != null && errorObj != Undefined.instance) {
-            throw RuntimeException("JS parsing failed: ${errorObj}")
-          }
-
-          val resultObj = page.executeJavaScript("parsingResult").javaScriptResult
-          if (resultObj != null && resultObj != Undefined.instance) {
-            result = resultObj.toString()
-            break
-          }
-        }
-
-        if (result == null) {
-          throw RuntimeException("Timeout waiting for readability parsing (10s)")
-        }
-
-        return@use json.decodeFromString<ReadabilityResult>(result)
+      try {
+        page.executeJavaScript(script)
+      } catch (e: Exception) {
+        throw RuntimeException("Failed to execute initial script: ${e.message}", e)
       }
+
+      // Wait for result
+      val maxRetries = 100 // 10 seconds
+      var result: String? = null
+
+      for (i in 0 until maxRetries) {
+        webClient.waitForBackgroundJavaScript(100)
+
+        val errorObj = page.executeJavaScript("parsingError").javaScriptResult
+        if (errorObj != null && errorObj != Undefined.instance) {
+          throw RuntimeException("JS parsing failed: ${errorObj}")
+        }
+
+        val resultObj = page.executeJavaScript("parsingResult").javaScriptResult
+        if (resultObj != null && resultObj != Undefined.instance) {
+          result = resultObj.toString()
+          break
+        }
+      }
+
+      if (result == null) {
+        throw RuntimeException("Timeout waiting for readability parsing (10s)")
+      }
+
+      return json.decodeFromString<ReadabilityResult>(result)
     }
+  }
 }

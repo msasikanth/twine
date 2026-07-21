@@ -19,19 +19,46 @@ var JUNK_SELECTORS = [
 ].join(",");
 
 
-function processIFrames(doc) {
-  var iframes = doc.querySelectorAll("iframe");
+// HtmlUnit's DOMParser builds a windowless document (enclosing window is
+// explicitly null), but it still tries to construct a live FrameWindow the
+// moment it parses a real <iframe>/<frame> tag, which NPEs on the null
+// parent window - and the same crash happens later if a real iframe tag is
+// created any other way (e.g. Readability's own iframe handling), since the
+// window stays null for the document's whole lifetime. Renaming the tag
+// before parsing keeps HtmlUnit from ever recognizing it as a frame element.
+var IFRAME_TAG = "twine-iframe";
+
+function neutralizeIframeTags(html) {
+  return html.replace(/<(\/?)i?frame\b/gi, "<$1" + IFRAME_TAG);
+}
+
+/**
+ * Renamed iframe tags are opaque to Readability's own iframe handling (which
+ * expects real "iframe" elements), so swap each one for a plain link before
+ * Readability runs. This also means the result survives Readability's content
+ * scoring like any other link, instead of relying on iframe-specific rules.
+ */
+function replaceIframesWithLinks(doc) {
+  var iframes = doc.querySelectorAll(IFRAME_TAG);
   for (var i = 0; i < iframes.length; i++) {
     var iframe = iframes[i];
-    var src = iframe.getAttribute("src");
-    var lazySrc =
+    var src =
+      iframe.getAttribute("src") ||
       iframe.getAttribute("data-src") ||
       iframe.getAttribute("data-runner-src") ||
       iframe.getAttribute("data-lazy-src");
 
-    if (!src && lazySrc) {
-      iframe.src = lazySrc;
+    if (!src) {
+      iframe.remove();
+      continue;
     }
+
+    var label = src.includes("youtube.com") ? "YouTube Video" : "Video";
+    var link = doc.createElement("a");
+    link.setAttribute("href", src);
+    link.textContent = label;
+
+    iframe.parentNode.replaceChild(link, iframe);
   }
 }
 
@@ -431,24 +458,15 @@ function getImageCaption(markdown) {
 function parseReaderContent(link, bannerImage, html) {
   return new Promise(function(resolve, reject) {
       try {
+        var safeHtml = neutralizeIframeTags(html);
         var parser = new DOMParser();
         var doc = parser.parseFromString(
-          "<html><head><base href=\"" + link + "\"></head><body>" + html + "</body></html>",
+          "<html><head><base href=\"" + link + "\"></head><body>" + safeHtml + "</body></html>",
           "text/html"
         );
         var turndownService = new TurndownService({
             headingStyle: 'atx',
             codeBlockStyle: 'fenced'
-        });
-
-        turndownService.addRule("iframe", {
-          filter: "iframe",
-          replacement: function(content, node) {
-            var src = node.getAttribute("src") || node.getAttribute("data-src");
-            if (!src) return "";
-            var label = src.includes("youtube.com") ? "YouTube Video" : "Video";
-            return "\n\n[" + label + "](" + src + ")\n\n";
-          }
         });
 
         turndownService.addRule("image", {
@@ -499,7 +517,7 @@ function parseReaderContent(link, bannerImage, html) {
 
         removeFirstH1(doc);
         stripAriaHidden(doc);
-        processIFrames(doc);
+        replaceIframesWithLinks(doc);
         processNoScriptImages(doc);
         transformShredditElements(doc);
         removeFirstImageTagByUrl(doc, bannerImage);
@@ -537,8 +555,11 @@ function parseReaderContent(link, bannerImage, html) {
         console.error("Reader Error:", error);
         // Never surface error text as article content; fall back to a plain
         // conversion of the original HTML, or nothing if even that fails.
+        // Turndown parses string input through the same DOMParser, so this
+        // must use the iframe-neutralized HTML too, or it can hit the exact
+        // crash it's trying to recover from.
         try {
-          resolve({ content: turndownService.turndown(html), excerpt: null });
+          resolve({ content: turndownService.turndown(safeHtml || neutralizeIframeTags(html)), excerpt: null });
         } catch (fallbackError) {
           resolve({ content: null, excerpt: null });
         }

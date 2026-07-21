@@ -149,7 +149,7 @@ class FreshRssSource(
             streamId = streamId,
             limit = limit,
             newerThan = newerThan,
-            continuation = continuation ?: "",
+            continuation = continuation?.takeIf { it.isNotBlank() },
             excludeState = excludeState,
           )
         )
@@ -191,7 +191,10 @@ class FreshRssSource(
 
   suspend fun addFeed(url: String): AddFeedResponsePayload? {
     return withContext(dispatchersProvider.io) {
-      authenticatedHttpClient().post(Reader.AddFeed(quickadd = url)).body()
+      authenticatedHttpClient()
+        .post(Reader.AddFeed(quickadd = url))
+        .body<AddFeedResponsePayload>()
+        .takeIf { it.streamId.isNotBlank() }
     }
   }
 
