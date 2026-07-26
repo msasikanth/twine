@@ -220,7 +220,13 @@ class FeedFetcher(
     redirectCount: Int,
   ): FeedFetchResult {
     val headerLocation = response.headers["Location"]
-    val redirectToUrl = UrlUtils.safeUrl(host = url.host, url = headerLocation)
+    val redirectToUrl =
+      UrlUtils.safeUrl(
+        host = url.host,
+        url = headerLocation,
+        user = url.user,
+        password = url.password,
+      )
 
     if (redirectToUrl == url.toString() || redirectToUrl.isNullOrBlank()) {
       return FeedFetchResult.Error(Exception("Failed to fetch the feed"))

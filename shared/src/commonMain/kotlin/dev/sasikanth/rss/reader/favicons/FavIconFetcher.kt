@@ -98,8 +98,14 @@ class FavIconFetcher(
             val sink =
               object : okio.Sink {
                   var bytesWritten = 0L
+                  var limitReached = false
 
                   override fun write(source: okio.Buffer, byteCount: Long) {
+                    if (limitReached) {
+                      source.skip(byteCount)
+                      return
+                    }
+
                     val toWrite = minOf(byteCount, MAX_HTML_READ_SIZE - bytesWritten)
                     if (toWrite > 0) {
                       buffer.write(source, toWrite)
@@ -107,6 +113,7 @@ class FavIconFetcher(
                     }
 
                     if (bytesWritten >= MAX_HTML_READ_SIZE) {
+                      limitReached = true
                       throw LimitExceededException()
                     }
                   }

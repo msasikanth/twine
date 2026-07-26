@@ -67,18 +67,29 @@ object UrlUtils {
     }
   }
 
-  fun safeUrl(host: String?, url: String?): String? {
+  fun safeUrl(
+    host: String?,
+    url: String?,
+    user: String? = null,
+    password: String? = null,
+  ): String? {
     if (host.isNullOrBlank()) return null
 
-    return if (!url.isNullOrBlank()) {
+    if (url.isNullOrBlank()) return null
+
+    val urlBuilder =
       if (isAbsoluteUrl(url)) {
-        URLBuilder(url).buildString()
+        URLBuilder(url)
       } else {
-        URLBuilder().apply { set(host = host, path = url) }.buildString()
+        URLBuilder().apply { set(host = host, path = url) }
       }
-    } else {
-      null
+
+    if (!user.isNullOrEmpty() && !password.isNullOrEmpty()) {
+      urlBuilder.user = user
+      urlBuilder.password = password
     }
+
+    return urlBuilder.buildString()
   }
 
   private fun isAbsoluteUrl(url: String): Boolean {
