@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.core.network.di
 
 import co.touchlab.kermit.Logger as KermitLogger
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.core.network.plugins.UrlBasicAuthPlugin
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.HttpClientEngineFactory
@@ -76,5 +77,7 @@ fun <T : HttpClientEngineConfig> httpClient(
     install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
 
     install(Resources)
+
+    install(UrlBasicAuthPlugin)
   }
 }
