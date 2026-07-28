@@ -53,7 +53,6 @@ import dev.sasikanth.rss.reader.data.opml.OpmlFeed
 import dev.sasikanth.rss.reader.data.opml.OpmlResult
 import dev.sasikanth.rss.reader.feeds.ui.SelectedCheckIndicator
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonCancel
@@ -140,6 +139,7 @@ internal fun OPMLSettingItem(
 @Composable
 internal fun OpmlFeedSelectionSheet(
   feeds: List<OpmlFeed>,
+  selectionLimit: Int,
   onFeedsSelected: (List<OpmlFeed>) -> Unit,
   onDismiss: () -> Unit,
 ) {
@@ -150,9 +150,8 @@ internal fun OpmlFeedSelectionSheet(
     sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
   ) {
     val selectedFeeds = remember { mutableStateListOf<OpmlFeed>() }
-    val canSelectMore by remember {
-      derivedStateOf { selectedFeeds.size < Constants.MAX_FREE_FEEDS }
-    }
+    val canSelectMore by
+      remember(selectionLimit) { derivedStateOf { selectedFeeds.size < selectionLimit } }
 
     Column(modifier = Modifier.fillMaxWidth()) {
       LazyColumn(
@@ -172,8 +171,7 @@ internal fun OpmlFeedSelectionSheet(
 
             Text(
               modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp),
-              text =
-                stringResource(Res.string.settingsOpmlSelectionSubtitle, Constants.MAX_FREE_FEEDS),
+              text = stringResource(Res.string.settingsOpmlSelectionSubtitle, selectionLimit),
               style = MaterialTheme.typography.labelLarge,
               color = AppTheme.colorScheme.onSurfaceVariant,
             )

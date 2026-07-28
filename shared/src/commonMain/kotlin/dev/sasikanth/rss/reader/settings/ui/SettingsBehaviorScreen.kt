@@ -168,6 +168,7 @@ private fun SettingsBehaviorContent(
       if (state.opmlFeedsToSelect != null) {
         OpmlFeedSelectionSheet(
           feeds = state.opmlFeedsToSelect,
+          selectionLimit = state.opmlFeedSelectionLimit,
           onFeedsSelected = { dispatch(SettingsEvent.OnOpmlFeedsSelected(it)) },
           onDismiss = { dispatch(SettingsEvent.ClearOpmlFeedsToSelect) },
         )

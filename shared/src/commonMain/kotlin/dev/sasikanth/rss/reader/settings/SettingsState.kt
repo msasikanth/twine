@@ -67,6 +67,7 @@ data class SettingsState(
   val showAppIconSelectionSheet: Boolean,
   val canSubscribe: Boolean,
   val opmlFeedsToSelect: List<OpmlFeed>?,
+  val opmlFeedSelectionLimit: Int,
   val showFreeFeedLimitWarning: Boolean,
   val blockedWordsCount: Int,
 ) {
@@ -121,6 +122,7 @@ data class SettingsState(
         showAppIconSelectionSheet = false,
         canSubscribe = false,
         opmlFeedsToSelect = null,
+        opmlFeedSelectionLimit = 0,
         showFreeFeedLimitWarning = false,
         blockedWordsCount = 0,
       )
