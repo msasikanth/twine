@@ -269,7 +269,23 @@ class SettingsViewModel(
   private fun onOpmlFeedsSelected(feeds: List<OpmlFeed>) {
     viewModelScope.launch {
       _state.update { it.copy(opmlFeedsToSelect = null) }
-      opmlManager.import(feeds)
+      if (feeds.isEmpty()) {
+        return@launch
+      }
+
+      val feedsToImport =
+        if (billingHandler.isSubscribed()) {
+          feeds
+        } else {
+          feeds.take(remainingFreeFeeds())
+        }
+
+      if (feedsToImport.isEmpty()) {
+        _state.update { it.copy(showFreeFeedLimitWarning = true) }
+        return@launch
+      }
+
+      opmlManager.import(feedsToImport)
     }
   }
 
@@ -412,12 +428,10 @@ class SettingsViewModel(
   private fun importOpmlClicked() {
     viewModelScope.launch {
       val isSubscribed = billingHandler.isSubscribed()
-      if (!isSubscribed) {
-        val feedsCount = rssRepository.numberOfFeeds().first()
-        if (feedsCount >= Constants.MAX_FREE_FEEDS) {
-          _state.update { it.copy(showFreeFeedLimitWarning = true) }
-          return@launch
-        }
+      val remainingFreeFeeds = remainingFreeFeeds()
+      if (!isSubscribed && remainingFreeFeeds == 0) {
+        _state.update { it.copy(showFreeFeedLimitWarning = true) }
+        return@launch
       }
 
       val opmlSources = opmlManager.pickAndDecode()
@@ -435,9 +449,16 @@ class SettingsViewModel(
               is OpmlFeedGroup -> source.feeds
             }
           }
-        _state.update { it.copy(opmlFeedsToSelect = feeds) }
+        _state.update {
+          it.copy(opmlFeedsToSelect = feeds, opmlFeedSelectionLimit = remainingFreeFeeds)
+        }
       }
     }
+  }
+
+  private suspend fun remainingFreeFeeds(): Int {
+    val feedsCount = rssRepository.numberOfFeeds().first()
+    return (Constants.MAX_FREE_FEEDS - feedsCount).coerceAtLeast(0L).toInt()
   }
 
   private fun onAppIconChanged(appIcon: AppIcon) {
