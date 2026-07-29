@@ -402,11 +402,14 @@ private fun HomeContent(
               with(density) { paddingValues.calculateTopPadding().roundToPx() }
             }
 
-          LaunchedEffect(
-            state.activePostIndex,
-            state.activePostScrollOffset,
-            featuredPosts.isNotEmpty(),
-          ) {
+          var featuredPostsLoaded by remember { mutableStateOf(false) }
+          LaunchedEffect(featuredPosts.isNotEmpty()) {
+            if (featuredPosts.isNotEmpty()) {
+              featuredPostsLoaded = true
+            }
+          }
+
+          LaunchedEffect(state.activePostIndex, state.activePostScrollOffset, featuredPostsLoaded) {
             val activePostIndex = state.activePostIndex
             val savedScrollOffset = state.activePostScrollOffset
             val numberOfFeaturedPosts = featuredPosts.size
