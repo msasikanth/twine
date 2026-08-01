@@ -138,7 +138,6 @@ internal fun NavigationDrawerContent(
   openGroupSelectionSheet: () -> Unit,
   openAddFeedScreen: () -> Unit,
   openPaywall: () -> Unit,
-  openFeedHealth: () -> Unit,
   closeDrawer: () -> Unit,
   modifier: Modifier = Modifier,
   expanded: Boolean = true,
@@ -176,7 +175,6 @@ internal fun NavigationDrawerContent(
     openFeedInfoSheet = openFeedInfoSheet,
     openGroupScreen = openGroupScreen,
     openGroupSelectionSheet = openGroupSelectionSheet,
-    openFeedHealth = openFeedHealth,
     closeDrawer = closeDrawerWithFocusClear,
     modifier = modifier,
     expanded = expanded,
@@ -201,7 +199,6 @@ internal fun NavigationDrawerContent(
   openFeedInfoSheet: (id: String) -> Unit,
   openGroupScreen: (id: String) -> Unit,
   openGroupSelectionSheet: () -> Unit,
-  openFeedHealth: () -> Unit,
   closeDrawer: () -> Unit,
   modifier: Modifier = Modifier,
   expanded: Boolean = true,
@@ -222,7 +219,6 @@ internal fun NavigationDrawerContent(
         openFeedInfoSheet = openFeedInfoSheet,
         openGroupScreen = openGroupScreen,
         openGroupSelectionSheet = openGroupSelectionSheet,
-        openFeedHealth = openFeedHealth,
         closeDrawer = closeDrawer,
         showCloseIcon = showCloseIcon,
         dismissOnSelection = dismissOnSelection,
@@ -253,7 +249,6 @@ private fun ExpandedDrawerContent(
   openFeedInfoSheet: (id: String) -> Unit,
   openGroupScreen: (id: String) -> Unit,
   openGroupSelectionSheet: () -> Unit,
-  openFeedHealth: () -> Unit,
   closeDrawer: () -> Unit,
   showCloseIcon: Boolean,
   dismissOnSelection: Boolean,
@@ -413,7 +408,6 @@ private fun ExpandedDrawerContent(
             feedsSortOrder = state.feedsSortOrder,
             onFeedsSortChanged = { dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
             onAddNewFeedClick = { dispatch(FeedsEvent.OnNewFeedClicked) },
-            onFeedHealthClick = openFeedHealth,
           )
         }
 
@@ -971,7 +965,6 @@ private fun NavigationDrawerPreview() {
       openGroupScreen = {},
       openGroupSelectionSheet = {},
       closeDrawer = {},
-      openFeedHealth = {},
     )
   }
 }

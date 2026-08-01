@@ -57,8 +57,6 @@ import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
 import dev.sasikanth.rss.reader.discovery.ui.DiscoveryScreen
 import dev.sasikanth.rss.reader.feed.FeedViewModel
 import dev.sasikanth.rss.reader.feed.ui.FeedInfoBottomSheet
-import dev.sasikanth.rss.reader.feedhealth.FeedHealthViewModel
-import dev.sasikanth.rss.reader.feedhealth.ui.FeedHealthScreen
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.freshrss.FreshRssLoginViewModel
@@ -341,7 +339,6 @@ fun EntryProviderScope<NavKey>.mainScreen(
         openGroupSelectionSheet = { feedsViewModel.dispatch(FeedsEvent.OnAddToGroupClicked) },
         openAddFeedScreen = { navigator.navigate(Screen.AddFeed) },
         openPaywall = { navigator.navigate(Screen.Paywall()) },
-        openFeedHealth = { navigator.navigate(Screen.FeedHealth) },
         canHandleBack = isMainActive,
         isSideNavigationExpanded = isSideNavigationExpanded.value,
         setSideNavigationExpanded = { isSideNavigationExpanded.value = it },
@@ -425,19 +422,7 @@ fun EntryProviderScope<NavKey>.settingsDataScreen(
       modifier = modifier,
       statisticsViewModel = viewModel,
       goBack = { navigator.goBack() },
-      openFeedHealth = { navigator.navigate(Screen.FeedHealth) },
     )
-  }
-}
-
-fun EntryProviderScope<NavKey>.feedHealthScreen(
-  feedHealthViewModel: () -> FeedHealthViewModel,
-  navigator: AppNavigator,
-  modifier: Modifier = Modifier,
-) {
-  entry<Screen.FeedHealth> {
-    val viewModel = viewModel { feedHealthViewModel() }
-    FeedHealthScreen(viewModel = viewModel, goBack = { navigator.goBack() }, modifier = modifier)
   }
 }
 

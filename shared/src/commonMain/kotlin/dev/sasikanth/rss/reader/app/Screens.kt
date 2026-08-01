@@ -81,8 +81,6 @@ sealed interface Screen : NavKey {
 
   @Serializable data object BlockedWords : Screen
 
-  @Serializable data object FeedHealth : Screen
-
   @Serializable data object FreshRssLogin : Screen
 
   @Serializable data object MinifluxLogin : Screen

@@ -24,7 +24,6 @@ import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
-import dev.sasikanth.rss.reader.core.model.local.FeedHealthInfo
 import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.local.PostFlag
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
@@ -448,30 +447,6 @@ class RssRepository(
 
   fun numberOfFeeds(): Flow<Long> {
     return feedRepository.numberOfFeeds()
-  }
-
-  fun staleFeeds(
-    sixMonthsAgo: Instant,
-    createdBefore: Instant,
-    limit: Long,
-  ): Flow<List<FeedHealthInfo>> {
-    return feedRepository.staleFeeds(sixMonthsAgo, createdBefore, limit)
-  }
-
-  fun highVolumeFeeds(
-    after: Instant,
-    limit: Long,
-    postsThreshold: Long,
-  ): Flow<List<FeedHealthInfo>> {
-    return feedRepository.highVolumeFeeds(after, limit, postsThreshold)
-  }
-
-  fun leastReadFeeds(after: Instant, limit: Long): Flow<List<FeedHealthInfo>> {
-    return feedRepository.leastReadFeeds(after, limit)
-  }
-
-  fun brokenFeeds(threshold: Long, limit: Long): Flow<List<FeedHealthInfo>> {
-    return feedRepository.brokenFeeds(threshold, limit)
   }
 
   suspend fun incrementFeedFetchErrors(feedId: String) {
