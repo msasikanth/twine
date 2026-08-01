@@ -80,7 +80,6 @@ import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
 import dev.sasikanth.rss.reader.feed.FeedViewModel
-import dev.sasikanth.rss.reader.feedhealth.FeedHealthViewModel
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.freshrss.FreshRssLoginViewModel
 import dev.sasikanth.rss.reader.group.GroupViewModel
@@ -174,7 +173,6 @@ fun App(
   groupViewModel: (SavedStateHandle) -> GroupViewModel,
   blockedWordsViewModel: () -> BlockedWordsViewModel,
   statisticsViewModel: () -> StatisticsViewModel,
-  feedHealthViewModel: () -> FeedHealthViewModel,
   discoveryViewModel: () -> DiscoveryViewModel,
   premiumPaywallViewModel: () -> PremiumPaywallViewModel,
   @Assisted onThemeChange: (useDarkTheme: Boolean) -> Unit,
@@ -470,12 +468,6 @@ fun App(
 
         settingsDataScreen(
           statisticsViewModel = statisticsViewModel,
-          navigator = navigator,
-          modifier = screenModifier,
-        )
-
-        feedHealthScreen(
-          feedHealthViewModel = feedHealthViewModel,
           navigator = navigator,
           modifier = screenModifier,
         )

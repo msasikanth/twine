@@ -86,7 +86,6 @@ internal fun MainScreen(
   openGroupSelectionSheet: () -> Unit,
   openAddFeedScreen: () -> Unit,
   openPaywall: () -> Unit,
-  openFeedHealth: () -> Unit,
   isSideNavigationExpanded: Boolean,
   setSideNavigationExpanded: (Boolean) -> Unit,
   modifier: Modifier = Modifier,
@@ -296,7 +295,6 @@ internal fun MainScreen(
         openGroupSelectionSheet = openGroupSelectionSheet,
         openAddFeedScreen = openAddFeedScreen,
         openPaywall = openPaywall,
-        openFeedHealth = openFeedHealth,
         closeDrawer = {
           when {
             hasInlineNavigation -> {

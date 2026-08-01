@@ -22,7 +22,6 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.model.local.Feed
-import dev.sasikanth.rss.reader.core.model.local.FeedHealthInfo
 import dev.sasikanth.rss.reader.data.database.FeedQueries
 import dev.sasikanth.rss.reader.data.database.FeedSearchFTSQueries
 import dev.sasikanth.rss.reader.data.database.TransactionRunner
@@ -332,101 +331,6 @@ class FeedRepository(
       hideFromAllFeeds = hideFromAllFeeds,
       enableNotifications = enableNotifications,
     )
-  }
-
-  fun staleFeeds(
-    sixMonthsAgo: Instant,
-    createdBefore: Instant,
-    limit: Long,
-  ): Flow<List<FeedHealthInfo>> {
-    return feedQueries
-      .staleFeeds(
-        sixMonthsAgo = sixMonthsAgo,
-        createdBefore = createdBefore,
-        limit = limit,
-        mapper = { id, name, icon, homepageLink, showFeedFavIcon, lastPostDate, totalPostsCount ->
-          FeedHealthInfo(
-            id = id,
-            name = name,
-            icon = icon,
-            homepageLink = homepageLink,
-            showFeedFavIcon = showFeedFavIcon,
-            lastPostDate = lastPostDate,
-            totalPostsCount = totalPostsCount,
-          )
-        },
-      )
-      .asFlow()
-      .mapToList(dispatchersProvider.databaseRead)
-  }
-
-  fun highVolumeFeeds(
-    after: Instant,
-    limit: Long,
-    postsThreshold: Long,
-  ): Flow<List<FeedHealthInfo>> {
-    return feedQueries
-      .highVolumeFeeds(
-        after = after,
-        limit = limit,
-        postsThreshold = postsThreshold,
-        mapper = { id, name, icon, homepageLink, showFeedFavIcon, totalPostsCount ->
-          FeedHealthInfo(
-            id = id,
-            name = name,
-            icon = icon,
-            homepageLink = homepageLink,
-            showFeedFavIcon = showFeedFavIcon,
-            lastPostDate = null,
-            totalPostsCount = totalPostsCount,
-          )
-        },
-      )
-      .asFlow()
-      .mapToList(dispatchersProvider.databaseRead)
-  }
-
-  fun leastReadFeeds(after: Instant, limit: Long): Flow<List<FeedHealthInfo>> {
-    return feedQueries
-      .leastReadFeeds(
-        after = after,
-        limit = limit,
-        mapper = { id, name, icon, homepageLink, showFeedFavIcon, totalPostsCount, readPostsCount ->
-          FeedHealthInfo(
-            id = id,
-            name = name,
-            icon = icon,
-            homepageLink = homepageLink,
-            showFeedFavIcon = showFeedFavIcon,
-            lastPostDate = null,
-            totalPostsCount = totalPostsCount,
-            readPostsCount = readPostsCount,
-          )
-        },
-      )
-      .asFlow()
-      .mapToList(dispatchersProvider.databaseRead)
-  }
-
-  fun brokenFeeds(threshold: Long, limit: Long): Flow<List<FeedHealthInfo>> {
-    return feedQueries
-      .brokenFeeds(
-        threshold = threshold,
-        limit = limit,
-        mapper = { id, name, icon, homepageLink, showFeedFavIcon, totalPostsCount ->
-          FeedHealthInfo(
-            id = id,
-            name = name,
-            icon = icon,
-            homepageLink = homepageLink,
-            showFeedFavIcon = showFeedFavIcon,
-            lastPostDate = null,
-            totalPostsCount = totalPostsCount,
-          )
-        },
-      )
-      .asFlow()
-      .mapToList(dispatchersProvider.databaseRead)
   }
 
   suspend fun incrementFeedFetchErrors(feedId: String) {
