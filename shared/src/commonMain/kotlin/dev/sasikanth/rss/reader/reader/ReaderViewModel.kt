@@ -230,7 +230,11 @@ class ReaderViewModel(
       if (readerScreenArgs.fromScreen == Home || readerScreenArgs.fromScreen == AudioPlayer) {
         val allPostsPagingData =
           allPostsPager
-            .allPostsPagingData(sessionPostIds = { _openedPostItems.value.toList() })
+            .allPostsPagingData(
+              sessionPostIds = {
+                (_openedPostItems.value + observableActiveReaderPost.openedPostIds.value).toList()
+              }
+            )
             .cachedIn(coroutineScope)
         _state.update { it.copy(posts = allPostsPagingData) }
       } else {

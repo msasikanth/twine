@@ -38,7 +38,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
@@ -253,10 +252,8 @@ private fun HomeContent(
     }
 
   val canShowBottomBar = platform !is Platform.Desktop && state.showPinnedSources
-  val appBarScrollBehaviour = TopAppBarDefaults.enterAlwaysScrollBehavior()
   val bottomBarScrollState =
     rememberPinnedSourcesBottomBarScrollBehavior(canScroll = { canShowBottomBar })
-  val homeScrollBehavior = rememberHomeScrollBehavior(appBarScrollBehaviour, bottomBarScrollState)
 
   val homeFocusRequester = remember { FocusRequester() }
   if (platform == Platform.Desktop) {
@@ -277,8 +274,6 @@ private fun HomeContent(
   LaunchedEffect(state.activeSource) {
     if (state.activeSource != state.prevActiveSource) {
       bottomBarScrollState.state.heightOffset = 0f
-      appBarScrollBehaviour.state.heightOffset = 0f
-      appBarScrollBehaviour.state.contentOffset = 0f
     }
   }
 
@@ -367,7 +362,7 @@ private fun HomeContent(
     ) {
       val nestedScrollModifier =
         if (platform !is Platform.Desktop) {
-          Modifier.nestedScroll(homeScrollBehavior.nestedScrollConnection)
+          Modifier.nestedScroll(bottomBarScrollState.nestedScrollConnection)
         } else {
           Modifier
         }
@@ -386,7 +381,6 @@ private fun HomeContent(
             listState = postsListState,
             hasUnreadPosts = latestState.hasUnreadPosts,
             confirmMarkAllAsRead = latestState.confirmMarkAllAsRead,
-            scrollBehavior = if (platform !is Platform.Desktop) appBarScrollBehaviour else null,
             onMenuClicked = onMenuClicked,
             onShowPostsSortFilter = { dispatch(HomeEvent.ShowPostsSortFilter(true)) },
             onMarkPostsAsRead = { dispatch(HomeEvent.MarkPostsAsRead(it)) },
@@ -409,7 +403,13 @@ private fun HomeContent(
             }
           }
 
-          LaunchedEffect(state.activePostIndex, state.activePostScrollOffset, featuredPostsLoaded) {
+          LaunchedEffect(
+            state.activePostId,
+            state.activePostIndex,
+            state.activePostScrollOffset,
+            featuredPostsLoaded,
+          ) {
+            val activePostId = state.activePostId
             val activePostIndex = state.activePostIndex
             val savedScrollOffset = state.activePostScrollOffset
             val numberOfFeaturedPosts = featuredPosts.size
@@ -420,20 +420,46 @@ private fun HomeContent(
 
             snapshotFlow { postsListState.isScrollInProgress }.first { !it }
 
-            if (activePostIndex < numberOfFeaturedPosts && numberOfFeaturedPosts > 0) {
-              postsListState.scrollToItem(0, scrollOffset = -(savedScrollOffset ?: 0))
-              featuredPostsPagerState.scrollToPage(activePostIndex)
-            } else {
-              // activePostIndex counts featured posts first, then list posts. In the
-              // LazyColumn the featured section always occupies item 0 (even when the
-              // featured list is empty), so the list index of a post is its position
-              // among non-featured posts plus one.
-              val adjustedIndex = (activePostIndex - numberOfFeaturedPosts + 1).coerceAtLeast(0)
+            val featuredIndexById =
+              if (activePostId != null) {
+                featuredPosts.indexOfFirst { it.resolvedPost.id == activePostId }
+              } else {
+                -1
+              }
+            val listIndexById =
+              if (activePostId != null && featuredIndexById == -1) {
+                latestPosts?.itemSnapshotList?.let { snapshot ->
+                  val itemIndex = snapshot.items.indexOfFirst { it.id == activePostId }
+                  // Plus one because the featured section always occupies LazyColumn item 0
+                  if (itemIndex >= 0) snapshot.placeholdersBefore + itemIndex + 1 else null
+                }
+              } else {
+                null
+              }
 
-              postsListState.scrollToItem(
-                adjustedIndex,
-                scrollOffset = -(savedScrollOffset ?: topOffset),
-              )
+            when {
+              featuredIndexById >= 0 -> {
+                postsListState.scrollToItem(0, scrollOffset = -(savedScrollOffset ?: 0))
+                featuredPostsPagerState.scrollToPage(featuredIndexById)
+              }
+              listIndexById != null -> {
+                postsListState.scrollToItem(
+                  listIndexById,
+                  scrollOffset = -(savedScrollOffset ?: topOffset),
+                )
+              }
+              targetIsFeatured -> {
+                postsListState.scrollToItem(0, scrollOffset = -(savedScrollOffset ?: 0))
+                featuredPostsPagerState.scrollToPage(activePostIndex)
+              }
+              else -> {
+                val adjustedIndex = (activePostIndex - numberOfFeaturedPosts + 1).coerceAtLeast(0)
+
+                postsListState.scrollToItem(
+                  adjustedIndex,
+                  scrollOffset = -(savedScrollOffset ?: topOffset),
+                )
+              }
             }
           }
 
@@ -553,20 +579,6 @@ private fun HomeContent(
                 bottomBarScrollState.state.heightOffset = value
               }
             }
-            launch {
-              animate(initialValue = appBarScrollBehaviour.state.heightOffset, targetValue = 0f) {
-                value,
-                _ ->
-                appBarScrollBehaviour.state.heightOffset = value
-              }
-            }
-            launch {
-              animate(initialValue = appBarScrollBehaviour.state.contentOffset, targetValue = 0f) {
-                value,
-                _ ->
-                appBarScrollBehaviour.state.contentOffset = value
-              }
-            }
             postsListState.animateScrollToItem(0)
           }
           dispatch(HomeEvent.LoadNewArticlesClick)
@@ -578,20 +590,6 @@ private fun HomeContent(
               value,
               _ ->
               bottomBarScrollState.state.heightOffset = value
-            }
-          }
-          launch {
-            animate(initialValue = appBarScrollBehaviour.state.heightOffset, targetValue = 0f) {
-              value,
-              _ ->
-              appBarScrollBehaviour.state.heightOffset = value
-            }
-          }
-          launch {
-            animate(initialValue = appBarScrollBehaviour.state.contentOffset, targetValue = 0f) {
-              value,
-              _ ->
-              appBarScrollBehaviour.state.contentOffset = value
             }
           }
           postsListState.animateScrollToItem(0)

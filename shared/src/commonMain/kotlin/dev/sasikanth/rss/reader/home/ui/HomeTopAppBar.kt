@@ -41,7 +41,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -88,7 +87,6 @@ internal fun HomeTopAppBar(
   listState: LazyListState,
   hasUnreadPosts: Boolean,
   confirmMarkAllAsRead: Boolean,
-  scrollBehavior: TopAppBarScrollBehavior?,
   modifier: Modifier = Modifier,
   onMenuClicked: (() -> Unit)? = null,
   onShowPostsSortFilter: () -> Unit,
@@ -127,7 +125,6 @@ internal fun HomeTopAppBar(
           alpha = backgroundAlphaProvider(),
         )
       },
-    scrollBehavior = scrollBehavior,
     contentPadding = PaddingValues(start = 0.dp, top = 8.dp, end = 12.dp, bottom = 8.dp),
     title = { SourceInfo(source = source) },
     navigationIcon = {

@@ -214,6 +214,7 @@ class HomeViewModel(
           unreadOnly = unreadOnly,
           after = postsAfter,
           postsUpperBound = postsUpperBound,
+          sessionPostIds = observableActiveReaderPost.openedPostIds.value.toList(),
         )
 
       if (position != null) {
@@ -237,6 +238,8 @@ class HomeViewModel(
     val lastRefreshedAt =
       state.value.lastRefreshedAt?.toInstant(TimeZone.currentSystemDefault()) ?: Clock.System.now()
 
+    val sessionPostIds = observableActiveReaderPost.openedPostIds.value.toList()
+
     if (featuredPosts.isEmpty()) {
       return rssRepository.postPosition(
         postId = postId,
@@ -245,6 +248,7 @@ class HomeViewModel(
         unreadOnly = unreadOnly,
         after = postsAfter,
         postsUpperBound = lastRefreshedAt,
+        sessionPostIds = sessionPostIds,
       ) ?: index
     }
 
@@ -281,6 +285,7 @@ class HomeViewModel(
         after = postsAfter,
         featuredPostsAfter = featuredPostsAfter,
         postsUpperBound = lastRefreshedAt,
+        sessionPostIds = sessionPostIds,
       )
 
     return if (position != null) {
@@ -359,12 +364,20 @@ class HomeViewModel(
           } else {
             selectedPost?.index ?: 0
           }
-        ActivePostPosition(index = homeIndex, scrollOffset = selectedPost?.scrollOffset)
+        ActivePostPosition(
+          postId = postId,
+          index = homeIndex,
+          scrollOffset = selectedPost?.scrollOffset,
+        )
       }
       .distinctUntilChanged()
       .onEach { position ->
         state.update {
-          it.copy(activePostIndex = position.index, activePostScrollOffset = position.scrollOffset)
+          it.copy(
+            activePostId = position.postId,
+            activePostIndex = position.index,
+            activePostScrollOffset = position.scrollOffset,
+          )
         }
       }
       .launchIn(viewModelScope)
@@ -540,7 +553,7 @@ class HomeViewModel(
   }
 }
 
-private data class ActivePostPosition(val index: Int, val scrollOffset: Int?)
+private data class ActivePostPosition(val postId: String?, val index: Int, val scrollOffset: Int?)
 
 private data class HomeSelectionFiltersCombined(
   val homeViewMode: HomeViewMode,
