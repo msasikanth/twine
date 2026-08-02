@@ -403,7 +403,13 @@ private fun HomeContent(
             }
           }
 
-          LaunchedEffect(state.activePostIndex, state.activePostScrollOffset, featuredPostsLoaded) {
+          LaunchedEffect(
+            state.activePostId,
+            state.activePostIndex,
+            state.activePostScrollOffset,
+            featuredPostsLoaded,
+          ) {
+            val activePostId = state.activePostId
             val activePostIndex = state.activePostIndex
             val savedScrollOffset = state.activePostScrollOffset
             val numberOfFeaturedPosts = featuredPosts.size
@@ -414,20 +420,46 @@ private fun HomeContent(
 
             snapshotFlow { postsListState.isScrollInProgress }.first { !it }
 
-            if (activePostIndex < numberOfFeaturedPosts && numberOfFeaturedPosts > 0) {
-              postsListState.scrollToItem(0, scrollOffset = -(savedScrollOffset ?: 0))
-              featuredPostsPagerState.scrollToPage(activePostIndex)
-            } else {
-              // activePostIndex counts featured posts first, then list posts. In the
-              // LazyColumn the featured section always occupies item 0 (even when the
-              // featured list is empty), so the list index of a post is its position
-              // among non-featured posts plus one.
-              val adjustedIndex = (activePostIndex - numberOfFeaturedPosts + 1).coerceAtLeast(0)
+            val featuredIndexById =
+              if (activePostId != null) {
+                featuredPosts.indexOfFirst { it.resolvedPost.id == activePostId }
+              } else {
+                -1
+              }
+            val listIndexById =
+              if (activePostId != null && featuredIndexById == -1) {
+                latestPosts?.itemSnapshotList?.let { snapshot ->
+                  val itemIndex = snapshot.items.indexOfFirst { it.id == activePostId }
+                  // Plus one because the featured section always occupies LazyColumn item 0
+                  if (itemIndex >= 0) snapshot.placeholdersBefore + itemIndex + 1 else null
+                }
+              } else {
+                null
+              }
 
-              postsListState.scrollToItem(
-                adjustedIndex,
-                scrollOffset = -(savedScrollOffset ?: topOffset),
-              )
+            when {
+              featuredIndexById >= 0 -> {
+                postsListState.scrollToItem(0, scrollOffset = -(savedScrollOffset ?: 0))
+                featuredPostsPagerState.scrollToPage(featuredIndexById)
+              }
+              listIndexById != null -> {
+                postsListState.scrollToItem(
+                  listIndexById,
+                  scrollOffset = -(savedScrollOffset ?: topOffset),
+                )
+              }
+              targetIsFeatured -> {
+                postsListState.scrollToItem(0, scrollOffset = -(savedScrollOffset ?: 0))
+                featuredPostsPagerState.scrollToPage(activePostIndex)
+              }
+              else -> {
+                val adjustedIndex = (activePostIndex - numberOfFeaturedPosts + 1).coerceAtLeast(0)
+
+                postsListState.scrollToItem(
+                  adjustedIndex,
+                  scrollOffset = -(savedScrollOffset ?: topOffset),
+                )
+              }
             }
           }
 

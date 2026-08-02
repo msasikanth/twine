@@ -341,6 +341,7 @@ class RssRepository(
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
+    sessionPostIds: List<String> = emptyList(),
   ): Int? {
     return postRepository.postPosition(
       postId,
@@ -350,6 +351,7 @@ class RssRepository(
       unreadOnly,
       after,
       postsUpperBound,
+      sessionPostIds,
     )
   }
 
@@ -363,6 +365,7 @@ class RssRepository(
     featuredPostsAfter: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     numberOfFeaturedPosts: Long = Constants.NUMBER_OF_FEATURED_POSTS,
+    sessionPostIds: List<String> = emptyList(),
   ): Int? {
     return postRepository.nonFeaturedPostPosition(
       postId,
@@ -374,6 +377,7 @@ class RssRepository(
       featuredPostsAfter,
       postsUpperBound,
       numberOfFeaturedPosts,
+      sessionPostIds,
     )
   }
 
