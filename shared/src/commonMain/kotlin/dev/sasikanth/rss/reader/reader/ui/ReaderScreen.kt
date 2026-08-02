@@ -79,7 +79,6 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.platform.LocalDensity
@@ -303,7 +302,6 @@ internal fun ReaderScreen(
   }
 
   val snackbarHostState = remember { SnackbarHostState() }
-  val scrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
   val fontFamily =
     when (state.selectedReaderFont) {
       ReaderFont.ComicNeue -> ComicNeueFontFamily
@@ -354,79 +352,56 @@ internal fun ReaderScreen(
       typography = typography,
       overriddenColorScheme = overriddenColorScheme,
     ) {
-      val nestedScrollModifier =
-        if (platform !is Platform.Desktop) {
-          Modifier.nestedScroll(scrollBehaviour.nestedScrollConnection)
-        } else {
-          Modifier
-        }
-
       Scaffold(
         modifier =
-          modifier
-            .fillMaxSize()
-            .then(nestedScrollModifier)
-            .focusRequester(readerFocusRequester)
-            .focusable()
-            .onKeyEvent { event ->
-              if (event.type != KeyEventType.KeyUp) return@onKeyEvent false
+          modifier.fillMaxSize().focusRequester(readerFocusRequester).focusable().onKeyEvent { event
+            ->
+            if (event.type != KeyEventType.KeyUp) return@onKeyEvent false
 
-              val currentReaderPost = runCatching { posts.peek(pagerState.settledPage) }.getOrNull()
+            val currentReaderPost = runCatching { posts.peek(pagerState.settledPage) }.getOrNull()
 
-              return@onKeyEvent when (event.key) {
-                Key.DirectionRight -> {
-                  coroutineScope.launch {
-                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                  }
+            return@onKeyEvent when (event.key) {
+              Key.DirectionRight -> {
+                coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
 
-                  true
-                }
-                Key.DirectionLeft -> {
-                  coroutineScope.launch {
-                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                  }
-
-                  true
-                }
-                Key.B if currentReaderPost != null -> {
-                  viewModel.dispatch(
-                    ReaderEvent.TogglePostBookmark(
-                      postId = currentReaderPost.id,
-                      currentBookmarkStatus = currentReaderPost.bookmarked,
-                    )
-                  )
-
-                  true
-                }
-                Key.U if currentReaderPost != null -> {
-                  viewModel.dispatch(ReaderEvent.OnMarkAsUnread(postId = currentReaderPost.id))
-
-                  true
-                }
-                Key.V if currentReaderPost != null -> {
-                  coroutineScope.launch { linkHandler.openLink(currentReaderPost.link) }
-
-                  true
-                }
-                Key.Escape -> {
-                  onBack()
-
-                  true
-                }
-                else -> false
+                true
               }
-            },
-        topBar = {
-          val scrollBehavior =
-            if (platform !is Platform.Desktop) {
-              scrollBehaviour
-            } else {
-              null
-            }
+              Key.DirectionLeft -> {
+                coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
 
+                true
+              }
+              Key.B if currentReaderPost != null -> {
+                viewModel.dispatch(
+                  ReaderEvent.TogglePostBookmark(
+                    postId = currentReaderPost.id,
+                    currentBookmarkStatus = currentReaderPost.bookmarked,
+                  )
+                )
+
+                true
+              }
+              Key.U if currentReaderPost != null -> {
+                viewModel.dispatch(ReaderEvent.OnMarkAsUnread(postId = currentReaderPost.id))
+
+                true
+              }
+              Key.V if currentReaderPost != null -> {
+                coroutineScope.launch { linkHandler.openLink(currentReaderPost.link) }
+
+                true
+              }
+              Key.Escape -> {
+                onBack()
+
+                true
+              }
+              else -> false
+            }
+          },
+        topBar = {
           CenterAlignedTopAppBar(
             expandedHeight = 72.dp,
-            scrollBehavior = scrollBehavior,
             colors =
               TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent,
