@@ -38,7 +38,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
@@ -253,10 +252,8 @@ private fun HomeContent(
     }
 
   val canShowBottomBar = platform !is Platform.Desktop && state.showPinnedSources
-  val appBarScrollBehaviour = TopAppBarDefaults.enterAlwaysScrollBehavior()
   val bottomBarScrollState =
     rememberPinnedSourcesBottomBarScrollBehavior(canScroll = { canShowBottomBar })
-  val homeScrollBehavior = rememberHomeScrollBehavior(appBarScrollBehaviour, bottomBarScrollState)
 
   val homeFocusRequester = remember { FocusRequester() }
   if (platform == Platform.Desktop) {
@@ -277,8 +274,6 @@ private fun HomeContent(
   LaunchedEffect(state.activeSource) {
     if (state.activeSource != state.prevActiveSource) {
       bottomBarScrollState.state.heightOffset = 0f
-      appBarScrollBehaviour.state.heightOffset = 0f
-      appBarScrollBehaviour.state.contentOffset = 0f
     }
   }
 
@@ -367,7 +362,7 @@ private fun HomeContent(
     ) {
       val nestedScrollModifier =
         if (platform !is Platform.Desktop) {
-          Modifier.nestedScroll(homeScrollBehavior.nestedScrollConnection)
+          Modifier.nestedScroll(bottomBarScrollState.nestedScrollConnection)
         } else {
           Modifier
         }
@@ -386,7 +381,6 @@ private fun HomeContent(
             listState = postsListState,
             hasUnreadPosts = latestState.hasUnreadPosts,
             confirmMarkAllAsRead = latestState.confirmMarkAllAsRead,
-            scrollBehavior = if (platform !is Platform.Desktop) appBarScrollBehaviour else null,
             onMenuClicked = onMenuClicked,
             onShowPostsSortFilter = { dispatch(HomeEvent.ShowPostsSortFilter(true)) },
             onMarkPostsAsRead = { dispatch(HomeEvent.MarkPostsAsRead(it)) },
@@ -553,20 +547,6 @@ private fun HomeContent(
                 bottomBarScrollState.state.heightOffset = value
               }
             }
-            launch {
-              animate(initialValue = appBarScrollBehaviour.state.heightOffset, targetValue = 0f) {
-                value,
-                _ ->
-                appBarScrollBehaviour.state.heightOffset = value
-              }
-            }
-            launch {
-              animate(initialValue = appBarScrollBehaviour.state.contentOffset, targetValue = 0f) {
-                value,
-                _ ->
-                appBarScrollBehaviour.state.contentOffset = value
-              }
-            }
             postsListState.animateScrollToItem(0)
           }
           dispatch(HomeEvent.LoadNewArticlesClick)
@@ -578,20 +558,6 @@ private fun HomeContent(
               value,
               _ ->
               bottomBarScrollState.state.heightOffset = value
-            }
-          }
-          launch {
-            animate(initialValue = appBarScrollBehaviour.state.heightOffset, targetValue = 0f) {
-              value,
-              _ ->
-              appBarScrollBehaviour.state.heightOffset = value
-            }
-          }
-          launch {
-            animate(initialValue = appBarScrollBehaviour.state.contentOffset, targetValue = 0f) {
-              value,
-              _ ->
-              appBarScrollBehaviour.state.contentOffset = value
             }
           }
           postsListState.animateScrollToItem(0)
