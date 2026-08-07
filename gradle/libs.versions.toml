@@ -57,7 +57,7 @@ multiplatform-nav3-ui = "1.1.1"
 glance = "1.2.0-rc01"
 material-kolor = "5.0.0"
 htmlunit = "5.3.0"
-androidx_media3 = "1.10.1"
+androidx_media3 = "1.11.0"
 vlcj = "4.12.1"
 
 [libraries]
