@@ -18,10 +18,15 @@
 package dev.sasikanth.rss.reader.reader.ui
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.animateBounds
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -80,11 +85,12 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -476,51 +482,11 @@ internal fun ReaderScreen(
             },
           )
         },
-        bottomBar = {
-          val readerPost =
-            try {
-              posts.peek(pagerState.settledPage)
-            } catch (_: IndexOutOfBoundsException) {
-              null
-            }
-          if (readerPost != null) {
-            val pageViewModel = pageViewModelFactory.invoke(readerPost)
-            val showFullArticle by pageViewModel.showFullArticle.collectAsStateWithLifecycle()
-
-            ReaderActionsPanel(
-              isParentThemeDark = isParentThemeDark,
-              isDarkTheme = isDarkTheme,
-              loadFullArticle = showFullArticle,
-              showReaderCustomisations = state.showReaderCustomisations,
-              selectedFont = state.selectedReaderFont,
-              selectedThemeVariant = state.selectedThemeVariant,
-              fontScaleFactor = state.readerFontScaleFactor,
-              fontLineHeightFactor = state.readerLineHeightScaleFactor,
-              isSubscribed = state.isSubscribed,
-              overriddenColorScheme = overriddenDarkColorScheme,
-              openInBrowserClick = {
-                coroutineScope.launch { linkHandler.openLink(readerPost.link) }
-              },
-              loadFullArticleClick = { pageViewModel.toggleFullArticle() },
-              openReaderViewSettings = { viewModel.dispatch(ReaderEvent.ShowReaderCustomisations) },
-              onFontChange = { font -> viewModel.dispatch(ReaderEvent.UpdateReaderFont(font)) },
-              onThemeVariantChange = { themeVariant ->
-                viewModel.dispatch(ReaderEvent.UpdateThemeVariant(themeVariant))
-              },
-              onFontScaleFactorChange = { fontScaleFactor ->
-                viewModel.dispatch(ReaderEvent.UpdateFontScaleFactor(fontScaleFactor))
-              },
-              onFontLineHeightFactorChange = { fontLineHeightFactor ->
-                viewModel.dispatch(ReaderEvent.UpdateFontLineHeightFactor(fontLineHeightFactor))
-              },
-            )
-          }
-        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = AppTheme.colorScheme.backdrop,
         contentColor = Color.Unspecified,
       ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().iosBottomSafeAreaPadding()) {
+        Box(modifier = Modifier.fillMaxSize()) {
           val layoutDirection = LocalLayoutDirection.current
           val sizeClass = LocalWindowSizeClass.current
           val readerContentMaxWidth =
@@ -530,6 +496,12 @@ internal fun ReaderScreen(
               700.dp
             }
 
+          val readerContentPadding =
+            PaddingValues(
+              top = paddingValues.calculateTopPadding(),
+              bottom = readerActionsPanelBottomInset() + READER_ACTIONS_PANEL_COLLAPSED_HEIGHT,
+            )
+
           val backdropColor = AppTheme.colorScheme.backdrop
           val scrimHeightPx = with(LocalDensity.current) { 96.dp.toPx() }
           HorizontalPager(
@@ -537,6 +509,7 @@ internal fun ReaderScreen(
               Modifier.widthIn(max = readerContentMaxWidth)
                 .fillMaxSize()
                 .align(Alignment.Center)
+                .iosBottomSafeAreaPadding()
                 .drawWithContent {
                   drawContent()
                   drawRect(
@@ -683,7 +656,7 @@ internal fun ReaderScreen(
                 }
               ReaderPage(
                 modifier = Modifier.fillMaxSize(),
-                contentPaddingValues = paddingValues,
+                contentPaddingValues = readerContentPadding,
                 pageViewModel = pageViewModel,
                 readerPost = readerPost,
                 showFullArticle = showFullArticle,
@@ -719,13 +692,53 @@ internal fun ReaderScreen(
                   .align(Alignment.BottomCenter)
             )
           }
+
+          val settledPost =
+            try {
+              posts.peek(pagerState.settledPage)
+            } catch (_: IndexOutOfBoundsException) {
+              null
+            }
+          if (settledPost != null) {
+            val settledPageViewModel = pageViewModelFactory.invoke(settledPost)
+            val showFullArticle by
+              settledPageViewModel.showFullArticle.collectAsStateWithLifecycle()
+
+            ReaderActionsPanel(
+              modifier = Modifier.align(Alignment.BottomCenter),
+              isParentThemeDark = isParentThemeDark,
+              isDarkTheme = isDarkTheme,
+              loadFullArticle = showFullArticle,
+              showReaderCustomisations = state.showReaderCustomisations,
+              selectedFont = state.selectedReaderFont,
+              selectedThemeVariant = state.selectedThemeVariant,
+              fontScaleFactor = state.readerFontScaleFactor,
+              fontLineHeightFactor = state.readerLineHeightScaleFactor,
+              isSubscribed = state.isSubscribed,
+              overriddenColorScheme = overriddenDarkColorScheme,
+              openInBrowserClick = {
+                coroutineScope.launch { linkHandler.openLink(settledPost.link) }
+              },
+              loadFullArticleClick = { settledPageViewModel.toggleFullArticle() },
+              openReaderViewSettings = { viewModel.dispatch(ReaderEvent.ShowReaderCustomisations) },
+              onFontChange = { font -> viewModel.dispatch(ReaderEvent.UpdateReaderFont(font)) },
+              onThemeVariantChange = { themeVariant ->
+                viewModel.dispatch(ReaderEvent.UpdateThemeVariant(themeVariant))
+              },
+              onFontScaleFactorChange = { fontScaleFactor ->
+                viewModel.dispatch(ReaderEvent.UpdateFontScaleFactor(fontScaleFactor))
+              },
+              onFontLineHeightFactorChange = { fontLineHeightFactor ->
+                viewModel.dispatch(ReaderEvent.UpdateFontLineHeightFactor(fontLineHeightFactor))
+              },
+            )
+          }
         }
       }
     }
   }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ReaderActionsPanel(
   isParentThemeDark: Boolean,
@@ -749,99 +762,116 @@ private fun ReaderActionsPanel(
 ) {
   val colorScheme = AppTheme.colorScheme
 
-  LookaheadScope {
+  Box(
+    modifier = Modifier.fillMaxWidth().wrapContentHeight().then(modifier),
+    contentAlignment = Alignment.BottomCenter,
+  ) {
+    val (shadowColor1, shadowColor2) =
+      remember(isDarkTheme) {
+        if (isDarkTheme) {
+          Pair(Color.Black.copy(alpha = 0.6f), Color.Black.copy(alpha = 0.24f))
+        } else {
+          Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))
+        }
+      }
+    val backgroundShape = RoundedCornerShape(36.dp)
+
+    val density = LocalDensity.current
+    val recoil = remember { Animatable(0f) }
+    var hasSettledOnce by remember { mutableStateOf(false) }
+    LaunchedEffect(showReaderCustomisations) {
+      if (!hasSettledOnce) {
+        hasSettledOnce = true
+        return@LaunchedEffect
+      }
+
+      val impulse = with(density) { READER_ACTIONS_PANEL_RECOIL.toPx() }
+      recoil.snapTo(if (showReaderCustomisations) impulse else -impulse)
+      recoil.animateTo(
+        targetValue = 0f,
+        animationSpec =
+          spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
+      )
+    }
+
     Box(
       modifier =
-        Modifier.fillMaxWidth()
-          .wrapContentHeight()
-          .animateBounds(
-            lookaheadScope = this,
-            boundsTransform = { _, _ ->
-              spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessMediumLow,
-              )
-            },
-          )
-          .then(modifier),
-      contentAlignment = Alignment.Center,
-    ) {
-      val (shadowColor1, shadowColor2) =
-        remember(isDarkTheme) {
-          if (isDarkTheme) {
-            Pair(Color.Black.copy(alpha = 0.6f), Color.Black.copy(alpha = 0.24f))
-          } else {
-            Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))
+        Modifier.graphicsLayer { translationY = recoil.value }
+          .padding(bottom = readerActionsPanelBottomInset())
+          .padding(horizontal = 16.dp)
+          .widthIn(max = 640.dp)
+          .pointerInput(Unit) {}
+          .dropShadow(shape = backgroundShape) {
+            offset = Offset(x = 0f, y = 16.dp.toPx())
+            radius = 32.dp.toPx()
+            color = shadowColor1
           }
-        }
-      val backgroundShape = RoundedCornerShape(36.dp)
-
-      Box(
-        modifier =
-          Modifier.padding(
-              bottom =
-                WindowInsets.navigationBars
-                  .asPaddingValues()
-                  .calculateBottomPadding()
-                  .coerceAtLeast(16.dp)
+          .dropShadow(shape = backgroundShape) {
+            offset = Offset(x = 0f, y = 4.dp.toPx())
+            radius = 8.dp.toPx()
+            color = shadowColor2
+          }
+          .clip(backgroundShape)
+          .drawBehind { drawRect(colorScheme.bottomSheet) }
+          .drawWithContent {
+            drawContent()
+            val outline = backgroundShape.createOutline(size, layoutDirection, this)
+            drawOutline(
+              outline = outline,
+              color = colorScheme.bottomSheetBorder,
+              style = Stroke(width = 1.dp.toPx()),
             )
-            .padding(horizontal = 16.dp)
-            .widthIn(max = 640.dp)
-            .pointerInput(Unit) {}
-            .dropShadow(shape = backgroundShape) {
-              offset = Offset(x = 0f, y = 16.dp.toPx())
-              radius = 32.dp.toPx()
-              color = shadowColor1
-            }
-            .dropShadow(shape = backgroundShape) {
-              offset = Offset(x = 0f, y = 4.dp.toPx())
-              radius = 8.dp.toPx()
-              color = shadowColor2
-            }
-            .clip(backgroundShape)
-            .drawBehind { drawRect(colorScheme.bottomSheet) }
-            .drawWithContent {
-              drawContent()
-              val outline = backgroundShape.createOutline(size, layoutDirection, this)
-              drawOutline(
-                outline = outline,
-                color = colorScheme.bottomSheetBorder,
-                style = Stroke(width = 1.dp.toPx()),
-              )
-            }
-            .graphicsLayer { clip = true }
-      ) {
-        AppTheme(useDarkTheme = true, overriddenColorScheme = overriddenColorScheme) {
-          AnimatedContent(
-            modifier = Modifier.requiredHeightIn(min = 64.dp),
-            contentAlignment = Alignment.BottomCenter,
-            targetState = showReaderCustomisations,
-          ) { targetState ->
-            if (targetState) {
-              ReaderCustomizationsContent(
-                selectedFont = selectedFont,
-                selectedThemeVariant = selectedThemeVariant,
-                fontScaleFactor = fontScaleFactor,
-                fontLineHeightFactor = fontLineHeightFactor,
-                isSubscribed = isSubscribed,
-                isParentThemeDark = isParentThemeDark,
-                onFontChange = onFontChange,
-                onThemeVariantChange = onThemeVariantChange,
-                onFontScaleFactorChange = onFontScaleFactorChange,
-                onFontLineHeightFactorChange = onFontLineHeightFactorChange,
-              )
-            } else {
-              ReaderViewBottomBar(
-                selectedAppColorScheme = overriddenColorScheme,
-                loadFullArticle = loadFullArticle,
-                openInBrowserClick = openInBrowserClick,
-                loadFullArticleClick = loadFullArticleClick,
-                openReaderViewSettings = openReaderViewSettings,
-              )
-            }
+          }
+          .graphicsLayer { clip = true }
+    ) {
+      AppTheme(useDarkTheme = true, overriddenColorScheme = overriddenColorScheme) {
+        AnimatedContent(
+          modifier = Modifier.requiredHeightIn(min = READER_ACTIONS_PANEL_COLLAPSED_HEIGHT),
+          contentAlignment = Alignment.BottomCenter,
+          targetState = showReaderCustomisations,
+          transitionSpec = {
+            fadeIn(tween(durationMillis = 220, delayMillis = 90)) togetherWith
+              fadeOut(tween(durationMillis = 90)) using
+              SizeTransform { _, _ ->
+                spring(
+                  dampingRatio = Spring.DampingRatioLowBouncy,
+                  stiffness = Spring.StiffnessMediumLow,
+                  visibilityThreshold = IntSize.VisibilityThreshold,
+                )
+              }
+          },
+        ) { targetState ->
+          if (targetState) {
+            ReaderCustomizationsContent(
+              selectedFont = selectedFont,
+              selectedThemeVariant = selectedThemeVariant,
+              fontScaleFactor = fontScaleFactor,
+              fontLineHeightFactor = fontLineHeightFactor,
+              isSubscribed = isSubscribed,
+              isParentThemeDark = isParentThemeDark,
+              onFontChange = onFontChange,
+              onThemeVariantChange = onThemeVariantChange,
+              onFontScaleFactorChange = onFontScaleFactorChange,
+              onFontLineHeightFactorChange = onFontLineHeightFactorChange,
+            )
+          } else {
+            ReaderViewBottomBar(
+              selectedAppColorScheme = overriddenColorScheme,
+              loadFullArticle = loadFullArticle,
+              openInBrowserClick = openInBrowserClick,
+              loadFullArticleClick = loadFullArticleClick,
+              openReaderViewSettings = openReaderViewSettings,
+            )
           }
         }
       }
     }
   }
 }
+
+private val READER_ACTIONS_PANEL_COLLAPSED_HEIGHT = 64.dp
+private val READER_ACTIONS_PANEL_RECOIL = 12.dp
+
+@Composable
+private fun readerActionsPanelBottomInset(): Dp =
+  WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().coerceAtLeast(16.dp)
