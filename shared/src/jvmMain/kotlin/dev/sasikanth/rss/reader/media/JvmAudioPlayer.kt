@@ -67,6 +67,9 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   private var progressJob: Job? = null
   private var playingUrl: String? = null
   private var playingPostId: String? = null
+  private var playingTitle: String? = null
+  private var playingArtist: String? = null
+  private var playingCoverUrl: String? = null
   private var sleepTimerJob: Job? = null
   private var sleepTimerRemainingMillis: Long? = null
   private var selectedSleepTimerOption: SleepTimerOption = SleepTimerOption.None
@@ -95,9 +98,7 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
             if (_playbackState.value.sleepTimerRemaining == -1L) {
               setSleepTimer(SleepTimerOption.None)
             }
-            updatePlaybackState()
-            stopProgressUpdate()
-            seekTo(0)
+            stop()
           }
 
           override fun error(mediaPlayer: MediaPlayer?) {
@@ -122,6 +123,9 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   ) {
     playingUrl = url
     playingPostId = postId
+    playingTitle = title
+    playingArtist = artist
+    playingCoverUrl = coverUrl
     mediaPlayer?.media()?.play(url)
     if (initialPosition > 0) {
       mediaPlayer?.controls()?.setTime(initialPosition)
@@ -131,6 +135,20 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
 
   override fun pause() {
     mediaPlayer?.controls()?.pause()
+  }
+
+  override fun stop() {
+    stopProgressUpdate()
+    mediaPlayer?.controls()?.stop()
+    sleepTimerJob?.cancel()
+    sleepTimerRemainingMillis = null
+    selectedSleepTimerOption = SleepTimerOption.None
+    playingUrl = null
+    playingPostId = null
+    playingTitle = null
+    playingArtist = null
+    playingCoverUrl = null
+    _playbackState.value = PlaybackState.Idle
   }
 
   override fun resume() {
@@ -185,6 +203,9 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
         duration = mediaPlayer?.status()?.length()?.coerceAtLeast(0) ?: 0L,
         playingUrl = playingUrl,
         playingPostId = playingPostId,
+        title = playingTitle,
+        artist = playingArtist,
+        coverUrl = playingCoverUrl,
         buffering = it.buffering,
         playbackSpeed = mediaPlayer?.status()?.rate() ?: 1f,
         sleepTimerRemaining = sleepTimerRemainingMillis,

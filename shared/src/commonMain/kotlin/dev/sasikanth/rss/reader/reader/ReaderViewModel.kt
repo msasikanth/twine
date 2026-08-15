@@ -37,6 +37,8 @@ import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
 import dev.sasikanth.rss.reader.data.repository.isPremium
 import dev.sasikanth.rss.reader.media.AudioPlayer as MediaAudioPlayer
+import dev.sasikanth.rss.reader.media.PlaybackState
+import dev.sasikanth.rss.reader.media.SleepTimerOption
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.AudioPlayer
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Bookmarks
@@ -44,16 +46,20 @@ import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Home
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Search
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.UnreadWidget
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -103,9 +109,86 @@ class ReaderViewModel(
   val exitScreen: SharedFlow<Boolean>
     get() = _exitScreen
 
+  private var audioProgressAutoSaveJob: Job? = null
+
   init {
     observableActiveReaderPost.updateActivePost(readerScreenArgs.postId)
     init()
+    observePlaybackForAutoSave()
+  }
+
+  private fun observePlaybackForAutoSave() {
+    audioPlayer.playbackState
+      .map { it.isPlaying }
+      .distinctUntilChanged()
+      .onEach { isPlaying ->
+        audioProgressAutoSaveJob?.cancel()
+        audioProgressAutoSaveJob =
+          if (isPlaying) {
+            coroutineScope.launch {
+              while (true) {
+                delay(10.seconds)
+                saveAudioProgress()
+              }
+            }
+          } else {
+            saveAudioProgress()
+            null
+          }
+      }
+      .launchIn(coroutineScope)
+  }
+
+  val playbackState: StateFlow<PlaybackState>
+    get() = audioPlayer.playbackState
+
+  fun pauseAudio() {
+    audioPlayer.pause()
+    saveAudioProgress()
+  }
+
+  fun resumeAudio() {
+    audioPlayer.resume()
+  }
+
+  fun seekAudio(position: Long) {
+    audioPlayer.seekTo(position)
+    saveAudioProgress(position = position)
+  }
+
+  fun seekForward() {
+    audioPlayer.seekTo(
+      audioPlayer.playbackState.value.currentPosition + 30.seconds.inWholeMilliseconds
+    )
+  }
+
+  fun seekBackward() {
+    audioPlayer.seekTo(
+      audioPlayer.playbackState.value.currentPosition - 30.seconds.inWholeMilliseconds
+    )
+  }
+
+  fun setPlaybackSpeed(speed: Float) {
+    audioPlayer.setPlaybackSpeed(speed)
+  }
+
+  fun setSleepTimer(option: SleepTimerOption) {
+    audioPlayer.setSleepTimer(option)
+  }
+
+  private fun saveAudioProgress(position: Long? = null) {
+    val playbackState = audioPlayer.playbackState.value
+    val postId = playbackState.playingPostId ?: return
+    val audioProgress = position ?: playbackState.currentPosition
+    if (audioProgress <= 0) return
+
+    coroutineScope.launch {
+      postRepository.updateAudioProgress(
+        postId = postId,
+        audioProgress = audioProgress,
+        audioDuration = playbackState.duration,
+      )
+    }
   }
 
   fun dispatch(event: ReaderEvent) {
@@ -113,8 +196,8 @@ class ReaderViewModel(
       is ReaderEvent.TogglePostBookmark ->
         togglePostBookmark(event.postId, event.currentBookmarkStatus)
       is ReaderEvent.PostPageChanged -> postPageChange(event.postIndex, event.post)
-      is ReaderEvent.ShowReaderCustomisations -> toggleReaderCustomisations(show = true)
-      is ReaderEvent.HideReaderCustomisations -> toggleReaderCustomisations(show = false)
+      is ReaderEvent.ShowPanelContent -> updatePanelContent(event.panelContent)
+      is ReaderEvent.CollapsePanel -> updatePanelContent(ReaderPanelContent.Actions)
       is ReaderEvent.UpdateReaderFont -> updateReaderFont(event.font)
       is ReaderEvent.UpdateThemeVariant -> updateThemeVariant(event.themeVariant)
       is ReaderEvent.UpdateFontScaleFactor -> updateFontScaleFactor(event.fontScaleFactor)
@@ -165,8 +248,8 @@ class ReaderViewModel(
     }
   }
 
-  private fun toggleReaderCustomisations(show: Boolean) {
-    coroutineScope.launch { _state.update { it.copy(showReaderCustomisations = show) } }
+  private fun updatePanelContent(panelContent: ReaderPanelContent) {
+    coroutineScope.launch { _state.update { it.copy(panelContent = panelContent) } }
   }
 
   private fun postPageChange(postIndex: Int, post: ResolvedPost) {

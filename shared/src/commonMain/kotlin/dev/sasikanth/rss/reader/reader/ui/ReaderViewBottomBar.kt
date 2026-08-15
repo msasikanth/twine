@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -51,6 +52,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.resources.icons.ArticleShortcut
 import dev.sasikanth.rss.reader.resources.icons.OpenBrowser
+import dev.sasikanth.rss.reader.resources.icons.Pause
+import dev.sasikanth.rss.reader.resources.icons.Play
 import dev.sasikanth.rss.reader.resources.icons.Settings
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppColorScheme
@@ -59,6 +62,8 @@ import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.cdLoadFullArticle
 import twine.shared.generated.resources.openWebsite
+import twine.shared.generated.resources.pause
+import twine.shared.generated.resources.play
 import twine.shared.generated.resources.readerSettings
 
 @Composable
@@ -154,6 +159,92 @@ internal fun ReaderViewBottomBar(
 }
 
 @Composable
+internal fun ReaderAudioBottomBar(
+  selectedAppColorScheme: AppColorScheme?,
+  isPlaying: Boolean,
+  isBuffering: Boolean,
+  openInBrowserClick: () -> Unit,
+  playPauseClick: () -> Unit,
+  openReaderViewSettings: () -> Unit,
+) {
+  Row(
+    modifier = Modifier.wrapContentWidth().height(IntrinsicSize.Min).padding(horizontal = 12.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    val colorScheme = selectedAppColorScheme ?: AppTheme.colorScheme
+    val transition = updateTransition(isPlaying)
+    val playPauseWidth by
+      transition.animateDp(
+        transitionSpec = {
+          spring(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioMediumBouncy)
+        }
+      ) {
+        if (it) {
+          88.dp
+        } else {
+          72.dp
+        }
+      }
+    val playPauseVerticalPadding by
+      transition.animateDp(
+        transitionSpec = {
+          spring(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioMediumBouncy)
+        }
+      ) {
+        if (it) {
+          8.dp
+        } else {
+          12.dp
+        }
+      }
+    val playPauseBackgroundColor by
+      transition.animateColor {
+        if (it) {
+          colorScheme.primaryContainer
+        } else {
+          colorScheme.surfaceContainerHighest
+        }
+      }
+    val playPauseContentColor by
+      transition.animateColor {
+        if (it) {
+          colorScheme.onPrimaryContainer
+        } else {
+          colorScheme.onSurface
+        }
+      }
+
+    BottomBarIconButton(
+      modifier = Modifier.padding(vertical = 12.dp),
+      label = stringResource(Res.string.openWebsite),
+      icon = TwineIcons.OpenBrowser,
+      onClick = openInBrowserClick,
+      minWidth = 52.dp,
+    )
+
+    BottomBarToggleIconButton(
+      modifier = Modifier.fillMaxHeight().padding(vertical = playPauseVerticalPadding),
+      label = stringResource(if (isPlaying) Res.string.pause else Res.string.play),
+      icon = if (isPlaying) TwineIcons.Pause else TwineIcons.Play,
+      onClick = playPauseClick,
+      backgroundColor = playPauseBackgroundColor,
+      contentColor = playPauseContentColor,
+      minWidth = playPauseWidth,
+      showProgress = isBuffering,
+    )
+
+    BottomBarIconButton(
+      modifier = Modifier.padding(vertical = 12.dp),
+      label = stringResource(Res.string.readerSettings),
+      icon = TwineIcons.Settings,
+      onClick = openReaderViewSettings,
+      minWidth = 52.dp,
+    )
+  }
+}
+
+@Composable
 private fun BottomBarIconButton(
   label: String,
   icon: ImageVector,
@@ -192,6 +283,7 @@ private fun BottomBarToggleIconButton(
   backgroundColor: Color = Color.Transparent,
   contentColor: Color = AppTheme.colorScheme.onSurfaceVariant,
   minWidth: Dp = 72.dp,
+  showProgress: Boolean = false,
 ) {
   Box(
     modifier =
@@ -206,11 +298,19 @@ private fun BottomBarToggleIconButton(
         .clickable { onClick() },
     contentAlignment = Alignment.Center,
   ) {
-    Icon(
-      modifier = Modifier.requiredSize(20.dp),
-      imageVector = icon,
-      contentDescription = null,
-      tint = contentColor,
-    )
+    if (showProgress) {
+      CircularProgressIndicator(
+        modifier = Modifier.requiredSize(20.dp),
+        color = contentColor,
+        strokeWidth = 2.dp,
+      )
+    } else {
+      Icon(
+        modifier = Modifier.requiredSize(20.dp),
+        imageVector = icon,
+        contentDescription = null,
+        tint = contentColor,
+      )
+    }
   }
 }

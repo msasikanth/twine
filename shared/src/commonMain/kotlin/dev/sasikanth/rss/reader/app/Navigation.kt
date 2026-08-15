@@ -180,6 +180,7 @@ fun EntryProviderScope<NavKey>.mainScreen(
   settingsViewModel: () -> SettingsViewModel,
   discoveryViewModel: () -> DiscoveryViewModel,
   openPost: (Int, ResolvedPost, FromScreen) -> Unit,
+  openCurrentlyPlaying: () -> Unit,
   screenModifier: Modifier,
   isSideNavigationExpanded: MutableState<Boolean>,
 ) {
@@ -249,6 +250,7 @@ fun EntryProviderScope<NavKey>.mainScreen(
             feedsViewModel = feedsViewModel,
             triggerSync = triggerSync,
             openPost = { index, post -> openPost(index, post, FromScreen.Home) },
+            openCurrentlyPlaying = openCurrentlyPlaying,
             onMenuClicked = openDrawer,
             modifier = screenModifier,
           )

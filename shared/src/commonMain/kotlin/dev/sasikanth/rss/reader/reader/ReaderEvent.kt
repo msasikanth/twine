@@ -28,9 +28,9 @@ sealed interface ReaderEvent {
 
   data class PostPageChanged(val postIndex: Int, val post: ResolvedPost) : ReaderEvent
 
-  data object ShowReaderCustomisations : ReaderEvent
+  data class ShowPanelContent(val panelContent: ReaderPanelContent) : ReaderEvent
 
-  data object HideReaderCustomisations : ReaderEvent
+  data object CollapsePanel : ReaderEvent
 
   data class UpdateReaderFont(val font: ReaderFont) : ReaderEvent
 

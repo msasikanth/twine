@@ -57,6 +57,9 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   private var progressJob: Job? = null
   private var playingUrl: String? = null
   private var playingPostId: String? = null
+  private var playingTitle: String? = null
+  private var playingArtist: String? = null
+  private var playingCoverUrl: String? = null
   private var playJob: Job? = null
   private var sleepTimerJob: Job? = null
   private var sleepTimerRemainingMillis: Long? = null
@@ -79,8 +82,7 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
       if (_playbackState.value.sleepTimerRemaining == -1L) {
         setSleepTimer(SleepTimerOption.None)
       }
-      pause()
-      seekTo(0)
+      stop()
     }
   }
 
@@ -97,6 +99,9 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
       scope.launch {
         playingUrl = url
         playingPostId = postId
+        playingTitle = title
+        playingArtist = artist
+        playingCoverUrl = coverUrl
 
         val fileName = "${nameBasedUuidOf(url)}.mp3"
         val localUrl = cacheDirectory.URLByAppendingPathComponent(fileName)!!
@@ -180,6 +185,22 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     player.pause()
     stopProgressUpdate()
     updatePlaybackState()
+  }
+
+  override fun stop() {
+    playJob?.cancel()
+    player.pause()
+    player.replaceCurrentItemWithPlayerItem(null)
+    stopProgressUpdate()
+    sleepTimerJob?.cancel()
+    sleepTimerRemainingMillis = null
+    selectedSleepTimerOption = SleepTimerOption.None
+    playingUrl = null
+    playingPostId = null
+    playingTitle = null
+    playingArtist = null
+    playingCoverUrl = null
+    _playbackState.value = PlaybackState.Idle
   }
 
   override fun resume() {
@@ -324,6 +345,9 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
         duration = duration,
         playingUrl = playingUrl,
         playingPostId = playingPostId,
+        title = playingTitle,
+        artist = playingArtist,
+        coverUrl = playingCoverUrl,
         buffering = buffering,
         playbackSpeed = currentSpeed,
         sleepTimerRemaining = sleepTimerRemainingMillis,

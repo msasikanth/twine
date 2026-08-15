@@ -35,10 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextLinkStyles
@@ -70,8 +67,6 @@ import com.mikepenz.markdown.model.markdownPadding
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
-import dev.sasikanth.rss.reader.media.PlaybackState
-import dev.sasikanth.rss.reader.media.SleepTimerOption
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
@@ -81,8 +76,6 @@ import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import kotlin.time.Instant
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
@@ -112,9 +105,6 @@ internal fun ReaderPage(
     markdownContentState = markdownContentState,
     excerptState = excerptState,
     contentParsingProgress = contentParsingProgress,
-    // Passed as a flow so the every-second playback position ticks only recompose
-    // the media controls item instead of the whole reader page.
-    playbackState = pageViewModel.audioPlayer.playbackState,
     isAudioPlayerAvailable = pageViewModel.audioPlayer.isAvailable,
     audioPlayerInstallationHint = pageViewModel.audioPlayer.installationHint,
     readerPost = readerPost,
@@ -128,13 +118,6 @@ internal fun ReaderPage(
     onBookmarkClick = onBookmarkClick,
     onMarkAsUnread = onMarkAsUnread,
     onImageClick = onImageClick,
-    onPlayClick = pageViewModel::playAudio,
-    onPauseClick = pageViewModel::pauseAudio,
-    onSeek = pageViewModel::seekAudio,
-    onSeekForward = pageViewModel::seekForward,
-    onSeekBackward = pageViewModel::seekBackward,
-    onPlaybackSpeedChange = { speed -> pageViewModel.setPlaybackSpeed(speed) },
-    onSleepTimerOptionSelected = { pageViewModel.setSleepTimer(it) },
     modifier = modifier,
     contentPaddingValues = contentPaddingValues,
   )
@@ -145,7 +128,6 @@ private fun ReaderPageContent(
   markdownContentState: State,
   excerptState: String?,
   contentParsingProgress: ReaderProcessingProgress,
-  playbackState: StateFlow<PlaybackState>,
   isAudioPlayerAvailable: Boolean,
   audioPlayerInstallationHint: String?,
   readerPost: ResolvedPost,
@@ -159,13 +141,6 @@ private fun ReaderPageContent(
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
   onImageClick: (String) -> Unit,
-  onPlayClick: () -> Unit,
-  onPauseClick: () -> Unit,
-  onSeek: (Long) -> Unit,
-  onSeekForward: () -> Unit,
-  onSeekBackward: () -> Unit,
-  onPlaybackSpeedChange: (Float) -> Unit,
-  onSleepTimerOptionSelected: (SleepTimerOption) -> Unit,
   modifier: Modifier = Modifier,
   contentPaddingValues: PaddingValues = PaddingValues(),
 ) {
@@ -174,7 +149,6 @@ private fun ReaderPageContent(
   val shouldBlockImage = LocalBlockImage.current
 
   val coroutineScope = rememberCoroutineScope()
-  var showSleepTimerSheet by remember { mutableStateOf(false) }
 
   val textSelectionColors =
     TextSelectionColors(
@@ -269,41 +243,6 @@ private fun ReaderPageContent(
                   )
                 }
               }
-            } else if (!readerPost.audioUrl.isNullOrBlank()) {
-              item(key = "podcast-player") {
-                val currentPlaybackState by playbackState.collectAsStateWithLifecycle()
-                val isPostAudioPlaying = currentPlaybackState.playingUrl == readerPost.audioUrl
-                val postPlaybackState =
-                  if (isPostAudioPlaying) {
-                    currentPlaybackState
-                  } else {
-                    PlaybackState.Idle
-                  }
-
-                DisableSelection {
-                  MediaControls(
-                    playbackState = postPlaybackState,
-                    onPlayClick = onPlayClick,
-                    onPauseClick = onPauseClick,
-                    onSeek = onSeek,
-                    onSeekForward = onSeekForward,
-                    onSeekBackward = onSeekBackward,
-                    onPlaybackSpeedChange = {
-                      val newSpeed =
-                        when (postPlaybackState.playbackSpeed) {
-                          0.5f -> 1.0f
-                          1.0f -> 1.5f
-                          1.5f -> 2.0f
-                          2.0f -> 0.5f
-                          else -> 1.0f
-                        }
-                      onPlaybackSpeedChange(newSpeed)
-                    },
-                    onSleepTimerClick = { showSleepTimerSheet = true },
-                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 40.dp),
-                  )
-                }
-              }
             }
 
             if (contentParsingProgress == ReaderProcessingProgress.Loading) {
@@ -330,18 +269,6 @@ private fun ReaderPageContent(
             }
           }
         }
-      }
-
-      if (showSleepTimerSheet) {
-        val currentPlaybackState by playbackState.collectAsStateWithLifecycle()
-        SleepTimerBottomSheet(
-          playbackState = currentPlaybackState,
-          onOptionSelected = {
-            onSleepTimerOptionSelected(it)
-            showSleepTimerSheet = false
-          },
-          onDismiss = { showSleepTimerSheet = false },
-        )
       }
     }
   }
@@ -372,7 +299,6 @@ private fun ReaderPagePreview() {
       markdownContentState = State.Loading(),
       excerptState = null,
       contentParsingProgress = ReaderProcessingProgress.Idle,
-      playbackState = remember { MutableStateFlow(PlaybackState.Idle) },
       readerPost =
         ResolvedPost(
           id = "",
@@ -403,13 +329,6 @@ private fun ReaderPagePreview() {
       onBookmarkClick = {},
       onMarkAsUnread = {},
       onImageClick = {},
-      onPlayClick = {},
-      onPauseClick = {},
-      onSeek = {},
-      onSeekForward = {},
-      onSeekBackward = {},
-      onPlaybackSpeedChange = {},
-      onSleepTimerOptionSelected = {},
       isAudioPlayerAvailable = true,
       audioPlayerInstallationHint = null,
     )

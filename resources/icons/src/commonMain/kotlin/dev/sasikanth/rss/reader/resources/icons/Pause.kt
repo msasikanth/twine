@@ -18,15 +18,17 @@
 package dev.sasikanth.rss.reader.resources.icons
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
-import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.group
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
+@Suppress("CheckReturnValue")
 public val TwineIcons.Pause: ImageVector
   get() {
     if (_pause != null) {
@@ -34,73 +36,72 @@ public val TwineIcons.Pause: ImageVector
     }
     _pause =
       ImageVector.Builder(
-          name = "Pause",
-          defaultWidth = 24.0.dp,
-          defaultHeight = 24.0.dp,
-          viewportWidth = 960.0f,
-          viewportHeight = 960.0f,
+          name = "pause",
+          defaultWidth = 20.dp,
+          defaultHeight = 20.dp,
+          viewportWidth = 20f,
+          viewportHeight = 20f,
         )
         .apply {
-          group(translationX = -0.0f, translationY = 960.0f) {
-            path(
-              fill = SolidColor(Color(0xFF000000)),
-              stroke = null,
-              strokeLineWidth = 0.0f,
-              strokeLineCap = Butt,
-              strokeLineJoin = Miter,
-              strokeLineMiter = 4.0f,
-              pathFillType = NonZero,
-            ) {
-              /* pathData = "M600-200q-33 0-56.5-23.5T520-280v-400q0-33 23.5-56.5T600-760h80q33 0 56.5 23.5T760-680v400q0 33-23.5 56.5T680-200h-80Zm-320 0q-33 0-56.5-23.5T200-280v-400q0-33 23.5-56.5T280-760h80q33 0 56.5 23.5T440-680v400q0 33-23.5 56.5T360-200h-80Zm320-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z" */
-              moveTo(600.0f, -200.0f)
-              quadToRelative(-33.0f, 0.0f, -56.5f, -23.5f)
-              reflectiveQuadTo(520.0f, -280.0f)
-              verticalLineToRelative(-400.0f)
-              quadToRelative(0.0f, -33.0f, 23.5f, -56.5f)
-              reflectiveQuadTo(600.0f, -760.0f)
-              horizontalLineToRelative(80.0f)
-              quadToRelative(33.0f, 0.0f, 56.5f, 23.5f)
-              reflectiveQuadTo(760.0f, -680.0f)
-              verticalLineToRelative(400.0f)
-              quadToRelative(0.0f, 33.0f, -23.5f, 56.5f)
-              reflectiveQuadTo(680.0f, -200.0f)
-              horizontalLineToRelative(-80.0f)
-              close()
-              moveToRelative(-320.0f, 0.0f)
-              quadToRelative(-33.0f, 0.0f, -56.5f, -23.5f)
-              reflectiveQuadTo(200.0f, -280.0f)
-              verticalLineToRelative(-400.0f)
-              quadToRelative(0.0f, -33.0f, 23.5f, -56.5f)
-              reflectiveQuadTo(280.0f, -760.0f)
-              horizontalLineToRelative(80.0f)
-              quadToRelative(33.0f, 0.0f, 56.5f, 23.5f)
-              reflectiveQuadTo(440.0f, -680.0f)
-              verticalLineToRelative(400.0f)
-              quadToRelative(0.0f, 33.0f, -23.5f, 56.5f)
-              reflectiveQuadTo(360.0f, -200.0f)
-              horizontalLineToRelative(-80.0f)
-              close()
-              moveToRelative(320.0f, -80.0f)
-              horizontalLineToRelative(80.0f)
-              verticalLineToRelative(-400.0f)
-              horizontalLineToRelative(-80.0f)
-              verticalLineToRelative(400.0f)
-              close()
-              moveToRelative(-320.0f, 0.0f)
-              horizontalLineToRelative(80.0f)
-              verticalLineToRelative(-400.0f)
-              horizontalLineToRelative(-80.0f)
-              verticalLineToRelative(400.0f)
-              close()
-              moveToRelative(0.0f, -400.0f)
-              verticalLineToRelative(400.0f)
-              verticalLineToRelative(-400.0f)
-              close()
-              moveToRelative(320.0f, 0.0f)
-              verticalLineToRelative(400.0f)
-              verticalLineToRelative(-400.0f)
-              close()
-            }
+          path(
+            fill = SolidColor(Color.Black),
+            fillAlpha = 1f,
+            stroke = null,
+            strokeAlpha = 1f,
+            strokeLineWidth = 1f,
+            strokeLineCap = StrokeCap.Butt,
+            strokeLineJoin = StrokeJoin.Bevel,
+            strokeLineMiter = 1f,
+            pathFillType = PathFillType.Companion.NonZero,
+          ) {
+            moveTo(12.96f, 17.12f)
+            quadToRelative(-0.74f, 0f, -1.26f, -0.52f)
+            reflectiveQuadTo(11.17f, 15.34f)
+            verticalLineToRelative(-10.71f)
+            quadTo(11.17f, 3.89f, 11.7f, 3.37f)
+            reflectiveQuadTo(12.96f, 2.84f)
+            horizontalLineToRelative(2.38f)
+            quadToRelative(0.74f, 0f, 1.26f, 0.52f)
+            reflectiveQuadTo(17.12f, 4.63f)
+            verticalLineToRelative(10.71f)
+            quadToRelative(0f, 0.74f, -0.52f, 1.26f)
+            reflectiveQuadTo(15.34f, 17.12f)
+            horizontalLineToRelative(-2.38f)
+            close()
+            moveToRelative(-8.33f, 0f)
+            quadTo(3.89f, 17.12f, 3.37f, 16.6f)
+            reflectiveQuadTo(2.84f, 15.34f)
+            verticalLineToRelative(-10.71f)
+            quadTo(2.84f, 3.89f, 3.37f, 3.37f)
+            reflectiveQuadTo(4.63f, 2.84f)
+            horizontalLineToRelative(2.38f)
+            quadTo(7.75f, 2.84f, 8.27f, 3.37f)
+            reflectiveQuadTo(8.79f, 4.63f)
+            verticalLineToRelative(10.71f)
+            quadToRelative(0f, 0.74f, -0.52f, 1.26f)
+            reflectiveQuadTo(7.01f, 17.12f)
+            horizontalLineToRelative(-2.38f)
+            close()
+            moveToRelative(8.33f, -1.78f)
+            horizontalLineToRelative(2.38f)
+            verticalLineToRelative(-10.71f)
+            horizontalLineToRelative(-2.38f)
+            verticalLineToRelative(10.71f)
+            close()
+            moveToRelative(-8.33f, 0f)
+            horizontalLineToRelative(2.38f)
+            verticalLineToRelative(-10.71f)
+            horizontalLineToRelative(-2.38f)
+            verticalLineToRelative(10.71f)
+            close()
+            moveToRelative(0f, -10.71f)
+            verticalLineToRelative(10.71f)
+            verticalLineToRelative(-10.71f)
+            close()
+            moveToRelative(8.33f, 0f)
+            verticalLineToRelative(10.71f)
+            verticalLineToRelative(-10.71f)
+            close()
           }
         }
         .build()

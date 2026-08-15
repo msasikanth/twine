@@ -41,6 +41,8 @@ import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.home.ui.PostListKey
+import dev.sasikanth.rss.reader.media.AudioPlayer
+import dev.sasikanth.rss.reader.media.PlaybackState
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
@@ -79,9 +81,31 @@ class HomeViewModel(
   private val syncCoordinator: SyncCoordinator,
   private val observableSelectedPost: ObservableSelectedPost,
   private val observableActiveReaderPost: ObservableActiveReaderPost,
+  private val audioPlayer: AudioPlayer,
 ) : ViewModel() {
 
   val activeReaderPostId: StateFlow<String?> = observableActiveReaderPost.activePostId
+
+  val playbackState: StateFlow<PlaybackState>
+    get() = audioPlayer.playbackState
+
+  val hasActiveTrack: StateFlow<Boolean> =
+    audioPlayer.playbackState
+      .map { it.playingPostId != null }
+      .distinctUntilChanged()
+      .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+  fun togglePlayback() {
+    if (audioPlayer.playbackState.value.isPlaying) {
+      audioPlayer.pause()
+    } else {
+      audioPlayer.resume()
+    }
+  }
+
+  fun stopPlayback() {
+    audioPlayer.stop()
+  }
 
   private val defaultState = HomeState.default()
   val state: StateFlow<HomeState>

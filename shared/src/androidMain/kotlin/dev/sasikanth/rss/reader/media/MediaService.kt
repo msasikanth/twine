@@ -18,6 +18,7 @@
 package dev.sasikanth.rss.reader.media
 
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import androidx.annotation.OptIn
@@ -60,12 +61,10 @@ class MediaService : MediaSessionService() {
         .build()
 
     val sessionActivityIntent =
-      (packageManager.getLaunchIntentForPackage(packageName)
-          ?: Intent().apply { setPackage(packageName) })
-        .apply {
-          action = Intent.ACTION_VIEW
-          data = Uri.parse("twine://reader/currently-playing")
-        }
+      Intent(Intent.ACTION_VIEW, Uri.parse("twine://reader/currently-playing")).apply {
+        setPackage(packageName)
+        resolveDeepLinkComponent(this)?.let { component = it }
+      }
 
     mediaSession =
       MediaSession.Builder(this, player)
@@ -78,6 +77,15 @@ class MediaService : MediaSessionService() {
           )
         )
         .build()
+  }
+
+  // Resolving the component ourselves instead of using `getLaunchIntentForPackage`, which throws
+  // on some devices where the resolved activity info has a null class name.
+  private fun resolveDeepLinkComponent(intent: Intent): ComponentName? {
+    val activityInfo =
+      runCatching { packageManager.resolveActivity(intent, 0)?.activityInfo }.getOrNull()
+    val className = activityInfo?.name ?: return null
+    return ComponentName(activityInfo.packageName ?: packageName, className)
   }
 
   override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {

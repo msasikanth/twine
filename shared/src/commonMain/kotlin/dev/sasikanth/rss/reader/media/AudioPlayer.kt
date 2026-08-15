@@ -41,6 +41,8 @@ interface AudioPlayer {
 
   fun pause()
 
+  fun stop()
+
   fun resume()
 
   fun seekTo(position: Long)
@@ -64,6 +66,9 @@ data class PlaybackState(
   val duration: Long,
   val playingUrl: String? = null,
   val playingPostId: String? = null,
+  val title: String? = null,
+  val artist: String? = null,
+  val coverUrl: String? = null,
   val buffering: Boolean = false,
   val playbackSpeed: Float = 1f,
   val sleepTimerRemaining: Long? = null,
@@ -77,6 +82,9 @@ data class PlaybackState(
         duration = 0,
         playingUrl = null,
         playingPostId = null,
+        title = null,
+        artist = null,
+        coverUrl = null,
         buffering = false,
         playbackSpeed = 1f,
         sleepTimerRemaining = null,
