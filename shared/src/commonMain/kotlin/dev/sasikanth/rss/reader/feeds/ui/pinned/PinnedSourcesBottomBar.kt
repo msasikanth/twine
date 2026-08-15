@@ -20,6 +20,9 @@ package dev.sasikanth.rss.reader.feeds.ui.pinned
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -61,6 +64,39 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.noPinnedSources
 
+@Composable
+internal fun NowPlayingBottomBar(
+  modifier: Modifier = Modifier,
+  content: @Composable RowScope.() -> Unit,
+) {
+  val shape = CircleShape
+  val colorScheme = AppTheme.colorScheme
+
+  Row(
+    modifier =
+      modifier
+        .navigationBarsPadding()
+        .padding(horizontal = 32.dp)
+        .shadow(elevation = 4.dp, shape = shape)
+        .clip(shape)
+        .drawBehind { drawRect(colorScheme.bottomSheet) }
+        .drawWithContent {
+          drawContent()
+
+          val outline = shape.createOutline(size, layoutDirection, this)
+          drawOutline(
+            outline = outline,
+            color = colorScheme.bottomSheetBorder,
+            style = Stroke(width = 1.dp.toPx()),
+          )
+        }
+        .height(PINNED_SOURCES_BOTTOM_BAR_HEIGHT)
+        .padding(horizontal = 8.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    content = content,
+  )
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun PinnedSourcesBottomBar(
@@ -72,6 +108,7 @@ internal fun PinnedSourcesBottomBar(
   onPinnedSourceOrderChanged: (List<Source>) -> Unit,
   modifier: Modifier = Modifier,
   scrollBehavior: PinnedSourcesBottomBarScrollBehavior? = null,
+  nowPlayingChip: (@Composable RowScope.() -> Unit)? = null,
 ) {
   val shape = CircleShape
   val colorScheme = AppTheme.colorScheme
@@ -87,8 +124,7 @@ internal fun PinnedSourcesBottomBar(
       },
     )
 
-  LazyRow(
-    state = lazyListState,
+  Row(
     modifier =
       Modifier.onGloballyPositioned { coordinates ->
           val height = coordinates.size.height.toFloat()
@@ -105,6 +141,25 @@ internal fun PinnedSourcesBottomBar(
         .clip(shape)
         .drawBehind { drawRect(colorScheme.bottomSheet) }
         .drawWithContent {
+          drawContent()
+
+          val outline = shape.createOutline(size, layoutDirection, this)
+          drawOutline(
+            outline = outline,
+            color = colorScheme.bottomSheetBorder,
+            style = Stroke(width = 1.dp.toPx()),
+          )
+        }
+        .fillMaxWidth()
+        .height(PINNED_SOURCES_BOTTOM_BAR_HEIGHT),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    nowPlayingChip?.invoke(this)
+
+    LazyRow(
+      state = lazyListState,
+      modifier =
+        Modifier.weight(1f).fillMaxHeight().drawWithContent {
           drawContent()
 
           val fadeWidth = 24.dp.toPx()
@@ -133,52 +188,44 @@ internal fun PinnedSourcesBottomBar(
               size = size.copy(width = fadeWidth),
             )
           }
-
-          val outline = shape.createOutline(size, layoutDirection, this)
-          drawOutline(
-            outline = outline,
-            color = colorScheme.bottomSheetBorder,
-            style = Stroke(width = 1.dp.toPx()),
-          )
-        }
-        .fillMaxWidth()
-        .height(PINNED_SOURCES_BOTTOM_BAR_HEIGHT),
-    verticalAlignment = Alignment.CenterVertically,
-    contentPadding = PaddingValues(start = 8.dp, end = 8.dp),
-  ) {
-    if (pinnedSources.isEmpty()) {
-      item {
-        Box(
-          modifier = Modifier.fillParentMaxWidth().padding(16.dp),
-          contentAlignment = Alignment.Center,
-        ) {
-          Text(
-            text = stringResource(Res.string.noPinnedSources),
-            style = MaterialTheme.typography.labelLarge,
-            color = colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-          )
+        },
+      verticalAlignment = Alignment.CenterVertically,
+      contentPadding = PaddingValues(start = 8.dp, end = 8.dp),
+    ) {
+      if (pinnedSources.isEmpty()) {
+        item {
+          Box(
+            modifier = Modifier.fillParentMaxWidth().padding(16.dp),
+            contentAlignment = Alignment.Center,
+          ) {
+            Text(
+              text = stringResource(Res.string.noPinnedSources),
+              style = MaterialTheme.typography.labelLarge,
+              color = colorScheme.onSurfaceVariant,
+              textAlign = TextAlign.Center,
+            )
+          }
         }
       }
-    }
 
-    items(count = pinnedSources.size, key = { pinnedSources[it].id }) { index ->
-      val source = pinnedSources[index]
-      ReorderableItem(state = reorderableLazyRowState, key = source.id) { isDragging ->
-        val haptic = LocalHapticFeedback.current
+      items(count = pinnedSources.size, key = { pinnedSources[it].id }) { index ->
+        val source = pinnedSources[index]
+        ReorderableItem(state = reorderableLazyRowState, key = source.id) { isDragging ->
+          val haptic = LocalHapticFeedback.current
 
-        SourceItem(
-          source = source,
-          activeSource = activeSource,
-          canShowUnreadPostsCount = canShowUnreadPostsCount,
-          onHomeSelected = onHomeSelected,
-          onSourceClick = onSourceClick,
-          isDragging = isDragging,
-          modifier =
-            Modifier.longPressDraggableHandle(
-              onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
-            ),
-        )
+          SourceItem(
+            source = source,
+            activeSource = activeSource,
+            canShowUnreadPostsCount = canShowUnreadPostsCount,
+            onHomeSelected = onHomeSelected,
+            onSourceClick = onSourceClick,
+            isDragging = isDragging,
+            modifier =
+              Modifier.longPressDraggableHandle(
+                onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
+              ),
+          )
+        }
       }
     }
   }

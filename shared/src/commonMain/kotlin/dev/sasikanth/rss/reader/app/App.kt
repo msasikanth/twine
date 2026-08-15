@@ -374,6 +374,12 @@ fun App(
           settingsViewModel = settingsViewModel,
           discoveryViewModel = discoveryViewModel,
           openPost = openPost,
+          openCurrentlyPlaying = {
+            val playingPostId = audioPlayer.playbackState.value.playingPostId
+            if (playingPostId != null) {
+              appViewModel.onCurrentlyPlayingDeepLink(playingPostId)
+            }
+          },
           screenModifier = screenModifier,
           isSideNavigationExpanded = isSideNavigationExpanded,
         )

@@ -91,12 +91,15 @@ import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsState
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
+import dev.sasikanth.rss.reader.feeds.ui.pinned.NowPlayingBottomBar
 import dev.sasikanth.rss.reader.feeds.ui.pinned.PinnedSourcesBottomBar
 import dev.sasikanth.rss.reader.feeds.ui.pinned.rememberPinnedSourcesBottomBarScrollBehavior
 import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeState
 import dev.sasikanth.rss.reader.home.HomeViewModel
+import dev.sasikanth.rss.reader.media.PlaybackState
+import dev.sasikanth.rss.reader.media.ui.NowPlayingChip
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.ArrowUp
 import dev.sasikanth.rss.reader.resources.icons.Newsstand
@@ -116,6 +119,8 @@ import kotlin.math.abs
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -133,6 +138,7 @@ internal fun HomeScreen(
   feedsViewModel: FeedsViewModel,
   triggerSync: Boolean,
   openPost: (Int, ResolvedPost) -> Unit,
+  openCurrentlyPlaying: () -> Unit,
   onMenuClicked: (() -> Unit)? = null,
   modifier: Modifier = Modifier,
 ) {
@@ -204,6 +210,7 @@ internal fun HomeScreen(
   }
 
   val activeReaderPostId by viewModel.activeReaderPostId.collectAsStateWithLifecycle()
+  val hasActiveTrack by viewModel.hasActiveTrack.collectAsStateWithLifecycle()
 
   HomeContent(
     state = state,
@@ -215,6 +222,11 @@ internal fun HomeScreen(
     onMenuClicked = onMenuClicked,
     modifier = modifier,
     activeReaderPostId = activeReaderPostId,
+    playbackState = viewModel.playbackState,
+    hasActiveTrack = hasActiveTrack,
+    onTogglePlayback = viewModel::togglePlayback,
+    onOpenCurrentlyPlaying = openCurrentlyPlaying,
+    onStopPlayback = viewModel::stopPlayback,
   )
 }
 
@@ -228,6 +240,11 @@ private fun HomeContent(
   dispatch: (HomeEvent) -> Unit,
   feedsDispatch: (FeedsEvent) -> Unit,
   onMenuClicked: (() -> Unit)?,
+  playbackState: StateFlow<PlaybackState>,
+  hasActiveTrack: Boolean,
+  onTogglePlayback: () -> Unit,
+  onOpenCurrentlyPlaying: () -> Unit,
+  onStopPlayback: () -> Unit,
   modifier: Modifier = Modifier,
   activeReaderPostId: String? = null,
 ) {
@@ -253,7 +270,18 @@ private fun HomeContent(
 
   val canShowBottomBar = platform !is Platform.Desktop && state.showPinnedSources
   val bottomBarScrollState =
-    rememberPinnedSourcesBottomBarScrollBehavior(canScroll = { canShowBottomBar })
+    rememberPinnedSourcesBottomBarScrollBehavior(
+      canScroll = { canShowBottomBar && !hasActiveTrack }
+    )
+
+  LaunchedEffect(hasActiveTrack) {
+    if (hasActiveTrack && bottomBarScrollState.state.heightOffset != 0f) {
+      animate(initialValue = bottomBarScrollState.state.heightOffset, targetValue = 0f) { value, _
+        ->
+        bottomBarScrollState.state.heightOffset = value
+      }
+    }
+  }
 
   val homeFocusRequester = remember { FocusRequester() }
   if (platform == Platform.Desktop) {
@@ -347,7 +375,31 @@ private fun HomeContent(
               onHomeSelected = onHomeSelected,
               onPinnedSourceOrderChanged = onPinnedSourceOrderChanged,
               scrollBehavior = bottomBarScrollState,
+              nowPlayingChip = {
+                NowPlayingChip(
+                  playbackState = playbackState,
+                  onPlayPauseClick = onTogglePlayback,
+                  onOpenClick = onOpenCurrentlyPlaying,
+                  onStopClick = onStopPlayback,
+                )
+              },
             )
+          }
+        }
+      } else if (hasActiveTrack) {
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+          AppTheme(useDarkTheme = true) {
+            NowPlayingBottomBar(
+              modifier =
+                Modifier.padding(bottom = if (platform == Platform.Desktop) 16.dp else 0.dp)
+            ) {
+              NowPlayingChip(
+                playbackState = playbackState,
+                onPlayPauseClick = onTogglePlayback,
+                onOpenClick = onOpenCurrentlyPlaying,
+                onStopClick = onStopPlayback,
+              )
+            }
           }
         }
       }
@@ -563,7 +615,10 @@ private fun HomeContent(
         canShowScrollToTop = showScrollToTop,
         modifier =
           Modifier.navigationBarsPadding()
-            .padding(bottom = if (canShowBottomBar) PINNED_SOURCES_BOTTOM_BAR_HEIGHT else 0.dp)
+            .padding(
+              bottom =
+                if (canShowBottomBar || hasActiveTrack) PINNED_SOURCES_BOTTOM_BAR_HEIGHT else 0.dp
+            )
             .graphicsLayer {
               translationY =
                 bottomBarScrollState.state.heightOffset
@@ -733,6 +788,11 @@ private fun HomePreview() {
       dispatch = {},
       feedsDispatch = {},
       onMenuClicked = {},
+      playbackState = remember { MutableStateFlow(PlaybackState.Idle) },
+      hasActiveTrack = false,
+      onTogglePlayback = {},
+      onOpenCurrentlyPlaying = {},
+      onStopPlayback = {},
     )
   }
 }
