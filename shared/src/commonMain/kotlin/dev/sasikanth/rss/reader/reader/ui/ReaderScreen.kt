@@ -29,6 +29,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,6 +57,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -114,11 +116,16 @@ import dev.sasikanth.rss.reader.markdown.SafeMarkdownHeader
 import dev.sasikanth.rss.reader.markdown.SafeMarkdownParagraph
 import dev.sasikanth.rss.reader.markdown.SafeMarkdownText
 import dev.sasikanth.rss.reader.markdown.safeUnescapedTextInNode
+import dev.sasikanth.rss.reader.media.PlaybackState
+import dev.sasikanth.rss.reader.media.SleepTimerOption
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
+import dev.sasikanth.rss.reader.reader.ReaderPanelContent
 import dev.sasikanth.rss.reader.reader.ReaderViewModel
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
+import dev.sasikanth.rss.reader.reader.page.ui.MediaControls
 import dev.sasikanth.rss.reader.reader.page.ui.ReaderPage
+import dev.sasikanth.rss.reader.reader.page.ui.SleepTimerBottomSheet
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Close
 import dev.sasikanth.rss.reader.resources.icons.CollapseContent
@@ -149,7 +156,10 @@ import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.intellij.markdown.MarkdownTokenTypes
 import org.jetbrains.compose.resources.stringResource
@@ -291,9 +301,9 @@ internal fun ReaderScreen(
 
   NavigationBackHandler(
     state = rememberNavigationEventState(NavigationEventInfo.None),
-    isBackEnabled = state.showReaderCustomisations,
+    isBackEnabled = state.isPanelExpanded,
   ) {
-    viewModel.dispatch(ReaderEvent.HideReaderCustomisations)
+    viewModel.dispatch(ReaderEvent.CollapsePanel)
   }
 
   val isParentThemeDark = AppTheme.isDark
@@ -682,12 +692,12 @@ internal fun ReaderScreen(
             }
           }
 
-          if (state.showReaderCustomisations) {
+          if (state.isPanelExpanded) {
             Box(
               modifier =
                 Modifier.fillMaxSize()
                   .pointerInput(Unit) {
-                    detectTapGestures { viewModel.dispatch(ReaderEvent.HideReaderCustomisations) }
+                    detectTapGestures { viewModel.dispatch(ReaderEvent.CollapsePanel) }
                   }
                   .align(Alignment.BottomCenter)
             )
@@ -709,7 +719,11 @@ internal fun ReaderScreen(
               isParentThemeDark = isParentThemeDark,
               isDarkTheme = isDarkTheme,
               loadFullArticle = showFullArticle,
-              showReaderCustomisations = state.showReaderCustomisations,
+              panelContent = state.panelContent,
+              isAudioPost = !settledPost.audioUrl.isNullOrBlank(),
+              isAudioPlayerAvailable = settledPageViewModel.audioPlayer.isAvailable,
+              playbackState = viewModel.playbackState,
+              settledPostId = settledPost.id,
               selectedFont = state.selectedReaderFont,
               selectedThemeVariant = state.selectedThemeVariant,
               fontScaleFactor = state.readerFontScaleFactor,
@@ -720,7 +734,21 @@ internal fun ReaderScreen(
                 coroutineScope.launch { linkHandler.openLink(settledPost.link) }
               },
               loadFullArticleClick = { settledPageViewModel.toggleFullArticle() },
-              openReaderViewSettings = { viewModel.dispatch(ReaderEvent.ShowReaderCustomisations) },
+              openReaderViewSettings = {
+                viewModel.dispatch(ReaderEvent.ShowPanelContent(ReaderPanelContent.Customizations))
+              },
+              openPlayer = {
+                viewModel.dispatch(ReaderEvent.ShowPanelContent(ReaderPanelContent.Player))
+              },
+              collapsePanel = { viewModel.dispatch(ReaderEvent.CollapsePanel) },
+              onPlayClick = { settledPageViewModel.playAudio() },
+              onPauseClick = viewModel::pauseAudio,
+              onResumeClick = viewModel::resumeAudio,
+              onSeek = viewModel::seekAudio,
+              onSeekForward = viewModel::seekForward,
+              onSeekBackward = viewModel::seekBackward,
+              onPlaybackSpeedChange = viewModel::setPlaybackSpeed,
+              onSleepTimerOptionSelected = viewModel::setSleepTimer,
               onFontChange = { font -> viewModel.dispatch(ReaderEvent.UpdateReaderFont(font)) },
               onThemeVariantChange = { themeVariant ->
                 viewModel.dispatch(ReaderEvent.UpdateThemeVariant(themeVariant))
@@ -744,7 +772,11 @@ private fun ReaderActionsPanel(
   isParentThemeDark: Boolean,
   isDarkTheme: Boolean,
   loadFullArticle: Boolean,
-  showReaderCustomisations: Boolean,
+  panelContent: ReaderPanelContent,
+  isAudioPost: Boolean,
+  isAudioPlayerAvailable: Boolean,
+  playbackState: StateFlow<PlaybackState>,
+  settledPostId: String,
   selectedFont: ReaderFont,
   selectedThemeVariant: ThemeVariant,
   fontScaleFactor: Float,
@@ -753,6 +785,16 @@ private fun ReaderActionsPanel(
   openInBrowserClick: () -> Unit,
   loadFullArticleClick: () -> Unit,
   openReaderViewSettings: () -> Unit,
+  openPlayer: () -> Unit,
+  collapsePanel: () -> Unit,
+  onPlayClick: () -> Unit,
+  onPauseClick: () -> Unit,
+  onResumeClick: () -> Unit,
+  onSeek: (Long) -> Unit,
+  onSeekForward: () -> Unit,
+  onSeekBackward: () -> Unit,
+  onPlaybackSpeedChange: (Float) -> Unit,
+  onSleepTimerOptionSelected: (SleepTimerOption) -> Unit,
   onFontChange: (ReaderFont) -> Unit,
   onThemeVariantChange: (ThemeVariant) -> Unit,
   onFontScaleFactorChange: (Float) -> Unit,
@@ -779,14 +821,15 @@ private fun ReaderActionsPanel(
     val density = LocalDensity.current
     val recoil = remember { Animatable(0f) }
     var hasSettledOnce by remember { mutableStateOf(false) }
-    LaunchedEffect(showReaderCustomisations) {
+    val isPanelExpanded = panelContent != ReaderPanelContent.Actions
+    LaunchedEffect(isPanelExpanded) {
       if (!hasSettledOnce) {
         hasSettledOnce = true
         return@LaunchedEffect
       }
 
       val impulse = with(density) { READER_ACTIONS_PANEL_RECOIL.toPx() }
-      recoil.snapTo(if (showReaderCustomisations) impulse else -impulse)
+      recoil.snapTo(if (isPanelExpanded) impulse else -impulse)
       recoil.animateTo(
         targetValue = 0f,
         animationSpec =
@@ -801,6 +844,24 @@ private fun ReaderActionsPanel(
           .padding(horizontal = 16.dp)
           .widthIn(max = 640.dp)
           .pointerInput(Unit) {}
+          .pointerInput(panelContent, isAudioPost) {
+            var dragTotal = 0f
+            val threshold = 24.dp.toPx()
+            detectVerticalDragGestures(
+              onDragStart = { dragTotal = 0f },
+              onDragEnd = {
+                when {
+                  dragTotal < -threshold &&
+                    panelContent == ReaderPanelContent.Actions &&
+                    isAudioPost -> openPlayer()
+                  dragTotal > threshold && panelContent != ReaderPanelContent.Actions ->
+                    collapsePanel()
+                }
+              },
+            ) { _, dragAmount ->
+              dragTotal += dragAmount
+            }
+          }
           .dropShadow(shape = backgroundShape) {
             offset = Offset(x = 0f, y = 16.dp.toPx())
             radius = 32.dp.toPx()
@@ -828,7 +889,7 @@ private fun ReaderActionsPanel(
         AnimatedContent(
           modifier = Modifier.requiredHeightIn(min = READER_ACTIONS_PANEL_COLLAPSED_HEIGHT),
           contentAlignment = Alignment.BottomCenter,
-          targetState = showReaderCustomisations,
+          targetState = panelContent,
           transitionSpec = {
             fadeIn(tween(durationMillis = 220, delayMillis = 90)) togetherWith
               fadeOut(tween(durationMillis = 90)) using
@@ -841,31 +902,170 @@ private fun ReaderActionsPanel(
               }
           },
         ) { targetState ->
-          if (targetState) {
-            ReaderCustomizationsContent(
-              selectedFont = selectedFont,
-              selectedThemeVariant = selectedThemeVariant,
-              fontScaleFactor = fontScaleFactor,
-              fontLineHeightFactor = fontLineHeightFactor,
-              isSubscribed = isSubscribed,
-              isParentThemeDark = isParentThemeDark,
-              onFontChange = onFontChange,
-              onThemeVariantChange = onThemeVariantChange,
-              onFontScaleFactorChange = onFontScaleFactorChange,
-              onFontLineHeightFactorChange = onFontLineHeightFactorChange,
-            )
-          } else {
-            ReaderViewBottomBar(
-              selectedAppColorScheme = overriddenColorScheme,
-              loadFullArticle = loadFullArticle,
-              openInBrowserClick = openInBrowserClick,
-              loadFullArticleClick = loadFullArticleClick,
-              openReaderViewSettings = openReaderViewSettings,
-            )
+          when (targetState) {
+            ReaderPanelContent.Customizations -> {
+              ReaderCustomizationsContent(
+                selectedFont = selectedFont,
+                selectedThemeVariant = selectedThemeVariant,
+                fontScaleFactor = fontScaleFactor,
+                fontLineHeightFactor = fontLineHeightFactor,
+                isSubscribed = isSubscribed,
+                isParentThemeDark = isParentThemeDark,
+                onFontChange = onFontChange,
+                onThemeVariantChange = onThemeVariantChange,
+                onFontScaleFactorChange = onFontScaleFactorChange,
+                onFontLineHeightFactorChange = onFontLineHeightFactorChange,
+              )
+            }
+            ReaderPanelContent.Player -> {
+              ReaderPanelPlayer(
+                playbackState = playbackState,
+                settledPostId = settledPostId,
+                onPlayClick = onPlayClick,
+                onPauseClick = onPauseClick,
+                onResumeClick = onResumeClick,
+                onSeek = onSeek,
+                onSeekForward = onSeekForward,
+                onSeekBackward = onSeekBackward,
+                onPlaybackSpeedChange = onPlaybackSpeedChange,
+                onSleepTimerOptionSelected = onSleepTimerOptionSelected,
+              )
+            }
+            ReaderPanelContent.Actions -> {
+              ReaderPanelActions(
+                overriddenColorScheme = overriddenColorScheme,
+                loadFullArticle = loadFullArticle,
+                isAudioPost = isAudioPost && isAudioPlayerAvailable,
+                playbackState = playbackState,
+                settledPostId = settledPostId,
+                openInBrowserClick = openInBrowserClick,
+                loadFullArticleClick = loadFullArticleClick,
+                openReaderViewSettings = openReaderViewSettings,
+                openPlayer = openPlayer,
+                onPlayClick = onPlayClick,
+                onPauseClick = onPauseClick,
+                onResumeClick = onResumeClick,
+              )
+            }
           }
         }
       }
     }
+  }
+}
+
+@Composable
+private fun ReaderPanelActions(
+  overriddenColorScheme: AppColorScheme?,
+  loadFullArticle: Boolean,
+  isAudioPost: Boolean,
+  playbackState: StateFlow<PlaybackState>,
+  settledPostId: String,
+  openInBrowserClick: () -> Unit,
+  loadFullArticleClick: () -> Unit,
+  openReaderViewSettings: () -> Unit,
+  openPlayer: () -> Unit,
+  onPlayClick: () -> Unit,
+  onPauseClick: () -> Unit,
+  onResumeClick: () -> Unit,
+) {
+  val flags by
+    remember(playbackState, settledPostId) {
+        playbackState
+          .map { state ->
+            val isSettledPostLoaded = state.playingPostId == settledPostId
+            ReaderPlaybackFlags(
+              isSettledPostLoaded = isSettledPostLoaded,
+              isPlaying = isSettledPostLoaded && state.isPlaying,
+              isBuffering = isSettledPostLoaded && state.buffering,
+            )
+          }
+          .distinctUntilChanged()
+      }
+      .collectAsStateWithLifecycle(ReaderPlaybackFlags())
+
+  if (isAudioPost) {
+    ReaderAudioBottomBar(
+      selectedAppColorScheme = overriddenColorScheme,
+      isPlaying = flags.isPlaying,
+      isBuffering = flags.isBuffering,
+      openInBrowserClick = openInBrowserClick,
+      playPauseClick = {
+        if (flags.isPlaying) {
+          onPauseClick()
+        } else {
+          if (flags.isSettledPostLoaded) onResumeClick() else onPlayClick()
+          openPlayer()
+        }
+      },
+      openReaderViewSettings = openReaderViewSettings,
+    )
+  } else {
+    ReaderViewBottomBar(
+      selectedAppColorScheme = overriddenColorScheme,
+      loadFullArticle = loadFullArticle,
+      openInBrowserClick = openInBrowserClick,
+      loadFullArticleClick = loadFullArticleClick,
+      openReaderViewSettings = openReaderViewSettings,
+    )
+  }
+}
+
+@Immutable
+private data class ReaderPlaybackFlags(
+  val isSettledPostLoaded: Boolean = false,
+  val isPlaying: Boolean = false,
+  val isBuffering: Boolean = false,
+)
+
+@Composable
+private fun ReaderPanelPlayer(
+  playbackState: StateFlow<PlaybackState>,
+  settledPostId: String,
+  onPlayClick: () -> Unit,
+  onPauseClick: () -> Unit,
+  onResumeClick: () -> Unit,
+  onSeek: (Long) -> Unit,
+  onSeekForward: () -> Unit,
+  onSeekBackward: () -> Unit,
+  onPlaybackSpeedChange: (Float) -> Unit,
+  onSleepTimerOptionSelected: (SleepTimerOption) -> Unit,
+) {
+  val playerState by playbackState.collectAsStateWithLifecycle(PlaybackState.Idle)
+  var showSleepTimerSheet by remember { mutableStateOf(false) }
+  val isSettledPostLoaded = playerState.playingPostId == settledPostId
+  val currentPlaybackState = if (isSettledPostLoaded) playerState else PlaybackState.Idle
+
+  MediaControls(
+    playbackState = currentPlaybackState,
+    onPlayClick = { if (isSettledPostLoaded) onResumeClick() else onPlayClick() },
+    onPauseClick = onPauseClick,
+    onSeek = onSeek,
+    onSeekForward = onSeekForward,
+    onSeekBackward = onSeekBackward,
+    onPlaybackSpeedChange = {
+      val newSpeed =
+        when (currentPlaybackState.playbackSpeed) {
+          0.5f -> 1.0f
+          1.0f -> 1.5f
+          1.5f -> 2.0f
+          2.0f -> 0.5f
+          else -> 1.0f
+        }
+      onPlaybackSpeedChange(newSpeed)
+    },
+    onSleepTimerClick = { showSleepTimerSheet = true },
+  )
+
+  if (showSleepTimerSheet) {
+    SleepTimerBottomSheet(
+      playbackState = currentPlaybackState,
+      onOptionSelected = {
+        onSleepTimerOptionSelected(it)
+        showSleepTimerSheet = false
+      },
+      onDismiss = { showSleepTimerSheet = false },
+    )
   }
 }
 

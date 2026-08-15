@@ -31,7 +31,7 @@ data class ReaderState(
   val activePostIndex: Int,
   val activePostId: String,
   val posts: Flow<PagingData<ResolvedPost>>,
-  val showReaderCustomisations: Boolean,
+  val panelContent: ReaderPanelContent,
   val selectedReaderFont: ReaderFont,
   val selectedThemeVariant: ThemeVariant,
   val readerFontScaleFactor: Float,
@@ -41,6 +41,9 @@ data class ReaderState(
   val fromScreen: FromScreen,
 ) {
 
+  val isPanelExpanded: Boolean
+    get() = panelContent != ReaderPanelContent.Actions
+
   companion object {
 
     fun default(initialPostIndex: Int, initialPostId: String, fromScreen: FromScreen): ReaderState {
@@ -48,7 +51,7 @@ data class ReaderState(
         activePostIndex = initialPostIndex,
         activePostId = initialPostId,
         posts = emptyFlow(),
-        showReaderCustomisations = false,
+        panelContent = ReaderPanelContent.Actions,
         selectedReaderFont = ReaderFont.Golos,
         selectedThemeVariant = ThemeVariant.Dynamic,
         readerFontScaleFactor = 1f,
@@ -59,4 +62,10 @@ data class ReaderState(
       )
     }
   }
+}
+
+enum class ReaderPanelContent {
+  Actions,
+  Customizations,
+  Player,
 }
