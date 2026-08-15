@@ -18,69 +18,70 @@
 package dev.sasikanth.rss.reader.resources.icons
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
-import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.group
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
+@Suppress("CheckReturnValue")
 public val TwineIcons.Play: ImageVector
   get() {
-    if (_playArrow != null) {
-      return _playArrow!!
+    if (_play_arrow != null) {
+      return _play_arrow!!
     }
-    _playArrow =
+    _play_arrow =
       ImageVector.Builder(
-          name = "PlayArrow",
-          defaultWidth = 24.0.dp,
-          defaultHeight = 24.0.dp,
-          viewportWidth = 960.0f,
-          viewportHeight = 960.0f,
+          name = "play_arrow",
+          defaultWidth = 20.dp,
+          defaultHeight = 20.dp,
+          viewportWidth = 20f,
+          viewportHeight = 20f,
         )
         .apply {
-          group(translationX = -0.0f, translationY = 960.0f) {
-            path(
-              fill = SolidColor(Color(0xFF000000)),
-              stroke = null,
-              strokeLineWidth = 0.0f,
-              strokeLineCap = Butt,
-              strokeLineJoin = Miter,
-              strokeLineMiter = 4.0f,
-              pathFillType = NonZero,
-            ) {
-              /* pathData = "M320-273v-414q0-17 12-28.5t28-11.5q5 0 10.5 1.5T381-721l326 207q9 6 13.5 15t4.5 19q0 10-4.5 19T707-446L381-239q-5 3-10.5 4.5T360-233q-16 0-28-11.5T320-273Zm80-207Zm0 134 210-134-210-134v268Z" */
-              moveTo(320.0f, -273.0f)
-              verticalLineToRelative(-414.0f)
-              quadToRelative(0.0f, -17.0f, 12.0f, -28.5f)
-              reflectiveQuadToRelative(28.0f, -11.5f)
-              quadToRelative(5.0f, 0.0f, 10.5f, 1.5f)
-              reflectiveQuadTo(381.0f, -721.0f)
-              lineToRelative(326.0f, 207.0f)
-              quadToRelative(9.0f, 6.0f, 13.5f, 15.0f)
-              reflectiveQuadToRelative(4.5f, 19.0f)
-              quadToRelative(0.0f, 10.0f, -4.5f, 19.0f)
-              reflectiveQuadTo(707.0f, -446.0f)
-              lineTo(381.0f, -239.0f)
-              quadToRelative(-5.0f, 3.0f, -10.5f, 4.5f)
-              reflectiveQuadTo(360.0f, -233.0f)
-              quadToRelative(-16.0f, 0.0f, -28.0f, -11.5f)
-              reflectiveQuadTo(320.0f, -273.0f)
-              close()
-              moveToRelative(80.0f, -207.0f)
-              close()
-              moveToRelative(0.0f, 134.0f)
-              lineToRelative(210.0f, -134.0f)
-              lineToRelative(-210.0f, -134.0f)
-              verticalLineToRelative(268.0f)
-              close()
-            }
+          path(
+            fill = SolidColor(Color.Black),
+            fillAlpha = 1f,
+            stroke = null,
+            strokeAlpha = 1f,
+            strokeLineWidth = 1f,
+            strokeLineCap = StrokeCap.Butt,
+            strokeLineJoin = StrokeJoin.Bevel,
+            strokeLineMiter = 1f,
+            pathFillType = PathFillType.Companion.NonZero,
+          ) {
+            moveTo(5.11f, 16.08f)
+            verticalLineTo(3.89f)
+            quadTo(5.11f, 3.38f, 5.45f, 3.07f)
+            reflectiveQuadTo(6.24f, 2.78f)
+            quadToRelative(0.13f, 0f, 0.3f, 0.04f)
+            reflectiveQuadToRelative(0.3f, 0.13f)
+            lineToRelative(9.41f, 6.11f)
+            quadToRelative(0.25f, 0.16f, 0.38f, 0.41f)
+            reflectiveQuadTo(16.77f, 9.98f)
+            reflectiveQuadToRelative(-0.13f, 0.52f)
+            reflectiveQuadToRelative(-0.38f, 0.4f)
+            lineTo(6.83f, 17.03f)
+            quadToRelative(-0.15f, 0.09f, -0.3f, 0.13f)
+            reflectiveQuadToRelative(-0.3f, 0.04f)
+            quadToRelative(-0.44f, 0f, -0.78f, -0.31f)
+            reflectiveQuadTo(5.11f, 16.08f)
+            close()
+            moveTo(7.36f, 9.95f)
+            close()
+            moveTo(7.33f, 14.05f)
+            lineTo(13.62f, 9.98f)
+            lineTo(7.33f, 5.91f)
+            verticalLineToRelative(8.14f)
+            close()
           }
         }
         .build()
-    return _playArrow!!
+    return _play_arrow!!
   }
 
-private var _playArrow: ImageVector? = null
+private var _play_arrow: ImageVector? = null
