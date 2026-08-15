@@ -108,6 +108,8 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
+import dev.sasikanth.rss.reader.ui.getOverriddenColorScheme
+import dev.sasikanth.rss.reader.ui.systemDynamicColorScheme
 import dev.sasikanth.rss.reader.utils.CollectItemTransition
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalInAppRating
@@ -269,6 +271,16 @@ private fun HomeContent(
     }
 
   val canShowBottomBar = platform !is Platform.Desktop && state.showPinnedSources
+  val systemDynamicDarkColors =
+    if (state.themeVariant == ThemeVariant.SystemDynamic) {
+      systemDynamicColorScheme(true)
+    } else {
+      null
+    }
+  val overriddenDarkColorScheme =
+    remember(state.themeVariant, systemDynamicDarkColors) {
+      systemDynamicDarkColors ?: state.themeVariant.getOverriddenColorScheme(true)
+    }
   val bottomBarScrollState =
     rememberPinnedSourcesBottomBarScrollBehavior(
       canScroll = { canShowBottomBar && !hasActiveTrack }
@@ -365,7 +377,7 @@ private fun HomeContent(
           }
 
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-          AppTheme(useDarkTheme = true) {
+          AppTheme(useDarkTheme = true, overriddenColorScheme = overriddenDarkColorScheme) {
             PinnedSourcesBottomBar(
               modifier = bottomBarModifier,
               pinnedSources = feedsState.pinnedSources,
@@ -388,7 +400,7 @@ private fun HomeContent(
         }
       } else if (hasActiveTrack) {
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-          AppTheme(useDarkTheme = true) {
+          AppTheme(useDarkTheme = true, overriddenColorScheme = overriddenDarkColorScheme) {
             NowPlayingBottomBar(
               modifier =
                 Modifier.padding(bottom = if (platform == Platform.Desktop) 16.dp else 0.dp)
