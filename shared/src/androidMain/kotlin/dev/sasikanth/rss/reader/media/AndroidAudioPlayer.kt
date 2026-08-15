@@ -80,12 +80,11 @@ class AndroidAudioPlayer(
 
           override fun onPlaybackStateChanged(state: Int) {
             updatePlaybackState()
-            if (
-              state == Player.STATE_ENDED &&
-                _playbackState.value.sleepTimerRemaining == -1L // End of track marker
-            ) {
-              pause()
-              setSleepTimer(SleepTimerOption.None)
+            if (state == Player.STATE_ENDED) {
+              if (_playbackState.value.sleepTimerRemaining == -1L) { // End of track marker
+                setSleepTimer(SleepTimerOption.None)
+              }
+              stop()
             }
           }
 
@@ -145,6 +144,17 @@ class AndroidAudioPlayer(
     controller?.pause()
   }
 
+  override fun stop() {
+    playJob?.cancel()
+    stopProgressUpdate()
+    controller?.stop()
+    controller?.clearMediaItems()
+    sleepTimerJob?.cancel()
+    sleepTimerRemainingMillis = null
+    selectedSleepTimerOption = SleepTimerOption.None
+    _playbackState.value = PlaybackState.Idle
+  }
+
   override fun resume() {
     controller?.play()
   }
@@ -196,6 +206,9 @@ class AndroidAudioPlayer(
         duration = player.duration.coerceAtLeast(0),
         playingUrl = player.currentMediaItem?.localConfiguration?.uri?.toString(),
         playingPostId = player.currentMediaItem?.mediaId,
+        title = player.mediaMetadata.title?.toString(),
+        artist = player.mediaMetadata.artist?.toString(),
+        coverUrl = player.mediaMetadata.artworkUri?.toString(),
         buffering = player.playbackState == Player.STATE_BUFFERING,
         playbackSpeed = player.playbackParameters.speed,
         sleepTimerRemaining = sleepTimerRemainingMillis,
