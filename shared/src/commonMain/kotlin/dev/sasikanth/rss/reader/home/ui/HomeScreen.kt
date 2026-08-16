@@ -410,6 +410,7 @@ private fun HomeContent(
                 onPlayPauseClick = onTogglePlayback,
                 onOpenClick = onOpenCurrentlyPlaying,
                 onStopClick = onStopPlayback,
+                expanded = true,
               )
             }
           }

@@ -76,6 +76,7 @@ internal fun NowPlayingBottomBar(
     modifier =
       modifier
         .navigationBarsPadding()
+        .widthIn(max = BOTTOM_BAR_MAX_WIDTH)
         .padding(horizontal = 32.dp)
         .shadow(elevation = 4.dp, shape = shape)
         .clip(shape)
@@ -90,8 +91,8 @@ internal fun NowPlayingBottomBar(
             style = Stroke(width = 1.dp.toPx()),
           )
         }
-        .height(PINNED_SOURCES_BOTTOM_BAR_HEIGHT)
-        .padding(horizontal = 8.dp),
+        .fillMaxWidth()
+        .height(PINNED_SOURCES_BOTTOM_BAR_HEIGHT),
     verticalAlignment = Alignment.CenterVertically,
     content = content,
   )
