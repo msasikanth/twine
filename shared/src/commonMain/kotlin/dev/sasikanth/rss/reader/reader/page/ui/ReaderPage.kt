@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.selection.DisableSelection
@@ -35,9 +36,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -75,10 +80,13 @@ import dev.sasikanth.rss.reader.reader.ui.LocalOnImageClick
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
+import dev.sasikanth.rss.reader.utils.smoothVerticalFade
 import kotlin.time.Instant
 import kotlinx.coroutines.launch
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
+
+private const val TOP_SCRIM_OPAQUE_THRESHOLD = 200f
 
 @Composable
 internal fun ReaderPage(
@@ -150,6 +158,23 @@ private fun ReaderPageContent(
 
   val coroutineScope = rememberCoroutineScope()
 
+  val listState = rememberLazyListState()
+  val backdropColor = AppTheme.colorScheme.backdrop
+  val density = LocalDensity.current
+  val topScrimSolidPx = with(density) { contentPaddingValues.calculateTopPadding().toPx() }
+  val topScrimFadePx = with(density) { 72.dp.toPx() }
+  val bottomScrimHeightPx = with(density) { 96.dp.toPx() }
+  val topScrimAlphaProvider =
+    remember(listState) {
+      {
+        if (listState.firstVisibleItemIndex == 0) {
+          (listState.firstVisibleItemScrollOffset / TOP_SCRIM_OPAQUE_THRESHOLD).coerceIn(0f, 1f)
+        } else {
+          1f
+        }
+      }
+    }
+
   val textSelectionColors =
     TextSelectionColors(
       handleColor = AppTheme.colorScheme.primary,
@@ -202,7 +227,34 @@ private fun ReaderPageContent(
             ),
         ) {
           LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier =
+              Modifier.fillMaxSize().drawWithContent {
+                drawContent()
+
+                val topScrimHeight = topScrimSolidPx + topScrimFadePx
+                drawRect(
+                  brush =
+                    smoothVerticalFade(
+                      color = backdropColor,
+                      endY = topScrimHeight,
+                      solidFraction = topScrimSolidPx / topScrimHeight,
+                    ),
+                  size = size.copy(height = topScrimHeight),
+                  alpha = topScrimAlphaProvider(),
+                )
+                drawRect(
+                  brush =
+                    smoothVerticalFade(
+                      color = backdropColor,
+                      startY = size.height - bottomScrimHeightPx,
+                      endY = size.height,
+                      reversed = true,
+                    ),
+                  topLeft = Offset(0f, size.height - bottomScrimHeightPx),
+                  size = size.copy(height = bottomScrimHeightPx),
+                )
+              },
+            state = listState,
             overscrollEffect = null,
             contentPadding =
               PaddingValues(

@@ -76,7 +76,6 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -512,33 +511,12 @@ internal fun ReaderScreen(
               bottom = readerActionsPanelBottomInset() + READER_ACTIONS_PANEL_COLLAPSED_HEIGHT,
             )
 
-          val backdropColor = AppTheme.colorScheme.backdrop
-          val scrimHeightPx = with(LocalDensity.current) { 96.dp.toPx() }
           HorizontalPager(
             modifier =
               Modifier.widthIn(max = readerContentMaxWidth)
                 .fillMaxSize()
                 .align(Alignment.Center)
-                .iosBottomSafeAreaPadding()
-                .drawWithContent {
-                  drawContent()
-                  drawRect(
-                    brush =
-                      Brush.verticalGradient(
-                        colors = listOf(backdropColor, Color.Transparent),
-                        startY = 0f,
-                        endY = scrimHeightPx,
-                      )
-                  )
-                  drawRect(
-                    brush =
-                      Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, backdropColor),
-                        startY = size.height - scrimHeightPx,
-                        endY = size.height,
-                      )
-                  )
-                },
+                .iosBottomSafeAreaPadding(),
             state = pagerState,
             overscrollEffect = null,
             beyondViewportPageCount = 1,
