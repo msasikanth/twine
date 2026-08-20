@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.core.EaseInSine
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -122,10 +123,20 @@ internal fun FeaturedSection(
       }
     }
 
+  val isDarkTheme = AppTheme.isDark
+  val backgroundImageColorFilter =
+    remember(isDarkTheme) {
+      ColorFilter.colorMatrix(
+        ColorMatrix().apply {
+          val saturation = if (isDarkTheme) 1f else 1.1f
+          setToSaturation(saturation)
+        }
+      )
+    }
+
   Box(modifier) {
     if (canBlurImage && blurEffect != null && featuredPosts.isNotEmpty()) {
-      // Only the current page and its immediate neighbors can be visible during a swipe;
-      // composing a blurred background per featured post stacks fully opaque layers.
+      // Only the current page and its immediate neighbors can be visible during a swipe.
       val backgroundPageRange by
         remember(featuredPosts.size) {
           derivedStateOf {
@@ -136,26 +147,35 @@ internal fun FeaturedSection(
           }
         }
 
-      for (page in backgroundPageRange) {
-        key(page) {
-          val featuredPost = featuredPosts[page]
-          val alphaProvider =
-            remember(page, postsType, markAsReadOn) {
-              {
-                val pageOffset = pagerState.getOffsetFractionForPage(page)
-                if (postsType == PostsType.UNREAD && markAsReadOn == MarkAsReadOn.Scroll) {
-                  calculateContentAlpha(pageOffset)
-                } else {
-                  calculateBackgroundAlpha(pageOffset)
+      val hasBackgroundImage =
+        backgroundPageRange.any { featuredPosts[it].resolvedPost.imageUrl != null }
+
+      if (hasBackgroundImage) {
+        FeaturedSectionBackground(
+          blurEffect = blurEffect,
+          modifier = Modifier.aspectRatio(imageAspectRatio),
+        ) {
+          for (page in backgroundPageRange) {
+            key(page) {
+              val featuredPost = featuredPosts[page]
+              val alphaProvider =
+                remember(page, postsType, markAsReadOn) {
+                  {
+                    val pageOffset = pagerState.getOffsetFractionForPage(page)
+                    if (postsType == PostsType.UNREAD && markAsReadOn == MarkAsReadOn.Scroll) {
+                      calculateContentAlpha(pageOffset)
+                    } else {
+                      calculateBackgroundAlpha(pageOffset)
+                    }
+                  }
                 }
-              }
+              FeaturedSectionBackgroundImage(
+                imageUrl = featuredPost.resolvedPost.imageUrl,
+                alphaProvider = alphaProvider,
+                colorFilter = backgroundImageColorFilter,
+              )
             }
-          FeaturedSectionBackground(
-            imageUrl = featuredPost.resolvedPost.imageUrl,
-            imageAspectRatio = imageAspectRatio,
-            blurEffect = blurEffect,
-            alphaProvider = alphaProvider,
-          )
+          }
         }
       }
     }
@@ -252,40 +272,21 @@ internal fun FeaturedSection(
   }
 }
 
+// Blurs and tints the cross-fading pages as one layer; blurring per page stacks the decal edge
+// fade and the overlay while two pages overlap, brightening the background mid-swipe.
 @Composable
 private fun FeaturedSectionBackground(
-  imageUrl: String?,
-  imageAspectRatio: Float,
   blurEffect: BlurEffect,
-  alphaProvider: () -> Float,
   modifier: Modifier = Modifier,
-  alignment: Alignment = Alignment.Center,
+  content: @Composable BoxScope.() -> Unit,
 ) {
   val overlayColor = AppTheme.colorScheme.inversePrimary
   val backdropColor = AppTheme.colorScheme.backdrop
-  val isDarkTheme = AppTheme.isDark
-  val colorFilter =
-    remember(isDarkTheme) {
-      ColorFilter.colorMatrix(
-        ColorMatrix().apply {
-          val saturation = if (isDarkTheme) 1f else 1.1f
-          setToSaturation(saturation)
-        }
-      )
-    }
 
-  if (imageUrl == null) return
-
-  AsyncImage(
-    url = imageUrl,
-    size = Size(Dimension.Undefined, height = 100), // Downscaled for blur
+  Box(
     modifier =
       modifier
-        .graphicsLayer {
-          renderEffect = blurEffect
-          alpha = alphaProvider()
-        }
-        .aspectRatio(imageAspectRatio)
+        .graphicsLayer { renderEffect = blurEffect }
         .drawWithCache {
           onDrawWithContent {
             drawContent()
@@ -293,9 +294,24 @@ private fun FeaturedSectionBackground(
             drawRect(brush = Brush.verticalGradient(0.7f to Color.Transparent, 1f to backdropColor))
           }
         },
+    content = content,
+  )
+}
+
+@Composable
+private fun BoxScope.FeaturedSectionBackgroundImage(
+  imageUrl: String?,
+  alphaProvider: () -> Float,
+  colorFilter: ColorFilter?,
+) {
+  if (imageUrl == null) return
+
+  AsyncImage(
+    url = imageUrl,
+    size = BackgroundBlurImageSize,
+    modifier = Modifier.matchParentSize().graphicsLayer { alpha = alphaProvider() },
     contentDescription = null,
     contentScale = widthBiasedScale,
-    alignment = alignment,
     colorFilter = colorFilter,
   )
 }
@@ -314,3 +330,5 @@ private fun calculateContentAlpha(pageOffset: Float): Float {
   val offsetAbsolute = minOf(1f, pageOffset.absoluteValue)
   return EaseInSine.transform(offsetAbsolute.inverse())
 }
+
+private val BackgroundBlurImageSize = Size(Dimension.Undefined, height = 100) // Downscaled for blur
