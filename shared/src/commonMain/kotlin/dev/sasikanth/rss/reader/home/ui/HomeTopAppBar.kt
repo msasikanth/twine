@@ -48,7 +48,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -63,6 +62,7 @@ import dev.sasikanth.rss.reader.resources.icons.MarkAllAsRead
 import dev.sasikanth.rss.reader.resources.icons.Menu
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.smoothVerticalFade
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.appBarAllFeeds
@@ -96,9 +96,9 @@ internal fun HomeTopAppBar(
     remember(listState) {
       {
         if (listState.firstVisibleItemIndex == 0) {
-          (listState.firstVisibleItemScrollOffset / APP_BAR_OPAQUE_THRESHOLD).coerceIn(0f, 0.9f)
+          (listState.firstVisibleItemScrollOffset / APP_BAR_OPAQUE_THRESHOLD).coerceIn(0f, 1f)
         } else {
-          0.9f
+          1f
         }
       }
     }
@@ -106,7 +106,7 @@ internal fun HomeTopAppBar(
   var showConfirmDialog by remember { mutableStateOf(false) }
 
   val backgroundColor = AppTheme.colorScheme.backdrop
-  val gradientFadeHeight = with(LocalDensity.current) { 40.dp.toPx() }
+  val gradientFadeHeight = with(LocalDensity.current) { 72.dp.toPx() }
   TopAppBar(
     modifier =
       modifier.drawBehind {
@@ -115,11 +115,10 @@ internal fun HomeTopAppBar(
         val gradientHeight = size.height + gradientFadeHeight
         drawRect(
           brush =
-            Brush.verticalGradient(
-              0f to backgroundColor,
-              size.height / gradientHeight to backgroundColor,
-              1f to Color.Transparent,
+            smoothVerticalFade(
+              color = backgroundColor,
               endY = gradientHeight,
+              solidFraction = size.height / gradientHeight,
             ),
           size = size.copy(height = gradientHeight),
           alpha = backgroundAlphaProvider(),
