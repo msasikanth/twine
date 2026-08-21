@@ -37,12 +37,10 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
@@ -63,6 +61,7 @@ import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.platform
 import kotlin.time.Clock
 import kotlin.time.Instant
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
@@ -292,13 +291,13 @@ fun Morph.toComposePath(progress: Float, scale: Float = 1f, path: Path = Path())
   return path
 }
 
-fun Modifier.iosBottomSafeAreaPadding(): Modifier = composed {
+@Composable
+fun Modifier.iosBottomSafeAreaPadding(): Modifier =
   if (platform is Platform.Apple) {
     windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
   } else {
     this
   }
-}
 
 // Desktop delivers wheel notches as small deltas (~1f); scale them up so a single notch
 // moves the list a noticeable amount.
@@ -310,19 +309,20 @@ private const val MOUSE_WHEEL_SCROLL_MULTIPLIER = 80f
  * This forwards vertical wheel scroll input to [scrollState] so such lists remain scrollable with a
  * regular mouse.
  */
-fun Modifier.scrollOnMouseWheel(scrollState: ScrollableState): Modifier = composed {
+fun Modifier.scrollOnMouseWheel(scrollState: ScrollableState): Modifier =
   if (platform is Platform.Desktop) {
-    val coroutineScope = rememberCoroutineScope()
     pointerInput(scrollState) {
-      awaitPointerEventScope {
-        while (true) {
-          val event = awaitPointerEvent(PointerEventPass.Main)
-          if (event.type == PointerEventType.Scroll) {
-            val scrollDelta = event.changes.first().scrollDelta
-            val delta = if (scrollDelta.x != 0f) scrollDelta.x else scrollDelta.y
-            if (delta != 0f) {
-              event.changes.forEach { it.consume() }
-              coroutineScope.launch { scrollState.scrollBy(delta * MOUSE_WHEEL_SCROLL_MULTIPLIER) }
+      coroutineScope {
+        awaitPointerEventScope {
+          while (true) {
+            val event = awaitPointerEvent(PointerEventPass.Main)
+            if (event.type == PointerEventType.Scroll) {
+              val scrollDelta = event.changes.first().scrollDelta
+              val delta = if (scrollDelta.x != 0f) scrollDelta.x else scrollDelta.y
+              if (delta != 0f) {
+                event.changes.forEach { it.consume() }
+                launch { scrollState.scrollBy(delta * MOUSE_WHEEL_SCROLL_MULTIPLIER) }
+              }
             }
           }
         }
@@ -331,13 +331,12 @@ fun Modifier.scrollOnMouseWheel(scrollState: ScrollableState): Modifier = compos
   } else {
     this
   }
-}
 
 /**
  * Reports the position of a right-click/secondary-click on desktop, so callers can show a context
  * menu anchored where the user actually clicked instead of at a fixed icon.
  */
-fun Modifier.onDesktopContextMenu(onContextMenu: (Offset) -> Unit): Modifier = composed {
+fun Modifier.onDesktopContextMenu(onContextMenu: (Offset) -> Unit): Modifier =
   if (platform is Platform.Desktop) {
     pointerInput(Unit) {
       awaitEachGesture {
@@ -353,4 +352,3 @@ fun Modifier.onDesktopContextMenu(onContextMenu: (Offset) -> Unit): Modifier = c
   } else {
     this
   }
-}
