@@ -62,11 +62,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -457,7 +458,11 @@ internal fun SleepTimerBottomSheet(
     onDismissRequest = onDismiss,
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = AppTheme.colorScheme.onSurface,
-    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    sheetState =
+      rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+      ),
   ) {
     Column(
       modifier =

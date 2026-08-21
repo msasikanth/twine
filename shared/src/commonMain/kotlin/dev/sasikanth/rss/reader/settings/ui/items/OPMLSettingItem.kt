@@ -35,8 +35,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -147,7 +148,11 @@ internal fun OpmlFeedSelectionSheet(
     onDismissRequest = onDismiss,
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = AppTheme.colorScheme.onSurface,
-    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    sheetState =
+      rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+      ),
   ) {
     val selectedFeeds = remember { mutableStateListOf<OpmlFeed>() }
     val canSelectMore by
