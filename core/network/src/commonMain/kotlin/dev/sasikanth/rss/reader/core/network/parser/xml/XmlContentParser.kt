@@ -20,9 +20,10 @@ package dev.sasikanth.rss.reader.core.network.parser.xml
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_URL
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_CONTENT
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_GROUP
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_THUMBNAIL
-import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_URL
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString
@@ -41,6 +42,7 @@ abstract class XmlContentParser {
   protected fun postsFlow(
     parser: XmlPullParser,
     firstPost: PostPayload? = null,
+    containerTag: String,
     itemTag: String,
     readItem: (XmlPullParser) -> PostPayload?,
   ): Flow<PostPayload> = flow {
@@ -48,10 +50,8 @@ abstract class XmlContentParser {
       emit(firstPost)
     }
 
-    while (parser.next() != EventType.END_TAG) {
-      if (parser.eventType != EventType.START_TAG) continue
-
-      if (parser.name == itemTag) {
+    forEachChildTag(parser, containerTag) { name ->
+      if (name == itemTag) {
         val post = readItem(parser)
         if (post != null) {
           emit(post)
@@ -60,6 +60,58 @@ abstract class XmlContentParser {
         parser.skipSubTree()
       }
     }
+  }
+
+  /**
+   * Loops over the direct children of the tag the parser is currently inside, stopping only at
+   * [containerTag]'s end tag. Bailing on any end tag would truncate the rest of the container when
+   * a single child leaves the parser misaligned.
+   */
+  protected inline fun forEachChildTag(
+    parser: XmlPullParser,
+    containerTag: String,
+    block: (String) -> Unit,
+  ) {
+    while (true) {
+      val eventType = parser.next()
+      if (eventType == EventType.END_DOCUMENT) return
+      if (eventType == EventType.END_TAG && parser.name == containerTag) return
+      if (eventType != EventType.START_TAG) continue
+
+      block(parser.name)
+    }
+  }
+
+  /**
+   * Reads a media image URL from either the `url` attribute or the element's text content, and
+   * consumes the whole element. Feeds like MyAnimeList put the URL in the text, and feeds like The
+   * Guardian nest `media:credit` inside `media:content`.
+   */
+  protected fun readMediaImageUrl(parser: XmlPullParser): String? {
+    val urlFromAttribute = parser.getAttributeValue(parser.namespace, ATTR_URL)
+    if (!urlFromAttribute.isNullOrBlank()) {
+      parser.skipSubTree()
+      return urlFromAttribute
+    }
+
+    return readTextContentAndSkipSubTree(parser)
+  }
+
+  protected fun readTextContentAndSkipSubTree(parser: XmlPullParser): String? {
+    var text: String? = null
+    var depth = 1
+
+    while (depth > 0) {
+      when (parser.next()) {
+        EventType.START_TAG -> depth++
+        EventType.END_TAG -> depth--
+        EventType.TEXT -> if (depth == 1 && text.isNullOrBlank()) text = parser.text
+        EventType.END_DOCUMENT -> break
+        else -> {}
+      }
+    }
+
+    return text?.trim()?.ifBlank { null }
   }
 
   protected fun createFeedPayload(
@@ -104,13 +156,13 @@ abstract class XmlContentParser {
     var image: String? = null
     var description: String? = null
 
-    while (parser.next() != EventType.END_TAG) {
-      if (parser.eventType != EventType.START_TAG) continue
-
-      when (parser.name) {
+    forEachChildTag(parser, TAG_MEDIA_GROUP) { name ->
+      when (name) {
         TAG_MEDIA_THUMBNAIL -> {
-          image = parser.getAttributeValue(parser.namespace, TAG_URL)
-          parser.nextTag()
+          val imageUrl = readMediaImageUrl(parser)
+          if (image.isNullOrBlank()) {
+            image = imageUrl
+          }
         }
         TAG_MEDIA_CONTENT -> {
           description = parser.nextText()
