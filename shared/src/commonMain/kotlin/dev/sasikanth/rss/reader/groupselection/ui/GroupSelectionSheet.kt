@@ -38,8 +38,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +54,7 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
+import dev.sasikanth.rss.reader.app.NavResultKey
 import dev.sasikanth.rss.reader.components.InverseButton
 import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.feeds.ui.CreateGroupDialog
@@ -69,7 +71,7 @@ import twine.shared.generated.resources.buttonCancel
 import twine.shared.generated.resources.buttonConfirm
 import twine.shared.generated.resources.groupAddNew
 
-const val SELECTED_GROUPS_KEY = "dev.sasikanth.twine.SELECTED_GROUPS"
+val SELECTED_GROUPS_KEY = NavResultKey<Set<String>>("dev.sasikanth.twine.SELECTED_GROUPS")
 
 @Composable
 fun GroupSelectionSheet(
@@ -91,7 +93,11 @@ fun GroupSelectionSheet(
           .only(WindowInsetsSides.Bottom)
           .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
       },
-      sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+      sheetState =
+        rememberBottomSheetState(
+          initialValue = SheetValue.Hidden,
+          enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+        ),
     ) {
       val state by viewModel.state.collectAsStateWithLifecycle()
       val groups = state.groups.collectAsLazyPagingItems()

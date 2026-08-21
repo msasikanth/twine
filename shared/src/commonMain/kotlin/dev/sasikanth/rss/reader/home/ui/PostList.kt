@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import androidx.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
 import dev.sasikanth.rss.reader.core.model.local.PostsType
@@ -37,6 +38,9 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+
+private const val FEATURED_ITEMS_KEY = "featured_items"
+private const val POST_ITEM_CONTENT_TYPE = "post_item"
 
 private data class VisibleWindow(
   val firstIndex: Int,
@@ -92,20 +96,21 @@ internal fun PostsList(
       .distinctUntilChanged()
       .onEach { window ->
         val currentPage = featuredPostsPagerState.currentPage
+        val visibleItemsInfo = listState.layoutInfo.visibleItemsInfo
         val visibleItems =
-          listState.layoutInfo.visibleItemsInfo
-            .mapNotNull { itemInfo ->
+          buildMap(visibleItemsInfo.size) {
+            visibleItemsInfo.fastForEach { itemInfo ->
               val keyString = itemInfo.key as? String
               when {
-                keyString.isNullOrBlank() -> null
-                keyString == "featured_items" -> {
+                keyString.isNullOrBlank() -> Unit
+                keyString == FEATURED_ITEMS_KEY -> {
                   val post = featuredPosts.getOrNull(currentPage)
-                  post?.resolvedPost?.id?.let { it to itemInfo.index }
+                  post?.resolvedPost?.id?.let { put(it, itemInfo.index) }
                 }
-                else -> PostListKey.decodeSafe(keyString)?.postId?.let { it to itemInfo.index }
+                else -> PostListKey.decodePostId(keyString)?.let { put(it, itemInfo.index) }
               }
             }
-            .toMap()
+          }
         onVisiblePostsChanged(visibleItems, window.firstVisibleItemIndex)
       }
       .launchIn(this)
@@ -120,7 +125,7 @@ internal fun PostsList(
         bottom = PINNED_SOURCES_BOTTOM_BAR_HEIGHT + 120.dp + paddingValues.calculateBottomPadding(),
       ),
   ) {
-    item(key = "featured_items", contentType = "featured_items") {
+    item(key = FEATURED_ITEMS_KEY, contentType = FEATURED_ITEMS_KEY) {
       FeaturedSection(
         paddingValues = paddingValues,
         featuredPosts = featuredPosts,
@@ -139,16 +144,8 @@ internal fun PostsList(
     val posts = posts.invoke()
     items(
       count = posts.itemCount,
-      key = { index ->
-        val post = posts.peek(index)
-
-        if (post != null) {
-          PostListKey.from(post).encode()
-        } else {
-          index
-        }
-      },
-      contentType = { "post_item" },
+      key = { index -> posts.peek(index)?.let(PostListKey::encode) ?: index },
+      contentType = { POST_ITEM_CONTENT_TYPE },
     ) { index ->
       val post = posts[index] ?: return@items
       val highlighted = post.id == activeReaderPostId

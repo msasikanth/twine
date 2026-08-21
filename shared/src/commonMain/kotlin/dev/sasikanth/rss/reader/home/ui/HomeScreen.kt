@@ -57,13 +57,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
@@ -114,17 +117,18 @@ import dev.sasikanth.rss.reader.utils.CollectItemTransition
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalInAppRating
 import dev.sasikanth.rss.reader.utils.LocalRootWindowSizeClass
-import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
 import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import kotlin.math.abs
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.noFeeds
@@ -132,6 +136,10 @@ import twine.shared.generated.resources.noNewPosts
 import twine.shared.generated.resources.noNewPostsSubtitle
 import twine.shared.generated.resources.swipeLeftGetStarted
 import twine.shared.generated.resources.swipeRightGetStarted
+
+private const val BOTTOM_SCRIM_FRACTION = 0.15f
+
+private class KeyRepeatGuard(var armed: Boolean = false)
 
 @OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
 @Composable
@@ -146,7 +154,6 @@ internal fun HomeScreen(
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
   val feedsState by feedsViewModel.state.collectAsStateWithLifecycle()
-  val sizeClass = LocalWindowSizeClass.current
   val shouldBlockImage = LocalBlockImage.current
   val inAppRating = LocalInAppRating.current
 
@@ -264,10 +271,12 @@ private fun HomeContent(
       }
     }
   val unreadSinceLastSync =
-    if (state.isSyncing) {
-      state.unreadSinceLastSync?.copy(hasNewArticles = false)
-    } else {
-      state.unreadSinceLastSync
+    remember(state.unreadSinceLastSync, state.isSyncing) {
+      if (state.isSyncing) {
+        state.unreadSinceLastSync?.copy(hasNewArticles = false)
+      } else {
+        state.unreadSinceLastSync
+      }
     }
 
   val canShowBottomBar = platform !is Platform.Desktop && state.showPinnedSources
@@ -299,7 +308,27 @@ private fun HomeContent(
   if (platform == Platform.Desktop) {
     LaunchedEffect(Unit) { homeFocusRequester.requestFocus() }
   }
-  var refreshShortcutArmed by remember { mutableStateOf(false) }
+  val refreshShortcut = remember { KeyRepeatGuard() }
+
+  val onRefreshKeyEvent =
+    remember(dispatch, refreshShortcut) {
+      { event: KeyEvent ->
+        when {
+          event.key == Key.R && event.type == KeyEventType.KeyDown && event.isMetaPressed -> {
+            if (!refreshShortcut.armed) {
+              refreshShortcut.armed = true
+              dispatch(HomeEvent.OnSwipeToRefresh)
+            }
+            true
+          }
+          event.key == Key.R && event.type == KeyEventType.KeyUp -> {
+            refreshShortcut.armed = false
+            false
+          }
+          else -> false
+        }
+      }
+    }
 
   val onSourceClick =
     remember(feedsDispatch) { { feed: Source -> feedsDispatch(FeedsEvent.OnSourceClick(feed)) } }
@@ -346,22 +375,7 @@ private fun HomeContent(
 
   Scaffold(
     modifier =
-      modifier.focusRequester(homeFocusRequester).focusable().onPreviewKeyEvent { event ->
-        when {
-          event.key == Key.R && event.type == KeyEventType.KeyDown && event.isMetaPressed -> {
-            if (!refreshShortcutArmed) {
-              refreshShortcutArmed = true
-              dispatch(HomeEvent.OnSwipeToRefresh)
-            }
-            true
-          }
-          event.key == Key.R && event.type == KeyEventType.KeyUp -> {
-            refreshShortcutArmed = false
-            false
-          }
-          else -> false
-        }
-      },
+      modifier.focusRequester(homeFocusRequester).focusable().onPreviewKeyEvent(onRefreshKeyEvent),
     bottomBar = {
       if (canShowBottomBar) {
         val scaffoldBottomPadding =
@@ -372,9 +386,7 @@ private fun HomeContent(
           }
 
         val bottomBarModifier =
-          remember(scaffoldBottomPadding, onMenuClicked, density) {
-            Modifier.padding(bottom = scaffoldBottomPadding)
-          }
+          remember(scaffoldBottomPadding) { Modifier.padding(bottom = scaffoldBottomPadding) }
 
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
           AppTheme(useDarkTheme = true, overriddenColorScheme = overriddenDarkColorScheme) {
@@ -456,10 +468,8 @@ private fun HomeContent(
           val state = latestState
           val posts = latestPosts
 
-          val topOffset =
-            remember(paddingValues) {
-              with(density) { paddingValues.calculateTopPadding().roundToPx() }
-            }
+          val topPadding = paddingValues.calculateTopPadding()
+          val topOffset = remember(topPadding, density) { with(density) { topPadding.roundToPx() } }
 
           var featuredPostsLoaded by remember { mutableStateOf(false) }
           LaunchedEffect(featuredPosts.isNotEmpty()) {
@@ -485,21 +495,26 @@ private fun HomeContent(
 
             snapshotFlow { postsListState.isScrollInProgress }.first { !it }
 
-            val featuredIndexById =
-              if (activePostId != null) {
-                featuredPosts.indexOfFirst { it.resolvedPost.id == activePostId }
-              } else {
-                -1
-              }
-            val listIndexById =
-              if (activePostId != null && featuredIndexById == -1) {
-                latestPosts?.itemSnapshotList?.let { snapshot ->
-                  val itemIndex = snapshot.items.indexOfFirst { it.id == activePostId }
-                  // Plus one because the featured section always occupies LazyColumn item 0
-                  if (itemIndex >= 0) snapshot.placeholdersBefore + itemIndex + 1 else null
-                }
-              } else {
-                null
+            val snapshotList = latestPosts?.itemSnapshotList
+            val (featuredIndexById, listIndexById) =
+              withContext(Dispatchers.Default) {
+                val featuredIndex =
+                  if (activePostId != null) {
+                    featuredPosts.indexOfFirst { it.resolvedPost.id == activePostId }
+                  } else {
+                    -1
+                  }
+                val listIndex =
+                  if (activePostId != null && featuredIndex == -1) {
+                    snapshotList?.let { snapshot ->
+                      val itemIndex = snapshot.items.indexOfFirst { it.id == activePostId }
+                      // Plus one because the featured section always occupies LazyColumn item 0
+                      if (itemIndex >= 0) snapshot.placeholdersBefore + itemIndex + 1 else null
+                    }
+                  } else {
+                    null
+                  }
+                featuredIndex to listIndex
               }
 
             when {
@@ -528,19 +543,22 @@ private fun HomeContent(
             }
           }
 
-          val saveVisibleItemIndex by rememberUpdatedState {
-            val firstVisibleItem = postsListState.layoutInfo.visibleItemsInfo.firstOrNull()
-            if (firstVisibleItem != null) {
-              dispatch(
-                HomeEvent.OnScreenStopped(
-                  firstVisibleItemIndex = firstVisibleItem.index,
-                  firstVisibleItemKey = firstVisibleItem.key as? String,
-                  firstVisibleItemOffset = firstVisibleItem.offset,
-                  settledPage = featuredPostsPagerState.settledPage,
-                )
-              )
+          val saveVisibleItemIndex =
+            remember(dispatch, postsListState, featuredPostsPagerState) {
+              {
+                val firstVisibleItem = postsListState.layoutInfo.visibleItemsInfo.firstOrNull()
+                if (firstVisibleItem != null) {
+                  dispatch(
+                    HomeEvent.OnScreenStopped(
+                      firstVisibleItemIndex = firstVisibleItem.index,
+                      firstVisibleItemKey = firstVisibleItem.key as? String,
+                      firstVisibleItemOffset = firstVisibleItem.offset,
+                      settledPage = featuredPostsPagerState.settledPage,
+                    )
+                  )
+                }
+              }
             }
-          }
 
           LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
             dispatch(HomeEvent.OnScreenStarted)
@@ -577,6 +595,26 @@ private fun HomeContent(
                 onRefresh = { dispatch(HomeEvent.OnSwipeToRefresh) },
               ) {
                 val backdropColor = AppTheme.colorScheme.backdrop
+                val listScrimModifier =
+                  remember(backdropColor) {
+                    Modifier.fillMaxSize().drawWithCache {
+                      val scrimHeight = size.height * BOTTOM_SCRIM_FRACTION
+                      val scrimTop = size.height - scrimHeight
+                      val brush =
+                        Brush.verticalGradient(
+                          0f to Color.Transparent,
+                          1f to backdropColor,
+                          startY = scrimTop,
+                          endY = size.height,
+                        )
+                      val scrimOffset = Offset(0f, scrimTop)
+                      val scrimSize = Size(size.width, scrimHeight)
+                      onDrawWithContent {
+                        drawContent()
+                        drawRect(brush = brush, topLeft = scrimOffset, size = scrimSize)
+                      }
+                    }
+                  }
                 PostsList(
                   paddingValues = paddingValues,
                   featuredPosts = featuredPosts,
@@ -608,20 +646,30 @@ private fun HomeContent(
                     dispatch(HomeEvent.UpdatePostReadStatus(postId, updatedReadStatus))
                   },
                   activeReaderPostId = activeReaderPostId,
-                  modifier =
-                    Modifier.fillMaxSize().drawWithContent {
-                      drawContent()
-                      drawRect(
-                        brush =
-                          Brush.verticalGradient(0.85f to Color.Transparent, 1f to backdropColor)
-                      )
-                    },
+                  modifier = listScrimModifier,
                 )
               }
             }
           }
         },
       )
+
+      val revealTopOfList =
+        remember(coroutineScope, bottomBarScrollState, postsListState) {
+          {
+            coroutineScope.launch {
+              launch {
+                animate(initialValue = bottomBarScrollState.state.heightOffset, targetValue = 0f) {
+                  value,
+                  _ ->
+                  bottomBarScrollState.state.heightOffset = value
+                }
+              }
+              postsListState.animateScrollToItem(0)
+            }
+            Unit
+          }
+        }
 
       NewArticlesScrollToTopButton(
         unreadSinceLastSync = unreadSinceLastSync,
@@ -639,29 +687,11 @@ private fun HomeContent(
                   .coerceAtMost(PINNED_SOURCES_BOTTOM_BAR_HEIGHT.toPx())
             },
         onLoadNewArticlesClick = {
-          coroutineScope.launch {
-            launch {
-              animate(initialValue = bottomBarScrollState.state.heightOffset, targetValue = 0f) {
-                value,
-                _ ->
-                bottomBarScrollState.state.heightOffset = value
-              }
-            }
-            postsListState.animateScrollToItem(0)
-          }
+          revealTopOfList()
           dispatch(HomeEvent.LoadNewArticlesClick)
         },
       ) {
-        coroutineScope.launch {
-          launch {
-            animate(initialValue = bottomBarScrollState.state.heightOffset, targetValue = 0f) {
-              value,
-              _ ->
-              bottomBarScrollState.state.heightOffset = value
-            }
-          }
-          postsListState.animateScrollToItem(0)
-        }
+        revealTopOfList()
       }
     }
   }

@@ -340,7 +340,6 @@ class ReaderViewModel(
                 UnreadWidget -> {
                   widgetDataRepository.unreadPostsPager(sessionPostIds = sessionPostIds)
                 }
-                else -> error("Unsupported screen")
               }
             }
             .flow

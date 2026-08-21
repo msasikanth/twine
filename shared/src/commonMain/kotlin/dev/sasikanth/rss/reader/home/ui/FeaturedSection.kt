@@ -89,8 +89,11 @@ internal fun FeaturedSection(
   val density = LocalDensity.current
   val sizeClass = LocalWindowSizeClass.current
 
+  val systemBars = WindowInsets.systemBars
   val systemBarsPaddingValues =
-    WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
+    remember(systemBars, density) {
+      systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues(density)
+    }
   val systemBarsHorizontalPadding =
     remember(systemBarsPaddingValues, layoutDirection) {
       val systemBarsStartPadding = systemBarsPaddingValues.calculateStartPadding(layoutDirection)
@@ -138,7 +141,7 @@ internal fun FeaturedSection(
     if (canBlurImage && blurEffect != null && featuredPosts.isNotEmpty()) {
       // Only the current page and its immediate neighbors can be visible during a swipe.
       val backgroundPageRange by
-        remember(featuredPosts.size) {
+        remember(featuredPosts) {
           derivedStateOf {
             val currentPage = pagerState.currentPage
             val firstPage = (currentPage - 1).coerceAtLeast(0)
@@ -189,15 +192,19 @@ internal fun FeaturedSection(
         )
       }
 
+    val featuredPostKey =
+      remember(featuredPosts) {
+        { page: Int ->
+          featuredPosts.getOrNull(page)?.let { PostListKey.encode(it.resolvedPost) } ?: page
+        }
+      }
+
     HorizontalPager(
       state = pagerState,
       verticalAlignment = Alignment.Top,
       contentPadding = contentPadding,
       beyondViewportPageCount = 1,
-      key = { page ->
-        val post = featuredPosts.getOrNull(page)
-        post?.let { PostListKey.from(post.resolvedPost).encode() } ?: page
-      },
+      key = featuredPostKey,
     ) { page ->
       val featuredPost = featuredPosts.getOrNull(page)
       if (featuredPost != null) {
@@ -288,10 +295,17 @@ private fun FeaturedSectionBackground(
       modifier
         .graphicsLayer { renderEffect = blurEffect }
         .drawWithCache {
+          val scrim =
+            Brush.verticalGradient(
+              0.7f to Color.Transparent,
+              1f to backdropColor,
+              startY = 0f,
+              endY = size.height,
+            )
           onDrawWithContent {
             drawContent()
             drawRect(color = overlayColor, blendMode = BlendMode.Luminosity)
-            drawRect(brush = Brush.verticalGradient(0.7f to Color.Transparent, 1f to backdropColor))
+            drawRect(brush = scrim)
           }
         },
     content = content,

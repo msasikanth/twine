@@ -85,10 +85,15 @@ internal fun AppTheme(
           )
         }
 
+      @Suppress("DEPRECATION")
+      val rippleConfiguration =
+        remember(colorScheme.secondary) {
+          RippleConfiguration(color = colorScheme.secondary, rippleAlpha = DefaultRippleAlpha)
+        }
+
       CompositionLocalProvider(
         LocalAppColorScheme provides colorScheme,
-        LocalRippleConfiguration provides
-          RippleConfiguration(color = colorScheme.secondary, rippleAlpha = DefaultRippleAlpha),
+        LocalRippleConfiguration provides rippleConfiguration,
         LocalTranslucentStyles provides localTranslucentStyles,
       ) {
         content()

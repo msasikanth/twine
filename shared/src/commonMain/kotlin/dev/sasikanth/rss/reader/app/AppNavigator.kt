@@ -19,21 +19,29 @@ package dev.sasikanth.rss.reader.app
 
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.mapNotNull
+
+/** Identifies a navigation result of type [T], so results can be set and read without casts. */
+class NavResultKey<T : Any>(val name: String)
 
 class AppNavigator(val backStack: NavBackStack<NavKey>) {
-  val results = MutableStateFlow<Map<String, Any>>(emptyMap())
+  private val results = MutableStateFlow<Map<String, Any>>(emptyMap())
 
-  fun setResult(key: String, value: Any) {
-    results.value = results.value + (key to value)
+  fun <T : Any> setResult(key: NavResultKey<T>, value: T) {
+    results.value += (key.name to value)
   }
 
-  fun consumeResult(key: String): Any? {
-    val res = results.value[key]
-    if (res != null) {
-      results.value = results.value - key
+  /** Emits the results set for [key], until they are consumed with [consumeResult]. */
+  fun <T : Any> result(key: NavResultKey<T>): Flow<T> =
+    results.mapNotNull {
+      @Suppress("UNCHECKED_CAST")
+      it[key.name] as T?
     }
-    return res
+
+  fun consumeResult(key: NavResultKey<*>) {
+    results.value -= key.name
   }
 
   fun navigate(route: NavKey) {

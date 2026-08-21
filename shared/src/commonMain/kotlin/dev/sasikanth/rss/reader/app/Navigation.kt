@@ -104,9 +104,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -222,9 +222,8 @@ fun EntryProviderScope<NavKey>.mainScreen(
           }
 
           LaunchedEffect(Unit) {
-            navigator.results
-              .map { it[SELECTED_GROUPS_KEY] as? Set<String> }
-              .filterNotNull()
+            navigator
+              .result(SELECTED_GROUPS_KEY)
               .onEach { selectedGroupIds ->
                 if (selectedGroupIds.isNotEmpty()) {
                   feedsViewModel.dispatch(FeedsEvent.OnGroupsSelected(selectedGroupIds))
@@ -236,8 +235,7 @@ fun EntryProviderScope<NavKey>.mainScreen(
 
           LaunchedEffect(Unit) {
             feedsViewModel.state
-              .map { it.openGroupSelection }
-              .filterNotNull()
+              .mapNotNull { it.openGroupSelection }
               .onEach { selectedGroupIds ->
                 navigator.navigate(Modals.GroupSelection(selectedGroupIds.toList()))
                 feedsViewModel.dispatch(FeedsEvent.MarkOpenGroupSelectionDone)
@@ -281,9 +279,8 @@ fun EntryProviderScope<NavKey>.mainScreen(
           val viewModel = viewModel { settingsViewModel() }
 
           LaunchedEffect(Unit) {
-            navigator.results
-              .map { it[FRESH_RSS_LOGIN_SUCCESS_KEY] as? Boolean }
-              .filterNotNull()
+            navigator
+              .result(FRESH_RSS_LOGIN_SUCCESS_KEY)
               .filter { it }
               .onEach {
                 viewModel.dispatch(SettingsEvent.TriggerSync)
@@ -292,9 +289,8 @@ fun EntryProviderScope<NavKey>.mainScreen(
               .launchIn(this)
           }
           LaunchedEffect(Unit) {
-            navigator.results
-              .map { it[MINIFLUX_LOGIN_SUCCESS_KEY] as? Boolean }
-              .filterNotNull()
+            navigator
+              .result(MINIFLUX_LOGIN_SUCCESS_KEY)
               .filter { it }
               .onEach {
                 viewModel.dispatch(SettingsEvent.TriggerSync)
@@ -303,9 +299,8 @@ fun EntryProviderScope<NavKey>.mainScreen(
               .launchIn(this)
           }
           LaunchedEffect(Unit) {
-            navigator.results
-              .map { it[BAZQUX_LOGIN_SUCCESS_KEY] as? Boolean }
-              .filterNotNull()
+            navigator
+              .result(BAZQUX_LOGIN_SUCCESS_KEY)
               .filter { it }
               .onEach {
                 viewModel.dispatch(SettingsEvent.TriggerSync)
@@ -565,9 +560,8 @@ fun EntryProviderScope<NavKey>.addFeedScreen(
     val viewModel = viewModel { addFeedViewModel() }
 
     LaunchedEffect(Unit) {
-      navigator.results
-        .map { it[SELECTED_GROUPS_KEY] as? Set<String> }
-        .filterNotNull()
+      navigator
+        .result(SELECTED_GROUPS_KEY)
         .onEach { selectedGroupIds ->
           if (selectedGroupIds.isNotEmpty()) {
             viewModel.dispatch(AddFeedEvent.OnGroupsSelected(selectedGroupIds))
@@ -638,9 +632,8 @@ fun EntryProviderScope<NavKey>.feedGroupScreen(
     val viewModel = viewModel { groupViewModel(savedStateHandle) }
 
     LaunchedEffect(Unit) {
-      navigator.results
-        .map { it[SELECTED_GROUPS_KEY] as? Set<String> }
-        .filterNotNull()
+      navigator
+        .result(SELECTED_GROUPS_KEY)
         .onEach { selectedGroupIds ->
           if (selectedGroupIds.isNotEmpty()) {
             viewModel.dispatch(GroupEvent.OnGroupsSelected(selectedGroupIds))

@@ -55,7 +55,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
@@ -79,6 +81,14 @@ import dev.sasikanth.rss.reader.utils.formatRelativeTime
 import dev.sasikanth.rss.reader.utils.onDesktopContextMenu
 import kotlin.math.roundToInt
 
+private val PostListExpandedPadding = PaddingValues(horizontal = 64.dp)
+private val PostListCompactPadding = PaddingValues(0.dp)
+private val CompactPostListExpandedPadding = PaddingValues(horizontal = 128.dp, vertical = 12.dp)
+private val CompactPostListDefaultPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+private val PostItemCornerRadius = 24.dp
+private val PostItemShape = RoundedCornerShape(PostItemCornerRadius)
+private val FeedIconShape = RoundedCornerShape(25)
+
 private val postListPadding: PaddingValues
   @Composable
   @ReadOnlyComposable
@@ -86,8 +96,8 @@ private val postListPadding: PaddingValues
     val sizeClass = LocalWindowSizeClass.current
     return when {
       sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) ->
-        PaddingValues(horizontal = 64.dp)
-      else -> PaddingValues(0.dp)
+        PostListExpandedPadding
+      else -> PostListCompactPadding
     }
   }
 
@@ -98,8 +108,8 @@ private val compactPostListPadding: PaddingValues
     val sizeClass = LocalWindowSizeClass.current
     return when {
       sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) ->
-        PaddingValues(horizontal = 128.dp, vertical = 12.dp)
-      else -> PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+        CompactPostListExpandedPadding
+      else -> CompactPostListDefaultPadding
     }
   }
 
@@ -126,7 +136,7 @@ internal fun PostListItem(
   var contextMenuOffset by remember { mutableStateOf<Offset?>(null) }
   val showImage = !(item.imageUrl.isNullOrBlank())
   val shouldBlockImage = LocalBlockImage.current
-  val highlightColor by
+  val highlightColor =
     animateColorAsState(
       if (highlighted) AppTheme.colorScheme.surfaceContainerHighest
       else AppTheme.colorScheme.backdrop
@@ -137,13 +147,18 @@ internal fun PostListItem(
       modifier =
         Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
           .padding(postListPadding)
-          .clip(RoundedCornerShape(24.dp))
+          .clip(PostItemShape)
           .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
           .onDesktopContextMenu { offset ->
             contextMenuOffset = offset
             showDropdown = true
           }
-          .background(highlightColor, RoundedCornerShape(24.dp))
+          .drawBehind {
+            drawRoundRect(
+              color = highlightColor.value,
+              cornerRadius = CornerRadius(PostItemCornerRadius.toPx()),
+            )
+          }
           .graphicsLayer { this.alpha = alpha }
           .semantics { contentDescription = item.title.ifBlank { item.description } }
           .padding(horizontal = 24.dp, vertical = 8.dp)
@@ -178,7 +193,7 @@ internal fun PostListItem(
             Box(modifier = Modifier.requiredSize(64.dp), contentAlignment = Alignment.Center) {
               AsyncImage(
                 url = url,
-                modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(25)),
+                modifier = Modifier.aspectRatio(1f).clip(FeedIconShape),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
               )
@@ -258,7 +273,7 @@ internal fun SimplePostListItem(
   var contextMenuOffset by remember { mutableStateOf<Offset?>(null) }
   val showImage = !(item.imageUrl.isNullOrBlank())
   val shouldBlockImage = LocalBlockImage.current
-  val highlightColor by
+  val highlightColor =
     animateColorAsState(
       if (highlighted) AppTheme.colorScheme.surfaceContainerHighest
       else AppTheme.colorScheme.backdrop
@@ -269,13 +284,18 @@ internal fun SimplePostListItem(
       modifier =
         Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
           .padding(postListPadding)
-          .clip(RoundedCornerShape(24.dp))
+          .clip(PostItemShape)
           .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
           .onDesktopContextMenu { offset ->
             contextMenuOffset = offset
             showDropdown = true
           }
-          .background(highlightColor, RoundedCornerShape(24.dp))
+          .drawBehind {
+            drawRoundRect(
+              color = highlightColor.value,
+              cornerRadius = CornerRadius(PostItemCornerRadius.toPx()),
+            )
+          }
           .graphicsLayer { this.alpha = alpha }
           .semantics { contentDescription = item.title.ifBlank { item.description } }
           .padding(horizontal = 24.dp, vertical = 4.dp)
@@ -297,7 +317,7 @@ internal fun SimplePostListItem(
             Box(modifier = Modifier.requiredSize(48.dp), contentAlignment = Alignment.Center) {
               AsyncImage(
                 url = url,
-                modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(25)),
+                modifier = Modifier.aspectRatio(1f).clip(FeedIconShape),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
               )
@@ -374,7 +394,7 @@ internal fun CompactPostListItem(
     )
   var showDropdown by remember { mutableStateOf(false) }
   var contextMenuOffset by remember { mutableStateOf<Offset?>(null) }
-  val highlightColor by
+  val highlightColor =
     animateColorAsState(
       if (highlighted) AppTheme.colorScheme.surfaceContainerHighest
       else AppTheme.colorScheme.backdrop
@@ -384,13 +404,18 @@ internal fun CompactPostListItem(
     Row(
       verticalAlignment = Alignment.CenterVertically,
       modifier =
-        Modifier.clip(RoundedCornerShape(24.dp))
+        Modifier.clip(PostItemShape)
           .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
           .onDesktopContextMenu { offset ->
             contextMenuOffset = offset
             showDropdown = true
           }
-          .background(highlightColor, RoundedCornerShape(24.dp))
+          .drawBehind {
+            drawRoundRect(
+              color = highlightColor.value,
+              cornerRadius = CornerRadius(PostItemCornerRadius.toPx()),
+            )
+          }
           .padding(compactPostListPadding)
           .graphicsLayer { this.alpha = alpha },
     ) {
@@ -402,7 +427,7 @@ internal fun CompactPostListItem(
           contentDescription = null,
           modifier =
             Modifier.requiredSize(20.dp)
-              .border(1.dp, AppTheme.colorScheme.outlineVariant, RoundedCornerShape(25))
+              .border(1.dp, AppTheme.colorScheme.outlineVariant, FeedIconShape)
               .align(Alignment.Center),
         )
 
