@@ -33,6 +33,7 @@ import dev.sasikanth.rss.reader.core.network.utils.podcastRssFeedUrl
 import dev.sasikanth.rss.reader.core.network.utils.podcastRssXmlContent
 import dev.sasikanth.rss.reader.core.network.utils.rdfXmlContent
 import dev.sasikanth.rss.reader.core.network.utils.rssXmlContent
+import dev.sasikanth.rss.reader.core.network.utils.rssXmlContentWithNestedMediaInFirstItem
 import dev.sasikanth.rss.reader.core.network.utils.youtubeAtomFeed
 import dev.sasikanth.rss.reader.core.network.utils.youtubeChannelHtml
 import dev.sasikanth.rss.reader.core.network.utils.youtubeFeedUrl
@@ -279,6 +280,60 @@ class XmlFeedParserTest {
                 isDateParsedCorrectly = true,
                 audioUrl = null,
               ),
+              PostPayload(
+                title = "Post with nested media content",
+                link = "https://example.com/post-with-nested-media-content",
+                description = "Nested media content description.",
+                rawContent =
+                  """
+                  <html>
+                   <body>Nested media content description.</body>
+                  </html>
+                  """
+                    .trimIndent(),
+                fullContent = null,
+                imageUrl = "https://example.com/media/nested-media-content",
+                date = 1685005200000,
+                commentsLink = null,
+                isDateParsedCorrectly = true,
+                audioUrl = null,
+              ),
+              PostPayload(
+                title = "Post with media thumbnail as text",
+                link = "https://example.com/post-with-media-thumbnail-text",
+                description = "Media thumbnail text description.",
+                rawContent =
+                  """
+                  <html>
+                   <body>Media thumbnail text description.</body>
+                  </html>
+                  """
+                    .trimIndent(),
+                fullContent = null,
+                imageUrl = "https://example.com/media/thumbnail-as-text",
+                date = 1685005200000,
+                commentsLink = null,
+                isDateParsedCorrectly = true,
+                audioUrl = null,
+              ),
+              PostPayload(
+                title = "Post after nested media content",
+                link = "https://example.com/post-after-nested-media-content",
+                description = "Post after nested media content description.",
+                rawContent =
+                  """
+                  <html>
+                   <body>Post after nested media content description.</body>
+                  </html>
+                  """
+                    .trimIndent(),
+                fullContent = null,
+                imageUrl = null,
+                date = 1685005200000,
+                commentsLink = null,
+                isDateParsedCorrectly = true,
+                audioUrl = null,
+              ),
             )
             .asFlow(),
       )
@@ -289,6 +344,18 @@ class XmlFeedParserTest {
 
     // then
     assertFeedPayloadEquals(expectedFeedPayload, payload)
+  }
+
+  @Test
+  fun parsingRssFeedWithNestedMediaContentShouldNotTruncateItems() = runTest {
+    // when
+    val content = ByteReadChannel(rssXmlContentWithNestedMediaInFirstItem.toByteArray())
+    val payload = xmlFeedParser.parse(content, feedUrl, Charsets.UTF8)
+    val posts = payload.posts.toList()
+
+    // then
+    assertEquals(listOf("First post", "Second post", "Third post"), posts.map { it.title })
+    assertEquals("https://example.com/media/first-post-140", posts.first().imageUrl)
   }
 
   @Test
