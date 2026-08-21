@@ -40,7 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextLinkStyles
@@ -228,31 +228,32 @@ private fun ReaderPageContent(
         ) {
           LazyColumn(
             modifier =
-              Modifier.fillMaxSize().drawWithContent {
-                drawContent()
-
+              Modifier.fillMaxSize().drawWithCache {
                 val topScrimHeight = topScrimSolidPx + topScrimFadePx
-                drawRect(
-                  brush =
-                    smoothVerticalFade(
-                      color = backdropColor,
-                      endY = topScrimHeight,
-                      solidFraction = topScrimSolidPx / topScrimHeight,
-                    ),
-                  size = size.copy(height = topScrimHeight),
-                  alpha = topScrimAlphaProvider(),
-                )
-                drawRect(
-                  brush =
-                    smoothVerticalFade(
-                      color = backdropColor,
-                      startY = size.height - bottomScrimHeightPx,
-                      endY = size.height,
-                      reversed = true,
-                    ),
-                  topLeft = Offset(0f, size.height - bottomScrimHeightPx),
-                  size = size.copy(height = bottomScrimHeightPx),
-                )
+                val topBrush =
+                  smoothVerticalFade(
+                    color = backdropColor,
+                    endY = topScrimHeight,
+                    solidFraction = topScrimSolidPx / topScrimHeight,
+                  )
+                val topScrimSize = size.copy(height = topScrimHeight)
+
+                val bottomScrimTop = size.height - bottomScrimHeightPx
+                val bottomBrush =
+                  smoothVerticalFade(
+                    color = backdropColor,
+                    startY = bottomScrimTop,
+                    endY = size.height,
+                    reversed = true,
+                  )
+                val bottomScrimOffset = Offset(0f, bottomScrimTop)
+                val bottomScrimSize = size.copy(height = bottomScrimHeightPx)
+
+                onDrawWithContent {
+                  drawContent()
+                  drawRect(brush = topBrush, size = topScrimSize, alpha = topScrimAlphaProvider())
+                  drawRect(brush = bottomBrush, topLeft = bottomScrimOffset, size = bottomScrimSize)
+                }
               },
             state = listState,
             overscrollEffect = null,

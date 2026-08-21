@@ -47,7 +47,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -109,20 +109,20 @@ internal fun HomeTopAppBar(
   val gradientFadeHeight = with(LocalDensity.current) { 72.dp.toPx() }
   TopAppBar(
     modifier =
-      modifier.drawBehind {
+      modifier.drawWithCache {
         // Extends past the toolbar bounds so scrolled content fades out
         // smoothly instead of getting cut off at the toolbar's bottom edge
         val gradientHeight = size.height + gradientFadeHeight
-        drawRect(
-          brush =
-            smoothVerticalFade(
-              color = backgroundColor,
-              endY = gradientHeight,
-              solidFraction = size.height / gradientHeight,
-            ),
-          size = size.copy(height = gradientHeight),
-          alpha = backgroundAlphaProvider(),
-        )
+        val brush =
+          smoothVerticalFade(
+            color = backgroundColor,
+            endY = gradientHeight,
+            solidFraction = size.height / gradientHeight,
+          )
+        val gradientSize = size.copy(height = gradientHeight)
+        onDrawBehind {
+          drawRect(brush = brush, size = gradientSize, alpha = backgroundAlphaProvider())
+        }
       },
     contentPadding = PaddingValues(start = 0.dp, top = 8.dp, end = 12.dp, bottom = 8.dp),
     title = { SourceInfo(source = source) },
