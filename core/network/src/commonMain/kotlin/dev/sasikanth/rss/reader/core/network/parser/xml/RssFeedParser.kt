@@ -97,6 +97,7 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
         postsFlow(
           parser = parser,
           firstPost = firstPost,
+          containerTag = TAG_RSS_CHANNEL,
           itemTag = TAG_RSS_ITEM,
           readItem = { readRssItem(it, UrlUtils.extractHost(link ?: feedUrl)) },
         ),
@@ -137,10 +138,7 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
     var audioUrl: String? = null
     var commentsLink: String? = null
 
-    while (parser.next() != EventType.END_TAG) {
-      if (parser.eventType != EventType.START_TAG) continue
-      val name = parser.name
-
+    forEachChildTag(parser, TAG_RSS_ITEM) { name ->
       when {
         name == TAG_TITLE -> {
           title = parser.nextText()
@@ -164,7 +162,7 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
             image = enclosureUrl
           }
 
-          parser.nextTag()
+          parser.skipSubTree()
         }
         name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
           val postContent = parsePostContent(parser)
@@ -177,13 +175,18 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
         name == TAG_PUB_DATE -> {
           date = parser.nextText()
         }
-        image.isNullOrBlank() && name == TAG_ITUNES_IMAGE -> {
-          image = parser.getAttributeValue(parser.namespace, XmlFeedParser.ATTR_HREF)
-          parser.nextTag()
+        name == TAG_ITUNES_IMAGE -> {
+          val itunesImage = parser.getAttributeValue(parser.namespace, XmlFeedParser.ATTR_HREF)
+          parser.skipSubTree()
+          if (image.isNullOrBlank()) {
+            image = itunesImage
+          }
         }
-        image.isNullOrBlank() && hasRssImageUrl(name, parser) -> {
-          image = parser.getAttributeValue(parser.namespace, ATTR_URL)
-          parser.nextTag()
+        name in XmlFeedParser.imageTags -> {
+          val mediaImage = readMediaImageUrl(parser)
+          if (image.isNullOrBlank()) {
+            image = mediaImage
+          }
         }
         image.isNullOrBlank() && name == TAG_FEATURED_IMAGE -> {
           image = parser.nextText()
@@ -212,10 +215,4 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
       hostLink = hostLink,
     )
   }
-
-  private fun hasRssImageUrl(name: String, parser: XmlPullParser) =
-    (XmlFeedParser.imageTags.contains(name) ||
-      (name == TAG_ENCLOSURE &&
-        parser.getAttributeValue(parser.namespace, ATTR_TYPE) == ATTR_VALUE_IMAGE)) &&
-      !parser.getAttributeValue(parser.namespace, ATTR_URL).isNullOrBlank()
 }

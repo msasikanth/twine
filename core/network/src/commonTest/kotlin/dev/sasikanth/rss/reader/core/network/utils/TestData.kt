@@ -92,6 +92,66 @@ const val rssXmlContent =
         <media:thumbnail url="https://example.com/media/maxresdefault.jpg" />
     </media:group>
     </item>
+    <item>
+      <title>Post with nested media content</title>
+      <link>https://example.com/post-with-nested-media-content</link>
+      <description>Nested media content description.</description>
+      <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
+      <media:content url="https://example.com/media/nested-media-content" type="image/jpeg" medium="image">
+        <media:thumbnail url="https://example.com/media/nested-media-thumbnail" />
+        <media:credit scheme="urn:ebu">Example Credit</media:credit>
+      </media:content>
+    </item>
+    <item>
+      <title>Post with media thumbnail as text</title>
+      <link>https://example.com/post-with-media-thumbnail-text</link>
+      <description>Media thumbnail text description.</description>
+      <media:thumbnail>https://example.com/media/thumbnail-as-text</media:thumbnail>
+      <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>Post after nested media content</title>
+      <link>https://example.com/post-after-nested-media-content</link>
+      <description>Post after nested media content description.</description>
+      <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
+    </item>
+  </channel>
+  </rss>
+  """
+
+// Shape used by The Guardian and Ars Technica: the very first item carries a `media:content`
+// element with nested children.
+const val rssXmlContentWithNestedMediaInFirstItem =
+  """<?xml version="1.0" encoding="UTF-8"?>
+  <rss version="2.0">
+  <channel>
+    <title>Feed title</title>
+    <link>https://example.com</link>
+    <description>Feed description</description>
+    <item>
+      <title>First post</title>
+      <link>https://example.com/first-post</link>
+      <description>First post description.</description>
+      <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
+      <media:content width="140" url="https://example.com/media/first-post-140">
+        <media:credit scheme="urn:ebu">Photograph: Example</media:credit>
+      </media:content>
+      <media:content width="460" url="https://example.com/media/first-post-460">
+        <media:credit scheme="urn:ebu">Photograph: Example</media:credit>
+      </media:content>
+    </item>
+    <item>
+      <title>Second post</title>
+      <link>https://example.com/second-post</link>
+      <description>Second post description.</description>
+      <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>Third post</title>
+      <link>https://example.com/third-post</link>
+      <description>Third post description.</description>
+      <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
+    </item>
   </channel>
   </rss>
   """

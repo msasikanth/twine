@@ -81,6 +81,7 @@ class RDFContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
       posts =
         postsFlow(
           parser = parser,
+          containerTag = XmlFeedParser.RDF_TAG,
           itemTag = TAG_RSS_ITEM,
           readItem = { readRssItem(it, UrlUtils.extractHost(link ?: feedUrl)) },
         ),
@@ -105,10 +106,7 @@ class RDFContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
     var date: String? = null
     var image: String? = null
 
-    while (parser.next() != EventType.END_TAG) {
-      if (parser.eventType != EventType.START_TAG) continue
-      val name = parser.name
-
+    forEachChildTag(parser, TAG_RSS_ITEM) { name ->
       when {
         name == TAG_TITLE -> {
           title = parser.nextText()

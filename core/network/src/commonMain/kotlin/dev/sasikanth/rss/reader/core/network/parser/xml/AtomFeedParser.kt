@@ -87,7 +87,7 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
         }
         TAG_ITUNES_IMAGE -> {
           iconUrl = parser.getAttributeValue(parser.namespace, ATTR_HREF)
-          parser.nextTag()
+          parser.skipSubTree()
         }
         TAG_ATOM_ENTRY -> {
           val host = UrlUtils.extractHost(link ?: feedUrl)
@@ -117,6 +117,7 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
         postsFlow(
           parser = parser,
           firstPost = firstPost,
+          containerTag = TAG_ATOM_FEED,
           itemTag = TAG_ATOM_ENTRY,
           readItem = { readAtomEntry(it, UrlUtils.extractHost(link ?: feedUrl)) },
         ),
@@ -140,10 +141,8 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
     var image: String? = null
     var audioUrl: String? = null
 
-    while (parser.next() != EventType.END_TAG) {
-      if (parser.eventType != EventType.START_TAG) continue
-
-      when (val tagName = parser.name) {
+    forEachChildTag(parser, TAG_ATOM_ENTRY) { tagName ->
+      when (tagName) {
         TAG_TITLE -> {
           title = parser.nextText()
         }
@@ -159,7 +158,7 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
           if (link.isNullOrBlank() && (rel == ATTR_VALUE_ALTERNATE || rel.isNullOrBlank())) {
             link = href
           }
-          parser.nextTag()
+          parser.skipSubTree()
         }
         TAG_CONTENT,
         TAG_SUMMARY -> {
@@ -179,8 +178,17 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
           }
         }
         TAG_ITUNES_IMAGE -> {
-          image = parser.getAttributeValue(parser.namespace, ATTR_HREF)
-          parser.nextTag()
+          val itunesImage = parser.getAttributeValue(parser.namespace, ATTR_HREF)
+          parser.skipSubTree()
+          if (image.isNullOrBlank()) {
+            image = itunesImage
+          }
+        }
+        in XmlFeedParser.imageTags -> {
+          val mediaImage = readMediaImageUrl(parser)
+          if (image.isNullOrBlank()) {
+            image = mediaImage
+          }
         }
         TAG_MEDIA_GROUP -> {
           val mediaGroupResult = readMediaGroup(parser)
