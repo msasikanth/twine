@@ -176,7 +176,7 @@ class HomeViewModel(
       if (isFeaturedItem) {
         featuredPosts.getOrNull(event.settledPage)?.resolvedPost?.id
       } else {
-        event.firstVisibleItemKey?.let { PostListKey.decodeSafe(it)?.postId }
+        event.firstVisibleItemKey?.let { PostListKey.decodePostId(it) }
       }
 
     val fallbackIndex =

@@ -268,7 +268,7 @@ private fun SearchContent(
             key = { index ->
               val post = searchResults[index]
               if (post != null) {
-                PostListKey.from(post).encode()
+                PostListKey.encode(post)
               } else {
                 index
               }

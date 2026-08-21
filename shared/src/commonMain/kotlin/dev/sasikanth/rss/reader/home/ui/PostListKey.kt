@@ -19,9 +19,11 @@ package dev.sasikanth.rss.reader.home.ui
 
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 
+private const val PREFIX = "post_key_"
+
 data class PostListKey(val postId: String, val feedId: String) {
 
-  fun encode(): String = "post_key_${postId}_${feedId}"
+  fun encode(): String = encode(postId, feedId)
 
   companion object {
 
@@ -29,17 +31,39 @@ data class PostListKey(val postId: String, val feedId: String) {
       return PostListKey(postId = post.id, feedId = post.sourceId)
     }
 
+    /**
+     * Builds the list key straight from [post]. Lazy list key lambdas run per item on the measure
+     * path, so this skips the intermediate [PostListKey] the two-step form allocates.
+     */
+    fun encode(post: ResolvedPost): String = encode(post.id, post.sourceId)
+
+    private fun encode(postId: String, feedId: String): String = "$PREFIX${postId}_${feedId}"
+
+    /**
+     * Extracts just the post id from an encoded key. Callers that only need the id should prefer
+     * this over [decodeSafe], which additionally allocates the feed id substring and a
+     * [PostListKey] wrapper — meaningful when it runs per visible item while scrolling.
+     */
+    fun decodePostId(key: String): String? {
+      val separatorIndex = separatorIndexOf(key) ?: return null
+      return key.substring(PREFIX.length, separatorIndex)
+    }
+
     fun decodeSafe(key: String): PostListKey? {
-      if (!key.startsWith("post_key_")) return null
-      val encoded = key.removePrefix("post_key_")
+      val separatorIndex = separatorIndexOf(key) ?: return null
+      return PostListKey(
+        postId = key.substring(PREFIX.length, separatorIndex),
+        feedId = key.substring(separatorIndex + 1),
+      )
+    }
+
+    private fun separatorIndexOf(key: String): Int? {
+      if (!key.startsWith(PREFIX)) return null
       // feedId is the segment after the last underscore; splitting on every
       // underscore would corrupt any id that itself contains one.
-      val separatorIndex = encoded.lastIndexOf('_')
-      if (separatorIndex <= 0 || separatorIndex == encoded.lastIndex) return null
-      return PostListKey(
-        postId = encoded.substring(0, separatorIndex),
-        feedId = encoded.substring(separatorIndex + 1),
-      )
+      val separatorIndex = key.lastIndexOf('_')
+      if (separatorIndex <= PREFIX.length || separatorIndex == key.lastIndex) return null
+      return separatorIndex
     }
   }
 }
