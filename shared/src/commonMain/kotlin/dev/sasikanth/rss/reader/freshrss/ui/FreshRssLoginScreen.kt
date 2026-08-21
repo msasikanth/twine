@@ -58,6 +58,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.sasikanth.rss.reader.app.NavResultKey
 import dev.sasikanth.rss.reader.components.AlertDialog
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
@@ -83,7 +84,8 @@ import twine.shared.generated.resources.freshRssPassword
 import twine.shared.generated.resources.freshRssServerUrl
 import twine.shared.generated.resources.freshRssUsername
 
-const val FRESH_RSS_LOGIN_SUCCESS_KEY = "dev.sasikanth.twine.FRESH_RSS_LOGIN_SUCCESS"
+val FRESH_RSS_LOGIN_SUCCESS_KEY =
+  NavResultKey<Boolean>("dev.sasikanth.twine.FRESH_RSS_LOGIN_SUCCESS")
 
 @Composable
 fun FreshRssLoginScreen(

@@ -58,6 +58,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.sasikanth.rss.reader.app.NavResultKey
 import dev.sasikanth.rss.reader.bazqux.BazQuxLoginError
 import dev.sasikanth.rss.reader.bazqux.BazQuxLoginEvent
 import dev.sasikanth.rss.reader.bazqux.BazQuxLoginState
@@ -83,7 +84,7 @@ import twine.shared.generated.resources.bazQuxPasswordHint
 import twine.shared.generated.resources.bazQuxUsername
 import twine.shared.generated.resources.buttonCancel
 
-const val BAZQUX_LOGIN_SUCCESS_KEY = "dev.sasikanth.twine.BAZQUX_LOGIN_SUCCESS"
+val BAZQUX_LOGIN_SUCCESS_KEY = NavResultKey<Boolean>("dev.sasikanth.twine.BAZQUX_LOGIN_SUCCESS")
 
 @Composable
 fun BazQuxLoginScreen(

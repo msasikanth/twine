@@ -54,6 +54,7 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
+import dev.sasikanth.rss.reader.app.NavResultKey
 import dev.sasikanth.rss.reader.components.InverseButton
 import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.feeds.ui.CreateGroupDialog
@@ -70,7 +71,7 @@ import twine.shared.generated.resources.buttonCancel
 import twine.shared.generated.resources.buttonConfirm
 import twine.shared.generated.resources.groupAddNew
 
-const val SELECTED_GROUPS_KEY = "dev.sasikanth.twine.SELECTED_GROUPS"
+val SELECTED_GROUPS_KEY = NavResultKey<Set<String>>("dev.sasikanth.twine.SELECTED_GROUPS")
 
 @Composable
 fun GroupSelectionSheet(
