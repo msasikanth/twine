@@ -32,9 +32,11 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,6 +65,7 @@ import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.canBlurImage
+import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
@@ -126,6 +129,7 @@ internal fun FeaturedSection(
       }
     }
 
+  val shouldBlockImage = LocalBlockImage.current
   val isDarkTheme = AppTheme.isDark
   val backgroundImageColorFilter =
     remember(isDarkTheme) {
@@ -154,28 +158,48 @@ internal fun FeaturedSection(
         backgroundPageRange.any { featuredPosts[it].resolvedPost.imageUrl != null }
 
       if (hasBackgroundImage) {
+        val alphaForPage =
+          remember(pagerState, postsType, markAsReadOn) {
+            { page: Int ->
+              val pageOffset = pagerState.getOffsetFractionForPage(page)
+              if (postsType == PostsType.UNREAD && markAsReadOn == MarkAsReadOn.Scroll) {
+                calculateContentAlpha(pageOffset)
+              } else {
+                calculateBackgroundAlpha(pageOffset)
+              }
+            }
+          }
+
+        val loadedBackgroundImages = remember { mutableStateMapOf<String, Unit>() }
+        val hasVisibleBackgroundImage =
+          remember(featuredPosts, alphaForPage, shouldBlockImage) {
+            {
+              shouldBlockImage ||
+                backgroundPageRange.any { page ->
+                  loadedBackgroundImages.containsKey(featuredPosts[page].resolvedPost.id) &&
+                    alphaForPage(page) > 0f
+                }
+            }
+          }
+
         FeaturedSectionBackground(
           blurEffect = blurEffect,
+          hasVisibleContent = hasVisibleBackgroundImage,
           modifier = Modifier.aspectRatio(imageAspectRatio),
         ) {
           for (page in backgroundPageRange) {
-            key(page) {
-              val featuredPost = featuredPosts[page]
-              val alphaProvider =
-                remember(page, postsType, markAsReadOn) {
-                  {
-                    val pageOffset = pagerState.getOffsetFractionForPage(page)
-                    if (postsType == PostsType.UNREAD && markAsReadOn == MarkAsReadOn.Scroll) {
-                      calculateContentAlpha(pageOffset)
-                    } else {
-                      calculateBackgroundAlpha(pageOffset)
-                    }
-                  }
-                }
+            val featuredPost = featuredPosts[page]
+            val postId = featuredPost.resolvedPost.id
+            key(postId) {
+              val alphaProvider = remember(page, alphaForPage) { { alphaForPage(page) } }
+
+              DisposableEffect(postId) { onDispose { loadedBackgroundImages.remove(postId) } }
+
               FeaturedSectionBackgroundImage(
                 imageUrl = featuredPost.resolvedPost.imageUrl,
                 alphaProvider = alphaProvider,
                 colorFilter = backgroundImageColorFilter,
+                onLoad = { loadedBackgroundImages[postId] = Unit },
               )
             }
           }
@@ -284,6 +308,7 @@ internal fun FeaturedSection(
 @Composable
 private fun FeaturedSectionBackground(
   blurEffect: BlurEffect,
+  hasVisibleContent: () -> Boolean,
   modifier: Modifier = Modifier,
   content: @Composable BoxScope.() -> Unit,
 ) {
@@ -304,8 +329,10 @@ private fun FeaturedSectionBackground(
             )
           onDrawWithContent {
             drawContent()
-            drawRect(color = overlayColor, blendMode = BlendMode.Luminosity)
-            drawRect(brush = scrim)
+            if (hasVisibleContent()) {
+              drawRect(color = overlayColor, blendMode = BlendMode.Luminosity)
+              drawRect(brush = scrim)
+            }
           }
         },
     content = content,
@@ -317,6 +344,7 @@ private fun BoxScope.FeaturedSectionBackgroundImage(
   imageUrl: String?,
   alphaProvider: () -> Float,
   colorFilter: ColorFilter?,
+  onLoad: () -> Unit,
 ) {
   if (imageUrl == null) return
 
@@ -327,6 +355,8 @@ private fun BoxScope.FeaturedSectionBackgroundImage(
     contentDescription = null,
     contentScale = widthBiasedScale,
     colorFilter = colorFilter,
+    crossfade = false,
+    onSuccess = onLoad,
   )
 }
 
