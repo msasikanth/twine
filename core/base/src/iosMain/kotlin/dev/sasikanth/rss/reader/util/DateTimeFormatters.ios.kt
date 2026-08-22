@@ -34,23 +34,22 @@ import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSLocale
 import platform.Foundation.timeIntervalSince1970
 
+private val dateFormatters by lazy {
+  dateFormatterPatterns.map { pattern ->
+    createDateFormatter(
+      pattern = pattern,
+      timeZone = if (hasTimeZonePattern(pattern)) null else TimeZone.UTC,
+    )
+  }
+}
+
 @Throws(DateTimeFormatException::class)
 actual fun String?.dateStringToEpochMillis(clock: Clock): Long? {
   if (this.isNullOrBlank()) return null
 
   try {
-    val date =
-      dateFormatterPatterns.firstNotNullOfOrNull { pattern ->
-        val timeZone =
-          if (hasTimeZonePattern(pattern)) {
-            null
-          } else {
-            TimeZone.UTC
-          }
-        val dateTimeFormatter = createDateFormatter(pattern = pattern, timeZone = timeZone)
-
-        dateTimeFormatter.dateFromString(this.trim())
-      }
+    val dateString = this.trim()
+    val date = dateFormatters.firstNotNullOfOrNull { it.dateFromString(dateString) }
 
     if (date != null) {
       val currentDate = clock.now().toNSDate()
