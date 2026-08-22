@@ -35,9 +35,9 @@ class ArticleHtmlParser {
     private const val TAG_SOURCE = "source"
     private const val ATTR_TYPE = "type"
 
-    private const val MAX_CONTENT_SIZE = 10 * 1024 * 1024 // 10MB
+    private const val MAX_CONTENT_SIZE = 5 * 1024 * 1024 // 5MB
 
-    private val gifRegex = Regex("/\\.gif(\\?.*)?\\$/i")
+    private val gifRegex = Regex("\\.gif(\\?.*)?$", RegexOption.IGNORE_CASE)
   }
 
   private val allowedContentTags by lazy {
@@ -59,15 +59,21 @@ class ArticleHtmlParser {
         }
       val cleanedHtmlDocument = Cleaner(allowedContentTags).clean(originalHtmlDocument)
       val body = cleanedHtmlDocument.body().first()
+      var firstGifImage: String? = null
       val heroImage =
-        body.firstNotNullOfOrNull {
-          val imageUrl = it.attr(ATTR_SRC)
-          if (it.tagName() == TAG_IMG && !gifRegex.containsMatchIn(imageUrl)) {
-            imageUrl.removeSurrounding("\"")
-          } else {
+        body.firstNotNullOfOrNull { element ->
+          if (element.tagName() != TAG_IMG) return@firstNotNullOfOrNull null
+
+          val imageUrl = element.attr(ATTR_SRC)
+          if (gifRegex.containsMatchIn(imageUrl)) {
+            if (firstGifImage == null) {
+              firstGifImage = imageUrl.removeSurrounding("\"")
+            }
             null
+          } else {
+            imageUrl.removeSurrounding("\"")
           }
-        }
+        } ?: firstGifImage
 
       val audioUrl =
         body.select(TAG_AUDIO).firstOrNull()?.let { audio ->

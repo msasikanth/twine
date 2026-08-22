@@ -87,6 +87,8 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
       }
     }
 
+    val postHostLink = UrlUtils.extractHost(link ?: feedUrl)
+
     return createFeedPayload(
       name = title,
       description = description,
@@ -99,7 +101,7 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
           firstPost = firstPost,
           containerTag = TAG_RSS_CHANNEL,
           itemTag = TAG_RSS_ITEM,
-          readItem = { readRssItem(it, UrlUtils.extractHost(link ?: feedUrl)) },
+          readItem = { readRssItem(it, postHostLink) },
         ),
     )
   }

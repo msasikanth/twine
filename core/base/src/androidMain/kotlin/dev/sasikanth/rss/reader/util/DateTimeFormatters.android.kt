@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.util
 
+import java.text.ParsePosition
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -30,6 +31,9 @@ import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toJavaZoneId
 import kotlinx.datetime.toLocalDateTime
 
+private val dateTimeFormatters =
+  dateFormatterPatterns.map { DateTimeFormatter.ofPattern(it, Locale.US) }
+
 @Throws(DateTimeFormatException::class)
 actual fun String?.dateStringToEpochMillis(clock: Clock): Long? {
   if (this.isNullOrBlank()) return null
@@ -37,8 +41,8 @@ actual fun String?.dateStringToEpochMillis(clock: Clock): Long? {
   val currentDate =
     clock.now().toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime()
 
-  for (pattern in dateFormatterPatterns) {
-    val dateTimeFormatter = DateTimeFormatter.ofPattern(pattern, Locale.US)
+  for (dateTimeFormatter in dateTimeFormatters) {
+    if (!dateTimeFormatter.canParse(this)) continue
 
     try {
       val parsedValue = parseToInstant(dateTimeFormatter, this)
@@ -54,6 +58,15 @@ actual fun String?.dateStringToEpochMillis(clock: Clock): Long? {
   }
 
   return null
+}
+
+private fun DateTimeFormatter.canParse(text: String): Boolean {
+  val position = ParsePosition(0)
+  return try {
+    parseUnresolved(text, position) != null && position.index == text.length
+  } catch (e: Exception) {
+    false
+  }
 }
 
 private fun parseToInstant(dateTimeFormatter: DateTimeFormatter, text: String): Instant {

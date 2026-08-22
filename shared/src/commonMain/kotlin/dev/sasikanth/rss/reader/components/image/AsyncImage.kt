@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImagePainter
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -44,6 +45,8 @@ internal fun AsyncImage(
   size: Size = Size(Dimension.Undefined, 500),
   colorFilter: ColorFilter? = null,
   alignment: Alignment = Alignment.Center,
+  crossfade: Boolean = true,
+  onSuccess: (() -> Unit)? = null,
 ) {
   val context = LocalPlatformContext.current
   val shouldBlockImage = LocalBlockImage.current
@@ -52,13 +55,13 @@ internal fun AsyncImage(
     // no-op
   } else {
     val model =
-      remember(context, url, size) {
+      remember(context, url, size, crossfade) {
         ImageRequest.Builder(context)
           .data(url)
           .size(size)
           .diskCacheKey(url)
           .memoryCacheKey(url)
-          .crossfade(true)
+          .crossfade(crossfade)
           .decoderCoroutineContext(imageDecoderDispatcher)
           .build()
       }
@@ -69,6 +72,10 @@ internal fun AsyncImage(
       contentScale = contentScale,
       colorFilter = colorFilter,
       alignment = alignment,
+      onState =
+        onSuccess?.let { callback ->
+          { state -> if (state is AsyncImagePainter.State.Success) callback() }
+        },
     )
   }
 }

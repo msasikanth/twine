@@ -49,6 +49,8 @@ import korlibs.io.lang.Charsets
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -356,6 +358,89 @@ class XmlFeedParserTest {
     // then
     assertEquals(listOf("First post", "Second post", "Third post"), posts.map { it.title })
     assertEquals("https://example.com/media/first-post-140", posts.first().imageUrl)
+  }
+
+  @Test
+  fun namedHtmlEntitiesShouldBeResolvedRatherThanDropped() = runTest {
+    // given
+    val xmlWithNamedEntities =
+      """<?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0"><channel>
+          <title>Feed &amp; Co &mdash; news</title>
+          <link>https://example.com</link>
+          <description>Desc &hellip; here</description>
+          <item>
+            <title>Caf&eacute; &mdash; it&rsquo;s &frac12; done &hellip;</title>
+            <link>https://example.com/post</link>
+            <pubDate>Wed, 12 Mar 2025 10:05:00 +0000</pubDate>
+            <description>Body text</description>
+          </item>
+        </channel></rss>"""
+
+    // when
+    val content = ByteReadChannel(xmlWithNamedEntities.toByteArray())
+    val payload = xmlFeedParser.parse(content, feedUrl, Charsets.UTF8)
+    val post = payload.posts.toList().single()
+
+    // then
+    assertEquals("Feed & Co \u2014 news", payload.name)
+    assertEquals("Desc \u2026 here", payload.description)
+    assertEquals("Caf\u00e9 \u2014 it\u2019s \u00bd done \u2026", post.title)
+  }
+
+  @Test
+  fun unknownEntitiesShouldNotBreakParsing() = runTest {
+    // given
+    val xmlWithUnknownEntity =
+      """<?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0"><channel>
+          <title>Feed</title>
+          <link>https://example.com</link>
+          <description>Desc</description>
+          <item>
+            <title>Known &amp; unknown&notarealentity; here</title>
+            <link>https://example.com/post</link>
+            <pubDate>Wed, 12 Mar 2025 10:05:00 +0000</pubDate>
+            <description>Body text</description>
+          </item>
+        </channel></rss>"""
+
+    // when
+    val content = ByteReadChannel(xmlWithUnknownEntity.toByteArray())
+    val payload = xmlFeedParser.parse(content, feedUrl, Charsets.UTF8)
+    val post = payload.posts.toList().single()
+
+    // then
+    assertEquals("Known & unknown here", post.title)
+  }
+
+  @Test
+  fun oversizedPostContentShouldStillYieldAnImageAndABoundedDescription() = runTest {
+    // given
+    val oversizedBody = buildString {
+      append("""<figure><img src="https://example.com/hero.jpg"/></figure>""")
+      while (length < 6 * 1024 * 1024) {
+        append("<p>Long form paragraph text that keeps accumulating size for this post.</p>")
+      }
+    }
+    val xml =
+      """<?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+        <channel><title>F</title><link>https://example.com</link><description>d</description>
+        <item><title>Big post</title><link>https://example.com/big</link>
+        <pubDate>Wed, 12 Mar 2025 10:05:00 +0000</pubDate>
+        <content:encoded><![CDATA[$oversizedBody]]></content:encoded>
+        </item></channel></rss>"""
+
+    // when
+    val payload = xmlFeedParser.parse(ByteReadChannel(xml.toByteArray()), feedUrl, Charsets.UTF8)
+    val post = payload.posts.toList().single()
+
+    // then
+    assertEquals("https://example.com/hero.jpg", post.imageUrl)
+    assertTrue(post.description.length < 16 * 1024)
+    assertFalse(post.description.contains("<p>"))
+    assertTrue(post.description.startsWith("Long form paragraph text"))
   }
 
   @Test
