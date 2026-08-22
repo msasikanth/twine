@@ -35,7 +35,7 @@ class ArticleHtmlParser {
     private const val TAG_SOURCE = "source"
     private const val ATTR_TYPE = "type"
 
-    private const val MAX_CONTENT_SIZE = 2 * 1024 * 1024 // 2MB
+    private const val MAX_CONTENT_SIZE = 5 * 1024 * 1024 // 5MB
 
     private val gifRegex = Regex("\\.gif(\\?.*)?$", RegexOption.IGNORE_CASE)
   }
