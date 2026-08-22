@@ -398,7 +398,7 @@ class XmlFeedParserTest {
           <link>https://example.com</link>
           <description>Desc</description>
           <item>
-            <title>Known &amp; unknown &notarealentity; here</title>
+            <title>Known &amp; unknown&notarealentity; here</title>
             <link>https://example.com/post</link>
             <pubDate>Wed, 12 Mar 2025 10:05:00 +0000</pubDate>
             <description>Body text</description>
@@ -411,7 +411,7 @@ class XmlFeedParserTest {
     val post = payload.posts.toList().single()
 
     // then
-    assertEquals("Known & unknown  here", post.title)
+    assertEquals("Known & unknown here", post.title)
   }
 
   @Test
