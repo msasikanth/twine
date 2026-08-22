@@ -17,6 +17,7 @@
 package dev.sasikanth.rss.reader.core.network.parser.xml
 
 import co.touchlab.kermit.Logger
+import com.fleeksoft.ksoup.nodes.Entities
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.network.utils.toCharIterator
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
@@ -44,6 +45,7 @@ class XmlFeedParser(
           MiniXmlPullParser(
             source = content.toCharIterator(charset, platformPageSize),
             relaxed = true,
+            entityResolver = ::resolveHtmlEntity,
           )
 
         parser.nextTag()
@@ -61,6 +63,8 @@ class XmlFeedParser(
       throw XmlParsingError(e.stackTraceToString())
     }
   }
+
+  private fun resolveHtmlEntity(name: String): String? = Entities.getByName(name).ifEmpty { null }
 
   companion object {
     const val RDF_TAG = "rdf:RDF"

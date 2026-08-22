@@ -35,6 +35,14 @@ import org.kobjects.ktxml.api.XmlPullParser
 
 abstract class XmlContentParser {
 
+  private companion object {
+    private const val FALLBACK_SCAN_LIMIT = 64 * 1024
+    private const val FALLBACK_PREVIEW_LIMIT = 8 * 1024
+
+    private val imgSrcRegex =
+      Regex("""<img\b[^>]*?\bsrc\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+  }
+
   protected abstract val articleHtmlParser: ArticleHtmlParser
 
   abstract suspend fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload
@@ -144,11 +152,23 @@ abstract class XmlContentParser {
     val postHtmlContent = parser.nextText().trimIndent()
     val htmlContent = articleHtmlParser.parse(htmlContent = postHtmlContent)
 
+    if (htmlContent == null) {
+      val head = postHtmlContent.take(FALLBACK_SCAN_LIMIT)
+      val preview = head.take(FALLBACK_PREVIEW_LIMIT)
+
+      return PostContent(
+        rawContent = null,
+        heroImage = imgSrcRegex.find(head)?.groupValues?.get(1)?.ifBlank { null },
+        textContent = XmlFeedParser.cleanText(preview).orEmpty().ifBlank { preview.trim() },
+        audioUrl = null,
+      )
+    }
+
     return PostContent(
-      rawContent = htmlContent?.cleanedHtml,
-      heroImage = htmlContent?.heroImage,
-      textContent = htmlContent?.textContent?.ifBlank { null } ?: postHtmlContent.trim(),
-      audioUrl = htmlContent?.audioUrl,
+      rawContent = htmlContent.cleanedHtml,
+      heroImage = htmlContent.heroImage,
+      textContent = htmlContent.textContent.ifBlank { null } ?: postHtmlContent.trim(),
+      audioUrl = htmlContent.audioUrl,
     )
   }
 

@@ -25,7 +25,7 @@ import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import kotlin.time.Clock
-import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import kotlinx.io.Source
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -54,8 +54,8 @@ class JsonFeedParser(
             urlString = jsonFeedPayload.homePageUrl ?: jsonFeedPayload.url ?: feedUrl
           )
 
-        val posts =
-          jsonFeedPayload.items.map { jsonFeedPost ->
+        val posts = flow {
+          jsonFeedPayload.items.forEach { jsonFeedPost ->
             val postPublishedAt = jsonFeedPost.publishedAt?.dateStringToEpochMillis()
 
             val htmlContent = articleHtmlParser.parse(jsonFeedPost.contentHtml.orEmpty())
@@ -77,19 +77,22 @@ class JsonFeedParser(
               jsonFeedPost.attachments.firstOrNull { it.mimeType.startsWith("audio/") }?.url
                 ?: htmlContent?.audioUrl
 
-            PostPayload(
-              title = jsonFeedPost.title.orEmpty(),
-              link = jsonFeedPost.url.orEmpty(),
-              description = description,
-              rawContent = rawContent,
-              fullContent = null,
-              imageUrl = jsonFeedPost.imageUrl ?: image,
-              audioUrl = audioUrl,
-              date = postPublishedAt ?: Clock.System.now().toEpochMilliseconds(),
-              commentsLink = null,
-              isDateParsedCorrectly = postPublishedAt != null,
+            emit(
+              PostPayload(
+                title = jsonFeedPost.title.orEmpty(),
+                link = jsonFeedPost.url.orEmpty(),
+                description = description,
+                rawContent = rawContent,
+                fullContent = null,
+                imageUrl = jsonFeedPost.imageUrl ?: image,
+                audioUrl = audioUrl,
+                date = postPublishedAt ?: Clock.System.now().toEpochMilliseconds(),
+                commentsLink = null,
+                isDateParsedCorrectly = postPublishedAt != null,
+              )
             )
           }
+        }
 
         val feedPayload =
           FeedPayload(
@@ -99,7 +102,7 @@ class JsonFeedParser(
             description = jsonFeedPayload.description.orEmpty(),
             homepageLink = jsonFeedPayload.homePageUrl ?: feedUrl,
             link = jsonFeedPayload.url ?: feedUrl,
-            posts = posts.asFlow(),
+            posts = posts,
           )
 
         return@withContext feedPayload
