@@ -96,6 +96,99 @@ class ArticleHtmlParserTest {
   }
 
   @Test
+  fun animatedGifsShouldBeSkippedWhenPickingTheHeroImage() {
+    // given
+    val htmlWithGifFirst =
+      """
+        <html>
+          <body>
+            <figure><img src="https://example.com/animation.gif"/></figure>
+            <figure><img src="https://example.com/photo.jpg?w=600"/></figure>
+          </body>
+        </html>
+      """
+
+    // when
+    val result = articleHtmlParser.parse(htmlWithGifFirst)
+
+    // then
+    assertEquals("https://example.com/photo.jpg?w=600", result?.heroImage)
+  }
+
+  @Test
+  fun gifsWithQueryParamsAndUppercaseExtensionsShouldBeSkipped() {
+    // given
+    val htmlWithGifVariants =
+      """
+        <html>
+          <body>
+            <img src="https://example.com/one.GIF"/>
+            <img src="https://example.com/two.gif?width=600&amp;height=400"/>
+            <img src="https://example.com/photo.png"/>
+          </body>
+        </html>
+      """
+
+    // when
+    val result = articleHtmlParser.parse(htmlWithGifVariants)
+
+    // then
+    assertEquals("https://example.com/photo.png", result?.heroImage)
+  }
+
+  @Test
+  fun postWithOnlyGifImagesShouldFallBackToTheFirstGif() {
+    // given
+    val htmlWithOnlyGifs =
+      """
+        <html>
+          <body>
+            <p>Some text</p>
+            <img src="https://example.com/first.gif"/>
+            <img src="https://example.com/second.gif?w=600"/>
+          </body>
+        </html>
+      """
+
+    // when
+    val result = articleHtmlParser.parse(htmlWithOnlyGifs)
+
+    // then
+    assertEquals("https://example.com/first.gif", result?.heroImage)
+  }
+
+  @Test
+  fun postWithNoImagesShouldHaveNoHeroImage() {
+    // given
+    val htmlWithoutImages = "<html><body><p>Some text</p></body></html>"
+
+    // when
+    val result = articleHtmlParser.parse(htmlWithoutImages)
+
+    // then
+    assertNull(result?.heroImage)
+  }
+
+  @Test
+  fun urlsThatMerelyContainGifShouldNotBeSkipped() {
+    // given
+    val htmlWithGifInPath =
+      """
+        <html>
+          <body>
+            <img src="https://example.com/gifts/photo.jpg"/>
+          </body>
+        </html>
+      """
+
+    // when
+    val result = articleHtmlParser.parse(htmlWithGifInPath)
+
+    // then
+    assertEquals("https://example.com/gifts/photo.jpg", result?.heroImage)
+  }
+
+  @Test
   fun parsingAudioContentShouldWorkCorrectly() {
     val htmlWithAudio =
       """
