@@ -107,6 +107,8 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
         iconUrl
       }
 
+    val postHostLink = UrlUtils.extractHost(link ?: feedUrl)
+
     return createFeedPayload(
       name = title,
       description = description,
@@ -119,7 +121,7 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
           firstPost = firstPost,
           containerTag = TAG_ATOM_FEED,
           itemTag = TAG_ATOM_ENTRY,
-          readItem = { readAtomEntry(it, UrlUtils.extractHost(link ?: feedUrl)) },
+          readItem = { readAtomEntry(it, postHostLink) },
         ),
     )
   }
