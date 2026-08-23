@@ -43,9 +43,7 @@ class MediaService : MediaSessionService() {
       CacheDataSource.Factory()
         .setCache(AudioCacheProvider.cache)
         .setUpstreamDataSourceFactory(
-          DefaultHttpDataSource.Factory()
-            .setAllowCrossProtocolRedirects(true)
-            .setUserAgent("Twine (https://github.com/msasikanth/twine)")
+          DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true).setUserAgent("Twine")
         )
 
     val player =
