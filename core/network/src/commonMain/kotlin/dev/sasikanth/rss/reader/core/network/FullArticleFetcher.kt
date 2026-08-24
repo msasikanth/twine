@@ -30,6 +30,7 @@ import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.withContext
@@ -45,18 +46,28 @@ class FullArticleFetcher(
 
   companion object {
     private const val MAX_CONTENT_SIZE = 10 * 1024 * 1024 // 10MB
+    private const val CHROME_VERSION = "140"
+    private const val BROWSER_USER_AGENT =
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " +
+        "Chrome/$CHROME_VERSION.0.0.0 Safari/537.36"
+    private val BLOCKED_STATUS_CODES =
+      setOf(
+        HttpStatusCode.Unauthorized,
+        HttpStatusCode.Forbidden,
+        HttpStatusCode.NotAcceptable,
+        HttpStatusCode.TooManyRequests,
+      )
   }
 
   private val fullArticleHttpClient by lazy {
     httpClient.config {
       followRedirects = true
 
-      install(UserAgent) {
-        agent =
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-      }
+      install(UserAgent) { agent = BROWSER_USER_AGENT }
     }
   }
+
+  private val fallbackHttpClient by lazy { httpClient.config { followRedirects = true } }
 
   suspend fun fetch(url: String, remoteId: String? = null): Result<String> {
     return withContext(dispatchersProvider.io) {
@@ -83,7 +94,18 @@ class FullArticleFetcher(
   }
 
   private suspend fun fetchFullArticleByUrl(url: String): String {
-    return fullArticleHttpClient
+    return try {
+      fetchArticleHtml(url, spoofBrowser = true)
+    } catch (e: BlockedByServerException) {
+      // Some CDNs reject the spoofed desktop browser headers, usually because the
+      // Chrome version we pretend to be has since gone stale. Retry as ourselves.
+      fetchArticleHtml(url, spoofBrowser = false)
+    }
+  }
+
+  private suspend fun fetchArticleHtml(url: String, spoofBrowser: Boolean): String {
+    val client = if (spoofBrowser) fullArticleHttpClient else fallbackHttpClient
+    return client
       .prepareGet(url) {
         headers {
           append(
@@ -91,23 +113,30 @@ class FullArticleFetcher(
             "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
           )
           append(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9")
-          append(HttpHeaders.Connection, "keep-alive")
-          append("Referer", url)
-          append("Upgrade-Insecure-Requests", "1")
-          append(
-            "sec-ch-ua",
-            "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"",
-          )
-          append("sec-ch-ua-mobile", "?0")
-          append("sec-ch-ua-platform", "\"Windows\"")
-          append("Sec-Fetch-Dest", "document")
-          append("Sec-Fetch-Mode", "navigate")
-          append("Sec-Fetch-Site", "none")
-          append("Sec-Fetch-User", "?1")
+
+          if (spoofBrowser) {
+            append(HttpHeaders.Connection, "keep-alive")
+            append("Referer", url)
+            append("Upgrade-Insecure-Requests", "1")
+            append(
+              "sec-ch-ua",
+              "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"$CHROME_VERSION\", \"Google Chrome\";v=\"$CHROME_VERSION\"",
+            )
+            append("sec-ch-ua-mobile", "?0")
+            append("sec-ch-ua-platform", "\"Windows\"")
+            append("Sec-Fetch-Dest", "document")
+            append("Sec-Fetch-Mode", "navigate")
+            append("Sec-Fetch-Site", "none")
+            append("Sec-Fetch-User", "?1")
+          }
         }
       }
       .execute { response ->
         if (!response.status.isSuccess()) {
+          if (spoofBrowser && response.status in BLOCKED_STATUS_CODES) {
+            throw BlockedByServerException(response.status)
+          }
+
           throw Exception("Failed to fetch article: ${response.status}")
         }
 
@@ -160,3 +189,6 @@ class FullArticleFetcher(
         html.contains("support", ignoreCase = true))
   }
 }
+
+private class BlockedByServerException(status: HttpStatusCode) :
+  Exception("Blocked by server: $status")
