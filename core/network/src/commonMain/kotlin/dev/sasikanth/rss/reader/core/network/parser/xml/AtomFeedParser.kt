@@ -17,9 +17,8 @@
 
 package dev.sasikanth.rss.reader.core.network.parser.xml
 
-import com.fleeksoft.io.kotlinx.asInputStream
 import com.fleeksoft.ksoup.Ksoup
-import com.fleeksoft.ksoup.parseMetaData
+import com.fleeksoft.ksoup.parseSource
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
@@ -53,6 +52,11 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
   XmlContentParser() {
 
   private val youTubeIconHttpClient = httpClient.config { followRedirects = true }
+
+  private companion object {
+    private const val SELECTOR_OG_IMAGE = "meta[property=og:image]"
+    private const val ATTR_CONTENT = "content"
+  }
 
   override suspend fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
     parser.require(EventType.START_TAG, parser.namespace, TAG_ATOM_FEED)
@@ -101,8 +105,8 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
     }
 
     iconUrl =
-      if (UrlUtils.isYouTubeLink(feedUrl)) {
-        youtubeChannelImage(link!!)
+      if (UrlUtils.isYouTubeLink(feedUrl) && !link.isNullOrBlank()) {
+        youtubeChannelImage(link) ?: iconUrl
       } else {
         iconUrl
       }
@@ -126,10 +130,14 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
     )
   }
 
-  private suspend fun youtubeChannelImage(link: String): String {
-    val response = youTubeIconHttpClient.get(urlString = link)
-    return Ksoup.parseMetaData(response.bodyAsChannel().asSource().asInputStream(), baseUri = link)
-      .ogImage!!
+  private suspend fun youtubeChannelImage(link: String): String? {
+    return try {
+      val response = youTubeIconHttpClient.get(urlString = link)
+      val document = Ksoup.parseSource(response.bodyAsChannel().asSource(), baseUri = link)
+      document.selectFirst(SELECTOR_OG_IMAGE)?.attr(ATTR_CONTENT)?.ifBlank { null }
+    } catch (e: Exception) {
+      null
+    }
   }
 
   private fun readAtomEntry(parser: XmlPullParser, hostLink: String?): PostPayload? {
