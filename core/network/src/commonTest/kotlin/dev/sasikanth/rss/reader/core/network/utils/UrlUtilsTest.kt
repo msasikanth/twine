@@ -18,7 +18,9 @@
 package dev.sasikanth.rss.reader.core.network.utils
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class UrlUtilsTest {
@@ -49,5 +51,56 @@ class UrlUtilsTest {
   fun isYouTubeLink_shouldReturnFalseForNonYouTubeLinks() {
     assertFalse(UrlUtils.isYouTubeLink("https://www.google.com"))
     assertFalse(UrlUtils.isYouTubeLink("https://vimeo.com/12345"))
+  }
+
+  @Test
+  fun youTubeVideoId_shouldExtractIdFromSupportedLinkShapes() {
+    val expectedId = "dQw4w9WgXcQ"
+
+    assertEquals(expectedId, UrlUtils.youTubeVideoId("https://www.youtube.com/watch?v=$expectedId"))
+    assertEquals(expectedId, UrlUtils.youTubeVideoId("https://m.youtube.com/watch?v=$expectedId"))
+    assertEquals(expectedId, UrlUtils.youTubeVideoId("https://youtube.com/watch?v=$expectedId"))
+    assertEquals(expectedId, UrlUtils.youTubeVideoId("https://youtu.be/$expectedId"))
+    assertEquals(expectedId, UrlUtils.youTubeVideoId("https://www.youtube.com/embed/$expectedId"))
+    assertEquals(expectedId, UrlUtils.youTubeVideoId("https://www.youtube.com/shorts/$expectedId"))
+    assertEquals(expectedId, UrlUtils.youTubeVideoId("https://www.youtube.com/live/$expectedId"))
+    assertEquals(
+      expectedId,
+      UrlUtils.youTubeVideoId("https://www.youtube-nocookie.com/embed/$expectedId"),
+    )
+  }
+
+  @Test
+  fun youTubeVideoId_shouldExtractIdWhenLinkHasExtraParams() {
+    val expectedId = "tDLbO9KeddY"
+
+    assertEquals(
+      expectedId,
+      UrlUtils.youTubeVideoId("https://www.youtube.com/watch?v=$expectedId&t=42s"),
+    )
+    assertEquals(
+      expectedId,
+      UrlUtils.youTubeVideoId("https://www.youtube.com/watch?app=desktop&v=$expectedId"),
+    )
+    assertEquals(expectedId, UrlUtils.youTubeVideoId("https://youtu.be/$expectedId?t=42"))
+  }
+
+  @Test
+  fun youTubeVideoId_shouldReturnNullForNonVideoLinks() {
+    assertNull(UrlUtils.youTubeVideoId(null))
+    assertNull(UrlUtils.youTubeVideoId(""))
+    assertNull(UrlUtils.youTubeVideoId("https://www.youtube.com"))
+    assertNull(UrlUtils.youTubeVideoId("https://www.youtube.com/@TomScottGo"))
+    assertNull(UrlUtils.youTubeVideoId("https://vimeo.com/12345"))
+    assertNull(UrlUtils.youTubeVideoId("https://www.youtube.com/watch?v=tooshort"))
+  }
+
+  @Test
+  fun youTubeThumbnail_shouldBuildThumbnailForVideoLinks() {
+    assertEquals(
+      "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+      UrlUtils.youTubeThumbnail("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
+    )
+    assertNull(UrlUtils.youTubeThumbnail("https://example.com/article"))
   }
 }

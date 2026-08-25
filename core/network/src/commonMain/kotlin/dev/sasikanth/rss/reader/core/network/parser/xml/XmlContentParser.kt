@@ -211,13 +211,15 @@ abstract class XmlContentParser {
       return null
     }
 
+    val postLink = XmlFeedParser.cleanText(link)!!
+
     return PostPayload(
       title = XmlFeedParser.cleanText(title).orEmpty().decodeHTMLString(),
-      link = XmlFeedParser.cleanText(link)!!,
+      link = postLink,
       description = description.orEmpty().decodeHTMLString(),
       rawContent = rawContent,
       fullContent = null,
-      imageUrl = UrlUtils.safeUrl(hostLink, imageUrl),
+      imageUrl = UrlUtils.safeUrl(hostLink, imageUrl) ?: UrlUtils.youTubeThumbnail(postLink),
       audioUrl = audioUrl,
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = commentsLink?.trim(),

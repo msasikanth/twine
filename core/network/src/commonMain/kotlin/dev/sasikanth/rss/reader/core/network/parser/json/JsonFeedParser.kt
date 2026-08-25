@@ -84,7 +84,8 @@ class JsonFeedParser(
                 description = description,
                 rawContent = rawContent,
                 fullContent = null,
-                imageUrl = jsonFeedPost.imageUrl ?: image,
+                imageUrl =
+                  jsonFeedPost.imageUrl ?: image ?: UrlUtils.youTubeThumbnail(jsonFeedPost.url),
                 audioUrl = audioUrl,
                 date = postPublishedAt ?: Clock.System.now().toEpochMilliseconds(),
                 commentsLink = null,

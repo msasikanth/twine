@@ -40,8 +40,26 @@ object UrlUtils {
 
   private val absoluteUrlPattern = """^[a-zA-Z][a-zA-Z0-9\+\-\.]*:""".toRegex()
 
+  private val youtubeVideoIdRegex =
+    Regex(
+      "^(?:https?:)?(?://)?(?:(?:www|m|music)\\.)?" +
+        "(?:youtube(?:-nocookie)?\\.com/(?:watch\\?(?:[^&]*&)*v=|embed/|shorts/|live/|v/)" +
+        "|youtu\\.be/)" +
+        "([\\w\\-]{11})(?:[?&#/].*)?$"
+    )
+
   fun isYouTubeLink(url: String): Boolean {
     return youtubeRegex.matches(url)
+  }
+
+  fun youTubeVideoId(url: String?): String? {
+    if (url.isNullOrBlank()) return null
+    return youtubeVideoIdRegex.find(url.trim())?.groupValues?.getOrNull(1)
+  }
+
+  fun youTubeThumbnail(url: String?): String? {
+    val videoId = youTubeVideoId(url) ?: return null
+    return "https://i.ytimg.com/vi/$videoId/hqdefault.jpg"
   }
 
   fun isUnconstrainedMedia(url: String): Boolean {
