@@ -20,6 +20,7 @@ package dev.sasikanth.rss.reader.utils
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import me.tatarka.inject.annotations.Inject
@@ -32,25 +33,29 @@ import platform.UIKit.UIWindowScene
 class IosInAppRating(private val settingsRepository: SettingsRepository) : InAppRating {
 
   override suspend fun request() {
-    val scene =
-      UIApplication.sharedApplication.connectedScenes
-        .mapNotNull { it as? UIWindowScene }
-        .firstOrNull { it.activationState == platform.UIKit.UISceneActivationStateForegroundActive }
-
     val now = Clock.System.now()
     val installDate = settingsRepository.installDate.firstOrNull() ?: now
-    val lastPromptDate = settingsRepository.lastReviewPromptDate.firstOrNull() ?: now
+    val lastPromptDate =
+      settingsRepository.lastReviewPromptDate.firstOrNull() ?: Instant.DISTANT_PAST
     val sessionCount = settingsRepository.userSessionCount.first()
     val canShowReviewPrompt =
       canShowReviewPrompt(
-        currentTime = Clock.System.now(),
+        currentTime = now,
         installDate = installDate,
         lastPromptDate = lastPromptDate,
         sessionCount = sessionCount,
       )
 
-    if (scene != null && canShowReviewPrompt) {
+    if (!canShowReviewPrompt) return
+
+    val scene =
+      UIApplication.sharedApplication.connectedScenes
+        .mapNotNull { it as? UIWindowScene }
+        .firstOrNull { it.activationState == platform.UIKit.UISceneActivationStateForegroundActive }
+
+    if (scene != null) {
       SKStoreReviewController.requestReviewInScene(scene)
+      settingsRepository.updateLastReviewPromptDate(now)
     }
   }
 }

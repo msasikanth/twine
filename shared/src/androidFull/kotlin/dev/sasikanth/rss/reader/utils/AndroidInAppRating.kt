@@ -23,6 +23,7 @@ import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import kotlin.coroutines.resume
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -36,6 +37,21 @@ class AndroidInAppRating(
 ) : InAppRating {
 
   override suspend fun request() {
+    val now = Clock.System.now()
+    val installDate = settingsRepository.installDate.firstOrNull() ?: now
+    val lastPromptDate =
+      settingsRepository.lastReviewPromptDate.firstOrNull() ?: Instant.DISTANT_PAST
+    val sessionCount = settingsRepository.userSessionCount.first()
+    val canShowReviewPrompt =
+      canShowReviewPrompt(
+        currentTime = now,
+        installDate = installDate,
+        lastPromptDate = lastPromptDate,
+        sessionCount = sessionCount,
+      )
+
+    if (!canShowReviewPrompt) return
+
     val manager = ReviewManagerFactory.create(activity)
     val request = suspendCancellableCoroutine { continuation ->
       manager.requestReviewFlow().addOnCompleteListener { task ->
@@ -47,19 +63,7 @@ class AndroidInAppRating(
       }
     }
 
-    val now = Clock.System.now()
-    val installDate = settingsRepository.installDate.firstOrNull() ?: now
-    val lastPromptDate = settingsRepository.lastReviewPromptDate.firstOrNull() ?: now
-    val sessionCount = settingsRepository.userSessionCount.first()
-    val canShowReviewPrompt =
-      canShowReviewPrompt(
-        currentTime = Clock.System.now(),
-        installDate = installDate,
-        lastPromptDate = lastPromptDate,
-        sessionCount = sessionCount,
-      )
-
-    if (request != null && canShowReviewPrompt) {
+    if (request != null) {
       manager.launchReviewFlow(activity, request)
       settingsRepository.updateLastReviewPromptDate(now)
     }
