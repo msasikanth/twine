@@ -26,6 +26,7 @@ import com.mikepenz.markdown.model.parseMarkdownFlow
 import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.data.repository.PostContentRepository
 import dev.sasikanth.rss.reader.media.AudioPlayer
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
@@ -80,7 +81,12 @@ class ReaderPageViewModel(
   private val _parsingProgress = MutableStateFlow(ReaderProcessingProgress.Loading)
   val parsingProgress: StateFlow<ReaderProcessingProgress> = _parsingProgress
 
-  private val _showFullArticle = MutableStateFlow(readerPost.alwaysFetchFullArticle)
+  val videoLink: String? = readerPost.link.takeIf { UrlUtils.youTubeVideoId(it) != null }
+
+  private val canLoadFullArticle = videoLink == null
+
+  private val _showFullArticle =
+    MutableStateFlow(readerPost.alwaysFetchFullArticle && canLoadFullArticle)
   val showFullArticle: StateFlow<Boolean> = _showFullArticle
 
   init {
@@ -94,6 +100,8 @@ class ReaderPageViewModel(
   }
 
   fun toggleFullArticle() {
+    if (!canLoadFullArticle) return
+
     _showFullArticle.value = !(_showFullArticle.value)
     if (_showFullArticle.value) {
       loadFullArticle()

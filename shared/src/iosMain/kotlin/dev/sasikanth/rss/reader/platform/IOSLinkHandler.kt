@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.platform
 
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
@@ -43,6 +44,11 @@ class IOSLinkHandler(
     val browserType = settingsRepository.browserType.first()
     val url = NSURL(string = link)
 
+    if (UrlUtils.youTubeVideoId(link) != null && isYouTubeAppInstalled()) {
+      openBrowser(url)
+      return
+    }
+
     when (browserType) {
       BrowserType.Default -> {
         val canOpenUrl = UIApplication.sharedApplication().canOpenURL(url)
@@ -65,6 +71,10 @@ class IOSLinkHandler(
         viewController.dismissViewControllerAnimated(flag = true, completion = null)
       }
     }
+  }
+
+  private fun isYouTubeAppInstalled(): Boolean {
+    return UIApplication.sharedApplication().canOpenURL(NSURL(string = "youtube://"))
   }
 
   private fun openBrowser(url: NSURL) {

@@ -361,6 +361,39 @@ class XmlFeedParserTest {
   }
 
   @Test
+  fun rssItemsLinkingToYouTubeShouldFallBackToTheVideoThumbnail() = runTest {
+    // given
+    val xmlWithYouTubeLinks =
+      """<?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0"><channel>
+          <title>Tom Scott's updates</title>
+          <link>https://www.tomscott.com/</link>
+          <description>Stuff on or around Tom Scott's web site</description>
+          <item>
+            <title>How do you keep 8,995 codebreakers secret?</title>
+            <link>https://www.youtube.com/watch?v=tDLbO9KeddY</link>
+            <description>How do you keep 8,995 codebreakers secret?</description>
+            <pubDate>Mon, 24 Aug 2026 15:00:09 +0000</pubDate>
+          </item>
+          <item>
+            <title>A post that is not a video</title>
+            <link>https://www.tomscott.com/blog/post</link>
+            <description>Body text</description>
+            <pubDate>Mon, 17 Aug 2026 15:00:26 +0000</pubDate>
+          </item>
+        </channel></rss>"""
+
+    // when
+    val content = ByteReadChannel(xmlWithYouTubeLinks.toByteArray())
+    val payload = xmlFeedParser.parse(content, feedUrl, Charsets.UTF8)
+    val posts = payload.posts.toList()
+
+    // then
+    assertEquals("https://i.ytimg.com/vi/tDLbO9KeddY/hqdefault.jpg", posts.first().imageUrl)
+    assertEquals(null, posts.last().imageUrl)
+  }
+
+  @Test
   fun namedHtmlEntitiesShouldBeResolvedRatherThanDropped() = runTest {
     // given
     val xmlWithNamedEntities =

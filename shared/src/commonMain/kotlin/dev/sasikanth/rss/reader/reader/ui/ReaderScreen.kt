@@ -697,6 +697,7 @@ internal fun ReaderScreen(
               isParentThemeDark = isParentThemeDark,
               isDarkTheme = isDarkTheme,
               loadFullArticle = showFullArticle,
+              videoLink = settledPageViewModel.videoLink,
               panelContent = state.panelContent,
               isAudioPost = !settledPost.audioUrl.isNullOrBlank(),
               isAudioPlayerAvailable = settledPageViewModel.audioPlayer.isAvailable,
@@ -712,6 +713,12 @@ internal fun ReaderScreen(
                 coroutineScope.launch { linkHandler.openLink(settledPost.link) }
               },
               loadFullArticleClick = { settledPageViewModel.toggleFullArticle() },
+              watchVideoClick = {
+                val videoLink = settledPageViewModel.videoLink
+                if (videoLink != null) {
+                  coroutineScope.launch { linkHandler.openLink(videoLink) }
+                }
+              },
               openReaderViewSettings = {
                 viewModel.dispatch(ReaderEvent.ShowPanelContent(ReaderPanelContent.Customizations))
               },
@@ -750,6 +757,7 @@ private fun ReaderActionsPanel(
   isParentThemeDark: Boolean,
   isDarkTheme: Boolean,
   loadFullArticle: Boolean,
+  videoLink: String?,
   panelContent: ReaderPanelContent,
   isAudioPost: Boolean,
   isAudioPlayerAvailable: Boolean,
@@ -762,6 +770,7 @@ private fun ReaderActionsPanel(
   isSubscribed: Boolean,
   openInBrowserClick: () -> Unit,
   loadFullArticleClick: () -> Unit,
+  watchVideoClick: () -> Unit,
   openReaderViewSettings: () -> Unit,
   openPlayer: () -> Unit,
   collapsePanel: () -> Unit,
@@ -913,11 +922,13 @@ private fun ReaderActionsPanel(
               ReaderPanelActions(
                 overriddenColorScheme = overriddenColorScheme,
                 loadFullArticle = loadFullArticle,
+                videoLink = videoLink,
                 isAudioPost = isAudioPost && isAudioPlayerAvailable,
                 playbackState = playbackState,
                 settledPostId = settledPostId,
                 openInBrowserClick = openInBrowserClick,
                 loadFullArticleClick = loadFullArticleClick,
+                watchVideoClick = watchVideoClick,
                 openReaderViewSettings = openReaderViewSettings,
                 openPlayer = openPlayer,
                 onPlayClick = onPlayClick,
@@ -936,11 +947,13 @@ private fun ReaderActionsPanel(
 private fun ReaderPanelActions(
   overriddenColorScheme: AppColorScheme?,
   loadFullArticle: Boolean,
+  videoLink: String?,
   isAudioPost: Boolean,
   playbackState: StateFlow<PlaybackState>,
   settledPostId: String,
   openInBrowserClick: () -> Unit,
   loadFullArticleClick: () -> Unit,
+  watchVideoClick: () -> Unit,
   openReaderViewSettings: () -> Unit,
   openPlayer: () -> Unit,
   onPlayClick: () -> Unit,
@@ -976,6 +989,13 @@ private fun ReaderPanelActions(
           openPlayer()
         }
       },
+      openReaderViewSettings = openReaderViewSettings,
+    )
+  } else if (videoLink != null) {
+    ReaderVideoBottomBar(
+      selectedAppColorScheme = overriddenColorScheme,
+      openInBrowserClick = openInBrowserClick,
+      watchVideoClick = watchVideoClick,
       openReaderViewSettings = openReaderViewSettings,
     )
   } else {
