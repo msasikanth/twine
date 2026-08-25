@@ -61,6 +61,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.cdLoadFullArticle
+import twine.shared.generated.resources.cdWatchVideo
 import twine.shared.generated.resources.openWebsite
 import twine.shared.generated.resources.pause
 import twine.shared.generated.resources.play
@@ -154,6 +155,48 @@ internal fun ReaderViewBottomBar(
       icon = TwineIcons.Settings,
       onClick = openReaderViewSettings,
       minWidth = buttonMinWidth,
+    )
+  }
+}
+
+@Composable
+internal fun ReaderVideoBottomBar(
+  selectedAppColorScheme: AppColorScheme?,
+  openInBrowserClick: () -> Unit,
+  watchVideoClick: () -> Unit,
+  openReaderViewSettings: () -> Unit,
+) {
+  Row(
+    modifier = Modifier.wrapContentWidth().height(IntrinsicSize.Min).padding(horizontal = 12.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    val colorScheme = selectedAppColorScheme ?: AppTheme.colorScheme
+
+    BottomBarIconButton(
+      modifier = Modifier.padding(vertical = 12.dp),
+      label = stringResource(Res.string.openWebsite),
+      icon = TwineIcons.OpenBrowser,
+      onClick = openInBrowserClick,
+      minWidth = 52.dp,
+    )
+
+    BottomBarToggleIconButton(
+      modifier = Modifier.fillMaxHeight().padding(vertical = 8.dp),
+      label = stringResource(Res.string.cdWatchVideo),
+      icon = TwineIcons.Play,
+      onClick = watchVideoClick,
+      backgroundColor = colorScheme.primaryContainer,
+      contentColor = colorScheme.onPrimaryContainer,
+      minWidth = 88.dp,
+    )
+
+    BottomBarIconButton(
+      modifier = Modifier.padding(vertical = 12.dp),
+      label = stringResource(Res.string.readerSettings),
+      icon = TwineIcons.Settings,
+      onClick = openReaderViewSettings,
+      minWidth = 52.dp,
     )
   }
 }

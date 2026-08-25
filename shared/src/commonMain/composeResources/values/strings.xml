@@ -190,6 +190,7 @@
   <string name="databaseMaintainenceTitle">Please wait...</string>
   <string name="databaseMaintainenceSubtitle">Performing database maintainence, don't close the app</string>
   <string name="cdLoadFullArticle">Load full article</string>
+  <string name="cdWatchVideo">Watch video</string>
   <string name="enableAutoSyncTitle">Enable background sync</string>
   <string name="enableAutoSyncDesc">Articles will be fetched in the background</string>
   <string name="showFeedFavIconTitle">Show website fav icon</string>
