@@ -94,21 +94,9 @@ internal class PinnedSourcesBottomBarScrollBehavior(
   val snapAnimationSpec: AnimationSpec<Float>?,
   val flingAnimationSpec: DecayAnimationSpec<Float>?,
   val canScroll: () -> Boolean = { true },
-  val reverseLayout: Boolean = false,
 ) {
   val nestedScrollConnection =
     object : NestedScrollConnection {
-      override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-        if (!canScroll()) return Offset.Zero
-        val prevHeightOffset = state.heightOffset
-        state.heightOffset += available.y
-        return if (!reverseLayout && prevHeightOffset != state.heightOffset) {
-          available.copy(x = 0f)
-        } else {
-          Offset.Zero
-        }
-      }
-
       override fun onPostScroll(
         consumed: Offset,
         available: Offset,
@@ -116,7 +104,7 @@ internal class PinnedSourcesBottomBarScrollBehavior(
       ): Offset {
         if (!canScroll()) return Offset.Zero
         state.contentOffset += consumed.y
-        if (!reverseLayout) state.heightOffset += consumed.y
+        state.heightOffset += consumed.y
         return Offset.Zero
       }
 
@@ -143,15 +131,13 @@ internal fun rememberPinnedSourcesBottomBarScrollBehavior(
   canScroll: () -> Boolean = { true },
   snapAnimationSpec: AnimationSpec<Float>? = spring(stiffness = Spring.StiffnessMediumLow),
   flingAnimationSpec: DecayAnimationSpec<Float>? = rememberSplineBasedDecay(),
-  reverseLayout: Boolean = false,
 ): PinnedSourcesBottomBarScrollBehavior =
-  remember(state, canScroll, snapAnimationSpec, flingAnimationSpec, reverseLayout) {
+  remember(state, canScroll, snapAnimationSpec, flingAnimationSpec) {
     PinnedSourcesBottomBarScrollBehavior(
       state = state,
       snapAnimationSpec = snapAnimationSpec,
       flingAnimationSpec = flingAnimationSpec,
       canScroll = canScroll,
-      reverseLayout = reverseLayout,
     )
   }
 

@@ -112,6 +112,7 @@ import twine.shared.generated.resources.errorRequestTimeout
 import twine.shared.generated.resources.errorServer
 import twine.shared.generated.resources.errorTooManyRedirects
 import twine.shared.generated.resources.errorUnAuthorized
+import twine.shared.generated.resources.errorUnknown
 import twine.shared.generated.resources.errorUnknownHttpStatus
 import twine.shared.generated.resources.errorUnsupportedFeed
 import twine.shared.generated.resources.feedEntryLinkHint
@@ -433,7 +434,7 @@ private suspend fun errorMessageForErrorType(errorType: AddFeedErrorType): Strin
     AddFeedErrorType.UnknownFeedType -> getString(Res.string.errorUnsupportedFeed)
     AddFeedErrorType.FailedToParseXML -> getString(Res.string.errorMalformedXml)
     AddFeedErrorType.Timeout -> getString(Res.string.errorRequestTimeout)
-    is AddFeedErrorType.Unknown -> errorType.e.message
+    is AddFeedErrorType.Unknown -> errorType.e.message ?: getString(Res.string.errorUnknown)
     is AddFeedErrorType.FeedNotFound ->
       getString(Res.string.errorFeedNotFound, errorType.statusCode.value)
     is AddFeedErrorType.ServerError -> getString(Res.string.errorServer, errorType.statusCode.value)
