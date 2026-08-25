@@ -17,10 +17,13 @@
 
 package dev.sasikanth.rss.reader.platform
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
@@ -38,6 +41,8 @@ class AndroidLinkHandler(
     if (link.isNullOrBlank()) return
 
     try {
+      if (UrlUtils.youTubeVideoId(link) != null && openInExternalApp(link)) return
+
       val browserType = settingsRepository.browserType.first()
       when (browserType) {
         BrowserType.Default -> {
@@ -63,6 +68,20 @@ class AndroidLinkHandler(
       activity.startActivity(intent)
     } else {
       openCustomTab(link)
+    }
+  }
+
+  private fun openInExternalApp(link: String): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return false
+
+    val intent =
+      Intent(Intent.ACTION_VIEW, link.toUri()).addFlags(Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER)
+
+    return try {
+      activity.startActivity(intent)
+      true
+    } catch (e: ActivityNotFoundException) {
+      false
     }
   }
 
