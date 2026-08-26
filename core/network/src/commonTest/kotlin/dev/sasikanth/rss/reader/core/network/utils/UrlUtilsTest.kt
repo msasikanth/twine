@@ -103,4 +103,26 @@ class UrlUtilsTest {
     )
     assertNull(UrlUtils.youTubeThumbnail("https://example.com/article"))
   }
+
+  @Test
+  fun prefersFeedProvidedIcon_shouldReturnTrueForSourcesWithSharedFavIcons() {
+    assertTrue(
+      UrlUtils.prefersFeedProvidedIcon(
+        "https://www.youtube.com/feeds/videos.xml?channel_id=UCBJycsmduvYEL83R_U4JriQ"
+      )
+    )
+    assertTrue(UrlUtils.prefersFeedProvidedIcon("https://www.reddit.com/r/formula1/.rss"))
+    assertTrue(UrlUtils.prefersFeedProvidedIcon("https://www.reddit.com/user/spez/.rss"))
+    assertTrue(UrlUtils.prefersFeedProvidedIcon("https://mastodon.social/@Gargron.rss"))
+    assertTrue(UrlUtils.prefersFeedProvidedIcon("https://hachyderm.io/@some_user.rss"))
+  }
+
+  @Test
+  fun prefersFeedProvidedIcon_shouldReturnFalseForOrdinaryFeeds() {
+    assertFalse(UrlUtils.prefersFeedProvidedIcon("https://sasikanth.dev/rss.xml"))
+    assertFalse(UrlUtils.prefersFeedProvidedIcon("https://www.youtube.com/@mkbhd"))
+    assertFalse(UrlUtils.prefersFeedProvidedIcon("https://www.reddit.com/r/formula1/"))
+    assertFalse(UrlUtils.prefersFeedProvidedIcon("https://example.com/feed/@notahandle/posts.xml"))
+    assertFalse(UrlUtils.prefersFeedProvidedIcon(""))
+  }
 }

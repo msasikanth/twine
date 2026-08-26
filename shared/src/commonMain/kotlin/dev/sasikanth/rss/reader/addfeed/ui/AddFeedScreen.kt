@@ -40,7 +40,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -82,7 +81,6 @@ import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
 import dev.sasikanth.rss.reader.addfeed.FeedFetchingState
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.CircularIconButton
-import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.TextField
 import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -92,17 +90,14 @@ import dev.sasikanth.rss.reader.resources.icons.Close
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.Newsstand
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.settings.ui.items.SettingItem
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalInAppRating
-import dev.sasikanth.rss.reader.utils.ignoreHorizontalParentPadding
 import dev.sasikanth.rss.reader.utils.removeLineBreaks
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.addToGroup
-import twine.shared.generated.resources.alwaysFetchSourceArticle
 import twine.shared.generated.resources.buttonAddFeed
 import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.discoveryTitle
@@ -117,7 +112,6 @@ import twine.shared.generated.resources.errorUnknownHttpStatus
 import twine.shared.generated.resources.errorUnsupportedFeed
 import twine.shared.generated.resources.feedEntryLinkHint
 import twine.shared.generated.resources.feedEntryTitleHint
-import twine.shared.generated.resources.showFeedFavIconTitle
 
 @Composable
 fun AddFeedScreen(
@@ -312,54 +306,6 @@ private fun AddFeedContent(
                   imeAction = ImeAction.Done,
                 ),
             )
-          }
-
-          item {
-            Column {
-              HorizontalDivider(
-                modifier = Modifier.padding(vertical = 12.dp).ignoreHorizontalParentPadding(24.dp),
-                color = AppTheme.colorScheme.outlineVariant,
-              )
-
-              SettingItem(
-                modifier = Modifier.ignoreHorizontalParentPadding(24.dp),
-                title = stringResource(Res.string.alwaysFetchSourceArticle),
-                action = {
-                  Switch(
-                    checked = state.alwaysFetchSourceArticle,
-                    onCheckedChange = {
-                      dispatch(AddFeedEvent.OnAlwaysFetchSourceArticleChanged(it))
-                    },
-                  )
-                },
-                onClick = {
-                  dispatch(
-                    AddFeedEvent.OnAlwaysFetchSourceArticleChanged(!state.alwaysFetchSourceArticle)
-                  )
-                },
-              )
-
-              HorizontalDivider(color = AppTheme.colorScheme.outlineVariant)
-
-              SettingItem(
-                modifier = Modifier.ignoreHorizontalParentPadding(24.dp),
-                title = stringResource(Res.string.showFeedFavIconTitle),
-                action = {
-                  Switch(
-                    checked = state.showFeedFavIcon,
-                    onCheckedChange = { dispatch(AddFeedEvent.OnShowFeedFavIconChanged(it)) },
-                  )
-                },
-                onClick = {
-                  dispatch(AddFeedEvent.OnShowFeedFavIconChanged(!state.showFeedFavIcon))
-                },
-              )
-
-              HorizontalDivider(
-                modifier = Modifier.padding(vertical = 12.dp).ignoreHorizontalParentPadding(24.dp),
-                color = AppTheme.colorScheme.outlineVariant,
-              )
-            }
           }
 
           item {
