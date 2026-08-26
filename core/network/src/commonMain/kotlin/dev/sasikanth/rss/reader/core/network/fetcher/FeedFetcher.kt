@@ -60,6 +60,7 @@ class FeedFetcher(
   private val xmlFeedParser: XmlFeedParser,
   private val jsonFeedParser: JsonFeedParser,
   private val fullArticleFetcher: FullArticleFetcher,
+  private val feedUrlResolver: FeedUrlResolver,
   private val dispatchersProvider: DispatchersProvider,
 ) {
 
@@ -71,7 +72,9 @@ class FeedFetcher(
   }
 
   suspend fun fetch(url: String, fetchFullContent: Boolean = false): FeedFetchResult {
-    return withContext(networkDispatcher) { fetch(url, fetchFullContent, redirectCount = 0) }
+    return withContext(networkDispatcher) {
+      fetch(feedUrlResolver.resolve(url), fetchFullContent, redirectCount = 0)
+    }
   }
 
   private suspend fun fetch(
