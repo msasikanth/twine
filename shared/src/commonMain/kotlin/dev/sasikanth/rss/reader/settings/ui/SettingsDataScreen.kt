@@ -248,10 +248,14 @@ private fun ReadingHeatmap(
       modifier
         .fillMaxWidth()
         .background(AppTheme.colorScheme.surfaceContainerLow)
-        .horizontalScroll(rememberScrollState(), reverseScrolling = true)
-        .padding(horizontal = 32.dp, vertical = 12.dp)
+        .padding(vertical = 12.dp)
   ) {
-    Column {
+    Column(
+      modifier =
+        Modifier.fillMaxWidth()
+          .horizontalScroll(rememberScrollState(), reverseScrolling = true)
+          .padding(horizontal = 32.dp)
+    ) {
       Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         weeks.forEachIndexed { index, week ->
           val monthName = monthLabels[index]
@@ -286,7 +290,7 @@ private fun ReadingHeatmap(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    HeatmapLegend(modifier = Modifier.align(Alignment.End))
+    HeatmapLegend(modifier = Modifier.padding(horizontal = 32.dp))
   }
 }
 
