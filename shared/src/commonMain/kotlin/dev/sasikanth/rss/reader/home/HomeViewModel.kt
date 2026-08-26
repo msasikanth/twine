@@ -216,7 +216,7 @@ class HomeViewModel(
       val markPostsAsReadOn = settingsRepository.markAsReadOn.first()
       if (markPostsAsReadOn != MarkAsReadOn.Scroll) return@launch
 
-      rssRepository.markPostsAsRead(postIds = postIds)
+      rssRepository.updatePostReadStatus(postIds = postIds, read = true)
     }
   }
 

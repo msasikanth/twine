@@ -16,18 +16,30 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
+import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
@@ -59,6 +71,8 @@ internal fun PostsList(
   featuredPostsPagerState: PagerState,
   homeViewMode: HomeViewMode,
   postsType: PostsType,
+  postsSortOrder: PostsSortOrder,
+  activeSourceId: String?,
   markAsReadOn: MarkAsReadOn,
   posts: () -> LazyPagingItems<ResolvedPost>,
   markFeaturedPostAsReadOnScroll: (String) -> Unit,
@@ -72,6 +86,15 @@ internal fun PostsList(
   modifier: Modifier = Modifier,
   activeReaderPostId: String? = null,
 ) {
+  val itemAnimationsEnabled =
+    rememberItemAnimationsEnabled(
+      featuredPosts.isNotEmpty(),
+      homeViewMode,
+      postsType,
+      postsSortOrder,
+      activeSourceId,
+    )
+
   val topContentPadding =
     if (featuredPosts.isEmpty()) {
       paddingValues.calculateTopPadding()
@@ -149,10 +172,12 @@ internal fun PostsList(
     ) { index ->
       val post = posts[index] ?: return@items
       val highlighted = post.id == activeReaderPostId
+      val itemModifier = if (itemAnimationsEnabled) animatePostItem() else Modifier
 
       when (homeViewMode) {
         HomeViewMode.Default -> {
           PostListItem(
+            modifier = itemModifier,
             item = post,
             highlighted = highlighted,
             onClick = { onPostClicked(post, index) },
@@ -167,6 +192,7 @@ internal fun PostsList(
         }
         HomeViewMode.Simple -> {
           SimplePostListItem(
+            modifier = itemModifier,
             item = post,
             highlighted = highlighted,
             onClick = { onPostClicked(post, index) },
@@ -181,6 +207,7 @@ internal fun PostsList(
         }
         HomeViewMode.Compact -> {
           CompactPostListItem(
+            modifier = itemModifier,
             item = post,
             highlighted = highlighted,
             onClick = { onPostClicked(post, index) },
@@ -196,3 +223,37 @@ internal fun PostsList(
     }
   }
 }
+
+/**
+ * Item add/remove animations are only meaningful while the list keeps its identity. Switching the
+ * source, view mode, filter or sort order swaps the whole backing list, and showing/hiding the
+ * featured section resizes item 0 and flips the list's top content padding — animating placement
+ * through any of those makes every post slide against a section that resizes instantly. The gate
+ * stays shut for the frame that lays the new structure out, then reopens.
+ */
+@Composable
+private fun rememberItemAnimationsEnabled(vararg structureInputs: Any?): Boolean {
+  val structureKey = remember(*structureInputs) { Any() }
+  var settledKey by remember { mutableStateOf<Any?>(null) }
+
+  LaunchedEffect(structureKey) {
+    withFrameNanos {}
+    settledKey = structureKey
+  }
+
+  return settledKey === structureKey
+}
+
+private fun LazyItemScope.animatePostItem(): Modifier =
+  Modifier.animateItem(
+    fadeInSpec = tween(durationMillis = FADE_IN_DURATION),
+    placementSpec =
+      spring(
+        stiffness = Spring.StiffnessMediumLow,
+        visibilityThreshold = IntOffset.VisibilityThreshold,
+      ),
+    fadeOutSpec = tween(durationMillis = FADE_OUT_DURATION),
+  )
+
+private const val FADE_IN_DURATION = 220
+private const val FADE_OUT_DURATION = 160
