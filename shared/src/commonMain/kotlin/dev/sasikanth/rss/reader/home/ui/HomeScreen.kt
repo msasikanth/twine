@@ -120,10 +120,12 @@ import dev.sasikanth.rss.reader.utils.LocalRootWindowSizeClass
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
 import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import kotlin.math.abs
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -138,6 +140,8 @@ import twine.shared.generated.resources.swipeLeftGetStarted
 import twine.shared.generated.resources.swipeRightGetStarted
 
 private const val BOTTOM_SCRIM_FRACTION = 0.15f
+
+private val EMPTY_STATE_SWITCH_DELAY = 300.milliseconds
 
 private class KeyRepeatGuard(var armed: Boolean = false)
 
@@ -570,6 +574,20 @@ private fun HomeContent(
 
           val pullToRefreshState = rememberPullToRefreshState()
 
+          // The last item leaving is still an item animation, so the list has to outlive it.
+          // Switching straight to the empty state disposes the LazyColumn in the same frame and
+          // the exit never runs.
+          val hasNoContent = featuredPosts.isEmpty() && (posts?.itemCount ?: 0) == 0
+          var showEmptyState by remember { mutableStateOf(hasNoContent) }
+          LaunchedEffect(hasNoContent) {
+            if (hasNoContent) {
+              delay(EMPTY_STATE_SWITCH_DELAY)
+              showEmptyState = true
+            } else {
+              showEmptyState = false
+            }
+          }
+
           when {
             state.hasFeeds == null || posts == null -> {
               // no-op
@@ -577,7 +595,7 @@ private fun HomeContent(
             !state.hasFeeds -> {
               NoFeeds { onMenuClicked?.invoke() }
             }
-            featuredPosts.isEmpty() && posts.itemCount == 0 -> {
+            showEmptyState && hasNoContent -> {
               PullToRefreshContent(
                 pullToRefreshState = pullToRefreshState,
                 state = state,
@@ -622,6 +640,8 @@ private fun HomeContent(
                   featuredPostsPagerState = featuredPostsPagerState,
                   homeViewMode = state.homeViewMode,
                   postsType = state.postsType,
+                  postsSortOrder = state.postsSortOrder,
+                  activeSourceId = state.activeSource?.id,
                   markAsReadOn = state.markAsReadOn,
                   posts = { posts },
                   markFeaturedPostAsReadOnScroll = {
