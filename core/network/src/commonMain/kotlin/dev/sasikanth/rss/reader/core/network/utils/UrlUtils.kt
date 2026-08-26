@@ -62,6 +62,24 @@ object UrlUtils {
     return "https://i.ytimg.com/vi/$videoId/hqdefault.jpg"
   }
 
+  private val feedProvidedIconRegexes =
+    listOf(
+      // YouTube channel feeds carry the channel avatar, scraped from the channel page by
+      // AtomFeedParser. Reddit and Mastodon carry the subreddit logo and the account avatar.
+      Regex("^https?://(?:www\\.)?youtube\\.com/feeds/videos\\.xml\\?", RegexOption.IGNORE_CASE),
+      Regex("^https?://(?:[\\w\\-]+\\.)*reddit\\.com/.+/\\.rss$", RegexOption.IGNORE_CASE),
+      Regex("^https?://[^/]+/@[A-Za-z0-9_.\\-]+\\.rss$", RegexOption.IGNORE_CASE),
+    )
+
+  /**
+   * Feeds whose own icon is a better identifier than the site favicon, which for these sources is
+   * shared by every feed on the host.
+   */
+  fun prefersFeedProvidedIcon(feedLink: String): Boolean {
+    val link = feedLink.trim()
+    return feedProvidedIconRegexes.any { it.containsMatchIn(link) }
+  }
+
   fun isUnconstrainedMedia(url: String): Boolean {
     return unconstrainedImagePrefixes.any { url.startsWith(it) }
   }

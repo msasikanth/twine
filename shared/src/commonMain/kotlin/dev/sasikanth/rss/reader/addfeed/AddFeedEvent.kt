@@ -30,8 +30,4 @@ sealed interface AddFeedEvent {
   data object MarkGoBackAsDone : AddFeedEvent
 
   data object MarkErrorAsShown : AddFeedEvent
-
-  data class OnAlwaysFetchSourceArticleChanged(val newValue: Boolean) : AddFeedEvent
-
-  data class OnShowFeedFavIconChanged(val newValue: Boolean) : AddFeedEvent
 }
