@@ -689,10 +689,6 @@ class RssRepository(
     widgetUpdater.updateUnreadWidget()
   }
 
-  suspend fun markPostsAsRead(postIds: Set<String>) {
-    updatePostReadStatus(postIds, read = true, recordHistory = false)
-  }
-
   suspend fun updatePostReadStatus(
     postIds: Set<String>,
     read: Boolean,

@@ -303,7 +303,7 @@ class ReaderViewModel(
       }
 
       if (postsToMarkAsRead.isNotEmpty()) {
-        rssRepository.markPostsAsRead(postsToMarkAsRead)
+        rssRepository.updatePostReadStatus(postIds = postsToMarkAsRead, read = true)
       }
     }
   }
