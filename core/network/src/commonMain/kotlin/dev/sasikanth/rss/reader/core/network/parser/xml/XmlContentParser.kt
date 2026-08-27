@@ -219,7 +219,9 @@ abstract class XmlContentParser {
       description = description.orEmpty().decodeHTMLString(),
       rawContent = rawContent,
       fullContent = null,
-      imageUrl = UrlUtils.safeUrl(hostLink, imageUrl) ?: UrlUtils.youTubeThumbnail(postLink),
+      imageUrl =
+        UrlUtils.upgradeYouTubeThumbnail(UrlUtils.safeUrl(hostLink, imageUrl))
+          ?: UrlUtils.youTubeThumbnail(postLink),
       audioUrl = audioUrl,
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = commentsLink?.trim(),

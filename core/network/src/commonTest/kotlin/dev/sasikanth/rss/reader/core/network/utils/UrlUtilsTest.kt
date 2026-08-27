@@ -98,7 +98,7 @@ class UrlUtilsTest {
   @Test
   fun youTubeThumbnail_shouldBuildThumbnailForVideoLinks() {
     assertEquals(
-      "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+      "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
       UrlUtils.youTubeThumbnail("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
     )
     assertNull(UrlUtils.youTubeThumbnail("https://example.com/article"))
@@ -124,5 +124,45 @@ class UrlUtilsTest {
     assertFalse(UrlUtils.prefersFeedProvidedIcon("https://www.reddit.com/r/formula1/"))
     assertFalse(UrlUtils.prefersFeedProvidedIcon("https://example.com/feed/@notahandle/posts.xml"))
     assertFalse(UrlUtils.prefersFeedProvidedIcon(""))
+  }
+
+  @Test
+  fun upgradeYouTubeThumbnail_shouldUpgradeLowResVariants() {
+    val expected = "https://i3.ytimg.com/vi/v-_d2e7x4KA/maxresdefault.jpg"
+
+    assertEquals(expected, UrlUtils.upgradeYouTubeThumbnail(expected))
+    assertEquals(
+      expected,
+      UrlUtils.upgradeYouTubeThumbnail("https://i3.ytimg.com/vi/v-_d2e7x4KA/hqdefault.jpg"),
+    )
+    assertEquals(
+      expected,
+      UrlUtils.upgradeYouTubeThumbnail("https://i3.ytimg.com/vi/v-_d2e7x4KA/mqdefault.jpg"),
+    )
+    assertEquals(
+      expected,
+      UrlUtils.upgradeYouTubeThumbnail("https://i3.ytimg.com/vi/v-_d2e7x4KA/sddefault.jpg"),
+    )
+  }
+
+  @Test
+  fun upgradeYouTubeThumbnail_shouldLeaveOtherImagesUntouched() {
+    val otherImage = "https://example.com/media/hqdefault.jpg"
+
+    assertEquals(otherImage, UrlUtils.upgradeYouTubeThumbnail(otherImage))
+    assertNull(UrlUtils.upgradeYouTubeThumbnail(null))
+  }
+
+  @Test
+  fun youTubeThumbnailFallback_shouldDowngradeOnlyMaxResThumbnails() {
+    assertEquals(
+      "https://i3.ytimg.com/vi/v-_d2e7x4KA/hqdefault.jpg",
+      UrlUtils.youTubeThumbnailFallback("https://i3.ytimg.com/vi/v-_d2e7x4KA/maxresdefault.jpg"),
+    )
+    assertNull(
+      UrlUtils.youTubeThumbnailFallback("https://i3.ytimg.com/vi/v-_d2e7x4KA/hqdefault.jpg")
+    )
+    assertNull(UrlUtils.youTubeThumbnailFallback("https://example.com/image.jpg"))
+    assertNull(UrlUtils.youTubeThumbnailFallback(null))
   }
 }

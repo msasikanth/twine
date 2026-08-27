@@ -29,9 +29,9 @@ import kotlinx.serialization.Serializable
 import me.tatarka.inject.annotations.Inject
 
 /**
- * Turns links that users naturally copy into links that actually serve a feed. Only handles sources
- * where feed auto discovery cannot work: Reddit serves a script only shell to non browser clients,
- * Mastodon handles are not URLs at all, and YouTube video pages do not advertise the channel feed.
+ * Handles the sources where feed auto discovery cannot work: Reddit serves a script only shell to
+ * non browser clients, Mastodon handles are not URLs, and YouTube video pages do not link the
+ * channel feed.
  */
 @Inject
 class FeedUrlResolver(private val httpClient: HttpClient) {
