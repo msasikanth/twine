@@ -389,7 +389,7 @@ class XmlFeedParserTest {
     val posts = payload.posts.toList()
 
     // then
-    assertEquals("https://i.ytimg.com/vi/tDLbO9KeddY/hqdefault.jpg", posts.first().imageUrl)
+    assertEquals("https://i.ytimg.com/vi/tDLbO9KeddY/maxresdefault.jpg", posts.first().imageUrl)
     assertEquals(null, posts.last().imageUrl)
   }
 

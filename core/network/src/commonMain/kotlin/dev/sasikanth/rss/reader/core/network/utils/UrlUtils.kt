@@ -38,6 +38,17 @@ object UrlUtils {
         "(?:/(?:[\\w\\-]+\\?v=|embed/|v/)?([\\w\\-]+)(?:\\S+)?)?"
     )
 
+  private const val MAX_RES_THUMBNAIL = "maxresdefault.jpg"
+
+  private const val HQ_THUMBNAIL = "hqdefault.jpg"
+
+  private val ytImgThumbnailRegex =
+    Regex(
+      "^(https?://[\\w\\-]*\\.?ytimg\\.com/vi(?:_webp)?/[\\w\\-]{11}/)" +
+        "((?:maxresdefault|hq720|sddefault|hqdefault|mqdefault|default)\\.jpg)",
+      RegexOption.IGNORE_CASE,
+    )
+
   private val absoluteUrlPattern = """^[a-zA-Z][a-zA-Z0-9\+\-\.]*:""".toRegex()
 
   private val youtubeVideoIdRegex =
@@ -59,7 +70,22 @@ object UrlUtils {
 
   fun youTubeThumbnail(url: String?): String? {
     val videoId = youTubeVideoId(url) ?: return null
-    return "https://i.ytimg.com/vi/$videoId/hqdefault.jpg"
+    return "https://i.ytimg.com/vi/$videoId/$MAX_RES_THUMBNAIL"
+  }
+
+  /** Feeds advertise the 480x360 4:3 thumbnail, which is letterboxed for 16:9 videos. */
+  fun upgradeYouTubeThumbnail(url: String?): String? {
+    if (url.isNullOrBlank()) return null
+    val (prefix, variant) = ytImgThumbnailRegex.find(url)?.destructured ?: return url
+
+    return if (variant == MAX_RES_THUMBNAIL) url else prefix + MAX_RES_THUMBNAIL
+  }
+
+  fun youTubeThumbnailFallback(url: String?): String? {
+    if (url.isNullOrBlank()) return null
+    val (prefix, variant) = ytImgThumbnailRegex.find(url)?.destructured ?: return null
+
+    return if (variant == MAX_RES_THUMBNAIL) prefix + HQ_THUMBNAIL else null
   }
 
   private val feedProvidedIconRegexes =
