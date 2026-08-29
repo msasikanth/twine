@@ -17,15 +17,33 @@
 
 package dev.sasikanth.rss.reader.app
 
-enum class AppIcon(val title: String) {
-  AntiqueGold("Antique Gold"),
-  Cranberry("Cranberry"),
-  DarkJade("Dark Jade"),
-  DeepIce("Deep Ice"),
-  DeepTeal("Deep Teal"),
-  DustyRose("Dusty Rose"),
-  RoyalPlum("Royal Plum"),
-  SlateBlue("Slate Blue"),
-  SoftSage("Soft Sage"),
-  StormySky("Stormy Sky"),
+enum class AppIcon(val isPremium: Boolean = true) {
+  Default(isPremium = false),
+  Solarized,
+  Amber,
+  Coral,
+  Raspberry,
+  Skyline,
+  Lavender,
+  Parchment,
+  Slate,
+  Sepia,
+}
+
+/**
+ * Icons shipped before the set was aligned with the app's theme variants. Their Android
+ * activity-aliases stay declared in the manifest so that installs still pointing at one keep a
+ * working launcher entry until [replacement] is applied.
+ */
+enum class LegacyAppIcon(val replacement: AppIcon) {
+  AntiqueGold(AppIcon.Amber),
+  Cranberry(AppIcon.Coral),
+  DarkJade(AppIcon.Default),
+  DeepIce(AppIcon.Skyline),
+  DeepTeal(AppIcon.Default),
+  DustyRose(AppIcon.Raspberry),
+  RoyalPlum(AppIcon.Raspberry),
+  SlateBlue(AppIcon.Slate),
+  SoftSage(AppIcon.Default),
+  StormySky(AppIcon.Slate),
 }

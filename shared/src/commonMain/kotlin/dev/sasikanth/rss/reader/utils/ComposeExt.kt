@@ -29,6 +29,8 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -352,3 +354,23 @@ fun Modifier.onDesktopContextMenu(onContextMenu: (Offset) -> Unit): Modifier =
   } else {
     this
   }
+
+/**
+ * A [LazyListState] that reveals [selectedIndex] once it is known. Settings load from DataStore
+ * after first composition, so seeding `initialFirstVisibleItemIndex` only ever captures the
+ * pre-load default. Scrolls only while the item is off-screen, so picking a visible one does not
+ * shift the row under the user.
+ */
+@Composable
+fun rememberSelectionListState(selectedIndex: Int): LazyListState {
+  val listState = rememberLazyListState()
+
+  LaunchedEffect(selectedIndex) {
+    val isVisible = listState.layoutInfo.visibleItemsInfo.any { it.index == selectedIndex }
+    if (selectedIndex >= 0 && !isVisible) {
+      listState.scrollToItem(selectedIndex)
+    }
+  }
+
+  return listState
+}

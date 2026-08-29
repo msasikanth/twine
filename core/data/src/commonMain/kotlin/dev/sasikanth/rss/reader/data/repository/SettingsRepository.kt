@@ -26,6 +26,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.app.LegacyAppIcon
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
@@ -430,13 +431,22 @@ class SettingsRepository(
     }
   }
 
+  /**
+   * Rewrites a stored [LegacyAppIcon] to its replacement, returning it so callers can re-apply the
+   * icon. Returns null once the stored value is already current.
+   */
+  suspend fun migrateLegacyAppIcon(): AppIcon? {
+    val stored = dataStore.data.first()[appIconKey]
+    val replacement =
+      runCatching { LegacyAppIcon.valueOf(stored.orEmpty()) }.getOrNull()?.replacement
+    return replacement?.also { updateAppIcon(it) }
+  }
+
   private fun mapToAppIcon(pref: String?): AppIcon {
-    if (pref.isNullOrBlank()) return AppIcon.DarkJade
-    return try {
-      AppIcon.valueOf(pref)
-    } catch (e: Exception) {
-      AppIcon.DarkJade
-    }
+    if (pref.isNullOrBlank()) return AppIcon.Default
+    return runCatching { AppIcon.valueOf(pref) }
+      .recoverCatching { LegacyAppIcon.valueOf(pref).replacement }
+      .getOrDefault(AppIcon.Default)
   }
 }
 

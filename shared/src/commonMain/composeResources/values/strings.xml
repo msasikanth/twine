@@ -273,6 +273,7 @@
   <string name="settingsCustomisations">Customisations</string>
   <string name="settingsAppIconTitle">App icon</string>
   <string name="settingsAppIconSubtitle">Choose how Twine looks on your home screen</string>
+  <string name="settingsAppIconDefault">Default</string>
   <string name="filter">Filter</string>
   <string name="freshRssLoginTitle">FreshRSS</string>
   <string name="freshRssServerUrl" translatable="false">https://freshrss.example.com/api/greader.php/</string>

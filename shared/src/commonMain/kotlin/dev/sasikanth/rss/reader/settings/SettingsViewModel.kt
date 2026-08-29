@@ -251,10 +251,6 @@ class SettingsViewModel(
       is SettingsEvent.SignOutClicked -> signOutClicked()
       SettingsEvent.ClearAuthUrl -> _state.update { it.copy(authUrlToOpen = null) }
       is SettingsEvent.OnAppIconChanged -> onAppIconChanged(event.appIcon)
-      SettingsEvent.AppIconClicked -> appIconClicked()
-      SettingsEvent.CloseAppIconSelectionSheet -> {
-        _state.update { it.copy(showAppIconSelectionSheet = false) }
-      }
       SettingsEvent.DeleteAppData -> deleteAppData()
       is SettingsEvent.OnOpmlFeedsSelected -> onOpmlFeedsSelected(event.feeds)
       SettingsEvent.ClearOpmlFeedsToSelect -> {
@@ -465,16 +461,6 @@ class SettingsViewModel(
     viewModelScope.launch {
       settingsRepository.updateAppIcon(appIcon)
       appIconManager.setIcon(appIcon)
-    }
-  }
-
-  private fun appIconClicked() {
-    viewModelScope.launch {
-      if (billingHandler.isSubscribed()) {
-        _state.update { it.copy(showAppIconSelectionSheet = true) }
-      } else {
-        _state.update { it.copy(openPaywall = true) }
-      }
     }
   }
 

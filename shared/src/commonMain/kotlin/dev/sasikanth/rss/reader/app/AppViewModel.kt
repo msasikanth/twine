@@ -66,6 +66,7 @@ class AppViewModel(
   private val syncCoordinator: SyncCoordinator,
   private val oAuthManager: OAuthManager,
   private val appInfo: AppInfo,
+  private val appIconManager: AppIconManager,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow(AppState.DEFAULT.copy(versionName = appInfo.versionName))
@@ -78,6 +79,7 @@ class AppViewModel(
   init {
     refreshFeedsIfExpired()
     setupSessionTracking()
+    migrateLegacyAppIcon()
 
     viewModelScope.launch { oAuthManager.loopbackRedirects.collect { uri -> completeSignIn(uri) } }
 
@@ -247,6 +249,12 @@ class AppViewModel(
 
   fun openChangelog() {
     viewModelScope.launch { _state.update { it.copy(showChangelog = true) } }
+  }
+
+  private fun migrateLegacyAppIcon() {
+    viewModelScope.launch {
+      settingsRepository.migrateLegacyAppIcon()?.let { appIconManager.setIcon(it) }
+    }
   }
 
   private fun refreshFeedsIfExpired() {

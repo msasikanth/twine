@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -32,6 +31,7 @@ import dev.sasikanth.rss.reader.components.ThemeVariantIconButton
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.isDynamicThemeSupported
 import dev.sasikanth.rss.reader.ui.isSystemDynamicColorSupported
+import dev.sasikanth.rss.reader.utils.rememberSelectionListState
 import dev.sasikanth.rss.reader.utils.scrollOnMouseWheel
 
 @Composable
@@ -50,10 +50,7 @@ internal fun ThemeVariantSettingItem(
       }
     }
   val themeVariantListState =
-    rememberLazyListState(
-      initialFirstVisibleItemIndex =
-        availableThemeVariants.indexOf(selectedThemeVariant).coerceAtLeast(0)
-    )
+    rememberSelectionListState(availableThemeVariants.indexOf(selectedThemeVariant))
 
   LazyRow(
     state = themeVariantListState,

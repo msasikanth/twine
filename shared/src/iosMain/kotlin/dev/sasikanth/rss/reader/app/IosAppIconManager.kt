@@ -31,7 +31,7 @@ class IosAppIconManager : AppIconManager {
     if (!application.supportsAlternateIcons) return
 
     val iconName =
-      if (icon == AppIcon.DarkJade) {
+      if (icon == AppIcon.Default) {
         null
       } else {
         "AppIcon${icon.name}"
