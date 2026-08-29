@@ -376,8 +376,13 @@ class MinifluxSyncCoordinator(
     val localGroupsByName = localGroups.associateBy { it.name }
 
     remoteFeeds.forEach { remoteFeed ->
+      val localFeed =
+        localFeedsByRemoteId[remoteFeed.id.toString()] ?: localFeedsByLink[remoteFeed.feedUrl]
+
+      // Locally resolved icons (YouTube channel avatars, etc.) are better than the server's
+      // favicon lookup, so only fall back to the remote icon when we don't have one.
       val iconDataUri =
-        if (remoteFeed.icon.externalIconId.isNotBlank()) {
+        if (localFeed?.icon.isNullOrBlank() && remoteFeed.icon.externalIconId.isNotBlank()) {
           val iconResponse = minifluxSource.feedIcon(remoteFeed.id)
           if (iconResponse != null) {
             "data:${iconResponse.data}"
@@ -388,16 +393,14 @@ class MinifluxSyncCoordinator(
           null
         }
 
-      val localFeed =
-        localFeedsByRemoteId[remoteFeed.id.toString()] ?: localFeedsByLink[remoteFeed.feedUrl]
-
       val feedId =
         if (localFeed != null) {
+          val resolvedIcon = iconDataUri ?: localFeed.icon
           if (
             localFeed.remoteId != remoteFeed.id.toString() ||
               localFeed.name != remoteFeed.title ||
               localFeed.homepageLink != remoteFeed.siteUrl ||
-              localFeed.icon != (iconDataUri ?: localFeed.icon)
+              localFeed.icon != resolvedIcon
           ) {
             rssRepository.upsertFeeds(
               listOf(
@@ -407,7 +410,7 @@ class MinifluxSyncCoordinator(
                   remoteId = remoteFeed.id.toString(),
                   lastUpdatedAt = syncStartTime,
                   isDeleted = false,
-                  icon = iconDataUri ?: localFeed.icon,
+                  icon = resolvedIcon,
                 )
               )
             )

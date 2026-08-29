@@ -352,10 +352,14 @@ class FreshRSSSyncCoordinator(
 
       val feedId =
         if (localFeed != null) {
+          // Locally resolved icons (YouTube channel avatars, etc.) are better than the server's
+          // favicon lookup, so only fall back to the remote icon when we don't have one.
+          val resolvedIcon = localFeed.icon.ifBlank { subscription.iconUrl }
           if (
             localFeed.remoteId != subscription.id ||
               localFeed.name != subscription.title ||
-              localFeed.homepageLink != subscription.htmlUrl
+              localFeed.homepageLink != subscription.htmlUrl ||
+              localFeed.icon != resolvedIcon
           ) {
             rssRepository.upsertFeeds(
               listOf(
@@ -365,6 +369,7 @@ class FreshRSSSyncCoordinator(
                   remoteId = subscription.id,
                   lastUpdatedAt = syncStartTime,
                   isDeleted = false,
+                  icon = resolvedIcon,
                 )
               )
             )
