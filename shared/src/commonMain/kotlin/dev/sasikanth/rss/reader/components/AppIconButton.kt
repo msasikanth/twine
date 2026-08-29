@@ -39,8 +39,10 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +54,9 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.graphics.shapes.CornerRounding
+import androidx.graphics.shapes.RoundedPolygon
+import androidx.graphics.shapes.rectangle
 import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.resources.icons.StarShine
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -81,6 +86,7 @@ fun AppIconButton(
   modifier: Modifier = Modifier,
   showLabel: Boolean = false,
 ) {
+  val iconShape = squircleShape(IconCornerFraction)
   val borderWidth by animateDpAsState(if (selected) 2.dp else 1.dp)
   val borderColor by
     animateColorAsState(
@@ -95,7 +101,7 @@ fun AppIconButton(
       modifier =
         Modifier.then(
           if (selected) {
-            Modifier.border(borderWidth, borderColor, MaterialTheme.shapes.largeIncreased)
+            Modifier.border(borderWidth, borderColor, squircleShape(RingCornerFraction))
           } else {
             Modifier
           }
@@ -104,16 +110,10 @@ fun AppIconButton(
     ) {
       Box(
         modifier =
-          modifier.requiredSize(72.dp).padding(4.dp).clip(MaterialTheme.shapes.large).clickable {
-            onClick()
-          },
+          modifier.requiredSize(72.dp).padding(4.dp).clip(iconShape).clickable { onClick() },
         contentAlignment = Alignment.Center,
       ) {
-        AppIconPreview(
-          appIcon = appIcon,
-          shape = MaterialTheme.shapes.large,
-          modifier = Modifier.matchParentSize(),
-        )
+        AppIconPreview(appIcon = appIcon, shape = iconShape, modifier = Modifier.matchParentSize())
 
         if (appIcon.isPremium && !isSubscribed) {
           PremiumBadge()
@@ -160,7 +160,7 @@ private fun BoxScope.PremiumBadge() {
 internal fun AppIconPreview(
   appIcon: AppIcon,
   modifier: Modifier = Modifier,
-  shape: Shape = MaterialTheme.shapes.large,
+  shape: Shape = squircleShape(IconCornerFraction),
 ) {
   val backgroundColor =
     when (appIcon) {
@@ -209,3 +209,23 @@ private fun AppIcon.displayName(): String =
     AppIcon.Slate -> stringResource(Res.string.themeVariantSlate)
     AppIcon.Sepia -> stringResource(Res.string.themeVariantSepia)
   }
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun squircleShape(cornerFraction: Float): Shape {
+  val polygon =
+    remember(cornerFraction) {
+      RoundedPolygon.rectangle(
+        width = 1f,
+        height = 1f,
+        rounding = CornerRounding(radius = cornerFraction, smoothing = SquircleSmoothing),
+        centerX = 0.5f,
+        centerY = 0.5f,
+      )
+    }
+  return polygon.toShape()
+}
+
+private const val SquircleSmoothing = 0.6f
+private const val IconCornerFraction = 0.25f
+private const val RingCornerFraction = 0.28f

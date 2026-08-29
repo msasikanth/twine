@@ -26,6 +26,7 @@ androidx_work = "2.11.2"
 androidx_datastore = "1.2.1"
 androidx_browser = "1.10.0"
 androidx_annotation = "1.10.0"
+androidx_graphics_shapes = "1.1.0"
 coil = "3.5.0"
 spotless = "8.10.0"
 ktfmt = "0.61"
@@ -103,6 +104,7 @@ sqldelight_extensions_coroutines = { module = "app.cash.sqldelight:coroutines-ex
 sqldelight_extensions_paging = { module = "app.cash.sqldelight:androidx-paging3-extensions", version.ref = "sqldelight" }
 sqldelight_sqlite_dialect = { module = "app.cash.sqldelight:sqlite-3-35-dialect", version.ref = "sqldelight" }
 androidx_activity_compose = { module = "androidx.activity:activity-compose", version.ref = "androidx_activity" }
+androidx_graphics_shapes = { module = "androidx.graphics:graphics-shapes", version.ref = "androidx_graphics_shapes" }
 androidx_appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx_appcompat" }
 androidx_core = { module = "androidx.core:core-ktx", version.ref = "androidx_core" }
 androidx_collection = { module = "androidx.collection:collection", version.ref = "androidx_collection" }

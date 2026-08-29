@@ -110,6 +110,7 @@ kotlin {
       implementation(libs.ktor.client.logging)
       implementation(libs.kotlininject.runtime)
       implementation(libs.androidx.collection)
+      implementation(libs.androidx.graphics.shapes)
       implementation(libs.ksoup)
       implementation(libs.ksoup.kotlinx.io)
       api(libs.androidx.datastore.okio)
