@@ -201,10 +201,14 @@ class MinifluxSyncCoordinator(
     val localFeeds = rssRepository.allFeedsBlocking()
     val lastSyncedAt = refreshPolicy.fetchLastSyncedAt() ?: Instant.DISTANT_PAST
 
-    // Early return if no feeds have been updated since last sync
-    val hasUpdatedFeeds =
-      localFeeds.any { (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt }
-    if (!hasUpdatedFeeds) return
+    // Early return if no feeds have been updated since last sync. Feeds the server previously
+    // refused are retried as well, since their timestamps are already older than the last sync.
+    val hasFeedsToPush =
+      localFeeds.any {
+        (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt ||
+          (it.remoteId == null && !it.isDeleted && it.syncError != null)
+      }
+    if (!hasFeedsToPush) return
 
     // 1. Handle deleted feeds
     localFeeds
@@ -220,14 +224,25 @@ class MinifluxSyncCoordinator(
       localFeeds.filter {
         !it.isDeleted &&
           it.remoteId == null &&
-          (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt
+          ((it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt || it.syncError != null)
       }
     if (newFeeds.isNotEmpty()) {
       val categories = minifluxSource.categories()
       val defaultCategory = findOrCreateDefaultCategory(categories, syncStartTime)
       newFeeds.forEach { feed ->
-        val remoteFeed = minifluxSource.addFeed(feed.link, defaultCategory.id)
-        rssRepository.updateFeedRemoteId(remoteFeed.id.toString(), feed.id, syncStartTime)
+        try {
+          val remoteFeed = minifluxSource.addFeed(feed.link, defaultCategory.id)
+          rssRepository.updateFeedRemoteId(remoteFeed.id.toString(), feed.id, syncStartTime)
+          rssRepository.updateFeedSyncError(feed.id, null)
+        } catch (e: Exception) {
+          // Miniflux fetches the feed itself when subscribing, so a feed it can't reach
+          // (Cloudflare challenges, etc.) stays local instead of failing the whole sync.
+          Logger.e(e) { "Failed to add feed to Miniflux: ${feed.link}" }
+          rssRepository.updateFeedSyncError(
+            feed.id,
+            e.message?.takeIf { it.isNotBlank() } ?: e.toString(),
+          )
+        }
       }
     }
 
@@ -382,7 +397,7 @@ class MinifluxSyncCoordinator(
       // Locally resolved icons (YouTube channel avatars, etc.) are better than the server's
       // favicon lookup, so only fall back to the remote icon when we don't have one.
       val iconDataUri =
-        if (localFeed?.icon.isNullOrBlank() && remoteFeed.icon.externalIconId.isNotBlank()) {
+        if (localFeed?.icon.isNullOrBlank() && !remoteFeed.icon?.externalIconId.isNullOrBlank()) {
           val iconResponse = minifluxSource.feedIcon(remoteFeed.id)
           if (iconResponse != null) {
             "data:${iconResponse.data}"

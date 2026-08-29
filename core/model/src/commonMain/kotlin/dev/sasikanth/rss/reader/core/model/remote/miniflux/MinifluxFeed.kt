@@ -27,7 +27,7 @@ data class MinifluxFeed(
   @SerialName("site_url") val siteUrl: String,
   @SerialName("feed_url") val feedUrl: String,
   val category: MinifluxCategory,
-  val icon: MinifluxFeedIcon,
+  val icon: MinifluxFeedIcon? = null,
 )
 
 @Serializable

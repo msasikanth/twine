@@ -26,6 +26,7 @@ import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.data.repository.FeedAddResult
 import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.logging.CrashReporter
 import io.ktor.client.network.sockets.ConnectTimeoutException
@@ -45,6 +46,7 @@ import me.tatarka.inject.annotations.Inject
 class AddFeedViewModel(
   private val rssRepository: RssRepository,
   private val feedFetcher: FeedFetcher,
+  private val syncCoordinator: SyncCoordinator,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow(AddFeedState.DEFAULT)
@@ -110,6 +112,7 @@ class AddFeedViewModel(
                 groupIds = groups.map { it.id }.toSet(),
                 feedIds = listOf(feedId),
               )
+              syncCoordinator.triggerFeedPush()
             } catch (e: Exception) {
               handleDatabaseErrors(FeedAddResult.DatabaseError(e), feedLink)
             }

@@ -121,6 +121,7 @@ class SourceRepository(
     pinnedPosition: Double,
     showFeedFavIcon: Boolean?,
     remoteId: String?,
+    syncError: String?,
   ): Source {
     return if (type == "group") {
       FeedGroup(
@@ -152,6 +153,7 @@ class SourceRepository(
         pinnedPosition = pinnedPosition,
         showFeedFavIcon = showFeedFavIcon ?: true,
         remoteId = remoteId,
+        syncError = syncError,
       )
     }
   }

@@ -207,19 +207,15 @@ class MinifluxSource(
           )
         }
 
-      if (response.status == HttpStatusCode.Created) {
+      if (response.status.isSuccess()) {
         val createFeedResponse = response.body<MinifluxCreateFeedResponse>()
         feed(createFeedResponse.feedId)
-      } else if (response.status == HttpStatusCode.BadRequest) {
-        val error = response.body<MinifluxError>()
-        if (error.errorMessage == "This feed already exists.") {
-          feeds().find { it.feedUrl == url }
-            ?: throw Exception("Feed already exists but could not be found")
-        } else {
-          throw Exception(error.errorMessage)
-        }
       } else {
-        response.body<MinifluxFeed>()
+        // Miniflux reports a duplicate subscription with different status codes and localised
+        // messages depending on the version, so fall back to looking the feed up by URL.
+        val errorMessage = runCatching { response.body<MinifluxError>().errorMessage }.getOrNull()
+        feeds().find { it.feedUrl == url }
+          ?: throw Exception(errorMessage ?: "Failed to add feed: ${response.status}")
       }
     }
   }
@@ -316,18 +312,12 @@ class MinifluxSource(
           setBody(buildJsonObject { put("title", title) })
         }
 
-      if (response.status == HttpStatusCode.Created) {
+      if (response.status.isSuccess()) {
         response.body<MinifluxCategory>()
-      } else if (response.status == HttpStatusCode.BadRequest) {
-        val error = response.body<MinifluxError>()
-        if (error.errorMessage == "This category already exists.") {
-          categories().find { it.title == title }
-            ?: throw Exception("Category already exists but could not be found")
-        } else {
-          throw Exception(error.errorMessage)
-        }
       } else {
-        response.body<MinifluxCategory>()
+        val errorMessage = runCatching { response.body<MinifluxError>().errorMessage }.getOrNull()
+        categories().find { it.title == title }
+          ?: throw Exception(errorMessage ?: "Failed to add category: ${response.status}")
       }
     }
   }

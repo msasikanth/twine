@@ -26,6 +26,7 @@ import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,10 +47,13 @@ class DiscoveryViewModel(
   private val settingsRepository: SettingsRepository,
   private val dispatchersProvider: DispatchersProvider,
   private val billingHandler: BillingHandler,
+  private val syncCoordinator: SyncCoordinator,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow(DiscoveryState.DEFAULT)
   val state: StateFlow<DiscoveryState> = _state.asStateFlow()
+
+  private var hasAddedFeeds = false
 
   init {
     dispatch(DiscoveryEvent.LoadDiscoveryGroups)
@@ -105,6 +109,7 @@ class DiscoveryViewModel(
               feedPayload = result.feedPayload,
               showWebsiteFavIcon = !(feed.useFeedIcon),
             )
+            hasAddedFeeds = true
           }
           else -> {
             // Handle error or just ignore for now in discovery
@@ -120,5 +125,13 @@ class DiscoveryViewModel(
 
   fun completeOnboarding() {
     viewModelScope.launch(dispatchersProvider.io) { settingsRepository.completeOnboarding() }
+  }
+
+  override fun onCleared() {
+    super.onCleared()
+    // Batched until the screen goes away, adding several feeds shouldn't queue up a push each.
+    if (hasAddedFeeds) {
+      syncCoordinator.triggerFeedPush()
+    }
   }
 }
