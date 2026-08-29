@@ -257,6 +257,7 @@ fun IconButton(
   modifier: Modifier = Modifier,
   enabled: Boolean = true,
   size: IconButtonSize = IconButtonSize.Default,
+  tint: Color = AppTheme.colorScheme.onSurfaceVariant,
   onClick: () -> Unit,
 ) {
   val interactionSource = remember { MutableInteractionSource() }
@@ -268,7 +269,7 @@ fun IconButton(
         .clip(CircleShape)
         .clickable(
           interactionSource = interactionSource,
-          indication = ripple(color = AppTheme.colorScheme.onSurfaceVariant),
+          indication = ripple(color = tint),
           enabled = enabled,
           onClick = onClick,
         )
@@ -279,7 +280,7 @@ fun IconButton(
       modifier = Modifier.requiredSize(size.iconSize),
       imageVector = icon,
       contentDescription = contentDescription,
-      tint = AppTheme.colorScheme.onSurfaceVariant,
+      tint = tint,
     )
   }
 }

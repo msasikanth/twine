@@ -192,9 +192,12 @@ class FreshRSSSyncCoordinator(
     val lastSyncedAt = refreshPolicy.fetchLastSyncedAt() ?: Instant.DISTANT_PAST
 
     // Early return if no feeds have been updated since last sync
-    val hasUpdatedFeeds =
-      localFeeds.any { (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt }
-    if (!hasUpdatedFeeds) return
+    val hasFeedsToPush =
+      localFeeds.any {
+        (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt ||
+          (it.remoteId == null && !it.isDeleted && it.syncError != null)
+      }
+    if (!hasFeedsToPush) return
 
     // 1. Handle deleted feeds
     localFeeds
@@ -210,12 +213,28 @@ class FreshRSSSyncCoordinator(
       .filter {
         !it.isDeleted &&
           it.remoteId == null &&
-          (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt
+          ((it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt || it.syncError != null)
       }
       .forEach { feed ->
-        val response = freshRssSource.addFeed(feed.link)
+        // The server fetches the feed itself when subscribing, so one it can't reach stays local
+        // instead of failing the whole sync.
+        val response =
+          try {
+            freshRssSource.addFeed(feed.link)
+          } catch (e: Exception) {
+            Logger.e(e) { "Failed to add feed to FreshRSS: ${feed.link}" }
+            rssRepository.updateFeedSyncError(
+              feed.id,
+              e.message?.takeIf { it.isNotBlank() } ?: e.toString(),
+            )
+            return@forEach
+          }
+
         if (response != null) {
           rssRepository.updateFeedRemoteId(response.streamId, feed.id, syncStartTime)
+          rssRepository.updateFeedSyncError(feed.id, null)
+        } else {
+          rssRepository.updateFeedSyncError(feed.id, "The server could not subscribe to this feed")
         }
       }
 
@@ -352,10 +371,14 @@ class FreshRSSSyncCoordinator(
 
       val feedId =
         if (localFeed != null) {
+          // Locally resolved icons (YouTube channel avatars, etc.) are better than the server's
+          // favicon lookup, so only fall back to the remote icon when we don't have one.
+          val resolvedIcon = localFeed.icon.ifBlank { subscription.iconUrl }
           if (
             localFeed.remoteId != subscription.id ||
               localFeed.name != subscription.title ||
-              localFeed.homepageLink != subscription.htmlUrl
+              localFeed.homepageLink != subscription.htmlUrl ||
+              localFeed.icon != resolvedIcon
           ) {
             rssRepository.upsertFeeds(
               listOf(
@@ -365,6 +388,7 @@ class FreshRSSSyncCoordinator(
                   remoteId = subscription.id,
                   lastUpdatedAt = syncStartTime,
                   isDeleted = false,
+                  icon = resolvedIcon,
                 )
               )
             )

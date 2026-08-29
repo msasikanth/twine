@@ -108,7 +108,7 @@ class UrlUtilsTest {
   fun prefersFeedProvidedIcon_shouldReturnTrueForSourcesWithSharedFavIcons() {
     assertTrue(
       UrlUtils.prefersFeedProvidedIcon(
-        "https://www.youtube.com/feeds/videos.xml?channel_id=UCBJycsmduvYEL83R_U4JriQ"
+        "https://www.youtube.com/feeds/videos.xml?playlist_id=UULFBJycsmduvYEL83R_U4JriQ"
       )
     )
     assertTrue(UrlUtils.prefersFeedProvidedIcon("https://www.reddit.com/r/formula1/.rss"))

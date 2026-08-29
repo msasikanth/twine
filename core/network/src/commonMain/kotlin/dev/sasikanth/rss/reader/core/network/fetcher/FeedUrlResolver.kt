@@ -22,6 +22,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.encodeURLParameter
 import kotlinx.serialization.SerialName
@@ -30,14 +31,18 @@ import me.tatarka.inject.annotations.Inject
 
 /**
  * Handles the sources where feed auto discovery cannot work: Reddit serves a script only shell to
- * non browser clients, Mastodon handles are not URLs, and YouTube video pages do not link the
- * channel feed.
+ * non browser clients, Mastodon handles are not URLs, and YouTube video and handle pages do not
+ * carry the channel id the feed is keyed by.
  */
 @Inject
 class FeedUrlResolver(private val httpClient: HttpClient) {
 
   companion object {
     private const val YOUTUBE_OEMBED_URL = "https://www.youtube.com/oembed"
+
+    private const val CHANNEL_ID_PREFIX = "UC"
+
+    private const val UPLOADS_PLAYLIST_PREFIX = "UULF"
 
     private val redditRegex =
       Regex(
@@ -54,6 +59,15 @@ class FeedUrlResolver(private val httpClient: HttpClient) {
         "^(?:https?://)?(?:(?:www|m|music)\\.)?youtube\\.com/channel/(UC[\\w\\-]{22})(?:[/?#].*)?$",
         RegexOption.IGNORE_CASE,
       )
+
+    private val youtubeHandleRegex =
+      Regex(
+        "^(?:https?://)?(?:(?:www|m|music)\\.)?youtube\\.com/(@[A-Za-z0-9_.\\-]+)(?:[/?#].*)?$",
+        RegexOption.IGNORE_CASE,
+      )
+
+    private val channelIdInPageRegex =
+      Regex("(?:channel_id=|\"channelId\":\"|\"externalId\":\")(UC[\\w\\-]{22})")
   }
 
   suspend fun resolve(input: String): String {
@@ -63,6 +77,7 @@ class FeedUrlResolver(private val httpClient: HttpClient) {
     return resolveReddit(url)
       ?: resolveMastodonHandle(url)
       ?: resolveYouTubeChannel(url)
+      ?: resolveYouTubeHandle(url)
       ?: resolveYouTubeVideo(url)
       ?: url
   }
@@ -86,6 +101,23 @@ class FeedUrlResolver(private val httpClient: HttpClient) {
     return youTubeChannelFeed(channelId)
   }
 
+  /** Handle URLs do not carry the channel id, so it has to be read off the channel page. */
+  private suspend fun resolveYouTubeHandle(url: String): String? {
+    val handle = youtubeHandleRegex.find(url)?.groupValues?.getOrNull(1) ?: return null
+
+    val channelId =
+      try {
+        val response = httpClient.get("https://www.youtube.com/$handle")
+
+        if (response.status != HttpStatusCode.OK) return null
+        channelIdInPageRegex.find(response.bodyAsText())?.groupValues?.getOrNull(1)
+      } catch (e: Exception) {
+        null
+      } ?: return null
+
+    return youTubeChannelFeed(channelId)
+  }
+
   private suspend fun resolveYouTubeVideo(url: String): String? {
     if (UrlUtils.youTubeVideoId(url) == null) return null
 
@@ -105,11 +137,17 @@ class FeedUrlResolver(private val httpClient: HttpClient) {
 
     val channelId = youtubeChannelIdRegex.find(authorUrl)?.groupValues?.getOrNull(1)
 
-    return if (channelId != null) youTubeChannelFeed(channelId) else authorUrl
+    return if (channelId != null) youTubeChannelFeed(channelId)
+    else resolveYouTubeHandle(authorUrl) ?: authorUrl
   }
 
-  private fun youTubeChannelFeed(channelId: String) =
-    "https://www.youtube.com/feeds/videos.xml?channel_id=${channelId.encodeURLParameter()}"
+  /** UULF is the channel's long form uploads playlist, which leaves Shorts out of the feed. */
+  private fun youTubeChannelFeed(channelId: String): String {
+    val uploadsPlaylistId = UPLOADS_PLAYLIST_PREFIX + channelId.removePrefix(CHANNEL_ID_PREFIX)
+
+    return "https://www.youtube.com/feeds/videos.xml" +
+      "?playlist_id=${uploadsPlaylistId.encodeURLParameter()}"
+  }
 }
 
 @Serializable

@@ -29,7 +29,6 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.graphics.Color
 import dev.sasikanth.rss.reader.utils.LocalAmoledSetting
 
 @Composable
@@ -118,7 +117,5 @@ internal val DefaultRippleAlpha =
     draggedAlpha = 0.24f,
     hoveredAlpha = 0.08f,
   )
-
-internal val SYSTEM_SCRIM = Color.Black.copy(alpha = 0.8f)
 
 internal val LocalIsDarkTheme = staticCompositionLocalOf { false }

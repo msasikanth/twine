@@ -461,6 +461,10 @@ class RssRepository(
     feedRepository.resetFeedFetchErrors(feedId)
   }
 
+  suspend fun updateFeedSyncError(feedId: String, syncError: String?) {
+    feedRepository.updateFeedSyncError(feedId, syncError)
+  }
+
   /** Search feeds, returns all feeds if [searchQuery] is empty */
   fun searchFeed(
     searchQuery: String,
@@ -1191,6 +1195,7 @@ class RssRepository(
     remoteId: String?,
     enableNotifications: Boolean,
     consecutiveFetchErrors: Long,
+    syncError: String?,
   ): Feed {
     return Feed(
       id = id,
@@ -1212,6 +1217,7 @@ class RssRepository(
       isDeleted = isDeleted,
       remoteId = remoteId,
       consecutiveFetchErrors = consecutiveFetchErrors,
+      syncError = syncError,
     )
   }
 

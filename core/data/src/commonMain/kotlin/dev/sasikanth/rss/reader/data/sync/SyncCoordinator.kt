@@ -72,6 +72,13 @@ interface SyncCoordinator {
    * push will happen in the background.
    */
   fun triggerPush() {}
+
+  /**
+   * Triggers a push for accounts that keep feeds on a server, so a feed the server refuses is
+   * reported soon after it is added. File based accounts sync whole snapshots and don't need to run
+   * on every added feed.
+   */
+  fun triggerFeedPush() {}
 }
 
 sealed interface SyncState {

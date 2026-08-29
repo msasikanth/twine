@@ -138,4 +138,17 @@ class DefaultSyncCoordinator(
   override fun triggerPush() {
     scope.launch { push() }
   }
+
+  override fun triggerFeedPush() {
+    scope.launch {
+      val keepsFeedsOnServer =
+        freshRssSyncProvider.isSignedInImmediate() ||
+          bazQuxSyncProvider.isSignedInImmediate() ||
+          minifluxSyncProvider.isSignedInImmediate()
+
+      if (keepsFeedsOnServer) {
+        push()
+      }
+    }
+  }
 }

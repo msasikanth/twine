@@ -44,4 +44,5 @@ data class Feed(
   override val isDeleted: Boolean = false,
   val remoteId: String? = null,
   val consecutiveFetchErrors: Long = 0L,
+  val syncError: String? = null,
 ) : Source

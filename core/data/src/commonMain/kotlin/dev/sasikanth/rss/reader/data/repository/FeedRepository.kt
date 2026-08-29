@@ -225,6 +225,7 @@ class FeedRepository(
     remoteId: String?,
     enableNotifications: Boolean,
     consecutiveFetchErrors: Long,
+    syncError: String?,
   ): Feed {
     return Feed(
       id = id,
@@ -246,6 +247,7 @@ class FeedRepository(
       isDeleted = isDeleted,
       remoteId = remoteId,
       consecutiveFetchErrors = consecutiveFetchErrors,
+      syncError = syncError,
     )
   }
 
@@ -267,6 +269,7 @@ class FeedRepository(
     isDeleted: Boolean,
     enableNotifications: Boolean,
     remoteId: String?,
+    syncError: String?,
   ): Feed {
     return Feed(
       id = id,
@@ -286,6 +289,7 @@ class FeedRepository(
       enableNotifications = enableNotifications,
       isDeleted = isDeleted,
       remoteId = remoteId,
+      syncError = syncError,
     )
   }
 
@@ -339,6 +343,12 @@ class FeedRepository(
 
   suspend fun resetFeedFetchErrors(feedId: String) {
     feedQueries.resetFetchErrors(id = feedId)
+  }
+
+  suspend fun updateFeedSyncError(feedId: String, syncError: String?) {
+    withContext(dispatchersProvider.databaseWrite) {
+      feedQueries.updateSyncError(syncError = syncError, id = feedId)
+    }
   }
 
   /**

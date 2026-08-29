@@ -53,17 +53,22 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.IconButton
+import dev.sasikanth.rss.reader.components.IconButtonSize
 import dev.sasikanth.rss.reader.components.UnreadBadge
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.resources.icons.MoreVert
 import dev.sasikanth.rss.reader.resources.icons.Pin
 import dev.sasikanth.rss.reader.resources.icons.PinFilled
+import dev.sasikanth.rss.reader.resources.icons.SyncError
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.onDesktopContextMenu
 import kotlin.math.roundToInt
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.feedSyncErrorTitle
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -75,6 +80,7 @@ internal fun FeedListItem(
   onFeedClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
   onPinClick: ((Feed) -> Unit)? = null,
+  onSyncErrorClick: ((Feed) -> Unit)? = null,
   modifier: Modifier = Modifier,
   interactionSource: MutableInteractionSource? = null,
   dropdownMenuContent: (@Composable ColumnScope.(onDismiss: () -> Unit) -> Unit)? = null,
@@ -150,6 +156,19 @@ internal fun FeedListItem(
       )
 
       Spacer(Modifier.requiredWidth(12.dp))
+
+      if (feed.syncError != null && onSyncErrorClick != null && !isInMultiSelectMode) {
+        IconButton(
+          icon = TwineIcons.SyncError,
+          contentDescription = stringResource(Res.string.feedSyncErrorTitle),
+          size = IconButtonSize.Small,
+          tint = AppTheme.colorScheme.error,
+        ) {
+          onSyncErrorClick(feed)
+        }
+
+        Spacer(Modifier.requiredWidth(4.dp))
+      }
 
       val numberOfUnreadPosts = feed.numberOfUnreadPosts
       if (canShowUnreadPostsCount && numberOfUnreadPosts > 0 && !isInMultiSelectMode) {

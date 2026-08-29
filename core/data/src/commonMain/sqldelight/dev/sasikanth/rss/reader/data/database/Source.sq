@@ -55,7 +55,8 @@ SELECT
   updatedAt,
   pinnedPosition,
   showFeedFavIcon,
-  remoteId
+  remoteId,
+  syncError
 FROM (
   SELECT
     'feed' AS type,
@@ -76,7 +77,8 @@ FROM (
     NULL AS updatedAt,
     f.pinnedPosition,
     f.showFeedFavIcon,
-    f.remoteId
+    f.remoteId,
+    f.syncError
   FROM feed f
   LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :postsUpperBound
   WHERE f.isDeleted = 0
@@ -103,7 +105,8 @@ FROM (
     fg.updatedAt,
     fg.pinnedPosition,
     NULL AS showFeedFavIcon,
-    NULL AS remoteId
+    NULL AS remoteId,
+    NULL AS syncError
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
   LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
@@ -162,7 +165,8 @@ SELECT
   updatedAt,
   pinnedPosition,
   showFeedFavIcon,
-  remoteId
+  remoteId,
+  syncError
 FROM (
   SELECT
     'feed' AS type,
@@ -183,7 +187,8 @@ FROM (
     NULL AS updatedAt,
     f.pinnedPosition,
     f.showFeedFavIcon,
-    f.remoteId
+    f.remoteId,
+    f.syncError
   FROM feed f
   LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :postsUpperBound
   WHERE f.isDeleted = 0
@@ -210,7 +215,8 @@ FROM (
     fg.updatedAt,
     fg.pinnedPosition,
     NULL AS showFeedFavIcon,
-    NULL AS remoteId
+    NULL AS remoteId,
+    NULL AS syncError
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
   LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
@@ -274,7 +280,8 @@ SELECT
   updatedAt,
   pinnedPosition,
   showFeedFavIcon,
-  remoteId
+  remoteId,
+  syncError
 FROM (
   SELECT
     'feed' AS type,
@@ -295,7 +302,8 @@ FROM (
     NULL AS updatedAt,
     f.pinnedPosition,
     f.showFeedFavIcon,
-    f.remoteId
+    f.remoteId,
+    f.syncError
   FROM feed f
   LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :postsUpperBound
   WHERE f.id = :id AND f.isDeleted = 0
@@ -322,7 +330,8 @@ FROM (
     fg.updatedAt,
     fg.pinnedPosition,
     NULL AS showFeedFavIcon,
-    NULL AS remoteId
+    NULL AS remoteId,
+    NULL AS syncError
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
   LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0

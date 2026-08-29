@@ -17,6 +17,8 @@
 
 package dev.sasikanth.rss.reader.feeds.ui.pinned
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,9 +33,10 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -125,6 +128,17 @@ internal fun PinnedSourcesBottomBar(
       },
     )
 
+  val startFade by
+    animateFloatAsState(
+      targetValue = if (lazyListState.canScrollBackward) 1f else 0f,
+      animationSpec = tween(durationMillis = 200),
+    )
+  val endFade by
+    animateFloatAsState(
+      targetValue = if (lazyListState.canScrollForward) 1f else 0f,
+      animationSpec = tween(durationMillis = 200),
+    )
+
   Row(
     modifier =
       Modifier.onGloballyPositioned { coordinates ->
@@ -163,25 +177,24 @@ internal fun PinnedSourcesBottomBar(
         Modifier.weight(1f).fillMaxHeight().drawWithContent {
           drawContent()
 
-          val fadeWidth = 24.dp.toPx()
-          if (lazyListState.canScrollBackward) {
+          val fadeWidth = BOTTOM_BAR_FADE_WIDTH.toPx()
+          if (startFade > 0f) {
             drawRect(
               brush =
                 Brush.horizontalGradient(
-                  0f to colorScheme.bottomSheet,
-                  1f to Color.Transparent,
+                  colorStops = fadeStops(colorScheme.bottomSheet, startFade, reversed = false),
+                  startX = 0f,
                   endX = fadeWidth,
                 ),
               size = size.copy(width = fadeWidth),
             )
           }
 
-          if (lazyListState.canScrollForward) {
+          if (endFade > 0f) {
             drawRect(
               brush =
                 Brush.horizontalGradient(
-                  0f to Color.Transparent,
-                  1f to colorScheme.bottomSheet,
+                  colorStops = fadeStops(colorScheme.bottomSheet, endFade, reversed = true),
                   startX = size.width - fadeWidth,
                   endX = size.width,
                 ),
@@ -281,5 +294,16 @@ private fun SourceItem(
         },
       )
     }
+  }
+}
+
+private val BOTTOM_BAR_FADE_WIDTH = 40.dp
+
+private fun fadeStops(color: Color, progress: Float, reversed: Boolean): Array<Pair<Float, Color>> {
+  val alphas = floatArrayOf(1f, 0.94f, 0.78f, 0.5f, 0.22f, 0.06f, 0f)
+  return Array(alphas.size) { index ->
+    val position = index / (alphas.size - 1).toFloat()
+    val alpha = if (reversed) alphas[alphas.size - 1 - index] else alphas[index]
+    position to color.copy(alpha = alpha * progress)
   }
 }

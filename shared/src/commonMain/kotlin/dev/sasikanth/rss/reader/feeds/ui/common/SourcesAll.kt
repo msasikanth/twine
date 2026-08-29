@@ -224,6 +224,7 @@ internal fun LazyListScope.allSources(
                 onFeedClick = onSourceClick,
                 onFeedSelected = onToggleSourceSelection,
                 onPinClick = onPinClick,
+                onSyncErrorClick = onSourceEditClick,
                 modifier =
                   Modifier.padding(
                       start = startPadding,
