@@ -43,6 +43,13 @@ class FeedUrlResolverTest {
     return FeedUrlResolver(client)
   }
 
+  private fun channelPageResponding(body: String) = MockEngine {
+    respond(
+      content = body,
+      headers = headersOf(HttpHeaders.ContentType, ContentType.Text.Html.toString()),
+    )
+  }
+
   private fun oEmbedResponding(authorUrl: String) = MockEngine {
     respond(
       content = """{"author_url":"$authorUrl"}""",
@@ -95,7 +102,7 @@ class FeedUrlResolverTest {
 
   @Test
   fun resolve_shouldBuildChannelFeedFromChannelLinks() = runTest {
-    val expected = "https://www.youtube.com/feeds/videos.xml?channel_id=UCBJycsmduvYEL83R_U4JriQ"
+    val expected = "https://www.youtube.com/feeds/videos.xml?playlist_id=UULFBJycsmduvYEL83R_U4JriQ"
 
     assertEquals(
       expected,
@@ -108,12 +115,56 @@ class FeedUrlResolverTest {
   }
 
   @Test
+  fun resolve_shouldResolveHandleLinksToChannelFeed() = runTest {
+    val page =
+      """<link rel="alternate" type="application/rss+xml" title="RSS"
+        href="https://www.youtube.com/feeds/videos.xml?channel_id=UCxkM67T_Iele-mRVUiBkRqg">"""
+    val expected = "https://www.youtube.com/feeds/videos.xml?playlist_id=UULFxkM67T_Iele-mRVUiBkRqg"
+
+    assertEquals(
+      expected,
+      resolver(channelPageResponding(page)).resolve("https://youtube.com/@jetlagthegame"),
+    )
+    assertEquals(
+      expected,
+      resolver(channelPageResponding(page)).resolve("https://www.youtube.com/@jetlagthegame/videos"),
+    )
+    assertEquals(
+      expected,
+      resolver(channelPageResponding(page)).resolve("m.youtube.com/@jetlagthegame"),
+    )
+    assertEquals(
+      expected,
+      resolver(channelPageResponding(page))
+        .resolve("https://youtube.com/@jetlagthegame?si=HkDckPn0ItP3_QS9"),
+    )
+  }
+
+  @Test
+  fun resolve_shouldReadChannelIdFromPlayerConfigWhenFeedLinkIsMissing() = runTest {
+    val page = """{"externalId":"UCxkM67T_Iele-mRVUiBkRqg","title":"Jet Lag"}"""
+
+    assertEquals(
+      "https://www.youtube.com/feeds/videos.xml?playlist_id=UULFxkM67T_Iele-mRVUiBkRqg",
+      resolver(channelPageResponding(page)).resolve("https://www.youtube.com/@jetlagthegame"),
+    )
+  }
+
+  @Test
+  fun resolve_shouldKeepHandleLinkWhenChannelIdCannotBeFound() = runTest {
+    val handleLink = "https://www.youtube.com/@jetlagthegame"
+
+    assertEquals(handleLink, resolver().resolve(handleLink))
+    assertEquals(handleLink, resolver(channelPageResponding("<html></html>")).resolve(handleLink))
+  }
+
+  @Test
   fun resolve_shouldResolveVideoLinksToChannelFeedViaOEmbed() = runTest {
     val resolver =
       resolver(oEmbedResponding("https://www.youtube.com/channel/UCBJycsmduvYEL83R_U4JriQ"))
 
     assertEquals(
-      "https://www.youtube.com/feeds/videos.xml?channel_id=UCBJycsmduvYEL83R_U4JriQ",
+      "https://www.youtube.com/feeds/videos.xml?playlist_id=UULFBJycsmduvYEL83R_U4JriQ",
       resolver.resolve("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
     )
   }
@@ -135,9 +186,7 @@ class FeedUrlResolverTest {
   @Test
   fun resolve_shouldLeaveOrdinaryLinksUntouched() = runTest {
     val link = "https://sasikanth.dev/rss.xml"
-    val channelHandleLink = "https://www.youtube.com/@mkbhd"
 
     assertEquals(link, resolver().resolve(link))
-    assertEquals(channelHandleLink, resolver().resolve(channelHandleLink))
   }
 }
