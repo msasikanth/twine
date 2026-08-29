@@ -258,6 +258,44 @@ const val youtubeAtomFeed =
 </feed>
 """
 
+const val youtubeUploadsPlaylistFeedUrl =
+  "https://www.youtube.com/feeds/videos.xml?playlist_id=UULF_x5XG1OV2P6uZZ5FSM9Ttw"
+
+/** The uploads playlist feed titles itself "Videos" and carries no alternate link. */
+const val youtubeUploadsPlaylistAtomFeed =
+  """
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+  <link rel="self" href="http://www.youtube.com/feeds/videos.xml?playlist_id=UULF_x5XG1OV2P6uZZ5FSM9Ttw"/>
+  <id>yt:playlist:UULF_x5XG1OV2P6uZZ5FSM9Ttw</id>
+  <yt:playlistId>UULF_x5XG1OV2P6uZZ5FSM9Ttw</yt:playlistId>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>Videos</title>
+  <author>
+    <name>Google Developers</name>
+    <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2007-06-05T18:32:40+00:00</published>
+  <entry>
+    <id>yt:video:2QpWq3iQdC4</id>
+    <yt:videoId>2QpWq3iQdC4</yt:videoId>
+    <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+    <title>Android Beyond Phones: A New Way to Build with Jetpack Compose | Android Dev Summit '23</title>
+    <link rel="alternate" href="https://www.youtube.com/watch?v=2QpWq3iQdC4"/>
+    <author>
+      <name>Google Developers</name>
+      <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+    </author>
+    <published>2023-10-25T19:09:48+00:00</published>
+    <media:group>
+      <media:title>Android Beyond Phones: A New Way to Build with Jetpack Compose | Android Dev Summit '23</media:title>
+      <media:description>Subscribe to watch more videos about Android development</media:description>
+      <media:thumbnail url="https://i.ytimg.com/vi/2QpWq3iQdC4/maxresdefault.jpg" />
+    </media:group>
+  </entry>
+</feed>
+"""
+
 const val youtubeChannelHtml =
   """<!DOCTYPE html>
 <html lang="en">

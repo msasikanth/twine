@@ -37,6 +37,8 @@ import dev.sasikanth.rss.reader.core.network.utils.rssXmlContentWithNestedMediaI
 import dev.sasikanth.rss.reader.core.network.utils.youtubeAtomFeed
 import dev.sasikanth.rss.reader.core.network.utils.youtubeChannelHtml
 import dev.sasikanth.rss.reader.core.network.utils.youtubeFeedUrl
+import dev.sasikanth.rss.reader.core.network.utils.youtubeUploadsPlaylistAtomFeed
+import dev.sasikanth.rss.reader.core.network.utils.youtubeUploadsPlaylistFeedUrl
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -640,6 +642,43 @@ class XmlFeedParserTest {
     // when
     val content = ByteReadChannel(atomXmlContent.toByteArray())
     val payload = xmlFeedParser.parse(content, feedUrl, Charsets.UTF8)
+
+    // then
+    assertFeedPayloadEquals(expectedFeedPayload, payload)
+  }
+
+  @Test
+  fun parsingYouTubeUploadsPlaylistFeedShouldUseTheChannelNameAndPage() = runTest {
+    // given
+    val expectedFeedPayload =
+      FeedPayload(
+        name = "Google Developers",
+        icon = "https://youtube.com/img/channel.jpg",
+        description = "",
+        link = youtubeUploadsPlaylistFeedUrl,
+        homepageLink = "https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw",
+        posts =
+          listOf(
+              PostPayload(
+                title =
+                  "Android Beyond Phones: A New Way to Build with Jetpack Compose | Android Dev Summit '23",
+                link = "https://www.youtube.com/watch?v=2QpWq3iQdC4",
+                description = "Subscribe to watch more videos about Android development",
+                rawContent = null,
+                fullContent = null,
+                imageUrl = "https://i.ytimg.com/vi/2QpWq3iQdC4/maxresdefault.jpg",
+                date = 1698260988000,
+                commentsLink = null,
+                isDateParsedCorrectly = true,
+                audioUrl = null,
+              )
+            )
+            .asFlow(),
+      )
+
+    // when
+    val content = ByteReadChannel(youtubeUploadsPlaylistAtomFeed.toByteArray())
+    val payload = xmlFeedParser.parse(content, youtubeUploadsPlaylistFeedUrl, Charsets.UTF8)
 
     // then
     assertFeedPayloadEquals(expectedFeedPayload, payload)

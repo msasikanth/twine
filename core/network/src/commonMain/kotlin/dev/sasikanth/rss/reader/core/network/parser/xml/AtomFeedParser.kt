@@ -27,17 +27,20 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_VALUE_ALTERNATE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ATOM_ENTRY
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ATOM_FEED
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_AUTHOR
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_CONTENT
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ICON
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ITUNES_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_LOGO
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_GROUP
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_NAME
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PUBLISHED
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_SUBTITLE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_SUMMARY
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_TITLE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_UPDATED
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_URI
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -65,6 +68,8 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
     var description: String? = null
     var link: String? = null
     var iconUrl: String? = null
+    var authorName: String? = null
+    var authorUri: String? = null
     var firstPost: PostPayload? = null
 
     while (parser.next() != EventType.END_TAG) {
@@ -93,6 +98,15 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
           iconUrl = parser.getAttributeValue(parser.namespace, ATTR_HREF)
           parser.skipSubTree()
         }
+        TAG_AUTHOR -> {
+          forEachChildTag(parser, TAG_AUTHOR) { authorTag ->
+            when (authorTag) {
+              TAG_NAME -> authorName = parser.nextText()
+              TAG_URI -> authorUri = parser.nextText()
+              else -> parser.skipSubTree()
+            }
+          }
+        }
         TAG_ATOM_ENTRY -> {
           val host = UrlUtils.extractHost(link ?: feedUrl)
           firstPost = readAtomEntry(parser, host)
@@ -102,6 +116,11 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
         }
         else -> parser.skipSubTree()
       }
+    }
+
+    if (UrlUtils.isYouTubeLink(feedUrl)) {
+      title = authorName?.ifBlank { null } ?: title
+      link = authorUri?.ifBlank { null } ?: link
     }
 
     iconUrl =
