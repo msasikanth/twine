@@ -14,11 +14,8 @@
  * limitations under the License.
  *
  */
-@file:OptIn(ExperimentalMaterialApi::class)
-
 package dev.sasikanth.rss.reader.home
 
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Immutable
 import androidx.paging.PagingData
