@@ -85,7 +85,6 @@ import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsState
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
-import dev.sasikanth.rss.reader.settings.ui.items.AppIconSelectionSheet
 import dev.sasikanth.rss.reader.settings.ui.items.AppIconSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.ThemeVariantSettingItem
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -105,6 +104,7 @@ import twine.shared.generated.resources.homeViewModeSimple
 import twine.shared.generated.resources.other
 import twine.shared.generated.resources.settingsAmoledSubtitle
 import twine.shared.generated.resources.settingsAmoledTitle
+import twine.shared.generated.resources.settingsAppIconTitle
 import twine.shared.generated.resources.settingsAppearanceAndLayout
 import twine.shared.generated.resources.settingsHeaderTheme
 import twine.shared.generated.resources.settingsShowFeaturedSectionSubtitle
@@ -181,17 +181,6 @@ private fun SettingsAppearanceContent(
     containerColor = AppTheme.colorScheme.backdrop,
     contentColor = Color.Unspecified,
     content = { padding ->
-      if (state.showAppIconSelectionSheet) {
-        AppIconSelectionSheet(
-          currentAppIcon = state.appIcon,
-          onAppIconChange = {
-            dispatch(SettingsEvent.OnAppIconChanged(it))
-            dispatch(SettingsEvent.CloseAppIconSelectionSheet)
-          },
-          onDismiss = { dispatch(SettingsEvent.CloseAppIconSelectionSheet) },
-        )
-      }
-
       LazyColumn(
         modifier = Modifier.restrictContentWidth().iosBottomSafeAreaPadding(),
         contentPadding =
@@ -245,6 +234,24 @@ private fun SettingsAppearanceContent(
           }
         }
 
+        if (platform !is Platform.Desktop) {
+          item { SubHeader(text = stringResource(Res.string.settingsAppIconTitle)) }
+
+          item {
+            AppIconSettingItem(
+              selectedAppIcon = state.appIcon,
+              isSubscribed = state.isSubscribed,
+              onAppIconChanged = {
+                if (it.isPremium && !state.isSubscribed) {
+                  openPaywall()
+                } else {
+                  dispatch(SettingsEvent.OnAppIconChanged(it))
+                }
+              },
+            )
+          }
+        }
+
         item { SubHeader(text = stringResource(Res.string.homeViewMode)) }
 
         item {
@@ -292,16 +299,6 @@ private fun SettingsAppearanceContent(
             checked = state.showFeedFavIcon,
             onValueChanged = { dispatch(SettingsEvent.ToggleShowFeedFavIcon(it)) },
           )
-        }
-
-        if (platform !is Platform.Desktop) {
-          item {
-            AppIconSettingItem(
-              appIcon = state.appIcon,
-              isSubscribed = state.isSubscribed,
-              onClick = { dispatch(SettingsEvent.AppIconClicked) },
-            )
-          }
         }
       }
     },

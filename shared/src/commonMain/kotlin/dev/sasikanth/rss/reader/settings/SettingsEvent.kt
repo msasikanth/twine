@@ -86,10 +86,6 @@ sealed interface SettingsEvent {
 
   data object ClearAuthUrl : SettingsEvent
 
-  data object AppIconClicked : SettingsEvent
-
-  data object CloseAppIconSelectionSheet : SettingsEvent
-
   data class OnAppIconChanged(val appIcon: AppIcon) : SettingsEvent
 
   data object DeleteAppData : SettingsEvent

@@ -32,22 +32,25 @@ class AndroidAppIconManager(private val context: Context) : AppIconManager {
   override fun setIcon(icon: AppIcon) {
     val packageManager = context.packageManager
     val packageName = context.packageName
+    val enabledAlias = aliasFor(icon.name)
+    val aliases =
+      AppIcon.entries.map { aliasFor(it.name) } + LegacyAppIcon.entries.map { aliasFor(it.name) }
 
-    AppIcon.entries.forEach { appIcon ->
-      val componentName =
-        ComponentName(packageName, "$BASE_PACKAGE_NAME.MainActivity${appIcon.name}")
+    aliases.forEach { alias ->
       val newState =
-        if (appIcon == icon) {
+        if (alias == enabledAlias) {
           PackageManager.COMPONENT_ENABLED_STATE_ENABLED
         } else {
           PackageManager.COMPONENT_ENABLED_STATE_DISABLED
         }
 
       packageManager.setComponentEnabledSetting(
-        componentName,
+        ComponentName(packageName, alias),
         newState,
         PackageManager.DONT_KILL_APP,
       )
     }
   }
+
+  private fun aliasFor(name: String) = "$BASE_PACKAGE_NAME.MainActivity$name"
 }
