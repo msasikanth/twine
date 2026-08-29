@@ -163,6 +163,8 @@
   <string name="feedOptionWebsite">Website</string>
   <string name="feedOptionRemove">Remove</string>
   <string name="feedTitleHint">Title</string>
+  <string name="feedSyncErrorTitle">Not synced to your account</string>
+  <string name="feedSyncErrorDescription">Your server couldn't subscribe to this feed, so it stays on this device only. Twine retries on every sync.</string>
   <string name="noUnreadPostsInFeed">No unread articles</string>
   <string name="feedsSortLatest">Last added</string>
   <string name="feedsSortOldest">First added</string>

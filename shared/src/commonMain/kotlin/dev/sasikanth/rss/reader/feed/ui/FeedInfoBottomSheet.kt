@@ -107,6 +107,8 @@ import twine.shared.generated.resources.alwaysFetchSourceArticle
 import twine.shared.generated.resources.enableNotifications
 import twine.shared.generated.resources.feedOptionCopyLink
 import twine.shared.generated.resources.feedOptionWebsite
+import twine.shared.generated.resources.feedSyncErrorDescription
+import twine.shared.generated.resources.feedSyncErrorTitle
 import twine.shared.generated.resources.feedTitleHint
 import twine.shared.generated.resources.hidePostsFromHome
 import twine.shared.generated.resources.markAsRead
@@ -161,6 +163,16 @@ fun FeedInfoBottomSheet(
               )
             },
           )
+
+          val syncError = feed.syncError
+          if (syncError != null) {
+            Spacer(Modifier.requiredHeight(16.dp))
+
+            FeedSyncError(
+              modifier = Modifier.fillMaxWidth().padding(horizontal = HORIZONTAL_PADDING),
+              syncError = syncError,
+            )
+          }
 
           Spacer(Modifier.requiredHeight(8.dp))
 
@@ -226,6 +238,36 @@ fun FeedInfoBottomSheet(
         }
       }
     }
+  }
+}
+
+@Composable
+private fun FeedSyncError(syncError: String, modifier: Modifier = Modifier) {
+  Column(
+    modifier =
+      modifier
+        .clip(RoundedCornerShape(16.dp))
+        .background(AppTheme.colorScheme.surfaceContainerHigh)
+        .padding(horizontal = 16.dp, vertical = 12.dp),
+    verticalArrangement = Arrangement.spacedBy(4.dp),
+  ) {
+    Text(
+      text = stringResource(Res.string.feedSyncErrorTitle),
+      color = AppTheme.colorScheme.error,
+      style = MaterialTheme.typography.labelLarge,
+    )
+
+    Text(
+      text = stringResource(Res.string.feedSyncErrorDescription),
+      color = AppTheme.colorScheme.onSurface,
+      style = MaterialTheme.typography.bodySmall,
+    )
+
+    Text(
+      text = syncError,
+      color = AppTheme.colorScheme.onSurfaceVariant,
+      style = MaterialTheme.typography.bodySmall,
+    )
   }
 }
 
