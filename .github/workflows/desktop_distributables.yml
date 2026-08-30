@@ -48,6 +48,7 @@ jobs:
           fetch-depth: 0
       - name: Configure Tramline
         id: tramline
+        if: ${{ github.event.inputs.tramline-input != '' }}
         uses: tramlinehq/deploy-action@v0.1.7
         with:
           input: ${{ github.event.inputs.tramline-input }}
