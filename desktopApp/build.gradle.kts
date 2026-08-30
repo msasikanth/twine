@@ -76,7 +76,14 @@ compose.desktop {
         }
       }
 
-      windows { iconFile.set(project.file("icon.ico")) }
+      windows {
+        iconFile.set(project.file("icon.ico"))
+        menu = true
+        menuGroup = "Twine"
+        // Keeps repeat installs upgrading in place instead of stacking up as separate
+        // entries; jpackage has no stable default, so it has to be pinned here.
+        upgradeUuid = "d4e54722-7924-4736-9d37-fb158d0f8f52"
+      }
 
       linux {
         debMaintainer = "contact@sasikanth.dev"
