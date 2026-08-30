@@ -12,6 +12,11 @@ on:
       - 'core/**'
       - '.github/workflows/desktop_distributables.yml'
   workflow_dispatch:
+    inputs:
+      upload_to_app_store:
+        description: "Upload the Mac App Store package to App Store Connect"
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -24,10 +29,35 @@ env:
   ORG_GRADLE_PROJECT_GOOGLE_DESKTOP_CLIENT_SECRET: ${{ secrets.GOOGLE_DESKTOP_CLIENT_SECRET }}
 
 jobs:
+  version:
+    name: Resolve app version
+    runs-on: ubuntu-latest
+    outputs:
+      name: ${{ steps.resolve.outputs.name }}
+      code: ${{ steps.resolve.outputs.code }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - id: resolve
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          TAG="$RELEASE_TAG"
+          if [ -z "$TAG" ]; then
+            TAG="$(git describe --tags --abbrev=0 2>/dev/null || echo 1.0.0)"
+          fi
+          echo "name=${TAG#v}" >> "$GITHUB_OUTPUT"
+          echo "code=${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
   build-macos:
     name: Build macOS DMG
     runs-on: macos-latest
+    needs: version
     timeout-minutes: 30
+    env:
+      ORG_GRADLE_PROJECT_VERSION_NAME: ${{ needs.version.outputs.name }}
+      ORG_GRADLE_PROJECT_VERSION_CODE: ${{ needs.version.outputs.code }}
     steps:
       - uses: actions/checkout@v6
       - name: Setup JDK 21
@@ -36,10 +66,6 @@ jobs:
           java-version: 21
           distribution: zulu
           cache: 'gradle'
-      - name: Compute macOS package version
-        run: |
-          echo "MAC_VERSION=$(date -u +%Y.%m.%d)" >> "$GITHUB_ENV"
-          echo "MAC_BUILD_VERSION=${{ github.run_number }}" >> "$GITHUB_ENV"
       - name: Import Developer ID signing certificate
         env:
           MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
@@ -67,9 +93,7 @@ jobs:
             -Pcompose.desktop.mac.signing.identity="$MACOS_SIGNING_IDENTITY" \
             -Pcompose.desktop.mac.notarization.appleID="$MACOS_NOTARIZATION_APPLE_ID" \
             -Pcompose.desktop.mac.notarization.password="$MACOS_NOTARIZATION_PASSWORD" \
-            -Pcompose.desktop.mac.notarization.teamID="$MACOS_NOTARIZATION_TEAM_ID" \
-            -Ptwine.macVersion="$MAC_VERSION" \
-            -Ptwine.macBuildVersion="$MAC_BUILD_VERSION"
+            -Pcompose.desktop.mac.notarization.teamID="$MACOS_NOTARIZATION_TEAM_ID"
       - name: Upload DMG
         uses: actions/upload-artifact@v7
         with:
@@ -84,7 +108,11 @@ jobs:
   build-macos-appstore:
     name: Build macOS App Store package
     runs-on: macos-latest
+    needs: version
     timeout-minutes: 25
+    env:
+      ORG_GRADLE_PROJECT_VERSION_NAME: ${{ needs.version.outputs.name }}
+      ORG_GRADLE_PROJECT_VERSION_CODE: ${{ needs.version.outputs.code }}
     steps:
       - uses: actions/checkout@v6
       - name: Setup JDK 21
@@ -93,10 +121,6 @@ jobs:
           java-version: 21
           distribution: zulu
           cache: 'gradle'
-      - name: Compute macOS package version
-        run: |
-          echo "MAC_VERSION=$(date -u +%Y.%m.%d)" >> "$GITHUB_ENV"
-          echo "MAC_BUILD_VERSION=${{ github.run_number }}" >> "$GITHUB_ENV"
       - name: Import Mac App Store signing certificate
         env:
           MAS_CERTIFICATE_P12: ${{ secrets.MAS_CERTIFICATE_P12 }}
@@ -126,9 +150,7 @@ jobs:
             -Ptwine.macAppStore=true \
             -Pcompose.desktop.mac.sign=true \
             -Pcompose.desktop.mac.signing.identity="$MAS_SIGNING_IDENTITY" \
-            -Pcompose.desktop.mac.signing.keychain="$HOME/Library/Keychains/mas-build.keychain-db" \
-            -Ptwine.macVersion="$MAC_VERSION" \
-            -Ptwine.macBuildVersion="$MAC_BUILD_VERSION"
+            -Pcompose.desktop.mac.signing.keychain="$HOME/Library/Keychains/mas-build.keychain-db"
       - name: Re-sign PKG with installer identity
         if: steps.build_mas_pkg.outcome == 'failure'
         env:
@@ -182,10 +204,34 @@ jobs:
         with:
           name: Twine-MacAppStore
           path: desktopApp/build/compose/binaries/main-release/pkg/*.pkg
+      - name: Install App Store Connect API key
+        if: github.event_name == 'release' || inputs.upload_to_app_store
+        env:
+          APP_STORE_API_PRIVATE_KEY: ${{ secrets.APP_STORE_API_PRIVATE_KEY }}
+          APP_STORE_KEY_ID: ${{ secrets.APP_STORE_KEY_ID }}
+        run: |
+          mkdir -p ~/private_keys
+          echo -n "$APP_STORE_API_PRIVATE_KEY" | base64 --decode > "$HOME/private_keys/AuthKey_$APP_STORE_KEY_ID.p8"
+      - name: Upload to App Store Connect
+        if: github.event_name == 'release' || inputs.upload_to_app_store
+        env:
+          API_KEY: ${{ secrets.APP_STORE_KEY_ID }}
+          API_ISSUER: ${{ secrets.APP_STORE_ISSUER_ID }}
+        run: |
+          PKG=$(ls desktopApp/build/compose/binaries/main-release/pkg/*.pkg)
+          xcrun altool --validate-app --type macos -f "$PKG" --apiKey "$API_KEY" --apiIssuer "$API_ISSUER"
+          xcrun altool --upload-app --type macos -f "$PKG" --apiKey "$API_KEY" --apiIssuer "$API_ISSUER"
+      - name: Clean up App Store Connect API key
+        if: always()
+        run: rm -rf ~/private_keys
 
   build-windows:
     name: Build Windows MSI
     runs-on: windows-latest
+    needs: version
+    env:
+      ORG_GRADLE_PROJECT_VERSION_NAME: ${{ needs.version.outputs.name }}
+      ORG_GRADLE_PROJECT_VERSION_CODE: ${{ needs.version.outputs.code }}
     steps:
       - uses: actions/checkout@v6
       - name: Setup JDK 21
@@ -210,6 +256,10 @@ jobs:
   build-linux:
     name: Build Linux DEB
     runs-on: ubuntu-latest
+    needs: version
+    env:
+      ORG_GRADLE_PROJECT_VERSION_NAME: ${{ needs.version.outputs.name }}
+      ORG_GRADLE_PROJECT_VERSION_CODE: ${{ needs.version.outputs.code }}
     steps:
       - uses: actions/checkout@v6
       - name: Setup JDK 21
