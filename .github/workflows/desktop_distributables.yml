@@ -13,6 +13,13 @@ on:
       - '.github/workflows/desktop_distributables.yml'
   workflow_dispatch:
     inputs:
+      tramline-input:
+        description: "Tramline input"
+        required: false
+      app_store_only:
+        description: "Build only the Mac App Store package, skipping DMG/MSI/DEB"
+        type: boolean
+        default: false
       upload_to_app_store:
         description: "Upload the Mac App Store package to App Store Connect"
         type: boolean
@@ -39,21 +46,32 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - name: Configure Tramline
+        id: tramline
+        uses: tramlinehq/deploy-action@v0.1.7
+        with:
+          input: ${{ github.event.inputs.tramline-input }}
       - id: resolve
         env:
+          TRAMLINE_VERSION_NAME: ${{ steps.tramline.outputs.version_name }}
+          TRAMLINE_VERSION_CODE: ${{ steps.tramline.outputs.version_code }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          TAG="$RELEASE_TAG"
-          if [ -z "$TAG" ]; then
-            TAG="$(git describe --tags --abbrev=0 2>/dev/null || echo 1.0.0)"
+          NAME="$TRAMLINE_VERSION_NAME"
+          if [ -z "$NAME" ]; then
+            NAME="$RELEASE_TAG"
           fi
-          echo "name=${TAG#v}" >> "$GITHUB_OUTPUT"
-          echo "code=${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          if [ -z "$NAME" ]; then
+            NAME="$(git describe --tags --abbrev=0 2>/dev/null || echo 1.0.0)"
+          fi
+          echo "name=${NAME#v}" >> "$GITHUB_OUTPUT"
+          echo "code=${TRAMLINE_VERSION_CODE:-${{ github.run_number }}}" >> "$GITHUB_OUTPUT"
 
   build-macos:
     name: Build macOS DMG
     runs-on: macos-latest
     needs: version
+    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.app_store_only }}
     timeout-minutes: 30
     env:
       ORG_GRADLE_PROJECT_VERSION_NAME: ${{ needs.version.outputs.name }}
@@ -229,6 +247,7 @@ jobs:
     name: Build Windows MSI
     runs-on: windows-latest
     needs: version
+    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.app_store_only }}
     env:
       ORG_GRADLE_PROJECT_VERSION_NAME: ${{ needs.version.outputs.name }}
       ORG_GRADLE_PROJECT_VERSION_CODE: ${{ needs.version.outputs.code }}
@@ -257,6 +276,7 @@ jobs:
     name: Build Linux DEB
     runs-on: ubuntu-latest
     needs: version
+    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.app_store_only }}
     env:
       ORG_GRADLE_PROJECT_VERSION_NAME: ${{ needs.version.outputs.name }}
       ORG_GRADLE_PROJECT_VERSION_CODE: ${{ needs.version.outputs.code }}

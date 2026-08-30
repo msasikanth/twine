@@ -7,6 +7,9 @@ on:
         description: "Tramline input"
         required: false
 
+permissions:
+  actions: write
+
 jobs:
   build:
     runs-on: macos-26
@@ -108,3 +111,15 @@ jobs:
         with:
           name: app
           path: ${{ runner.temp }}/build/twine.ipa
+
+      - name: Build and upload macOS to TestFlight
+        if: ${{ github.event.inputs.tramline-input != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TRAMLINE_INPUT: ${{ github.event.inputs.tramline-input }}
+        run: |
+          gh workflow run desktop_distributables.yml \
+            --ref "$GITHUB_REF_NAME" \
+            -f tramline-input="$TRAMLINE_INPUT" \
+            -f app_store_only=true \
+            -f upload_to_app_store=true
