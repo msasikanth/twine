@@ -58,8 +58,8 @@ abstract class ApplicationComponent : SharedApplicationComponent(), WidgetPlatfo
   @AppScope
   fun providesAppInfo(): AppInfo =
     AppInfo(
-      versionCode = 1,
-      versionName = "1.0.0",
+      versionCode = DESKTOP_VERSION_CODE,
+      versionName = DESKTOP_VERSION_NAME,
       isDebugBuild = false,
       isFoss = isFoss,
       isGoogleDriveSupported = isGoogleDriveSupported,

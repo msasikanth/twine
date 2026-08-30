@@ -202,6 +202,39 @@ composeCompiler {
   metricsDestination = layout.buildDirectory.dir("compose_compiler")
 }
 
+val appVersionName =
+  providers.gradleProperty("VERSION_NAME").map { it.removePrefix("v") }.orElse("1.0.0")
+
+val appVersionCode = providers.gradleProperty("VERSION_CODE").orElse("1")
+
+val generateDesktopAppVersion =
+  tasks.register("generateDesktopAppVersion") {
+    description = "Generate the version the desktop app reports at runtime"
+    val versionName = appVersionName
+    val versionCode = appVersionCode
+    val outputDir = layout.buildDirectory.dir("generated/desktopAppVersion/kotlin")
+    inputs.property("versionName", versionName)
+    inputs.property("versionCode", versionCode)
+    outputs.dir(outputDir)
+    doLast {
+      val file = outputDir.get().file("dev/sasikanth/rss/reader/di/DesktopAppVersion.kt").asFile
+      file.parentFile.mkdirs()
+      file.writeText(
+        """
+        |package dev.sasikanth.rss.reader.di
+        |
+        |internal const val DESKTOP_VERSION_NAME: String = "${versionName.get()}"
+        |
+        |internal const val DESKTOP_VERSION_CODE: Int = ${versionCode.get().toInt()}
+        |
+        """
+          .trimMargin()
+      )
+    }
+  }
+
+kotlin.sourceSets.named("jvmMain") { kotlin.srcDir(generateDesktopAppVersion) }
+
 dependencies {
   "androidRuntimeClasspath"(libs.compose.ui.tooling)
 

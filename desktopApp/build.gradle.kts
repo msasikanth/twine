@@ -9,7 +9,6 @@
  *
  */
 
-import java.time.LocalDate
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -46,7 +45,7 @@ compose.desktop {
     nativeDistributions {
       targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Pkg)
       packageName = "Twine"
-      packageVersion = "1.0.0"
+      packageVersion = appPackageVersion
       modules("java.sql")
       modules("jdk.unsupported")
 
@@ -61,9 +60,11 @@ compose.desktop {
         // Covers every macOS target format (app image, dmg, pkg) - dmg/pkg-specific
         // version properties don't exist for the app-image format, so the app's own
         // Info.plist (baked in during createReleaseDistributable) would otherwise fall
-        // back to the shared top-level packageVersion instead of picking up CalVer.
-        packageVersion = macPackageVersion
-        packageBuildVersion = macPackageBuildVersion
+        // back to the shared top-level packageVersion.
+        packageVersion = appPackageVersion
+        // CFBundleVersion: must increase on every App Store upload of a given
+        // CFBundleShortVersionString, so it tracks the build counter, not the release.
+        packageBuildVersion = appVersionCode
 
         minimumSystemVersion = "12.0"
 
@@ -97,15 +98,16 @@ compose.desktop {
 val isMacAppStoreBuild: Boolean
   get() = providers.gradleProperty("twine.macAppStore").getOrElse("false").toBoolean()
 
-val macPackageVersion: String
-  get() {
-    val today = LocalDate.now()
-    val defaultVersion = "%d.%02d.%02d".format(today.year, today.monthValue, today.dayOfMonth)
-    return providers.gradleProperty("twine.macVersion").getOrElse(defaultVersion)
-  }
+val appVersionName: String
+  get() = providers.gradleProperty("VERSION_NAME").getOrElse("1.0.0").removePrefix("v")
 
-val macPackageBuildVersion: String
-  get() = providers.gradleProperty("twine.macBuildVersion").getOrElse("1")
+val appVersionCode: String
+  get() = providers.gradleProperty("VERSION_CODE").getOrElse("1")
+
+// jpackage only accepts dotted numbers, so a pre-release tag like `3.9.0-beta1` has to
+// drop its suffix before it reaches any of the installer bundlers.
+val appPackageVersion: String
+  get() = appVersionName.substringBefore('-')
 
 val macExtraPlistKeys: String
   get() =
