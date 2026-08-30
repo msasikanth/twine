@@ -9,6 +9,7 @@
  *
  */
 
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -34,6 +35,33 @@ kotlin {
   }
 }
 
+// sqlite-jdbc extracts its bundled native library to a temp directory on first use, and an
+// App Store build may only load code that is signed inside its own bundle. Unpacking it here
+// puts it in app resources, where Compose signs it along with the other native libraries.
+val sqliteJdbcNatives: Provider<List<FileTree>> =
+  configurations.named("jvmRuntimeClasspath").map { configuration ->
+    configuration.incoming
+      .artifactView {
+        componentFilter { id -> id is ModuleComponentIdentifier && id.module == "sqlite-jdbc" }
+      }
+      .files
+      .map { zipTree(it) }
+  }
+
+val unpackSqliteNatives by
+  tasks.registering(Sync::class) {
+    from(sqliteJdbcNatives) {
+      include("org/sqlite/native/Mac/aarch64/**")
+      eachFile { relativePath = RelativePath(true, "macos-arm64", name) }
+    }
+    from(sqliteJdbcNatives) {
+      include("org/sqlite/native/Mac/x86_64/**")
+      eachFile { relativePath = RelativePath(true, "macos-x64", name) }
+    }
+    includeEmptyDirs = false
+    into(layout.buildDirectory.dir("appResources"))
+  }
+
 compose.desktop {
   application {
     mainClass = "dev.sasikanth.rss.reader.MainKt"
@@ -50,6 +78,8 @@ compose.desktop {
       modules("jdk.unsupported")
 
       buildTypes.release.proguard { configurationFiles.from(project.file("proguard-rules.pro")) }
+
+      appResourcesRootDir.fileProvider(unpackSqliteNatives.map { it.destinationDir })
 
       macOS {
         bundleID = "dev.sasikanth.rss.reader"

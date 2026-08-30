@@ -25,6 +25,8 @@ import me.tatarka.inject.annotations.Inject
 actual class DriverFactory(private val codeMigrations: Array<AfterVersion>) {
 
   actual fun createDriver(): SqlDriver {
+    useBundledSqliteNativeLibrary()
+
     val databasePath = File(System.getProperty("user.home"), ".twine/${DB_NAME}")
     databasePath.parentFile.mkdirs()
 
@@ -45,6 +47,23 @@ actual class DriverFactory(private val codeMigrations: Array<AfterVersion>) {
     driver.execute(null, "PRAGMA foreign_keys = ON;", 0)
 
     return driver
+  }
+
+  // Without this sqlite-jdbc unpacks its native library into a temp directory and loads it
+  // from there, which macOS refuses for a sandboxed App Store build. The packaged app ships a
+  // signed copy in its resources; outside a package the property is absent and the default
+  // extraction path is used.
+  private fun useBundledSqliteNativeLibrary() {
+    val resourcesDir = System.getProperty("compose.application.resources.dir") ?: return
+    val library = File(resourcesDir, SQLITE_LIBRARY_NAME)
+    if (!library.exists()) return
+
+    System.setProperty("org.sqlite.lib.path", resourcesDir)
+    System.setProperty("org.sqlite.lib.name", SQLITE_LIBRARY_NAME)
+  }
+
+  private companion object {
+    const val SQLITE_LIBRARY_NAME = "libsqlitejdbc.dylib"
   }
 
   private fun readUserVersion(databasePath: File): Long {
