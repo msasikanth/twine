@@ -44,11 +44,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -71,6 +68,7 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.IconButton
+import dev.sasikanth.rss.reader.components.ModalSheet
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.TextField
 import dev.sasikanth.rss.reader.components.image.FeedIcon
@@ -428,15 +426,8 @@ private fun DiscoveryFeedInfoBottomSheet(
   onAddFeed: () -> Unit,
   dismiss: () -> Unit,
 ) {
-  val sheetState =
-    rememberBottomSheetState(
-      initialValue = SheetValue.Hidden,
-      enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
-    )
-
-  ModalBottomSheet(
+  ModalSheet(
     onDismissRequest = dismiss,
-    sheetState = sheetState,
     containerColor = AppTheme.colorScheme.surfaceContainerLow,
     contentColor = AppTheme.colorScheme.onSurface,
   ) {

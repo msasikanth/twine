@@ -26,10 +26,7 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -47,6 +44,7 @@ import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.markdownPadding
+import dev.sasikanth.rss.reader.components.ModalSheet
 import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -63,16 +61,11 @@ internal fun ChangelogSheet(
 
   LaunchedEffect(Unit) { changelogContent = Res.readBytes("files/changelog.md").decodeToString() }
 
-  ModalBottomSheet(
+  ModalSheet(
     modifier = modifier,
     onDismissRequest = onDismiss,
     containerColor = AppTheme.colorScheme.surfaceContainerHighest,
     contentColor = AppTheme.colorScheme.onSurface,
-    sheetState =
-      rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
-      ),
   ) {
     Column(
       modifier =

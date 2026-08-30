@@ -34,10 +34,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -49,6 +46,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.InverseButton
+import dev.sasikanth.rss.reader.components.ModalSheet
 import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.data.opml.OpmlFeed
 import dev.sasikanth.rss.reader.data.opml.OpmlResult
@@ -144,15 +142,10 @@ internal fun OpmlFeedSelectionSheet(
   onFeedsSelected: (List<OpmlFeed>) -> Unit,
   onDismiss: () -> Unit,
 ) {
-  ModalBottomSheet(
+  ModalSheet(
     onDismissRequest = onDismiss,
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = AppTheme.colorScheme.onSurface,
-    sheetState =
-      rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
-      ),
   ) {
     val selectedFeeds = remember { mutableStateListOf<OpmlFeed>() }
     val canSelectMore by

@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
@@ -37,9 +36,9 @@ import androidx.window.core.layout.WindowSizeClass
 import dev.sasikanth.rss.reader.utils.LocalRootWindowSizeClass
 
 /**
- * Renders [content] as a [ModalBottomSheet] on compact windows, and as a centered dialog on
- * expanded windows, so a short, fixed-height set of choices feels native to the window it's shown
- * in rather than always sliding up from the bottom.
+ * Renders [content] as a [ModalSheet] on compact windows, and as a centered dialog on expanded
+ * windows, so a short, fixed-height set of choices feels native to the window it's shown in rather
+ * than always sliding up from the bottom.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,7 +74,7 @@ internal fun AdaptiveSheet(
       }
     }
   } else {
-    ModalBottomSheet(
+    ModalSheet(
       modifier = modifier,
       onDismissRequest = onDismissRequest,
       containerColor = containerColor,

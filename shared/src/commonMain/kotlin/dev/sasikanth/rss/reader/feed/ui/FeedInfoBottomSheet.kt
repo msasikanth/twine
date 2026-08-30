@@ -48,11 +48,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -77,6 +74,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
 import dev.sasikanth.rss.reader.components.ContextActionItem
+import dev.sasikanth.rss.reader.components.ModalSheet
 import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
@@ -135,7 +133,7 @@ fun FeedInfoBottomSheet(
   AppTheme(useDarkTheme = true) {
     val translucentStyle = LocalTranslucentStyles.current
 
-    ModalBottomSheet(
+    ModalSheet(
       modifier = Modifier.then(modifier),
       onDismissRequest = { dismiss() },
       containerColor = translucentStyle.default.background.compositeOver(Color.Black),
@@ -145,11 +143,6 @@ fun FeedInfoBottomSheet(
           .only(WindowInsetsSides.Bottom)
           .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
       },
-      sheetState =
-        rememberBottomSheetState(
-          initialValue = SheetValue.Hidden,
-          enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
-        ),
     ) {
       Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
         val feed = state.feed
