@@ -20,6 +20,16 @@ package dev.sasikanth.rss.reader.media
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import io.ktor.client.HttpClient
+import io.ktor.client.request.head
+import io.ktor.client.request.header
+import io.ktor.client.request.prepareGet
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.URLBuilder
+import io.ktor.http.takeFrom
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -29,6 +39,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory
 import uk.co.caprica.vlcj.player.base.MediaPlayer
@@ -36,7 +47,14 @@ import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter
 
 @Inject
 @AppScope
-class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : AudioPlayer {
+class JvmAudioPlayer(
+  private val dispatchersProvider: DispatchersProvider,
+  private val httpClient: HttpClient,
+) : AudioPlayer {
+
+  companion object {
+    private const val MAX_REDIRECTS = 10
+  }
 
   private val _playbackState = MutableStateFlow(PlaybackState.Idle)
   override val playbackState: StateFlow<PlaybackState> = _playbackState.asStateFlow()
@@ -65,6 +83,7 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     }
 
   private var progressJob: Job? = null
+  private var resolveJob: Job? = null
   private var playingUrl: String? = null
   private var playingPostId: String? = null
   private var playingTitle: String? = null
@@ -102,6 +121,7 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
           }
 
           override fun error(mediaPlayer: MediaPlayer?) {
+            _playbackState.update { it.copy(buffering = false) }
             updatePlaybackState()
             stopProgressUpdate()
           }
@@ -121,17 +141,87 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     postId: String?,
     initialPosition: Long,
   ) {
+    resolveJob?.cancel()
+    stopProgressUpdate()
+    mediaPlayer?.controls()?.stop()
+
     playingUrl = url
     playingPostId = postId
     playingTitle = title
     playingArtist = artist
     playingCoverUrl = coverUrl
-    mediaPlayer?.media()?.play(url)
-    if (initialPosition > 0) {
-      mediaPlayer?.controls()?.setTime(initialPosition)
+    _playbackState.update {
+      it.copy(
+        isPlaying = false,
+        currentPosition = initialPosition,
+        duration = 0,
+        playingUrl = url,
+        playingPostId = postId,
+        title = title,
+        artist = artist,
+        coverUrl = coverUrl,
+        buffering = true,
+      )
     }
-    updatePlaybackState()
+
+    resolveJob =
+      scope.launch {
+        val mrl = withContext(dispatchersProvider.io) { resolveRedirects(url) }
+        mediaPlayer?.media()?.play(mrl)
+        if (initialPosition > 0) {
+          mediaPlayer?.controls()?.setTime(initialPosition)
+        }
+      }
   }
+
+  /**
+   * libVLC stops after five redirects, which podcast prefix chains (Podtrac, Chartable, Megaphone)
+   * routinely exceed, so the final media URL is resolved before it is handed over.
+   */
+  private suspend fun resolveRedirects(url: String): String {
+    var currentUrl = url
+    repeat(MAX_REDIRECTS) {
+      val location =
+        try {
+          redirectLocation(currentUrl)
+        } catch (e: Exception) {
+          Logger.e(e) { "Failed to resolve redirects for $currentUrl" }
+          return currentUrl
+        }
+
+      val nextUrl = location?.let { redirectTarget(currentUrl, it) } ?: return currentUrl
+      if (nextUrl == currentUrl) return currentUrl
+
+      currentUrl = nextUrl
+    }
+
+    return currentUrl
+  }
+
+  private suspend fun redirectLocation(url: String): String? {
+    val response = httpClient.head(url)
+    if (response.status != HttpStatusCode.MethodNotAllowed) return response.redirectLocation()
+
+    return httpClient
+      .prepareGet(url) { header(HttpHeaders.Range, "bytes=0-0") }
+      .execute { it.redirectLocation() }
+  }
+
+  private fun HttpResponse.redirectLocation(): String? =
+    if (status.value in 300..399) headers[HttpHeaders.Location] else null
+
+  /** Absolute targets are used as is, so signed CDN URLs are not re-encoded. */
+  private fun redirectTarget(url: String, location: String): String? =
+    try {
+      if (location.startsWith("https://", ignoreCase = true)) {
+        location
+      } else {
+        URLBuilder(url).takeFrom(location).buildString()
+      }
+    } catch (e: Exception) {
+      Logger.e(e) { "Failed to resolve redirect target $location" }
+      null
+    }
 
   override fun pause() {
     mediaPlayer?.controls()?.pause()
@@ -139,6 +229,8 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
 
   override fun stop() {
     stopProgressUpdate()
+    resolveJob?.cancel()
+    resolveJob = null
     mediaPlayer?.controls()?.stop()
     sleepTimerJob?.cancel()
     sleepTimerRemainingMillis = null
@@ -183,7 +275,7 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
         sleepTimerJob =
           scope.launch {
             while (sleepTimerRemainingMillis!! > 0) {
-              delay(1000)
+              delay(1000.milliseconds)
               sleepTimerRemainingMillis = sleepTimerRemainingMillis!! - 1000
               updatePlaybackState()
             }
@@ -198,7 +290,7 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   private fun updatePlaybackState() {
     _playbackState.update {
       it.copy(
-        isPlaying = mediaPlayer?.status()?.isPlaying() ?: false,
+        isPlaying = mediaPlayer?.status()?.isPlaying ?: false,
         currentPosition = mediaPlayer?.status()?.time()?.coerceAtLeast(0) ?: 0L,
         duration = mediaPlayer?.status()?.length()?.coerceAtLeast(0) ?: 0L,
         playingUrl = playingUrl,
@@ -215,13 +307,12 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   }
 
   private fun startProgressUpdate() {
-    val mediaPlayer = mediaPlayer ?: return
     progressJob?.cancel()
     progressJob =
       scope.launch {
         while (true) {
           updatePlaybackState()
-          delay(1000)
+          delay(1000.milliseconds)
         }
       }
   }
