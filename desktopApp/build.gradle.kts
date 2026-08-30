@@ -43,7 +43,7 @@ compose.desktop {
     }
 
     nativeDistributions {
-      targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Pkg)
+      targetFormats(*hostTargetFormats)
       packageName = "Twine"
       packageVersion = appPackageVersion
       modules("java.sql")
@@ -94,6 +94,18 @@ compose.desktop {
     }
   }
 }
+
+// Compose validates packageVersion against *every* declared format, so a globally declared
+// Msi made macOS-only builds fail the Windows rule (major <= 255) on versions macOS allows.
+val hostTargetFormats: Array<TargetFormat>
+  get() {
+    val os = System.getProperty("os.name")
+    return when {
+      os.contains("Mac") -> arrayOf(TargetFormat.Dmg, TargetFormat.Pkg)
+      os.startsWith("Win") -> arrayOf(TargetFormat.Msi)
+      else -> arrayOf(TargetFormat.Deb)
+    }
+  }
 
 val isMacAppStoreBuild: Boolean
   get() = providers.gradleProperty("twine.macAppStore").getOrElse("false").toBoolean()
