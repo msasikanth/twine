@@ -80,7 +80,8 @@ compose.desktop {
 
       linux {
         debMaintainer = "contact@sasikanth.dev"
-        iconFile.set(project.file("icon.png"))
+        // Lives in resources so the app can also load it as the AWT window icon.
+        iconFile.set(project.file("src/jvmMain/resources/icon.png"))
       }
     }
   }
