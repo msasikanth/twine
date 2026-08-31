@@ -35,29 +35,55 @@ kotlin {
   }
 }
 
-// sqlite-jdbc extracts its bundled native library to a temp directory on first use, and an
-// App Store build may only load code that is signed inside its own bundle. Unpacking it here
-// puts it in app resources, where Compose signs it along with the other native libraries.
-val sqliteJdbcNatives: Provider<List<FileTree>> =
+// vlcj pulls the modular jna-jpms artifacts, which carry the same com.sun.jna packages that
+// filekit brings in through plain jna. Shipping both leaves the winner down to classpath order,
+// and the bundled native library below has to match whichever one loads.
+configurations.named("jvmRuntimeClasspath") {
+  exclude(group = "net.java.dev.jna", module = "jna-jpms")
+  exclude(group = "net.java.dev.jna", module = "jna-platform-jpms")
+}
+
+// sqlite-jdbc and JNA both unpack their native libraries into a temp directory on first use,
+// and an App Store build may only load code that is signed inside its own bundle. Unpacking
+// them here puts them in app resources, where Compose signs them like the other native
+// libraries. The jars are taken from the resolved runtime classpath so the extracted copies
+// cannot drift from the versions actually on it.
+fun nativesFrom(module: String): Provider<List<FileTree>> =
   configurations.named("jvmRuntimeClasspath").map { configuration ->
     configuration.incoming
       .artifactView {
-        componentFilter { id -> id is ModuleComponentIdentifier && id.module == "sqlite-jdbc" }
+        componentFilter { id -> id is ModuleComponentIdentifier && id.module == module }
       }
       .files
       .map { zipTree(it) }
   }
 
-val unpackSqliteNatives by
+val unpackNativeLibraries by
   tasks.registering(Sync::class) {
-    from(sqliteJdbcNatives) {
-      include("org/sqlite/native/Mac/aarch64/**")
-      eachFile { relativePath = RelativePath(true, "macos-arm64", name) }
+    val natives =
+      mapOf(
+        "macos-arm64" to
+          listOf(
+            "sqlite-jdbc" to "org/sqlite/native/Mac/aarch64/**",
+            "jna" to "com/sun/jna/darwin-aarch64/**",
+          ),
+        "macos-x64" to
+          listOf(
+            "sqlite-jdbc" to "org/sqlite/native/Mac/x86_64/**",
+            "jna" to "com/sun/jna/darwin-x86-64/**",
+          ),
+      )
+
+    natives.forEach { (target, sources) ->
+      sources.forEach { (module, path) ->
+        from(nativesFrom(module)) {
+          include(path)
+          // jpackage only code-signs .dylib, and JNA falls back to that extension itself.
+          eachFile { relativePath = RelativePath(true, target, name.replace(".jnilib", ".dylib")) }
+        }
+      }
     }
-    from(sqliteJdbcNatives) {
-      include("org/sqlite/native/Mac/x86_64/**")
-      eachFile { relativePath = RelativePath(true, "macos-x64", name) }
-    }
+
     includeEmptyDirs = false
     into(layout.buildDirectory.dir("appResources"))
   }
@@ -79,7 +105,7 @@ compose.desktop {
 
       buildTypes.release.proguard { configurationFiles.from(project.file("proguard-rules.pro")) }
 
-      appResourcesRootDir.fileProvider(unpackSqliteNatives.map { it.destinationDir })
+      appResourcesRootDir.fileProvider(unpackNativeLibraries.map { it.destinationDir })
 
       macOS {
         bundleID = "dev.sasikanth.rss.reader"
