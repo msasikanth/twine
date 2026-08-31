@@ -26,9 +26,12 @@ import java.awt.Color
 import java.awt.Desktop
 import java.awt.Image
 import java.awt.image.BufferedImage
+import java.io.File
 import javax.imageio.ImageIO
 
 fun main() {
+  useBundledJnaLibrary()
+
   val applicationComponent = ApplicationComponent::class.create()
   val desktopComponent = DesktopComponent::class.create(applicationComponent)
 
@@ -64,6 +67,14 @@ fun main() {
       )
     }
   }
+}
+
+private fun useBundledJnaLibrary() {
+  val resourcesDir = System.getProperty("compose.application.resources.dir") ?: return
+  if (!File(resourcesDir, "libjnidispatch.dylib").exists()) return
+
+  System.setProperty("jna.boot.library.path", resourcesDir)
+  System.setProperty("jna.nounpack", "true")
 }
 
 private object AppIcon {
