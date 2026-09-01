@@ -373,7 +373,7 @@
   <string name="premiumPaywallFeature2Desc">Unlock Miniflux, FreshRSS and other cloud integrations.</string>
   <string name="premiumPaywallFeature3Title">Themes</string>
   <string name="premiumPaywallFeature3Desc">Keep Twine dynamic or stick to your favorite color palette.</string>
-  <string name="premiumPaywallFeature4Title">Widgets</string>
+  <string name="premiumPaywallFeature4Title">小工具</string>
   <string name="premiumPaywallFeature4Desc">Get access to powerful home screen widgets.</string>
   <string name="premiumPaywallPrivacyPolicy">Privacy policy</string>
   <string name="premiumPaywallTermsOfService">Terms of service</string>
