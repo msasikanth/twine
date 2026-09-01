@@ -24,7 +24,7 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : " • %@"
           }
         },
@@ -65,8 +65,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : " • %dm read"
+            "state" : "translated",
+            "value" : " • Читать %dм"
           }
         },
         "tr" : {
@@ -106,8 +106,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Next Post"
+            "state" : "translated",
+            "value" : "Следующий пост"
           }
         },
         "tr" : {
@@ -385,26 +385,26 @@
             "plural" : {
               "few" : {
                 "stringUnit" : {
-                  "state" : "new",
-                  "value" : "%@: %lld new articles"
+                  "state" : "translated",
+                  "value" : "%@: %lld новые статьи"
                 }
               },
               "many" : {
                 "stringUnit" : {
-                  "state" : "new",
-                  "value" : "%@: %lld new articles"
+                  "state" : "translated",
+                  "value" : "%@: %lld новых статей"
                 }
               },
               "one" : {
                 "stringUnit" : {
-                  "state" : "new",
-                  "value" : "%@: 1 new article"
+                  "state" : "translated",
+                  "value" : "%@: 1 новая статья"
                 }
               },
               "other" : {
                 "stringUnit" : {
-                  "state" : "new",
-                  "value" : "%@: %lld new articles"
+                  "state" : "translated",
+                  "value" : "%@: %lld новых статей"
                 }
               }
             }
@@ -465,8 +465,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Previous Post"
+            "state" : "translated",
+            "value" : "Предыдущий пост"
           }
         },
         "tr" : {
@@ -506,8 +506,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Refresh"
+            "state" : "translated",
+            "value" : "Обновить"
           }
         },
         "tr" : {
@@ -646,8 +646,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Latest"
+            "state" : "translated",
+            "value" : "Последние"
           }
         },
         "tr" : {
@@ -740,8 +740,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Shows 5 recent unread in a carousel"
+            "state" : "translated",
+            "value" : "Показывает 5 недавних непрочитанных в карусели"
           }
         },
         "tr" : {
@@ -786,8 +786,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Shows a list of recent unread articles"
+            "state" : "translated",
+            "value" : "Показывает список недавних непрочитанных статей"
           }
         },
         "tr" : {
@@ -832,8 +832,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Recent unread (Large)"
+            "state" : "translated",
+            "value" : "Недавние непрочитанные (Большой)"
           }
         },
         "tr" : {
@@ -878,8 +878,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Shows recent unread articles with more details"
+            "state" : "translated",
+            "value" : "Показывает недавние непрочитанные статьи с подробностями"
           }
         },
         "tr" : {
@@ -924,8 +924,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Recent unread (Medium)"
+            "state" : "translated",
+            "value" : "Недавние непрочитанные (Средний)"
           }
         },
         "tr" : {
@@ -970,8 +970,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Recent unread (Small)"
+            "state" : "translated",
+            "value" : "Недавние непрочитанные (Маленький)"
           }
         },
         "tr" : {
