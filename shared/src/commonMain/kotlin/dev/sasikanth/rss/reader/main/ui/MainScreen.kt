@@ -39,14 +39,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
@@ -63,10 +60,9 @@ import dev.sasikanth.rss.reader.app.AppNavigator
 import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
-import dev.sasikanth.rss.reader.resources.icons.Platform
-import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalRootWindowSizeClass
+import dev.sasikanth.rss.reader.utils.ShortcutHandler
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.modules.SerializersModule
@@ -208,55 +204,45 @@ internal fun MainScreen(
 
   var showKeyboardShortcuts by remember { mutableStateOf(false) }
 
-  val mainFocusRequester = remember { FocusRequester() }
-  if (platform == Platform.Desktop) {
-    LaunchedEffect(selectedDestination) { mainFocusRequester.requestFocus() }
-  }
-
   // Global shortcuts fire on key-down (while Cmd is still held, since some platforms
   // release the modifier key before the letter key) and are armed/disarmed per-key so
   // holding a key doesn't repeatedly trigger navigation.
   var armedShortcutKey by remember { mutableStateOf<Key?>(null) }
 
-  val keyboardShortcutsModifier =
-    if (platform == Platform.Desktop) {
-      Modifier.focusRequester(mainFocusRequester).focusable().onPreviewKeyEvent { event ->
-        if (event.type == KeyEventType.KeyUp) {
-          armedShortcutKey = null
-          return@onPreviewKeyEvent false
-        }
-        if (event.type != KeyEventType.KeyDown || !event.isMetaPressed) {
-          return@onPreviewKeyEvent false
-        }
-        if (armedShortcutKey == event.key) return@onPreviewKeyEvent true
-
-        when (event.key) {
-          Key.F -> {
-            armedShortcutKey = event.key
-            navigateToDestination(MainDestination.Search)
-            true
-          }
-          Key.Comma -> {
-            armedShortcutKey = event.key
-            navigateToDestination(MainDestination.Settings)
-            true
-          }
-          Key.N -> {
-            armedShortcutKey = event.key
-            openAddFeedScreen()
-            true
-          }
-          Key.Slash -> {
-            armedShortcutKey = event.key
-            showKeyboardShortcuts = true
-            true
-          }
-          else -> false
-        }
-      }
-    } else {
-      Modifier
+  ShortcutHandler { event ->
+    if (event.type == KeyEventType.KeyUp) {
+      armedShortcutKey = null
+      return@ShortcutHandler false
     }
+    if (event.type != KeyEventType.KeyDown || !event.isMetaPressed) {
+      return@ShortcutHandler false
+    }
+    if (armedShortcutKey == event.key) return@ShortcutHandler true
+
+    when (event.key) {
+      Key.F -> {
+        armedShortcutKey = event.key
+        navigateToDestination(MainDestination.Search)
+        true
+      }
+      Key.Comma -> {
+        armedShortcutKey = event.key
+        navigateToDestination(MainDestination.Settings)
+        true
+      }
+      Key.N -> {
+        armedShortcutKey = event.key
+        openAddFeedScreen()
+        true
+      }
+      Key.Slash -> {
+        armedShortcutKey = event.key
+        showKeyboardShortcuts = true
+        true
+      }
+      else -> false
+    }
+  }
 
   val drawerContent =
     @Composable { isExpanded: Boolean ->
@@ -314,7 +300,7 @@ internal fun MainScreen(
 
   when {
     hasInlineNavigation -> {
-      Row(modifier = modifier.fillMaxSize().then(keyboardShortcutsModifier)) {
+      Row(modifier = modifier.fillMaxSize()) {
         val sideNavigationWidth by animateDpAsState(if (isSideNavigationExpanded) 360.dp else 80.dp)
 
         Box(modifier = Modifier.requiredWidth(sideNavigationWidth)) {
@@ -335,7 +321,7 @@ internal fun MainScreen(
     }
     else -> {
       ModalNavigationDrawer(
-        modifier = modifier.then(keyboardShortcutsModifier),
+        modifier = modifier,
         drawerState = drawerState,
         drawerContent = {
           ModalDrawerSheet(

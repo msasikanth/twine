@@ -11,7 +11,9 @@
 
 package dev.sasikanth.rss.reader
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -22,6 +24,8 @@ import dev.sasikanth.rss.reader.di.DesktopComponent
 import dev.sasikanth.rss.reader.di.create
 import dev.sasikanth.rss.reader.utils.DesktopWindowChrome
 import dev.sasikanth.rss.reader.utils.ExternalUriHandler
+import dev.sasikanth.rss.reader.utils.LocalShortcutDispatcher
+import dev.sasikanth.rss.reader.utils.ShortcutDispatcher
 import java.awt.Color
 import java.awt.Desktop
 import java.awt.Image
@@ -46,10 +50,15 @@ fun main() {
   }
 
   application {
+    val shortcutDispatcher = remember { ShortcutDispatcher() }
+
     Window(
       state = rememberWindowState(size = DpSize(1200.dp, 800.dp)),
       onCloseRequest = ::exitApplication,
       title = "",
+      // Dispatched after the focused component has had the event, so text fields keep their
+      // own input instead of losing single-letter keys to shortcuts.
+      onKeyEvent = { shortcutDispatcher.dispatch(it) },
     ) {
       // macOS renders the transparent title bar with the window background; other
       // platforms ignore the client property.
@@ -60,11 +69,13 @@ fun main() {
         onDispose { DesktopWindowChrome.listener = null }
       }
 
-      desktopComponent.app(
-        { /* Handle theme change if needed */ },
-        { /* No-op on desktop */ },
-        { /* No-op on desktop */ },
-      )
+      CompositionLocalProvider(LocalShortcutDispatcher provides shortcutDispatcher) {
+        desktopComponent.app(
+          { /* Handle theme change if needed */ },
+          { /* No-op on desktop */ },
+          { /* No-op on desktop */ },
+        )
+      }
     }
   }
 }

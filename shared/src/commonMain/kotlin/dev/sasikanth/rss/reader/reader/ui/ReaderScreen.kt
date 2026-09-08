@@ -27,7 +27,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -73,8 +72,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.dropShadow
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawOutline
@@ -83,7 +80,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -129,9 +125,7 @@ import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Close
 import dev.sasikanth.rss.reader.resources.icons.CollapseContent
 import dev.sasikanth.rss.reader.resources.icons.ExpandContent
-import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppColorScheme
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
@@ -150,6 +144,7 @@ import dev.sasikanth.rss.reader.ui.typography
 import dev.sasikanth.rss.reader.utils.CollectItemTransition
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
+import dev.sasikanth.rss.reader.utils.ShortcutHandler
 import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
@@ -209,11 +204,6 @@ internal fun ReaderScreen(
   }
   val pagerState = rememberPagerState(initialPage = state.activePostIndex) { posts.itemCount }
   val exitScreen by viewModel.exitScreen.collectAsStateWithLifecycle(false)
-
-  val readerFocusRequester = remember { FocusRequester() }
-  if (platform is Platform.Desktop) {
-    LaunchedEffect(Unit) { readerFocusRequester.requestFocus() }
-  }
 
   // If the pager lays out before paging delivers its first item count, the initial
   // page gets clamped to 0 and the requested index is lost. Restore it exactly once,
@@ -367,53 +357,53 @@ internal fun ReaderScreen(
       typography = typography,
       overriddenColorScheme = overriddenColorScheme,
     ) {
+      ShortcutHandler { event ->
+        if (event.type != KeyEventType.KeyUp) return@ShortcutHandler false
+
+        val currentReaderPost = runCatching { posts.peek(pagerState.settledPage) }.getOrNull()
+
+        return@ShortcutHandler when (event.key) {
+          Key.DirectionRight -> {
+            coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+
+            true
+          }
+          Key.DirectionLeft -> {
+            coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
+
+            true
+          }
+          Key.B if currentReaderPost != null -> {
+            viewModel.dispatch(
+              ReaderEvent.TogglePostBookmark(
+                postId = currentReaderPost.id,
+                currentBookmarkStatus = currentReaderPost.bookmarked,
+              )
+            )
+
+            true
+          }
+          Key.U if currentReaderPost != null -> {
+            viewModel.dispatch(ReaderEvent.OnMarkAsUnread(postId = currentReaderPost.id))
+
+            true
+          }
+          Key.V if currentReaderPost != null -> {
+            coroutineScope.launch { linkHandler.openLink(currentReaderPost.link) }
+
+            true
+          }
+          Key.Escape -> {
+            onBack()
+
+            true
+          }
+          else -> false
+        }
+      }
+
       Scaffold(
-        modifier =
-          modifier.fillMaxSize().focusRequester(readerFocusRequester).focusable().onKeyEvent { event
-            ->
-            if (event.type != KeyEventType.KeyUp) return@onKeyEvent false
-
-            val currentReaderPost = runCatching { posts.peek(pagerState.settledPage) }.getOrNull()
-
-            return@onKeyEvent when (event.key) {
-              Key.DirectionRight -> {
-                coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
-
-                true
-              }
-              Key.DirectionLeft -> {
-                coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
-
-                true
-              }
-              Key.B if currentReaderPost != null -> {
-                viewModel.dispatch(
-                  ReaderEvent.TogglePostBookmark(
-                    postId = currentReaderPost.id,
-                    currentBookmarkStatus = currentReaderPost.bookmarked,
-                  )
-                )
-
-                true
-              }
-              Key.U if currentReaderPost != null -> {
-                viewModel.dispatch(ReaderEvent.OnMarkAsUnread(postId = currentReaderPost.id))
-
-                true
-              }
-              Key.V if currentReaderPost != null -> {
-                coroutineScope.launch { linkHandler.openLink(currentReaderPost.link) }
-
-                true
-              }
-              Key.Escape -> {
-                onBack()
-
-                true
-              }
-              else -> false
-            }
-          },
+        modifier = modifier.fillMaxSize(),
         topBar = {
           CenterAlignedTopAppBar(
             expandedHeight = 72.dp,
