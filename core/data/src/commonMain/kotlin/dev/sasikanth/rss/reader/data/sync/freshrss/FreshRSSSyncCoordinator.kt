@@ -25,6 +25,7 @@ import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.core.network.freshrss.FreshRssSource
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -521,8 +522,9 @@ class FreshRSSSyncCoordinator(
 
           if (feed != null) {
             val htmlContent = articleHtmlParser.parse(item.summary.content)
+            val isVideoPost = UrlUtils.youTubeVideoId(postLink) != null
             val fullContent =
-              if (downloadFullContent && postLink.isNotBlank()) {
+              if (downloadFullContent && postLink.isNotBlank() && !isVideoPost) {
                 fullArticleFetcher.fetch(postLink).getOrNull()
               } else {
                 null
@@ -533,7 +535,9 @@ class FreshRSSSyncCoordinator(
                 link = postLink,
                 description = htmlContent?.textContent ?: "",
                 rawContent = htmlContent?.cleanedHtml ?: item.summary.content,
-                imageUrl = htmlContent?.heroImage,
+                imageUrl =
+                  UrlUtils.upgradeYouTubeThumbnail(htmlContent?.heroImage)
+                    ?: UrlUtils.youTubeThumbnail(postLink),
                 audioUrl = item.enclosure.firstOrNull()?.href ?: htmlContent?.audioUrl,
                 date = item.published * 1000, // FreshRSS uses seconds, we use millis
                 commentsLink = null,

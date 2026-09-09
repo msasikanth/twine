@@ -26,6 +26,7 @@ import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxCategory
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.core.network.miniflux.MinifluxSource
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -575,8 +576,9 @@ class MinifluxSyncCoordinator(
           val feed = existingFeeds[entry.feedId.toString()]
           if (feed != null) {
             val htmlContent = articleHtmlParser.parse(entry.content)
+            val isVideoPost = UrlUtils.youTubeVideoId(entry.url) != null
             val fullContent =
-              if (downloadFullContent && entry.url.isNotBlank()) {
+              if (downloadFullContent && entry.url.isNotBlank() && !isVideoPost) {
                 fullArticleFetcher.fetch(entry.url, remoteId).getOrNull()
               } else {
                 null
@@ -591,7 +593,9 @@ class MinifluxSyncCoordinator(
                 link = entry.url,
                 description = htmlContent?.textContent ?: "",
                 rawContent = htmlContent?.cleanedHtml ?: entry.content,
-                imageUrl = htmlContent?.heroImage,
+                imageUrl =
+                  UrlUtils.upgradeYouTubeThumbnail(htmlContent?.heroImage)
+                    ?: UrlUtils.youTubeThumbnail(entry.url),
                 audioUrl = audioUrl,
                 date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
                 commentsLink = entry.commentsUrl,

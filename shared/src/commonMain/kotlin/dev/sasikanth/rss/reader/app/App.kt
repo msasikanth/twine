@@ -49,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
@@ -118,8 +119,10 @@ import dev.sasikanth.rss.reader.utils.LocalAmoledSetting
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalInAppRating
 import dev.sasikanth.rss.reader.utils.LocalRootWindowSizeClass
+import dev.sasikanth.rss.reader.utils.LocalShortcutDispatcher
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
+import dev.sasikanth.rss.reader.utils.ShortcutDispatcher
 import dev.sasikanth.rss.reader.utils.horizontalResizePointerIcon
 import dev.sasikanth.rss.reader.utils.updateWindowBackdropColor
 import kotlinx.coroutines.flow.launchIn
@@ -191,7 +194,13 @@ fun App(
   val coroutineScope = rememberCoroutineScope()
   val windowInfo = currentWindowAdaptiveInfoV2()
 
+  // Desktop installs a dispatcher at the window so shortcuts survive whatever holds focus.
+  // Other platforms have no such hook, so the root gets one that key events bubble up into.
+  val windowShortcutDispatcher = LocalShortcutDispatcher.current
+  val shortcutDispatcher = windowShortcutDispatcher ?: remember { ShortcutDispatcher() }
+
   CompositionLocalProvider(
+    LocalShortcutDispatcher provides shortcutDispatcher,
     LocalWindowSizeClass provides windowInfo.windowSizeClass,
     LocalRootWindowSizeClass provides windowInfo.windowSizeClass,
     LocalShareHandler provides shareHandler,
@@ -584,8 +593,18 @@ fun App(
         )
       val bottomSheetSceneStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
 
+      val rootShortcutModifier =
+        if (windowShortcutDispatcher == null) {
+          Modifier.onKeyEvent { shortcutDispatcher.dispatch(it) }
+        } else {
+          Modifier
+        }
+
       NavDisplay(
-        modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.backdrop),
+        modifier =
+          Modifier.fillMaxSize()
+            .background(AppTheme.colorScheme.backdrop)
+            .then(rootShortcutModifier),
         backStack = backStack,
         entryProvider = entryProvider,
         entryDecorators =

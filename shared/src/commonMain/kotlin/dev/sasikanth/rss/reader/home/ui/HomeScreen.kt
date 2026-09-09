@@ -17,7 +17,6 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.core.animate
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,6 +46,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -58,19 +58,15 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
@@ -118,6 +114,7 @@ import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalInAppRating
 import dev.sasikanth.rss.reader.utils.LocalRootWindowSizeClass
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
+import dev.sasikanth.rss.reader.utils.ShortcutHandler
 import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
@@ -144,6 +141,8 @@ private const val BOTTOM_SCRIM_FRACTION = 0.15f
 private val EMPTY_STATE_SWITCH_DELAY = 300.milliseconds
 
 private class KeyRepeatGuard(var armed: Boolean = false)
+
+private const val NO_POST_SELECTED = -1
 
 @OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
 @Composable
@@ -308,31 +307,85 @@ private fun HomeContent(
     }
   }
 
-  val homeFocusRequester = remember { FocusRequester() }
-  if (platform == Platform.Desktop) {
-    LaunchedEffect(Unit) { homeFocusRequester.requestFocus() }
-  }
   val refreshShortcut = remember { KeyRepeatGuard() }
 
-  val onRefreshKeyEvent =
-    remember(dispatch, refreshShortcut) {
-      { event: KeyEvent ->
-        when {
-          event.key == Key.R && event.type == KeyEventType.KeyDown && event.isMetaPressed -> {
-            if (!refreshShortcut.armed) {
-              refreshShortcut.armed = true
-              dispatch(HomeEvent.OnSwipeToRefresh)
-            }
-            true
+  ShortcutHandler { event ->
+    when {
+      event.key == Key.R && event.type == KeyEventType.KeyDown && event.isMetaPressed -> {
+        if (!refreshShortcut.armed) {
+          refreshShortcut.armed = true
+          dispatch(HomeEvent.OnSwipeToRefresh)
+        }
+        true
+      }
+      event.key == Key.R && event.type == KeyEventType.KeyUp -> {
+        refreshShortcut.armed = false
+        false
+      }
+      else -> false
+    }
+  }
+
+  // Indexes into the paged list, so it cannot outlive the list it points into.
+  var selectedPostIndex by remember { mutableIntStateOf(NO_POST_SELECTED) }
+
+  LaunchedEffect(state.activeSource?.id, state.postsType, state.postsSortOrder) {
+    selectedPostIndex = NO_POST_SELECTED
+  }
+
+  ShortcutHandler { event ->
+    if (event.type != KeyEventType.KeyDown || event.isMetaPressed) return@ShortcutHandler false
+
+    val pagedPosts = posts() ?: return@ShortcutHandler false
+    val lastIndex = pagedPosts.itemCount - 1
+    if (lastIndex < 0) return@ShortcutHandler false
+
+    when (event.key) {
+      Key.J,
+      Key.DirectionDown -> {
+        selectedPostIndex = (selectedPostIndex + 1).coerceAtMost(lastIndex)
+        true
+      }
+      Key.K,
+      Key.DirectionUp -> {
+        selectedPostIndex = (selectedPostIndex - 1).coerceAtLeast(0)
+        true
+      }
+      Key.Enter -> {
+        val selectedPost =
+          if (selectedPostIndex in 0..lastIndex) {
+            runCatching { pagedPosts.peek(selectedPostIndex) }.getOrNull()
+          } else {
+            null
           }
-          event.key == Key.R && event.type == KeyEventType.KeyUp -> {
-            refreshShortcut.armed = false
-            false
-          }
-          else -> false
+
+        if (selectedPost != null) {
+          dispatch(HomeEvent.OnPostClicked(selectedPost))
+          true
+        } else {
+          false
         }
       }
+      else -> false
     }
+  }
+
+  // The featured section always occupies LazyColumn item 0, so post N sits at N + 1.
+  LaunchedEffect(selectedPostIndex) {
+    if (selectedPostIndex == NO_POST_SELECTED) return@LaunchedEffect
+
+    val targetIndex = selectedPostIndex + 1
+    val layoutInfo = postsListState.layoutInfo
+    val visibleItem = layoutInfo.visibleItemsInfo.firstOrNull { it.index == targetIndex }
+    val isFullyVisible =
+      visibleItem != null &&
+        visibleItem.offset >= layoutInfo.viewportStartOffset &&
+        visibleItem.offset + visibleItem.size <= layoutInfo.viewportEndOffset
+
+    if (!isFullyVisible) {
+      postsListState.animateScrollToItem(targetIndex)
+    }
+  }
 
   val onSourceClick =
     remember(feedsDispatch) { { feed: Source -> feedsDispatch(FeedsEvent.OnSourceClick(feed)) } }
@@ -378,8 +431,7 @@ private fun HomeContent(
   }
 
   Scaffold(
-    modifier =
-      modifier.focusRequester(homeFocusRequester).focusable().onPreviewKeyEvent(onRefreshKeyEvent),
+    modifier = modifier,
     bottomBar = {
       if (canShowBottomBar) {
         val scaffoldBottomPadding =
@@ -666,6 +718,7 @@ private fun HomeContent(
                     dispatch(HomeEvent.UpdatePostReadStatus(postId, updatedReadStatus))
                   },
                   activeReaderPostId = activeReaderPostId,
+                  selectedPostIndex = selectedPostIndex,
                   modifier = listScrimModifier,
                 )
               }
@@ -725,26 +778,25 @@ private fun PullToRefreshContent(
   onRefresh: () -> Unit,
   content: @Composable () -> Unit,
 ) {
-  if (platform == Platform.Desktop) {
-    Box(modifier = Modifier.fillMaxSize()) { content() }
-  } else {
-    PullToRefreshBox(
-      state = pullToRefreshState,
-      isRefreshing = state.isSyncing,
-      onRefresh = onRefresh,
-      indicator = {
-        Indicator(
-          modifier =
-            Modifier.align(Alignment.TopCenter).padding(top = paddingValues.calculateTopPadding()),
-          isRefreshing = state.isSyncing,
-          containerColor = AppTheme.colorScheme.surfaceContainerHigh,
-          color = AppTheme.colorScheme.primary,
-          state = pullToRefreshState,
-        )
-      },
-    ) {
-      content()
-    }
+  PullToRefreshBox(
+    state = pullToRefreshState,
+    isRefreshing = state.isSyncing,
+    onRefresh = onRefresh,
+    // Desktop has no pull gesture, but the indicator still follows isSyncing, so keyboard and
+    // background syncs get the same feedback as a pull on mobile.
+    enabled = platform !is Platform.Desktop,
+    indicator = {
+      Indicator(
+        modifier =
+          Modifier.align(Alignment.TopCenter).padding(top = paddingValues.calculateTopPadding()),
+        isRefreshing = state.isSyncing,
+        containerColor = AppTheme.colorScheme.surfaceContainerHigh,
+        color = AppTheme.colorScheme.primary,
+        state = pullToRefreshState,
+      )
+    },
+  ) {
+    content()
   }
 }
 

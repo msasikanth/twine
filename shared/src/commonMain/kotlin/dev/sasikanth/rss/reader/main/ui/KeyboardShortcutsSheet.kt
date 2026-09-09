@@ -41,10 +41,12 @@ import twine.shared.generated.resources.keyboardShortcutsClose
 import twine.shared.generated.resources.keyboardShortcutsMarkAsUnread
 import twine.shared.generated.resources.keyboardShortcutsNextPost
 import twine.shared.generated.resources.keyboardShortcutsOpenInBrowser
+import twine.shared.generated.resources.keyboardShortcutsOpenPost
 import twine.shared.generated.resources.keyboardShortcutsPreviousPost
 import twine.shared.generated.resources.keyboardShortcutsRefresh
 import twine.shared.generated.resources.keyboardShortcutsSearch
 import twine.shared.generated.resources.keyboardShortcutsSectionGlobal
+import twine.shared.generated.resources.keyboardShortcutsSectionPostList
 import twine.shared.generated.resources.keyboardShortcutsSectionReader
 import twine.shared.generated.resources.keyboardShortcutsSettings
 import twine.shared.generated.resources.keyboardShortcutsShowShortcuts
@@ -77,6 +79,16 @@ internal fun KeyboardShortcutsSheet(onDismiss: () -> Unit) {
             "⌘N" to stringResource(Res.string.keyboardShortcutsAddFeed),
             "⌘," to stringResource(Res.string.keyboardShortcutsSettings),
             "⌘/" to stringResource(Res.string.keyboardShortcutsShowShortcuts),
+          ),
+      )
+
+      ShortcutSection(
+        title = stringResource(Res.string.keyboardShortcutsSectionPostList),
+        shortcuts =
+          listOf(
+            "J  ↓" to stringResource(Res.string.keyboardShortcutsNextPost),
+            "K  ↑" to stringResource(Res.string.keyboardShortcutsPreviousPost),
+            "↵" to stringResource(Res.string.keyboardShortcutsOpenPost),
           ),
       )
 

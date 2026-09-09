@@ -85,6 +85,7 @@ internal fun PostsList(
   updateReadStatus: (String, Boolean) -> Unit,
   modifier: Modifier = Modifier,
   activeReaderPostId: String? = null,
+  selectedPostIndex: Int = -1,
 ) {
   val itemAnimationsEnabled =
     rememberItemAnimationsEnabled(
@@ -171,7 +172,7 @@ internal fun PostsList(
       contentType = { POST_ITEM_CONTENT_TYPE },
     ) { index ->
       val post = posts[index] ?: return@items
-      val highlighted = post.id == activeReaderPostId
+      val highlighted = post.id == activeReaderPostId || index == selectedPostIndex
       val itemModifier = if (itemAnimationsEnabled) animatePostItem() else Modifier
 
       when (homeViewMode) {
