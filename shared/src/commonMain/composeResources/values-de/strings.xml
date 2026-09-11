@@ -43,6 +43,7 @@
   <string name="errorTooManyRedirects">Die angegebene URL enthält zu viele Weiterleitungen. Bitte verwenden Sie eine andere URL.</string>
   <string name="errorUnAuthorized">(%1$s): Sie sind nicht berechtigt, auf Inhalte unter diesem Link zuzugreifen.</string>
   <string name="errorUnknownHttpStatus">Inhalt konnte nicht mit HTTP-Code geladen werden: (%1$s)</string>
+  <string name="errorUnknown">Failed to add the feed. Please try again later.</string>
   <string name="postsSearchHint">Search</string>
   <string name="searchSortNewest">Neueste</string>
   <string name="searchSortNewestFirst">Neueste zuerst</string>
@@ -52,6 +53,10 @@
   <string name="unBookmark">Lesezeichen entfernen</string>
   <string name="bookmarks">Lesezeichen</string>
   <string name="bookmarksPlaceholder">Mit Lesezeichen versehene Beiträge werden hier angezeigt 🔖</string>
+  <string name="readerPanePlaceholder">Select a post to read</string>
+  <string name="buttonClose">Close</string>
+  <string name="readerExpandScreen">Expand reader</string>
+  <string name="readerCollapseScreen">Collapse reader</string>
   <string name="settings">Einstellungen</string>
   <string name="settingsAppearanceAndLayout">Aussehen &amp; Layout</string>
   <string name="settingsAppearanceAndLayoutSubtitle">Anpassen, wie Twine aussieht</string>
@@ -97,6 +102,8 @@
   <string name="settingsPostsDeletionPeriodNever">Niemals</string>
   <string name="settingsShowReaderViewTitle">Leseansicht aktivieren</string>
   <string name="settingsShowReaderViewSubtitle">Beiträge werden in einem vereinfachten Format angezeigt</string>
+  <string name="settingsConfirmMarkAllAsReadTitle">Confirm mark all as read</string>
+  <string name="settingsConfirmMarkAllAsReadSubtitle">Ask for confirmation before marking all articles as read</string>
   <string name="settingsThemeAuto">Automatisch</string>
   <string name="settingsThemeLight">Hell</string>
   <string name="settingsThemeDark">Dunkel</string>
@@ -151,6 +158,8 @@
   <string name="feedOptionWebsite">Website</string>
   <string name="feedOptionRemove">Entfernen</string>
   <string name="feedTitleHint">Titel</string>
+  <string name="feedSyncErrorTitle">Not synced to your account</string>
+  <string name="feedSyncErrorDescription">Your server couldn't subscribe to this feed, so it stays on this device only. Twine retries on every sync.</string>
   <string name="noUnreadPostsInFeed">Keine ungelesenen Beiträge</string>
   <string name="feedsSortLatest">Zuletzt hinzugefügt</string>
   <string name="feedsSortOldest">Zuerst hinzugefügt</string>
@@ -179,6 +188,7 @@
   <string name="databaseMaintainenceTitle">Bitte warten…</string>
   <string name="databaseMaintainenceSubtitle">Datenbankwartung wird durchgeführt, schließen Sie die App nicht</string>
   <string name="cdLoadFullArticle">Vollständigen Beitrag laden</string>
+  <string name="cdWatchVideo">Watch video</string>
   <string name="enableAutoSyncTitle">Hintergrundsynchronisation aktivieren</string>
   <string name="enableAutoSyncDesc">Beiträge werden im Hintergrund abgerufen</string>
   <string name="showFeedFavIconTitle">Feed-Favoriten-Symbol anzeigen</string>
@@ -232,6 +242,8 @@
   <string name="settingsDownloadFullContentSubtitle">Wenn aktiviert, versucht die App, während der Synchronisierung vollständige Artikel herunterzuladen.</string>
   <string name="settingsDownloadFullContentWarning">Achtung!: Dies kann die Ladezeiten der Feeds, den Datenverbrauch, den Arbeitsspeicher und den Speicherplatzbedarf erhöhen. Es kann potenziell Ihr Nutzererlebnis beeinträchtigen.</string>
   <string name="sort">Sortieren</string>
+  <string name="settingsHeaderCloudStorage">Cloud storage</string>
+  <string name="settingsHeaderFeedServices">Feed services</string>
   <string name="settingsSyncDropboxDesc">Konsistente plattformübergreifende Synchronisierung</string>
   <string name="settingsSyncStatusIdle">Nicht synchronisiert</string>
   <string name="settingsSyncStatusSyncing">Synchronisation läuft</string>
@@ -243,6 +255,7 @@
   <string name="settingsCustomisations">Anpassungen</string>
   <string name="settingsAppIconTitle">App-Symbol</string>
   <string name="settingsAppIconSubtitle">Wählen Sie aus, wie Twine auf Ihrem Startbildschirm aussieht</string>
+  <string name="settingsAppIconDefault">Default</string>
   <string name="filter">Filter</string>
   <string name="freshRssLoginTitle">FreshRSS</string>
   <string name="freshRssUsername">Benutzername</string>
@@ -262,6 +275,15 @@
   <string name="minifluxClearDataPositive">Fortfahren</string>
   <string name="minifluxErrorLoginFailed">Login fehlgeschlagen. Bitte überprüfe die Zugangsdaten und URL.</string>
   <string name="minifluxErrorUnknown">Ein unbekannter Fehler ist aufgetreten</string>
+  <string name="bazQuxUsername">Username</string>
+  <string name="bazQuxPassword">Password</string>
+  <string name="bazQuxLoginButton">Login</string>
+  <string name="bazQuxPasswordHint">If you signed up with Google or Facebook, set a password on bazqux.com first</string>
+  <string name="bazQuxClearDataTitle">Sign in with BazQux?</string>
+  <string name="bazQuxClearDataDesc">Twine will remove all data before proceeding. This includes all feeds, articles and bookmarks.</string>
+  <string name="bazQuxClearDataPositive">Proceed</string>
+  <string name="bazQuxErrorLoginFailed">Login failed. Please check your username and password, and make sure your BazQux subscription is active.</string>
+  <string name="bazQuxErrorUnknown">An unknown error occurred</string>
   <string name="switchServiceTitle">Mit %1$s anmelden?</string>
   <string name="switchServiceDescription">Twine löscht alle Daten zu %1$s, bevor es fortfährt. Dies umfasst alle Beiträge und Lesezeichen, die mit %1$s verknüpft sind.</string>
   <string name="settingsNotificationWarningAndroid">Probleme mit Benachrichtigungen? Ihr Gerät schließt die App möglicherweise im Hintergrund. Tippen Sie hier, um zu erfahren, wie Sie das beheben können.</string>
@@ -269,6 +291,8 @@
   <string name="onboardingSubtitle">Feed erstellen</string>
   <string name="onboardingSubtitle2">Kein Algorithmus. Keine Werbung.\nNur der Inhalt, den du liebst.</string>
   <string name="readingTimeEstimate">%1$d Min. Lesezeit</string>
+  <string name="nowPlayingOpenEpisode">Open episode</string>
+  <string name="nowPlayingStop">Stop playing</string>
   <string name="play">Abspielen</string>
   <string name="pause">Pausieren</string>
   <string name="seek_forward">30 Sekunden vorspulen</string>
@@ -278,6 +302,9 @@
   <string name="sleep_timer_off">Aus</string>
   <string name="sleep_timer_end_of_track">Ende des Tracks</string>
   <string name="sleep_timer_minutes">%1$d Minuten</string>
+  <string name="media_player_unavailable_title">Audio playback requires VLC</string>
+  <string name="media_player_unavailable_message">Install VLC and restart Twine to play this episode.</string>
+  <string name="media_player_unavailable_copied">Copied</string>
   <string name="readerPageCount">%1$d von %2$d</string>
   <string name="statistics">Statistiken</string>
   <string name="statisticsNoData">Noch keine Lesedaten verfügbar</string>
@@ -344,7 +371,7 @@
   <string name="premiumPaywallTitle">Unlock Twine Pro</string>
   <string name="premiumPaywallSubtitle">Get access to all premium features and support the development of Twine.</string>
   <string name="premiumPaywallFeature1Title">Unlimited feeds</string>
-  <string name="premiumPaywallFeature1Desc">Add more than 30 feeds, and enable OPML importing.</string>
+  <string name="premiumPaywallFeature1Desc">Add more than %1$d feeds, and enable OPML importing.</string>
   <string name="premiumPaywallFeature2Title">Cloud sync</string>
   <string name="premiumPaywallFeature2Desc">Unlock Miniflux, FreshRSS and other cloud integrations.</string>
   <string name="premiumPaywallFeature3Title">Themes</string>
@@ -364,4 +391,20 @@
   <string name="premiumPaywallBilledAnnually">Billed annually</string>
   <string name="premiumPaywallPayOnce">Pay once</string>
   <string name="premiumPaywallCancelAnytime">Cancel anytime. No commitment.</string>
+  <string name="keyboardShortcutsTitle">Keyboard shortcuts</string>
+  <string name="keyboardShortcutsSectionGlobal">Global</string>
+  <string name="keyboardShortcutsSectionReader">Reader</string>
+  <string name="keyboardShortcutsSectionPostList">Post list</string>
+  <string name="keyboardShortcutsRefresh">Refresh feeds</string>
+  <string name="keyboardShortcutsSearch">Search</string>
+  <string name="keyboardShortcutsSettings">Settings</string>
+  <string name="keyboardShortcutsAddFeed">Add feed</string>
+  <string name="keyboardShortcutsShowShortcuts">Show this dialog</string>
+  <string name="keyboardShortcutsNextPost">Next article</string>
+  <string name="keyboardShortcutsPreviousPost">Previous article</string>
+  <string name="keyboardShortcutsToggleBookmark">Toggle bookmark</string>
+  <string name="keyboardShortcutsMarkAsUnread">Mark as unread</string>
+  <string name="keyboardShortcutsOpenInBrowser">Open in browser</string>
+  <string name="keyboardShortcutsClose">Close reader</string>
+  <string name="keyboardShortcutsOpenPost">Open article</string>
 </resources>
