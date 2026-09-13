@@ -46,7 +46,7 @@ android {
   namespace = "dev.sasikanth.rss.reader"
 
   defaultConfig {
-    applicationId = "dev.sasikanth.rss.reader"
+    applicationId = "com.camilopaezz.twine"
     minSdk = libs.versions.android.sdk.min.get().toInt()
     targetSdk = libs.versions.android.sdk.target.get().toInt()
 

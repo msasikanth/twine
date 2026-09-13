@@ -3,27 +3,7 @@ name: Desktop Distributables
 on:
   release:
     types: [published]
-  push:
-    branches:
-      - main
-    paths:
-      - 'desktopApp/**'
-      - 'shared/**'
-      - 'core/**'
-      - '.github/workflows/desktop_distributables.yml'
   workflow_dispatch:
-    inputs:
-      tramline-input:
-        description: "Tramline input"
-        required: false
-      app_store_only:
-        description: "Build only the Mac App Store package, skipping DMG/MSI/DEB"
-        type: boolean
-        default: false
-      upload_to_app_store:
-        description: "Upload the Mac App Store package to App Store Connect"
-        type: boolean
-        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -31,9 +11,6 @@ concurrency:
 
 permissions:
   contents: write
-
-env:
-  ORG_GRADLE_PROJECT_GOOGLE_DESKTOP_CLIENT_SECRET: ${{ secrets.GOOGLE_DESKTOP_CLIENT_SECRET }}
 
 jobs:
   version:
@@ -46,209 +23,21 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - name: Configure Tramline
-        id: tramline
-        if: ${{ github.event.inputs.tramline-input != '' }}
-        uses: tramlinehq/deploy-action@v0.1.7
-        with:
-          input: ${{ github.event.inputs.tramline-input }}
       - id: resolve
         env:
-          TRAMLINE_VERSION_NAME: ${{ steps.tramline.outputs.version_name }}
-          TRAMLINE_VERSION_CODE: ${{ steps.tramline.outputs.version_code }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          NAME="$TRAMLINE_VERSION_NAME"
-          if [ -z "$NAME" ]; then
-            NAME="$RELEASE_TAG"
-          fi
+          NAME="$RELEASE_TAG"
           if [ -z "$NAME" ]; then
             NAME="$(git describe --tags --abbrev=0 2>/dev/null || echo 1.0.0)"
           fi
           echo "name=${NAME#v}" >> "$GITHUB_OUTPUT"
-          echo "code=${TRAMLINE_VERSION_CODE:-${{ github.run_number }}}" >> "$GITHUB_OUTPUT"
-
-  build-macos:
-    name: Build macOS DMG
-    runs-on: macos-latest
-    needs: version
-    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.app_store_only }}
-    timeout-minutes: 30
-    env:
-      ORG_GRADLE_PROJECT_VERSION_NAME: ${{ needs.version.outputs.name }}
-      ORG_GRADLE_PROJECT_VERSION_CODE: ${{ needs.version.outputs.code }}
-    steps:
-      - uses: actions/checkout@v6
-      - name: Setup JDK 21
-        uses: actions/setup-java@v5
-        with:
-          java-version: 21
-          distribution: zulu
-          cache: 'gradle'
-      - name: Import Developer ID signing certificate
-        env:
-          MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
-          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
-        run: |
-          KEYCHAIN_PASSWORD=$(uuidgen)
-          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-          security list-keychains -s build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-          security set-keychain-settings build.keychain
-          echo "$MACOS_CERTIFICATE_P12" | base64 --decode > certificate.p12
-          security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -A
-          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-          rm certificate.p12
-      - name: Build and notarize DMG
-        env:
-          MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
-          MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
-          MACOS_NOTARIZATION_PASSWORD: ${{ secrets.MACOS_NOTARIZATION_PASSWORD }}
-          MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
-        run: |
-          ./gradlew :desktopApp:notarizeReleaseDmg --no-daemon \
-            -Pcompose.desktop.mac.sign=true \
-            -Pcompose.desktop.mac.signing.identity="$MACOS_SIGNING_IDENTITY" \
-            -Pcompose.desktop.mac.notarization.appleID="$MACOS_NOTARIZATION_APPLE_ID" \
-            -Pcompose.desktop.mac.notarization.password="$MACOS_NOTARIZATION_PASSWORD" \
-            -Pcompose.desktop.mac.notarization.teamID="$MACOS_NOTARIZATION_TEAM_ID"
-      - name: Upload DMG
-        uses: actions/upload-artifact@v7
-        with:
-          name: Twine-macOS
-          path: desktopApp/build/compose/binaries/main-release/dmg/*.dmg
-      - name: Upload DMG to GitHub Release
-        if: github.event_name == 'release'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ github.event.release.tag_name }} desktopApp/build/compose/binaries/main-release/dmg/*.dmg --clobber
-
-  build-macos-appstore:
-    name: Build macOS App Store package
-    runs-on: macos-latest
-    needs: version
-    timeout-minutes: 25
-    env:
-      ORG_GRADLE_PROJECT_VERSION_NAME: ${{ needs.version.outputs.name }}
-      ORG_GRADLE_PROJECT_VERSION_CODE: ${{ needs.version.outputs.code }}
-    steps:
-      - uses: actions/checkout@v6
-      - name: Setup JDK 21
-        uses: actions/setup-java@v5
-        with:
-          java-version: 21
-          distribution: zulu
-          cache: 'gradle'
-      - name: Import Mac App Store signing certificate
-        env:
-          MAS_CERTIFICATE_P12: ${{ secrets.MAS_CERTIFICATE_P12 }}
-          MAS_CERTIFICATE_PASSWORD: ${{ secrets.MAS_CERTIFICATE_PASSWORD }}
-        run: |
-          KEYCHAIN_PASSWORD=$(uuidgen)
-          security create-keychain -p "$KEYCHAIN_PASSWORD" mas-build.keychain
-          security list-keychains -s mas-build.keychain
-          security default-keychain -s mas-build.keychain
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" mas-build.keychain
-          security set-keychain-settings mas-build.keychain
-          echo "$MAS_CERTIFICATE_P12" | base64 --decode > mas-certificate.p12
-          security import mas-certificate.p12 -k mas-build.keychain -P "$MAS_CERTIFICATE_PASSWORD" -A
-          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" mas-build.keychain
-          rm mas-certificate.p12
-      - name: Decode provisioning profile
-        env:
-          MAS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MAS_PROVISIONING_PROFILE_BASE64 }}
-        run: echo "$MAS_PROVISIONING_PROFILE_BASE64" | base64 --decode > desktopApp/embedded.provisionprofile
-      - name: Build Mac App Store package
-        id: build_mas_pkg
-        continue-on-error: true
-        env:
-          MAS_SIGNING_IDENTITY: ${{ secrets.MAS_SIGNING_IDENTITY }}
-        run: |
-          ./gradlew :desktopApp:packageReleasePkg --no-daemon \
-            -Ptwine.macAppStore=true \
-            -Pcompose.desktop.mac.sign=true \
-            -Pcompose.desktop.mac.signing.identity="$MAS_SIGNING_IDENTITY" \
-            -Pcompose.desktop.mac.signing.keychain="$HOME/Library/Keychains/mas-build.keychain-db"
-      - name: Re-sign PKG with installer identity
-        if: steps.build_mas_pkg.outcome == 'failure'
-        env:
-          MAS_SIGNING_IDENTITY: ${{ secrets.MAS_SIGNING_IDENTITY }}
-        run: |
-          MAS_INSTALLER_IDENTITY="${MAS_SIGNING_IDENTITY/Application/Installer}"
-          ARGS_FILE="desktopApp/build/compose/tmp/packageReleasePkg.args.txt"
-
-          # Compose Desktop's jpackage invocation for the PKG bundler passes a
-          # single --mac-signing-key-user-name that gets reused verbatim for both
-          # codesigning the .app (needs an Application-type identity, already
-          # correct) and productbuild's installer signing (needs a distinct
-          # Installer-type identity). There's no Gradle property to supply two
-          # different identities for these two purposes, so patch the already
-          # -generated jpackage args file to use the installer identity for this
-          # remaining step and invoke jpackage directly - the app image is already
-          # correctly signed from the earlier createReleaseDistributable run.
-          python3 - "$ARGS_FILE" "$MAS_SIGNING_IDENTITY" "$MAS_INSTALLER_IDENTITY" <<'PYEOF'
-          import re
-          import sys
-
-          path, old_identity, new_identity = sys.argv[1], sys.argv[2], sys.argv[3]
-
-          with open(path) as f:
-              content = f.read()
-
-          pattern = re.compile(
-              r"(--mac-signing-key-user-name\s+)(\"?)" + re.escape(old_identity) + r"(\"?)"
-          )
-          new_content, count = pattern.subn(
-              lambda m: f"{m.group(1)}{m.group(2)}{new_identity}{m.group(3)}",
-              content,
-          )
-          if count != 1:
-              sys.exit(f"ERROR: expected exactly 1 replacement of the signing identity, found {count}")
-
-          with open(path, "w") as f:
-              f.write(new_content)
-          PYEOF
-
-          "$JAVA_HOME/bin/jpackage" "@$ARGS_FILE"
-      - name: Print jpackage logs on failure
-        if: failure()
-        run: |
-          for f in desktopApp/build/compose/logs/packageReleasePkg/*.txt; do
-            echo "== $f =="
-            cat "$f"
-          done
-      - name: Upload App Store package
-        uses: actions/upload-artifact@v7
-        with:
-          name: Twine-MacAppStore
-          path: desktopApp/build/compose/binaries/main-release/pkg/*.pkg
-      - name: Install App Store Connect API key
-        if: github.event_name == 'release' || inputs.upload_to_app_store
-        env:
-          APP_STORE_API_PRIVATE_KEY: ${{ secrets.APP_STORE_API_PRIVATE_KEY }}
-          APP_STORE_KEY_ID: ${{ secrets.APP_STORE_KEY_ID }}
-        run: |
-          mkdir -p ~/private_keys
-          echo -n "$APP_STORE_API_PRIVATE_KEY" | base64 --decode > "$HOME/private_keys/AuthKey_$APP_STORE_KEY_ID.p8"
-      - name: Upload to App Store Connect
-        if: github.event_name == 'release' || inputs.upload_to_app_store
-        env:
-          API_KEY: ${{ secrets.APP_STORE_KEY_ID }}
-          API_ISSUER: ${{ secrets.APP_STORE_ISSUER_ID }}
-        run: |
-          PKG=$(ls desktopApp/build/compose/binaries/main-release/pkg/*.pkg)
-          xcrun altool --validate-app --type macos -f "$PKG" --apiKey "$API_KEY" --apiIssuer "$API_ISSUER"
-          xcrun altool --upload-app --type macos -f "$PKG" --apiKey "$API_KEY" --apiIssuer "$API_ISSUER"
-      - name: Clean up App Store Connect API key
-        if: always()
-        run: rm -rf ~/private_keys
+          echo "code=${{ github.run_number }}" >> "$GITHUB_OUTPUT"
 
   build-windows:
     name: Build Windows MSI
     runs-on: windows-latest
     needs: version
-    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.app_store_only }}
     env:
       ORG_GRADLE_PROJECT_VERSION_NAME: ${{ needs.version.outputs.name }}
       ORG_GRADLE_PROJECT_VERSION_CODE: ${{ needs.version.outputs.code }}
@@ -277,7 +66,6 @@ jobs:
     name: Build Linux DEB
     runs-on: ubuntu-latest
     needs: version
-    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.app_store_only }}
     env:
       ORG_GRADLE_PROJECT_VERSION_NAME: ${{ needs.version.outputs.name }}
       ORG_GRADLE_PROJECT_VERSION_CODE: ${{ needs.version.outputs.code }}

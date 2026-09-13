@@ -1,18 +1,22 @@
 # Twine - RSS Reader
 
-![CI-MAIN](https://github.com/msasikanth/twine/actions/workflows/ci_checks.yml/badge.svg?branch=main)
-[![Crowdin](https://badges.crowdin.net/twine-rss-reader/localized.svg)](https://crowdin.com/project/twine-rss-reader)
+![CI-MAIN](https://github.com/camilopaezz/twine/actions/workflows/ci_checks.yml/badge.svg?branch=main)
 
 <img src="readme_images/banner.png" alt="banner" />
 
 Twine is a modern cross-platform RSS reader app built using Kotlin and Compose Multiplatform. It features a nice user experience
 to browse through your feeds, with [dynamic theming](https://m3.material.io/styles/color/dynamic-color/user-generated-color), changing app ambient color based on content.
 
+This is a personal fork of [msasikanth/twine](https://github.com/msasikanth/twine) (`com.camilopaezz.twine`).
+
 ## Download
 
-<a href='https://play.google.com/store/apps/details?id=dev.sasikanth.rss.reader&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width="200px"/></a>
-<a href="https://apps.apple.com/us/app/twine-rss-reader/id6465694958?itsct=apps_box_badge&amp;itscg=30200" style="display: inline-block; overflow: hidden; border-radius: 13px;"><img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/white/en-us;releaseDate=1694390400" alt="Download on the App Store" width="200px"></a>
-<a href='https://apt.izzysoft.de/packages/dev.sasikanth.rss.reader'><img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" width="200" alt="Get it at IzzyOnDroid"></a>
+GitHub Releases ship:
+- Android FOSS APK
+- Windows MSI
+- Linux DEB
+
+See [Releases](https://github.com/camilopaezz/twine/releases).
 
 ## Features ✨
 
