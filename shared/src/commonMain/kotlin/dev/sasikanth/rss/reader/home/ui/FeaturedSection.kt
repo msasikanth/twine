@@ -17,18 +17,22 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.core.EaseInSine
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
@@ -49,11 +53,11 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowSizeClass
 import coil3.size.Dimension
 import coil3.size.Size
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
@@ -66,7 +70,6 @@ import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
-import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.sasikanth.rss.reader.utils.inverse
@@ -90,7 +93,6 @@ internal fun FeaturedSection(
 ) {
   val layoutDirection = LocalLayoutDirection.current
   val density = LocalDensity.current
-  val sizeClass = LocalWindowSizeClass.current
 
   val systemBars = WindowInsets.systemBars
   val systemBarsPaddingValues =
@@ -120,15 +122,6 @@ internal fun FeaturedSection(
       }
     }
 
-  val imageAspectRatio =
-    remember(sizeClass) {
-      when {
-        sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> 2f
-        sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) -> 1.5f
-        else -> 1f
-      }
-    }
-
   val shouldBlockImage = LocalBlockImage.current
   val isDarkTheme = AppTheme.isDark
   val backgroundImageColorFilter =
@@ -141,142 +134,171 @@ internal fun FeaturedSection(
       )
     }
 
-  Box(modifier) {
-    if (canBlurImage && blurEffect != null && featuredPosts.isNotEmpty()) {
-      // Only the current page and its immediate neighbors can be visible during a swipe.
-      val backgroundPageRange by
-        remember(featuredPosts) {
-          derivedStateOf {
-            val currentPage = pagerState.currentPage
-            val firstPage = (currentPage - 1).coerceAtLeast(0)
-            val lastPage = (currentPage + 1).coerceAtMost(featuredPosts.lastIndex)
-            firstPage..lastPage
+  val pageHeightsPx = remember { mutableStateMapOf<Int, Int>() }
+  val settledPageHeightPx = pageHeightsPx[pagerState.settledPage] ?: 0
+  val animatedPagerHeight by
+    animateDpAsState(
+      targetValue = with(density) { settledPageHeightPx.toDp() },
+      label = "featuredPagerHeight",
+    )
+
+  Column(modifier) {
+    Box(
+      modifier =
+        Modifier.fillMaxWidth()
+          .then(
+            if (settledPageHeightPx > 0) {
+              Modifier.height(animatedPagerHeight)
+            } else {
+              Modifier.wrapContentHeight(align = Alignment.Top)
+            }
+          )
+    ) {
+      if (canBlurImage && blurEffect != null && featuredPosts.isNotEmpty()) {
+        // Only the current page and its immediate neighbors can be visible during a swipe.
+        val backgroundPageRange by
+          remember(featuredPosts) {
+            derivedStateOf {
+              val currentPage = pagerState.currentPage
+              val firstPage = (currentPage - 1).coerceAtLeast(0)
+              val lastPage = (currentPage + 1).coerceAtMost(featuredPosts.lastIndex)
+              firstPage..lastPage
+            }
           }
-        }
 
-      val hasBackgroundImage =
-        backgroundPageRange.any { featuredPosts[it].resolvedPost.imageUrl != null }
+        val hasBackgroundImage =
+          backgroundPageRange.any { featuredPosts[it].resolvedPost.imageUrl != null }
 
-      if (hasBackgroundImage) {
-        val alphaForPage =
-          remember(pagerState, postsType, markAsReadOn) {
-            { page: Int ->
-              val pageOffset = pagerState.getOffsetFractionForPage(page)
-              if (postsType == PostsType.UNREAD && markAsReadOn == MarkAsReadOn.Scroll) {
-                calculateContentAlpha(pageOffset)
-              } else {
-                calculateBackgroundAlpha(pageOffset)
+        if (hasBackgroundImage) {
+          val alphaForPage =
+            remember(pagerState, postsType, markAsReadOn) {
+              { page: Int ->
+                val pageOffset = pagerState.getOffsetFractionForPage(page)
+                if (postsType == PostsType.UNREAD && markAsReadOn == MarkAsReadOn.Scroll) {
+                  calculateContentAlpha(pageOffset)
+                } else {
+                  calculateBackgroundAlpha(pageOffset)
+                }
+              }
+            }
+
+          val loadedBackgroundImages = remember { mutableStateMapOf<String, Unit>() }
+          val hasVisibleBackgroundImage =
+            remember(featuredPosts, alphaForPage, shouldBlockImage) {
+              {
+                shouldBlockImage ||
+                  backgroundPageRange.any { page ->
+                    loadedBackgroundImages.containsKey(featuredPosts[page].resolvedPost.id) &&
+                      alphaForPage(page) > 0f
+                  }
+              }
+            }
+
+          FeaturedSectionBackground(
+            blurEffect = blurEffect,
+            hasVisibleContent = hasVisibleBackgroundImage,
+            modifier = Modifier.matchParentSize(),
+          ) {
+            for (page in backgroundPageRange) {
+              val featuredPost = featuredPosts[page]
+              val postId = featuredPost.resolvedPost.id
+              key(postId) {
+                val alphaProvider = remember(page, alphaForPage) { { alphaForPage(page) } }
+
+                DisposableEffect(postId) { onDispose { loadedBackgroundImages.remove(postId) } }
+
+                FeaturedSectionBackgroundImage(
+                  imageUrl = featuredPost.resolvedPost.imageUrl,
+                  alphaProvider = alphaProvider,
+                  colorFilter = backgroundImageColorFilter,
+                  onLoad = { loadedBackgroundImages[postId] = Unit },
+                )
               }
             }
           }
+        }
+      }
 
-        val loadedBackgroundImages = remember { mutableStateMapOf<String, Unit>() }
-        val hasVisibleBackgroundImage =
-          remember(featuredPosts, alphaForPage, shouldBlockImage) {
-            {
-              shouldBlockImage ||
-                backgroundPageRange.any { page ->
-                  loadedBackgroundImages.containsKey(featuredPosts[page].resolvedPost.id) &&
-                    alphaForPage(page) > 0f
-                }
-            }
+      val contentPadding =
+        remember(systemBarsHorizontalPadding) {
+          PaddingValues(
+            start = systemBarsHorizontalPadding + 16.dp,
+            end = systemBarsHorizontalPadding + 16.dp,
+          )
+        }
+
+      val featuredPostKey =
+        remember(featuredPosts) {
+          { page: Int ->
+            featuredPosts.getOrNull(page)?.let { PostListKey.encode(it.resolvedPost) } ?: page
           }
+        }
 
-        FeaturedSectionBackground(
-          blurEffect = blurEffect,
-          hasVisibleContent = hasVisibleBackgroundImage,
-          modifier = Modifier.aspectRatio(imageAspectRatio),
-        ) {
-          for (page in backgroundPageRange) {
-            val featuredPost = featuredPosts[page]
-            val postId = featuredPost.resolvedPost.id
-            key(postId) {
-              val alphaProvider = remember(page, alphaForPage) { { alphaForPage(page) } }
-
-              DisposableEffect(postId) { onDispose { loadedBackgroundImages.remove(postId) } }
-
-              FeaturedSectionBackgroundImage(
-                imageUrl = featuredPost.resolvedPost.imageUrl,
-                alphaProvider = alphaProvider,
-                colorFilter = backgroundImageColorFilter,
-                onLoad = { loadedBackgroundImages[postId] = Unit },
+      HorizontalPager(
+        modifier = Modifier.fillMaxWidth(),
+        state = pagerState,
+        verticalAlignment = Alignment.Top,
+        contentPadding = contentPadding,
+        beyondViewportPageCount = 1,
+        key = featuredPostKey,
+      ) { page ->
+        val featuredPost = featuredPosts.getOrNull(page)
+        if (featuredPost != null) {
+          val postWithMetadata = featuredPost.resolvedPost
+          val imageAlignment =
+            remember(page) {
+              ParallaxAlignment(
+                horizontalBias = { pagerState.getOffsetFractionForPage(page) },
+                multiplier = 2f,
               )
             }
-          }
-        }
-      }
-    }
 
-    val contentPadding =
-      remember(systemBarsHorizontalPadding, featuredPosts.isNotEmpty()) {
-        PaddingValues(
-          start = systemBarsHorizontalPadding + 16.dp,
-          end = systemBarsHorizontalPadding + 16.dp,
-          bottom = if (featuredPosts.isNotEmpty()) 24.dp else 0.dp,
-        )
-      }
-
-    val featuredPostKey =
-      remember(featuredPosts) {
-        { page: Int ->
-          featuredPosts.getOrNull(page)?.let { PostListKey.encode(it.resolvedPost) } ?: page
-        }
-      }
-
-    HorizontalPager(
-      state = pagerState,
-      verticalAlignment = Alignment.Top,
-      contentPadding = contentPadding,
-      beyondViewportPageCount = 1,
-      key = featuredPostKey,
-    ) { page ->
-      val featuredPost = featuredPosts.getOrNull(page)
-      if (featuredPost != null) {
-        val postWithMetadata = featuredPost.resolvedPost
-        val imageAlignment =
-          remember(page) {
-            ParallaxAlignment(
-              horizontalBias = { pagerState.getOffsetFractionForPage(page) },
-              multiplier = 2f,
-            )
-          }
-
-        val contentAlphaProvider =
-          remember(page) {
-            {
-              val pageOffset = pagerState.getOffsetFractionForPage(page)
-              calculateContentAlpha(pageOffset)
-            }
-          }
-
-        Box(
-          modifier =
-            Modifier.onVisibilityChanged(minDurationMs = 500) {
-              val previousFeaturedPost =
-                featuredPosts.getOrNull(page - 1) ?: return@onVisibilityChanged
-
-              if (previousFeaturedPost.resolvedPost.read) return@onVisibilityChanged
-
-              if (it) {
-                markFeaturedPostAsReadOnScroll(previousFeaturedPost.resolvedPost.id)
+          val contentAlphaProvider =
+            remember(page) {
+              {
+                val pageOffset = pagerState.getOffsetFractionForPage(page)
+                calculateContentAlpha(pageOffset)
               }
             }
-        ) {
-          FeaturedPostItem(
-            item = postWithMetadata,
-            contentAlphaProvider = contentAlphaProvider,
-            onClick = { onItemClick(postWithMetadata, page) },
-            onBookmarkClick = { onPostBookmarkClick(postWithMetadata) },
-            onCommentsClick = { onPostCommentsClick(postWithMetadata.commentsLink!!) },
-            onSourceClick = { onPostSourceClick(postWithMetadata.sourceId) },
-            updateReadStatus = { updatedReadStatus ->
-              updateReadStatus(postWithMetadata.id, updatedReadStatus)
-            },
+
+          Box(
             modifier =
-              Modifier.padding(top = paddingValues.calculateTopPadding())
-                .padding(horizontal = 6.dp),
-            { FeaturedImage(imageUrl = postWithMetadata.imageUrl, alignment = imageAlignment) },
-          )
+              Modifier
+                // Measure the full post even when the pager is still sized to a shorter
+                // neighbor; otherwise tall pages report a clipped height and stay clipped.
+                .wrapContentHeight(align = Alignment.Top, unbounded = true)
+                .onSizeChanged { size ->
+                  if (size.height > 0) {
+                    pageHeightsPx[page] = size.height
+                  }
+                }
+                .onVisibilityChanged(minDurationMs = 500) {
+                  val previousFeaturedPost =
+                    featuredPosts.getOrNull(page - 1) ?: return@onVisibilityChanged
+
+                  if (previousFeaturedPost.resolvedPost.read) return@onVisibilityChanged
+
+                  if (it) {
+                    markFeaturedPostAsReadOnScroll(previousFeaturedPost.resolvedPost.id)
+                  }
+                }
+          ) {
+            FeaturedPostItem(
+              item = postWithMetadata,
+              contentAlphaProvider = contentAlphaProvider,
+              onClick = { onItemClick(postWithMetadata, page) },
+              onBookmarkClick = { onPostBookmarkClick(postWithMetadata) },
+              onCommentsClick = { onPostCommentsClick(postWithMetadata.commentsLink!!) },
+              onSourceClick = { onPostSourceClick(postWithMetadata.sourceId) },
+              updateReadStatus = { updatedReadStatus ->
+                updateReadStatus(postWithMetadata.id, updatedReadStatus)
+              },
+              modifier =
+                Modifier.padding(top = paddingValues.calculateTopPadding())
+                  .padding(horizontal = 6.dp),
+              { FeaturedImage(imageUrl = postWithMetadata.imageUrl, alignment = imageAlignment) },
+            )
+          }
         }
       }
     }
@@ -296,7 +318,7 @@ internal fun FeaturedSection(
       }
 
       HorizontalPageIndicators(
-        modifier = Modifier.padding(vertical = 8.dp).align(Alignment.BottomCenter),
+        modifier = Modifier.padding(top = 8.dp, bottom = 8.dp).align(Alignment.CenterHorizontally),
         pageIndicatorState = pageIndicatorState,
       )
     }

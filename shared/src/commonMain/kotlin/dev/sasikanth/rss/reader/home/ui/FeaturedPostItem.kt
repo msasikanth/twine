@@ -39,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
@@ -86,11 +85,6 @@ internal fun FeaturedPostItem(
         .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
         .graphicsLayer { this.alpha = alpha * contentAlphaProvider.invoke() }
   ) {
-    val density = LocalDensity.current
-    val titleTextStyle = MaterialTheme.typography.headlineMedium
-    val titleMaxLines = 3
-    var dynamicTitlePadding by remember(item.link) { mutableStateOf(0.dp) }
-
     featuredImage()
 
     Spacer(Modifier.height(16.dp))
@@ -107,17 +101,10 @@ internal fun FeaturedPostItem(
             }
         },
       text = item.title.ifBlank { item.description },
-      style = titleTextStyle,
+      style = MaterialTheme.typography.headlineMedium,
       color = AppTheme.colorScheme.onSurfaceVariant,
-      maxLines = titleMaxLines,
+      maxLines = 3,
       overflow = TextOverflow.Ellipsis,
-      onTextLayout = { textLayoutResult ->
-        val numberOfLines = textLayoutResult.lineCount
-        if (numberOfLines < titleMaxLines) {
-          val lineHeight = with(density) { titleTextStyle.lineHeight.toDp() }
-          dynamicTitlePadding = lineHeight * (titleMaxLines - numberOfLines)
-        }
-      },
     )
 
     Spacer(Modifier.height(8.dp))
@@ -126,12 +113,9 @@ internal fun FeaturedPostItem(
       text = item.description,
       style = MaterialTheme.typography.bodyMedium,
       color = AppTheme.colorScheme.outline,
-      minLines = 3,
       maxLines = 3,
       overflow = TextOverflow.Ellipsis,
     )
-
-    Spacer(Modifier.requiredHeight(dynamicTitlePadding))
 
     Spacer(modifier = Modifier.requiredHeight(4.dp))
 
@@ -157,7 +141,5 @@ internal fun FeaturedPostItem(
       onDropdownChange = { showDropdown = it },
       onSourceClick = onSourceClick,
     )
-
-    Spacer(Modifier.requiredHeight(16.dp))
   }
 }

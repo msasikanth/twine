@@ -63,7 +63,8 @@ fun FeaturedImage(
     if (unlockAspectRatio) {
       ContentScale.FillWidth
     } else {
-      widthBiasedScale
+      // Show the full image inside the fixed frame instead of cropping it.
+      ContentScale.Fit
     }
 
   imageUrl?.let { imageUrl ->
