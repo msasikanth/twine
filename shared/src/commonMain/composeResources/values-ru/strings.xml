@@ -43,7 +43,7 @@
   <string name="errorTooManyRedirects">На данном URL-адресе слишком много перенаправлений. Пожалуйста, используйте другой URL-адрес.</string>
   <string name="errorUnAuthorized">(%1$s): Вы не авторизованы для доступа к контенту по этой ссылке.</string>
   <string name="errorUnknownHttpStatus">Не удалось загрузить содержимое с помощью HTTP-кода: (%1$s)</string>
-  <string name="errorUnknown">Failed to add the feed. Please try again later.</string>
+  <string name="errorUnknown">Не удалось добавить ленту. Пожалуйста, повторите попытку позже.</string>
   <string name="postsSearchHint">Search</string>
   <string name="searchSortNewest">Сначала новые</string>
   <string name="searchSortNewestFirst">Сначала новые</string>
@@ -53,9 +53,9 @@
   <string name="unBookmark">Удалить закладку</string>
   <string name="bookmarks">Закладки</string>
   <string name="bookmarksPlaceholder">Здесь будут появляться посты, добавленные в закладки 🔖</string>
-  <string name="readerPanePlaceholder">Select a post to read</string>
-  <string name="buttonClose">Close</string>
-  <string name="readerExpandScreen">Expand reader</string>
+  <string name="readerPanePlaceholder">Выберите сообщение для чтения</string>
+  <string name="buttonClose">Закрыть</string>
+  <string name="readerExpandScreen">Развернуть ридер</string>
   <string name="readerCollapseScreen">Collapse reader</string>
   <string name="settings">Настройки</string>
   <string name="settingsAppearanceAndLayout">Внешний вид</string>
