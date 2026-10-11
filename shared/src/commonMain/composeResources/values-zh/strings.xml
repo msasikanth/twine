@@ -43,6 +43,7 @@
   <string name="errorTooManyRedirects">给定的链接重定向太多。请使用其他链接。</string>
   <string name="errorUnAuthorized">（%1$s）：你没有访问该链接内容的权限。</string>
   <string name="errorUnknownHttpStatus">使用 HTTP 代码加载内容失败：（%1$s）</string>
+  <string name="errorUnknown">Failed to add the feed. Please try again later.</string>
   <string name="postsSearchHint">Search</string>
   <string name="searchSortNewest">最新</string>
   <string name="searchSortNewestFirst">优先最新</string>
@@ -52,6 +53,10 @@
   <string name="unBookmark">取消书签</string>
   <string name="bookmarks">书签</string>
   <string name="bookmarksPlaceholder">已添加书签的文章会出现在这里 🔖</string>
+  <string name="readerPanePlaceholder">Select a post to read</string>
+  <string name="buttonClose">Close</string>
+  <string name="readerExpandScreen">Expand reader</string>
+  <string name="readerCollapseScreen">Collapse reader</string>
   <string name="settings">设置</string>
   <string name="settingsAppearanceAndLayout">外观 &amp; 布局</string>
   <string name="settingsAppearanceAndLayoutSubtitle">自定义 Twine 的外观</string>
@@ -97,6 +102,8 @@
   <string name="settingsPostsDeletionPeriodNever">从不</string>
   <string name="settingsShowReaderViewTitle">启用阅读器视图</string>
   <string name="settingsShowReaderViewSubtitle">文章将以简化、易读的视图呈现</string>
+  <string name="settingsConfirmMarkAllAsReadTitle">Confirm mark all as read</string>
+  <string name="settingsConfirmMarkAllAsReadSubtitle">Ask for confirmation before marking all articles as read</string>
   <string name="settingsThemeAuto">自动</string>
   <string name="settingsThemeLight">浅色</string>
   <string name="settingsThemeDark">深色</string>
@@ -151,6 +158,8 @@
   <string name="feedOptionWebsite">网站</string>
   <string name="feedOptionRemove">移除</string>
   <string name="feedTitleHint">标题</string>
+  <string name="feedSyncErrorTitle">Not synced to your account</string>
+  <string name="feedSyncErrorDescription">Your server couldn't subscribe to this feed, so it stays on this device only. Twine retries on every sync.</string>
   <string name="noUnreadPostsInFeed">没有未读文章</string>
   <string name="feedsSortLatest">最近添加</string>
   <string name="feedsSortOldest">首次添加</string>
@@ -179,6 +188,7 @@
   <string name="databaseMaintainenceTitle">请稍候……</string>
   <string name="databaseMaintainenceSubtitle">正在维护数据库，请不要关闭应用</string>
   <string name="cdLoadFullArticle">加载完整文章</string>
+  <string name="cdWatchVideo">Watch video</string>
   <string name="enableAutoSyncTitle">开启后台同步</string>
   <string name="enableAutoSyncDesc">开启后，来源将在后台自动更新</string>
   <string name="showFeedFavIconTitle">显示来源图标</string>
@@ -232,6 +242,8 @@
   <string name="settingsDownloadFullContentSubtitle">启用后，应用将在同步期间尝试下载完整文章。</string>
   <string name="settingsDownloadFullContentWarning">警告！：这可能会增加订阅源加载时间、数据使用量、内存和存储消耗。它可能会影响您的用户体验。</string>
   <string name="sort">排序</string>
+  <string name="settingsHeaderCloudStorage">Cloud storage</string>
+  <string name="settingsHeaderFeedServices">Feed services</string>
   <string name="settingsSyncDropboxDesc">一致的跨平台同步</string>
   <string name="settingsSyncStatusIdle">未同步</string>
   <string name="settingsSyncStatusSyncing">正在同步</string>
@@ -243,6 +255,7 @@
   <string name="settingsCustomisations">定制</string>
   <string name="settingsAppIconTitle">应用图标</string>
   <string name="settingsAppIconSubtitle">选择 Twine 在主屏幕上的外观</string>
+  <string name="settingsAppIconDefault">Default</string>
   <string name="filter">过滤</string>
   <string name="freshRssLoginTitle">FreshRSS</string>
   <string name="freshRssUsername">用户名</string>
@@ -262,6 +275,15 @@
   <string name="minifluxClearDataPositive">继续</string>
   <string name="minifluxErrorLoginFailed">登录失败。请检查你的登录凭证和 URL。</string>
   <string name="minifluxErrorUnknown">发生了未知错误</string>
+  <string name="bazQuxUsername">Username</string>
+  <string name="bazQuxPassword">Password</string>
+  <string name="bazQuxLoginButton">Login</string>
+  <string name="bazQuxPasswordHint">If you signed up with Google or Facebook, set a password on bazqux.com first</string>
+  <string name="bazQuxClearDataTitle">Sign in with BazQux?</string>
+  <string name="bazQuxClearDataDesc">Twine will remove all data before proceeding. This includes all feeds, articles and bookmarks.</string>
+  <string name="bazQuxClearDataPositive">Proceed</string>
+  <string name="bazQuxErrorLoginFailed">Login failed. Please check your username and password, and make sure your BazQux subscription is active.</string>
+  <string name="bazQuxErrorUnknown">An unknown error occurred</string>
   <string name="switchServiceTitle">通过 %1$s 登录？</string>
   <string name="switchServiceDescription">继续前 Twine 将移除所有 %1$s 数据。包括所有与 %1$s 相关的文章和书签。</string>
   <string name="settingsNotificationWarningAndroid">通知有问题？您的设备可能会在后台关闭应用。点击此处了解如何修复。</string>
@@ -269,6 +291,8 @@
   <string name="onboardingSubtitle">构建你的时间流</string>
   <string name="onboardingSubtitle2">没有算法。没有广告。\n只有你喜爱的内容。</string>
   <string name="readingTimeEstimate">阅读需要 %1$d 分钟</string>
+  <string name="nowPlayingOpenEpisode">Open episode</string>
+  <string name="nowPlayingStop">Stop playing</string>
   <string name="play">播放</string>
   <string name="pause">暂停</string>
   <string name="seek_forward">前进 30 秒</string>
@@ -278,6 +302,9 @@
   <string name="sleep_timer_off">关闭</string>
   <string name="sleep_timer_end_of_track">播放结束</string>
   <string name="sleep_timer_minutes">%1$d 分钟</string>
+  <string name="media_player_unavailable_title">Audio playback requires VLC</string>
+  <string name="media_player_unavailable_message">Install VLC and restart Twine to play this episode.</string>
+  <string name="media_player_unavailable_copied">Copied</string>
   <string name="readerPageCount">%1$d/%2$d</string>
   <string name="statistics">统计数据</string>
   <string name="statisticsNoData">还没有阅读数据</string>
@@ -340,12 +367,12 @@
   <string name="premiumPaywallTitle">Unlock Twine Pro</string>
   <string name="premiumPaywallSubtitle">Get access to all premium features and support the development of Twine.</string>
   <string name="premiumPaywallFeature1Title">Unlimited feeds</string>
-  <string name="premiumPaywallFeature1Desc">Add more than 30 feeds, and enable OPML importing.</string>
+  <string name="premiumPaywallFeature1Desc">Add more than %1$d feeds, and enable OPML importing.</string>
   <string name="premiumPaywallFeature2Title">Cloud sync</string>
   <string name="premiumPaywallFeature2Desc">Unlock Miniflux, FreshRSS and other cloud integrations.</string>
   <string name="premiumPaywallFeature3Title">Themes</string>
   <string name="premiumPaywallFeature3Desc">Keep Twine dynamic or stick to your favorite color palette.</string>
-  <string name="premiumPaywallFeature4Title">Widgets</string>
+  <string name="premiumPaywallFeature4Title">小工具</string>
   <string name="premiumPaywallFeature4Desc">Get access to powerful home screen widgets.</string>
   <string name="premiumPaywallPrivacyPolicy">Privacy policy</string>
   <string name="premiumPaywallTermsOfService">Terms of service</string>
@@ -360,4 +387,20 @@
   <string name="premiumPaywallBilledAnnually">Billed annually</string>
   <string name="premiumPaywallPayOnce">Pay once</string>
   <string name="premiumPaywallCancelAnytime">Cancel anytime. No commitment.</string>
+  <string name="keyboardShortcutsTitle">Keyboard shortcuts</string>
+  <string name="keyboardShortcutsSectionGlobal">Global</string>
+  <string name="keyboardShortcutsSectionReader">Reader</string>
+  <string name="keyboardShortcutsSectionPostList">Post list</string>
+  <string name="keyboardShortcutsRefresh">Refresh feeds</string>
+  <string name="keyboardShortcutsSearch">Search</string>
+  <string name="keyboardShortcutsSettings">Settings</string>
+  <string name="keyboardShortcutsAddFeed">Add feed</string>
+  <string name="keyboardShortcutsShowShortcuts">Show this dialog</string>
+  <string name="keyboardShortcutsNextPost">Next article</string>
+  <string name="keyboardShortcutsPreviousPost">Previous article</string>
+  <string name="keyboardShortcutsToggleBookmark">Toggle bookmark</string>
+  <string name="keyboardShortcutsMarkAsUnread">Mark as unread</string>
+  <string name="keyboardShortcutsOpenInBrowser">Open in browser</string>
+  <string name="keyboardShortcutsClose">Close reader</string>
+  <string name="keyboardShortcutsOpenPost">Open article</string>
 </resources>
