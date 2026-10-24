@@ -26,7 +26,6 @@ import androidx.paging.cachedIn
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
-import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveReaderPost
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.ObservableSelectedPost
@@ -270,8 +269,7 @@ class ReaderViewModel(
     observableActiveReaderPost.updateActivePost(post.id)
 
     coroutineScope.launch {
-      val markAsReadOn = settingsRepository.markAsReadOn.first()
-      if (markAsReadOn == MarkAsReadOn.Open && post.audioUrl == null) {
+      if (post.audioUrl == null) {
         rssRepository.updatePostReadStatus(read = true, id = post.id)
       }
     }
@@ -279,9 +277,8 @@ class ReaderViewModel(
 
   private fun markPostsAsRead(): Job {
     return coroutineScope.launch {
-      val markAsReadOn = settingsRepository.markAsReadOn.first()
       val openedPostItems = _openedPostItems.value
-      if (markAsReadOn != MarkAsReadOn.Open || openedPostItems.isEmpty()) return@launch
+      if (openedPostItems.isEmpty()) return@launch
 
       val audioMarkAsReadThreshold = settingsRepository.audioMarkAsReadThreshold.first()
       val posts = postRepository.postsByIds(openedPostItems)
