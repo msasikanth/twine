@@ -196,6 +196,8 @@ fun EntryProviderScope<NavKey>.mainScreen(
     // But mainScreen is almost always active when it's rendered, so canHandleBack is true.
     val isMainActive = true
 
+    val isDetailOpen = navigator.backStack.lastOrNull() !is Screen.Main
+
     LaunchedEffect(useDarkTheme) {
       toggleLightStatusBar(!useDarkTheme)
       toggleLightNavBar(!useDarkTheme)
@@ -337,6 +339,7 @@ fun EntryProviderScope<NavKey>.mainScreen(
         openAddFeedScreen = { navigator.navigate(Screen.AddFeed) },
         openPaywall = { navigator.navigate(Screen.Paywall()) },
         canHandleBack = isMainActive,
+        canResetActiveSourceOnBack = !isDetailOpen,
         isSideNavigationExpanded = isSideNavigationExpanded.value,
         setSideNavigationExpanded = { isSideNavigationExpanded.value = it },
       )

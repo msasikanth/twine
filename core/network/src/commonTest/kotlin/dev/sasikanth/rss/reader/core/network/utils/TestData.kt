@@ -394,3 +394,49 @@ const val jsonFeed =
   ]
 }
 """
+
+const val rssXmlContentWithElementBeforeChannel =
+  """<?xml version="1.0" encoding="UTF-8"?>
+  <?xml-stylesheet type="text/xsl" href="/global/feed/rss.xslt" ?>
+  <rss version="2.0">
+  <script src="https://example.com/global/feed/xslt-polyfill.min.js" xmlns="http://www.w3.org/1999/xhtml"></script>
+  <atom:link href="https://example.com/feed" rel="self" type="application/rss+xml" />
+  <!-- a comment before the channel -->
+  <wrapper><nested>text<deeper /></nested></wrapper>
+  <channel>
+    <title>Feed title</title>
+    <link>https://example.com</link>
+    <description>Feed description</description>
+    <item>
+      <title>First post</title>
+      <link>https://example.com/first-post</link>
+      <description>First post description.</description>
+      <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>Second post</title>
+      <link>https://example.com/second-post</link>
+      <description>Second post description.</description>
+      <pubDate>Thu, 25 May 2023 07:30:00 +0000</pubDate>
+    </item>
+  </channel>
+  </rss>
+  """
+
+const val rdfXmlContentWithElementBeforeChannel =
+  """<?xml version="1.0" encoding="UTF-8"?>
+  <rdf:RDF>
+  <script src="https://example.com/polyfill.js" xmlns="http://www.w3.org/1999/xhtml"></script>
+  <channel>
+    <title>Feed title</title>
+    <link>https://example.com</link>
+    <description>Feed description</description>
+  </channel>
+    <item>
+      <title>Post</title>
+      <link>https://example.com/first-post</link>
+      <description>First post description.</description>
+      <dc:date>Thu, 25 May 2023 09:00:00 +0000</dc:date>
+    </item>
+  </rdf:RDF>
+  """

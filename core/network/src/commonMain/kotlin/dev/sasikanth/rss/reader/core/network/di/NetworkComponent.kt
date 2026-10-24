@@ -60,7 +60,7 @@ fun <T : HttpClientEngineConfig> httpClient(
       logger =
         object : Logger {
           override fun log(message: String) {
-            KermitLogger.i("HttpClient") {
+            KermitLogger.i(tag = "HttpClient") {
               """
               |---
               |$message

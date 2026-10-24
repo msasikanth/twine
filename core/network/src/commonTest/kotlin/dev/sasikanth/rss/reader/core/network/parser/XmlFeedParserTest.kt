@@ -32,13 +32,16 @@ import dev.sasikanth.rss.reader.core.network.utils.podcastAtomXmlContent
 import dev.sasikanth.rss.reader.core.network.utils.podcastRssFeedUrl
 import dev.sasikanth.rss.reader.core.network.utils.podcastRssXmlContent
 import dev.sasikanth.rss.reader.core.network.utils.rdfXmlContent
+import dev.sasikanth.rss.reader.core.network.utils.rdfXmlContentWithElementBeforeChannel
 import dev.sasikanth.rss.reader.core.network.utils.rssXmlContent
+import dev.sasikanth.rss.reader.core.network.utils.rssXmlContentWithElementBeforeChannel
 import dev.sasikanth.rss.reader.core.network.utils.rssXmlContentWithNestedMediaInFirstItem
 import dev.sasikanth.rss.reader.core.network.utils.youtubeAtomFeed
 import dev.sasikanth.rss.reader.core.network.utils.youtubeChannelHtml
 import dev.sasikanth.rss.reader.core.network.utils.youtubeFeedUrl
 import dev.sasikanth.rss.reader.core.network.utils.youtubeUploadsPlaylistAtomFeed
 import dev.sasikanth.rss.reader.core.network.utils.youtubeUploadsPlaylistFeedUrl
+import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -51,6 +54,7 @@ import korlibs.io.lang.Charsets
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.asFlow
@@ -360,6 +364,45 @@ class XmlFeedParserTest {
     // then
     assertEquals(listOf("First post", "Second post", "Third post"), posts.map { it.title })
     assertEquals("https://example.com/media/first-post-140", posts.first().imageUrl)
+  }
+
+  @Test
+  fun elementsBetweenTheFeedRootAndChannelShouldBeSkipped() = runTest {
+    // when
+    val content = ByteReadChannel(rssXmlContentWithElementBeforeChannel.toByteArray())
+    val payload = xmlFeedParser.parse(content, feedUrl, Charsets.UTF8)
+    val posts = payload.posts.toList()
+
+    // then
+    assertEquals("Feed title", payload.name)
+    assertEquals(listOf("First post", "Second post"), posts.map { it.title })
+  }
+
+  @Test
+  fun aFeedThatEndsBeforeItsChannelShouldFailInsteadOfHanging() = runTest {
+    // given
+    val truncatedXml =
+      """<?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0">
+        <script src="https://example.com/polyfill.js">"""
+
+    // when
+    val content = ByteReadChannel(truncatedXml.toByteArray())
+
+    // then
+    assertFailsWith<XmlParsingError> { xmlFeedParser.parse(content, feedUrl, Charsets.UTF8) }
+  }
+
+  @Test
+  fun elementsBetweenTheRdfRootAndChannelShouldBeSkipped() = runTest {
+    // when
+    val content = ByteReadChannel(rdfXmlContentWithElementBeforeChannel.toByteArray())
+    val payload = xmlFeedParser.parse(content, feedUrl, Charsets.UTF8)
+    val posts = payload.posts.toList()
+
+    // then
+    assertEquals("Feed title", payload.name)
+    assertEquals(listOf("Post"), posts.map { it.title })
   }
 
   @Test

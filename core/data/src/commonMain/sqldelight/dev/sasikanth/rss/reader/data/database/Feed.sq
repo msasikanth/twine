@@ -86,6 +86,7 @@ SELECT
 FROM feed f
 LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :postsUpperBound
 WHERE f.id = :id AND f.isDeleted = 0
+GROUP BY f.id
 ORDER BY pinnedAt DESC, f.createdAt DESC LIMIT 1;
 
 updateFeedName:

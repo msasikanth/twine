@@ -47,6 +47,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -63,6 +64,8 @@ import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalRootWindowSizeClass
 import dev.sasikanth.rss.reader.utils.ShortcutHandler
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.modules.SerializersModule
@@ -87,6 +90,7 @@ internal fun MainScreen(
   setSideNavigationExpanded: (Boolean) -> Unit,
   modifier: Modifier = Modifier,
   canHandleBack: Boolean = true,
+  canResetActiveSourceOnBack: Boolean = true,
   startTab: String? = null,
 ) {
   // Inline side navigation (rail/expanded drawer) is reserved for large widths; on
@@ -128,17 +132,30 @@ internal fun MainScreen(
     }
   }
 
+  val hasActiveSource by
+    remember(feedsViewModel) {
+        feedsViewModel.state.map { it.activeSource != null }.distinctUntilChanged()
+      }
+      .collectAsStateWithLifecycle(initialValue = feedsViewModel.state.value.activeSource != null)
+
+  val canResetActiveSource =
+    canResetActiveSourceOnBack && selectedDestination == MainDestination.Home && hasActiveSource
+
   NavigationEventHandler(
     state = rememberNavigationEventState(NavigationEventInfo.None),
     isBackEnabled =
-      canHandleBack && (selectedDestination != MainDestination.Home || drawerState.isOpen),
+      canHandleBack &&
+        (selectedDestination != MainDestination.Home || drawerState.isOpen || canResetActiveSource),
   ) {
     when {
       drawerState.isOpen -> {
         scope.launch { drawerState.close() }
       }
-      else -> {
+      selectedDestination != MainDestination.Home -> {
         navigator.popUpTo(Screen.MainHome::class, inclusive = false)
+      }
+      else -> {
+        feedsViewModel.dispatch(FeedsEvent.OnHomeSelected)
       }
     }
   }

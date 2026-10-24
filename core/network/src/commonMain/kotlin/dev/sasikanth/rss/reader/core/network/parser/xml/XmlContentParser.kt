@@ -47,6 +47,30 @@ abstract class XmlContentParser {
 
   abstract suspend fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload
 
+  /**
+   * Advances to [containerTag]'s start tag, skipping over any sibling elements that precede it.
+   * Some providers put unrelated elements, like a `<script>` for their XSLT stylesheet, between the
+   * feed root and its container tag. Depth is tracked here instead of using `skipSubTree`, which
+   * loops forever when the document ends inside the subtree being skipped.
+   */
+  protected fun advanceToContainerTag(parser: XmlPullParser, containerTag: String) {
+    var depth = 0
+
+    while (true) {
+      when (parser.next()) {
+        EventType.END_DOCUMENT -> break
+        EventType.START_TAG -> {
+          if (depth == 0 && parser.name == containerTag) return
+          depth++
+        }
+        EventType.END_TAG -> if (depth > 0) depth--
+        else -> {}
+      }
+    }
+
+    parser.require(EventType.START_TAG, parser.namespace, containerTag)
+  }
+
   protected fun postsFlow(
     parser: XmlPullParser,
     firstPost: PostPayload? = null,

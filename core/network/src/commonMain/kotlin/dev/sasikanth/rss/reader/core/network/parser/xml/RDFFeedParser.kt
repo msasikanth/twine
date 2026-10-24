@@ -39,8 +39,7 @@ import org.kobjects.ktxml.api.XmlPullParser
 class RDFContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlContentParser() {
 
   override suspend fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
-    parser.nextTag()
-    parser.require(EventType.START_TAG, parser.namespace, TAG_RSS_CHANNEL)
+    advanceToContainerTag(parser, TAG_RSS_CHANNEL)
 
     var title: String? = null
     var link: String? = null
