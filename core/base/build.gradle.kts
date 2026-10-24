@@ -33,7 +33,12 @@ kotlin {
     namespace = "dev.sasikanth.rss.reader.core.base"
 
     minSdk = libs.versions.android.sdk.min.get().toInt()
-    compileSdk = libs.versions.android.sdk.compile.get().toInt()
+    compileSdk {
+      version =
+        release(libs.versions.android.sdk.compile.get().toInt()) {
+          minorApiLevel = libs.versions.android.sdk.minor.get().toInt()
+        }
+    }
 
     androidResources { enable = true }
 

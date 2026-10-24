@@ -42,7 +42,12 @@ plugins {
 }
 
 android {
-  compileSdk = libs.versions.android.sdk.compile.get().toInt()
+  compileSdk {
+    version =
+      release(libs.versions.android.sdk.compile.get().toInt()) {
+        minorApiLevel = libs.versions.android.sdk.minor.get().toInt()
+      }
+  }
   namespace = "dev.sasikanth.rss.reader"
 
   defaultConfig {

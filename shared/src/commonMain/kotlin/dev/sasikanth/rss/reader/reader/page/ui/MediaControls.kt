@@ -65,6 +65,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -163,9 +164,12 @@ internal fun MediaControls(
             activeTrackColor = AppTheme.colorScheme.primaryContainer,
             inactiveTrackColor = translucentStyle.prominent.background,
           )
+        val sliderState = rememberSliderState(value = progress)
+        sliderState.value = progress
+
         Slider(
           modifier = Modifier.padding(top = 8.dp),
-          value = progress,
+          state = sliderState,
           onValueChange = {
             val newPosition = (it * playbackState.duration).toLong()
             val previousPosition = (progress * playbackState.duration).toLong()

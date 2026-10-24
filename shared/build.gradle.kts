@@ -71,9 +71,7 @@ kotlin {
 
   applyDefaultHierarchyTemplate()
 
-  compilerOptions {
-    freeCompilerArgs.addAll("-Xexpect-actual-classes", "-Xexplicit-backing-fields")
-  }
+  compilerOptions { freeCompilerArgs.addAll("-Xexpect-actual-classes") }
 
   jvm()
 
@@ -81,7 +79,12 @@ kotlin {
     namespace = "dev.sasikanth.rss.reader.common"
 
     minSdk = libs.versions.android.sdk.min.get().toInt()
-    compileSdk = libs.versions.android.sdk.compile.get().toInt()
+    compileSdk {
+      version =
+        release(libs.versions.android.sdk.compile.get().toInt()) {
+          minorApiLevel = libs.versions.android.sdk.minor.get().toInt()
+        }
+    }
 
     androidResources { enable = true }
     withHostTestBuilder {}.configure {}

@@ -18,7 +18,7 @@
 package dev.sasikanth.rss.reader.core.network.utils
 
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.readRemaining
+import io.ktor.utils.io.readBuffer
 import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
 import kotlinx.io.readByteArray
@@ -29,7 +29,7 @@ internal suspend fun ByteReadChannel.toCharIterator(
   charset: Charset,
   platformPageSize: Long,
 ): CharIterator {
-  val bytes = readRemaining().readByteArray()
+  val bytes = readBuffer().readByteArray()
 
   val firstChunkSize = minOf(bytes.size, platformPageSize.toInt())
   val encodingContent = buildString { Charsets.UTF8.decode(this, bytes, 0, firstChunkSize) }

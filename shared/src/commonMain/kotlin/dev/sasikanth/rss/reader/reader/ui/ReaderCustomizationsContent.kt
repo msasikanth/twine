@@ -42,6 +42,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -204,12 +205,13 @@ private fun FontLineHeightStepper(
         inactiveTickColor = AppTheme.colorScheme.inverseSurface,
         inactiveTrackColor = AppTheme.colorScheme.surfaceContainerHigh,
       )
+    val sliderState = rememberSliderState(value = defaultValue, steps = 9, trackRange = 1f..2f)
+    sliderState.value = defaultValue
+
     Slider(
       modifier = Modifier.weight(1f).padding(horizontal = 12.dp, vertical = 8.dp),
-      value = defaultValue,
+      state = sliderState,
       onValueChange = onValueChange,
-      valueRange = 1f..2f,
-      steps = 9,
       thumb = {
         Box(
           modifier =
@@ -258,12 +260,13 @@ private fun FontScaleStepper(
         inactiveTickColor = AppTheme.colorScheme.inverseSurface,
         inactiveTrackColor = AppTheme.colorScheme.surfaceContainerHigh,
       )
+    val sliderState = rememberSliderState(value = defaultValue, steps = 11, trackRange = 0.8f..2f)
+    sliderState.value = defaultValue
+
     Slider(
       modifier = Modifier.weight(1f).padding(horizontal = 12.dp, vertical = 8.dp),
-      value = defaultValue,
+      state = sliderState,
       onValueChange = onValueChange,
-      valueRange = 0.8f..2f,
-      steps = 11,
       thumb = {
         Box(
           modifier =
