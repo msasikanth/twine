@@ -107,6 +107,7 @@ import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
+import dev.sasikanth.rss.reader.markdown.ReaderMarkdownTable
 import dev.sasikanth.rss.reader.markdown.SafeMarkdownCheckBox
 import dev.sasikanth.rss.reader.markdown.SafeMarkdownHeader
 import dev.sasikanth.rss.reader.markdown.SafeMarkdownParagraph
@@ -649,6 +650,7 @@ internal fun ReaderScreen(
                         style = cm.typography.text,
                       )
                     },
+                    table = { cm -> ReaderMarkdownTable(cm) },
                     codeBlock = { cm ->
                       MarkdownHighlightedCodeBlock(
                         content = cm.content,
