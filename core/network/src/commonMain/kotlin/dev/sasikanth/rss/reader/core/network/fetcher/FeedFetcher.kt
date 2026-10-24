@@ -69,7 +69,11 @@ class FeedFetcher(
   companion object {
     private const val MAX_REDIRECTS_ALLOWED = 5
     private const val FULL_CONTENT_CONCURRENCY = 3
+
+    private val XHTML_CONTENT_TYPE = ContentType("application", "xhtml+xml")
   }
+
+  private fun ContentType.isXml() = contentSubtype.endsWith("xml", ignoreCase = true)
 
   suspend fun fetch(url: String, fetchFullContent: Boolean = false): FeedFetchResult {
     return withContext(networkDispatcher) {
@@ -150,8 +154,8 @@ class FeedFetcher(
       }
 
     val responseChannel = response.bodyAsChannel()
-    when (contentType) {
-      ContentType.Text.Html -> {
+    when {
+      contentType == ContentType.Text.Html || contentType == XHTML_CONTENT_TYPE -> {
         val feedUrl = fetchFeedLinkFromHtmlIfExists(responseChannel, url)
 
         if (feedUrl != url && !feedUrl.isNullOrBlank()) {
@@ -163,15 +167,10 @@ class FeedFetcher(
         }
       }
 
-      // There are scenarios where a feed doesn't have any content-type, rare, but it's possible
-      // in those scenarios we default to trying to parse them as XML and if it fails, it fails.
-      ContentType.Application.Atom,
-      ContentType.Application.Rss,
-      ContentType.Application.Xml,
-      ContentType.Text.Xml,
-      ContentType("text", "atom+xml"),
-      ContentType("text", "rss+xml"),
-      null -> {
+      // Feeds are served under a long tail of XML content types, like `application/x-rss+xml`,
+      // and there are rare scenarios where a feed doesn't have any content-type at all. In both
+      // cases we default to trying to parse them as XML and if it fails, it fails.
+      contentType == null || contentType.isXml() -> {
         val responseCharset =
           try {
             response.contentType()?.parameter("charset")
@@ -189,7 +188,7 @@ class FeedFetcher(
 
         return FeedFetchResult.Success(feedPayload)
       }
-      ContentType.Application.Json -> {
+      contentType == ContentType.Application.Json -> {
         val jsonSource = responseChannel.readBuffer()
         var feedPayload = jsonFeedParser.parse(content = jsonSource, feedUrl = url)
 
