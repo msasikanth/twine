@@ -164,6 +164,10 @@
   <string name="feedsSortLatest">Последнее добавленное</string>
   <string name="feedsSortOldest">Добавленное первым</string>
   <string name="feedsSortAlphabetical">По алфавиту</string>
+  <string name="feedsSortSectionTitle">Sort by</string>
+  <string name="feedsFilterSectionTitle">Filter</string>
+  <string name="feedsFilterUnreadOnly">Unread feeds</string>
+  <string name="feedsNoUnread">No feeds with unread articles.</string>
   <string name="feedsBottomBarNewGroup">Новая группа</string>
   <string name="feedsBottomBarNewFeed">Новый канал</string>
   <string name="actionPin">Закрепить</string>
