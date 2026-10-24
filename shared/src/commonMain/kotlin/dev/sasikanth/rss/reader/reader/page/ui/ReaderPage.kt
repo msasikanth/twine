@@ -189,7 +189,8 @@ private fun ReaderPageContent(
           LocalMarkdownComponents provides markdownComponents,
           LocalReferenceLinkHandler provides ReferenceLinkHandlerImpl(),
           LocalMarkdownPadding provides markdownPadding(block = 12.dp),
-          LocalMarkdownDimens provides markdownDimens(),
+          LocalMarkdownDimens provides
+            markdownDimens(tableCellWidth = 140.dp, tableCellPadding = 12.dp),
           LocalImageTransformer provides CoilMarkdownTransformer,
           LocalMarkdownAnnotator provides
             markdownAnnotator(

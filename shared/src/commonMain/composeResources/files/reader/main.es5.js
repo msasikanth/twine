@@ -445,6 +445,170 @@ function dedupeAdjacentHeadings(doc) {
 }
 
 
+/**
+ * Turndown ships no table rules, so table/row/cell elements all fall through
+ * to the block default and a table arrives in the reader as a run of loose
+ * lines. These helpers emit GFM table syntax instead, which the markdown
+ * renderer parses with its GFM flavour.
+ *
+ * A GFM table can only express a flat grid with a single header row, so a
+ * table that would lose structure in the conversion (row spans, nested
+ * tables, block content inside a cell) is left to the default handling
+ * rather than emitted as a broken grid.
+ */
+var CELL_BLOCK_CONTENT_SELECTOR =
+  "table, ul, ol, pre, blockquote, figure, h1, h2, h3, h4, h5, h6";
+
+function tableCellsOf(row) {
+  var cells = [];
+  var children = row.children;
+  for (var i = 0; i < children.length; i++) {
+    var tagName = children[i].tagName.toLowerCase();
+    if (tagName === "th" || tagName === "td") cells.push(children[i]);
+  }
+  return cells;
+}
+
+function tableRowsOf(table) {
+  var rows = Array.prototype.slice.call(table.querySelectorAll("tr"));
+  var populatedRows = [];
+  for (var i = 0; i < rows.length; i++) {
+    if (tableCellsOf(rows[i]).length > 0) populatedRows.push(rows[i]);
+  }
+  return populatedRows;
+}
+
+function cellSpan(cell, attribute) {
+  var value = parseInt(cell.getAttribute(attribute), 10);
+  return isNaN(value) || value < 1 ? 1 : value;
+}
+
+function tableColumnCount(rows) {
+  var columnCount = 0;
+  for (var i = 0; i < rows.length; i++) {
+    var cells = tableCellsOf(rows[i]);
+    var rowColumns = 0;
+    for (var j = 0; j < cells.length; j++) {
+      rowColumns += cellSpan(cells[j], "colspan");
+    }
+    if (rowColumns > columnCount) columnCount = rowColumns;
+  }
+  return columnCount;
+}
+
+function isConvertibleTable(table) {
+  // Table markdown can't be indented into a list item or quote without
+  // turning into a code block, so leave those tables alone.
+  if (table.querySelector("table") || table.closest("li") || table.closest("blockquote")) {
+    return false;
+  }
+
+  var rows = tableRowsOf(table);
+  if (rows.length < 2) return false;
+
+  for (var i = 0; i < rows.length; i++) {
+    var cells = tableCellsOf(rows[i]);
+    for (var j = 0; j < cells.length; j++) {
+      var cell = cells[j];
+      if (cellSpan(cell, "rowspan") > 1) return false;
+      if (cell.querySelector(CELL_BLOCK_CONTENT_SELECTOR)) return false;
+    }
+  }
+
+  return tableColumnCount(rows) > 1;
+}
+
+function tableCellMarkdown(turndownService, cell) {
+  var markdown;
+  try {
+    markdown = turndownService.turndown(cell.innerHTML || "");
+  } catch (e) {
+    markdown = cell.textContent || "";
+  }
+  return markdown.replace(/\|/g, "\\|").replace(/\s+/g, " ").trim();
+}
+
+function cellAlignmentAttribute(cell) {
+  var align = (cell.getAttribute("align") || "").toLowerCase();
+  if (align) return align;
+
+  var style = (cell.getAttribute("style") || "").toLowerCase();
+  var match = style.match(/text-align\s*:\s*(left|center|right)/);
+  return match ? match[1] : "";
+}
+
+/**
+ * Readability strips presentational attributes, "align" among them, before the
+ * markdown conversion runs, so carry the column alignment over in a data
+ * attribute, which it leaves alone.
+ */
+function preserveTableAlignment(doc) {
+  var cells = doc.querySelectorAll("th, td");
+  for (var i = 0; i < cells.length; i++) {
+    var align = cellAlignmentAttribute(cells[i]);
+    if (align === "left" || align === "center" || align === "right") {
+      cells[i].setAttribute("data-twine-align", align);
+    }
+  }
+}
+
+function cellAlignment(cell) {
+  var align = (cell.getAttribute("data-twine-align") || "").toLowerCase();
+  if (!align) align = cellAlignmentAttribute(cell);
+
+  if (align === "center") return ":---:";
+  if (align === "right") return "---:";
+  if (align === "left") return ":---";
+  return "---";
+}
+
+function tableRowMarkdown(turndownService, row, columnCount) {
+  var cells = tableCellsOf(row);
+  var columns = [];
+
+  for (var i = 0; i < cells.length; i++) {
+    columns.push(tableCellMarkdown(turndownService, cells[i]));
+    // A column span has no markdown equivalent; pad with empty columns so
+    // the cells after it stay under the right headers.
+    for (var span = cellSpan(cells[i], "colspan"); span > 1; span--) {
+      columns.push("");
+    }
+  }
+
+  while (columns.length < columnCount) columns.push("");
+
+  return "| " + columns.slice(0, columnCount).join(" | ") + " |";
+}
+
+function tableMarkdown(turndownService, table) {
+  var rows = tableRowsOf(table);
+  var columnCount = tableColumnCount(rows);
+
+  // GFM has no headerless table, so the first row always becomes the header,
+  // whether or not the source marked it up as one.
+  var headerCells = tableCellsOf(rows[0]);
+  var alignments = [];
+  for (var i = 0; i < headerCells.length; i++) {
+    var alignment = cellAlignment(headerCells[i]);
+    for (var span = cellSpan(headerCells[i], "colspan"); span > 0; span--) {
+      alignments.push(alignment);
+    }
+  }
+  while (alignments.length < columnCount) alignments.push("---");
+
+  var lines = [tableRowMarkdown(turndownService, rows[0], columnCount)];
+  lines.push("| " + alignments.slice(0, columnCount).join(" | ") + " |");
+  for (var r = 1; r < rows.length; r++) {
+    lines.push(tableRowMarkdown(turndownService, rows[r], columnCount));
+  }
+
+  var caption = table.querySelector("caption");
+  var captionText = caption ? (caption.textContent || "").replace(/\s+/g, " ").trim() : "";
+  var captionLine = captionText ? "**" + captionText + "**\n\n" : "";
+
+  return "\n\n" + captionLine + lines.join("\n") + "\n\n";
+}
+
 function getImageCaption(markdown) {
   var captionPattern = /!\[[^\]]*\]\([^\s)]+\s+"([^"]*)"\)/;
   var match = markdown.match(captionPattern);
@@ -502,6 +666,15 @@ function parseReaderContent(link, bannerImage, html) {
           }
         });
 
+        turndownService.addRule("gfm-table", {
+          filter: function(node) {
+            return node.nodeName === "TABLE" && isConvertibleTable(node);
+          },
+          replacement: function(content, node) {
+            return tableMarkdown(turndownService, node);
+          }
+        });
+
         if (isXkcdUrl(link)) {
           var markdown = turndownService.turndown(doc.body.innerHTML);
           // The comic itself is shown as the post's banner image, so the
@@ -519,6 +692,7 @@ function parseReaderContent(link, bannerImage, html) {
         stripAriaHidden(doc);
         replaceIframesWithLinks(doc);
         processNoScriptImages(doc);
+        preserveTableAlignment(doc);
         transformShredditElements(doc);
         removeFirstImageTagByUrl(doc, bannerImage);
 
