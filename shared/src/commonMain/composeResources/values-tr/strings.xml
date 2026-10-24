@@ -164,6 +164,10 @@
   <string name="feedsSortLatest">Son eklenen</string>
   <string name="feedsSortOldest">İlk eklenen</string>
   <string name="feedsSortAlphabetical">A'dan Z'ye</string>
+  <string name="feedsSortSectionTitle">Sort by</string>
+  <string name="feedsFilterSectionTitle">Filter</string>
+  <string name="feedsFilterUnreadOnly">Unread feeds</string>
+  <string name="feedsNoUnread">No feeds with unread articles.</string>
   <string name="feedsBottomBarNewGroup">Yeni grup</string>
   <string name="feedsBottomBarNewFeed">Yeni akış</string>
   <string name="actionPin">Sabitle</string>
