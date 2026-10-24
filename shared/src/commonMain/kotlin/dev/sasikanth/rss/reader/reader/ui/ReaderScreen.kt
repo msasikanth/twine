@@ -95,6 +95,7 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import androidx.paging.LoadState.NotLoading
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.window.core.layout.WindowSizeClass
 import com.mikepenz.markdown.compose.components.markdownComponents
@@ -210,6 +211,7 @@ internal fun ReaderScreen(
   // as soon as the count is available, unless the user has already started swiping.
   val initialPostIndex = remember { state.activePostIndex }
   var initialPageRestored by rememberSaveable { mutableStateOf(false) }
+  var anchoredPostId by rememberSaveable { mutableStateOf<String?>(null) }
   LaunchedEffect(posts.itemCount) {
     if (!initialPageRestored && posts.itemCount > 0) {
       if (
@@ -219,8 +221,41 @@ internal fun ReaderScreen(
       ) {
         pagerState.scrollToPage(initialPostIndex)
       }
+      anchoredPostId = runCatching { posts.peek(pagerState.currentPage) }.getOrNull()?.id
       initialPageRestored = true
     }
+  }
+
+  LaunchedEffect(pagerState, posts) {
+    snapshotFlow { pagerState.settledPage }
+      .collect { page ->
+        if (!initialPageRestored) return@collect
+        runCatching { posts.peek(page) }.getOrNull()?.let { anchoredPostId = it.id }
+      }
+  }
+
+  LaunchedEffect(pagerState, posts) {
+    snapshotFlow {
+        val page = pagerState.currentPage
+        Triple(page, posts.itemCount, runCatching { posts.peek(page) }.getOrNull()?.id)
+      }
+      .collect { (page, itemCount, postIdAtPage) ->
+        val anchor = anchoredPostId
+        if (
+          !initialPageRestored ||
+            anchor == null ||
+            postIdAtPage == null ||
+            postIdAtPage == anchor ||
+            pagerState.isScrollInProgress
+        ) {
+          return@collect
+        }
+
+        val anchorIndex = posts.indexOfPostNear(postId = anchor, page = page, itemCount = itemCount)
+        if (anchorIndex != null && anchorIndex != page) {
+          pagerState.scrollToPage(anchorIndex)
+        }
+      }
   }
 
   // Publish the active post from the settled page rather than per-page visibility:
@@ -1055,6 +1090,22 @@ private fun ReaderPanelPlayer(
       onDismiss = { showSleepTimerSheet = false },
     )
   }
+}
+
+private const val ANCHOR_SEARCH_RADIUS = 25
+
+private fun LazyPagingItems<ResolvedPost>.indexOfPostNear(
+  postId: String,
+  page: Int,
+  itemCount: Int,
+): Int? {
+  for (offset in 0..ANCHOR_SEARCH_RADIUS) {
+    for (index in intArrayOf(page - offset, page + offset)) {
+      if (index < 0 || index >= itemCount) continue
+      if (runCatching { peek(index) }.getOrNull()?.id == postId) return index
+    }
+  }
+  return null
 }
 
 private val READER_ACTIONS_PANEL_COLLAPSED_HEIGHT = 64.dp

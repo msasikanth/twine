@@ -112,6 +112,9 @@ class ReaderViewModel(
   private var audioProgressAutoSaveJob: Job? = null
 
   init {
+    if (canPublishSelectedPost) {
+      observableActiveReaderPost.addOpenedPost(readerScreenArgs.postId)
+    }
     observableActiveReaderPost.updateActivePost(readerScreenArgs.postId)
     init()
     observePlaybackForAutoSave()
@@ -315,7 +318,10 @@ class ReaderViewModel(
           allPostsPager
             .allPostsPagingData(
               sessionPostIds = {
-                (_openedPostItems.value + observableActiveReaderPost.openedPostIds.value).toList()
+                (_openedPostItems.value +
+                    observableActiveReaderPost.openedPostIds.value +
+                    readerScreenArgs.postId)
+                  .toList()
               }
             )
             .cachedIn(coroutineScope)
@@ -325,7 +331,7 @@ class ReaderViewModel(
           Pager(
               config = PagingConfig(pageSize = 4, enablePlaceholders = true, jumpThreshold = 12)
             ) {
-              val sessionPostIds = _openedPostItems.value.toList()
+              val sessionPostIds = (_openedPostItems.value + readerScreenArgs.postId).toList()
               when (readerScreenArgs.fromScreen) {
                 is Search -> {
                   rssRepository.search(
