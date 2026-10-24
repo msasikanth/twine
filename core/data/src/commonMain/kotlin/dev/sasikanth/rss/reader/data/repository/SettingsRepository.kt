@@ -51,6 +51,8 @@ class SettingsRepository(
   private val postsSortOrderKey = stringPreferencesKey("posts_sort_order")
   private val showReaderViewKey = booleanPreferencesKey("pref_show_reader_view")
   private val feedsSortOrderKey = stringPreferencesKey("pref_feeds_sort_order")
+  private val hideFeedsWithoutUnreadPostsKey =
+    booleanPreferencesKey("pref_hide_feeds_without_unread_posts")
   private val appThemeModeKey = stringPreferencesKey("pref_app_theme_mode_v2")
   private val useAmoledKey = booleanPreferencesKey("use_amoled")
   private val enableAutoSyncKey = booleanPreferencesKey("enable_auto_sync")
@@ -106,6 +108,9 @@ class SettingsRepository(
     dataStore.data.map { preferences ->
       mapToFeedsOrderBy(preferences[feedsSortOrderKey]) ?: FeedsOrderBy.Latest
     }
+
+  val hideFeedsWithoutUnreadPosts: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[hideFeedsWithoutUnreadPostsKey] ?: false }
 
   val appThemeMode: Flow<AppThemeMode> =
     dataStore.data.map { preferences ->
@@ -201,6 +206,10 @@ class SettingsRepository(
 
   suspend fun updateFeedsSortOrder(value: FeedsOrderBy) {
     dataStore.edit { preferences -> preferences[feedsSortOrderKey] = value.name }
+  }
+
+  suspend fun toggleHideFeedsWithoutUnreadPosts(value: Boolean) {
+    dataStore.edit { preferences -> preferences[hideFeedsWithoutUnreadPostsKey] = value }
   }
 
   suspend fun postsDeletionPeriodImmediate(): Period {

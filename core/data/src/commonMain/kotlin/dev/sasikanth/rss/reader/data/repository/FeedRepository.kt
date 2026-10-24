@@ -65,6 +65,16 @@ class FeedRepository(
     return feedQueries.numberOfFeeds().asFlow().mapToOne(dispatchersProvider.databaseRead)
   }
 
+  fun numberOfFeedsWithUnreadPosts(
+    postsAfter: Instant = Instant.DISTANT_PAST,
+    postsUpperBound: Instant = Instant.DISTANT_FUTURE,
+  ): Flow<Long> {
+    return feedQueries
+      .numberOfFeedsWithUnreadPosts(postsAfter = postsAfter, postsUpperBound = postsUpperBound)
+      .asFlow()
+      .mapToOne(dispatchersProvider.databaseRead)
+  }
+
   fun hasFeeds(): Flow<Boolean> {
     return feedQueries.numberOfFeeds().asFlow().mapToOne(dispatchersProvider.databaseRead).map {
       it > 0

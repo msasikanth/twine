@@ -34,9 +34,11 @@ data class FeedsState(
   val activeSource: Source?,
   val canShowUnreadPostsCount: Boolean,
   val feedsSortOrder: FeedsOrderBy,
+  val hideFeedsWithoutUnreadPosts: Boolean,
   val isPinnedSectionExpanded: Boolean,
   val selectedSources: Set<Source>,
   val numberOfFeeds: Int,
+  val numberOfFeedsWithUnreadPosts: Int,
   val numberOfFeedGroups: Int,
   val sourceToDelete: Source? = null,
   val sourceToAddToGroup: Source? = null,
@@ -49,6 +51,9 @@ data class FeedsState(
   val isInMultiSelectMode: Boolean
     get() = selectedSources.isNotEmpty()
 
+  val visibleFeedsCount: Int
+    get() = if (hideFeedsWithoutUnreadPosts) numberOfFeedsWithUnreadPosts else numberOfFeeds
+
   companion object {
 
     val DEFAULT =
@@ -59,9 +64,11 @@ data class FeedsState(
         activeSource = null,
         canShowUnreadPostsCount = false,
         feedsSortOrder = FeedsOrderBy.Latest,
+        hideFeedsWithoutUnreadPosts = false,
         isPinnedSectionExpanded = false,
         selectedSources = emptySet(),
         numberOfFeeds = 0,
+        numberOfFeedsWithUnreadPosts = 0,
         numberOfFeedGroups = 0,
         sourceToDelete = null,
         sourceToAddToGroup = null,

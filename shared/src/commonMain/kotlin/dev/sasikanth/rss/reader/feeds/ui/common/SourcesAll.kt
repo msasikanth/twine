@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
@@ -42,7 +43,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import dev.sasikanth.rss.reader.components.CircularIconButton
@@ -75,9 +78,13 @@ import twine.shared.generated.resources.allFeeds
 import twine.shared.generated.resources.buttonAddFeed
 import twine.shared.generated.resources.edit
 import twine.shared.generated.resources.feedOptionRemove
+import twine.shared.generated.resources.feedsFilterSectionTitle
+import twine.shared.generated.resources.feedsFilterUnreadOnly
+import twine.shared.generated.resources.feedsNoUnread
 import twine.shared.generated.resources.feedsSortAlphabetical
 import twine.shared.generated.resources.feedsSortLatest
 import twine.shared.generated.resources.feedsSortOldest
+import twine.shared.generated.resources.feedsSortSectionTitle
 import twine.shared.generated.resources.markAllAsRead
 import twine.shared.generated.resources.sort
 import twine.shared.generated.resources.sourcesCount
@@ -85,6 +92,7 @@ import twine.shared.generated.resources.sourcesCount
 internal fun LazyListScope.allSources(
   numberOfFeedGroups: Int,
   sources: LazyPagingItems<SourceListItem>,
+  hideFeedsWithoutUnreadPosts: Boolean,
   selectedSources: Set<Source>,
   activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
@@ -291,14 +299,30 @@ internal fun LazyListScope.allSources(
         }
       }
     }
+  } else if (hideFeedsWithoutUnreadPosts && sources.loadState.refresh is LoadState.NotLoading) {
+    item { NoUnreadFeeds() }
   }
+}
+
+@Composable
+private fun NoUnreadFeeds() {
+  Text(
+    modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 24.dp),
+    text = stringResource(Res.string.feedsNoUnread),
+    style = MaterialTheme.typography.labelLarge,
+    color = AppTheme.colorScheme.onSurfaceVariant,
+    textAlign = TextAlign.Center,
+  )
 }
 
 @Composable
 internal fun AllFeedsHeader(
   feedsCount: Int,
+  visibleFeedsCount: Int,
   feedsSortOrder: FeedsOrderBy,
+  hideFeedsWithoutUnreadPosts: Boolean,
   onFeedsSortChanged: (FeedsOrderBy) -> Unit,
+  onHideFeedsWithoutUnreadPostsChanged: (Boolean) -> Unit,
   modifier: Modifier = Modifier,
   showAddButton: Boolean = true,
   onAddNewFeedClick: (() -> Unit)? = null,
@@ -314,7 +338,7 @@ internal fun AllFeedsHeader(
     Column(
       modifier =
         Modifier.weight(1f).clearAndSetSemantics {
-          contentDescription = "${allFeedsLabel}: ${feedsCount}"
+          contentDescription = "${allFeedsLabel}: ${visibleFeedsCount}"
         },
       horizontalAlignment = Alignment.Start,
     ) {
@@ -325,7 +349,7 @@ internal fun AllFeedsHeader(
       )
 
       Text(
-        text = stringResource(Res.string.sourcesCount, feedsCount),
+        text = stringResource(Res.string.sourcesCount, visibleFeedsCount),
         style = MaterialTheme.typography.bodySmall,
         color = AppTheme.colorScheme.onSurfaceVariant,
       )
@@ -347,6 +371,8 @@ internal fun AllFeedsHeader(
             expanded = showSortDropdown,
             onDismissRequest = { showSortDropdown = false },
           ) {
+            DropdownMenuSectionTitle(text = stringResource(Res.string.feedsSortSectionTitle))
+
             FeedsOrderBy.entries
               .filter { it != FeedsOrderBy.Pinned }
               .forEach { sortOrder ->
@@ -371,6 +397,20 @@ internal fun AllFeedsHeader(
                   },
                 )
               }
+
+            DropdownMenuDivider()
+
+            DropdownMenuSectionTitle(text = stringResource(Res.string.feedsFilterSectionTitle))
+
+            DropdownMenuItem(
+              selected = hideFeedsWithoutUnreadPosts,
+              text = stringResource(Res.string.feedsFilterUnreadOnly),
+              trailingIcon = if (hideFeedsWithoutUnreadPosts) TwineIcons.Check else null,
+              onClick = {
+                onHideFeedsWithoutUnreadPostsChanged(!hideFeedsWithoutUnreadPosts)
+                showSortDropdown = false
+              },
+            )
           }
         }
       }
@@ -389,4 +429,14 @@ internal fun AllFeedsHeader(
       )
     }
   }
+}
+
+@Composable
+private fun DropdownMenuSectionTitle(text: String) {
+  Text(
+    modifier = Modifier.padding(horizontal = 20.dp).padding(top = 12.dp, bottom = 4.dp),
+    text = text,
+    style = MaterialTheme.typography.labelMedium,
+    color = AppTheme.colorScheme.onSurfaceVariant,
+  )
 }

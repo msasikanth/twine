@@ -58,15 +58,23 @@ class SourceRepository(
     postsAfter: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     orderBy: FeedsOrderBy = FeedsOrderBy.Latest,
+    unreadOnly: Boolean = false,
   ): PagingSource<Int, Source> {
+    val unreadOnlyFlag = if (unreadOnly) 1L else 0L
     return QueryPagingSource(
-      countQuery = sourceQueries.sourcesCount(),
+      countQuery =
+        sourceQueries.sourcesCount(
+          unreadOnly = unreadOnlyFlag,
+          postsAfter = postsAfter,
+          postsUpperBound = postsUpperBound,
+        ),
       transacter = sourceQueries,
       context = dispatchersProvider.databaseRead,
       queryProvider = { limit, offset ->
         sourceQueries.sources(
           postsAfter = postsAfter,
           postsUpperBound = postsUpperBound,
+          unreadOnly = unreadOnlyFlag,
           orderBy = orderBy.value,
           limit = limit,
           offset = offset,

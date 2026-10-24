@@ -453,6 +453,13 @@ class RssRepository(
     return feedRepository.numberOfFeeds()
   }
 
+  fun numberOfFeedsWithUnreadPosts(
+    postsAfter: Instant = Instant.DISTANT_PAST,
+    postsUpperBound: Instant = Instant.DISTANT_FUTURE,
+  ): Flow<Long> {
+    return feedRepository.numberOfFeedsWithUnreadPosts(postsAfter, postsUpperBound)
+  }
+
   suspend fun incrementFeedFetchErrors(feedId: String) {
     feedRepository.incrementFeedFetchErrors(feedId)
   }
@@ -1044,8 +1051,9 @@ class RssRepository(
     postsAfter: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     orderBy: FeedsOrderBy = FeedsOrderBy.Latest,
+    unreadOnly: Boolean = false,
   ): PagingSource<Int, Source> {
-    return sourceRepository.sources(postsAfter, postsUpperBound, orderBy)
+    return sourceRepository.sources(postsAfter, postsUpperBound, orderBy, unreadOnly)
   }
 
   fun source(

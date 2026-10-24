@@ -169,6 +169,10 @@
   <string name="feedsSortLatest">Last added</string>
   <string name="feedsSortOldest">First added</string>
   <string name="feedsSortAlphabetical">A-Z</string>
+  <string name="feedsSortSectionTitle">Sort by</string>
+  <string name="feedsFilterSectionTitle">Filter</string>
+  <string name="feedsFilterUnreadOnly">Unread feeds</string>
+  <string name="feedsNoUnread">No feeds with unread articles.</string>
   <string name="feedsBottomBarNewGroup">New group</string>
   <string name="feedsBottomBarNewFeed">New feed</string>
   <string name="actionPin">Pin</string>

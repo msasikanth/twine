@@ -1,9 +1,35 @@
 sourcesCount:
 WITH feeds AS (
-  SELECT COUNT(*) AS count FROM feed WHERE isDeleted = 0
+  SELECT COUNT(*) AS count FROM feed f
+  WHERE f.isDeleted = 0
+    AND (
+      :unreadOnly = 0
+      OR EXISTS (
+        SELECT 1 FROM post p
+        WHERE p.sourceId = f.id
+          AND p.postDate > :postsAfter
+          AND p.createdAt < :postsUpperBound
+          AND (p.flags & 2) == 0
+          AND (p.flags & 4) == 0
+      )
+    )
 ),
 feedGroups AS (
-  SELECT COUNT(*) AS count FROM feedGroup WHERE isDeleted = 0
+  SELECT COUNT(*) AS count FROM feedGroup fg
+  WHERE fg.isDeleted = 0
+    AND (
+      :unreadOnly = 0
+      OR EXISTS (
+        SELECT 1 FROM feedGroupFeed gf
+        JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
+        JOIN post p ON p.sourceId = f.id
+        WHERE gf.feedGroupId = fg.id
+          AND p.postDate > :postsAfter
+          AND p.createdAt < :postsUpperBound
+          AND (p.flags & 2) == 0
+          AND (p.flags & 4) == 0
+      )
+    )
 )
 SELECT feeds.count + feedGroups.count
 FROM feeds, feedGroups;
@@ -225,6 +251,7 @@ FROM (
   WHERE fg.isDeleted = 0
   GROUP BY fg.id
 )
+WHERE :unreadOnly = 0 OR numberOfUnreadPosts > 0
 ORDER BY type DESC,
   CASE WHEN :orderBy = 'latest' THEN createdAt END DESC,
   CASE WHEN :orderBy = 'oldest' THEN createdAt END ASC,
