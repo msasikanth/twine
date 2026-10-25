@@ -520,12 +520,6 @@ class PostRepository(
     }
   }
 
-  suspend fun post(postId: String): Post {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.postById(postId, ::Post).executeAsList().first()
-    }
-  }
-
   suspend fun postOrNull(postId: String): Post? {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries.postById(postId, ::Post).executeAsList().firstOrNull()
@@ -549,12 +543,6 @@ class PostRepository(
       postQueries
         .postsWithImagesAndNoSeedColor(limit = limit, mapper = ::mapToResolvedPost)
         .executeAsList()
-    }
-  }
-
-  suspend fun postByLink(link: String): Post? {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.postByLink(link, ::Post).executeAsOneOrNull()
     }
   }
 

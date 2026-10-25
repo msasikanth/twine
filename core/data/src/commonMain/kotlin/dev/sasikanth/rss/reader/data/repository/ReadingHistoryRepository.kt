@@ -39,10 +39,6 @@ class ReadingHistoryRepository(
   private val dispatchersProvider: DispatchersProvider,
 ) {
 
-  suspend fun deleteAll() {
-    withContext(dispatchersProvider.databaseWrite) { readingHistoryQueries.deleteAll() }
-  }
-
   suspend fun getReadingStatistics(startDate: Instant): Flow<ReadingStatistics> {
     return withContext(dispatchersProvider.databaseRead) {
       val totalReadCount = readingHistoryQueries.totalReadPostsCount().executeAsOne()

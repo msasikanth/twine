@@ -54,7 +54,6 @@ import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import dev.sasikanth.rss.reader.util.splitAndTrim
 import kotlin.time.Clock
-import kotlin.time.Duration
 import kotlin.time.Instant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -226,7 +225,7 @@ class RssRepository(
   }
 
   fun feed(feedId: String): Feed? {
-    return feedQueries.feed(feedId, mapper = ::mapToFeed).executeAsOneOrNull()
+    return feedRepository.feed(feedId)
   }
 
   suspend fun postsCountForFeed(feedId: String): Long {
@@ -403,12 +402,6 @@ class RssRepository(
     widgetUpdater.updateUnreadWidget()
   }
 
-  suspend fun updateSeedColor(seedColor: Int, id: String) {
-    withContext(dispatchersProvider.databaseWrite) {
-      postQueries.updateSeedColor(seedColor = seedColor.toLong(), id = id)
-    }
-  }
-
   suspend fun updateSeedColors(updates: Map<String, Int>) {
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
@@ -458,14 +451,6 @@ class RssRepository(
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
   ): Flow<Long> {
     return feedRepository.numberOfFeedsWithUnreadPosts(postsAfter, postsUpperBound)
-  }
-
-  suspend fun incrementFeedFetchErrors(feedId: String) {
-    feedRepository.incrementFeedFetchErrors(feedId)
-  }
-
-  suspend fun resetFeedFetchErrors(feedId: String) {
-    feedRepository.resetFeedFetchErrors(feedId)
   }
 
   suspend fun updateFeedSyncError(feedId: String, syncError: String?) {
@@ -529,10 +514,6 @@ class RssRepository(
 
   suspend fun updateFeedGroupUpdatedAt(groupId: String, updatedAt: Instant) {
     feedGroupRepository.updateFeedGroupUpdatedAt(groupId, updatedAt)
-  }
-
-  suspend fun updateFeedRefreshInterval(feedId: String, refreshInterval: Duration) {
-    feedRepository.updateFeedRefreshInterval(feedId, refreshInterval)
   }
 
   suspend fun applyFeedsSyncMetadata(updates: List<FeedSyncMetadataUpdate>) {
@@ -749,10 +730,6 @@ class RssRepository(
     widgetUpdater.updateUnreadWidget()
   }
 
-  suspend fun post(postId: String): Post {
-    return postRepository.post(postId)
-  }
-
   suspend fun postOrNull(postId: String): Post? {
     return postRepository.postOrNull(postId)
   }
@@ -771,10 +748,6 @@ class RssRepository(
 
   suspend fun updatePostRemoteId(remoteId: String, postId: String) {
     syncRepository.updatePostRemoteId(remoteId, postId)
-  }
-
-  suspend fun updatePostSyncedAt(postId: String, syncedAt: Instant) {
-    syncRepository.updatePostSyncedAt(postId, syncedAt)
   }
 
   suspend fun updatePostSyncedAt(postIds: Set<String>, syncedAt: Instant) {
@@ -797,32 +770,16 @@ class RssRepository(
     return feedGroupRepository.feedGroupByRemoteId(remoteId)
   }
 
-  suspend fun latestPostRemoteId(): String? {
-    return syncRepository.latestPostRemoteId()
-  }
-
   suspend fun latestPostRemoteIdForFeed(feedId: String): String? {
     return syncRepository.latestPostRemoteIdForFeed(feedId)
-  }
-
-  suspend fun postsWithRemoteId(): List<Post> {
-    return syncRepository.postsWithRemoteId()
   }
 
   suspend fun postsWithRemoteIdPaged(limit: Long, offset: Long): List<Post> {
     return syncRepository.postsWithRemoteIdPaged(limit, offset)
   }
 
-  suspend fun postsWithLocalChanges(): List<Post> {
-    return syncRepository.postsWithLocalChanges()
-  }
-
   suspend fun postsWithLocalChangesPaged(limit: Long, offset: Long): List<Post> {
     return syncRepository.postsWithLocalChangesPaged(limit, offset)
-  }
-
-  suspend fun postsWithLocalChangesForFeed(feedId: String): List<Post> {
-    return syncRepository.postsWithLocalChangesForFeed(feedId)
   }
 
   suspend fun postsWithLocalChangesForFeedPaged(
@@ -833,10 +790,6 @@ class RssRepository(
     return syncRepository.postsWithLocalChangesForFeedPaged(feedId, limit, offset)
   }
 
-  suspend fun postByRemoteId(remoteId: String): Post? {
-    return syncRepository.postByRemoteId(remoteId)
-  }
-
   suspend fun postsByRemoteIds(remoteIds: Set<String>): List<Post> {
     return syncRepository.postsByRemoteIds(remoteIds)
   }
@@ -845,16 +798,8 @@ class RssRepository(
     return postRepository.postsWithImagesAndNoSeedColor(limit)
   }
 
-  suspend fun postByLink(link: String): Post? {
-    return postRepository.postByLink(link)
-  }
-
   suspend fun postsByLinks(links: Set<String>): List<Post> {
     return postRepository.postsByLinks(links)
-  }
-
-  fun feedByRemoteId(remoteId: String): Feed? {
-    return syncRepository.feedByRemoteId(remoteId)
   }
 
   fun feedsByRemoteIds(remoteIds: Set<String>): List<Feed> {
@@ -1181,186 +1126,6 @@ class RssRepository(
 
   suspend fun getReadingStatistics(startDate: Instant): Flow<ReadingStatistics> {
     return readingHistoryRepository.getReadingStatistics(startDate)
-  }
-
-  private fun mapToFeed(
-    id: String,
-    name: String,
-    icon: String,
-    description: String,
-    link: String,
-    homepageLink: String,
-    createdAt: Instant,
-    pinnedAt: Instant?,
-    lastCleanUpAt: Instant?,
-    alwaysFetchSourceArticle: Boolean,
-    pinnedPosition: Double,
-    showFeedFavIcon: Boolean,
-    lastUpdatedAt: Instant?,
-    refreshInterval: String,
-    isDeleted: Boolean,
-    hideFromAllFeeds: Boolean,
-    remoteId: String?,
-    enableNotifications: Boolean,
-    consecutiveFetchErrors: Long,
-    syncError: String?,
-  ): Feed {
-    return Feed(
-      id = id,
-      name = name,
-      icon = icon,
-      description = description,
-      homepageLink = homepageLink,
-      createdAt = createdAt,
-      link = link,
-      pinnedAt = pinnedAt,
-      lastCleanUpAt = lastCleanUpAt,
-      lastUpdatedAt = lastUpdatedAt,
-      refreshInterval = Duration.parse(refreshInterval),
-      alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-      pinnedPosition = pinnedPosition,
-      showFeedFavIcon = showFeedFavIcon,
-      hideFromAllFeeds = hideFromAllFeeds,
-      enableNotifications = enableNotifications,
-      isDeleted = isDeleted,
-      remoteId = remoteId,
-      consecutiveFetchErrors = consecutiveFetchErrors,
-      syncError = syncError,
-    )
-  }
-
-  private fun mapToFeedWithUnreadCount(
-    id: String,
-    name: String,
-    icon: String,
-    description: String,
-    link: String,
-    homepageLink: String,
-    createdAt: Instant,
-    pinnedAt: Instant?,
-    lastCleanUpAt: Instant?,
-    alwaysFetchSourceArticle: Boolean,
-    pinnedPosition: Double,
-    numberOfUnreadPosts: Long,
-    showFeedFavIcon: Boolean,
-    hideFromAllFeeds: Boolean,
-    isDeleted: Boolean,
-    enableNotifications: Boolean,
-    remoteId: String?,
-  ): Feed {
-    return Feed(
-      id = id,
-      name = name,
-      icon = icon,
-      description = description,
-      homepageLink = homepageLink,
-      createdAt = createdAt,
-      link = link,
-      pinnedAt = pinnedAt,
-      lastCleanUpAt = lastCleanUpAt,
-      alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-      pinnedPosition = pinnedPosition,
-      numberOfUnreadPosts = numberOfUnreadPosts,
-      showFeedFavIcon = showFeedFavIcon,
-      hideFromAllFeeds = hideFromAllFeeds,
-      enableNotifications = enableNotifications,
-      isDeleted = isDeleted,
-      remoteId = remoteId,
-    )
-  }
-
-  private fun mapToFeedWithUnreadCountAndRefreshInterval(
-    id: String,
-    name: String,
-    icon: String,
-    description: String,
-    link: String,
-    homepageLink: String,
-    createdAt: Instant,
-    pinnedAt: Instant?,
-    lastCleanUpAt: Instant?,
-    alwaysFetchSourceArticle: Boolean,
-    pinnedPosition: Double,
-    lastUpdatedAt: Instant?,
-    refreshInterval: String,
-    isDeleted: Boolean,
-    enableNotifications: Boolean,
-    remoteId: String?,
-    numberOfUnreadPosts: Long,
-    showFeedFavIcon: Boolean,
-    hideFromAllFeeds: Boolean,
-  ): Feed {
-    return Feed(
-      id = id,
-      name = name,
-      icon = icon,
-      description = description,
-      link = link,
-      homepageLink = homepageLink,
-      createdAt = createdAt,
-      pinnedAt = pinnedAt,
-      lastCleanUpAt = lastCleanUpAt,
-      alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-      pinnedPosition = pinnedPosition,
-      lastUpdatedAt = lastUpdatedAt,
-      refreshInterval = Duration.parse(refreshInterval),
-      isDeleted = isDeleted,
-      remoteId = remoteId,
-      numberOfUnreadPosts = numberOfUnreadPosts,
-      showFeedFavIcon = showFeedFavIcon,
-      hideFromAllFeeds = hideFromAllFeeds,
-      enableNotifications = enableNotifications,
-    )
-  }
-
-  private fun mapToResolvedPost(
-    id: String,
-    sourceId: String,
-    title: String,
-    description: String,
-    imageUrl: String?,
-    audioUrl: String?,
-    date: Instant,
-    createdAt: Instant,
-    link: String,
-    commentsLink: String?,
-    flags: Set<PostFlag>,
-    remoteId: String?,
-    feedName: String,
-    feedIcon: String,
-    feedHomepageLink: String,
-    alwaysFetchFullArticle: Boolean,
-    showFeedFavIcon: Boolean,
-    feedContentReadingTime: Long?,
-    articleContentReadingTime: Long?,
-    seedColor: Long?,
-    audioProgress: Long,
-    audioDuration: Long,
-  ): ResolvedPost {
-    return ResolvedPost(
-      id = id,
-      sourceId = sourceId,
-      title = title,
-      description = description,
-      imageUrl = imageUrl,
-      audioUrl = audioUrl,
-      date = date,
-      createdAt = createdAt,
-      link = link,
-      commentsLink = commentsLink,
-      flags = flags,
-      feedName = feedName,
-      feedIcon = feedIcon,
-      feedHomepageLink = feedHomepageLink,
-      alwaysFetchFullArticle = alwaysFetchFullArticle,
-      showFeedFavIcon = showFeedFavIcon,
-      feedContentReadingTime = feedContentReadingTime?.toInt(),
-      articleContentReadingTime = articleContentReadingTime?.toInt(),
-      seedColor = seedColor?.toInt(),
-      remoteId = remoteId,
-      audioProgress = audioProgress,
-      audioDuration = audioDuration,
-    )
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {

@@ -25,10 +25,8 @@ import dev.sasikanth.rss.reader.core.model.local.PostFlag
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.WidgetPost
 import dev.sasikanth.rss.reader.data.database.PostQueries
-import dev.sasikanth.rss.reader.data.database.ReadingHistoryQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import kotlin.collections.Set
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -38,7 +36,6 @@ import me.tatarka.inject.annotations.Inject
 @AppScope
 class WidgetDataRepository(
   private val postQueries: PostQueries,
-  private val readingHistoryQueries: ReadingHistoryQueries,
   private val dispatchersProvider: DispatchersProvider,
 ) {
 

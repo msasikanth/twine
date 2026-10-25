@@ -16,17 +16,7 @@
  */
 package dev.sasikanth.rss.reader.data.repository
 
-import io.ktor.http.HttpStatusCode
-
 sealed interface FeedAddResult {
 
-  data class Success(val feedId: String) : FeedAddResult
-
-  data class HttpStatusError(val statusCode: HttpStatusCode) : FeedAddResult
-
-  data class NetworkError(val exception: Exception) : FeedAddResult
-
   data class DatabaseError(val exception: Exception) : FeedAddResult
-
-  data object TooManyRedirects : FeedAddResult
 }
