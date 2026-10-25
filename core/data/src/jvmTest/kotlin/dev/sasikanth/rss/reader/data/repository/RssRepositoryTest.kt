@@ -17,11 +17,14 @@
 
 package dev.sasikanth.rss.reader.data.repository
 
+import androidx.paging.PagingSource
 import app.cash.sqldelight.ColumnAdapter
 import app.cash.sqldelight.EnumColumnAdapter
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup as FeedGroupModel
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
+import dev.sasikanth.rss.reader.core.model.local.Source as SourceModel
 import dev.sasikanth.rss.reader.data.database.BlockedWord
 import dev.sasikanth.rss.reader.data.database.Feed
 import dev.sasikanth.rss.reader.data.database.FeedGroup
@@ -690,6 +693,128 @@ class RssRepositoryTest {
 
     assertEquals(emptySet(), post1.flags)
     assertEquals(setOf(dev.sasikanth.rss.reader.core.model.local.PostFlag.Hidden), post2.flags)
+  }
+
+  @Test
+  fun sourcesShouldOnlyReturnFeedsWithUnreadPostsWhenUnreadOnlyIsEnabled() = runTest {
+    // given
+    insertFeed(id = "feed-unread", name = "Feed with unread")
+    insertFeed(id = "feed-read", name = "Feed without unread")
+    insertFeed(id = "feed-empty", name = "Feed without posts")
+
+    insertPost(id = "post-unread", sourceId = "feed-unread", postDate = postDate)
+    insertPost(id = "post-read", sourceId = "feed-read", postDate = postDate)
+    markPostAsRead("post-read")
+
+    // when
+    val allSources = loadSources(unreadOnly = false)
+    val unreadSources = loadSources(unreadOnly = true)
+
+    // then
+    assertEquals(setOf("feed-unread", "feed-read", "feed-empty"), allSources.map { it.id }.toSet())
+    assertEquals(listOf("feed-unread"), unreadSources.map { it.id })
+  }
+
+  @Test
+  fun sourcesShouldKeepGroupsWithUnreadPostsWhenUnreadOnlyIsEnabled() = runTest {
+    // given
+    insertFeed(id = "feed-unread", name = "Feed with unread")
+    insertFeed(id = "feed-read", name = "Feed without unread")
+
+    insertGroup(id = "group-unread", name = "Group with unread", feedIds = listOf("feed-unread"))
+    insertGroup(id = "group-read", name = "Group without unread", feedIds = listOf("feed-read"))
+
+    insertPost(id = "post-unread", sourceId = "feed-unread", postDate = postDate)
+    insertPost(id = "post-read", sourceId = "feed-read", postDate = postDate)
+    markPostAsRead("post-read")
+
+    // when
+    val unreadSources = loadSources(unreadOnly = true)
+
+    // then
+    assertEquals(listOf("group-unread", "feed-unread"), unreadSources.map { it.id })
+
+    // and the group still carries all of its feeds, filtered or not
+    val group = unreadSources.filterIsInstance<FeedGroupModel>().single()
+    assertEquals(listOf("feed-unread"), group.feedIds)
+  }
+
+  @Test
+  fun numberOfFeedsWithUnreadPostsShouldOnlyCountFeedsWithUnreadPosts() = runTest {
+    // given
+    insertFeed(id = "feed-unread", name = "Feed with unread")
+    insertFeed(id = "feed-read", name = "Feed without unread")
+    insertFeed(id = "feed-empty", name = "Feed without posts")
+
+    insertPost(id = "post-unread", sourceId = "feed-unread", postDate = postDate)
+    insertPost(id = "post-read", sourceId = "feed-read", postDate = postDate)
+    markPostAsRead("post-read")
+
+    // when
+    val numberOfFeeds = repository.numberOfFeeds().first()
+    val numberOfFeedsWithUnreadPosts =
+      repository
+        .numberOfFeedsWithUnreadPosts(postsAfter = postsAfter, postsUpperBound = postsUpperBound)
+        .first()
+
+    // then
+    assertEquals(3, numberOfFeeds)
+    assertEquals(1, numberOfFeedsWithUnreadPosts)
+  }
+
+  private val postDate = Instant.fromEpochMilliseconds(1000)
+  private val postsAfter = Instant.fromEpochMilliseconds(0)
+  private val postsUpperBound = Instant.fromEpochMilliseconds(Long.MAX_VALUE / 2)
+
+  private suspend fun loadSources(unreadOnly: Boolean): List<SourceModel> {
+    val pagingSource =
+      repository.sources(
+        postsAfter = postsAfter,
+        postsUpperBound = postsUpperBound,
+        orderBy = FeedsOrderBy.Latest,
+        unreadOnly = unreadOnly,
+      )
+    val result =
+      pagingSource.load(
+        PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false)
+      )
+    return (result as PagingSource.LoadResult.Page).data
+  }
+
+  private fun insertFeed(id: String, name: String) {
+    database.feedQueries.upsert(
+      id = id,
+      name = name,
+      icon = "icon",
+      description = "description",
+      homepageLink = "homepage-$id",
+      createdAt = Instant.fromEpochMilliseconds(0),
+      link = "link-$id",
+      alwaysFetchSourceArticle = false,
+      showFeedFavIcon = false,
+      lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+      enableNotifications = true,
+    )
+  }
+
+  private fun insertGroup(id: String, name: String, feedIds: List<String>) {
+    database.feedGroupQueries.createGroup(
+      id = id,
+      name = name,
+      createdAt = Instant.fromEpochMilliseconds(0),
+      updatedAt = Instant.fromEpochMilliseconds(0),
+    )
+    feedIds.forEach { feedId ->
+      database.feedGroupFeedQueries.addFeedToGroup(feedGroupId = id, feedId = feedId)
+    }
+  }
+
+  private fun markPostAsRead(id: String) {
+    database.postQueries.updateReadStatus(
+      read = 1L,
+      updatedAt = Instant.fromEpochMilliseconds(0),
+      id = id,
+    )
   }
 
   private fun insertPost(

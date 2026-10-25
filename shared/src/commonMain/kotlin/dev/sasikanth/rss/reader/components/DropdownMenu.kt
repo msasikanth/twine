@@ -70,6 +70,7 @@ internal fun DropdownMenuItem(
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
   leadingIcon: ImageVector? = null,
+  trailingIcon: ImageVector? = null,
   contentDescription: String? = null,
   enabled: Boolean = true,
   selected: Boolean = false,
@@ -104,6 +105,18 @@ internal fun DropdownMenuItem(
 
     CompositionLocalProvider(LocalContentColor provides contentColor) {
       Text(text = text, style = MaterialTheme.typography.bodyMedium)
+    }
+
+    if (trailingIcon != null) {
+      Spacer(Modifier.weight(1f))
+
+      CompositionLocalProvider(LocalContentColor provides contentColor) {
+        Icon(
+          modifier = Modifier.padding(start = 12.dp).size(20.dp),
+          imageVector = trailingIcon,
+          contentDescription = null,
+        )
+      }
     }
   }
 }

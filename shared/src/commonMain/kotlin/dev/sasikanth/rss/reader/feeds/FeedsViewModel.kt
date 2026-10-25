@@ -33,6 +33,7 @@ import androidx.paging.map
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
@@ -92,17 +93,19 @@ class FeedsViewModel(
     combine(
         settingsRepository.postsType,
         settingsRepository.feedsSortOrder,
+        settingsRepository.hideFeedsWithoutUnreadPosts,
         refreshPolicy.lastRefreshedAtFlow,
-      ) { postsType, feedsSortOrder, dateTime ->
-        Triple(postsType, feedsSortOrder, dateTime)
+      ) { postsType, feedsSortOrder, hideFeedsWithoutUnreadPosts, dateTime ->
+        SourcesQueryParams(postsType, feedsSortOrder, hideFeedsWithoutUnreadPosts, dateTime)
       }
-      .flatMapLatest { (postsType, feedsSortOrder, dateTime) ->
-        val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
+      .flatMapLatest { params ->
+        val postsAfter = PostsFilterUtils.postsThresholdTime(params.postsType, params.dateTime)
         val sources =
           sources(
             postsAfter = postsAfter,
-            postsUpperBound = dateTime,
-            feedsSortOrder = feedsSortOrder,
+            postsUpperBound = params.dateTime,
+            feedsSortOrder = params.feedsSortOrder,
+            unreadOnly = params.hideFeedsWithoutUnreadPosts,
           )
 
         addSourcesSeparator(sources)
@@ -154,6 +157,8 @@ class FeedsViewModel(
       is FeedsEvent.OnSourceClick -> onSourceClicked(event.source)
       FeedsEvent.TogglePinnedSection -> onTogglePinnedSection()
       is FeedsEvent.OnFeedSortOrderChanged -> onFeedSortOrderChanged(event.feedsOrderBy)
+      is FeedsEvent.OnHideFeedsWithoutUnreadPostsChanged ->
+        onHideFeedsWithoutUnreadPostsChanged(event.hide)
       is FeedsEvent.OnHomeSelected -> onHomeSelected()
       FeedsEvent.CancelSourcesSelection -> onCancelSourcesSelection()
       FeedsEvent.DeleteSelectedSourcesClicked -> onDeleteSelectedSourcesClicked()
@@ -332,6 +337,14 @@ class FeedsViewModel(
     }
   }
 
+  private fun onHideFeedsWithoutUnreadPostsChanged(hide: Boolean) {
+    viewModelScope.launch {
+      withContext(dispatchersProvider.io) {
+        settingsRepository.toggleHideFeedsWithoutUnreadPosts(hide)
+      }
+    }
+  }
+
   private fun onTogglePinnedSection() {
     _state.update { it.copy(isPinnedSectionExpanded = !_state.value.isPinnedSectionExpanded) }
   }
@@ -375,6 +388,10 @@ class FeedsViewModel(
   private fun observePreferences() {
     settingsRepository.feedsSortOrder
       .onEach { feedsSortOrder -> _state.update { it.copy(feedsSortOrder = feedsSortOrder) } }
+      .launchIn(viewModelScope)
+
+    settingsRepository.hideFeedsWithoutUnreadPosts
+      .onEach { hide -> _state.update { it.copy(hideFeedsWithoutUnreadPosts = hide) } }
       .launchIn(viewModelScope)
   }
 
@@ -429,6 +446,20 @@ class FeedsViewModel(
       }
       .flatMapLatest { (postsType, dateTime) ->
         val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
+        rssRepository.numberOfFeedsWithUnreadPosts(
+          postsAfter = postsAfter,
+          postsUpperBound = dateTime.toInstant(TimeZone.currentSystemDefault()),
+        )
+      }
+      .onEach { count -> _state.update { it.copy(numberOfFeedsWithUnreadPosts = count.toInt()) } }
+      .launchIn(viewModelScope)
+
+    combine(settingsRepository.postsType, refreshPolicy.lastRefreshedAtFlow) { postsType, dateTime
+        ->
+        Pair(postsType, dateTime)
+      }
+      .flatMapLatest { (postsType, dateTime) ->
+        val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
         rssRepository.pinnedSources(
           postsAfter = postsAfter,
           postsUpperBound = dateTime.toInstant(TimeZone.currentSystemDefault()),
@@ -449,12 +480,14 @@ class FeedsViewModel(
     postsAfter: Instant,
     postsUpperBound: LocalDateTime,
     feedsSortOrder: FeedsOrderBy,
+    unreadOnly: Boolean,
   ) =
     Pager(config = PagingConfig(pageSize = 20)) {
         rssRepository.sources(
           postsAfter = postsAfter,
           postsUpperBound = postsUpperBound.toInstant(TimeZone.currentSystemDefault()),
           orderBy = feedsSortOrder,
+          unreadOnly = unreadOnly,
         )
       }
       .flow
@@ -484,4 +517,11 @@ class FeedsViewModel(
         }
     }
   }
+
+  private data class SourcesQueryParams(
+    val postsType: PostsType,
+    val feedsSortOrder: FeedsOrderBy,
+    val hideFeedsWithoutUnreadPosts: Boolean,
+    val dateTime: LocalDateTime,
+  )
 }

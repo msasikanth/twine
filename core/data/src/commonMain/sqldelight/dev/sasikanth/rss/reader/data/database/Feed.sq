@@ -101,6 +101,18 @@ UPDATE feed SET pinnedAt = :pinnedAt, pinnedPosition = 0.0, lastUpdatedAt = :las
 numberOfFeeds:
 SELECT COUNT(*) FROM feed WHERE isDeleted = 0;
 
+numberOfFeedsWithUnreadPosts:
+SELECT COUNT(*) FROM feed f
+WHERE f.isDeleted = 0
+  AND EXISTS (
+    SELECT 1 FROM post p
+    WHERE p.sourceId = f.id
+      AND p.postDate > :postsAfter
+      AND p.createdAt < :postsUpperBound
+      AND (p.flags & 2) == 0
+      AND (p.flags & 4) == 0
+  );
+
 updateLastCleanUpAt:
 UPDATE feed SET lastCleanUpAt = :lastCleanUpAt WHERE id = :id;
 

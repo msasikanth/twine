@@ -50,6 +50,8 @@ import org.intellij.markdown.flavours.gfm.GFMElementTypes
 import org.intellij.markdown.flavours.gfm.GFMTokenTypes
 
 private val MinTableCellWidth = 72.dp
+private const val MinColumnChars = 8f
+private const val MaxColumnChars = 28f
 private val CompactTableCellWidth = 120.dp
 private val CompactTableCellPadding = 8.dp
 
@@ -67,6 +69,8 @@ fun ReaderMarkdownTable(model: MarkdownComponentModel) {
       } ?: 0
     }
   val alignments = remember(model.node, model.content) { columnAlignments(model) }
+  val weights =
+    remember(model.node, model.content, columnCount) { columnWeights(model, columnCount) }
   val dimens = LocalMarkdownDimens.current
 
   BoxWithConstraints {
@@ -102,6 +106,7 @@ fun ReaderMarkdownTable(model: MarkdownComponentModel) {
             tableWidth = tableWidth,
             style = style,
             alignments = alignments,
+            weights = weights,
             rowIndex = 0,
           )
         },
@@ -112,6 +117,7 @@ fun ReaderMarkdownTable(model: MarkdownComponentModel) {
             tableWidth = tableWidth,
             style = style,
             alignments = alignments,
+            weights = weights,
             rowIndex = LocalTableRowIndex.current,
           )
         },
@@ -127,6 +133,7 @@ private fun ReaderTableRow(
   tableWidth: Dp,
   style: TextStyle,
   alignments: List<Alignment.Horizontal>,
+  weights: List<Float>,
   rowIndex: Int,
 ) {
   val isHeader = rowIndex == 0
@@ -144,7 +151,7 @@ private fun ReaderTableRow(
       .forEachIndexed { columnIndex, cell ->
         Column(
           modifier =
-            Modifier.padding(cellPadding).weight(1f).semantics {
+            Modifier.padding(cellPadding).weight(weights.getOrElse(columnIndex) { 1f }).semantics {
               if (isHeader) heading()
               collectionItemInfo =
                 CollectionItemInfo(
@@ -184,3 +191,34 @@ private fun columnAlignments(model: MarkdownComponentModel): List<Alignment.Hori
     }
   }
 }
+
+/**
+ * Columns share the table width in proportion to the longest cell in each, so a column of prose
+ * does not end up as narrow as one holding a number. The weights sum to the column count, which
+ * keeps the table the same overall width as evenly split columns.
+ */
+private fun columnWeights(model: MarkdownComponentModel, columnCount: Int): List<Float> {
+  if (columnCount <= 0) return emptyList()
+
+  val longest = FloatArray(columnCount)
+  fun measure(row: ASTNode) {
+    row.children
+      .filter { it.type == GFMTokenTypes.CELL }
+      .forEachIndexed { columnIndex, cell ->
+        if (columnIndex < columnCount) {
+          val text =
+            cell.getTextInNode(model.content).toString().replace(LinkTargetRegex, "]").trim()
+          longest[columnIndex] = maxOf(longest[columnIndex], text.length.toFloat())
+        }
+      }
+  }
+
+  model.node.findChildOfType(GFMElementTypes.HEADER)?.let(::measure)
+  model.node.children.filter { it.type == GFMElementTypes.ROW }.forEach(::measure)
+
+  val clamped = longest.map { it.coerceIn(MinColumnChars, MaxColumnChars) }
+  val total = clamped.sum()
+  return if (total <= 0f) List(columnCount) { 1f } else clamped.map { columnCount * it / total }
+}
+
+private val LinkTargetRegex = Regex("""\]\([^)]*\)""")
