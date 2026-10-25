@@ -89,7 +89,7 @@ private val PostItemCornerRadius = 24.dp
 private val PostItemShape = RoundedCornerShape(PostItemCornerRadius)
 private val FeedIconShape = RoundedCornerShape(25)
 
-private val postListPadding: PaddingValues
+internal val postListPadding: PaddingValues
   @Composable
   @ReadOnlyComposable
   get() {
@@ -101,7 +101,7 @@ private val postListPadding: PaddingValues
     }
   }
 
-private val compactPostListPadding: PaddingValues
+internal val compactPostListPadding: PaddingValues
   @Composable
   @ReadOnlyComposable
   get() {
@@ -125,6 +125,8 @@ internal fun PostListItem(
   reduceReadItemAlpha: Boolean = false,
   highlighted: Boolean = false,
   postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
+  contentPadding: PaddingValues = postListPadding,
+  blockImages: Boolean = LocalBlockImage.current,
 ) {
   var readStatus by remember(item.read) { mutableStateOf(item.read) }
   val alpha by
@@ -135,7 +137,6 @@ internal fun PostListItem(
   var showDropdown by remember { mutableStateOf(false) }
   var contextMenuOffset by remember { mutableStateOf<Offset?>(null) }
   val showImage = !(item.imageUrl.isNullOrBlank())
-  val shouldBlockImage = LocalBlockImage.current
   val highlightColor =
     animateColorAsState(
       if (highlighted) AppTheme.colorScheme.surfaceContainerHighest
@@ -146,7 +147,7 @@ internal fun PostListItem(
     Column(
       modifier =
         Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-          .padding(postListPadding)
+          .padding(contentPadding)
           .clip(PostItemShape)
           .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
           .onDesktopContextMenu { offset ->
@@ -188,7 +189,7 @@ internal fun PostListItem(
           }
         }
 
-        if (!shouldBlockImage) {
+        if (!blockImages) {
           item.imageUrl?.let { url ->
             Box(modifier = Modifier.requiredSize(64.dp), contentAlignment = Alignment.Center) {
               AsyncImage(
@@ -262,6 +263,8 @@ internal fun SimplePostListItem(
   reduceReadItemAlpha: Boolean = false,
   highlighted: Boolean = false,
   postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
+  contentPadding: PaddingValues = postListPadding,
+  blockImages: Boolean = LocalBlockImage.current,
 ) {
   var readStatus by remember(item.read) { mutableStateOf(item.read) }
   val alpha by
@@ -272,7 +275,6 @@ internal fun SimplePostListItem(
   var showDropdown by remember { mutableStateOf(false) }
   var contextMenuOffset by remember { mutableStateOf<Offset?>(null) }
   val showImage = !(item.imageUrl.isNullOrBlank())
-  val shouldBlockImage = LocalBlockImage.current
   val highlightColor =
     animateColorAsState(
       if (highlighted) AppTheme.colorScheme.surfaceContainerHighest
@@ -283,7 +285,7 @@ internal fun SimplePostListItem(
     Column(
       modifier =
         Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-          .padding(postListPadding)
+          .padding(contentPadding)
           .clip(PostItemShape)
           .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
           .onDesktopContextMenu { offset ->
@@ -312,7 +314,7 @@ internal fun SimplePostListItem(
           )
         }
 
-        if (!shouldBlockImage) {
+        if (!blockImages) {
           item.imageUrl?.let { url ->
             Box(modifier = Modifier.requiredSize(48.dp), contentAlignment = Alignment.Center) {
               AsyncImage(
@@ -385,6 +387,7 @@ internal fun CompactPostListItem(
   reduceReadItemAlpha: Boolean = false,
   highlighted: Boolean = false,
   postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
+  contentPadding: PaddingValues = compactPostListPadding,
 ) {
   var readStatus by remember(item.read) { mutableStateOf(item.read) }
   val alpha by
@@ -416,7 +419,7 @@ internal fun CompactPostListItem(
               cornerRadius = CornerRadius(PostItemCornerRadius.toPx()),
             )
           }
-          .padding(compactPostListPadding)
+          .padding(contentPadding)
           .graphicsLayer { this.alpha = alpha },
     ) {
       Box(modifier = Modifier.requiredSize(24.dp).graphicsLayer(compositingStrategy = Offscreen)) {

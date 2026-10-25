@@ -30,6 +30,8 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import dev.sasikanth.rss.reader.utils.LocalAmoledSetting
+import dev.sasikanth.rss.reader.utils.LocalRelativeDateFormatter
+import dev.sasikanth.rss.reader.utils.rememberRelativeDateFormatter
 
 @Composable
 internal fun AppTheme(
@@ -94,6 +96,7 @@ internal fun AppTheme(
         LocalAppColorScheme provides colorScheme,
         LocalRippleConfiguration provides rippleConfiguration,
         LocalTranslucentStyles provides localTranslucentStyles,
+        LocalRelativeDateFormatter provides rememberRelativeDateFormatter(),
       ) {
         content()
       }

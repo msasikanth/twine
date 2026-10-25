@@ -44,6 +44,7 @@ import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
+import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.FlowPreview
@@ -95,6 +96,10 @@ internal fun PostsList(
       postsSortOrder,
       activeSourceId,
     )
+
+  val listItemPadding = postListPadding
+  val compactItemPadding = compactPostListPadding
+  val blockImages = LocalBlockImage.current
 
   val topContentPadding =
     if (featuredPosts.isEmpty()) {
@@ -189,6 +194,8 @@ internal fun PostsList(
               updateReadStatus(post.id, updatedReadStatus)
             },
             reduceReadItemAlpha = true,
+            contentPadding = listItemPadding,
+            blockImages = blockImages,
           )
         }
         HomeViewMode.Simple -> {
@@ -204,6 +211,8 @@ internal fun PostsList(
               updateReadStatus(post.id, updatedReadStatus)
             },
             reduceReadItemAlpha = true,
+            contentPadding = listItemPadding,
+            blockImages = blockImages,
           )
         }
         HomeViewMode.Compact -> {
@@ -218,6 +227,7 @@ internal fun PostsList(
               updateReadStatus(post.id, updatedReadStatus)
             },
             reduceReadItemAlpha = true,
+            contentPadding = compactItemPadding,
           )
         }
       }

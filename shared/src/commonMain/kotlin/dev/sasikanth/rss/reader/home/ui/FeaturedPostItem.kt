@@ -39,8 +39,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
@@ -48,6 +50,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.formatRelativeTime
+import kotlin.math.roundToInt
 
 private val featuredItemPadding: PaddingValues
   @Composable
@@ -60,6 +63,16 @@ private val featuredItemPadding: PaddingValues
       else -> PaddingValues(0.dp)
     }
   }
+
+/**
+ * The title reserves three lines worth of height so every page of the pager is the same height. The
+ * line count is only known once the title is laid out, so it is kept off the snapshot system and
+ * read back in the filler's own measure pass; writing it to state would make the Layout phase
+ * invalidate a Composition read and compose every page twice.
+ */
+private class TitleFiller {
+  var heightPx = 0f
+}
 
 @Composable
 internal fun FeaturedPostItem(
@@ -89,7 +102,7 @@ internal fun FeaturedPostItem(
     val density = LocalDensity.current
     val titleTextStyle = MaterialTheme.typography.headlineMedium
     val titleMaxLines = 3
-    var dynamicTitlePadding by remember(item.link) { mutableStateOf(0.dp) }
+    val titleFiller = remember(item.link) { TitleFiller() }
 
     featuredImage()
 
@@ -113,10 +126,12 @@ internal fun FeaturedPostItem(
       overflow = TextOverflow.Ellipsis,
       onTextLayout = { textLayoutResult ->
         val numberOfLines = textLayoutResult.lineCount
-        if (numberOfLines < titleMaxLines) {
-          val lineHeight = with(density) { titleTextStyle.lineHeight.toDp() }
-          dynamicTitlePadding = lineHeight * (titleMaxLines - numberOfLines)
-        }
+        titleFiller.heightPx =
+          if (numberOfLines < titleMaxLines) {
+            with(density) { titleTextStyle.lineHeight.toPx() } * (titleMaxLines - numberOfLines)
+          } else {
+            0f
+          }
       },
     )
 
@@ -131,7 +146,13 @@ internal fun FeaturedPostItem(
       overflow = TextOverflow.Ellipsis,
     )
 
-    Spacer(Modifier.requiredHeight(dynamicTitlePadding))
+    Spacer(
+      Modifier.layout { measurable, _ ->
+        val height = titleFiller.heightPx.roundToInt()
+        val placeable = measurable.measure(Constraints.fixed(width = 0, height = height))
+        layout(0, height) { placeable.place(0, 0) }
+      }
+    )
 
     Spacer(modifier = Modifier.requiredHeight(4.dp))
 

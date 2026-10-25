@@ -45,7 +45,7 @@ import twine.shared.generated.resources.markAllAsRead
 
 internal fun LazyListScope.sourcesSearchResults(
   searchResults: LazyPagingItems<Feed>,
-  selectedSources: Set<Source>,
+  selectedSourceIds: Set<String>,
   activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
   isInMultiSelectMode: Boolean,
@@ -75,7 +75,7 @@ internal fun LazyListScope.sourcesSearchResults(
         isInMultiSelectMode = isInMultiSelectMode,
         isFeedSelected =
           if (isInMultiSelectMode) {
-            selectedSources.any { it.id == feed.id }
+            selectedSourceIds.contains(feed.id)
           } else {
             activeSource?.id == feed.id
           },

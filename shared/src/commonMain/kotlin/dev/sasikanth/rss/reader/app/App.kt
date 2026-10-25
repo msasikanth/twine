@@ -51,7 +51,7 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -568,7 +568,7 @@ fun App(
             VerticalDragHandle(
               modifier =
                 Modifier.pointerHoverIcon(horizontalResizePointerIcon)
-                  .onGloballyPositioned { coordinates ->
+                  .onPlaced { coordinates ->
                     val center = coordinates.positionInParent().x + coordinates.size.width / 2f
                     dividerCenterPx.floatValue = center
                     if (isDragged) {

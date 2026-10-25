@@ -93,7 +93,7 @@ internal fun LazyListScope.allSources(
   numberOfFeedGroups: Int,
   sources: LazyPagingItems<SourceListItem>,
   hideFeedsWithoutUnreadPosts: Boolean,
-  selectedSources: Set<Source>,
+  selectedSourceIds: Set<String>,
   activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
   isInMultiSelectMode: Boolean,
@@ -147,7 +147,7 @@ internal fun LazyListScope.allSources(
                 isInMultiSelectMode = isInMultiSelectMode,
                 selected =
                   if (isInMultiSelectMode) {
-                    selectedSources.any { it.id == source.id }
+                    selectedSourceIds.contains(source.id)
                   } else {
                     activeSource?.id == source.id
                   },
@@ -225,7 +225,7 @@ internal fun LazyListScope.allSources(
                 isInMultiSelectMode = isInMultiSelectMode,
                 isFeedSelected =
                   if (isInMultiSelectMode) {
-                    selectedSources.any { it.id == source.id }
+                    selectedSourceIds.contains(source.id)
                   } else {
                     activeSource?.id == source.id
                   },

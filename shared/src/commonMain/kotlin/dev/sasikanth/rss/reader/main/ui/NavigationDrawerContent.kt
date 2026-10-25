@@ -60,7 +60,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -284,9 +283,9 @@ private fun ExpandedDrawerContent(
     Box(modifier = Modifier.fillMaxSize()) {
       val allSources = state.sources.collectAsLazyPagingItems()
       val searchResults = state.feedsSearchResults.collectAsLazyPagingItems()
-      val isInSearchMode by derivedStateOf {
-        searchQuery.text.length >= Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
-      }
+      val selectedSourceIds =
+        remember(state.selectedSources) { state.selectedSources.mapTo(mutableSetOf()) { it.id } }
+      val isInSearchMode = searchQuery.text.length >= Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
 
       val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
       val lazyListState =
@@ -445,7 +444,7 @@ private fun ExpandedDrawerContent(
           if (isInSearchMode) {
             sourcesSearchResults(
               searchResults = searchResults,
-              selectedSources = state.selectedSources,
+              selectedSourceIds = selectedSourceIds,
               activeSource = state.activeSource,
               canShowUnreadPostsCount = state.canShowUnreadPostsCount,
               isInMultiSelectMode = state.isInMultiSelectMode,
@@ -478,7 +477,7 @@ private fun ExpandedDrawerContent(
               numberOfFeedGroups = state.numberOfFeedGroups,
               sources = allSources,
               hideFeedsWithoutUnreadPosts = state.hideFeedsWithoutUnreadPosts,
-              selectedSources = state.selectedSources,
+              selectedSourceIds = selectedSourceIds,
               activeSource = state.activeSource,
               canShowUnreadPostsCount = state.canShowUnreadPostsCount,
               isInMultiSelectMode = state.isInMultiSelectMode,
