@@ -23,16 +23,25 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.KeyboardActionHandler
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
@@ -46,7 +55,6 @@ fun TextField(
   keyboardActions: KeyboardActions = KeyboardActions(),
   keyboardOptions: KeyboardOptions = KeyboardOptions(),
   enabled: Boolean = true,
-  visualTransformation: VisualTransformation = VisualTransformation.None,
   trailingIcon: @Composable (() -> Unit)? = null,
   supportingText: @Composable (() -> Unit)? = null,
 ) {
@@ -63,7 +71,78 @@ fun TextField(
     textStyle = MaterialTheme.typography.labelLarge,
     shape = containerShape,
     enabled = enabled,
-    visualTransformation = visualTransformation,
+    colors =
+      OutlinedTextFieldDefaults.colors(
+        unfocusedContainerColor = translucentStyles.default.background,
+        focusedContainerColor = translucentStyles.default.background,
+        disabledContainerColor = translucentStyles.default.background,
+        cursorColor = AppTheme.colorScheme.primary,
+        selectionColors =
+          TextSelectionColors(
+            handleColor = AppTheme.colorScheme.primary,
+            backgroundColor = AppTheme.colorScheme.primary.copy(0.4f),
+          ),
+        unfocusedBorderColor = translucentStyles.default.outline,
+        focusedBorderColor = translucentStyles.default.outline,
+      ),
+    placeholder = {
+      Text(
+        text = hint,
+        style = MaterialTheme.typography.labelLarge,
+        color = AppTheme.colorScheme.primary.copy(alpha = 0.4f),
+      )
+    },
+    supportingText = supportingText,
+    trailingIcon = trailingIcon,
+  )
+}
+
+@Composable
+fun PasswordTextField(
+  value: String,
+  onValueChange: (String) -> Unit,
+  hint: String,
+  modifier: Modifier = Modifier,
+  onKeyboardAction: KeyboardActionHandler? = null,
+  keyboardOptions: KeyboardOptions =
+    KeyboardOptions(
+      autoCorrectEnabled = false,
+      keyboardType = KeyboardType.Password,
+      imeAction = ImeAction.Done,
+    ),
+  enabled: Boolean = true,
+  trailingIcon: @Composable (() -> Unit)? = null,
+  supportingText: @Composable (() -> Unit)? = null,
+) {
+  val translucentStyles = LocalTranslucentStyles.current
+  val containerShape = RoundedCornerShape(50)
+  val state = rememberTextFieldState(initialText = value)
+  val currentValue by rememberUpdatedState(value)
+  val currentOnValueChange by rememberUpdatedState(onValueChange)
+
+  LaunchedEffect(value) {
+    if (state.text.toString() != value) {
+      state.setTextAndPlaceCursorAtEnd(value)
+    }
+  }
+
+  LaunchedEffect(state) {
+    snapshotFlow { state.text.toString() }
+      .collect {
+        if (it != currentValue) {
+          currentOnValueChange(it)
+        }
+      }
+  }
+
+  OutlinedSecureTextField(
+    modifier = modifier.fillMaxWidth(),
+    state = state,
+    keyboardOptions = keyboardOptions,
+    onKeyboardAction = onKeyboardAction,
+    textStyle = MaterialTheme.typography.labelLarge,
+    shape = containerShape,
+    enabled = enabled,
     colors =
       OutlinedTextFieldDefaults.colors(
         unfocusedContainerColor = translucentStyles.default.background,
@@ -99,7 +178,6 @@ fun TextField(
   keyboardActions: KeyboardActions = KeyboardActions(),
   keyboardOptions: KeyboardOptions = KeyboardOptions(),
   enabled: Boolean = true,
-  visualTransformation: VisualTransformation = VisualTransformation.None,
   trailingIcon: @Composable (() -> Unit)? = null,
 ) {
   val translucentStyles = LocalTranslucentStyles.current
@@ -119,7 +197,6 @@ fun TextField(
     textStyle = MaterialTheme.typography.labelLarge,
     shape = containerShape,
     enabled = enabled,
-    visualTransformation = visualTransformation,
     colors =
       TextFieldDefaults.colors(
         unfocusedContainerColor = translucentStyles.default.background,

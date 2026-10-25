@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -50,7 +51,7 @@ import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -141,8 +142,8 @@ internal fun PinnedSourcesBottomBar(
 
   Row(
     modifier =
-      Modifier.onGloballyPositioned { coordinates ->
-          val height = coordinates.size.height.toFloat()
+      Modifier.onSizeChanged { size ->
+          val height = size.height.toFloat()
           if (scrollBehavior != null && scrollBehavior.state.heightOffsetLimit != -height) {
             scrollBehavior.state.heightOffsetLimit = -height
           }
@@ -174,33 +175,35 @@ internal fun PinnedSourcesBottomBar(
     LazyRow(
       state = lazyListState,
       modifier =
-        Modifier.weight(1f).fillMaxHeight().drawWithContent {
-          drawContent()
-
+        Modifier.weight(1f).fillMaxHeight().drawWithCache {
           val fadeWidth = BOTTOM_BAR_FADE_WIDTH.toPx()
-          if (startFade > 0f) {
-            drawRect(
-              brush =
-                Brush.horizontalGradient(
-                  colorStops = fadeStops(colorScheme.bottomSheet, startFade, reversed = false),
-                  startX = 0f,
-                  endX = fadeWidth,
-                ),
-              size = size.copy(width = fadeWidth),
+          val fadeSize = size.copy(width = fadeWidth)
+          val startBrush =
+            Brush.horizontalGradient(
+              colorStops = fadeStops(colorScheme.bottomSheet, reversed = false),
+              startX = 0f,
+              endX = fadeWidth,
             )
-          }
+          val endBrush =
+            Brush.horizontalGradient(
+              colorStops = fadeStops(colorScheme.bottomSheet, reversed = true),
+              startX = size.width - fadeWidth,
+              endX = size.width,
+            )
+          val endTopLeft = Offset(size.width - fadeWidth, 0f)
 
-          if (endFade > 0f) {
-            drawRect(
-              brush =
-                Brush.horizontalGradient(
-                  colorStops = fadeStops(colorScheme.bottomSheet, endFade, reversed = true),
-                  startX = size.width - fadeWidth,
-                  endX = size.width,
-                ),
-              topLeft = Offset(size.width - fadeWidth, 0f),
-              size = size.copy(width = fadeWidth),
-            )
+          onDrawWithContent {
+            drawContent()
+
+            val start = startFade
+            if (start > 0f) {
+              drawRect(brush = startBrush, size = fadeSize, alpha = start)
+            }
+
+            val end = endFade
+            if (end > 0f) {
+              drawRect(brush = endBrush, topLeft = endTopLeft, size = fadeSize, alpha = end)
+            }
           }
         },
       verticalAlignment = Alignment.CenterVertically,
@@ -299,11 +302,11 @@ private fun SourceItem(
 
 private val BOTTOM_BAR_FADE_WIDTH = 40.dp
 
-private fun fadeStops(color: Color, progress: Float, reversed: Boolean): Array<Pair<Float, Color>> {
+private fun fadeStops(color: Color, reversed: Boolean): Array<Pair<Float, Color>> {
   val alphas = floatArrayOf(1f, 0.94f, 0.78f, 0.5f, 0.22f, 0.06f, 0f)
   return Array(alphas.size) { index ->
     val position = index / (alphas.size - 1).toFloat()
     val alpha = if (reversed) alphas[alphas.size - 1 - index] else alphas[index]
-    position to color.copy(alpha = alpha * progress)
+    position to color.copy(alpha = alpha)
   }
 }

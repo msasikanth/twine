@@ -22,9 +22,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
@@ -47,7 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
@@ -71,11 +70,13 @@ import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
 import dev.sasikanth.rss.reader.resources.icons.MoreHorizFilled
+import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.Visibility
 import dev.sasikanth.rss.reader.resources.icons.VisibilityOff
 import dev.sasikanth.rss.reader.resources.icons.Website
+import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
@@ -93,6 +94,9 @@ import twine.shared.generated.resources.openWebsite
 import twine.shared.generated.resources.readingTimeEstimate
 import twine.shared.generated.resources.share
 import twine.shared.generated.resources.unBookmark
+
+private val FeedIconShape = RoundedCornerShape(25)
+private val TooltipShape = RoundedCornerShape(4.dp)
 
 @Composable
 internal fun PostActionBar(
@@ -118,16 +122,14 @@ internal fun PostActionBar(
   onSourceClick: () -> Unit,
 ) {
   val colorScheme = AppTheme.colorScheme
-  Row(
-    modifier = Modifier.height(IntrinsicSize.Min).then(modifier),
-    verticalAlignment = Alignment.CenterVertically,
-  ) {
-    Row(
-      modifier = Modifier.fillMaxHeight().weight(1f),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
+  Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
       SourceInfo(
-        modifier = Modifier.weight(1f, fill = false).widthIn(max = 120.dp).clearAndSetSemantics {},
+        modifier =
+          Modifier.weight(1f, fill = false)
+            .widthIn(max = 120.dp)
+            .heightIn(min = IconButtonSize.Small.containerSize)
+            .clearAndSetSemantics {},
         feedName = feedName,
         feedIcon = feedIcon,
         feedHomepageLink = feedHomepageLink,
@@ -193,6 +195,43 @@ internal fun PostActionBar(
   }
 }
 
+/**
+ * Tooltips are a pointer affordance, and every post row in the list pays for the tooltip state,
+ * position provider and pointer input of each action. Compose them only where a pointer exists; on
+ * touch platforms a long press belongs to the row's context menu.
+ */
+@Composable
+private fun ActionTooltip(label: String, content: @Composable () -> Unit) {
+  if (platform !is Platform.Desktop) {
+    content()
+    return
+  }
+
+  val colorScheme = AppTheme.colorScheme
+  TooltipBox(
+    state = rememberTooltipState(),
+    positionProvider =
+      TooltipDefaults.rememberTooltipPositionProvider(positioning = TooltipAnchorPosition.Above),
+    tooltip = {
+      Box(
+        modifier =
+          Modifier.drawWithCache {
+              val outline = TooltipShape.createOutline(size, layoutDirection, this)
+              onDrawBehind { drawOutline(outline, colorScheme.surface) }
+            }
+            .padding(8.dp)
+      ) {
+        Text(
+          text = label,
+          style = MaterialTheme.typography.labelMedium,
+          color = colorScheme.onSurface,
+        )
+      }
+    },
+    content = content,
+  )
+}
+
 @Composable
 private fun SourceInfo(
   feedIcon: String,
@@ -215,7 +254,6 @@ private fun SourceInfo(
   Row(
     modifier =
       modifier
-        .fillMaxHeight()
         .clip(MaterialTheme.shapes.extraSmall)
         .clickable(onClick = onSourceClick, enabled = config.enablePostSource),
     verticalAlignment = Alignment.CenterVertically,
@@ -225,7 +263,6 @@ private fun SourceInfo(
         Modifier.requiredSize(18.dp)
           .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
     ) {
-      val feedIconShape = RoundedCornerShape(25)
       FeedIcon(
         icon = feedIcon,
         homepageLink = feedHomepageLink,
@@ -233,14 +270,17 @@ private fun SourceInfo(
         contentDescription = null,
         modifier =
           Modifier.requiredSize(16.dp)
-            .drawWithContent {
-              drawContent()
-              val outline = feedIconShape.createOutline(size, layoutDirection, this)
-              drawOutline(
-                outline = outline,
-                color = colorScheme.outlineVariant,
-                style = Stroke(width = 1.dp.toPx()),
-              )
+            .drawWithCache {
+              val outline = FeedIconShape.createOutline(size, layoutDirection, this)
+              val borderStyle = Stroke(width = 1.dp.toPx())
+              onDrawWithContent {
+                drawContent()
+                drawOutline(
+                  outline = outline,
+                  color = colorScheme.outlineVariant,
+                  style = borderStyle,
+                )
+              }
             }
             .align(Alignment.Center),
       )
@@ -288,38 +328,13 @@ internal fun PostActions(
   onCommentsClick: () -> Unit,
   togglePostReadClick: () -> Unit,
 ) {
-  val colorScheme = AppTheme.colorScheme
-  val tooltipShape = RoundedCornerShape(4.dp)
-
   Row(
     modifier = modifier.semantics { isTraversalGroup = true },
     horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
   ) {
     if (!commentsLink.isNullOrBlank()) {
       val commentsLabel = stringResource(Res.string.comments)
-      TooltipBox(
-        state = rememberTooltipState(),
-        positionProvider =
-          TooltipDefaults.rememberTooltipPositionProvider(
-            positioning = TooltipAnchorPosition.Above
-          ),
-        tooltip = {
-          Box(
-            modifier =
-              Modifier.drawBehind {
-                  val outline = tooltipShape.createOutline(size, layoutDirection, this)
-                  drawOutline(outline, colorScheme.surface)
-                }
-                .padding(8.dp)
-          ) {
-            Text(
-              text = commentsLabel,
-              style = MaterialTheme.typography.labelMedium,
-              color = colorScheme.onSurface,
-            )
-          }
-        },
-      ) {
+      ActionTooltip(label = commentsLabel) {
         IconButton(
           icon = TwineIcons.Comments,
           contentDescription = commentsLabel,
@@ -336,27 +351,7 @@ internal fun PostActions(
         stringResource(Res.string.bookmark)
       }
 
-    TooltipBox(
-      state = rememberTooltipState(),
-      positionProvider =
-        TooltipDefaults.rememberTooltipPositionProvider(positioning = TooltipAnchorPosition.Above),
-      tooltip = {
-        Box(
-          modifier =
-            Modifier.drawBehind {
-                val outline = tooltipShape.createOutline(size, layoutDirection, this)
-                drawOutline(outline, colorScheme.surface)
-              }
-              .padding(8.dp)
-        ) {
-          Text(
-            text = bookmarkLabel,
-            style = MaterialTheme.typography.labelMedium,
-            color = colorScheme.onSurface,
-          )
-        }
-      },
-    ) {
+    ActionTooltip(label = bookmarkLabel) {
       IconButton(
         icon =
           if (postBookmarked) {
@@ -374,29 +369,7 @@ internal fun PostActions(
       val coroutineScope = rememberCoroutineScope()
       val moreMenuOptionsLabel = stringResource(Res.string.moreMenuOptions)
 
-      TooltipBox(
-        state = rememberTooltipState(),
-        positionProvider =
-          TooltipDefaults.rememberTooltipPositionProvider(
-            positioning = TooltipAnchorPosition.Above
-          ),
-        tooltip = {
-          Box(
-            modifier =
-              Modifier.drawBehind {
-                  val outline = tooltipShape.createOutline(size, layoutDirection, this)
-                  drawOutline(outline, colorScheme.surface)
-                }
-                .padding(8.dp)
-          ) {
-            Text(
-              text = moreMenuOptionsLabel,
-              style = MaterialTheme.typography.labelMedium,
-              color = colorScheme.onSurface,
-            )
-          }
-        },
-      ) {
+      ActionTooltip(label = moreMenuOptionsLabel) {
         IconButton(
           icon = TwineIcons.MoreHorizFilled,
           contentDescription = moreMenuOptionsLabel,

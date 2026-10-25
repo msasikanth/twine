@@ -157,12 +157,6 @@ class FeedRepository(
     }
   }
 
-  suspend fun updateFeedRefreshInterval(feedId: String, refreshInterval: Duration) {
-    withContext(dispatchersProvider.databaseWrite) {
-      feedQueries.updateRefreshInterval(refreshInterval = refreshInterval.toString(), id = feedId)
-    }
-  }
-
   suspend fun updateFeedAlwaysFetchSource(feedId: String, newValue: Boolean) {
     withContext(dispatchersProvider.databaseWrite) {
       feedQueries.updateAlwaysFetchSourceArticle(newValue, feedId)
@@ -345,14 +339,6 @@ class FeedRepository(
       hideFromAllFeeds = hideFromAllFeeds,
       enableNotifications = enableNotifications,
     )
-  }
-
-  suspend fun incrementFeedFetchErrors(feedId: String) {
-    feedQueries.incrementFetchErrors(id = feedId)
-  }
-
-  suspend fun resetFeedFetchErrors(feedId: String) {
-    feedQueries.resetFetchErrors(id = feedId)
   }
 
   suspend fun updateFeedSyncError(feedId: String, syncError: String?) {

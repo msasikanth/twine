@@ -67,7 +67,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -309,8 +308,8 @@ internal fun MediaControls(
               dampingRatio = Spring.DampingRatioMediumBouncy,
             ),
         )
-      val fabMorph by remember {
-        derivedStateOf { Morph(start = MaterialShapes.Circle, end = MaterialShapes.Cookie9Sided) }
+      val fabMorph = remember {
+        Morph(start = MaterialShapes.Circle, end = MaterialShapes.Cookie9Sided)
       }
       val infiniteTransition = rememberInfiniteTransition(label = "playButtonRotation")
       val rotationAngle by

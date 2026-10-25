@@ -36,10 +36,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -147,9 +147,7 @@ internal fun OpmlFeedSelectionSheet(
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = AppTheme.colorScheme.onSurface,
   ) {
-    val selectedFeeds = remember { mutableStateListOf<OpmlFeed>() }
-    val canSelectMore by
-      remember(selectionLimit) { derivedStateOf { selectedFeeds.size < selectionLimit } }
+    var selectedFeeds by remember { mutableStateOf(emptySet<OpmlFeed>()) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
       LazyColumn(
@@ -178,18 +176,19 @@ internal fun OpmlFeedSelectionSheet(
           }
         }
 
-        items(feeds) { feed ->
-          val isSelected = selectedFeeds.contains(feed)
+        items(items = feeds, contentType = { "OpmlFeedItem" }) { feed ->
           OpmlFeedItem(
             feed = feed,
-            isSelected = isSelected,
-            canSelectMore = canSelectMore,
+            isSelectedProvider = { selectedFeeds.contains(feed) },
+            canSelectMoreProvider = { selectedFeeds.size < selectionLimit },
             onClick = {
-              if (isSelected) {
-                selectedFeeds.remove(feed)
-              } else if (canSelectMore) {
-                selectedFeeds.add(feed)
-              }
+              val selection = selectedFeeds
+              selectedFeeds =
+                when {
+                  selection.contains(feed) -> selection - feed
+                  selection.size < selectionLimit -> selection + feed
+                  else -> selection
+                }
             },
           )
         }
@@ -220,11 +219,12 @@ internal fun OpmlFeedSelectionSheet(
 @Composable
 private fun OpmlFeedItem(
   feed: OpmlFeed,
-  isSelected: Boolean,
-  canSelectMore: Boolean,
+  isSelectedProvider: () -> Boolean,
+  canSelectMoreProvider: () -> Boolean,
   onClick: () -> Unit,
 ) {
-  val enabled = isSelected || canSelectMore
+  val isSelected = isSelectedProvider()
+  val enabled = isSelected || canSelectMoreProvider()
   Row(
     modifier =
       Modifier.fillMaxWidth()

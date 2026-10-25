@@ -41,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -112,9 +113,44 @@ fun Modifier.ignoreHorizontalParentPadding(horizontal: Dp): Modifier {
   }
 }
 
-// Formatter construction is relatively expensive and this runs per list item; cache it
-// keyed on the localized month names so a locale change still produces a fresh formatter.
-private val relativeTimeFormatterCache = mutableMapOf<List<String>, DateTimeFormat<LocalDateTime>>()
+/**
+ * The numeric date format behind [formatRelativeTime] is built from twelve localized month names.
+ * Resolving those per list item costs twelve resource reads, a list allocation and a cache probe on
+ * every recomposition, so the formatter is built once for the whole theme and read back here.
+ */
+val LocalRelativeDateFormatter =
+  staticCompositionLocalOf<DateTimeFormat<LocalDateTime>> {
+    error("No relative date formatter provided")
+  }
+
+@Composable
+internal fun rememberRelativeDateFormatter(): DateTimeFormat<LocalDateTime> {
+  val monthNames =
+    listOf(
+      stringResource(Res.string.month_jan),
+      stringResource(Res.string.month_feb),
+      stringResource(Res.string.month_mar),
+      stringResource(Res.string.month_apr),
+      stringResource(Res.string.month_may),
+      stringResource(Res.string.month_jun),
+      stringResource(Res.string.month_jul),
+      stringResource(Res.string.month_aug),
+      stringResource(Res.string.month_sep),
+      stringResource(Res.string.month_oct),
+      stringResource(Res.string.month_nov),
+      stringResource(Res.string.month_dec),
+    )
+
+  return remember(monthNames) {
+    LocalDateTime.Format {
+      day(Padding.ZERO)
+      char(' ')
+      monthName(MonthNames(monthNames))
+      char(' ')
+      yearTwoDigits(baseYear = 1950)
+    }
+  }
+}
 
 @Composable
 fun Instant.formatRelativeTime(): String {
@@ -128,35 +164,10 @@ fun Instant.formatRelativeTime(): String {
     seconds < 3600 -> stringResource(Res.string.unit_minutes, duration.inWholeMinutes)
     seconds < 86400 -> stringResource(Res.string.unit_hours, duration.inWholeHours)
     days < 7 -> stringResource(Res.string.unit_days, days)
-    else -> {
-      val monthNames =
-        listOf(
-          stringResource(Res.string.month_jan),
-          stringResource(Res.string.month_feb),
-          stringResource(Res.string.month_mar),
-          stringResource(Res.string.month_apr),
-          stringResource(Res.string.month_may),
-          stringResource(Res.string.month_jun),
-          stringResource(Res.string.month_jul),
-          stringResource(Res.string.month_aug),
-          stringResource(Res.string.month_sep),
-          stringResource(Res.string.month_oct),
-          stringResource(Res.string.month_nov),
-          stringResource(Res.string.month_dec),
-        )
-      val numericDateFormatter =
-        relativeTimeFormatterCache.getOrPut(monthNames) {
-          LocalDateTime.Format {
-            day(Padding.ZERO)
-            char(' ')
-            monthName(MonthNames(monthNames))
-            char(' ')
-            yearTwoDigits(baseYear = 1950)
-          }
-        }
-
-      numericDateFormatter.format(this.toLocalDateTime(TimeZone.currentSystemDefault()))
-    }
+    else ->
+      LocalRelativeDateFormatter.current.format(
+        this.toLocalDateTime(TimeZone.currentSystemDefault())
+      )
   }
 }
 

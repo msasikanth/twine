@@ -38,8 +38,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
@@ -58,6 +59,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -92,10 +94,10 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
-import dev.sasikanth.rss.reader.utils.removeLineBreaks
 import dev.sasikanth.rss.reader.utils.toClipEntry
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -353,7 +355,7 @@ private fun FeedLabelInput(
         color = AppTheme.colorScheme.onSurfaceVariant,
       )
 
-      var input by remember(feed.name) { mutableStateOf(feed.name) }
+      val input = remember(feed.name) { TextFieldState(feed.name) }
       val focusManager = LocalFocusManager.current
       val keyboardState by keyboardVisibilityAsState()
 
@@ -369,25 +371,24 @@ private fun FeedLabelInput(
 
       // Debounce input changes
       LaunchedEffect(input) {
-        if (input.isBlank()) return@LaunchedEffect
-        delay(500.milliseconds)
-        onFeedNameChange(input)
+        snapshotFlow { input.text.toString() }
+          .collectLatest { name ->
+            if (name.isBlank()) return@collectLatest
+            delay(500.milliseconds)
+            onFeedNameChange(name)
+          }
       }
 
       CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColors) {
         BasicTextField(
           modifier = Modifier.fillMaxWidth(),
-          value = input,
-          onValueChange = { input = it.removeLineBreaks() },
+          state = input,
           keyboardOptions = KeyboardOptions(autoCorrectEnabled = false, imeAction = ImeAction.Done),
-          keyboardActions =
-            KeyboardActions(
-              onDone = {
-                focusManager.clearFocus()
-                onFeedNameChange(input)
-              }
-            ),
-          singleLine = true,
+          onKeyboardAction = {
+            focusManager.clearFocus()
+            onFeedNameChange(input.text.toString())
+          },
+          lineLimits = TextFieldLineLimits.SingleLine,
           textStyle =
             MaterialTheme.typography.titleMedium.copy(color = AppTheme.colorScheme.onSurface),
           cursorBrush = SolidColor(AppTheme.colorScheme.onSurface),

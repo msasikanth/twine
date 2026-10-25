@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -53,7 +52,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -61,6 +59,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.app.NavResultKey
 import dev.sasikanth.rss.reader.components.AlertDialog
 import dev.sasikanth.rss.reader.components.Button
+import dev.sasikanth.rss.reader.components.PasswordTextField
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.TextField
 import dev.sasikanth.rss.reader.freshrss.FreshRssLoginError
@@ -270,7 +269,7 @@ private fun FreshRssLoginContent(
         }
 
         item {
-          TextField(
+          PasswordTextField(
             value = state.password,
             onValueChange = { onEvent(FreshRssLoginEvent.OnPasswordChanged(it)) },
             hint = stringResource(Res.string.freshRssPassword),
@@ -279,15 +278,7 @@ private fun FreshRssLoginContent(
                 previous = usernameFocus
               },
             enabled = !state.isLoading,
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions =
-              KeyboardOptions(
-                autoCorrectEnabled = false,
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done,
-              ),
-            keyboardActions =
-              KeyboardActions(onDone = { onEvent(FreshRssLoginEvent.OnLoginClicked) }),
+            onKeyboardAction = { onEvent(FreshRssLoginEvent.OnLoginClicked) },
           )
         }
       }

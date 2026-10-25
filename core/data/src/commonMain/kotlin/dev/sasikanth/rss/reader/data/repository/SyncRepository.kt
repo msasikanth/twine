@@ -67,12 +67,6 @@ class SyncRepository(
     }
   }
 
-  suspend fun updatePostSyncedAt(postId: String, syncedAt: Instant) {
-    withContext(dispatchersProvider.databaseWrite) {
-      postQueries.updatePostSyncedAt(syncedAt = syncedAt, id = postId)
-    }
-  }
-
   suspend fun updatePostSyncedAt(postIds: Set<String>, syncedAt: Instant) {
     val postIdsSnapshot = postIds.toList()
     withContext(dispatchersProvider.databaseWrite) {
@@ -95,21 +89,9 @@ class SyncRepository(
     }
   }
 
-  suspend fun latestPostRemoteId(): String? {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.latestPostRemoteId().executeAsOneOrNull()
-    }
-  }
-
   suspend fun latestPostRemoteIdForFeed(feedId: String): String? {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries.latestPostRemoteIdForFeed(feedId).executeAsOneOrNull()
-    }
-  }
-
-  suspend fun postsWithRemoteId(): List<Post> {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.postsWithRemoteId(::Post).executeAsList()
     }
   }
 
@@ -119,21 +101,9 @@ class SyncRepository(
     }
   }
 
-  suspend fun postsWithLocalChanges(): List<Post> {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.postsWithLocalChanges(::Post).executeAsList()
-    }
-  }
-
   suspend fun postsWithLocalChangesPaged(limit: Long, offset: Long): List<Post> {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries.postsWithLocalChangesPaged(limit, offset, ::Post).executeAsList()
-    }
-  }
-
-  suspend fun postsWithLocalChangesForFeed(feedId: String): List<Post> {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.postsWithLocalChangesForFeed(feedId, ::Post).executeAsList()
     }
   }
 
@@ -147,20 +117,10 @@ class SyncRepository(
     }
   }
 
-  suspend fun postByRemoteId(remoteId: String): Post? {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.postByRemoteId(remoteId, ::Post).executeAsOneOrNull()
-    }
-  }
-
   suspend fun postsByRemoteIds(remoteIds: Set<String>): List<Post> {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries.postsByRemoteIds(remoteIds, ::Post).executeAsList()
     }
-  }
-
-  fun feedByRemoteId(remoteId: String): Feed? {
-    return feedQueries.feedByRemoteId(remoteId, mapper = ::mapToFeed).executeAsOneOrNull()
   }
 
   fun feedsByRemoteIds(remoteIds: Set<String>): List<Feed> {

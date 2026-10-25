@@ -198,6 +198,9 @@ private fun GroupContent(
     },
     containerColor = AppTheme.colorScheme.backdrop,
   ) { innerPadding ->
+    val selectedSourceIds =
+      remember(state.selectedSources) { state.selectedSources.mapTo(mutableSetOf()) { it.id } }
+
     LazyColumn(
       modifier = Modifier.restrictContentWidth(),
       contentPadding =
@@ -221,7 +224,7 @@ private fun GroupContent(
             feed = feed,
             canShowUnreadPostsCount = false,
             isInMultiSelectMode = state.isInMultiSelectMode,
-            isFeedSelected = state.selectedSources.any { it.id == feed.id },
+            isFeedSelected = selectedSourceIds.contains(feed.id),
             onFeedClick = { dispatch(GroupEvent.OnFeedClicked(feed)) },
             onFeedSelected = { dispatch(GroupEvent.OnFeedClicked(feed)) },
             dropdownMenuContent = { onDismiss ->
