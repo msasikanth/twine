@@ -137,7 +137,7 @@
   <string name="removeFeed">Feed entfernen</string>
   <string name="delete">Löschen</string>
   <string name="removeFeedDesc">Möchten Sie <b>"%1$s"</b> entfernen?</string>
-  <string name="alwaysFetchSourceArticle">Immer vollständige Beiträge in der Leseansicht abrufen</string>
+  <string name="alwaysFetchSourceArticle">Fetch full articles in reader view</string>
   <string name="enableNotifications">Benachrichtigungen aktivieren</string>
   <string name="getFeedInfo">Informationen bekommen</string>
   <string name="newTag">Neuer Tag</string>
@@ -190,8 +190,8 @@
   <string name="addFeedSubtitle">Paste a feed link, or a website address and Twine will find its feed.</string>
   <string name="addFeedAddedTitle">Feed added</string>
   <string name="addFeedAddedSubtitle">Give it a name and pick how it should look.</string>
-  <string name="addFeedIconFromFeed">Feed icon</string>
-  <string name="addFeedIconFromWebsite">Website icon</string>
+  <string name="feedIconFromFeed">Feed icon</string>
+  <string name="feedIconFromWebsite">Website icon</string>
   <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">Quellen löschen</string>
   <string name="removeSourcesDesc">Möchten Sie die ausgewählten Quellen löschen?</string>
@@ -202,8 +202,8 @@
   <string name="cdWatchVideo">Watch video</string>
   <string name="enableAutoSyncTitle">Hintergrundsynchronisation aktivieren</string>
   <string name="enableAutoSyncDesc">Beiträge werden im Hintergrund abgerufen</string>
-  <string name="showFeedFavIconTitle">Feed-Favoriten-Symbol anzeigen</string>
-  <string name="showFeedFavIconDesc">Wenn ausgeschaltet, wird das Feed-Symbol anstelle des Favoriten-Symbols der Website angezeigt</string>
+  <string name="showFeedFavIconTitle">Use website icons for new feeds</string>
+  <string name="showFeedFavIconDesc">Sets which icon newly added feeds start with. You can change it per feed at any time.</string>
   <string name="settingsShowFeaturedSectionTitle">Empfohlen Bereich anzeigen</string>
   <string name="settingsShowFeaturedSectionSubtitle">Zeigt ein Karussell mit den neuesten Beiträgen an</string>
   <string name="hidePostsFromHome">Auf der Startseite ausblenden</string>
