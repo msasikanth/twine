@@ -66,7 +66,7 @@ import dev.sasikanth.rss.reader.resources.icons.Edit
 import dev.sasikanth.rss.reader.resources.icons.MarkAllAsRead
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.RemoveFeed
-import dev.sasikanth.rss.reader.resources.icons.Sort
+import dev.sasikanth.rss.reader.resources.icons.Tune
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.bottomPaddingOfSourceItem
@@ -361,7 +361,7 @@ internal fun AllFeedsHeader(
 
         Box {
           CircularIconButton(
-            icon = TwineIcons.Sort,
+            icon = TwineIcons.Tune,
             label = stringResource(Res.string.sort),
             onClick = { showSortDropdown = true },
           )
