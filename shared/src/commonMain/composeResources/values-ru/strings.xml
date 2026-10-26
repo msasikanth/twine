@@ -137,7 +137,7 @@
   <string name="removeFeed">Удалить новостную ленту</string>
   <string name="delete">Удалить</string>
   <string name="removeFeedDesc">Вы хотите удалить <b>"%1$s"</b>?</string>
-  <string name="alwaysFetchSourceArticle">Всегда загружать полные статьи в режиме чтения</string>
+  <string name="alwaysFetchSourceArticle">Fetch full articles in reader view</string>
   <string name="enableNotifications">Включить уведомления</string>
   <string name="getFeedInfo">Получить информацию</string>
   <string name="newTag">Новый тег</string>
@@ -190,8 +190,8 @@
   <string name="addFeedSubtitle">Paste a feed link, or a website address and Twine will find its feed.</string>
   <string name="addFeedAddedTitle">Feed added</string>
   <string name="addFeedAddedSubtitle">Give it a name and pick how it should look.</string>
-  <string name="addFeedIconFromFeed">Feed icon</string>
-  <string name="addFeedIconFromWebsite">Website icon</string>
+  <string name="feedIconFromFeed">Feed icon</string>
+  <string name="feedIconFromWebsite">Website icon</string>
   <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">Удалить источники</string>
   <string name="removeSourcesDesc">Вы хотите удалить выбранные источники?</string>
@@ -202,8 +202,8 @@
   <string name="cdWatchVideo">Watch video</string>
   <string name="enableAutoSyncTitle">Включить автоматическую синхронизацию</string>
   <string name="enableAutoSyncDesc">Если функция включена, каналы будут обновляться в фоновом режиме</string>
-  <string name="showFeedFavIconTitle">Показывать значок ленты новостей</string>
-  <string name="showFeedFavIconDesc">Если функция отключена вместо значка веб-сайта будет отображаться значок ленты</string>
+  <string name="showFeedFavIconTitle">Use website icons for new feeds</string>
+  <string name="showFeedFavIconDesc">Sets which icon newly added feeds start with. You can change it per feed at any time.</string>
   <string name="settingsShowFeaturedSectionTitle">Показать раздел «Избранное»</string>
   <string name="settingsShowFeaturedSectionSubtitle">Отображает карусель с недавними статьями</string>
   <string name="hidePostsFromHome">Скрыть с «Главной»</string>
