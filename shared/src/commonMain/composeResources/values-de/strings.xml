@@ -186,6 +186,13 @@
   <string name="appBarAllFeeds">Alle Feeds</string>
   <string name="edit">Bearbeiten</string>
   <string name="addToGroup">Zu Gruppe hinzufügen</string>
+  <string name="addFeedTitle">Add feed</string>
+  <string name="addFeedSubtitle">Paste a feed link, or a website address and Twine will find its feed.</string>
+  <string name="addFeedAddedTitle">Feed added</string>
+  <string name="addFeedAddedSubtitle">Give it a name and pick how it should look.</string>
+  <string name="addFeedIconFromFeed">Feed icon</string>
+  <string name="addFeedIconFromWebsite">Website icon</string>
+  <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">Quellen löschen</string>
   <string name="removeSourcesDesc">Möchten Sie die ausgewählten Quellen löschen?</string>
   <string name="noPinnedSources">Keine angepinnten Feeds/Gruppen</string>
@@ -294,6 +301,9 @@
   <string name="onboardingGetStarted">Loslegen</string>
   <string name="onboardingSubtitle">Feed erstellen</string>
   <string name="onboardingSubtitle2">Kein Algorithmus. Keine Werbung.\nNur der Inhalt, den du liebst.</string>
+  <string name="discoveryImportOpml">Or import an OPML file</string>
+  <string name="opmlImportTitle">Import feeds</string>
+  <string name="opmlImportProgress">Importing feeds.. %1$d%</string>
   <string name="readingTimeEstimate">%1$d Min. Lesezeit</string>
   <string name="nowPlayingOpenEpisode">Open episode</string>
   <string name="nowPlayingStop">Stop playing</string>
@@ -338,6 +348,8 @@
   <string name="accountSelectionLocal">Lokal</string>
   <string name="accountSelectionLocalAccount">Auf dem Gerät</string>
   <string name="accountSelectionCloudSync">Cloud-Synchronisation</string>
+  <string name="accountSelectionLocalDesc">Everything stays on this device. No account needed.</string>
+  <string name="accountSelectionCloudSyncDesc">Sign in to keep your feeds and bookmarks in sync across devices.</string>
   <string name="unit_seconds">&lt;1 Min.</string>
   <string name="unit_minutes">%1$d Min.</string>
   <string name="unit_hours">%1$d Std.</string>
