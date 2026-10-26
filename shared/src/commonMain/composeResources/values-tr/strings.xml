@@ -186,6 +186,13 @@
   <string name="appBarAllFeeds">Tüm akışlar</string>
   <string name="edit">Düzenle</string>
   <string name="addToGroup">Gruba ekle</string>
+  <string name="addFeedTitle">Add feed</string>
+  <string name="addFeedSubtitle">Paste a feed link, or a website address and Twine will find its feed.</string>
+  <string name="addFeedAddedTitle">Feed added</string>
+  <string name="addFeedAddedSubtitle">Give it a name and pick how it should look.</string>
+  <string name="addFeedIconFromFeed">Feed icon</string>
+  <string name="addFeedIconFromWebsite">Website icon</string>
+  <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">Kaynakları sil</string>
   <string name="removeSourcesDesc">Seçilen kaynakları silmek istediğinizden emin misiniz?</string>
   <string name="noPinnedSources">Sabitlenmiş akış veya grup yok</string>
@@ -294,6 +301,9 @@
   <string name="onboardingGetStarted">Başlayın</string>
   <string name="onboardingSubtitle">Kendi akışınızı kurun</string>
   <string name="onboardingSubtitle2">Algoritmalar yok. Reklamlar yok.\nSadece okumak istediğiniz içerikler var.</string>
+  <string name="discoveryImportOpml">Or import an OPML file</string>
+  <string name="opmlImportTitle">Import feeds</string>
+  <string name="opmlImportProgress">Importing feeds.. %1$d%</string>
   <string name="readingTimeEstimate">%1$d dk okuma</string>
   <string name="nowPlayingOpenEpisode">Bölümü aç</string>
   <string name="nowPlayingStop">Oynatmayı durdur</string>
@@ -338,6 +348,8 @@
   <string name="accountSelectionLocal">Yerel</string>
   <string name="accountSelectionLocalAccount">Bu Cihazda</string>
   <string name="accountSelectionCloudSync">Bulut Eşzamanlama</string>
+  <string name="accountSelectionLocalDesc">Everything stays on this device. No account needed.</string>
+  <string name="accountSelectionCloudSyncDesc">Sign in to keep your feeds and bookmarks in sync across devices.</string>
   <string name="unit_seconds">&lt;1 dk</string>
   <string name="unit_minutes">%1$d dk</string>
   <string name="unit_hours">%1$d sa</string>
