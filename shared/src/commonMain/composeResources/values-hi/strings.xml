@@ -186,6 +186,13 @@
   <string name="appBarAllFeeds">All feeds</string>
   <string name="edit">Edit</string>
   <string name="addToGroup">समूह में जोड़ें</string>
+  <string name="addFeedTitle">Add feed</string>
+  <string name="addFeedSubtitle">Paste a feed link, or a website address and Twine will find its feed.</string>
+  <string name="addFeedAddedTitle">Feed added</string>
+  <string name="addFeedAddedSubtitle">Give it a name and pick how it should look.</string>
+  <string name="addFeedIconFromFeed">Feed icon</string>
+  <string name="addFeedIconFromWebsite">Website icon</string>
+  <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">Delete sources</string>
   <string name="removeSourcesDesc">Do you want to delete selected sources?</string>
   <string name="noPinnedSources">No pinned feeds/groups</string>
@@ -294,6 +301,9 @@
   <string name="onboardingGetStarted">शुरू करें</string>
   <string name="onboardingSubtitle">अपनी फ़ीड बनाएँ</string>
   <string name="onboardingSubtitle2">कोई एल्गोरिदम नहीं। कोई विज्ञापन नहीं।\n बस वही सामग्री जो आपको पसंद है।</string>
+  <string name="discoveryImportOpml">Or import an OPML file</string>
+  <string name="opmlImportTitle">Import feeds</string>
+  <string name="opmlImportProgress">Importing feeds.. %1$d%</string>
   <string name="readingTimeEstimate">%1$d मिनट का पाठ</string>
   <string name="nowPlayingOpenEpisode">Open episode</string>
   <string name="nowPlayingStop">Stop playing</string>
@@ -338,6 +348,8 @@
   <string name="accountSelectionLocal">Local</string>
   <string name="accountSelectionLocalAccount">On Device</string>
   <string name="accountSelectionCloudSync">Cloud Sync</string>
+  <string name="accountSelectionLocalDesc">Everything stays on this device. No account needed.</string>
+  <string name="accountSelectionCloudSyncDesc">Sign in to keep your feeds and bookmarks in sync across devices.</string>
   <string name="unit_seconds">%1$ds</string>
   <string name="unit_minutes">%1$dm</string>
   <string name="unit_hours">%1$dh</string>
