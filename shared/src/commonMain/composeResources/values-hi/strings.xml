@@ -137,7 +137,7 @@
   <string name="removeFeed">Remove feed</string>
   <string name="delete">Delete</string>
   <string name="removeFeedDesc">Do you want to remove <b>"%1$s"</b>?</string>
-  <string name="alwaysFetchSourceArticle">Always fetch full articles in reader view</string>
+  <string name="alwaysFetchSourceArticle">Fetch full articles in reader view</string>
   <string name="enableNotifications">सूचनाएं सक्षम करें</string>
   <string name="getFeedInfo">Get Info</string>
   <string name="newTag">New tag</string>
@@ -190,8 +190,8 @@
   <string name="addFeedSubtitle">Paste a feed link, or a website address and Twine will find its feed.</string>
   <string name="addFeedAddedTitle">Feed added</string>
   <string name="addFeedAddedSubtitle">Give it a name and pick how it should look.</string>
-  <string name="addFeedIconFromFeed">Feed icon</string>
-  <string name="addFeedIconFromWebsite">Website icon</string>
+  <string name="feedIconFromFeed">Feed icon</string>
+  <string name="feedIconFromWebsite">Website icon</string>
   <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">Delete sources</string>
   <string name="removeSourcesDesc">Do you want to delete selected sources?</string>
@@ -202,8 +202,8 @@
   <string name="cdWatchVideo">Watch video</string>
   <string name="enableAutoSyncTitle">Enable auto sync</string>
   <string name="enableAutoSyncDesc">When turned-on, feeds will be updated in the background</string>
-  <string name="showFeedFavIconTitle">Show feed fav icon</string>
-  <string name="showFeedFavIconDesc">When turned-off, the feed icon will be displayed instead of the website's favicon</string>
+  <string name="showFeedFavIconTitle">Use website icons for new feeds</string>
+  <string name="showFeedFavIconDesc">Sets which icon newly added feeds start with. You can change it per feed at any time.</string>
   <string name="settingsShowFeaturedSectionTitle">चुनिंदा सेक्शन दिखाएँ</string>
   <string name="settingsShowFeaturedSectionSubtitle">सबसे हाल के लेखों के साथ एक कैरोसेल प्रदर्शित करता है</string>
   <string name="hidePostsFromHome">"होम" से छिपाएँ</string>
