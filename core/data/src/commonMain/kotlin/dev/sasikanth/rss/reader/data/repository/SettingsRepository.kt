@@ -57,6 +57,8 @@ class SettingsRepository(
   private val useAmoledKey = booleanPreferencesKey("use_amoled")
   private val enableAutoSyncKey = booleanPreferencesKey("enable_auto_sync")
   private val showFeedFavIconKey = booleanPreferencesKey("show_feed_fav_icon")
+  private val feedFavIconDefaultsAppliedKey =
+    booleanPreferencesKey("feed_fav_icon_defaults_applied")
   private val markPostsAsReadOnKey = stringPreferencesKey("mark_posts_as_read_on")
   private val confirmMarkAllAsReadKey = booleanPreferencesKey("confirm_mark_all_as_read")
   private val audioMarkAsReadThresholdKey = stringPreferencesKey("audio_mark_as_read_threshold")
@@ -444,6 +446,18 @@ class SettingsRepository(
    * Rewrites a stored [LegacyAppIcon] to its replacement, returning it so callers can re-apply the
    * icon. Returns null once the stored value is already current.
    */
+  /**
+   * The fav icon setting used to override every feed. Feeds own that choice now, so the setting's
+   * value is written to the existing feeds once and then only applies to newly added ones.
+   */
+  suspend fun consumeFeedFavIconDefaultToBackfill(): Boolean? {
+    val preferences = dataStore.data.first()
+    if (preferences[feedFavIconDefaultsAppliedKey] == true) return null
+
+    dataStore.edit { it[feedFavIconDefaultsAppliedKey] = true }
+    return preferences[showFeedFavIconKey] ?: true
+  }
+
   suspend fun migrateLegacyAppIcon(): AppIcon? {
     val stored = dataStore.data.first()[appIconKey]
     val replacement =

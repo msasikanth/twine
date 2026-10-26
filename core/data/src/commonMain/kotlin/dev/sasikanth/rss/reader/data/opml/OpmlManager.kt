@@ -22,6 +22,7 @@ import co.touchlab.stately.concurrency.AtomicInt
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.utils.Constants.BACKUP_FILE_EXTENSION
 import dev.sasikanth.rss.reader.data.utils.Constants.BACKUP_FILE_NAME
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -48,6 +49,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -61,6 +63,7 @@ class OpmlManager(
   private val sourcesOpml: SourcesOpml,
   private val rssRepository: RssRepository,
   private val feedFetcher: FeedFetcher,
+  private val settingsRepository: SettingsRepository,
 ) {
 
   private val job = SupervisorJob()
@@ -277,6 +280,7 @@ class OpmlManager(
     return rssRepository.upsertFeedWithPosts(
       feedPayload = feedFetcherResult.feedPayload,
       title = feed.title,
+      showWebsiteFavIcon = settingsRepository.showFeedFavIcon.first(),
     )
   }
 

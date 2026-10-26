@@ -24,7 +24,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -46,7 +45,6 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -75,7 +73,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -87,12 +84,12 @@ import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
 import dev.sasikanth.rss.reader.addfeed.AddedFeed
 import dev.sasikanth.rss.reader.addfeed.FeedFetchingState
 import dev.sasikanth.rss.reader.components.Button
+import dev.sasikanth.rss.reader.components.FeedIconPicker
 import dev.sasikanth.rss.reader.components.IconButton
 import dev.sasikanth.rss.reader.components.IconButtonSize
 import dev.sasikanth.rss.reader.components.ModalSheet
 import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.TextField
-import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.resources.icons.Add
 import dev.sasikanth.rss.reader.resources.icons.Close
@@ -107,8 +104,6 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.addFeedAddedSubtitle
 import twine.shared.generated.resources.addFeedAddedTitle
 import twine.shared.generated.resources.addFeedGroupLabel
-import twine.shared.generated.resources.addFeedIconFromFeed
-import twine.shared.generated.resources.addFeedIconFromWebsite
 import twine.shared.generated.resources.addFeedSubtitle
 import twine.shared.generated.resources.addFeedTitle
 import twine.shared.generated.resources.addToGroup
@@ -128,7 +123,6 @@ import twine.shared.generated.resources.errorUnsupportedFeed
 import twine.shared.generated.resources.feedEntryLinkHint
 import twine.shared.generated.resources.feedEntryTitleHint
 
-private val ICON_CHOICES_MAX_WIDTH = 280.dp
 private val FEED_OPTION_ROW_HEIGHT = 48.dp
 private val FEED_OPTION_ROW_SPACING = 16.dp
 
@@ -350,31 +344,13 @@ private fun ColumnScope.FeedDetailsStep(
     subtitle = stringResource(Res.string.addFeedAddedSubtitle),
   )
 
-  Row(
-    modifier =
-      Modifier.align(Alignment.CenterHorizontally)
-        .widthIn(max = ICON_CHOICES_MAX_WIDTH)
-        .fillMaxWidth(),
-    horizontalArrangement = Arrangement.spacedBy(16.dp),
-  ) {
-    IconChoice(
-      modifier = Modifier.weight(1f),
-      addedFeed = addedFeed,
-      useFavIcon = false,
-      label = stringResource(Res.string.addFeedIconFromFeed),
-      selected = !addedFeed.showFeedFavIcon,
-      onClick = { dispatch(AddFeedEvent.ShowFavIconToggled(false)) },
-    )
-
-    IconChoice(
-      modifier = Modifier.weight(1f),
-      addedFeed = addedFeed,
-      useFavIcon = true,
-      label = stringResource(Res.string.addFeedIconFromWebsite),
-      selected = addedFeed.showFeedFavIcon,
-      onClick = { dispatch(AddFeedEvent.ShowFavIconToggled(true)) },
-    )
-  }
+  FeedIconPicker(
+    modifier = Modifier.align(Alignment.CenterHorizontally),
+    icon = addedFeed.icon,
+    homepageLink = addedFeed.homepageLink,
+    showFeedFavIcon = addedFeed.showFeedFavIcon,
+    onShowFeedFavIconChanged = { dispatch(AddFeedEvent.ShowFavIconToggled(it)) },
+  )
 
   Spacer(Modifier.height(24.dp))
 
@@ -431,52 +407,6 @@ private fun StepHeader(title: String, subtitle: String) {
   )
 
   Spacer(Modifier.height(24.dp))
-}
-
-@Composable
-private fun IconChoice(
-  addedFeed: AddedFeed,
-  useFavIcon: Boolean,
-  label: String,
-  selected: Boolean,
-  onClick: () -> Unit,
-  modifier: Modifier = Modifier,
-) {
-  val borderColor =
-    if (selected) AppTheme.colorScheme.primary else AppTheme.colorScheme.outlineVariant
-
-  Column(
-    modifier =
-      modifier
-        .clip(MaterialTheme.shapes.large)
-        .clickable(onClick = onClick)
-        .border(
-          width = if (selected) 2.dp else 1.dp,
-          color = borderColor,
-          shape = MaterialTheme.shapes.large,
-        )
-        .padding(16.dp),
-    horizontalAlignment = Alignment.CenterHorizontally,
-  ) {
-    FeedIcon(
-      modifier = Modifier.requiredSize(48.dp),
-      icon = addedFeed.icon,
-      homepageLink = addedFeed.homepageLink,
-      showFeedFavIcon = useFavIcon,
-      contentDescription = null,
-    )
-
-    Spacer(Modifier.height(8.dp))
-
-    Text(
-      text = label,
-      style = MaterialTheme.typography.labelMedium,
-      color = if (selected) AppTheme.colorScheme.primary else AppTheme.colorScheme.onSurfaceVariant,
-      textAlign = TextAlign.Center,
-      maxLines = 2,
-      overflow = TextOverflow.Ellipsis,
-    )
-  }
 }
 
 @Composable

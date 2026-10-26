@@ -26,6 +26,7 @@ import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.data.repository.FeedAddResult
 import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.logging.CrashReporter
@@ -37,6 +38,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
@@ -49,6 +51,7 @@ class AddFeedViewModel(
   private val rssRepository: RssRepository,
   private val feedFetcher: FeedFetcher,
   private val syncCoordinator: SyncCoordinator,
+  private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow(AddFeedState.DEFAULT)
@@ -172,7 +175,9 @@ class AddFeedViewModel(
           is FeedFetchResult.Success -> {
             val feedPayload = feedFetchResult.feedPayload
             try {
-              val showWebsiteFavIcon = !UrlUtils.prefersFeedProvidedIcon(feedPayload.link)
+              val showWebsiteFavIcon =
+                settingsRepository.showFeedFavIcon.first() &&
+                  !UrlUtils.prefersFeedProvidedIcon(feedPayload.link)
               val feedId =
                 rssRepository.upsertFeedWithPosts(
                   feedPayload = feedPayload,

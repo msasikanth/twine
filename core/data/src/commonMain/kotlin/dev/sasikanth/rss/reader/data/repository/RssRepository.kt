@@ -835,6 +835,10 @@ class RssRepository(
     feedRepository.updateFeedShowFavIcon(feedId, newValue)
   }
 
+  suspend fun updateAllFeedsShowFavIcon(newValue: Boolean) {
+    feedRepository.updateAllFeedsShowFavIcon(newValue)
+  }
+
   suspend fun updateFeedEnableNotifications(feedId: String, newValue: Boolean) {
     feedRepository.updateFeedEnableNotifications(feedId, newValue)
   }
