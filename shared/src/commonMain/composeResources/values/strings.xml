@@ -191,6 +191,13 @@
   <string name="appBarAllFeeds">All feeds</string>
   <string name="edit">Edit</string>
   <string name="addToGroup">Add to group</string>
+  <string name="addFeedTitle">Add feed</string>
+  <string name="addFeedSubtitle">Paste a feed link, or a website address and Twine will find its feed.</string>
+  <string name="addFeedAddedTitle">Feed added</string>
+  <string name="addFeedAddedSubtitle">Give it a name and pick how it should look.</string>
+  <string name="addFeedIconFromFeed">Feed icon</string>
+  <string name="addFeedIconFromWebsite">Website icon</string>
+  <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">Delete sources</string>
   <string name="removeSourcesDesc">Do you want to delete selected sources?</string>
   <string name="noPinnedSources">No pinned feeds/groups</string>
@@ -319,6 +326,9 @@
   <string name="onboardingGetStarted">Get started</string>
   <string name="onboardingSubtitle">Build your feed</string>
   <string name="onboardingSubtitle2">No algorithm. No ads.\nJust the content you love.</string>
+  <string name="discoveryImportOpml">Or import an OPML file</string>
+  <string name="opmlImportTitle">Import feeds</string>
+  <string name="opmlImportProgress">Importing feeds.. %1$d%</string>
   <string name="readingTimeEstimate">%1$dm read</string>
   <string name="nowPlayingOpenEpisode">Open episode</string>
   <string name="nowPlayingStop">Stop playing</string>
@@ -366,6 +376,8 @@
   <string name="accountSelectionLocal">Local</string>
   <string name="accountSelectionLocalAccount">On Device</string>
   <string name="accountSelectionCloudSync">Cloud Sync</string>
+  <string name="accountSelectionLocalDesc">Everything stays on this device. No account needed.</string>
+  <string name="accountSelectionCloudSyncDesc">Sign in to keep your feeds and bookmarks in sync across devices.</string>
 
   <string name="unit_seconds">&lt;1m</string>
   <string name="unit_minutes">%1$dm</string>

@@ -71,6 +71,8 @@ import twine.shared.generated.resources.groupAddNew
 
 val SELECTED_GROUPS_KEY = NavResultKey<Set<String>>("dev.sasikanth.twine.SELECTED_GROUPS")
 
+val ADD_FEED_GROUPS_KEY = NavResultKey<Set<String>>("dev.sasikanth.twine.ADD_FEED_GROUPS")
+
 @Composable
 fun GroupSelectionSheet(
   viewModel: GroupSelectionViewModel,

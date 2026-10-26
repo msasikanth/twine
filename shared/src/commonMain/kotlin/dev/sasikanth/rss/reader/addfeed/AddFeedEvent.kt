@@ -29,5 +29,15 @@ sealed interface AddFeedEvent {
 
   data object MarkGoBackAsDone : AddFeedEvent
 
+  data class FeedNameChanged(val name: String) : AddFeedEvent
+
+  data class ShowFavIconToggled(val value: Boolean) : AddFeedEvent
+
+  data class AlwaysFetchSourceArticleToggled(val value: Boolean) : AddFeedEvent
+
+  data class NotificationsToggled(val value: Boolean) : AddFeedEvent
+
+  data object DoneClicked : AddFeedEvent
+
   data object MarkErrorAsShown : AddFeedEvent
 }

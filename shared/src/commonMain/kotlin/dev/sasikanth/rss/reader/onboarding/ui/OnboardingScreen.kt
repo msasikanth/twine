@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -34,14 +33,12 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,11 +51,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.onboarding.OnboardingEffect
 import dev.sasikanth.rss.reader.onboarding.OnboardingEvent
-import dev.sasikanth.rss.reader.onboarding.OnboardingState
 import dev.sasikanth.rss.reader.onboarding.OnboardingViewModel
 import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.platform
@@ -77,32 +72,22 @@ import twine.shared.generated.resources.onboardingSubtitle2
 @Composable
 internal fun OnboardingScreen(
   viewModel: OnboardingViewModel,
-  onOnboardingDone: () -> Unit,
-  onNavigateToDiscovery: () -> Unit,
   onNavigateToAccountSelection: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val state by viewModel.state.collectAsStateWithLifecycle()
-
   LaunchedEffect(Unit) {
     viewModel.effects.collect { effect ->
       when (effect) {
-        OnboardingEffect.NavigateToHome -> onOnboardingDone()
-        OnboardingEffect.NavigateToDiscovery -> onNavigateToDiscovery()
         OnboardingEffect.NavigateToAccountSelection -> onNavigateToAccountSelection()
       }
     }
   }
 
-  OnboardingContent(state = state, onEvent = viewModel::dispatch, modifier = modifier)
+  OnboardingContent(onEvent = viewModel::dispatch, modifier = modifier)
 }
 
 @Composable
-private fun OnboardingContent(
-  state: OnboardingState,
-  onEvent: (OnboardingEvent) -> Unit,
-  modifier: Modifier = Modifier,
-) {
+private fun OnboardingContent(onEvent: (OnboardingEvent) -> Unit, modifier: Modifier = Modifier) {
   val backgroundColor = AppTheme.colorScheme.primary
 
   val entranceProgress = remember { Animatable(0f) }
@@ -144,7 +129,6 @@ private fun OnboardingContent(
           onClick = { onEvent(OnboardingEvent.GetStartedClicked) },
           modifier =
             Modifier.widthIn(max = Constants.MAX_CONTENT_WIDTH).fillMaxWidth().height(56.dp),
-          enabled = !state.isPrePopulating,
           shape = MaterialTheme.shapes.extraLarge,
           colors =
             ButtonDefaults.buttonColors(
@@ -153,21 +137,11 @@ private fun OnboardingContent(
             ),
           elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 6.dp),
         ) {
-          Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            if (state.isPrePopulating) {
-              CircularProgressIndicator(
-                modifier = Modifier.requiredSize(24.dp),
-                color = AppTheme.colorScheme.primary,
-                strokeWidth = 2.dp,
-              )
-            } else {
-              Text(
-                text = stringResource(Res.string.onboardingGetStarted).uppercase(),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-              )
-            }
-          }
+          Text(
+            text = stringResource(Res.string.onboardingGetStarted).uppercase(),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+          )
         }
 
         if (platform !is Platform.Apple) {
@@ -231,5 +205,5 @@ private fun OnboardingContent(
 @Preview(locale = "en")
 @Composable
 private fun OnboardingPreview() {
-  AppTheme { OnboardingContent(state = OnboardingState.DEFAULT, onEvent = {}) }
+  AppTheme { OnboardingContent(onEvent = {}) }
 }
