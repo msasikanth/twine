@@ -137,7 +137,7 @@
   <string name="removeFeed">Akışı kaldır</string>
   <string name="delete">Sil</string>
   <string name="removeFeedDesc"><b>"%1$s"</b> akışını silmek istediğinizden emin misiniz?</string>
-  <string name="alwaysFetchSourceArticle">Okuma modunda her zaman tam makaleyi çek</string>
+  <string name="alwaysFetchSourceArticle">Fetch full articles in reader view</string>
   <string name="enableNotifications">Bildirimleri aç</string>
   <string name="getFeedInfo">Bilgi Al</string>
   <string name="newTag">Yeni etiket</string>
@@ -190,8 +190,8 @@
   <string name="addFeedSubtitle">Paste a feed link, or a website address and Twine will find its feed.</string>
   <string name="addFeedAddedTitle">Feed added</string>
   <string name="addFeedAddedSubtitle">Give it a name and pick how it should look.</string>
-  <string name="addFeedIconFromFeed">Feed icon</string>
-  <string name="addFeedIconFromWebsite">Website icon</string>
+  <string name="feedIconFromFeed">Feed icon</string>
+  <string name="feedIconFromWebsite">Website icon</string>
   <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">Kaynakları sil</string>
   <string name="removeSourcesDesc">Seçilen kaynakları silmek istediğinizden emin misiniz?</string>
@@ -202,8 +202,8 @@
   <string name="cdWatchVideo">Videoyu izle</string>
   <string name="enableAutoSyncTitle">Arka planda eşzamanlama</string>
   <string name="enableAutoSyncDesc">Yeni yazılar siz uygulamada değilken de sessizce indirilir</string>
-  <string name="showFeedFavIconTitle">Site simgelerini göster</string>
-  <string name="showFeedFavIconDesc">Açık olduğunda genel akış simgesi yerine sitelerin kendi logoları gösterilir</string>
+  <string name="showFeedFavIconTitle">Use website icons for new feeds</string>
+  <string name="showFeedFavIconDesc">Sets which icon newly added feeds start with. You can change it per feed at any time.</string>
   <string name="settingsShowFeaturedSectionTitle">Öne çıkanlar bölümü</string>
   <string name="settingsShowFeaturedSectionSubtitle">En yeni yazıları ana ekranda kaydırılabilir bir vitrin olarak listeler</string>
   <string name="hidePostsFromHome">"Ana Sayfa"da gösterme</string>
