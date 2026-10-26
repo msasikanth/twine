@@ -15,15 +15,10 @@
  *
  */
 
-package dev.sasikanth.rss.reader.onboarding
+package dev.sasikanth.rss.reader.opmlimport
 
-import androidx.compose.runtime.Immutable
+sealed interface OpmlImportEffect {
+  data object GoBack : OpmlImportEffect
 
-@Immutable
-data class OnboardingState(val isPrePopulating: Boolean) {
-
-  companion object {
-
-    val DEFAULT = OnboardingState(isPrePopulating = false)
-  }
+  data object ImportComplete : OpmlImportEffect
 }

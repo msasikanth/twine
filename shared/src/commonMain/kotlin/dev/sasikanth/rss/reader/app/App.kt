@@ -89,6 +89,7 @@ import dev.sasikanth.rss.reader.home.HomeViewModel
 import dev.sasikanth.rss.reader.media.AudioPlayer
 import dev.sasikanth.rss.reader.miniflux.MinifluxLoginViewModel
 import dev.sasikanth.rss.reader.onboarding.OnboardingViewModel
+import dev.sasikanth.rss.reader.opmlimport.OpmlImportViewModel
 import dev.sasikanth.rss.reader.placeholder.PlaceholderViewModel
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -177,6 +178,7 @@ fun App(
   blockedWordsViewModel: () -> BlockedWordsViewModel,
   statisticsViewModel: () -> StatisticsViewModel,
   discoveryViewModel: () -> DiscoveryViewModel,
+  opmlImportViewModel: () -> OpmlImportViewModel,
   premiumPaywallViewModel: () -> PremiumPaywallViewModel,
   @Assisted onThemeChange: (useDarkTheme: Boolean) -> Unit,
   @Assisted toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
@@ -434,6 +436,12 @@ fun App(
           discoveryViewModel = discoveryViewModel,
           navigator = navigator,
           screenModifier = screenModifier,
+        )
+
+        opmlImportScreen(
+          opmlImportViewModel = opmlImportViewModel,
+          navigator = navigator,
+          modifier = screenModifier,
         )
 
         aboutScreen(modifier = screenModifier, navigator = navigator)

@@ -67,7 +67,6 @@ import dev.sasikanth.rss.reader.billing.PackageType
 import dev.sasikanth.rss.reader.billing.TwinePackage
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
-import dev.sasikanth.rss.reader.resources.icons.Close
 import dev.sasikanth.rss.reader.resources.icons.FormatLineSpacing
 import dev.sasikanth.rss.reader.resources.icons.LayoutSimple
 import dev.sasikanth.rss.reader.resources.icons.Palette
@@ -106,7 +105,6 @@ fun PremiumPaywallScreen(
   packages: List<TwinePackage>,
   inProgress: Boolean,
   hasPremium: Boolean,
-  isFromOnboarding: Boolean = false,
   onPurchase: (String) -> Unit,
   onRestore: () -> Unit,
   goBack: () -> Unit,
@@ -134,16 +132,9 @@ fun PremiumPaywallScreen(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        val icon =
-          if (isFromOnboarding) {
-            TwineIcons.Close
-          } else {
-            TwineIcons.ArrowBack
-          }
-
         CircularIconButton(
           modifier = Modifier.padding(start = 12.dp),
-          icon = icon,
+          icon = TwineIcons.ArrowBack,
           label = stringResource(Res.string.buttonGoBack),
           onClick = goBack,
         )

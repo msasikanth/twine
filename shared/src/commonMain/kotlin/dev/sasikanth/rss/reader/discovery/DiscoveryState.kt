@@ -24,6 +24,8 @@ import dev.sasikanth.rss.reader.core.model.DiscoveryGroup
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
+private const val MIN_ONBOARDING_FEEDS = 3
+
 @Immutable
 data class DiscoveryState(
   val groups: ImmutableList<DiscoveryGroup>,
@@ -46,6 +48,9 @@ data class DiscoveryState(
         isSubscribed = false,
       )
   }
+
+  val canFinishOnboarding: Boolean
+    get() = addedFeedLinks.size >= MIN_ONBOARDING_FEEDS
 
   val filteredGroups: List<DiscoveryGroup>
     get() {

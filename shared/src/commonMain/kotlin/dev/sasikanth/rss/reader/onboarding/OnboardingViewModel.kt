@@ -20,25 +20,14 @@ package dev.sasikanth.rss.reader.onboarding
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
 @Stable
 @Inject
-class OnboardingViewModel(
-  private val settingsRepository: SettingsRepository,
-  private val dispatchersProvider: DispatchersProvider,
-) : ViewModel() {
-
-  private val _state = MutableStateFlow(OnboardingState.DEFAULT)
-  val state: StateFlow<OnboardingState> = _state.asStateFlow()
+class OnboardingViewModel : ViewModel() {
 
   private val _effects = MutableSharedFlow<OnboardingEffect>()
   val effects = _effects.asSharedFlow()

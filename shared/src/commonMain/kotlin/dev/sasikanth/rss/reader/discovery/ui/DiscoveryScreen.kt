@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -46,6 +47,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -91,6 +93,7 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonChange
 import twine.shared.generated.resources.discoveryAddFeed
 import twine.shared.generated.resources.discoveryAdded
+import twine.shared.generated.resources.discoveryImportOpml
 import twine.shared.generated.resources.discoveryOnboardingHint
 import twine.shared.generated.resources.discoveryRefresh
 import twine.shared.generated.resources.discoverySearchHint
@@ -102,6 +105,7 @@ fun DiscoveryScreen(
   goBack: () -> Unit,
   showDoneButton: Boolean = false,
   onDone: () -> Unit = goBack,
+  onImportOpml: () -> Unit = {},
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsState()
@@ -112,6 +116,7 @@ fun DiscoveryScreen(
     goBack = goBack,
     showDoneButton = showDoneButton,
     onDone = onDone,
+    onImportOpml = onImportOpml,
     modifier = modifier,
   )
 }
@@ -124,6 +129,7 @@ private fun DiscoveryContent(
   goBack: () -> Unit,
   showDoneButton: Boolean,
   onDone: () -> Unit,
+  onImportOpml: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val focusRequester = remember { FocusRequester() }
@@ -159,7 +165,7 @@ private fun DiscoveryContent(
                 modifier = Modifier.padding(end = 12.dp),
                 icon = TwineIcons.Check,
                 label = stringResource(Res.string.buttonChange),
-                enabled = state.addedFeedLinks.size >= 3,
+                enabled = state.canFinishOnboarding,
                 onClick = onDone,
               )
             }
@@ -189,17 +195,32 @@ private fun DiscoveryContent(
           )
 
           if (showDoneButton) {
-            Text(
-              text = stringResource(Res.string.discoveryOnboardingHint),
-              style = MaterialTheme.typography.bodyMedium,
-              color = AppTheme.colorScheme.onSurfaceVariant,
+            Column(
               modifier =
                 Modifier.widthIn(max = Constants.MAX_CONTENT_WIDTH)
                   .fillMaxWidth()
-                  .padding(horizontal = 24.dp)
-                  .padding(bottom = 16.dp),
-              textAlign = TextAlign.Center,
-            )
+                  .padding(horizontal = 24.dp, vertical = 12.dp),
+              horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+              Text(
+                text = stringResource(Res.string.discoveryOnboardingHint),
+                style = MaterialTheme.typography.bodyMedium,
+                color = AppTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+              )
+
+              TextButton(
+                onClick = onImportOpml,
+                modifier = Modifier.heightIn(min = 36.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+              ) {
+                Text(
+                  text = stringResource(Res.string.discoveryImportOpml),
+                  style = MaterialTheme.typography.labelLarge,
+                  color = AppTheme.colorScheme.primary,
+                )
+              }
+            }
           }
         }
       }
@@ -521,6 +542,7 @@ private fun DiscoveryPreview() {
       goBack = {},
       showDoneButton = false,
       onDone = {},
+      onImportOpml = {},
     )
   }
 }

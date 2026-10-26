@@ -76,6 +76,8 @@ import dev.sasikanth.rss.reader.miniflux.ui.MINIFLUX_LOGIN_SUCCESS_KEY
 import dev.sasikanth.rss.reader.miniflux.ui.MinifluxLoginScreen
 import dev.sasikanth.rss.reader.onboarding.OnboardingViewModel
 import dev.sasikanth.rss.reader.onboarding.ui.OnboardingScreen
+import dev.sasikanth.rss.reader.opmlimport.OpmlImportViewModel
+import dev.sasikanth.rss.reader.opmlimport.ui.OpmlImportScreen
 import dev.sasikanth.rss.reader.placeholder.PlaceholderScreen
 import dev.sasikanth.rss.reader.placeholder.PlaceholderViewModel
 import dev.sasikanth.rss.reader.premium.PremiumPaywallScreen
@@ -138,8 +140,6 @@ fun EntryProviderScope<NavKey>.onboardingScreen(
     OnboardingScreen(
       modifier = modifier,
       viewModel = viewModel,
-      onOnboardingDone = { navigator.navigateToMain() },
-      onNavigateToDiscovery = { navigator.navigate(Screen.Discovery(isFromOnboarding = true)) },
       onNavigateToAccountSelection = { navigator.navigate(Screen.AccountSelection) },
     )
   }
@@ -158,7 +158,7 @@ fun EntryProviderScope<NavKey>.accountSelectionScreen(
       viewModel = viewModel,
       onNavigateToHome = { navigator.navigateToMain(triggerSync = true) },
       onNavigateToDiscovery = { navigator.navigate(Screen.Discovery(isFromOnboarding = true)) },
-      openPaywall = { navigator.navigate(Screen.Paywall()) },
+      openPaywall = { navigator.navigate(Screen.Paywall) },
       openFreshRssLogin = { navigator.navigate(Screen.FreshRssLogin) },
       openMinifluxLogin = { navigator.navigate(Screen.MinifluxLogin) },
       openBazQuxLogin = { navigator.navigate(Screen.BazQuxLogin) },
@@ -319,7 +319,7 @@ fun EntryProviderScope<NavKey>.mainScreen(
             openServicesSettings = { navigator.navigate(Screen.SettingsServices) },
             openDataSettings = { navigator.navigate(Screen.SettingsData) },
             openAppInfoSettings = { navigator.navigate(Screen.SettingsAppInfo) },
-            openPaywall = { navigator.navigate(Screen.Paywall()) },
+            openPaywall = { navigator.navigate(Screen.Paywall) },
             modifier = screenModifier,
           )
         },
@@ -337,7 +337,7 @@ fun EntryProviderScope<NavKey>.mainScreen(
         openGroupScreen = { groupId -> navigator.navigate(Screen.FeedGroup(groupId)) },
         openGroupSelectionSheet = { feedsViewModel.dispatch(FeedsEvent.OnAddToGroupClicked) },
         openAddFeedScreen = { navigator.navigate(Screen.AddFeed) },
-        openPaywall = { navigator.navigate(Screen.Paywall()) },
+        openPaywall = { navigator.navigate(Screen.Paywall) },
         canHandleBack = isMainActive,
         canResetActiveSourceOnBack = !isDetailOpen,
         isSideNavigationExpanded = isSideNavigationExpanded.value,
@@ -371,7 +371,7 @@ fun EntryProviderScope<NavKey>.settingsAppearanceScreen(
       modifier = modifier,
       viewModel = viewModel,
       goBack = { navigator.goBack() },
-      openPaywall = { navigator.navigate(Screen.Paywall()) },
+      openPaywall = { navigator.navigate(Screen.Paywall) },
     )
   }
 }
@@ -403,7 +403,7 @@ fun EntryProviderScope<NavKey>.settingsServicesScreen(
       modifier = modifier,
       viewModel = viewModel,
       goBack = { navigator.goBack() },
-      openPaywall = { navigator.navigate(Screen.Paywall()) },
+      openPaywall = { navigator.navigate(Screen.Paywall) },
       openFreshRssLogin = { navigator.navigate(Screen.FreshRssLogin) },
       openMinifluxLogin = { navigator.navigate(Screen.MinifluxLogin) },
       openBazQuxLogin = { navigator.navigate(Screen.BazQuxLogin) },
@@ -534,7 +534,7 @@ fun EntryProviderScope<NavKey>.readerScreen(
       viewModel = viewModel,
       pageViewModelFactory = { post -> viewModel(key = post.id) { readerPageViewModel(post) } },
       onBack = { navigator.goBack() },
-      openPaywall = { navigator.navigate(Screen.Paywall()) },
+      openPaywall = { navigator.navigate(Screen.Paywall) },
       onImageClick = { imageUrl -> navigator.navigate(Screen.ImageViewer(imageUrl)) },
       toggleLightStatusBar = toggleLightStatusBar,
       toggleLightNavBar = toggleLightNavBar,
@@ -599,7 +599,6 @@ fun EntryProviderScope<NavKey>.discoveryScreen(
   entry<Screen.Discovery> { discoveryRoute ->
     val viewModel = viewModel { discoveryViewModel() }
     val isFromOnboarding = discoveryRoute.isFromOnboarding
-    val state by viewModel.state.collectAsStateWithLifecycle()
 
     DiscoveryScreen(
       viewModel = viewModel,
@@ -608,15 +607,30 @@ fun EntryProviderScope<NavKey>.discoveryScreen(
         if (isFromOnboarding) {
           viewModel.completeOnboarding()
           navigator.navigateToMain()
-          if (!state.isSubscribed) {
-            navigator.navigate(Screen.Paywall(isFromOnboarding = true))
-          }
         } else {
           navigator.goBack()
         }
       },
+      onImportOpml = { navigator.navigate(Screen.OpmlImport) },
       goBack = { navigator.goBack() },
       modifier = screenModifier,
+    )
+  }
+}
+
+fun EntryProviderScope<NavKey>.opmlImportScreen(
+  opmlImportViewModel: () -> OpmlImportViewModel,
+  navigator: AppNavigator,
+  modifier: Modifier = Modifier,
+) {
+  entry<Screen.OpmlImport> {
+    val viewModel = viewModel { opmlImportViewModel() }
+
+    OpmlImportScreen(
+      modifier = modifier,
+      viewModel = viewModel,
+      goBack = { navigator.goBack() },
+      onImportComplete = { navigator.navigateToMain() },
     )
   }
 }
@@ -671,12 +685,11 @@ fun EntryProviderScope<NavKey>.paywallScreen(
   premiumPaywallViewModel: () -> PremiumPaywallViewModel,
   navigator: AppNavigator,
 ) {
-  entry<Screen.Paywall> { paywallRoute ->
+  entry<Screen.Paywall> {
     val viewModel = viewModel { premiumPaywallViewModel() }
     val hasPremium by viewModel.hasPremium.collectAsStateWithLifecycle()
     val packages by viewModel.packages.collectAsStateWithLifecycle()
     val inProgress by viewModel.inProgress.collectAsStateWithLifecycle()
-    val isFromOnboarding = paywallRoute.isFromOnboarding
 
     LaunchedEffect(hasPremium) {
       if (hasPremium) {
@@ -690,7 +703,6 @@ fun EntryProviderScope<NavKey>.paywallScreen(
       packages = packages,
       inProgress = inProgress,
       hasPremium = hasPremium,
-      isFromOnboarding = isFromOnboarding,
       onPurchase = viewModel::purchasePackage,
       onRestore = viewModel::restorePurchases,
       goBack = { navigator.goBack() },

@@ -69,8 +69,10 @@ import dev.sasikanth.rss.reader.utils.restrictContentWidth
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.accountSelectionCloudSync
+import twine.shared.generated.resources.accountSelectionCloudSyncDesc
 import twine.shared.generated.resources.accountSelectionLocal
 import twine.shared.generated.resources.accountSelectionLocalAccount
+import twine.shared.generated.resources.accountSelectionLocalDesc
 import twine.shared.generated.resources.accountSelectionSubtitle
 import twine.shared.generated.resources.accountSelectionTitle
 import twine.shared.generated.resources.buttonGoBack
@@ -175,6 +177,8 @@ private fun AccountSelectionContent(
     LazyColumn(modifier = Modifier.restrictContentWidth().padding(padding)) {
       item { SubHeader(text = stringResource(Res.string.accountSelectionLocal)) }
 
+      item { SectionDescription(text = stringResource(Res.string.accountSelectionLocalDesc)) }
+
       item {
         AccountItem(
           label = stringResource(Res.string.accountSelectionLocalAccount),
@@ -191,6 +195,8 @@ private fun AccountSelectionContent(
       }
 
       item { SubHeader(text = stringResource(Res.string.accountSelectionCloudSync)) }
+
+      item { SectionDescription(text = stringResource(Res.string.accountSelectionCloudSyncDesc)) }
 
       items(availableProviders.toList()) { provider ->
         val label =
@@ -221,6 +227,16 @@ private fun AccountSelectionContent(
       }
     }
   }
+}
+
+@Composable
+private fun SectionDescription(text: String, modifier: Modifier = Modifier) {
+  Text(
+    text = text,
+    style = MaterialTheme.typography.bodyMedium,
+    color = AppTheme.colorScheme.onSurfaceVariant,
+    modifier = modifier.padding(horizontal = 24.dp).padding(bottom = 8.dp),
+  )
 }
 
 @Composable

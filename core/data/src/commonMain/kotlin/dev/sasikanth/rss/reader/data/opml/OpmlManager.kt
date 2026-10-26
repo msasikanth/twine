@@ -69,6 +69,9 @@ class OpmlManager(
   private val _result = MutableSharedFlow<OpmlResult>(replay = 1)
   val result: SharedFlow<OpmlResult> = _result
 
+  private var feedLinksBeforeImport = emptySet<String>()
+  private var groupIdsBeforeImport = emptySet<String>()
+
   companion object {
     private const val IMPORT_CHUNKS = 6
   }
@@ -109,6 +112,10 @@ class OpmlManager(
   suspend fun import(sources: List<OpmlSource>) {
     try {
       _result.emit(OpmlResult.InProgress.Importing(0))
+
+      feedLinksBeforeImport =
+        rssRepository.allFeedsBlocking().filterNot { it.isDeleted }.map { it.link }.toSet()
+      groupIdsBeforeImport = rssRepository.allFeedGroupsBlocking().map { it.id }.toSet()
 
       coroutineScope
         .launch(dispatchersProvider.io) {
@@ -186,6 +193,24 @@ class OpmlManager(
   fun cancel() {
     job.cancelChildren()
     _result.tryEmit(OpmlResult.Idle)
+  }
+
+  suspend fun cancelAndRollbackImport() {
+    job.cancelChildren()
+
+    val importedFeeds =
+      rssRepository.allFeedsBlocking().filterNot {
+        it.isDeleted || feedLinksBeforeImport.contains(it.link)
+      }
+    val importedGroups =
+      rssRepository.allFeedGroupsBlocking().filterNot { groupIdsBeforeImport.contains(it.id) }
+    val importedSources = (importedFeeds + importedGroups).toSet()
+
+    if (importedSources.isNotEmpty()) {
+      rssRepository.deleteSources(importedSources)
+    }
+
+    _result.emit(OpmlResult.Idle)
   }
 
   private fun addOpmlSources(sources: List<OpmlSource>): Flow<Int> = channelFlow {

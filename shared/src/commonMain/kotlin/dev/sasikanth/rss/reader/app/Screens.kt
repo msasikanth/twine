@@ -87,7 +87,9 @@ sealed interface Screen : NavKey {
 
   @Serializable data object BazQuxLogin : Screen
 
-  @Serializable data class Paywall(val isFromOnboarding: Boolean = false) : Screen
+  @Serializable data object Paywall : Screen
+
+  @Serializable data object OpmlImport : Screen
 
   @Serializable data class ImageViewer(val imageUrl: String) : Screen
 
