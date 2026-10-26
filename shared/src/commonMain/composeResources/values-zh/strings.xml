@@ -186,6 +186,13 @@
   <string name="appBarAllFeeds">所有来源</string>
   <string name="edit">编辑</string>
   <string name="addToGroup">添加到分组</string>
+  <string name="addFeedTitle">Add feed</string>
+  <string name="addFeedSubtitle">Paste a feed link, or a website address and Twine will find its feed.</string>
+  <string name="addFeedAddedTitle">Feed added</string>
+  <string name="addFeedAddedSubtitle">Give it a name and pick how it should look.</string>
+  <string name="addFeedIconFromFeed">Feed icon</string>
+  <string name="addFeedIconFromWebsite">Website icon</string>
+  <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">删除来源</string>
   <string name="removeSourcesDesc">你想删除选定来源吗？</string>
   <string name="noPinnedSources">没有钉选的来源/分组</string>
@@ -294,6 +301,9 @@
   <string name="onboardingGetStarted">开始</string>
   <string name="onboardingSubtitle">构建你的时间流</string>
   <string name="onboardingSubtitle2">没有算法。没有广告。\n只有你喜爱的内容。</string>
+  <string name="discoveryImportOpml">Or import an OPML file</string>
+  <string name="opmlImportTitle">Import feeds</string>
+  <string name="opmlImportProgress">Importing feeds.. %1$d%</string>
   <string name="readingTimeEstimate">阅读需要 %1$d 分钟</string>
   <string name="nowPlayingOpenEpisode">Open episode</string>
   <string name="nowPlayingStop">Stop playing</string>
@@ -338,6 +348,8 @@
   <string name="accountSelectionLocal">本地</string>
   <string name="accountSelectionLocalAccount">设备本机</string>
   <string name="accountSelectionCloudSync">云端同步</string>
+  <string name="accountSelectionLocalDesc">Everything stays on this device. No account needed.</string>
+  <string name="accountSelectionCloudSyncDesc">Sign in to keep your feeds and bookmarks in sync across devices.</string>
   <string name="unit_seconds">&lt; 1 分钟</string>
   <string name="unit_minutes">%1$d 分</string>
   <string name="unit_hours">%1$d 小时</string>
