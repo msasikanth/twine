@@ -76,9 +76,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
 import dev.sasikanth.rss.reader.components.ContextActionItem
+import dev.sasikanth.rss.reader.components.FeedIconPicker
 import dev.sasikanth.rss.reader.components.ModalSheet
 import dev.sasikanth.rss.reader.components.Switch
-import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feed.FeedEvent
 import dev.sasikanth.rss.reader.feed.FeedViewModel
@@ -114,7 +114,6 @@ import twine.shared.generated.resources.hidePostsFromHome
 import twine.shared.generated.resources.markAsRead
 import twine.shared.generated.resources.noUnreadPostsInFeed
 import twine.shared.generated.resources.numberOfUnreadPostsInFeed
-import twine.shared.generated.resources.showFeedFavIconTitle
 
 private val HORIZONTAL_PADDING = 24.dp
 
@@ -149,6 +148,18 @@ fun FeedInfoBottomSheet(
       Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
         val feed = state.feed
         if (feed != null) {
+          FeedIconPicker(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            icon = feed.icon,
+            homepageLink = feed.homepageLink,
+            showFeedFavIcon = feed.showFeedFavIcon,
+            onShowFeedFavIconChanged = { newValue ->
+              feedViewModel.dispatch(FeedEvent.OnShowFeedFavIconChanged(newValue, feed.id))
+            },
+          )
+
+          Spacer(Modifier.requiredHeight(16.dp))
+
           FeedLabelInput(
             modifier = Modifier.padding(horizontal = HORIZONTAL_PADDING),
             feed = feed,
@@ -183,15 +194,6 @@ fun FeedInfoBottomSheet(
             feed = feed,
             onValueChanged = { newValue, feedId ->
               feedViewModel.dispatch(FeedEvent.OnAlwaysFetchSourceArticleChanged(newValue, feedId))
-            },
-          )
-
-          Divider(horizontalInsets = HORIZONTAL_PADDING)
-
-          ShowFeedFavIconSwitch(
-            feed = feed,
-            onValueChanged = { newValue, feedId ->
-              feedViewModel.dispatch(FeedEvent.OnShowFeedFavIconChanged(newValue, feedId))
             },
           )
 
@@ -335,19 +337,9 @@ private fun FeedLabelInput(
     Modifier.then(modifier)
       .clip(RoundedCornerShape(24.dp))
       .background(AppTheme.colorScheme.surfaceContainerLow)
-      .padding(8.dp)
+      .padding(12.dp)
       .fillMaxWidth()
   ) {
-    FeedIcon(
-      icon = feed.icon,
-      homepageLink = feed.homepageLink,
-      showFeedFavIcon = feed.showFeedFavIcon,
-      contentDescription = feed.name,
-      modifier = Modifier.requiredSize(56.dp),
-    )
-
-    Spacer(Modifier.requiredWidth(16.dp))
-
     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
       Text(
         text = stringResource(Res.string.feedTitleHint),
@@ -460,20 +452,6 @@ private fun AlwaysFetchSourceArticleSwitch(
   FeedOptionSwitch(
     title = stringResource(Res.string.alwaysFetchSourceArticle),
     checked = feed.alwaysFetchSourceArticle,
-    modifier = modifier,
-    onValueChanged = { newValue -> onValueChanged(newValue, feed.id) },
-  )
-}
-
-@Composable
-private fun ShowFeedFavIconSwitch(
-  feed: Feed,
-  modifier: Modifier = Modifier,
-  onValueChanged: (newValue: Boolean, feedId: String) -> Unit,
-) {
-  FeedOptionSwitch(
-    title = stringResource(Res.string.showFeedFavIconTitle),
-    checked = feed.showFeedFavIcon,
     modifier = modifier,
     onValueChanged = { newValue -> onValueChanged(newValue, feed.id) },
   )

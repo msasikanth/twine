@@ -122,6 +122,9 @@ UPDATE feed SET alwaysFetchSourceArticle = :alwaysFetchSourceArticle WHERE id = 
 updateShowFeedFavIcon:
 UPDATE feed SET showFeedFavIcon = :showFeedFavIcon WHERE id = :id;
 
+updateShowFeedFavIconForAll:
+UPDATE feed SET showFeedFavIcon = :showFeedFavIcon;
+
 updateHideFromAllFeeds:
 UPDATE feed SET hideFromAllFeeds = :hideFromAllFeeds, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
 

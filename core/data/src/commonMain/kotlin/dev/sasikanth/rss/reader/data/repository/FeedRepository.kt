@@ -169,6 +169,12 @@ class FeedRepository(
     }
   }
 
+  suspend fun updateAllFeedsShowFavIcon(newValue: Boolean) {
+    withContext(dispatchersProvider.databaseWrite) {
+      feedQueries.updateShowFeedFavIconForAll(newValue)
+    }
+  }
+
   suspend fun updateFeedEnableNotifications(feedId: String, newValue: Boolean) {
     withContext(dispatchersProvider.databaseWrite) {
       feedQueries.updateEnableNotifications(

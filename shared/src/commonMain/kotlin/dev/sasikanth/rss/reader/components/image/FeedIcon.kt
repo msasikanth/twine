@@ -40,7 +40,6 @@ import dev.sasikanth.rss.reader.resources.icons.RSS
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
-import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 
 @Composable
 internal fun FeedIcon(
@@ -52,8 +51,7 @@ internal fun FeedIcon(
   contentScale: ContentScale = ContentScale.Fit,
   size: Size = Size(Dimension.Undefined, 500),
 ) {
-  val globalShowFeedFavIcon = LocalShowFeedFavIconSetting.current
-  val useFavIcon = showFeedFavIcon && globalShowFeedFavIcon
+  val useFavIcon = showFeedFavIcon
   val shouldBlockImage = LocalBlockImage.current
   val iconShape = RoundedCornerShape(25)
 

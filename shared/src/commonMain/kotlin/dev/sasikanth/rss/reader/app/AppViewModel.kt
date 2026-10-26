@@ -80,6 +80,7 @@ class AppViewModel(
     refreshFeedsIfExpired()
     setupSessionTracking()
     migrateLegacyAppIcon()
+    backfillFeedFavIconDefaults()
 
     viewModelScope.launch { oAuthManager.loopbackRedirects.collect { uri -> completeSignIn(uri) } }
 
@@ -249,6 +250,14 @@ class AppViewModel(
 
   fun openChangelog() {
     viewModelScope.launch { _state.update { it.copy(showChangelog = true) } }
+  }
+
+  private fun backfillFeedFavIconDefaults() {
+    viewModelScope.launch {
+      settingsRepository.consumeFeedFavIconDefaultToBackfill()?.let { showFavIcon ->
+        rssRepository.updateAllFeedsShowFavIcon(showFavIcon)
+      }
+    }
   }
 
   private fun migrateLegacyAppIcon() {
