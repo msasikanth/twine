@@ -186,6 +186,13 @@
   <string name="appBarAllFeeds">Все каналы</string>
   <string name="edit">Редактировать</string>
   <string name="addToGroup">Добавить в группу</string>
+  <string name="addFeedTitle">Add feed</string>
+  <string name="addFeedSubtitle">Paste a feed link, or a website address and Twine will find its feed.</string>
+  <string name="addFeedAddedTitle">Feed added</string>
+  <string name="addFeedAddedSubtitle">Give it a name and pick how it should look.</string>
+  <string name="addFeedIconFromFeed">Feed icon</string>
+  <string name="addFeedIconFromWebsite">Website icon</string>
+  <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">Удалить источники</string>
   <string name="removeSourcesDesc">Вы хотите удалить выбранные источники?</string>
   <string name="noPinnedSources">Закреплённых каналов/групп нет</string>
@@ -294,6 +301,9 @@
   <string name="onboardingGetStarted">Начать</string>
   <string name="onboardingSubtitle">Создать свою ленту</string>
   <string name="onboardingSubtitle2">Без алгоритмов. Без рекламы.\nЛишь контент, который вы любите.</string>
+  <string name="discoveryImportOpml">Or import an OPML file</string>
+  <string name="opmlImportTitle">Import feeds</string>
+  <string name="opmlImportProgress">Importing feeds.. %1$d%</string>
   <string name="readingTimeEstimate">Читать %1$dм</string>
   <string name="nowPlayingOpenEpisode">Open episode</string>
   <string name="nowPlayingStop">Stop playing</string>
@@ -338,6 +348,8 @@
   <string name="accountSelectionLocal">Локально</string>
   <string name="accountSelectionLocalAccount">На устройстве</string>
   <string name="accountSelectionCloudSync">Облачная синхронизация</string>
+  <string name="accountSelectionLocalDesc">Everything stays on this device. No account needed.</string>
+  <string name="accountSelectionCloudSyncDesc">Sign in to keep your feeds and bookmarks in sync across devices.</string>
   <string name="unit_seconds">%1$ds</string>
   <string name="unit_minutes">%1$dм</string>
   <string name="unit_hours">%1$dч</string>
