@@ -37,6 +37,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
@@ -56,15 +58,34 @@ class AddFeedViewModel(
   private val _effects = MutableSharedFlow<AddFeedEffect>()
   val effects: SharedFlow<AddFeedEffect> = _effects.asSharedFlow()
 
+  private val selectedGroupIds = MutableStateFlow(emptySet<String>())
+
+  init {
+    viewModelScope.launch {
+      selectedGroupIds
+        .flatMapLatest { groupIds ->
+          if (groupIds.isEmpty()) {
+            flowOf(emptyList())
+          } else {
+            rssRepository.groupsByIdsFlow(groupIds)
+          }
+        }
+        .collect { groups -> _state.update { it.copy(selectedFeedGroups = groups.toSet()) } }
+    }
+  }
+
   fun dispatch(event: AddFeedEvent) {
     when (event) {
-      is AddFeedEvent.AddFeedClicked ->
-        addFeed(
-          feedLink = event.feedLink,
-          title = event.name,
-          groups = _state.value.selectedFeedGroups,
-        )
+      is AddFeedEvent.AddFeedClicked -> addFeed(feedLink = event.feedLink, title = event.name)
       is AddFeedEvent.OnGroupsSelected -> onGroupsSelected(event.selectedGroupIds)
+      is AddFeedEvent.FeedNameChanged -> {
+        _state.update { it.copy(addedFeed = it.addedFeed?.copy(name = event.name)) }
+      }
+      is AddFeedEvent.ShowFavIconToggled -> showFavIconToggled(event.value)
+      is AddFeedEvent.AlwaysFetchSourceArticleToggled ->
+        alwaysFetchSourceArticleToggled(event.value)
+      is AddFeedEvent.NotificationsToggled -> notificationsToggled(event.value)
+      AddFeedEvent.DoneClicked -> doneClicked()
       is AddFeedEvent.OnRemoveGroupClicked -> onRemoveSelectedGroup(event.group)
       AddFeedEvent.MarkErrorAsShown -> {
         _state.update { it.copy(error = null) }
@@ -75,18 +96,67 @@ class AddFeedViewModel(
     }
   }
 
-  private fun onRemoveSelectedGroup(group: FeedGroup) {
-    viewModelScope.launch { _state.update { it.copy(selectedFeedGroups = emptySet()) } }
+  private fun showFavIconToggled(value: Boolean) {
+    val addedFeed = _state.value.addedFeed ?: return
+    _state.update { it.copy(addedFeed = addedFeed.copy(showFeedFavIcon = value)) }
+    viewModelScope.launch { rssRepository.updateFeedShowFavIcon(addedFeed.id, value) }
   }
 
-  private fun onGroupsSelected(selectedGroupIds: Set<String>) {
+  private fun alwaysFetchSourceArticleToggled(value: Boolean) {
+    val addedFeed = _state.value.addedFeed ?: return
+    _state.update { it.copy(addedFeed = addedFeed.copy(alwaysFetchSourceArticle = value)) }
+    viewModelScope.launch { rssRepository.updateFeedAlwaysFetchSource(addedFeed.id, value) }
+  }
+
+  private fun notificationsToggled(value: Boolean) {
+    val addedFeed = _state.value.addedFeed ?: return
+    _state.update { it.copy(addedFeed = addedFeed.copy(enableNotifications = value)) }
+    viewModelScope.launch { rssRepository.updateFeedEnableNotifications(addedFeed.id, value) }
+  }
+
+  private fun doneClicked() {
+    val addedFeed = _state.value.addedFeed ?: return
     viewModelScope.launch {
-      val feedGroups = rssRepository.groupByIds(selectedGroupIds)
-      _state.update { it.copy(selectedFeedGroups = feedGroups.toSet()) }
+      if (addedFeed.name.isNotBlank()) {
+        rssRepository.updateFeedName(newFeedName = addedFeed.name, feedId = addedFeed.id)
+      }
+      syncCoordinator.triggerFeedPush()
+      _state.update { it.copy(goBack = true) }
     }
   }
 
-  private fun addFeed(feedLink: String, title: String?, groups: Set<FeedGroup>) {
+  private fun onRemoveSelectedGroup(group: FeedGroup) {
+    viewModelScope.launch {
+      val feedId = _state.value.addedFeed?.id
+      selectedGroupIds.value = emptySet()
+
+      if (feedId != null) {
+        rssRepository.removeFeedIdsFromGroups(groupIds = setOf(group.id), feedIds = listOf(feedId))
+      }
+    }
+  }
+
+  private fun onGroupsSelected(groupIds: Set<String>) {
+    viewModelScope.launch {
+      val feedId = _state.value.addedFeed?.id
+      val previousGroupIds = selectedGroupIds.value
+      selectedGroupIds.value = groupIds
+
+      if (feedId != null) {
+        val removedGroupIds = previousGroupIds - groupIds
+        if (removedGroupIds.isNotEmpty()) {
+          rssRepository.removeFeedIdsFromGroups(
+            groupIds = removedGroupIds,
+            feedIds = listOf(feedId),
+          )
+        }
+
+        rssRepository.addFeedIdsToGroups(groupIds = groupIds, feedIds = listOf(feedId))
+      }
+    }
+  }
+
+  private fun addFeed(feedLink: String, title: String?) {
     if (feedLink.isBlank()) return
 
     viewModelScope.launch {
@@ -102,23 +172,31 @@ class AddFeedViewModel(
           is FeedFetchResult.Success -> {
             val feedPayload = feedFetchResult.feedPayload
             try {
+              val showWebsiteFavIcon = !UrlUtils.prefersFeedProvidedIcon(feedPayload.link)
               val feedId =
                 rssRepository.upsertFeedWithPosts(
                   feedPayload = feedPayload,
                   title = title,
-                  showWebsiteFavIcon = !UrlUtils.prefersFeedProvidedIcon(feedPayload.link),
+                  showWebsiteFavIcon = showWebsiteFavIcon,
                 )
-              rssRepository.addFeedIdsToGroups(
-                groupIds = groups.map { it.id }.toSet(),
-                feedIds = listOf(feedId),
-              )
-              syncCoordinator.triggerFeedPush()
+              _state.update {
+                it.copy(
+                  addedFeed =
+                    AddedFeed(
+                      id = feedId,
+                      name = if (title.isNullOrBlank()) feedPayload.name else title,
+                      icon = feedPayload.icon,
+                      homepageLink = feedPayload.homepageLink,
+                      showFeedFavIcon = showWebsiteFavIcon,
+                      alwaysFetchSourceArticle = false,
+                      enableNotifications = true,
+                    )
+                )
+              }
+              _effects.emit(AddFeedEffect.RequestInAppRating)
             } catch (e: Exception) {
               handleDatabaseErrors(FeedAddResult.DatabaseError(e), feedLink)
             }
-
-            _state.update { it.copy(goBack = true) }
-            _effects.emit(AddFeedEffect.RequestInAppRating)
           }
         }
       } catch (e: Exception) {

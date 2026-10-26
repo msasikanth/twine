@@ -17,10 +17,12 @@
 
 package dev.sasikanth.rss.reader.components
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.resources.icons.Check
@@ -29,7 +31,12 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
-fun Switch(checked: Boolean, modifier: Modifier = Modifier, onCheckedChange: (Boolean) -> Unit) {
+fun Switch(
+  checked: Boolean,
+  modifier: Modifier = Modifier,
+  interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+  onCheckedChange: (Boolean) -> Unit,
+) {
   MaterialTheme(
     colorScheme =
       MaterialTheme.colorScheme.copy(
@@ -41,6 +48,7 @@ fun Switch(checked: Boolean, modifier: Modifier = Modifier, onCheckedChange: (Bo
   ) {
     androidx.compose.material3.Switch(
       modifier = modifier,
+      interactionSource = interactionSource,
       checked = checked,
       thumbContent = {
         val icon = if (checked) TwineIcons.Check else TwineIcons.Close

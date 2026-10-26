@@ -26,6 +26,7 @@ import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.database.SourceQueries
 import dev.sasikanth.rss.reader.data.utils.Constants
+import dev.sasikanth.rss.reader.data.utils.mapToFeedShowFavIconSettings
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.splitAndTrim
@@ -98,15 +99,6 @@ class SourceRepository(
       )
       .asFlow()
       .mapToOneOrNull(dispatchersProvider.databaseRead)
-  }
-
-  private fun mapToFeedShowFavIconSettings(feedShowFavIconSettings: String?): List<Boolean> {
-    return feedShowFavIconSettings?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR)?.map {
-      when (it) {
-        "1" -> true
-        else -> false
-      }
-    } ?: emptyList()
   }
 
   private fun mapToSource(

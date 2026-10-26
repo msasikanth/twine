@@ -423,14 +423,7 @@ fun App(
           isReaderPaneExpanded = isReaderPaneExpanded,
         )
 
-        addFeedScreen(
-          modifier = screenModifier,
-          addFeedViewModel = addFeedViewModel,
-          navigator = navigator,
-          useDarkTheme = useDarkTheme,
-          toggleLightStatusBar = toggleLightStatusBar,
-          toggleLightNavBar = toggleLightNavBar,
-        )
+        addFeedScreen(addFeedViewModel = addFeedViewModel, navigator = navigator)
 
         discoveryScreen(
           discoveryViewModel = discoveryViewModel,

@@ -49,6 +49,7 @@ import dev.sasikanth.rss.reader.data.database.TransactionRunner
 import dev.sasikanth.rss.reader.data.sync.ReadPostSyncEntity
 import dev.sasikanth.rss.reader.data.utils.Constants
 import dev.sasikanth.rss.reader.data.utils.ReadingTimeCalculator
+import dev.sasikanth.rss.reader.data.utils.mapToFeedShowFavIconSettings
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
@@ -489,19 +490,6 @@ class RssRepository(
       }
     }
     widgetUpdater.updateUnreadWidget()
-  }
-
-  private fun mapToFeedShowFavIconSettings(feedShowFavIconSettings: String?): List<Boolean> {
-    return feedShowFavIconSettings
-      ?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR)
-      ?.map {
-        when (it) {
-          "true" -> true
-          "false" -> false
-          else -> true
-        }
-      }
-      .orEmpty()
   }
 
   suspend fun updateFeedName(newFeedName: String, feedId: String) {
@@ -1019,6 +1007,10 @@ class RssRepository(
 
   suspend fun groupByIds(ids: Set<String>): List<FeedGroup> {
     return feedGroupRepository.groupByIds(ids)
+  }
+
+  fun groupsByIdsFlow(ids: Set<String>): Flow<List<FeedGroup>> {
+    return feedGroupRepository.groupsByIdsFlow(ids)
   }
 
   fun groupById(groupId: String): Flow<FeedGroup> {

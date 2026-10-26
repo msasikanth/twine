@@ -18,6 +18,7 @@
 package dev.sasikanth.rss.reader.app
 
 import androidx.navigation3.runtime.NavKey
+import dev.sasikanth.rss.reader.groupselection.ui.SELECTED_GROUPS_KEY
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -27,5 +28,11 @@ internal sealed interface Modals : NavKey {
 
   @Serializable data class FeedInfo(val feedId: String) : Modals
 
-  @Serializable data class GroupSelection(val selectedGroupIds: List<String> = emptyList()) : Modals
+  @Serializable
+  data class GroupSelection(
+    val selectedGroupIds: List<String> = emptyList(),
+    // Several screens can be waiting for a group selection at once, so each says where its
+    // result should land instead of sharing one key.
+    val resultKey: String = SELECTED_GROUPS_KEY.name,
+  ) : Modals
 }

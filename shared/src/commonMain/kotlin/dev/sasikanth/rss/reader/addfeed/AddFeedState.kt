@@ -24,6 +24,7 @@ data class AddFeedState(
   val selectedFeedGroups: Set<FeedGroup>,
   val error: AddFeedErrorType?,
   val goBack: Boolean,
+  val addedFeed: AddedFeed?,
 ) {
 
   companion object {
@@ -34,9 +35,21 @@ data class AddFeedState(
         selectedFeedGroups = emptySet(),
         error = null,
         goBack = false,
+        addedFeed = null,
       )
   }
 }
+
+/** The feed as it was just saved, which the customisation step edits in place. */
+data class AddedFeed(
+  val id: String,
+  val name: String,
+  val icon: String,
+  val homepageLink: String,
+  val showFeedFavIcon: Boolean,
+  val alwaysFetchSourceArticle: Boolean,
+  val enableNotifications: Boolean,
+)
 
 enum class FeedFetchingState {
   Idle,

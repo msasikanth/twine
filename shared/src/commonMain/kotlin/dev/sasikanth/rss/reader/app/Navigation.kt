@@ -42,7 +42,6 @@ import androidx.window.core.layout.WindowSizeClass
 import dev.sasikanth.rss.reader.about.ui.AboutScreen
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionViewModel
 import dev.sasikanth.rss.reader.accountselection.ui.AccountSelectionScreen
-import dev.sasikanth.rss.reader.addfeed.AddFeedEvent
 import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
 import dev.sasikanth.rss.reader.addfeed.ui.AddFeedScreen
 import dev.sasikanth.rss.reader.bazqux.BazQuxLoginViewModel
@@ -66,6 +65,7 @@ import dev.sasikanth.rss.reader.group.GroupEvent
 import dev.sasikanth.rss.reader.group.GroupViewModel
 import dev.sasikanth.rss.reader.group.ui.GroupScreen
 import dev.sasikanth.rss.reader.groupselection.GroupSelectionViewModel
+import dev.sasikanth.rss.reader.groupselection.ui.ADD_FEED_GROUPS_KEY
 import dev.sasikanth.rss.reader.groupselection.ui.GroupSelectionSheet
 import dev.sasikanth.rss.reader.groupselection.ui.SELECTED_GROUPS_KEY
 import dev.sasikanth.rss.reader.home.HomeViewModel
@@ -554,39 +554,25 @@ fun EntryProviderScope<NavKey>.readerScreen(
 fun EntryProviderScope<NavKey>.addFeedScreen(
   addFeedViewModel: () -> AddFeedViewModel,
   navigator: AppNavigator,
-  useDarkTheme: Boolean,
-  toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
-  toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
-  modifier: Modifier = Modifier,
 ) {
-  entry<Screen.AddFeed> {
+  entry<Screen.AddFeed>(metadata = BottomSheetSceneStrategy.bottomSheet()) {
     val viewModel = viewModel { addFeedViewModel() }
 
-    LaunchedEffect(Unit) {
-      navigator
-        .result(SELECTED_GROUPS_KEY)
-        .onEach { selectedGroupIds ->
-          if (selectedGroupIds.isNotEmpty()) {
-            viewModel.dispatch(AddFeedEvent.OnGroupsSelected(selectedGroupIds))
-            navigator.consumeResult(SELECTED_GROUPS_KEY)
-          }
-        }
-        .launchIn(this)
-    }
-
-    LaunchedEffect(useDarkTheme) {
-      toggleLightStatusBar(!useDarkTheme)
-      toggleLightNavBar(!useDarkTheme)
-    }
-
     AddFeedScreen(
-      modifier = modifier,
       viewModel = viewModel,
-      goBack = { navigator.goBack() },
+      dismiss = { navigator.goBack() },
+      // Collected by the sheet itself: the entry sits under the group selection sheet while it
+      // is open, and the result has to be picked up by whatever is still composed.
+      groupSelectionResults = navigator.result(ADD_FEED_GROUPS_KEY),
+      onGroupSelectionConsumed = { navigator.consumeResult(ADD_FEED_GROUPS_KEY) },
       openGroupSelection = { selectedGroupIds ->
-        navigator.navigate(Modals.GroupSelection(selectedGroupIds.toList()))
+        navigator.navigate(
+          Modals.GroupSelection(
+            selectedGroupIds = selectedGroupIds.toList(),
+            resultKey = ADD_FEED_GROUPS_KEY.name,
+          )
+        )
       },
-      openDiscovery = { navigator.navigate(Screen.Discovery()) },
     )
   }
 }
@@ -765,7 +751,7 @@ fun EntryProviderScope<NavKey>.groupSelectionDialog(
       viewModel = viewModel,
       dismiss = { navigator.goBack() },
       onGroupsSelected = { selectedGroupIds ->
-        navigator.setResult(SELECTED_GROUPS_KEY, selectedGroupIds)
+        navigator.setResult(NavResultKey(modalRoute.resultKey), selectedGroupIds)
         navigator.goBack()
       },
     )

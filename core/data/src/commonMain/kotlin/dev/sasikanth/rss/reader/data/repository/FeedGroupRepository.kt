@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.data.repository
 
 import androidx.paging.PagingSource
 import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
@@ -26,6 +27,7 @@ import dev.sasikanth.rss.reader.data.database.FeedGroupFeedQueries
 import dev.sasikanth.rss.reader.data.database.FeedGroupQueries
 import dev.sasikanth.rss.reader.data.database.TransactionRunner
 import dev.sasikanth.rss.reader.data.utils.Constants
+import dev.sasikanth.rss.reader.data.utils.mapToFeedShowFavIconSettings
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
@@ -120,6 +122,13 @@ class FeedGroupRepository(
     }
   }
 
+  fun groupsByIdsFlow(ids: Set<String>): Flow<List<FeedGroup>> {
+    return feedGroupQueries
+      .groupsByIds(ids = ids, mapper = ::mapToFeedGroupFromGroupsByIds)
+      .asFlow()
+      .mapToList(dispatchersProvider.databaseRead)
+  }
+
   fun groupById(groupId: String): Flow<FeedGroup> {
     return feedGroupQueries
       .groupsByIds(ids = setOf(groupId), mapper = ::mapToFeedGroupFromGroupsByIds)
@@ -195,15 +204,6 @@ class FeedGroupRepository(
         .map { it.feedGroupId }
         .filterNotNull()
     }
-  }
-
-  private fun mapToFeedShowFavIconSettings(feedShowFavIconSettings: String?): List<Boolean> {
-    return feedShowFavIconSettings?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR)?.map {
-      when (it) {
-        "1" -> true
-        else -> false
-      }
-    } ?: emptyList()
   }
 
   private fun mapToFeedGroup(
