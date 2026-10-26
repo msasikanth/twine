@@ -137,7 +137,7 @@
   <string name="removeFeed">移除来源</string>
   <string name="delete">删除</string>
   <string name="removeFeedDesc">你想移除 <b>%1$s</b> 吗？</string>
-  <string name="alwaysFetchSourceArticle">总是在阅读器视图中获取全文</string>
+  <string name="alwaysFetchSourceArticle">Fetch full articles in reader view</string>
   <string name="enableNotifications">启用通知</string>
   <string name="getFeedInfo">获取信息</string>
   <string name="newTag">新建标签</string>
@@ -190,8 +190,8 @@
   <string name="addFeedSubtitle">Paste a feed link, or a website address and Twine will find its feed.</string>
   <string name="addFeedAddedTitle">Feed added</string>
   <string name="addFeedAddedSubtitle">Give it a name and pick how it should look.</string>
-  <string name="addFeedIconFromFeed">Feed icon</string>
-  <string name="addFeedIconFromWebsite">Website icon</string>
+  <string name="feedIconFromFeed">Feed icon</string>
+  <string name="feedIconFromWebsite">Website icon</string>
   <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">删除来源</string>
   <string name="removeSourcesDesc">你想删除选定来源吗？</string>
@@ -202,8 +202,8 @@
   <string name="cdWatchVideo">Watch video</string>
   <string name="enableAutoSyncTitle">开启后台同步</string>
   <string name="enableAutoSyncDesc">开启后，来源将在后台自动更新</string>
-  <string name="showFeedFavIconTitle">显示来源图标</string>
-  <string name="showFeedFavIconDesc">关闭时，将显示来源图标而不是网站图标</string>
+  <string name="showFeedFavIconTitle">Use website icons for new feeds</string>
+  <string name="showFeedFavIconDesc">Sets which icon newly added feeds start with. You can change it per feed at any time.</string>
   <string name="settingsShowFeaturedSectionTitle">展示精选板块</string>
   <string name="settingsShowFeaturedSectionSubtitle">展示近期文章的轮播卡片</string>
   <string name="hidePostsFromHome">从「主页」隐藏</string>
