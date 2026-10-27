@@ -19,10 +19,14 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 @ActivityScope
 class JvmShareHandler : ShareHandler {
-  override fun share(content: String?) {
-    if (content.isNullOrBlank()) return
+  override fun share(content: String?): ShareResult {
+    if (content.isNullOrBlank()) return ShareResult.Unavailable
     val selection = StringSelection(content)
     val clipboard = Toolkit.getDefaultToolkit().systemClipboard
-    clipboard.setContents(selection, selection)
+    return runCatching {
+        clipboard.setContents(selection, selection)
+        ShareResult.CopiedToClipboard
+      }
+      .getOrDefault(ShareResult.Unavailable)
   }
 }

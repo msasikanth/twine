@@ -101,6 +101,7 @@ import androidx.window.core.layout.WindowSizeClass
 import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeBlock
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeFence
+import dev.sasikanth.rss.reader.app.LocalSnackbarHostState
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
@@ -363,6 +364,7 @@ internal fun ReaderScreen(
   CompositionLocalProvider(
     LocalDynamicColorState provides articleDynamicColorState,
     LocalUriHandler provides readerLinkHandler,
+    LocalSnackbarHostState provides snackbarHostState,
   ) {
     val sourceColorScheme = AppTheme.colorScheme
     val systemDynamicColors =

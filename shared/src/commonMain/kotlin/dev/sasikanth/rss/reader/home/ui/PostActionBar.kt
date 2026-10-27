@@ -60,6 +60,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.app.LocalSnackbarHostState
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.IconButton
@@ -78,8 +79,10 @@ import dev.sasikanth.rss.reader.resources.icons.VisibilityOff
 import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.share.LocalShareHandler
+import dev.sasikanth.rss.reader.share.ShareResult
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -93,6 +96,7 @@ import twine.shared.generated.resources.moreMenuOptions
 import twine.shared.generated.resources.openWebsite
 import twine.shared.generated.resources.readingTimeEstimate
 import twine.shared.generated.resources.share
+import twine.shared.generated.resources.shareLinkCopied
 import twine.shared.generated.resources.unBookmark
 
 private val FeedIconShape = RoundedCornerShape(25)
@@ -492,7 +496,9 @@ private fun PostActionsMenuItems(
   )
 
   val shareHandler = LocalShareHandler.current
+  val snackbarHostState = LocalSnackbarHostState.current
   val shareLabel = stringResource(Res.string.share)
+  val linkCopiedLabel = stringResource(Res.string.shareLinkCopied)
 
   DropdownMenuItem(
     modifier = Modifier.fillMaxWidth(),
@@ -502,8 +508,10 @@ private fun PostActionsMenuItems(
     onClick = {
       coroutineScope.launch {
         onDropdownChange(false)
-        delay(150)
-        shareHandler.share(postLink)
+        delay(150.milliseconds)
+        if (shareHandler.share(postLink) == ShareResult.CopiedToClipboard) {
+          snackbarHostState.showSnackbar(linkCopiedLabel)
+        }
       }
     },
   )

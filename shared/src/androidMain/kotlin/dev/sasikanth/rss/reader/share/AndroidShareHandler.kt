@@ -26,8 +26,8 @@ import me.tatarka.inject.annotations.Inject
 @ActivityScope
 class AndroidShareHandler(private val activity: ComponentActivity) : ShareHandler {
 
-  override fun share(content: String?) {
-    if (content.isNullOrBlank()) return
+  override fun share(content: String?): ShareResult {
+    if (content.isNullOrBlank()) return ShareResult.Unavailable
 
     val sendIntent =
       Intent().apply {
@@ -37,5 +37,7 @@ class AndroidShareHandler(private val activity: ComponentActivity) : ShareHandle
       }
     val shareIntent = Intent.createChooser(sendIntent, null)
     activity.startActivity(shareIntent)
+
+    return ShareResult.Shared
   }
 }
