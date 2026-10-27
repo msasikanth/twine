@@ -143,6 +143,120 @@ function transformShredditElements(doc) {
 }
 
 /**
+ * Vox Media's Duet scorecard (the review box on The Verge and its sister
+ * sites) is a CSS grid of bare divs: the score sits in an element of its own,
+ * apart from the "Verge Score" label that explains it; the price is emitted
+ * twice, once for the narrow layout and once for the wide one, with whichever
+ * one doesn't apply hidden by CSS; and the retailer links are inline
+ * siblings. Flattened to markdown as-is, that reads as a stray number, a
+ * doubled price and a single run of concatenated links, so rebuild the box out
+ * of plain blocks before extraction. The grid itself can't survive - markdown
+ * has no two-column layout to put "The Good" and "The Bad" side by side - so
+ * the columns are left to stack as the lists they already are.
+ */
+function transformScorecards(doc) {
+  var cards = doc.querySelectorAll(".duet--article--scorecard");
+  for (var i = 0; i < cards.length; i++) {
+    mergeScorecardScore(cards[i]);
+    removeScorecardResponsiveDuplicates(cards[i]);
+    splitScorecardLinkRows(doc, cards[i]);
+    unwrapScorecardWrappers(cards[i]);
+  }
+}
+
+function scorecardLeafText(element) {
+  if (element.children.length > 0) return "";
+  return element.textContent.replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Joins the bare score to the label that follows it, so the number arrives as
+ * "Verge Score: 8" rather than as a line holding nothing but a digit.
+ */
+function mergeScorecardScore(card) {
+  var elements = Array.prototype.slice.call(card.querySelectorAll("*"));
+  for (var i = 0; i < elements.length; i++) {
+    var score = elements[i];
+    if (!/^\d{1,3}(\.\d+)?$/.test(scorecardLeafText(score))) continue;
+
+    var label = score.nextElementSibling;
+    if (!label || !/score/i.test(scorecardLeafText(label))) continue;
+
+    label.textContent = scorecardLeafText(label) + ": " + scorecardLeafText(score);
+    score.remove();
+    return;
+  }
+}
+
+/**
+ * Drops the layout's hidden twin of a text leaf. Scoped to plain text outside
+ * lists, headings and links, so a price repeated for a second breakpoint goes
+ * while a retailer link that happens to carry the same price stays.
+ */
+function removeScorecardResponsiveDuplicates(card) {
+  var elements = Array.prototype.slice.call(card.querySelectorAll("*"));
+  var seen = {};
+
+  for (var i = 0; i < elements.length; i++) {
+    var element = elements[i];
+    if (!element.parentNode) continue;
+    if (element.closest("ul, ol, a, h1, h2, h3, h4, h5, h6")) continue;
+
+    var text = scorecardLeafText(element);
+    if (!text) continue;
+
+    if (seen[text]) {
+      element.remove();
+    } else {
+      seen[text] = true;
+    }
+  }
+}
+
+/**
+ * Puts each retailer link in a block of its own. Left as inline siblings they
+ * convert to one unbroken line of "[$180 at Amazon](...)[$180 at Google](...)".
+ */
+function splitScorecardLinkRows(doc, card) {
+  var rows = Array.prototype.slice.call(card.querySelectorAll("*"));
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    var links = [];
+    for (var j = 0; j < row.children.length; j++) {
+      if (row.children[j].tagName === "A") links.push(row.children[j]);
+    }
+
+    if (links.length < 2 || links.length !== row.children.length) continue;
+    if (row.textContent.replace(/\s+/g, "") === "") continue;
+
+    for (var k = 0; k < links.length; k++) {
+      var paragraph = doc.createElement("p");
+      row.insertBefore(paragraph, links[k]);
+      paragraph.appendChild(links[k]);
+    }
+  }
+}
+
+/**
+ * Lifts the card's contents out of its grid wrappers. The product name and
+ * price sit in a wrapper of their own that holds little besides a link, which
+ * Readability drops as boilerplate along with everything inside it; as direct
+ * children of the card they are scored with the rest of the review instead.
+ */
+function unwrapScorecardWrappers(card) {
+  var wrappers = Array.prototype.slice.call(card.querySelectorAll("div"));
+  for (var i = wrappers.length - 1; i >= 0; i--) {
+    var wrapper = wrappers[i];
+    if (!wrapper.parentNode) continue;
+
+    while (wrapper.firstChild) {
+      wrapper.parentNode.insertBefore(wrapper.firstChild, wrapper);
+    }
+    wrapper.remove();
+  }
+}
+
+/**
  * Specifically targets Reddit pages (both modern Shreddit and legacy UI) to extract
  * the main post content, effectively isolating it from sidebars, comments, and
  * other "noise" that might confuse Readability.
@@ -771,6 +885,7 @@ function parseReaderContent(link, bannerImage, html) {
         processNoScriptImages(doc);
         preserveTableAlignment(doc);
         transformShredditElements(doc);
+        transformScorecards(doc);
         removeFirstImageTagByUrl(doc, bannerImage);
 
         var junkElements = doc.querySelectorAll(JUNK_SELECTORS);
