@@ -27,6 +27,7 @@
   <string name="feedEntryLinkHint">Feed link</string>
   <string name="feedEntryTitleHint">Title (optional)</string>
   <string name="share">Share</string>
+  <string name="shareLinkCopied">Link copied to clipboard</string>
   <string name="scrollToTop">Scroll to top</string>
   <string name="newArticles">New articles</string>
   <string name="noFeeds">No feeds present!</string>
