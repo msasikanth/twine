@@ -27,6 +27,7 @@
   <string name="feedEntryLinkHint">Ссылка на канал</string>
   <string name="feedEntryTitleHint">Название (необязательно)</string>
   <string name="share">Поделиться</string>
+  <string name="shareLinkCopied">Link copied to clipboard</string>
   <string name="scrollToTop">Наверх</string>
   <string name="newArticles">Новые статьи</string>
   <string name="noFeeds">Никаких каналов нет!</string>
