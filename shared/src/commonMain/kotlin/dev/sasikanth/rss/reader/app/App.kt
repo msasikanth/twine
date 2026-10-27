@@ -23,10 +23,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DragHandleColors
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.VerticalDragHandle
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
@@ -45,6 +51,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
@@ -195,6 +202,7 @@ fun App(
     )
   val coroutineScope = rememberCoroutineScope()
   val windowInfo = currentWindowAdaptiveInfoV2()
+  val snackbarHostState = remember { SnackbarHostState() }
 
   // Desktop installs a dispatcher at the window so shortcuts survive whatever holds focus.
   // Other platforms have no such hook, so the root gets one that key events bubble up into.
@@ -206,6 +214,7 @@ fun App(
     LocalWindowSizeClass provides windowInfo.windowSizeClass,
     LocalRootWindowSizeClass provides windowInfo.windowSizeClass,
     LocalShareHandler provides shareHandler,
+    LocalSnackbarHostState provides snackbarHostState,
     LocalLinkHandler provides linkHandler,
     LocalInAppRating provides inAppRating,
     LocalDynamicColorState provides dynamicColorState,
@@ -601,28 +610,36 @@ fun App(
           Modifier
         }
 
-      NavDisplay(
-        modifier =
-          Modifier.fillMaxSize()
-            .background(AppTheme.colorScheme.backdrop)
-            .then(rootShortcutModifier),
-        backStack = backStack,
-        entryProvider = entryProvider,
-        entryDecorators =
-          listOf(
-            rememberSaveableStateHolderNavEntryDecorator(),
-            rememberViewModelStoreNavEntryDecorator(),
-          ),
-        sceneStrategies = listOf(bottomSheetSceneStrategy, listDetailSceneStrategy),
-        transitionSpec = {
-          if (initialState.entries.any { it.contentKey == Screen.Placeholder.toString() }) {
-            fadeIn() togetherWith fadeOut()
-          } else {
-            defaultTransitionSpec<NavKey>().invoke(this)
-          }
-        },
-        onBack = { navigator.goBack() },
-      )
+      Box(modifier = Modifier.fillMaxSize()) {
+        NavDisplay(
+          modifier =
+            Modifier.fillMaxSize()
+              .background(AppTheme.colorScheme.backdrop)
+              .then(rootShortcutModifier),
+          backStack = backStack,
+          entryProvider = entryProvider,
+          entryDecorators =
+            listOf(
+              rememberSaveableStateHolderNavEntryDecorator(),
+              rememberViewModelStoreNavEntryDecorator(),
+            ),
+          sceneStrategies = listOf(bottomSheetSceneStrategy, listDetailSceneStrategy),
+          transitionSpec = {
+            if (initialState.entries.any { it.contentKey == Screen.Placeholder.toString() }) {
+              fadeIn() togetherWith fadeOut()
+            } else {
+              defaultTransitionSpec<NavKey>().invoke(this)
+            }
+          },
+          onBack = { navigator.goBack() },
+        )
+
+        SnackbarHost(
+          hostState = snackbarHostState,
+          modifier =
+            Modifier.align(Alignment.BottomCenter).windowInsetsPadding(WindowInsets.safeDrawing),
+        )
+      }
 
       if (appState.showChangelog) {
         ChangelogSheet(

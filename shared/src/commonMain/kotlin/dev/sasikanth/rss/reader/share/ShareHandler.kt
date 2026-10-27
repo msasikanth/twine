@@ -19,12 +19,18 @@ package dev.sasikanth.rss.reader.share
 
 import androidx.compose.runtime.staticCompositionLocalOf
 
+enum class ShareResult {
+  Shared,
+  CopiedToClipboard,
+  Unavailable,
+}
+
 interface ShareHandler {
-  fun share(content: String?)
+  fun share(content: String?): ShareResult
 }
 
 val LocalShareHandler = staticCompositionLocalOf<ShareHandler> { NoopShareHandler }
 
 private object NoopShareHandler : ShareHandler {
-  override fun share(content: String?) {}
+  override fun share(content: String?) = ShareResult.Unavailable
 }

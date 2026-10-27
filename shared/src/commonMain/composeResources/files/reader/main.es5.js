@@ -15,7 +15,16 @@ var JUNK_SELECTORS = [
   ".share", ".social", ".ad", ".promo", ".related", ".newsletter-widget",
   ".sharedaddy", ".jp-relatedposts", ".share-links", ".share-tools",
   ".social-share", ".share-container", ".entry-utility", ".post-tags",
-  ".post-categories", ".subscription-widget-container", ".sub-button-container"
+  ".post-categories", ".subscription-widget-container", ".sub-button-container",
+  // Vox Media's "Duet" design system (The Verge, Polygon, Eater, SB Nation...)
+  // places recirculation rails, section headers and ads inside the same
+  // <article> element as the story, so Readability scores them as part of the
+  // body. These class names are the design system's own, not build hashes.
+  ".duet--layout--rail", ".duet--layout--header-pattern",
+  ".duet--layout--article-recirc", ".duet--layout--article-recirc-color-container",
+  ".duet--ad--native-ad-rail", ".duet--ad--native-ad-linkset",
+  ".duet--cta--newsletter", ".duet--article--share-buttons",
+  ".duet--navigation--footer", ".duet--navigation--sticky-nav"
 ].join(",");
 
 
@@ -445,6 +454,74 @@ function dedupeAdjacentHeadings(doc) {
 }
 
 
+function nextNodeInTreeOrder(node, root) {
+  if (node.firstChild) return node.firstChild;
+  return nextNodeSkippingSubtree(node, root);
+}
+
+function nextNodeSkippingSubtree(node, root) {
+  while (node && node !== root) {
+    if (node.nextSibling) return node.nextSibling;
+    node = node.parentNode;
+  }
+  return null;
+}
+
+var EMPTY_SECTION_MEDIA_TAGS = {
+  IMG: 1, VIDEO: 1, AUDIO: 1, TABLE: 1, PICTURE: 1, EMBED: 1, OBJECT: 1, CANVAS: 1
+};
+
+function headingLevel(node) {
+  if (node.nodeType !== 1 || !/^H[1-6]$/.test(node.tagName)) return 0;
+  return parseInt(node.tagName.charAt(1), 10);
+}
+
+/**
+ * True when nothing but whitespace stands between a heading and the end of its
+ * section, media included. A deeper heading (an h3 under an h2) belongs to the
+ * section rather than ending it, so it counts as content.
+ */
+function headingSectionIsEmpty(heading, root) {
+  var level = headingLevel(heading);
+  var node = nextNodeSkippingSubtree(heading, root);
+  while (node) {
+    var nodeLevel = headingLevel(node);
+    if (nodeLevel > 0) {
+      if (nodeLevel <= level) return true;
+      return false;
+    }
+
+    if (node.nodeType === 3) {
+      if (node.textContent.replace(/\s+/g, "") !== "") return false;
+    } else if (node.nodeType === 1 && EMPTY_SECTION_MEDIA_TAGS[node.tagName]) {
+      return false;
+    }
+
+    node = nextNodeInTreeOrder(node, root);
+  }
+
+  return true;
+}
+
+/**
+ * Readability discards link-dense lists but keeps the heading that introduced
+ * them, so a page's recirculation blocks ("Most Popular", "Top Stories") can
+ * survive the extraction as bare headings with nothing underneath. A heading
+ * with no section left to introduce says nothing, so drop it.
+ */
+function removeEmptyHeadings(doc) {
+  var root = doc.body || doc;
+  var headings = Array.prototype.slice.call(
+    root.querySelectorAll("h1, h2, h3, h4, h5, h6")
+  );
+
+  // Walk backwards so an emptied subsection is already gone when the heading
+  // above it is checked.
+  for (var i = headings.length - 1; i >= 0; i--) {
+    if (headingSectionIsEmpty(headings[i], root)) headings[i].remove();
+  }
+}
+
 /**
  * Turndown ships no table rules, so table/row/cell elements all fall through
  * to the block default and a table arrives in the reader as a run of loose
@@ -716,7 +793,19 @@ function parseReaderContent(link, bannerImage, html) {
             return;
         }
 
-        var markdownArticle = turndownService.turndown(article.content);
+        // Readability hands back an HTML string, so the post-extraction cleanup
+        // runs on a re-parse of it. Iframe tags were already swapped for links
+        // before extraction, but neutralize again in case one survived - a real
+        // iframe tag crashes HtmlUnit's windowless document.
+        var articleDoc = parser.parseFromString(
+          "<html><head><base href=\"" + link + "\"></head><body>" +
+            neutralizeIframeTags(article.content) +
+            "</body></html>",
+          "text/html"
+        );
+        removeEmptyHeadings(articleDoc);
+
+        var markdownArticle = turndownService.turndown(articleDoc.body.innerHTML);
 
         resolve({
           title: article.title,

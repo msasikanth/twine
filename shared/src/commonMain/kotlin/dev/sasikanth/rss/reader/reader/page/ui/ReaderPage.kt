@@ -69,6 +69,7 @@ import com.mikepenz.markdown.model.markdownAnimations
 import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.markdownDimens
 import com.mikepenz.markdown.model.markdownPadding
+import dev.sasikanth.rss.reader.app.LocalSnackbarHostState
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
@@ -78,6 +79,7 @@ import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
 import dev.sasikanth.rss.reader.reader.page.ReaderProcessingProgress
 import dev.sasikanth.rss.reader.reader.ui.LocalOnImageClick
 import dev.sasikanth.rss.reader.share.LocalShareHandler
+import dev.sasikanth.rss.reader.share.ShareResult
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.smoothVerticalFade
@@ -85,6 +87,9 @@ import kotlin.time.Instant
 import kotlinx.coroutines.launch
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.shareLinkCopied
 
 private const val TOP_SCRIM_OPAQUE_THRESHOLD = 200f
 
@@ -154,6 +159,8 @@ private fun ReaderPageContent(
 ) {
   val linkHandler = LocalLinkHandler.current
   val sharedHandler = LocalShareHandler.current
+  val snackbarHostState = LocalSnackbarHostState.current
+  val linkCopiedLabel = stringResource(Res.string.shareLinkCopied)
   val shouldBlockImage = LocalBlockImage.current
 
   val coroutineScope = rememberCoroutineScope()
@@ -281,7 +288,13 @@ private fun ReaderPageContent(
                     coroutineScope.launch { linkHandler.openLink(commentsLink) }
                   }
                 },
-                onShareClick = { sharedHandler.share(readerPost.link) },
+                onShareClick = {
+                  coroutineScope.launch {
+                    if (sharedHandler.share(readerPost.link) == ShareResult.CopiedToClipboard) {
+                      snackbarHostState.showSnackbar(linkCopiedLabel)
+                    }
+                  }
+                },
                 onBookmarkClick = onBookmarkClick,
                 onMarkAsUnread = onMarkAsUnread,
                 onImageClick = onImageClick,
