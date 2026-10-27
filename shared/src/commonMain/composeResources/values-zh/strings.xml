@@ -27,6 +27,7 @@
   <string name="feedEntryLinkHint">来源链接</string>
   <string name="feedEntryTitleHint">标题（可选）</string>
   <string name="share">分享</string>
+  <string name="shareLinkCopied">Link copied to clipboard</string>
   <string name="scrollToTop">回到顶部</string>
   <string name="newArticles">新文章</string>
   <string name="noFeeds">没有可呈现的来源！</string>
