@@ -269,6 +269,7 @@
   <string name="settingsAppIconTitle">ऐप आइकन</string>
   <string name="settingsAppIconSubtitle">चुनें कि ट्विन आपकी होम स्क्रीन पर कैसा दिखता है</string>
   <string name="settingsAppIconDefault">Default</string>
+  <string name="settingsAppIconClassic">Classic</string>
   <string name="filter">फ़िल्टर</string>
   <string name="freshRssLoginTitle">FreshRSS</string>
   <string name="freshRssUsername">यूज़रनेम</string>
