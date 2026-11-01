@@ -269,6 +269,7 @@
   <string name="settingsAppIconTitle">Icône de l'application</string>
   <string name="settingsAppIconSubtitle">Choisissez l'apparence de Twine sur votre écran d'accueil</string>
   <string name="settingsAppIconDefault">Par défaut</string>
+  <string name="settingsAppIconClassic">Classic</string>
   <string name="filter">Filtrer</string>
   <string name="freshRssLoginTitle">FreshRSS</string>
   <string name="freshRssUsername">Nom d'utilisateur</string>
