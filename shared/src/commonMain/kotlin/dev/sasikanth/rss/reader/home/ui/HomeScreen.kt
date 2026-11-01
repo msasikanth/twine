@@ -16,7 +16,12 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animate
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -282,7 +287,13 @@ private fun HomeContent(
       }
     }
 
-  val canShowBottomBar = platform !is Platform.Desktop && state.showPinnedSources
+  val rootSizeClass = LocalRootWindowSizeClass.current
+  val hasInlineNavigation =
+    rootSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)
+  val isActiveSourceInPinnedSources =
+    state.activeSource == null || feedsState.pinnedSources.any { it.id == state.activeSource.id }
+  val canShowBottomBar =
+    platform !is Platform.Desktop && state.showPinnedSources && isActiveSourceInPinnedSources
   val systemDynamicDarkColors =
     if (state.themeVariant == ThemeVariant.SystemDynamic) {
       systemDynamicColorScheme(true)
@@ -433,19 +444,23 @@ private fun HomeContent(
   Scaffold(
     modifier = modifier,
     bottomBar = {
-      if (canShowBottomBar) {
-        val scaffoldBottomPadding =
-          if (platform == Platform.Desktop) {
-            16.dp
-          } else {
-            0.dp
-          }
+      val scaffoldBottomPadding =
+        if (platform == Platform.Desktop) {
+          16.dp
+        } else {
+          0.dp
+        }
 
-        val bottomBarModifier =
-          remember(scaffoldBottomPadding) { Modifier.padding(bottom = scaffoldBottomPadding) }
+      val bottomBarModifier =
+        remember(scaffoldBottomPadding) { Modifier.padding(bottom = scaffoldBottomPadding) }
 
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-          AppTheme(useDarkTheme = true, overriddenColorScheme = overriddenDarkColorScheme) {
+      Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
+        AppTheme(useDarkTheme = true, overriddenColorScheme = overriddenDarkColorScheme) {
+          AnimatedVisibility(
+            visible = canShowBottomBar,
+            enter = slideInVertically { it } + fadeIn(),
+            exit = slideOutVertically { it } + fadeOut(),
+          ) {
             PinnedSourcesBottomBar(
               modifier = bottomBarModifier,
               pinnedSources = feedsState.pinnedSources,
@@ -465,14 +480,13 @@ private fun HomeContent(
               },
             )
           }
-        }
-      } else if (hasActiveTrack) {
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-          AppTheme(useDarkTheme = true, overriddenColorScheme = overriddenDarkColorScheme) {
-            NowPlayingBottomBar(
-              modifier =
-                Modifier.padding(bottom = if (platform == Platform.Desktop) 16.dp else 0.dp)
-            ) {
+
+          AnimatedVisibility(
+            visible = !canShowBottomBar && hasActiveTrack,
+            enter = slideInVertically { it } + fadeIn(),
+            exit = slideOutVertically { it } + fadeOut(),
+          ) {
+            NowPlayingBottomBar(modifier = bottomBarModifier) {
               NowPlayingChip(
                 playbackState = playbackState,
                 onPlayPauseClick = onTogglePlayback,
@@ -514,7 +528,9 @@ private fun HomeContent(
             listState = postsListState,
             hasUnreadPosts = latestState.hasUnreadPosts,
             confirmMarkAllAsRead = latestState.confirmMarkAllAsRead,
+            showBackButton = !hasInlineNavigation && latestState.activeSource != null,
             onMenuClicked = onMenuClicked,
+            onBackClicked = onHomeSelected,
             onShowPostsSortFilter = { dispatch(HomeEvent.ShowPostsSortFilter(true)) },
             onMarkPostsAsRead = { dispatch(HomeEvent.MarkPostsAsRead(it)) },
           )

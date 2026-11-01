@@ -19,6 +19,9 @@ package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -30,6 +33,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -46,6 +50,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
@@ -57,6 +62,7 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.ArrowDown
 import dev.sasikanth.rss.reader.resources.icons.MarkAllAsRead
 import dev.sasikanth.rss.reader.resources.icons.Menu
@@ -68,6 +74,7 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.appBarAllFeeds
 import twine.shared.generated.resources.buttonCancel
 import twine.shared.generated.resources.buttonConfirm
+import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.markAllAsRead
 import twine.shared.generated.resources.markAllAsReadDialogDesc
 import twine.shared.generated.resources.markAllAsReadDialogTitle
@@ -88,7 +95,9 @@ internal fun HomeTopAppBar(
   hasUnreadPosts: Boolean,
   confirmMarkAllAsRead: Boolean,
   modifier: Modifier = Modifier,
+  showBackButton: Boolean = false,
   onMenuClicked: (() -> Unit)? = null,
+  onBackClicked: () -> Unit = {},
   onShowPostsSortFilter: () -> Unit,
   onMarkPostsAsRead: (Source?) -> Unit,
 ) {
@@ -127,12 +136,26 @@ internal fun HomeTopAppBar(
     contentPadding = PaddingValues(start = 0.dp, top = 8.dp, end = 12.dp, bottom = 8.dp),
     title = { SourceInfo(source = source) },
     navigationIcon = {
-      if (onMenuClicked != null) {
+      if (showBackButton || onMenuClicked != null) {
+        val icon = if (showBackButton) TwineIcons.ArrowBack else TwineIcons.Menu
+        val label =
+          if (showBackButton) {
+            stringResource(Res.string.buttonGoBack)
+          } else {
+            stringResource(Res.string.moreMenuOptions)
+          }
+
         CircularIconButton(
           modifier = Modifier.padding(start = 12.dp),
-          icon = TwineIcons.Menu,
-          label = stringResource(Res.string.moreMenuOptions),
-          onClick = onMenuClicked,
+          icon = icon,
+          label = label,
+          onClick = {
+            if (showBackButton) {
+              onBackClicked()
+            } else {
+              onMenuClicked?.invoke()
+            }
+          },
         )
       }
     },
@@ -219,29 +242,44 @@ internal fun HomeTopAppBar(
 
 @Composable
 private fun SourceInfo(source: Source?, modifier: Modifier = Modifier) {
-  Column(modifier = modifier.padding(start = 12.dp)) {
-    val title = stringResource(Res.string.screenHome)
-    val subtitle =
-      when (source) {
-        is Feed -> source.name
-        is FeedGroup -> source.name
-        else -> stringResource(Res.string.appBarAllFeeds)
+  AnimatedContent(
+    modifier = modifier.fillMaxWidth().padding(start = 12.dp),
+    targetState = source,
+    contentKey = { it?.id },
+    contentAlignment = Alignment.CenterStart,
+    transitionSpec = {
+      fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium))
+        .togetherWith(fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)))
+        .using(SizeTransform(clip = false))
+    },
+    label = "SourceInfo",
+  ) { targetSource ->
+    Column(modifier = Modifier.fillMaxWidth()) {
+      val title =
+        when (targetSource) {
+          is Feed -> targetSource.name
+          is FeedGroup -> targetSource.name
+          else -> stringResource(Res.string.screenHome)
+        }
+
+      Text(
+        modifier = Modifier.basicMarquee(),
+        text = title,
+        style = MaterialTheme.typography.titleMedium,
+        color = AppTheme.colorScheme.onSurface,
+        maxLines = 1,
+      )
+
+      if (targetSource == null) {
+        Text(
+          modifier = Modifier.basicMarquee(),
+          text = stringResource(Res.string.appBarAllFeeds),
+          style = MaterialTheme.typography.bodySmall,
+          color = AppTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
+        )
       }
-
-    Text(
-      text = title,
-      style = MaterialTheme.typography.titleMedium,
-      color = AppTheme.colorScheme.onSurface,
-      maxLines = 1,
-    )
-
-    Text(
-      modifier = Modifier.basicMarquee(),
-      text = subtitle,
-      style = MaterialTheme.typography.bodySmall,
-      color = AppTheme.colorScheme.onSurfaceVariant,
-      maxLines = 1,
-    )
+    }
   }
 }
 
