@@ -269,6 +269,7 @@
   <string name="settingsAppIconTitle">Uygulama simgesi</string>
   <string name="settingsAppIconSubtitle">Twine'ın ana ekranınızda nasıl duracağını belirleyin</string>
   <string name="settingsAppIconDefault">Varsayılan</string>
+  <string name="settingsAppIconClassic">Classic</string>
   <string name="filter">Filtrele</string>
   <string name="freshRssLoginTitle">FreshRSS</string>
   <string name="freshRssUsername">Kullanıcı adı</string>
