@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.app
 
 enum class AppIcon(val isPremium: Boolean = true) {
   Default(isPremium = false),
+  Classic,
   Solarized,
   Amber,
   Coral,

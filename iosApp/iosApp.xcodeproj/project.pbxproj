@@ -17,6 +17,7 @@
 		22983D202F1756B30087F808 /* AppIconParchment.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983D102F1756B30087F808 /* AppIconParchment.icon */; };
 		22983D202F1756B30087F809 /* AppIconSlate.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983D102F1756B30087F809 /* AppIconSlate.icon */; };
 		22983D202F1756B30087F80A /* AppIconSepia.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983D102F1756B30087F80A /* AppIconSepia.icon */; };
+		22983D202F1756B30087F80B /* AppIconClassic.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983D102F1756B30087F80B /* AppIconClassic.icon */; };
 		22983D302F1756B30087F800 /* AppIconDefault.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983D102F1756B30087F800 /* AppIconDefault.icon */; };
 		22983D302F1756B30087F801 /* AppIconSolarized.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983D102F1756B30087F801 /* AppIconSolarized.icon */; };
 		22983D302F1756B30087F803 /* AppIconAmber.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983D102F1756B30087F803 /* AppIconAmber.icon */; };
@@ -27,6 +28,7 @@
 		22983D302F1756B30087F808 /* AppIconParchment.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983D102F1756B30087F808 /* AppIconParchment.icon */; };
 		22983D302F1756B30087F809 /* AppIconSlate.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983D102F1756B30087F809 /* AppIconSlate.icon */; };
 		22983D302F1756B30087F80A /* AppIconSepia.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983D102F1756B30087F80A /* AppIconSepia.icon */; };
+		22983D302F1756B30087F80B /* AppIconClassic.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983D102F1756B30087F80B /* AppIconClassic.icon */; };
 		058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557BA273AAA24004C7B11 /* Assets.xcassets */; };
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
@@ -78,6 +80,7 @@
 		22983D102F1756B30087F808 /* AppIconParchment.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIconParchment.icon; sourceTree = "<group>"; };
 		22983D102F1756B30087F809 /* AppIconSlate.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIconSlate.icon; sourceTree = "<group>"; };
 		22983D102F1756B30087F80A /* AppIconSepia.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIconSepia.icon; sourceTree = "<group>"; };
+		22983D102F1756B30087F80B /* AppIconClassic.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIconClassic.icon; sourceTree = "<group>"; };
 		058557BA273AAA24004C7B11 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		2152FB032600AC8F00CF470E /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
@@ -168,6 +171,7 @@
 				22983D102F1756B30087F808 /* AppIconParchment.icon */,
 				22983D102F1756B30087F809 /* AppIconSlate.icon */,
 				22983D102F1756B30087F80A /* AppIconSepia.icon */,
+				22983D102F1756B30087F80B /* AppIconClassic.icon */,
 			);
 			sourceTree = "<group>";
 		};
@@ -311,6 +315,7 @@
 				22983D302F1756B30087F808 /* AppIconParchment.icon in Resources */,
 				22983D302F1756B30087F809 /* AppIconSlate.icon in Resources */,
 				22983D302F1756B30087F80A /* AppIconSepia.icon in Resources */,
+				22983D302F1756B30087F80B /* AppIconClassic.icon in Resources */,
 				058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */,
 				058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */,
 				CD9827932E13C8E400D17D40 /* Localizable.xcstrings in Resources */,
@@ -331,6 +336,7 @@
 				22983D202F1756B30087F808 /* AppIconParchment.icon in Resources */,
 				22983D202F1756B30087F809 /* AppIconSlate.icon in Resources */,
 				22983D202F1756B30087F80A /* AppIconSepia.icon in Resources */,
+				22983D202F1756B30087F80B /* AppIconClassic.icon in Resources */,
 				CD9827922E13C8E400D17D40 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

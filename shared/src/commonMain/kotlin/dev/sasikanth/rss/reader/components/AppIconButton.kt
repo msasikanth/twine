@@ -65,6 +65,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.ic_launcher_foreground
+import twine.shared.generated.resources.settingsAppIconClassic
 import twine.shared.generated.resources.settingsAppIconDefault
 import twine.shared.generated.resources.themeVariantAmber
 import twine.shared.generated.resources.themeVariantCoral
@@ -168,6 +169,7 @@ internal fun AppIconPreview(
       AppIcon.Solarized -> Color(0xFFA85232)
       AppIcon.Amber -> Color(0xFFD59C20)
       AppIcon.Coral -> Color(0xFFF8875C)
+      AppIcon.Classic -> Color(0xFFEE802F)
       AppIcon.Raspberry -> Color(0xFFC55FA8)
       AppIcon.Skyline -> Color(0xFF048BD0)
       AppIcon.Lavender -> Color(0xFF8976D3)
@@ -202,6 +204,7 @@ private fun AppIcon.displayName(): String =
     AppIcon.Solarized -> stringResource(Res.string.themeVariantSolarized)
     AppIcon.Amber -> stringResource(Res.string.themeVariantAmber)
     AppIcon.Coral -> stringResource(Res.string.themeVariantCoral)
+    AppIcon.Classic -> stringResource(Res.string.settingsAppIconClassic)
     AppIcon.Raspberry -> stringResource(Res.string.themeVariantRaspberry)
     AppIcon.Skyline -> stringResource(Res.string.themeVariantSkyline)
     AppIcon.Lavender -> stringResource(Res.string.themeVariantLavender)
