@@ -426,4 +426,6 @@
   <string name="keyboardShortcutsOpenInBrowser">Tarayıcıda aç</string>
   <string name="keyboardShortcutsClose">Okuyucuyu kapat</string>
   <string name="keyboardShortcutsOpenPost">Yazıyı aç</string>
+  <string name="settingsDefaultSourceTitle">Default feed</string>
+  <string name="settingsDefaultSourceSubtitle">Choose the feed or group to open on startup</string>
 </resources>
