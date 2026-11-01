@@ -880,7 +880,7 @@ WHERE
   ) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
-  (post.postDate > :postDate OR (post.postDate = :postDate AND (post.createdAt > :postCreatedAt OR (post.createdAt = :postCreatedAt AND post.id > :postId))));
+  (post.postDate, post.createdAt, post.id) > (:postDate, :postCreatedAt, :postId);
 
 postPositionOldest:
 SELECT COUNT(*) FROM post
@@ -895,7 +895,7 @@ WHERE
   ) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
-  (post.postDate < :postDate OR (post.postDate = :postDate AND (post.createdAt < :postCreatedAt OR (post.createdAt = :postCreatedAt AND post.id < :postId))));
+  (post.postDate, post.createdAt, post.id) < (:postDate, :postCreatedAt, :postId);
 
 postPositionAddedLatest:
 SELECT COUNT(*) FROM post
@@ -910,7 +910,7 @@ WHERE
   ) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
-  (post.createdAt > :postCreatedAt OR (post.createdAt = :postCreatedAt AND (post.postDate > :postDate OR (post.postDate = :postDate AND post.id > :postId))));
+  (post.createdAt, post.postDate, post.id) > (:postCreatedAt, :postDate, :postId);
 
 postPositionAddedOldest:
 SELECT COUNT(*) FROM post
@@ -925,7 +925,7 @@ WHERE
   ) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
-  (post.createdAt < :postCreatedAt OR (post.createdAt = :postCreatedAt AND (post.postDate < :postDate OR (post.postDate = :postDate AND post.id < :postId))));
+  (post.createdAt, post.postDate, post.id) < (:postCreatedAt, :postDate, :postId);
 
 nonFeaturedPostPositionLatest:
 SELECT COUNT(*) FROM post
@@ -958,7 +958,7 @@ WHERE
   ) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
-  (post.postDate > :postDate OR (post.postDate = :postDate AND (post.createdAt > :postCreatedAt OR (post.createdAt = :postCreatedAt AND post.id > :postId))));
+  (post.postDate, post.createdAt, post.id) > (:postDate, :postCreatedAt, :postId);
 
 nonFeaturedPostPositionOldest:
 SELECT COUNT(*) FROM post
@@ -991,7 +991,7 @@ WHERE
   ) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
-  (post.postDate < :postDate OR (post.postDate = :postDate AND (post.createdAt < :postCreatedAt OR (post.createdAt = :postCreatedAt AND post.id < :postId))));
+  (post.postDate, post.createdAt, post.id) < (:postDate, :postCreatedAt, :postId);
 
 nonFeaturedPostPositionAddedLatest:
 SELECT COUNT(*) FROM post
@@ -1024,7 +1024,7 @@ WHERE
   ) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
-  (post.createdAt > :postCreatedAt OR (post.createdAt = :postCreatedAt AND (post.postDate > :postDate OR (post.postDate = :postDate AND post.id > :postId))));
+  (post.createdAt, post.postDate, post.id) > (:postCreatedAt, :postDate, :postId);
 
 nonFeaturedPostPositionAddedOldest:
 SELECT COUNT(*) FROM post
@@ -1057,7 +1057,7 @@ WHERE
   ) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
-  (post.createdAt < :postCreatedAt OR (post.createdAt = :postCreatedAt AND (post.postDate < :postDate OR (post.postDate = :postDate AND post.id < :postId))));
+  (post.createdAt, post.postDate, post.id) < (:postCreatedAt, :postDate, :postId);
 
 updatePostRemoteId:
 UPDATE post SET remoteId = :remoteId WHERE id = :id;
