@@ -141,12 +141,12 @@ class ReaderPageViewModel(
 
   private fun loadFullArticle() {
     viewModelScope.launch {
-      _parsingProgress.value = ReaderProcessingProgress.Loading
-
       val fullArticle = postContentRepository.postContent(readerPost.id).firstOrNull()
       if (fullArticle != null && !(fullArticle.articleContent.isNullOrBlank())) {
         return@launch
       }
+
+      _parsingProgress.value = ReaderProcessingProgress.Loading
 
       val article = fullArticleFetcher.fetch(readerPost.link, readerPost.remoteId).getOrNull()
       if (article == null) {
@@ -180,7 +180,7 @@ class ReaderPageViewModel(
             )
           } catch (e: Exception) {
             Logger.e(e) { "Failed to parse reader content" }
-            ReadabilityResult()
+            ReadabilityResult(content = content)
           }
 
         onParsingComplete(readabilityResult)
