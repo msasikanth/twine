@@ -14,9 +14,11 @@ upsert:
 INSERT INTO postContent (id, feedContent, feedContentLen, articleContent, createdAt, feedContentReadingTime, articleContentReadingTime)
 VALUES (:id, :feedContent, :feedContentLen, :articleContent, :createdAt, :feedContentReadingTime, :articleContentReadingTime)
 ON CONFLICT (id) DO UPDATE SET
-  feedContent = excluded.feedContent,
-  feedContentReadingTime = excluded.feedContentReadingTime
-WHERE COALESCE(postContent.feedContentLen, 0) < COALESCE(length(excluded.feedContent), 0);
+  feedContent = CASE WHEN COALESCE(postContent.feedContentLen, 0) < COALESCE(length(excluded.feedContent), 0) THEN excluded.feedContent ELSE postContent.feedContent END,
+  feedContentLen = CASE WHEN COALESCE(postContent.feedContentLen, 0) < COALESCE(length(excluded.feedContent), 0) THEN excluded.feedContentLen ELSE postContent.feedContentLen END,
+  feedContentReadingTime = CASE WHEN COALESCE(postContent.feedContentLen, 0) < COALESCE(length(excluded.feedContent), 0) THEN excluded.feedContentReadingTime ELSE postContent.feedContentReadingTime END,
+  articleContent = COALESCE(excluded.articleContent, postContent.articleContent),
+  articleContentReadingTime = COALESCE(excluded.articleContentReadingTime, postContent.articleContentReadingTime);
 
 getByPostId:
 SELECT * FROM postContent

@@ -26,6 +26,7 @@ import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
 import dev.sasikanth.rss.reader.reader.redability.ReaderHTML
+import dev.sasikanth.rss.reader.reader.redability.fallbackReadabilityResult
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.concurrent.AtomicInt
 import kotlin.coroutines.cancellation.CancellationException
@@ -68,8 +69,10 @@ class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider)
     link: String?,
     content: String,
     image: String?,
-  ): ReadabilityResult =
-    semaphore.withPermit {
+  ): ReadabilityResult {
+    if (content.isBlank()) return ReadabilityResult(content = content)
+
+    return semaphore.withPermit {
       val htmlShell = withContext(dispatchersProvider.default) { ReaderHTML.createOrGet() }
 
       // Using your Json.encodeToString based asJSString logic directly here
@@ -108,13 +111,13 @@ class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider)
           }
             ?: run {
               Logger.e { "Timed out running readability pipeline, falling back to raw content" }
-              ReadabilityResult(content = content)
+              withContext(dispatchersProvider.default) { fallbackReadabilityResult(content) }
             }
         } catch (e: CancellationException) {
           throw e
         } catch (e: Exception) {
           Logger.e(e) { "Failed to run readability pipeline, falling back to raw content" }
-          ReadabilityResult(content = content)
+          withContext(dispatchersProvider.default) { fallbackReadabilityResult(content) }
         } finally {
           withContext(NonCancellable) {
             cleanupWebView(webView)
@@ -123,6 +126,7 @@ class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider)
         }
       }
     }
+  }
 
   private suspend fun awaitParsedContent(
     webView: WKWebView,
@@ -163,14 +167,11 @@ class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider)
 
     webView.loadHTMLString(htmlShell, baseURL = link?.let { NSURL.URLWithString(it) })
 
-    continuation.invokeOnCancellation {
-      isFinished.value = 1
-      webView.stopLoading()
-      cleanupWebView(webView)
-    }
+    continuation.invokeOnCancellation { isFinished.value = 1 }
   }
 
   private fun cleanupWebView(webView: WKWebView) {
+    webView.stopLoading()
     webView.configuration.userContentController.apply {
       removeScriptMessageHandlerForName("readabilityMessageHandler")
       removeAllUserScripts()
@@ -189,10 +190,7 @@ class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider)
     }
 
   private suspend fun returnWebViewToPool(webView: WKWebView) =
-    poolMutex.withLock {
-      webView.loadHTMLString("", baseURL = null)
-      pool.add(webView)
-    }
+    poolMutex.withLock { pool.add(webView) }
 }
 
 // Ensure this remains a top-level or internal class so it isn't collected

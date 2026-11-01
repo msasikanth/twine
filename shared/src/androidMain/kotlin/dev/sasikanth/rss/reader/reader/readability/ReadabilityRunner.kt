@@ -29,6 +29,7 @@ import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
 import dev.sasikanth.rss.reader.reader.redability.ReaderHTML
+import dev.sasikanth.rss.reader.reader.redability.fallbackReadabilityResult
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.asJSString
 import java.util.concurrent.atomic.AtomicBoolean
@@ -67,8 +68,10 @@ class AndroidReadabilityRunner(
     link: String?,
     content: String,
     image: String?,
-  ): ReadabilityResult =
-    semaphore.withPermit {
+  ): ReadabilityResult {
+    if (content.isBlank()) return ReadabilityResult(content = content)
+
+    return semaphore.withPermit {
       val htmlShell = withContext(dispatchersProvider.default) { ReaderHTML.createOrGet() }
 
       withContext(dispatchersProvider.main) {
@@ -86,18 +89,19 @@ class AndroidReadabilityRunner(
           }
             ?: run {
               Logger.e { "Timed out running readability pipeline, falling back to raw content" }
-              ReadabilityResult(content = content)
+              withContext(dispatchersProvider.default) { fallbackReadabilityResult(content) }
             }
         } catch (e: CancellationException) {
           throw e
         } catch (e: Exception) {
           Logger.e(e) { "Failed to run readability pipeline, falling back to raw content" }
-          ReadabilityResult(content = content)
+          withContext(dispatchersProvider.default) { fallbackReadabilityResult(content) }
         } finally {
           withContext(NonCancellable) { returnWebViewToPool(webView) }
         }
       }
     }
+  }
 
   private suspend fun awaitParsedContent(
     webView: WebView,
@@ -110,6 +114,36 @@ class AndroidReadabilityRunner(
 
     val bridge =
       object {
+        @JavascriptInterface
+        fun onPageReady() {
+          if (isFinished.get()) return
+          webView.post {
+            if (isFinished.get()) return@post
+            val script =
+              """
+                  try {
+                      if (typeof parseReaderContent === 'undefined') {
+                          ReaderJSInterface.onContentParseFailed('parseReaderContent is undefined');
+                      } else {
+                          parseReaderContent(
+                              ${link.asJSString}, 
+                              ${image.asJSString}, 
+                              ${content.asJSString}
+                          ).then(function (res) {
+                              ReaderJSInterface.onContentParsed(JSON.stringify(res));
+                          }).catch(function (err) {
+                              ReaderJSInterface.onContentParseFailed('Promise error: ' + err);
+                          });
+                      }
+                  } catch (e) {
+                      ReaderJSInterface.onContentParseFailed('Script error: ' + e);
+                  }
+              """
+                .trimIndent()
+            webView.evaluateJavascript(script, null)
+          }
+        }
+
         @JavascriptInterface
         fun onContentParsed(result: String) {
           if (!isFinished.compareAndSet(false, true)) return
@@ -133,31 +167,6 @@ class AndroidReadabilityRunner(
 
     webView.webViewClient =
       object : WebViewClient() {
-        override fun onPageFinished(view: WebView, url: String) {
-          val script =
-            """
-                try {
-                    if (typeof parseReaderContent === 'undefined') {
-                        ReaderJSInterface.onContentParseFailed('parseReaderContent is undefined');
-                    } else {
-                        parseReaderContent(
-                            ${link.asJSString}, 
-                            ${image.asJSString}, 
-                            ${content.asJSString}
-                        ).then(function (res) {
-                            ReaderJSInterface.onContentParsed(JSON.stringify(res));
-                        }).catch(function (err) {
-                            ReaderJSInterface.onContentParseFailed('Promise error: ' + err);
-                        });
-                    }
-                } catch (e) {
-                    ReaderJSInterface.onContentParseFailed('Script error: ' + e);
-                }
-            """
-              .trimIndent()
-          view.evaluateJavascript(script, null)
-        }
-
         override fun onReceivedError(
           view: WebView,
           request: WebResourceRequest,
@@ -173,7 +182,7 @@ class AndroidReadabilityRunner(
 
     webView.loadDataWithBaseURL(link, htmlShell, "text/html", "UTF-8", null)
 
-    continuation.invokeOnCancellation { webView.stopLoading() }
+    continuation.invokeOnCancellation { isFinished.set(true) }
   }
 
   @SuppressLint("SetJavaScriptEnabled")
@@ -184,9 +193,9 @@ class AndroidReadabilityRunner(
 
   private suspend fun returnWebViewToPool(webView: WebView) =
     poolMutex.withLock {
+      webView.stopLoading()
       webView.removeJavascriptInterface("ReaderJSInterface")
       webView.webViewClient = WebViewClient()
-      webView.loadUrl("about:blank")
       pool.addLast(webView)
     }
 }
