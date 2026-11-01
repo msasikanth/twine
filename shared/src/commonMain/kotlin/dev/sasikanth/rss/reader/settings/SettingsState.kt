@@ -21,6 +21,7 @@ import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.SubscriptionResult
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.opml.OpmlFeed
 import dev.sasikanth.rss.reader.data.opml.OpmlResult
@@ -69,6 +70,7 @@ data class SettingsState(
   val opmlFeedSelectionLimit: Int,
   val showFreeFeedLimitWarning: Boolean,
   val blockedWordsCount: Int,
+  val defaultSource: Source?,
 ) {
 
   val isSubscribed: Boolean
@@ -123,6 +125,7 @@ data class SettingsState(
         opmlFeedSelectionLimit = 0,
         showFreeFeedLimitWarning = false,
         blockedWordsCount = 0,
+        defaultSource = null,
       )
   }
 }

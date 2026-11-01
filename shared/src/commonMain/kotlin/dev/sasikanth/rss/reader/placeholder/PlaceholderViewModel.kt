@@ -20,13 +20,18 @@ package dev.sasikanth.rss.reader.placeholder
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
+import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import me.tatarka.inject.annotations.Inject
 
 @Stable
@@ -34,6 +39,8 @@ import me.tatarka.inject.annotations.Inject
 class PlaceholderViewModel(
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
+  private val observableActiveSource: ObservableActiveSource,
+  private val refreshPolicy: RefreshPolicy,
 ) : ViewModel() {
 
   private val _navigateToHome = MutableStateFlow(false)
@@ -48,16 +55,42 @@ class PlaceholderViewModel(
     viewModelScope.launch {
       val isOnboardingDone = settingsRepository.isOnboardingDone.first()
       if (isOnboardingDone) {
+        setDefaultActiveSource()
         _navigateToHome.value = true
       } else {
         val numberOfFeeds = numberOfFeeds() ?: 0
         if (numberOfFeeds > 0) {
           settingsRepository.completeOnboarding()
+          setDefaultActiveSource()
           _navigateToHome.value = true
         } else {
           _navigateToOnboarding.value = true
         }
       }
+    }
+  }
+
+  private suspend fun setDefaultActiveSource() {
+    if (observableActiveSource.currentActiveSource != null) return
+
+    val defaultSourceId = settingsRepository.defaultSourceId.first() ?: return
+    val postsType = settingsRepository.postsType.first()
+    val lastRefreshedAt = refreshPolicy.lastRefreshedAtFlow.first()
+    val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, lastRefreshedAt)
+
+    val source =
+      rssRepository
+        .source(
+          id = defaultSourceId,
+          postsAfter = postsAfter,
+          postsUpperBound = lastRefreshedAt.toInstant(TimeZone.currentSystemDefault()),
+        )
+        .firstOrNull()
+
+    if (source != null) {
+      observableActiveSource.changeActiveSource(source)
+    } else {
+      settingsRepository.updateDefaultSourceId(null)
     }
   }
 

@@ -19,12 +19,17 @@ package dev.sasikanth.rss.reader.settings
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import coil3.ImageLoader
 import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.app.AppIconManager
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.core.model.local.User
 import dev.sasikanth.rss.reader.data.opml.OpmlFeed
@@ -35,6 +40,7 @@ import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.AudioMarkAsReadThreshold
 import dev.sasikanth.rss.reader.data.repository.BlockedWordsRepository
 import dev.sasikanth.rss.reader.data.repository.BrowserType
+import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.Period
@@ -48,16 +54,21 @@ import dev.sasikanth.rss.reader.data.sync.auth.OAuthManager
 import dev.sasikanth.rss.reader.notifications.Notifier
 import dev.sasikanth.rss.reader.utils.Constants
 import kotlin.time.Instant
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @Stable
 @Inject
 class SettingsViewModel(
@@ -76,6 +87,13 @@ class SettingsViewModel(
   private val blockedWordsRepository: BlockedWordsRepository,
   val availableProviders: Set<CloudServiceProvider>,
 ) : ViewModel() {
+
+  val sources: Flow<PagingData<Source>> =
+    Pager(config = PagingConfig(pageSize = 20)) {
+        rssRepository.sources(orderBy = FeedsOrderBy.Alphabetical)
+      }
+      .flow
+      .cachedIn(viewModelScope)
 
   private val _state = MutableStateFlow(SettingsState.default(appInfo))
   val state: StateFlow<SettingsState>
@@ -215,6 +233,17 @@ class SettingsViewModel(
     opmlManager.result
       .onEach { result -> _state.update { it.copy(opmlResult = result) } }
       .launchIn(viewModelScope)
+
+    settingsRepository.defaultSourceId
+      .flatMapLatest { defaultSourceId ->
+        if (defaultSourceId != null) {
+          rssRepository.source(id = defaultSourceId)
+        } else {
+          flowOf(null)
+        }
+      }
+      .onEach { defaultSource -> _state.update { it.copy(defaultSource = defaultSource) } }
+      .launchIn(viewModelScope)
   }
 
   fun dispatch(event: SettingsEvent) {
@@ -259,7 +288,12 @@ class SettingsViewModel(
       SettingsEvent.MarkFreeFeedLimitWarningAsDone -> {
         _state.update { it.copy(showFreeFeedLimitWarning = false) }
       }
+      is SettingsEvent.OnDefaultSourceChanged -> onDefaultSourceChanged(event.sourceId)
     }
+  }
+
+  private fun onDefaultSourceChanged(sourceId: String?) {
+    viewModelScope.launch { settingsRepository.updateDefaultSourceId(sourceId) }
   }
 
   private fun onOpmlFeedsSelected(feeds: List<OpmlFeed>) {

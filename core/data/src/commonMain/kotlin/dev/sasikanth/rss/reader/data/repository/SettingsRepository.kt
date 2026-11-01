@@ -82,6 +82,7 @@ class SettingsRepository(
   private val showPinnedSourcesKey = booleanPreferencesKey("show_pinned_sources")
   private val showFeaturedSectionKey = booleanPreferencesKey("show_featured_section")
   private val lastSeenChangelogVersionKey = stringPreferencesKey("last_seen_changelog_version")
+  private val defaultSourceIdKey = stringPreferencesKey("default_source_id")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -205,6 +206,9 @@ class SettingsRepository(
 
   val lastSeenChangelogVersion: Flow<String?> =
     dataStore.data.map { preferences -> preferences[lastSeenChangelogVersionKey] }
+
+  val defaultSourceId: Flow<String?> =
+    dataStore.data.map { preferences -> preferences[defaultSourceIdKey] }
 
   suspend fun enableAutoSyncImmediate(): Boolean {
     return enableAutoSync.first()
@@ -359,6 +363,16 @@ class SettingsRepository(
 
   suspend fun updateLastSeenChangelogVersion(versionName: String) {
     dataStore.edit { preferences -> preferences[lastSeenChangelogVersionKey] = versionName }
+  }
+
+  suspend fun updateDefaultSourceId(sourceId: String?) {
+    dataStore.edit { preferences ->
+      if (sourceId != null) {
+        preferences[defaultSourceIdKey] = sourceId
+      } else {
+        preferences.remove(defaultSourceIdKey)
+      }
+    }
   }
 
   suspend fun clear() {

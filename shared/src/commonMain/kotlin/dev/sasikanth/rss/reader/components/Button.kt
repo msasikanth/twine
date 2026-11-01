@@ -134,6 +134,7 @@ fun TranslucentButton(
       }
 
       AnimatedContent(
+        modifier = Modifier.weight(1f, fill = false),
         targetState = text,
         contentAlignment = Alignment.Center,
         transitionSpec = {

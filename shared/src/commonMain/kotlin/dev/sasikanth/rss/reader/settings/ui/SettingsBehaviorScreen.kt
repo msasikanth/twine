@@ -32,7 +32,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -40,10 +42,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.PagingData
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.app.AppPlatform
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.components.SubHeader
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.platform
@@ -52,6 +56,8 @@ import dev.sasikanth.rss.reader.settings.SettingsState
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.items.AudioMarkAsReadThresholdSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.BlockedWordsSettingItem
+import dev.sasikanth.rss.reader.settings.ui.items.DefaultSourceSelectionSheet
+import dev.sasikanth.rss.reader.settings.ui.items.DefaultSourceSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.MarkAsReadOnSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.OpmlFeedSelectionSheet
 import dev.sasikanth.rss.reader.settings.ui.items.PostsDeletionPeriodSettingItem
@@ -60,6 +66,8 @@ import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import dev.sasikanth.rss.reader.utils.restrictContentWidth
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -103,6 +111,7 @@ internal fun SettingsBehaviorScreen(
 
   SettingsBehaviorContent(
     state = state,
+    sources = viewModel.sources,
     dispatch = viewModel::dispatch,
     snackbarHostState = snackbarHostState,
     goBack = goBack,
@@ -114,6 +123,7 @@ internal fun SettingsBehaviorScreen(
 @Composable
 private fun SettingsBehaviorContent(
   state: SettingsState,
+  sources: Flow<PagingData<Source>>,
   dispatch: (SettingsEvent) -> Unit,
   snackbarHostState: SnackbarHostState,
   goBack: () -> Unit,
@@ -121,6 +131,7 @@ private fun SettingsBehaviorContent(
   modifier: Modifier = Modifier,
 ) {
   val layoutDirection = LocalLayoutDirection.current
+  var showDefaultSourcePicker by remember { mutableStateOf(false) }
 
   Scaffold(
     modifier = modifier,
@@ -170,6 +181,15 @@ private fun SettingsBehaviorContent(
         )
       }
 
+      if (showDefaultSourcePicker) {
+        DefaultSourceSelectionSheet(
+          sources = sources,
+          selectedSourceId = state.defaultSource?.id,
+          onSourceSelected = { dispatch(SettingsEvent.OnDefaultSourceChanged(it)) },
+          onDismiss = { showDefaultSourcePicker = false },
+        )
+      }
+
       LazyColumn(
         modifier = Modifier.restrictContentWidth().iosBottomSafeAreaPadding(),
         contentPadding =
@@ -211,6 +231,13 @@ private fun SettingsBehaviorContent(
         }
 
         item { SubHeader(text = stringResource(Res.string.settingsHeaderBehaviour)) }
+
+        item {
+          DefaultSourceSettingItem(
+            defaultSource = state.defaultSource,
+            onClick = { showDefaultSourcePicker = true },
+          )
+        }
 
         item {
           SettingsSwitchItem(
@@ -273,6 +300,7 @@ private fun SettingsBehaviorPreview() {
               platform = AppPlatform.Android,
             )
         ),
+      sources = emptyFlow(),
       dispatch = {},
       snackbarHostState = remember { SnackbarHostState() },
       goBack = {},
