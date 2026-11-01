@@ -24,41 +24,33 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.AtomContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.RDFContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.RSSContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser
+import dev.sasikanth.rss.reader.core.network.utils.TestDispatchersProvider
 import dev.sasikanth.rss.reader.core.network.utils.feedUrl
 import dev.sasikanth.rss.reader.core.network.utils.rssXmlContent
-import dev.sasikanth.rss.reader.util.DispatchersProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpHeaders
 import io.ktor.http.headersOf
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.core.toByteArray
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 
 class FeedFetcherTest {
 
-  /** [FeedFetcher] calls `limitedParallelism`, which the test dispatchers do not support. */
-  private class FetcherDispatchersProvider : DispatchersProvider {
-    override val main: CoroutineDispatcher = Dispatchers.Default
-    override val io: CoroutineDispatcher = Dispatchers.Default
-    override val default: CoroutineDispatcher = Dispatchers.Default
-    override val databaseRead: CoroutineDispatcher = Dispatchers.Default
-    override val databaseWrite: CoroutineDispatcher = Dispatchers.Default
-  }
-
   private fun fetcherRespondingWith(contentType: String?): FeedFetcher {
-    val dispatchersProvider = FetcherDispatchersProvider()
+    val dispatchersProvider = TestDispatchersProvider()
     val articleHtmlParser = ArticleHtmlParser()
     val httpClient =
       HttpClient(MockEngine) {
         engine {
+          dispatcher = dispatchersProvider.io
           addHandler {
             respond(
-              content = rssXmlContent,
+              content = ByteReadChannel(rssXmlContent.toByteArray()),
               headers =
                 if (contentType == null) headersOf()
                 else headersOf(HttpHeaders.ContentType, contentType),

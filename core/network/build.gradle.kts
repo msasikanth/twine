@@ -65,6 +65,7 @@ kotlin {
       implementation(libs.ktor.json)
       implementation(libs.ktor.resources)
       implementation(libs.kotlinx.serialization.json)
+      implementation(libs.kotlinx.serialization.json.io)
       implementation(libs.ksoup)
       implementation(libs.ksoup.kotlinx.io)
       implementation(libs.ktxml)

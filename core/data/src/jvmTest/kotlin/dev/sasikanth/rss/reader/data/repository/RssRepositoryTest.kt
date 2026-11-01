@@ -397,8 +397,8 @@ class RssRepositoryTest {
     repository.updateSeedColors(updates)
 
     // then
-    val post1 = repository.post("post-1")
-    val post2 = repository.post("post-2")
+    val post1 = repository.postOrNull("post-1")!!
+    val post2 = repository.postOrNull("post-2")!!
 
     assertEquals(123, post1.seedColor)
     assertEquals(456, post2.seedColor)
@@ -552,8 +552,8 @@ class RssRepositoryTest {
     blockedWordsRepository.addWord("spam")
 
     // then
-    val post1 = repository.post("post-1")
-    val post2 = repository.post("post-2")
+    val post1 = repository.postOrNull("post-1")!!
+    val post2 = repository.postOrNull("post-2")!!
 
     assertEquals(emptySet(), post1.flags)
     assertEquals(setOf(dev.sasikanth.rss.reader.core.model.local.PostFlag.Hidden), post2.flags)
@@ -597,7 +597,7 @@ class RssRepositoryTest {
     blockedWordsRepository.addWord("spam")
     blockedWordsRepository.addWord("promo")
 
-    val postBefore = repository.post("post-1")
+    val postBefore = repository.postOrNull("post-1")!!
     assertEquals(setOf(dev.sasikanth.rss.reader.core.model.local.PostFlag.Hidden), postBefore.flags)
 
     val wordSpamId = blockedWordsRepository.words().first().first { it.content == "spam" }.id
@@ -606,7 +606,7 @@ class RssRepositoryTest {
     blockedWordsRepository.removeWord(wordSpamId)
 
     // then - should still be blocked because "promo" matches
-    val postAfterOneRemoval = repository.post("post-1")
+    val postAfterOneRemoval = repository.postOrNull("post-1")!!
     assertEquals(
       setOf(dev.sasikanth.rss.reader.core.model.local.PostFlag.Hidden),
       postAfterOneRemoval.flags,
@@ -618,7 +618,7 @@ class RssRepositoryTest {
     blockedWordsRepository.removeWord(wordPromoId)
 
     // then - should be unblocked
-    val postAfterBothRemovals = repository.post("post-1")
+    val postAfterBothRemovals = repository.postOrNull("post-1")!!
     assertEquals(emptySet(), postAfterBothRemovals.flags)
   }
 
@@ -688,8 +688,8 @@ class RssRepositoryTest {
     repository.upsertPosts(syncedPosts)
 
     // then
-    val post1 = repository.post("post-1")
-    val post2 = repository.post("post-2")
+    val post1 = repository.postOrNull("post-1")!!
+    val post2 = repository.postOrNull("post-2")!!
 
     assertEquals(emptySet(), post1.flags)
     assertEquals(setOf(dev.sasikanth.rss.reader.core.model.local.PostFlag.Hidden), post2.flags)
