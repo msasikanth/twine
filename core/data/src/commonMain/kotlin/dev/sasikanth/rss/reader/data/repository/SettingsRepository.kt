@@ -53,6 +53,7 @@ class SettingsRepository(
   private val feedsSortOrderKey = stringPreferencesKey("pref_feeds_sort_order")
   private val hideFeedsWithoutUnreadPostsKey =
     booleanPreferencesKey("pref_hide_feeds_without_unread_posts")
+  private val hideGroupedFeedsKey = booleanPreferencesKey("pref_hide_grouped_feeds")
   private val appThemeModeKey = stringPreferencesKey("pref_app_theme_mode_v2")
   private val useAmoledKey = booleanPreferencesKey("use_amoled")
   private val enableAutoSyncKey = booleanPreferencesKey("enable_auto_sync")
@@ -113,6 +114,9 @@ class SettingsRepository(
 
   val hideFeedsWithoutUnreadPosts: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[hideFeedsWithoutUnreadPostsKey] ?: false }
+
+  val hideGroupedFeeds: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[hideGroupedFeedsKey] ?: false }
 
   val appThemeMode: Flow<AppThemeMode> =
     dataStore.data.map { preferences ->
@@ -212,6 +216,10 @@ class SettingsRepository(
 
   suspend fun toggleHideFeedsWithoutUnreadPosts(value: Boolean) {
     dataStore.edit { preferences -> preferences[hideFeedsWithoutUnreadPostsKey] = value }
+  }
+
+  suspend fun toggleHideGroupedFeeds(value: Boolean) {
+    dataStore.edit { preferences -> preferences[hideGroupedFeedsKey] = value }
   }
 
   suspend fun postsDeletionPeriodImmediate(): Period {

@@ -3,6 +3,15 @@ WITH feeds AS (
   SELECT COUNT(*) AS count FROM feed f
   WHERE f.isDeleted = 0
     AND (
+      :hideGroupedFeeds = 0
+      OR NOT EXISTS (
+        SELECT 1 FROM feedGroupFeed gf
+        JOIN feedGroup fg ON gf.feedGroupId = fg.id
+        WHERE gf.feedId = f.id
+          AND fg.isDeleted = 0
+      )
+    )
+    AND (
       :unreadOnly = 0
       OR EXISTS (
         SELECT 1 FROM post p
@@ -218,6 +227,15 @@ FROM (
   FROM feed f
   LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :postsUpperBound
   WHERE f.isDeleted = 0
+    AND (
+      :hideGroupedFeeds = 0
+      OR NOT EXISTS (
+        SELECT 1 FROM feedGroupFeed gf
+        JOIN feedGroup fg ON gf.feedGroupId = fg.id
+        WHERE gf.feedId = f.id
+          AND fg.isDeleted = 0
+      )
+    )
   GROUP BY f.id
 
   UNION ALL

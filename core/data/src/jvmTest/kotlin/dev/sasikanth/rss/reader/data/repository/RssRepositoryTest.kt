@@ -762,17 +762,54 @@ class RssRepositoryTest {
     assertEquals(1, numberOfFeedsWithUnreadPosts)
   }
 
+  @Test
+  fun sourcesShouldHideFeedsInActiveGroupsWhenHideGroupedFeedsIsEnabled() = runTest {
+    // given
+    insertFeed(id = "feed-grouped", name = "Grouped Feed")
+    insertFeed(id = "feed-ungrouped", name = "Ungrouped Feed")
+    insertFeed(id = "feed-in-deleted-group", name = "Feed in deleted group")
+
+    insertGroup(id = "group-active", name = "Active Group", feedIds = listOf("feed-grouped"))
+    insertGroup(
+      id = "group-deleted",
+      name = "Deleted Group",
+      feedIds = listOf("feed-in-deleted-group"),
+    )
+    database.feedGroupQueries.markAsDeleted(
+      id = "group-deleted",
+      updatedAt = Instant.fromEpochMilliseconds(0),
+    )
+
+    // when
+    val allSources = loadSources(unreadOnly = false, hideGroupedFeeds = false)
+    val ungroupedSources = loadSources(unreadOnly = false, hideGroupedFeeds = true)
+
+    // then
+    assertEquals(
+      setOf("group-active", "feed-grouped", "feed-ungrouped", "feed-in-deleted-group"),
+      allSources.map { it.id }.toSet(),
+    )
+    assertEquals(
+      setOf("group-active", "feed-ungrouped", "feed-in-deleted-group"),
+      ungroupedSources.map { it.id }.toSet(),
+    )
+  }
+
   private val postDate = Instant.fromEpochMilliseconds(1000)
   private val postsAfter = Instant.fromEpochMilliseconds(0)
   private val postsUpperBound = Instant.fromEpochMilliseconds(Long.MAX_VALUE / 2)
 
-  private suspend fun loadSources(unreadOnly: Boolean): List<SourceModel> {
+  private suspend fun loadSources(
+    unreadOnly: Boolean,
+    hideGroupedFeeds: Boolean = false,
+  ): List<SourceModel> {
     val pagingSource =
       repository.sources(
         postsAfter = postsAfter,
         postsUpperBound = postsUpperBound,
         orderBy = FeedsOrderBy.Latest,
         unreadOnly = unreadOnly,
+        hideGroupedFeeds = hideGroupedFeeds,
       )
     val result =
       pagingSource.load(
