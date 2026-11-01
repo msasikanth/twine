@@ -23,6 +23,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -132,6 +134,7 @@ fun TranslucentButton(
       }
 
       AnimatedContent(
+        modifier = Modifier.weight(1f, fill = false),
         targetState = text,
         contentAlignment = Alignment.Center,
         transitionSpec = {
@@ -328,12 +331,26 @@ fun CircularIconButton(
         .graphicsLayer { alpha = animatedAlpha },
     contentAlignment = Alignment.Center,
   ) {
-    Icon(
-      modifier = Modifier.requiredSize(20.dp),
-      imageVector = icon,
-      contentDescription = null,
-      tint = contentColor ?: AppTheme.colorScheme.onSurface,
-    )
+    AnimatedContent(
+      targetState = icon,
+      contentAlignment = Alignment.Center,
+      transitionSpec = {
+        (fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+            scaleIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)))
+          .togetherWith(
+            fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+              scaleOut(animationSpec = spring(stiffness = Spring.StiffnessMedium))
+          )
+      },
+      label = "CircularIconButtonIcon",
+    ) { targetIcon ->
+      Icon(
+        modifier = Modifier.requiredSize(20.dp),
+        imageVector = targetIcon,
+        contentDescription = null,
+        tint = contentColor ?: AppTheme.colorScheme.onSurface,
+      )
+    }
   }
 }
 

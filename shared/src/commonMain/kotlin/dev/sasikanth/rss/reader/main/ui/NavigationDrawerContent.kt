@@ -407,10 +407,12 @@ private fun ExpandedDrawerContent(
             visibleFeedsCount = state.visibleFeedsCount,
             feedsSortOrder = state.feedsSortOrder,
             hideFeedsWithoutUnreadPosts = state.hideFeedsWithoutUnreadPosts,
+            hideGroupedFeeds = state.hideGroupedFeeds,
             onFeedsSortChanged = { dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
             onHideFeedsWithoutUnreadPostsChanged = {
               dispatch(FeedsEvent.OnHideFeedsWithoutUnreadPostsChanged(it))
             },
+            onHideGroupedFeedsChanged = { dispatch(FeedsEvent.OnHideGroupedFeedsChanged(it)) },
             onAddNewFeedClick = { dispatch(FeedsEvent.OnNewFeedClicked) },
           )
         }

@@ -94,9 +94,16 @@ class FeedsViewModel(
         settingsRepository.postsType,
         settingsRepository.feedsSortOrder,
         settingsRepository.hideFeedsWithoutUnreadPosts,
+        settingsRepository.hideGroupedFeeds,
         refreshPolicy.lastRefreshedAtFlow,
-      ) { postsType, feedsSortOrder, hideFeedsWithoutUnreadPosts, dateTime ->
-        SourcesQueryParams(postsType, feedsSortOrder, hideFeedsWithoutUnreadPosts, dateTime)
+      ) { postsType, feedsSortOrder, hideFeedsWithoutUnreadPosts, hideGroupedFeeds, dateTime ->
+        SourcesQueryParams(
+          postsType = postsType,
+          feedsSortOrder = feedsSortOrder,
+          hideFeedsWithoutUnreadPosts = hideFeedsWithoutUnreadPosts,
+          hideGroupedFeeds = hideGroupedFeeds,
+          dateTime = dateTime,
+        )
       }
       .flatMapLatest { params ->
         val postsAfter = PostsFilterUtils.postsThresholdTime(params.postsType, params.dateTime)
@@ -106,6 +113,7 @@ class FeedsViewModel(
             postsUpperBound = params.dateTime,
             feedsSortOrder = params.feedsSortOrder,
             unreadOnly = params.hideFeedsWithoutUnreadPosts,
+            hideGroupedFeeds = params.hideGroupedFeeds,
           )
 
         addSourcesSeparator(sources)
@@ -159,6 +167,7 @@ class FeedsViewModel(
       is FeedsEvent.OnFeedSortOrderChanged -> onFeedSortOrderChanged(event.feedsOrderBy)
       is FeedsEvent.OnHideFeedsWithoutUnreadPostsChanged ->
         onHideFeedsWithoutUnreadPostsChanged(event.hide)
+      is FeedsEvent.OnHideGroupedFeedsChanged -> onHideGroupedFeedsChanged(event.hide)
       is FeedsEvent.OnHomeSelected -> onHomeSelected()
       FeedsEvent.CancelSourcesSelection -> onCancelSourcesSelection()
       FeedsEvent.DeleteSelectedSourcesClicked -> onDeleteSelectedSourcesClicked()
@@ -345,6 +354,12 @@ class FeedsViewModel(
     }
   }
 
+  private fun onHideGroupedFeedsChanged(hide: Boolean) {
+    viewModelScope.launch {
+      withContext(dispatchersProvider.io) { settingsRepository.toggleHideGroupedFeeds(hide) }
+    }
+  }
+
   private fun onTogglePinnedSection() {
     _state.update { it.copy(isPinnedSectionExpanded = !_state.value.isPinnedSectionExpanded) }
   }
@@ -392,6 +407,10 @@ class FeedsViewModel(
 
     settingsRepository.hideFeedsWithoutUnreadPosts
       .onEach { hide -> _state.update { it.copy(hideFeedsWithoutUnreadPosts = hide) } }
+      .launchIn(viewModelScope)
+
+    settingsRepository.hideGroupedFeeds
+      .onEach { hide -> _state.update { it.copy(hideGroupedFeeds = hide) } }
       .launchIn(viewModelScope)
   }
 
@@ -481,6 +500,7 @@ class FeedsViewModel(
     postsUpperBound: LocalDateTime,
     feedsSortOrder: FeedsOrderBy,
     unreadOnly: Boolean,
+    hideGroupedFeeds: Boolean,
   ) =
     Pager(config = PagingConfig(pageSize = 20)) {
         rssRepository.sources(
@@ -488,6 +508,7 @@ class FeedsViewModel(
           postsUpperBound = postsUpperBound.toInstant(TimeZone.currentSystemDefault()),
           orderBy = feedsSortOrder,
           unreadOnly = unreadOnly,
+          hideGroupedFeeds = hideGroupedFeeds,
         )
       }
       .flow
@@ -522,6 +543,7 @@ class FeedsViewModel(
     val postsType: PostsType,
     val feedsSortOrder: FeedsOrderBy,
     val hideFeedsWithoutUnreadPosts: Boolean,
+    val hideGroupedFeeds: Boolean,
     val dateTime: LocalDateTime,
   )
 }

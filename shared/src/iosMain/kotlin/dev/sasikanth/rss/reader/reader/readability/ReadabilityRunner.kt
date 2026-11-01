@@ -21,27 +21,35 @@
 
 package dev.sasikanth.rss.reader.reader.readability
 
+import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
 import dev.sasikanth.rss.reader.reader.redability.ReaderHTML
+import dev.sasikanth.rss.reader.reader.redability.fallbackReadabilityResult
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.concurrent.AtomicInt
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.readValue
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import me.tatarka.inject.annotations.Inject
 import platform.Foundation.NSURL
 import platform.WebKit.*
 import platform.darwin.NSObject
+
+private val PARSE_TIMEOUT = 15.seconds
 
 @Inject
 @AppScope
@@ -61,8 +69,10 @@ class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider)
     link: String?,
     content: String,
     image: String?,
-  ): ReadabilityResult =
-    semaphore.withPermit {
+  ): ReadabilityResult {
+    if (content.isBlank()) return ReadabilityResult(content = content)
+
+    return semaphore.withPermit {
       val htmlShell = withContext(dispatchersProvider.default) { ReaderHTML.createOrGet() }
 
       // Using your Json.encodeToString based asJSString logic directly here
@@ -96,54 +106,72 @@ class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider)
         val webView = getOrCreateWebView()
 
         try {
-          suspendCancellableCoroutine { continuation ->
-            val isFinished = AtomicInt(0)
-
-            // We create the handler and ensure it is held strongly during this scope
-            val handler = ReaderJSHandler { result ->
-              if (result == "READY") {
-                webView.evaluateJavaScript(executionScript) { _, error ->
-                  if (error != null && isFinished.compareAndSet(0, 1)) {
-                    continuation.resumeWithException(
-                      Exception("JS Execution Error: ${error.localizedDescription}")
-                    )
-                  }
-                }
-                return@ReaderJSHandler
-              }
-
-              if (isFinished.compareAndSet(0, 1)) {
-                if (result.startsWith("ERROR:")) {
-                  continuation.resumeWithException(Exception(result))
-                } else {
-                  try {
-                    continuation.resume(json.decodeFromString<ReadabilityResult>(result))
-                  } catch (e: Exception) {
-                    continuation.resumeWithException(e)
-                  }
-                }
-              }
-            }
-
-            val userController = webView.configuration.userContentController
-            userController.addScriptMessageHandler(handler, "readabilityMessageHandler")
-
-            webView.loadHTMLString(htmlShell, baseURL = link?.let { NSURL.URLWithString(it) })
-
-            continuation.invokeOnCancellation {
-              isFinished.value = 1
-              webView.stopLoading()
-              cleanupWebView(webView)
-            }
+          withTimeoutOrNull(PARSE_TIMEOUT) {
+            awaitParsedContent(webView, htmlShell, link, executionScript)
           }
+            ?: run {
+              Logger.e { "Timed out running readability pipeline, falling back to raw content" }
+              withContext(dispatchersProvider.default) { fallbackReadabilityResult(content) }
+            }
+        } catch (e: CancellationException) {
+          throw e
+        } catch (e: Exception) {
+          Logger.e(e) { "Failed to run readability pipeline, falling back to raw content" }
+          withContext(dispatchersProvider.default) { fallbackReadabilityResult(content) }
         } finally {
-          cleanupWebView(webView)
-          returnWebViewToPool(webView)
+          withContext(NonCancellable) {
+            cleanupWebView(webView)
+            returnWebViewToPool(webView)
+          }
+        }
+      }
+    }
+  }
+
+  private suspend fun awaitParsedContent(
+    webView: WKWebView,
+    htmlShell: String,
+    link: String?,
+    executionScript: String,
+  ): ReadabilityResult = suspendCancellableCoroutine { continuation ->
+    val isFinished = AtomicInt(0)
+
+    // We create the handler and ensure it is held strongly during this scope
+    val handler = ReaderJSHandler { result ->
+      if (result == "READY") {
+        webView.evaluateJavaScript(executionScript) { _, error ->
+          if (error != null && isFinished.compareAndSet(0, 1)) {
+            continuation.resumeWithException(
+              Exception("JS Execution Error: ${error.localizedDescription}")
+            )
+          }
+        }
+        return@ReaderJSHandler
+      }
+
+      if (isFinished.compareAndSet(0, 1)) {
+        if (result.startsWith("ERROR:")) {
+          continuation.resumeWithException(Exception(result))
+        } else {
+          try {
+            continuation.resume(json.decodeFromString<ReadabilityResult>(result))
+          } catch (e: Exception) {
+            continuation.resumeWithException(e)
+          }
         }
       }
     }
 
+    val userController = webView.configuration.userContentController
+    userController.addScriptMessageHandler(handler, "readabilityMessageHandler")
+
+    webView.loadHTMLString(htmlShell, baseURL = link?.let { NSURL.URLWithString(it) })
+
+    continuation.invokeOnCancellation { isFinished.value = 1 }
+  }
+
   private fun cleanupWebView(webView: WKWebView) {
+    webView.stopLoading()
     webView.configuration.userContentController.apply {
       removeScriptMessageHandlerForName("readabilityMessageHandler")
       removeAllUserScripts()
@@ -162,10 +190,7 @@ class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider)
     }
 
   private suspend fun returnWebViewToPool(webView: WKWebView) =
-    poolMutex.withLock {
-      webView.loadHTMLString("", baseURL = null)
-      pool.add(webView)
-    }
+    poolMutex.withLock { pool.add(webView) }
 }
 
 // Ensure this remains a top-level or internal class so it isn't collected

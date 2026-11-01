@@ -17,9 +17,32 @@
 
 package dev.sasikanth.rss.reader.reader.redability
 
+import com.fleeksoft.ksoup.Ksoup
 import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 
 interface ReadabilityRunner {
 
   suspend fun parseHtml(link: String?, content: String, image: String? = null): ReadabilityResult
+}
+
+internal fun fallbackReadabilityResult(content: String?): ReadabilityResult {
+  if (content.isNullOrBlank()) return ReadabilityResult(content = content)
+
+  val cleanedContent =
+    runCatching {
+        val document = Ksoup.parse(content)
+        document.head().remove()
+        document.select("script, style, noscript").remove()
+        document.select("p, div, h1, h2, h3, h4, h5, h6, li, blockquote, tr").prepend("\\n\\n")
+        document
+          .wholeText()
+          .replace("\\n", "\n")
+          .lines()
+          .joinToString("\n") { it.trim() }
+          .replace(Regex("\n{3,}"), "\n\n")
+          .trim()
+      }
+      .getOrDefault(content)
+
+  return ReadabilityResult(content = cleanedContent.ifBlank { content })
 }

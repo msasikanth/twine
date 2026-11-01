@@ -22,8 +22,10 @@ import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
 import dev.sasikanth.rss.reader.reader.redability.ReaderHTML
+import dev.sasikanth.rss.reader.reader.redability.fallbackReadabilityResult
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.asJSString
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import me.tatarka.inject.annotations.Inject
@@ -47,19 +49,24 @@ class HtmlReadabilityRunner(private val dispatchersProvider: DispatchersProvider
     link: String?,
     content: String,
     image: String?,
-  ): ReadabilityResult =
-    withContext(dispatchersProvider.io) {
+  ): ReadabilityResult {
+    if (content.isBlank()) return ReadabilityResult(content = content)
+
+    return withContext(dispatchersProvider.io) {
       try {
         parseHtmlOrThrow(link, content, image)
+      } catch (e: CancellationException) {
+        throw e
       } catch (e: Exception) {
         // HtmlUnit is a best-effort HTML engine, not a real browser: it can throw on
         // content it can't model correctly (e.g. it NPEs building a live frame window
         // for <iframe> tags parsed into a windowless document). Never let a parsing
         // quirk take down the reader — show the original content instead.
         Logger.e(e) { "Failed to run readability pipeline, falling back to raw content" }
-        ReadabilityResult(content = content)
+        fallbackReadabilityResult(content)
       }
     }
+  }
 
   private suspend fun parseHtmlOrThrow(
     link: String?,

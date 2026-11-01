@@ -78,6 +78,7 @@ import twine.shared.generated.resources.allFeeds
 import twine.shared.generated.resources.buttonAddFeed
 import twine.shared.generated.resources.edit
 import twine.shared.generated.resources.feedOptionRemove
+import twine.shared.generated.resources.feedsFilterHideGrouped
 import twine.shared.generated.resources.feedsFilterSectionTitle
 import twine.shared.generated.resources.feedsFilterUnreadOnly
 import twine.shared.generated.resources.feedsNoUnread
@@ -321,8 +322,10 @@ internal fun AllFeedsHeader(
   visibleFeedsCount: Int,
   feedsSortOrder: FeedsOrderBy,
   hideFeedsWithoutUnreadPosts: Boolean,
+  hideGroupedFeeds: Boolean,
   onFeedsSortChanged: (FeedsOrderBy) -> Unit,
   onHideFeedsWithoutUnreadPostsChanged: (Boolean) -> Unit,
+  onHideGroupedFeedsChanged: (Boolean) -> Unit,
   modifier: Modifier = Modifier,
   showAddButton: Boolean = true,
   onAddNewFeedClick: (() -> Unit)? = null,
@@ -408,6 +411,16 @@ internal fun AllFeedsHeader(
               trailingIcon = if (hideFeedsWithoutUnreadPosts) TwineIcons.Check else null,
               onClick = {
                 onHideFeedsWithoutUnreadPostsChanged(!hideFeedsWithoutUnreadPosts)
+                showSortDropdown = false
+              },
+            )
+
+            DropdownMenuItem(
+              selected = hideGroupedFeeds,
+              text = stringResource(Res.string.feedsFilterHideGrouped),
+              trailingIcon = if (hideGroupedFeeds) TwineIcons.Check else null,
+              onClick = {
+                onHideGroupedFeedsChanged(!hideGroupedFeeds)
                 showSortDropdown = false
               },
             )

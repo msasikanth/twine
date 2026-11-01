@@ -173,6 +173,7 @@
   <string name="feedsSortSectionTitle">Sort by</string>
   <string name="feedsFilterSectionTitle">Filter</string>
   <string name="feedsFilterUnreadOnly">Unread feeds</string>
+  <string name="feedsFilterHideGrouped">Hide grouped feeds</string>
   <string name="feedsNoUnread">No feeds with unread articles.</string>
   <string name="feedsBottomBarNewGroup">New group</string>
   <string name="feedsBottomBarNewFeed">New feed</string>
@@ -286,6 +287,7 @@
   <string name="settingsAppIconTitle">App icon</string>
   <string name="settingsAppIconSubtitle">Choose how Twine looks on your home screen</string>
   <string name="settingsAppIconDefault">Default</string>
+  <string name="settingsAppIconClassic">Classic</string>
   <string name="filter">Filter</string>
   <string name="freshRssLoginTitle">FreshRSS</string>
   <string name="freshRssServerUrl" translatable="false">https://freshrss.example.com/api/greader.php/</string>
@@ -460,4 +462,6 @@
   <string name="keyboardShortcutsOpenInBrowser">Open in browser</string>
   <string name="keyboardShortcutsClose">Close reader</string>
   <string name="keyboardShortcutsOpenPost">Open article</string>
+  <string name="settingsDefaultSourceTitle">Default feed</string>
+  <string name="settingsDefaultSourceSubtitle">Choose the feed or group to open on startup</string>
 </resources>

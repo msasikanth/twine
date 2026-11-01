@@ -46,6 +46,7 @@ jobs:
 
   common-tests:
     runs-on: macos-26
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
 

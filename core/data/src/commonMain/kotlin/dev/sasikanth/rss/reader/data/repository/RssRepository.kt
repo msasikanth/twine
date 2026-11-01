@@ -989,8 +989,15 @@ class RssRepository(
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     orderBy: FeedsOrderBy = FeedsOrderBy.Latest,
     unreadOnly: Boolean = false,
+    hideGroupedFeeds: Boolean = false,
   ): PagingSource<Int, Source> {
-    return sourceRepository.sources(postsAfter, postsUpperBound, orderBy, unreadOnly)
+    return sourceRepository.sources(
+      postsAfter = postsAfter,
+      postsUpperBound = postsUpperBound,
+      orderBy = orderBy,
+      unreadOnly = unreadOnly,
+      hideGroupedFeeds = hideGroupedFeeds,
+    )
   }
 
   fun source(

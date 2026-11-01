@@ -18,23 +18,35 @@
 package dev.sasikanth.rss.reader.core.network.utils
 
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class TestDispatchersProvider : DispatchersProvider {
 
-  override val main: CoroutineDispatcher
-    get() = UnconfinedTestDispatcher()
+  private val dispatcher =
+    object : CoroutineDispatcher() {
+      private val delegate = UnconfinedTestDispatcher()
 
-  override val io: CoroutineDispatcher
-    get() = UnconfinedTestDispatcher()
+      override fun isDispatchNeeded(context: CoroutineContext): Boolean =
+        delegate.isDispatchNeeded(context)
 
-  override val default: CoroutineDispatcher
-    get() = UnconfinedTestDispatcher()
+      override fun dispatch(context: CoroutineContext, block: Runnable) =
+        delegate.dispatch(context, block)
 
-  override val databaseRead: CoroutineDispatcher
-    get() = UnconfinedTestDispatcher()
+      override fun limitedParallelism(parallelism: Int, name: String?): CoroutineDispatcher = this
+    }
 
-  override val databaseWrite: CoroutineDispatcher
-    get() = UnconfinedTestDispatcher()
+  override val main: CoroutineDispatcher = dispatcher
+
+  override val io: CoroutineDispatcher = dispatcher
+
+  override val default: CoroutineDispatcher = dispatcher
+
+  override val databaseRead: CoroutineDispatcher = dispatcher
+
+  override val databaseWrite: CoroutineDispatcher = dispatcher
 }

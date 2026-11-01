@@ -60,11 +60,14 @@ class SourceRepository(
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     orderBy: FeedsOrderBy = FeedsOrderBy.Latest,
     unreadOnly: Boolean = false,
+    hideGroupedFeeds: Boolean = false,
   ): PagingSource<Int, Source> {
     val unreadOnlyFlag = if (unreadOnly) 1L else 0L
+    val hideGroupedFeedsFlag = if (hideGroupedFeeds) 1L else 0L
     return QueryPagingSource(
       countQuery =
         sourceQueries.sourcesCount(
+          hideGroupedFeeds = hideGroupedFeedsFlag,
           unreadOnly = unreadOnlyFlag,
           postsAfter = postsAfter,
           postsUpperBound = postsUpperBound,
@@ -75,6 +78,7 @@ class SourceRepository(
         sourceQueries.sources(
           postsAfter = postsAfter,
           postsUpperBound = postsUpperBound,
+          hideGroupedFeeds = hideGroupedFeedsFlag,
           unreadOnly = unreadOnlyFlag,
           orderBy = orderBy.value,
           limit = limit,

@@ -30,7 +30,9 @@ import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.data.repository.PostContentRepository
 import dev.sasikanth.rss.reader.media.AudioPlayer
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
+import dev.sasikanth.rss.reader.reader.redability.fallbackReadabilityResult
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -46,13 +48,14 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
 @Stable
 @Inject
 class ReaderPageViewModel(
-  dispatchersProvider: DispatchersProvider,
+  private val dispatchersProvider: DispatchersProvider,
   private val postContentRepository: PostContentRepository,
   private val fullArticleFetcher: FullArticleFetcher,
   private val readabilityRunner: ReadabilityRunner,
@@ -68,7 +71,7 @@ class ReaderPageViewModel(
       .flatMapLatest {
         parseMarkdownFlow(it).onEach { state ->
           if (state !is State.Loading) {
-            _parsingProgress.value = ReaderProcessingProgress.Idle
+            isParsingContent.value = false
           }
         }
       }
@@ -78,8 +81,21 @@ class ReaderPageViewModel(
   private val _excerptState = MutableStateFlow("")
   val excerptState: StateFlow<String> = _excerptState
 
-  private val _parsingProgress = MutableStateFlow(ReaderProcessingProgress.Loading)
-  val parsingProgress: StateFlow<ReaderProcessingProgress> = _parsingProgress
+  private val isParsingContent = MutableStateFlow(true)
+  private val isFetchingFullArticle = MutableStateFlow(false)
+  val parsingProgress: StateFlow<ReaderProcessingProgress> =
+    combine(isParsingContent, isFetchingFullArticle) { isParsing, isFetching ->
+        if (isParsing || isFetching) {
+          ReaderProcessingProgress.Loading
+        } else {
+          ReaderProcessingProgress.Idle
+        }
+      }
+      .stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        ReaderProcessingProgress.Loading,
+      )
 
   val videoLink: String? = readerPost.link.takeIf { UrlUtils.youTubeVideoId(it) != null }
 
@@ -141,19 +157,31 @@ class ReaderPageViewModel(
 
   private fun loadFullArticle() {
     viewModelScope.launch {
-      _parsingProgress.value = ReaderProcessingProgress.Loading
-
-      val fullArticle = postContentRepository.postContent(readerPost.id).firstOrNull()
-      if (fullArticle != null && !(fullArticle.articleContent.isNullOrBlank())) {
+      val postContent = postContentRepository.postContent(readerPost.id).firstOrNull()
+      if (postContent != null && !(postContent.articleContent.isNullOrBlank())) {
         return@launch
       }
 
-      val article = fullArticleFetcher.fetch(readerPost.link, readerPost.remoteId).getOrNull()
-      if (article == null) {
-        _parsingProgress.value = ReaderProcessingProgress.Idle
-        return@launch
+      isFetchingFullArticle.value = true
+      try {
+        val article = fullArticleFetcher.fetch(readerPost.link, readerPost.remoteId).getOrNull()
+        if (article.isNullOrBlank()) {
+          return@launch
+        }
+
+        if (postContent == null) {
+          postContentRepository.upsert(
+            postId = readerPost.id,
+            feedContent = readerPost.description,
+            articleContent = article,
+            createdAt = readerPost.createdAt,
+          )
+        } else {
+          postContentRepository.updateFullArticleContent(readerPost.id, article)
+        }
+      } finally {
+        isFetchingFullArticle.value = false
       }
-      postContentRepository.updateFullArticleContent(readerPost.id, article)
     }
   }
 
@@ -161,26 +189,33 @@ class ReaderPageViewModel(
     combine(postContentRepository.postContent(readerPost.id), showFullArticle) {
         postContent,
         alwaysFetchFullArticle ->
-        val content =
-          if (alwaysFetchFullArticle) {
-            postContent?.articleContent ?: postContent?.feedContent
-          } else {
-            postContent?.feedContent ?: readerPost.description
-          }
-        content
+        if (alwaysFetchFullArticle) {
+          postContent?.articleContent?.takeUnless { it.isBlank() }
+            ?: postContent?.feedContent?.takeUnless { it.isBlank() }
+            ?: readerPost.description
+        } else {
+          postContent?.feedContent?.takeUnless { it.isBlank() } ?: readerPost.description
+        }
       }
       .distinctUntilChanged()
       .onEach { content ->
+        isParsingContent.value = true
         val readabilityResult =
-          try {
-            readabilityRunner.parseHtml(
-              link = readerPost.link,
-              content = content ?: "",
-              image = readerPost.imageUrl,
-            )
-          } catch (e: Exception) {
-            Logger.e(e) { "Failed to parse reader content" }
-            ReadabilityResult()
+          if (content.isBlank()) {
+            ReadabilityResult(content = "")
+          } else {
+            try {
+              readabilityRunner.parseHtml(
+                link = readerPost.link,
+                content = content,
+                image = readerPost.imageUrl,
+              )
+            } catch (e: CancellationException) {
+              throw e
+            } catch (e: Exception) {
+              Logger.e(e) { "Failed to parse reader content" }
+              withContext(dispatchersProvider.default) { fallbackReadabilityResult(content) }
+            }
           }
 
         onParsingComplete(readabilityResult)
@@ -192,7 +227,7 @@ class ReaderPageViewModel(
     viewModelScope.launch {
       _contentState.update { it -> result.content ?: it }
       _excerptState.update { it -> result.excerpt ?: it }
-      _parsingProgress.value = ReaderProcessingProgress.Idle
+      isParsingContent.value = false
     }
   }
 }

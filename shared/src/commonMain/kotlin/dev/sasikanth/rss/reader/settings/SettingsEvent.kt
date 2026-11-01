@@ -95,4 +95,6 @@ sealed interface SettingsEvent {
   data object ClearOpmlFeedsToSelect : SettingsEvent
 
   data object MarkFreeFeedLimitWarningAsDone : SettingsEvent
+
+  data class OnDefaultSourceChanged(val sourceId: String?) : SettingsEvent
 }

@@ -47,6 +47,8 @@ sealed interface FeedsEvent {
 
   data class OnHideFeedsWithoutUnreadPostsChanged(val hide: Boolean) : FeedsEvent
 
+  data class OnHideGroupedFeedsChanged(val hide: Boolean) : FeedsEvent
+
   data object TogglePinnedSection : FeedsEvent
 
   data object OnHomeSelected : FeedsEvent
