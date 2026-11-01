@@ -168,6 +168,7 @@
   <string name="feedsSortSectionTitle">Sort by</string>
   <string name="feedsFilterSectionTitle">Filter</string>
   <string name="feedsFilterUnreadOnly">Unread feeds</string>
+  <string name="feedsFilterHideGrouped">Hide grouped feeds</string>
   <string name="feedsNoUnread">No feeds with unread articles.</string>
   <string name="feedsBottomBarNewGroup">Yeni grup</string>
   <string name="feedsBottomBarNewFeed">Yeni akış</string>
