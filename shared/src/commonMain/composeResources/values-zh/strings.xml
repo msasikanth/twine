@@ -269,6 +269,7 @@
   <string name="settingsAppIconTitle">应用图标</string>
   <string name="settingsAppIconSubtitle">选择 Twine 在主屏幕上的外观</string>
   <string name="settingsAppIconDefault">Default</string>
+  <string name="settingsAppIconClassic">Classic</string>
   <string name="filter">过滤</string>
   <string name="freshRssLoginTitle">FreshRSS</string>
   <string name="freshRssUsername">用户名</string>
