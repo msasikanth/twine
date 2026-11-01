@@ -426,4 +426,6 @@
   <string name="keyboardShortcutsOpenInBrowser">Ouvrir dans votre navigateur</string>
   <string name="keyboardShortcutsClose">Fermer le lecteur</string>
   <string name="keyboardShortcutsOpenPost">Ouvrir l'article</string>
+  <string name="settingsDefaultSourceTitle">Default feed</string>
+  <string name="settingsDefaultSourceSubtitle">Choose the feed or group to open on startup</string>
 </resources>
