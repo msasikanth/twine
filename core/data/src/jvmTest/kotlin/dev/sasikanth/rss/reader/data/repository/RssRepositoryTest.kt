@@ -513,6 +513,65 @@ class RssRepositoryTest {
   }
 
   @Test
+  fun postPositionShouldBreakTiesByPostIdForAllSortOrders() = runTest {
+    // given
+    val feedId = "feed-1"
+    database.feedQueries.upsert(
+      id = feedId,
+      name = "Feed 1",
+      icon = "icon",
+      description = "description",
+      homepageLink = "homepage",
+      createdAt = Instant.fromEpochMilliseconds(0),
+      link = "link",
+      alwaysFetchSourceArticle = false,
+      showFeedFavIcon = false,
+      lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+      enableNotifications = true,
+    )
+
+    val now = Instant.fromEpochMilliseconds(1000000000)
+    insertPost(id = "post-1", sourceId = feedId, postDate = now.minus(1.hours))
+    listOf("post-2", "post-3", "post-4").forEach { id ->
+      insertPost(id = id, sourceId = feedId, postDate = now)
+    }
+    val postIds = listOf("post-1", "post-2", "post-3", "post-4")
+
+    PostsSortOrder.entries.forEach { sortOrder ->
+      // when
+      val positions =
+        postIds.associateWith { postId ->
+          repository.postPosition(
+            postId = postId,
+            activeSourceIds = emptyList(),
+            postsSortOrder = sortOrder,
+          )
+        }
+      val nonFeaturedPositions =
+        postIds.associateWith { postId ->
+          repository.nonFeaturedPostPosition(
+            postId = postId,
+            activeSourceIds = emptyList(),
+            postsSortOrder = sortOrder,
+          )
+        }
+
+      // then
+      val expected =
+        when (sortOrder) {
+          PostsSortOrder.Latest,
+          PostsSortOrder.AddedLatest ->
+            mapOf("post-4" to 0, "post-3" to 1, "post-2" to 2, "post-1" to 3)
+          PostsSortOrder.Oldest,
+          PostsSortOrder.AddedOldest ->
+            mapOf("post-1" to 0, "post-2" to 1, "post-3" to 2, "post-4" to 3)
+        }
+      assertEquals(expected, positions, "Failed for $sortOrder")
+      assertEquals(expected, nonFeaturedPositions, "Failed for $sortOrder")
+    }
+  }
+
+  @Test
   fun blockedWordsRetroactiveBlock() = runTest {
     // given
     val feedId = "feed-1"
