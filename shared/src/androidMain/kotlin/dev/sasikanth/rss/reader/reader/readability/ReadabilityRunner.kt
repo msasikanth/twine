@@ -19,6 +19,8 @@ package dev.sasikanth.rss.reader.reader.readability
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -58,6 +60,7 @@ class AndroidReadabilityRunner(
   private val semaphore = Semaphore(permits = 3)
   private val pool = ArrayDeque<WebView>()
   private val poolMutex = Mutex()
+  private val mainHandler = Handler(Looper.getMainLooper())
   private val json = Json {
     ignoreUnknownKeys = true
     isLenient = true
@@ -117,7 +120,7 @@ class AndroidReadabilityRunner(
         @JavascriptInterface
         fun onPageReady() {
           if (isFinished.get()) return
-          webView.post {
+          mainHandler.post {
             if (isFinished.get()) return@post
             val script =
               """
