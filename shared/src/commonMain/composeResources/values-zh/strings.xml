@@ -422,6 +422,6 @@
   <string name="keyboardShortcutsOpenInBrowser">Open in browser</string>
   <string name="keyboardShortcutsClose">Close reader</string>
   <string name="keyboardShortcutsOpenPost">Open article</string>
-  <string name="settingsDefaultSourceTitle">Default feed</string>
+  <string name="settingsDefaultSourceTitle">Default source</string>
   <string name="settingsDefaultSourceSubtitle">Choose the feed or group to open on startup</string>
 </resources>
