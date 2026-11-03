@@ -340,7 +340,8 @@ internal fun MainScreen(
       ModalNavigationDrawer(
         modifier = modifier,
         drawerState = drawerState,
-        gesturesEnabled = drawerState.isOpen || !hasActiveSource,
+        gesturesEnabled =
+          drawerState.isOpen || (selectedDestination == MainDestination.Home && !hasActiveSource),
         drawerContent = {
           ModalDrawerSheet(
             // Full-width on phones; partial overlay (Gmail-style) on foldables/expanded.
