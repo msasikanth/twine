@@ -192,7 +192,7 @@ internal fun AppIconPreview(
       painter = painterResource(Res.drawable.ic_launcher_foreground),
       contentDescription = null,
       tint = Color.Unspecified,
-      modifier = Modifier.scale(1.2f).fillMaxSize(),
+      modifier = Modifier.scale(1.6f).fillMaxSize(),
     )
   }
 }
