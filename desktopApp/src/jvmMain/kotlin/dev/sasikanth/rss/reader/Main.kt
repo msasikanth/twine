@@ -11,9 +11,13 @@
 
 package dev.sasikanth.rss.reader
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.absolutePadding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -26,6 +30,7 @@ import dev.sasikanth.rss.reader.utils.DesktopWindowChrome
 import dev.sasikanth.rss.reader.utils.ExternalUriHandler
 import dev.sasikanth.rss.reader.utils.LocalShortcutDispatcher
 import dev.sasikanth.rss.reader.utils.ShortcutDispatcher
+import dev.sasikanth.rss.reader.utils.windowsResizeEdgeInset
 import java.awt.Color
 import java.awt.Desktop
 import java.awt.Image
@@ -69,12 +74,27 @@ fun main() {
         onDispose { DesktopWindowChrome.listener = null }
       }
 
+      val resizeEdgeInset = remember { windowsResizeEdgeInset() }
+
       CompositionLocalProvider(LocalShortcutDispatcher provides shortcutDispatcher) {
-        desktopComponent.app(
-          { /* Handle theme change if needed */ },
-          { /* No-op on desktop */ },
-          { /* No-op on desktop */ },
-        )
+        if (resizeEdgeInset > 0.dp) {
+          Box(
+            Modifier.fillMaxSize()
+              .absolutePadding(right = resizeEdgeInset, bottom = resizeEdgeInset)
+          ) {
+            desktopComponent.app(
+              { /* Handle theme change if needed */ },
+              { /* No-op on desktop */ },
+              { /* No-op on desktop */ },
+            )
+          }
+        } else {
+          desktopComponent.app(
+            { /* Handle theme change if needed */ },
+            { /* No-op on desktop */ },
+            { /* No-op on desktop */ },
+          )
+        }
       }
     }
   }

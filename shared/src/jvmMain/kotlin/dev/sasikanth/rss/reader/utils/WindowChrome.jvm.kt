@@ -19,6 +19,8 @@ package dev.sasikanth.rss.reader.utils
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 /**
  * Bridges the app's backdrop color to the desktop window. The last color is replayed on [listener]
@@ -38,6 +40,14 @@ object DesktopWindowChrome {
     listener?.invoke(argb)
   }
 }
+
+/**
+ * Windows hit-tests the right and bottom edges of a decorated window as resize borders a few pixels
+ * into the client area, which swallows pointer events on overlay scrollbars. Insetting the content
+ * keeps scrollbars clear of that strip.
+ */
+fun windowsResizeEdgeInset(osName: String = System.getProperty("os.name").orEmpty()): Dp =
+  if (osName.startsWith("Windows", ignoreCase = true)) 16.dp else 0.dp
 
 internal actual fun updateWindowBackdropColor(color: Color) {
   DesktopWindowChrome.update(color.toArgb())
