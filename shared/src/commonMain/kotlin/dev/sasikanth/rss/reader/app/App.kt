@@ -16,6 +16,8 @@
  */
 package dev.sasikanth.rss.reader.app
 
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -53,15 +55,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -73,6 +80,8 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.defaultTransitionSpec
+import androidx.navigationevent.NavigationEventTransitionState
+import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
 import androidx.savedstate.serialization.SavedStateConfiguration
 import androidx.window.core.layout.WindowSizeClass
 import coil3.ImageLoader
@@ -133,6 +142,7 @@ import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.ShortcutDispatcher
 import dev.sasikanth.rss.reader.utils.horizontalResizePointerIcon
 import dev.sasikanth.rss.reader.utils.updateWindowBackdropColor
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -295,25 +305,57 @@ fun App(
           )
         }
       }
-    val screenCornerRadius =
+    val navigationEventDispatcherOwner = LocalNavigationEventDispatcherOwner.current
+    val navigationTransitionState by
+      remember(navigationEventDispatcherOwner) {
+          navigationEventDispatcherOwner?.navigationEventDispatcher?.transitionState ?: emptyFlow()
+        }
+        .collectAsStateWithLifecycle(NavigationEventTransitionState.Idle)
+    val backProgress =
+      (navigationTransitionState as? NavigationEventTransitionState.InProgress)
+        ?.latestEvent
+        ?.progress ?: 0f
+    val maxScreenCornerRadius =
       if (platform == Platform.Apple) {
         38.dp
       } else {
-        24.dp
+        36.dp
       }
-    val screenModifier =
-      Modifier.fillMaxSize().let {
-        if (platform == Platform.Apple) {
-          it
-            .dropShadow(shape = RoundedCornerShape(screenCornerRadius)) {
+    val screenCornerRadius =
+      animateDpAsState(
+        targetValue = maxScreenCornerRadius * LinearOutSlowInEasing.transform(backProgress)
+      )
+    val screenModifier = remember {
+      val screenShape =
+        object : Shape {
+          override fun createOutline(
+            size: Size,
+            layoutDirection: LayoutDirection,
+            density: Density,
+          ): Outline {
+            return RoundedCornerShape(screenCornerRadius.value)
+              .createOutline(size, layoutDirection, density)
+          }
+        }
+
+      Modifier.fillMaxSize()
+        .let {
+          if (platform == Platform.Apple) {
+            it.dropShadow(shape = screenShape) {
+              screenCornerRadius.value
               color = Color.Black.copy(alpha = 0.1f)
               radius = 32.dp.toPx()
             }
-            .clip(RoundedCornerShape(screenCornerRadius))
-        } else {
-          it
+          } else {
+            it
+          }
         }
-      }
+        .graphicsLayer {
+          val cornerRadius = screenCornerRadius.value
+          shape = RoundedCornerShape(cornerRadius)
+          clip = cornerRadius > 0.dp
+        }
+    }
 
     LaunchedEffect(useDarkTheme) { onThemeChange(useDarkTheme) }
 
