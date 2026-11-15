@@ -16,6 +16,9 @@
  */
 package dev.sasikanth.rss.reader.settings.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -71,6 +74,8 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.settingsAlwaysFetchSourceArticleSubtitle
+import twine.shared.generated.resources.settingsAlwaysFetchSourceArticleTitle
 import twine.shared.generated.resources.settingsBrowserTypeSubtitle
 import twine.shared.generated.resources.settingsBrowserTypeTitle
 import twine.shared.generated.resources.settingsConfirmMarkAllAsReadSubtitle
@@ -209,6 +214,23 @@ private fun SettingsBehaviorContent(
             checked = state.showReaderView,
             onValueChanged = { newValue -> dispatch(SettingsEvent.ToggleShowReaderView(newValue)) },
           )
+        }
+
+        item {
+          AnimatedVisibility(
+            visible = state.showReaderView,
+            enter = expandVertically(),
+            exit = shrinkVertically(),
+          ) {
+            SettingsSwitchItem(
+              title = stringResource(Res.string.settingsAlwaysFetchSourceArticleTitle),
+              subtitle = stringResource(Res.string.settingsAlwaysFetchSourceArticleSubtitle),
+              checked = state.alwaysFetchSourceArticle,
+              onValueChanged = { newValue ->
+                dispatch(SettingsEvent.ToggleAlwaysFetchSourceArticle(newValue))
+              },
+            )
+          }
         }
 
         if (platform !is Platform.Desktop) {

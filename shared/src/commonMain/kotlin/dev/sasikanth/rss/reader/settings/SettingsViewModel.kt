@@ -102,13 +102,30 @@ class SettingsViewModel(
   init {
     combine(
         combine(
+          combine(
+            settingsRepository.showReaderView,
+            settingsRepository.alwaysFetchSourceArticle,
+            ::Pair,
+          ),
           settingsRepository.browserType,
           settingsRepository.showUnreadPostsCount,
           settingsRepository.postsDeletionPeriod,
-          settingsRepository.showReaderView,
           settingsRepository.markAsReadOn,
-          ::SettingsGroup1,
-        ),
+        ) {
+          (showReaderView, alwaysFetchSourceArticle),
+          browserType,
+          showUnreadPostsCount,
+          postsDeletionPeriod,
+          markAsReadOn ->
+          SettingsGroup1(
+            browserType = browserType,
+            showUnreadPostsCount = showUnreadPostsCount,
+            postsDeletionPeriod = postsDeletionPeriod,
+            showReaderView = showReaderView,
+            alwaysFetchSourceArticle = alwaysFetchSourceArticle,
+            markAsReadOn = markAsReadOn,
+          )
+        },
         combine(
           combine(settingsRepository.appThemeMode, settingsRepository.useAmoled, ::Pair),
           combine(
@@ -152,6 +169,7 @@ class SettingsViewModel(
           showUnreadPostsCount = group1.showUnreadPostsCount,
           postsDeletionPeriod = group1.postsDeletionPeriod,
           showReaderView = group1.showReaderView,
+          alwaysFetchSourceArticle = group1.alwaysFetchSourceArticle,
           appThemeMode = combinedGroup.appThemeMode,
           themeVariant = combinedGroup.themeVariant,
           useAmoled = combinedGroup.useAmoled,
@@ -180,6 +198,7 @@ class SettingsViewModel(
             showUnreadPostsCount = settings.showUnreadPostsCount,
             postsDeletionPeriod = settings.postsDeletionPeriod,
             showReaderView = settings.showReaderView,
+            alwaysFetchSourceArticle = settings.alwaysFetchSourceArticle,
             appThemeMode = settings.appThemeMode,
             themeVariant = settings.themeVariant,
             useAmoled = settings.useAmoled,
@@ -251,6 +270,7 @@ class SettingsViewModel(
       is SettingsEvent.UpdateBrowserType -> updateBrowserType(event.browserType)
       is SettingsEvent.ToggleShowUnreadPostsCount -> toggleShowUnreadPostsCount(event.value)
       is SettingsEvent.ToggleShowReaderView -> toggleShowReaderView(event.value)
+      is SettingsEvent.ToggleAlwaysFetchSourceArticle -> toggleAlwaysFetchSourceArticle(event.value)
       is SettingsEvent.ToggleAutoSync -> toggleAutoSync(event.value)
       is SettingsEvent.ToggleShowFeedFavIcon -> toggleShowFeedFavIcon(event.value)
       is SettingsEvent.ToggleShowFeaturedSection -> toggleShowFeaturedSection(event.value)
@@ -439,6 +459,13 @@ class SettingsViewModel(
     viewModelScope.launch { settingsRepository.toggleShowReaderView(value) }
   }
 
+  private fun toggleAlwaysFetchSourceArticle(value: Boolean) {
+    viewModelScope.launch {
+      settingsRepository.toggleAlwaysFetchSourceArticle(value)
+      rssRepository.updateAllFeedsAlwaysFetchSource(value)
+    }
+  }
+
   private fun postsDeletionPeriodChanged(newPeriod: Period) {
     viewModelScope.launch { settingsRepository.updatePostsDeletionPeriod(newPeriod) }
   }
@@ -508,6 +535,7 @@ private data class Settings(
   val showUnreadPostsCount: Boolean,
   val postsDeletionPeriod: Period,
   val showReaderView: Boolean,
+  val alwaysFetchSourceArticle: Boolean,
   val appThemeMode: AppThemeMode,
   val themeVariant: ThemeVariant,
   val useAmoled: Boolean,
@@ -534,6 +562,7 @@ private data class SettingsGroup1(
   val showUnreadPostsCount: Boolean,
   val postsDeletionPeriod: Period,
   val showReaderView: Boolean,
+  val alwaysFetchSourceArticle: Boolean,
   val markAsReadOn: MarkAsReadOn,
 )
 
