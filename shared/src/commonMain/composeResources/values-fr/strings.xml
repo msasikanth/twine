@@ -103,6 +103,8 @@
   <string name="settingsPostsDeletionPeriodNever">Never</string>
   <string name="settingsShowReaderViewTitle">Enable reader view</string>
   <string name="settingsShowReaderViewSubtitle">Articles will be shown in a simplified, easy-to-read view</string>
+  <string name="settingsAlwaysFetchSourceArticleTitle">Fetch full articles in reader view</string>
+  <string name="settingsAlwaysFetchSourceArticleSubtitle">Updates all existing and newly added feeds. You can still change it per feed at any time.</string>
   <string name="settingsConfirmMarkAllAsReadTitle">Confirmer tout marquer comme lu</string>
   <string name="settingsConfirmMarkAllAsReadSubtitle">Demander une confirmation avant de marquer tous les articles comme lus</string>
   <string name="settingsThemeAuto">Auto</string>
