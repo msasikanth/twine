@@ -1,0 +1,60 @@
+DROP TRIGGER IF EXISTS post_search_fts_AFTER_UPDATE;
+CREATE TRIGGER post_search_fts_AFTER_UPDATE
+AFTER UPDATE OF title, description ON post
+WHEN old.title != new.title OR old.description != new.description
+BEGIN UPDATE OR IGNORE post_search SET title = new.title, description = new.description WHERE id = new.id;
+END;
+
+DROP TRIGGER IF EXISTS feed_search_fts_AFTER_UPDATE;
+CREATE TRIGGER feed_search_fts_AFTER_UPDATE
+AFTER UPDATE OF name ON feed
+WHEN old.name != new.name
+BEGIN UPDATE OR IGNORE feed_search SET name = new.name WHERE id = new.id;
+END;
+
+DROP TRIGGER IF EXISTS inherit_flags_on_insert;
+CREATE TRIGGER inherit_flags_on_insert
+AFTER INSERT ON post
+FOR EACH ROW
+BEGIN
+  UPDATE post
+  SET flags = (
+    SELECT flags | new.flags FROM post
+    WHERE id = new.id AND sourceId != new.sourceId
+    LIMIT 1
+  ) | CASE WHEN EXISTS (
+    SELECT 1 FROM post
+    WHERE id = new.id AND sourceId != new.sourceId AND (flags & 4) != 0
+  ) THEN 4 ELSE 0 END
+  WHERE id = new.id AND sourceId = new.sourceId
+  AND EXISTS (
+    SELECT 1 FROM post
+    WHERE id = new.id AND sourceId != new.sourceId
+  );
+
+  UPDATE post
+  SET flags = flags | 4
+  WHERE (new.flags & 4) != 0
+    AND id = new.id
+    AND sourceId != new.sourceId
+    AND (flags & 4) == 0;
+END;
+
+DROP TRIGGER IF EXISTS sync_hidden_flag_on_update;
+CREATE TRIGGER sync_hidden_flag_on_update
+AFTER UPDATE OF flags ON post
+FOR EACH ROW
+WHEN (old.flags & 4) != (new.flags & 4)
+BEGIN
+  UPDATE post
+  SET flags = (flags & ~4) | (new.flags & 4)
+  WHERE id = new.id AND sourceId != new.sourceId AND (flags & 4) != (new.flags & 4);
+END;
+
+CREATE INDEX IF NOT EXISTS post_unread_unblocked_source_date_created_index ON post(sourceId, postDate, createdAt) WHERE (flags & 2) == 0 AND (flags & 4) == 0;
+CREATE INDEX IF NOT EXISTS post_unblocked_latest_index ON post(postDate DESC, createdAt DESC, id DESC) WHERE (flags & 4) = 0;
+CREATE INDEX IF NOT EXISTS post_unblocked_oldest_index ON post(postDate ASC, createdAt ASC, id ASC) WHERE (flags & 4) = 0;
+CREATE INDEX IF NOT EXISTS post_unblocked_added_latest_index ON post(createdAt DESC, postDate DESC, id DESC) WHERE (flags & 4) = 0;
+CREATE INDEX IF NOT EXISTS post_unblocked_added_oldest_index ON post(createdAt ASC, postDate ASC, id ASC) WHERE (flags & 4) = 0;
+CREATE INDEX IF NOT EXISTS post_dirty_sync_index ON post(sourceId, id) WHERE remoteId IS NOT NULL AND updatedAt > syncedAt;
+CREATE INDEX IF NOT EXISTS post_missing_seed_color_index ON post(postDate DESC) WHERE imageUrl IS NOT NULL AND seedColor IS NULL;

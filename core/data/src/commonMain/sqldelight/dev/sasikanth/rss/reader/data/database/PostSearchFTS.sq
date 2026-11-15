@@ -15,7 +15,8 @@ END;
 
 CREATE TRIGGER IF NOT EXISTS
 post_search_fts_AFTER_UPDATE
-AFTER UPDATE ON post
+AFTER UPDATE OF title, description ON post
+WHEN old.title != new.title OR old.description != new.description
 BEGIN UPDATE OR IGNORE post_search SET title = new.title, description = new.description WHERE id = new.id;
 END;
 

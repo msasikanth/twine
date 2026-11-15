@@ -808,6 +808,54 @@ class RssRepositoryTest {
   }
 
   @Test
+  fun blockedFeedFollowedByUnblockedDuplicateAndRefreshKeepsBothBlocked() = runTest {
+    val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+    ReaderDatabase.Schema.create(driver)
+    try {
+      CrossFeedBlockedWordsTestSuite(driver)
+        .blockedFeedFollowedByUnblockedDuplicateAndRefreshKeepsBothBlocked()
+    } finally {
+      driver.close()
+    }
+  }
+
+  @Test
+  fun unblockedFeedFollowedByBlockedDuplicateBlocksBothAndRemovingWordUnblocksBoth() = runTest {
+    val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+    ReaderDatabase.Schema.create(driver)
+    try {
+      CrossFeedBlockedWordsTestSuite(driver)
+        .unblockedFeedFollowedByBlockedDuplicateBlocksBothAndRemovingWordUnblocksBoth()
+    } finally {
+      driver.close()
+    }
+  }
+
+  @Test
+  fun singleFeedAndCrossFeedEditedPostsUnblockWhenNoCopyMatchesBlockedWord() = runTest {
+    val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+    ReaderDatabase.Schema.create(driver)
+    try {
+      CrossFeedBlockedWordsTestSuite(driver)
+        .singleFeedAndCrossFeedEditedPostsUnblockWhenNoCopyMatchesBlockedWord()
+    } finally {
+      driver.close()
+    }
+  }
+
+  @Test
+  fun directUpsertAndSyncRepositoryUpsertPreserveCrossFeedHiddenFlag() = runTest {
+    val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+    ReaderDatabase.Schema.create(driver)
+    try {
+      CrossFeedBlockedWordsTestSuite(driver)
+        .directUpsertAndSyncRepositoryUpsertPreserveCrossFeedHiddenFlag()
+    } finally {
+      driver.close()
+    }
+  }
+
+  @Test
   fun sourcesShouldOnlyReturnFeedsWithUnreadPostsWhenUnreadOnlyIsEnabled() = runTest {
     // given
     insertFeed(id = "feed-unread", name = "Feed with unread")

@@ -146,7 +146,7 @@ WITH ranked_feeds AS (
     ROW_NUMBER() OVER (PARTITION BY gf.feedGroupId ORDER BY gf.rowid) AS rn
   FROM feedGroupFeed gf
   JOIN feed f ON gf.feedId = f.id
-  WHERE f.isDeleted = 0
+  WHERE gf.feedGroupId = :id AND f.isDeleted = 0
 ),
 feed_group_metadata AS (
   SELECT
@@ -190,7 +190,7 @@ WITH ranked_feeds AS (
     ROW_NUMBER() OVER (PARTITION BY gf.feedGroupId ORDER BY gf.rowid) AS rn
   FROM feedGroupFeed gf
   JOIN feed f ON gf.feedId = f.id
-  WHERE f.isDeleted = 0
+  WHERE gf.feedGroupId IN :ids AND f.isDeleted = 0
 ),
 feed_group_metadata AS (
   SELECT

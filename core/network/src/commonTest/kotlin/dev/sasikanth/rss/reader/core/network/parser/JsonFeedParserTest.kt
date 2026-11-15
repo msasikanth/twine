@@ -27,6 +27,7 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.readBuffer
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
@@ -146,5 +147,38 @@ class JsonFeedParserTest {
 
     // then
     assertFeedPayloadEquals(expectedFeed, payload)
+  }
+
+  @Test
+  fun parsingJsonFeedWithLongContentPreservesFullDescriptionAndRawContent() = runTest {
+    val longBody = "c".repeat(4095) + "\uD83D\uDE80 json-tail-keyword " + "c".repeat(1000)
+    val rawJson =
+      """
+      {
+        "version": "https://jsonfeed.org/version/1.1",
+        "title": "Long JSON Feed",
+        "home_page_url": "https://example.com",
+        "feed_url": "https://example.com/feed.json",
+        "items": [
+          {
+            "id": "1",
+            "url": "https://example.com/1",
+            "title": "Long JSON Item",
+            "content_html": "<p>$longBody</p>",
+            "date_published": "2025-02-28T09:15:00Z"
+          }
+        ]
+      }
+      """
+        .trimIndent()
+
+    val payload =
+      parser.parse(ByteReadChannel(rawJson).readBuffer(), "https://example.com/feed.json")
+    val posts = payload.posts.toList()
+
+    assertEquals(1, posts.size)
+    val post = posts.single()
+    assertEquals(longBody, post.description)
+    assertTrue((post.rawContent ?: "").contains(longBody))
   }
 }

@@ -38,40 +38,50 @@ import me.tatarka.inject.annotations.Inject
 @AppScope
 class RefreshPolicy(private val dataStore: DataStore<Preferences>) {
 
+  internal constructor(
+    dataStore: DataStore<Preferences>,
+    clock: Clock,
+  ) : this(dataStore = dataStore) {
+    this.clock = clock
+  }
+
   companion object Companion {
     private val UPDATE_DURATION = 60.minutes
   }
 
+  private var clock: Clock = Clock.System
   private val lastRefreshedAtKey = stringPreferencesKey("pref_last_updated_at")
   private val lastSyncedAtKey = stringPreferencesKey("pref_last_sync_time")
 
   val lastRefreshedAtFlow: Flow<LocalDateTime> =
     dataStore.data
-      .map { preferences ->
-        val timeZone = TimeZone.currentSystemDefault()
-        val instantString =
-          preferences[lastRefreshedAtKey] ?: return@map Clock.System.now().toLocalDateTime(timeZone)
-        val instant = Instant.parse(instantString)
-        instant.toLocalDateTime(timeZone)
+      .map { preferences -> preferences[lastRefreshedAtKey] }
+      .distinctUntilChanged()
+      .map { timestamp ->
+        val instant = if (timestamp != null) Instant.parse(timestamp) else clock.now()
+        instant.toLocalDateTime(TimeZone.currentSystemDefault())
       }
       .distinctUntilChanged()
 
   val lastSyncedAtFlow: Flow<Instant?> =
-    dataStore.data.map { preferences -> preferences[lastSyncedAtKey]?.let { Instant.parse(it) } }
+    dataStore.data
+      .map { preferences -> preferences[lastSyncedAtKey]?.let { Instant.parse(it) } }
+      .distinctUntilChanged()
 
   suspend fun updateLastRefreshedAt() {
-    dataStore.edit { preferences ->
-      preferences[lastRefreshedAtKey] = Clock.System.now().toString()
-    }
+    dataStore.edit { preferences -> preferences[lastRefreshedAtKey] = clock.now().toString() }
   }
 
   suspend fun updateLastSyncedAt() {
-    dataStore.edit { preferences -> preferences[lastSyncedAtKey] = Clock.System.now().toString() }
+    dataStore.edit { preferences -> preferences[lastSyncedAtKey] = clock.now().toString() }
   }
+
+  suspend fun hasLastRefreshedAt(): Boolean =
+    dataStore.data.map { preferences -> preferences[lastRefreshedAtKey] != null }.first()
 
   suspend fun hasExpired(): Boolean {
     val lastSyncedAt = fetchLastSyncedAt() ?: return true
-    val currentTime = Clock.System.now()
+    val currentTime = clock.now()
     val lastSyncDuration = currentTime - lastSyncedAt
 
     return lastSyncDuration > UPDATE_DURATION

@@ -51,6 +51,13 @@ CREATE INDEX post_read_by_date_index ON post(postDate) WHERE (flags & 2) != 0;
 CREATE INDEX post_read_by_source_date_index ON post(sourceId, postDate) WHERE (flags & 2) != 0;
 
 CREATE INDEX post_with_image_index ON post(postDate DESC) WHERE imageUrl IS NOT NULL;
+CREATE INDEX post_unread_unblocked_source_date_created_index ON post(sourceId, postDate, createdAt) WHERE (flags & 2) == 0 AND (flags & 4) == 0;
+CREATE INDEX post_unblocked_latest_index ON post(postDate DESC, createdAt DESC, id DESC) WHERE (flags & 4) = 0;
+CREATE INDEX post_unblocked_oldest_index ON post(postDate ASC, createdAt ASC, id ASC) WHERE (flags & 4) = 0;
+CREATE INDEX post_unblocked_added_latest_index ON post(createdAt DESC, postDate DESC, id DESC) WHERE (flags & 4) = 0;
+CREATE INDEX post_unblocked_added_oldest_index ON post(createdAt ASC, postDate ASC, id ASC) WHERE (flags & 4) = 0;
+CREATE INDEX post_dirty_sync_index ON post(sourceId, id) WHERE remoteId IS NOT NULL AND updatedAt > syncedAt;
+CREATE INDEX post_missing_seed_color_index ON post(postDate DESC) WHERE imageUrl IS NOT NULL AND seedColor IS NULL;
 
 markPostAsBlocked:
 UPDATE post SET flags = flags | 4 WHERE id = :id;
@@ -61,7 +68,7 @@ UPDATE post SET flags = flags & ~4 WHERE id = :id;
 blockPostsWithWord:
 UPDATE post
 SET flags = flags | 4
-WHERE (lower(title) LIKE '%' || :word || '%' OR lower(description) LIKE '%' || :word || '%')
+WHERE (instr(lower(title), :word) > 0 OR instr(lower(description), :word) > 0)
   AND (flags & 4) == 0;
 
 blockedPosts:
@@ -72,21 +79,51 @@ UPDATE post
 SET flags = flags & ~4
 WHERE id IN :ids;
 
+otherSourcePostsByIds:
+SELECT id, title, description
+FROM post
+WHERE id IN :ids AND sourceId != :sourceId;
+
+otherSourcePostsById:
+SELECT title, description
+FROM post
+WHERE id = :id AND sourceId != :sourceId;
+
 CREATE TRIGGER inherit_flags_on_insert
 AFTER INSERT ON post
 FOR EACH ROW
 BEGIN
   UPDATE post
   SET flags = (
-    SELECT flags FROM post
+    SELECT flags | new.flags FROM post
     WHERE id = new.id AND sourceId != new.sourceId
     LIMIT 1
-  )
+  ) | CASE WHEN EXISTS (
+    SELECT 1 FROM post
+    WHERE id = new.id AND sourceId != new.sourceId AND (flags & 4) != 0
+  ) THEN 4 ELSE 0 END
   WHERE id = new.id AND sourceId = new.sourceId
   AND EXISTS (
     SELECT 1 FROM post
     WHERE id = new.id AND sourceId != new.sourceId
   );
+
+  UPDATE post
+  SET flags = flags | 4
+  WHERE (new.flags & 4) != 0
+    AND id = new.id
+    AND sourceId != new.sourceId
+    AND (flags & 4) == 0;
+END;
+
+CREATE TRIGGER sync_hidden_flag_on_update
+AFTER UPDATE OF flags ON post
+FOR EACH ROW
+WHEN (old.flags & 4) != (new.flags & 4)
+BEGIN
+  UPDATE post
+  SET flags = (flags & ~4) | (new.flags & 4)
+  WHERE id = new.id AND sourceId != new.sourceId AND (flags & 4) != (new.flags & 4);
 END;
 
 upsert:
@@ -99,9 +136,84 @@ UPDATE SET
     imageUrl = excluded.imageUrl,
     audioUrl = excluded.audioUrl,
     postDate = CASE WHEN :isDateParsedCorrectly == 1 AND postDate < excluded.postDate THEN excluded.postDate ELSE postDate END,
-    remoteId = COALESCE(post.remoteId, excluded.remoteId);
+    remoteId = COALESCE(post.remoteId, excluded.remoteId)
+WHERE
+    post.title != excluded.title OR
+    post.description != excluded.description OR
+    post.imageUrl IS NOT excluded.imageUrl OR
+    post.audioUrl IS NOT excluded.audioUrl OR
+    (:isDateParsedCorrectly == 1 AND post.postDate < excluded.postDate) OR
+    (post.remoteId IS NULL AND excluded.remoteId IS NOT NULL);
+
+upsertFeedPost:
+INSERT INTO post(id, sourceId, title, description, imageUrl, audioUrl, postDate, createdAt, updatedAt, syncedAt, link, commentsLink, flags, remoteId)
+VALUES (:id, :sourceId, :title, :description, :imageUrl, :audioUrl, :postDate, :createdAt, :updatedAt, :syncedAt, :link, :commentsLink, :flags, :remoteId)
+ON CONFLICT(id, sourceId) DO
+UPDATE SET
+    title = excluded.title,
+    description = excluded.description,
+    imageUrl = excluded.imageUrl,
+    audioUrl = excluded.audioUrl,
+    postDate = CASE WHEN :isDateParsedCorrectly == 1 AND postDate < excluded.postDate THEN excluded.postDate ELSE postDate END,
+    flags = (post.flags & ~4) | (excluded.flags & 4) | CASE
+      WHEN (excluded.flags & 4) == 0 AND EXISTS (
+        SELECT 1 FROM post AS sibling
+        INNER JOIN blockedWord AS bw ON bw.isDeleted = 0
+        WHERE sibling.id = excluded.id
+          AND sibling.sourceId != excluded.sourceId
+          AND bw.content != ''
+          AND (
+            instr(lower(sibling.title), lower(bw.content)) > 0 OR
+            instr(lower(sibling.description), lower(bw.content)) > 0
+          )
+      ) THEN 4
+      ELSE 0
+    END,
+    remoteId = COALESCE(post.remoteId, excluded.remoteId)
+WHERE
+    post.title != excluded.title OR
+    post.description != excluded.description OR
+    post.imageUrl IS NOT excluded.imageUrl OR
+    post.audioUrl IS NOT excluded.audioUrl OR
+    (:isDateParsedCorrectly == 1 AND post.postDate < excluded.postDate) OR
+    ((post.flags & 4) != (
+      (excluded.flags & 4) | CASE
+        WHEN (excluded.flags & 4) == 0 AND (post.flags & 4) != 0 AND EXISTS (
+          SELECT 1 FROM post AS sibling
+          INNER JOIN blockedWord AS bw ON bw.isDeleted = 0
+          WHERE sibling.id = excluded.id
+            AND sibling.sourceId != excluded.sourceId
+            AND bw.content != ''
+            AND (
+              instr(lower(sibling.title), lower(bw.content)) > 0 OR
+              instr(lower(sibling.description), lower(bw.content)) > 0
+            )
+        ) THEN 4
+        ELSE 0
+      END
+    )) OR
+    (post.remoteId IS NULL AND excluded.remoteId IS NOT NULL);
 
 featuredPostsLatest:
+WITH paged AS (
+  SELECT post.rowid AS postRowId
+  FROM post
+  INNER JOIN feed ON post.sourceId = feed.id
+  WHERE
+    post.imageUrl IS NOT NULL AND
+    post.postDate > :featuredPostsAfter AND
+    post.postDate > :postsAfter AND
+    post.createdAt < :postsUpperBound AND
+    (post.flags & 4) = 0 AND
+    ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+    feed.isDeleted = 0 AND
+    (
+      (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+      OR post.id IN :sessionPostIds
+    )
+  ORDER BY post.postDate DESC, post.createdAt DESC, post.id DESC
+  LIMIT :limit
+)
 SELECT
   post.id AS id,
   post.sourceId AS sourceId,
@@ -125,25 +237,32 @@ SELECT
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
   post.audioDuration AS audioDuration
-FROM post
+FROM paged
+INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
-WHERE
-  post.imageUrl IS NOT NULL AND
-  post.postDate > :featuredPostsAfter AND
-  post.postDate > :postsAfter AND
-  post.createdAt < :postsUpperBound AND
-  (post.flags & 4) = 0 AND
-  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
-  feed.isDeleted = 0 AND
-  (
-    (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
-    OR post.id IN :sessionPostIds
-  )
-ORDER BY post.postDate DESC, post.createdAt DESC, post.id DESC
-LIMIT :limit;
+ORDER BY post.postDate DESC, post.createdAt DESC, post.id DESC;
 
 featuredPostsOldest:
+WITH paged AS (
+  SELECT post.rowid AS postRowId
+  FROM post
+  INNER JOIN feed ON post.sourceId = feed.id
+  WHERE
+    post.imageUrl IS NOT NULL AND
+    post.postDate > :featuredPostsAfter AND
+    post.postDate > :postsAfter AND
+    post.createdAt < :postsUpperBound AND
+    (post.flags & 4) = 0 AND
+    ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+    feed.isDeleted = 0 AND
+    (
+      (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+      OR post.id IN :sessionPostIds
+    )
+  ORDER BY post.postDate ASC, post.createdAt ASC, post.id ASC
+  LIMIT :limit
+)
 SELECT
   post.id AS id,
   post.sourceId AS sourceId,
@@ -167,25 +286,32 @@ SELECT
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
   post.audioDuration AS audioDuration
-FROM post
+FROM paged
+INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
-WHERE
-  post.imageUrl IS NOT NULL AND
-  post.postDate > :featuredPostsAfter AND
-  post.postDate > :postsAfter AND
-  post.createdAt < :postsUpperBound AND
-  (post.flags & 4) = 0 AND
-  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
-  feed.isDeleted = 0 AND
-  (
-    (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
-    OR post.id IN :sessionPostIds
-  )
-ORDER BY post.postDate ASC, post.createdAt ASC, post.id ASC
-LIMIT :limit;
+ORDER BY post.postDate ASC, post.createdAt ASC, post.id ASC;
 
 featuredPostsAddedLatest:
+WITH paged AS (
+  SELECT post.rowid AS postRowId
+  FROM post
+  INNER JOIN feed ON post.sourceId = feed.id
+  WHERE
+    post.imageUrl IS NOT NULL AND
+    post.postDate > :featuredPostsAfter AND
+    post.postDate > :postsAfter AND
+    post.createdAt < :postsUpperBound AND
+    (post.flags & 4) = 0 AND
+    ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+    feed.isDeleted = 0 AND
+    (
+      (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+      OR post.id IN :sessionPostIds
+    )
+  ORDER BY post.createdAt DESC, post.postDate DESC, post.id DESC
+  LIMIT :limit
+)
 SELECT
   post.id AS id,
   post.sourceId AS sourceId,
@@ -209,25 +335,32 @@ SELECT
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
   post.audioDuration AS audioDuration
-FROM post
+FROM paged
+INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
-WHERE
-  post.imageUrl IS NOT NULL AND
-  post.postDate > :featuredPostsAfter AND
-  post.postDate > :postsAfter AND
-  post.createdAt < :postsUpperBound AND
-  (post.flags & 4) = 0 AND
-  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
-  feed.isDeleted = 0 AND
-  (
-    (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
-    OR post.id IN :sessionPostIds
-  )
-ORDER BY post.createdAt DESC, post.postDate DESC, post.id DESC
-LIMIT :limit;
+ORDER BY post.createdAt DESC, post.postDate DESC, post.id DESC;
 
 featuredPostsAddedOldest:
+WITH paged AS (
+  SELECT post.rowid AS postRowId
+  FROM post
+  INNER JOIN feed ON post.sourceId = feed.id
+  WHERE
+    post.imageUrl IS NOT NULL AND
+    post.postDate > :featuredPostsAfter AND
+    post.postDate > :postsAfter AND
+    post.createdAt < :postsUpperBound AND
+    (post.flags & 4) = 0 AND
+    ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+    feed.isDeleted = 0 AND
+    (
+      (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+      OR post.id IN :sessionPostIds
+    )
+  ORDER BY post.createdAt ASC, post.postDate ASC, post.id ASC
+  LIMIT :limit
+)
 SELECT
   post.id AS id,
   post.sourceId AS sourceId,
@@ -251,23 +384,11 @@ SELECT
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
   post.audioDuration AS audioDuration
-FROM post
+FROM paged
+INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
-WHERE
-  post.imageUrl IS NOT NULL AND
-  post.postDate > :featuredPostsAfter AND
-  post.postDate > :postsAfter AND
-  post.createdAt < :postsUpperBound AND
-  (post.flags & 4) = 0 AND
-  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
-  feed.isDeleted = 0 AND
-  (
-    (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
-    OR post.id IN :sessionPostIds
-  )
-ORDER BY post.createdAt ASC, post.postDate ASC, post.id ASC
-LIMIT :limit;
+ORDER BY post.createdAt ASC, post.postDate ASC, post.id ASC;
 
 allPostsCount:
 SELECT COUNT(post.id) FROM post
@@ -284,6 +405,26 @@ WHERE
   post.createdAt < :postsUpperBound;
 
 allPostsLatest:
+WITH paged AS (
+  SELECT post.rowid AS postRowId
+  FROM post
+  INNER JOIN feed ON post.sourceId = feed.id
+  WHERE
+    post.postDate > :postsAfter AND
+    post.createdAt < :postsUpperBound AND
+    (post.flags & 4) = 0 AND
+    ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+    feed.isDeleted = 0 AND
+    (
+      (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+      OR post.id IN :sessionPostIds
+    )
+  ORDER BY
+    post.postDate DESC,
+    post.createdAt DESC,
+    post.id DESC
+  LIMIT :limit OFFSET :offset
+)
 SELECT
   post.id AS id,
   post.sourceId AS sourceId,
@@ -307,26 +448,36 @@ SELECT
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
   post.audioDuration AS audioDuration
-FROM post
+FROM paged
+INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
-WHERE
-  post.postDate > :postsAfter AND
-  post.createdAt < :postsUpperBound AND
-  (post.flags & 4) = 0 AND
-  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
-  feed.isDeleted = 0 AND
-  (
-    (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
-    OR post.id IN :sessionPostIds
-  )
 ORDER BY
   post.postDate DESC,
   post.createdAt DESC,
-  post.id DESC
-LIMIT :limit OFFSET :offset;
+  post.id DESC;
 
 allPostsOldest:
+WITH paged AS (
+  SELECT post.rowid AS postRowId
+  FROM post
+  INNER JOIN feed ON post.sourceId = feed.id
+  WHERE
+    post.postDate > :postsAfter AND
+    post.createdAt < :postsUpperBound AND
+    (post.flags & 4) = 0 AND
+    ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+    feed.isDeleted = 0 AND
+    (
+      (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+      OR post.id IN :sessionPostIds
+    )
+  ORDER BY
+    post.postDate ASC,
+    post.createdAt ASC,
+    post.id ASC
+  LIMIT :limit OFFSET :offset
+)
 SELECT
   post.id AS id,
   post.sourceId AS sourceId,
@@ -350,26 +501,36 @@ SELECT
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
   post.audioDuration AS audioDuration
-FROM post
+FROM paged
+INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
-WHERE
-  post.postDate > :postsAfter AND
-  post.createdAt < :postsUpperBound AND
-  (post.flags & 4) = 0 AND
-  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
-  feed.isDeleted = 0 AND
-  (
-    (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
-    OR post.id IN :sessionPostIds
-  )
 ORDER BY
   post.postDate ASC,
   post.createdAt ASC,
-  post.id ASC
-LIMIT :limit OFFSET :offset;
+  post.id ASC;
 
 allPostsAddedLatest:
+WITH paged AS (
+  SELECT post.rowid AS postRowId
+  FROM post
+  INNER JOIN feed ON post.sourceId = feed.id
+  WHERE
+    post.postDate > :postsAfter AND
+    post.createdAt < :postsUpperBound AND
+    (post.flags & 4) = 0 AND
+    ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+    feed.isDeleted = 0 AND
+    (
+      (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+      OR post.id IN :sessionPostIds
+    )
+  ORDER BY
+    post.createdAt DESC,
+    post.postDate DESC,
+    post.id DESC
+  LIMIT :limit OFFSET :offset
+)
 SELECT
   post.id AS id,
   post.sourceId AS sourceId,
@@ -393,26 +554,36 @@ SELECT
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
   post.audioDuration AS audioDuration
-FROM post
+FROM paged
+INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
-WHERE
-  post.postDate > :postsAfter AND
-  post.createdAt < :postsUpperBound AND
-  (post.flags & 4) = 0 AND
-  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
-  feed.isDeleted = 0 AND
-  (
-    (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
-    OR post.id IN :sessionPostIds
-  )
 ORDER BY
   post.createdAt DESC,
   post.postDate DESC,
-  post.id DESC
-LIMIT :limit OFFSET :offset;
+  post.id DESC;
 
 allPostsAddedOldest:
+WITH paged AS (
+  SELECT post.rowid AS postRowId
+  FROM post
+  INNER JOIN feed ON post.sourceId = feed.id
+  WHERE
+    post.postDate > :postsAfter AND
+    post.createdAt < :postsUpperBound AND
+    (post.flags & 4) = 0 AND
+    ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+    feed.isDeleted = 0 AND
+    (
+      (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+      OR post.id IN :sessionPostIds
+    )
+  ORDER BY
+    post.createdAt ASC,
+    post.postDate ASC,
+    post.id ASC
+  LIMIT :limit OFFSET :offset
+)
 SELECT
   post.id AS id,
   post.sourceId AS sourceId,
@@ -436,26 +607,56 @@ SELECT
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
   post.audioDuration AS audioDuration
-FROM post
+FROM paged
+INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
-WHERE
-  post.postDate > :postsAfter AND
-  post.createdAt < :postsUpperBound AND
-  (post.flags & 4) = 0 AND
-  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
-  feed.isDeleted = 0 AND
-  (
-    (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
-    OR post.id IN :sessionPostIds
-  )
 ORDER BY
   post.createdAt ASC,
   post.postDate ASC,
-  post.id ASC
-LIMIT :limit OFFSET :offset;
+  post.id ASC;
 
 nonFeaturedPostsLatest:
+WITH featured AS (
+  SELECT p2.id
+  FROM post p2
+  INNER JOIN feed f2 ON p2.sourceId = f2.id
+  WHERE
+    p2.imageUrl IS NOT NULL AND
+    p2.postDate > :featuredPostsAfter AND
+    p2.postDate > :postsAfter AND
+    p2.createdAt < :postsUpperBound AND
+    (p2.flags & 4) = 0 AND
+    ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
+    f2.isDeleted = 0 AND
+    (
+      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
+      OR p2.id IN :sessionPostIds
+    )
+  ORDER BY p2.postDate DESC, p2.createdAt DESC, p2.id DESC
+  LIMIT :numberOfFeaturedPosts
+),
+paged AS (
+  SELECT post.rowid AS postRowId
+  FROM post
+  INNER JOIN feed ON post.sourceId = feed.id
+  WHERE
+    post.id NOT IN (SELECT id FROM featured) AND
+    post.postDate > :postsAfter AND
+    post.createdAt < :postsUpperBound AND
+    (post.flags & 4) = 0 AND
+    ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+    feed.isDeleted = 0 AND
+    (
+      (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+      OR post.id IN :sessionPostIds
+    )
+  ORDER BY
+    post.postDate DESC,
+    post.createdAt DESC,
+    post.id DESC
+  LIMIT :limit OFFSET :offset
+)
 SELECT
   post.id AS id,
   post.sourceId AS sourceId,
@@ -479,44 +680,56 @@ SELECT
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
   post.audioDuration AS audioDuration
-FROM post
+FROM paged
+INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
-WHERE
-  post.id NOT IN (
-    SELECT p2.id FROM post p2
-    INNER JOIN feed f2 ON p2.sourceId = f2.id
-    WHERE
-      p2.imageUrl IS NOT NULL AND
-      p2.postDate > :featuredPostsAfter AND
-      p2.postDate > :postsAfter AND
-      p2.createdAt < :postsUpperBound AND
-      (p2.flags & 4) = 0 AND
-      ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
-      f2.isDeleted = 0 AND
-      (
-        (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
-        OR p2.id IN :sessionPostIds
-      )
-    ORDER BY p2.postDate DESC, p2.createdAt DESC, p2.id DESC
-    LIMIT :numberOfFeaturedPosts
-  ) AND
-  post.postDate > :postsAfter AND
-  post.createdAt < :postsUpperBound AND
-  (post.flags & 4) = 0 AND
-  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
-  feed.isDeleted = 0 AND
-  (
-    (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
-    OR post.id IN :sessionPostIds
-  )
 ORDER BY
   post.postDate DESC,
   post.createdAt DESC,
-  post.id DESC
-LIMIT :limit OFFSET :offset;
+  post.id DESC;
 
 nonFeaturedPostsOldest:
+WITH featured AS (
+  SELECT p2.id
+  FROM post p2
+  INNER JOIN feed f2 ON p2.sourceId = f2.id
+  WHERE
+    p2.imageUrl IS NOT NULL AND
+    p2.postDate > :featuredPostsAfter AND
+    p2.postDate > :postsAfter AND
+    p2.createdAt < :postsUpperBound AND
+    (p2.flags & 4) = 0 AND
+    ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
+    f2.isDeleted = 0 AND
+    (
+      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
+      OR p2.id IN :sessionPostIds
+    )
+  ORDER BY p2.postDate ASC, p2.createdAt ASC, p2.id ASC
+  LIMIT :numberOfFeaturedPosts
+),
+paged AS (
+  SELECT post.rowid AS postRowId
+  FROM post
+  INNER JOIN feed ON post.sourceId = feed.id
+  WHERE
+    post.id NOT IN (SELECT id FROM featured) AND
+    post.postDate > :postsAfter AND
+    post.createdAt < :postsUpperBound AND
+    (post.flags & 4) = 0 AND
+    ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+    feed.isDeleted = 0 AND
+    (
+      (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+      OR post.id IN :sessionPostIds
+    )
+  ORDER BY
+    post.postDate ASC,
+    post.createdAt ASC,
+    post.id ASC
+  LIMIT :limit OFFSET :offset
+)
 SELECT
   post.id AS id,
   post.sourceId AS sourceId,
@@ -540,44 +753,56 @@ SELECT
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
   post.audioDuration AS audioDuration
-FROM post
+FROM paged
+INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
-WHERE
-  post.id NOT IN (
-    SELECT p2.id FROM post p2
-    INNER JOIN feed f2 ON p2.sourceId = f2.id
-    WHERE
-      p2.imageUrl IS NOT NULL AND
-      p2.postDate > :featuredPostsAfter AND
-      p2.postDate > :postsAfter AND
-      p2.createdAt < :postsUpperBound AND
-      (p2.flags & 4) = 0 AND
-      ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
-      f2.isDeleted = 0 AND
-      (
-        (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
-        OR p2.id IN :sessionPostIds
-      )
-    ORDER BY p2.postDate ASC, p2.createdAt ASC, p2.id ASC
-    LIMIT :numberOfFeaturedPosts
-  ) AND
-  post.postDate > :postsAfter AND
-  post.createdAt < :postsUpperBound AND
-  (post.flags & 4) = 0 AND
-  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
-  feed.isDeleted = 0 AND
-  (
-    (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
-    OR post.id IN :sessionPostIds
-  )
 ORDER BY
   post.postDate ASC,
   post.createdAt ASC,
-  post.id ASC
-LIMIT :limit OFFSET :offset;
+  post.id ASC;
 
 nonFeaturedPostsAddedLatest:
+WITH featured AS (
+  SELECT p2.id
+  FROM post p2
+  INNER JOIN feed f2 ON p2.sourceId = f2.id
+  WHERE
+    p2.imageUrl IS NOT NULL AND
+    p2.postDate > :featuredPostsAfter AND
+    p2.postDate > :postsAfter AND
+    p2.createdAt < :postsUpperBound AND
+    (p2.flags & 4) = 0 AND
+    ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
+    f2.isDeleted = 0 AND
+    (
+      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
+      OR p2.id IN :sessionPostIds
+    )
+  ORDER BY p2.createdAt DESC, p2.postDate DESC, p2.id DESC
+  LIMIT :numberOfFeaturedPosts
+),
+paged AS (
+  SELECT post.rowid AS postRowId
+  FROM post
+  INNER JOIN feed ON post.sourceId = feed.id
+  WHERE
+    post.id NOT IN (SELECT id FROM featured) AND
+    post.postDate > :postsAfter AND
+    post.createdAt < :postsUpperBound AND
+    (post.flags & 4) = 0 AND
+    ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+    feed.isDeleted = 0 AND
+    (
+      (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+      OR post.id IN :sessionPostIds
+    )
+  ORDER BY
+    post.createdAt DESC,
+    post.postDate DESC,
+    post.id DESC
+  LIMIT :limit OFFSET :offset
+)
 SELECT
   post.id AS id,
   post.sourceId AS sourceId,
@@ -601,44 +826,56 @@ SELECT
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
   post.audioDuration AS audioDuration
-FROM post
+FROM paged
+INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
-WHERE
-  post.id NOT IN (
-    SELECT p2.id FROM post p2
-    INNER JOIN feed f2 ON p2.sourceId = f2.id
-    WHERE
-      p2.imageUrl IS NOT NULL AND
-      p2.postDate > :featuredPostsAfter AND
-      p2.postDate > :postsAfter AND
-      p2.createdAt < :postsUpperBound AND
-      (p2.flags & 4) = 0 AND
-      ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
-      f2.isDeleted = 0 AND
-      (
-        (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
-        OR p2.id IN :sessionPostIds
-      )
-    ORDER BY p2.createdAt DESC, p2.postDate DESC, p2.id DESC
-    LIMIT :numberOfFeaturedPosts
-  ) AND
-  post.postDate > :postsAfter AND
-  post.createdAt < :postsUpperBound AND
-  (post.flags & 4) = 0 AND
-  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
-  feed.isDeleted = 0 AND
-  (
-    (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
-    OR post.id IN :sessionPostIds
-  )
 ORDER BY
   post.createdAt DESC,
   post.postDate DESC,
-  post.id DESC
-LIMIT :limit OFFSET :offset;
+  post.id DESC;
 
 nonFeaturedPostsAddedOldest:
+WITH featured AS (
+  SELECT p2.id
+  FROM post p2
+  INNER JOIN feed f2 ON p2.sourceId = f2.id
+  WHERE
+    p2.imageUrl IS NOT NULL AND
+    p2.postDate > :featuredPostsAfter AND
+    p2.postDate > :postsAfter AND
+    p2.createdAt < :postsUpperBound AND
+    (p2.flags & 4) = 0 AND
+    ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
+    f2.isDeleted = 0 AND
+    (
+      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
+      OR p2.id IN :sessionPostIds
+    )
+  ORDER BY p2.createdAt ASC, p2.postDate ASC, p2.id ASC
+  LIMIT :numberOfFeaturedPosts
+),
+paged AS (
+  SELECT post.rowid AS postRowId
+  FROM post
+  INNER JOIN feed ON post.sourceId = feed.id
+  WHERE
+    post.id NOT IN (SELECT id FROM featured) AND
+    post.postDate > :postsAfter AND
+    post.createdAt < :postsUpperBound AND
+    (post.flags & 4) = 0 AND
+    ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+    feed.isDeleted = 0 AND
+    (
+      (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+      OR post.id IN :sessionPostIds
+    )
+  ORDER BY
+    post.createdAt ASC,
+    post.postDate ASC,
+    post.id ASC
+  LIMIT :limit OFFSET :offset
+)
 SELECT
   post.id AS id,
   post.sourceId AS sourceId,
@@ -662,42 +899,14 @@ SELECT
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
   post.audioDuration AS audioDuration
-FROM post
+FROM paged
+INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
-WHERE
-  post.id NOT IN (
-    SELECT p2.id FROM post p2
-    INNER JOIN feed f2 ON p2.sourceId = f2.id
-    WHERE
-      p2.imageUrl IS NOT NULL AND
-      p2.postDate > :featuredPostsAfter AND
-      p2.postDate > :postsAfter AND
-      p2.createdAt < :postsUpperBound AND
-      (p2.flags & 4) = 0 AND
-      ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
-      f2.isDeleted = 0 AND
-      (
-        (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
-        OR p2.id IN :sessionPostIds
-      )
-    ORDER BY p2.createdAt ASC, p2.postDate ASC, p2.id ASC
-    LIMIT :numberOfFeaturedPosts
-  ) AND
-  post.postDate > :postsAfter AND
-  post.createdAt < :postsUpperBound AND
-  (post.flags & 4) = 0 AND
-  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
-  feed.isDeleted = 0 AND
-  (
-    (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
-    OR post.id IN :sessionPostIds
-  )
 ORDER BY
   post.createdAt ASC,
   post.postDate ASC,
-  post.id ASC
-LIMIT :limit OFFSET :offset;
+  post.id ASC;
 
 nonFeaturedPostsCount:
 SELECT COUNT(post.id) FROM post
@@ -1193,7 +1402,20 @@ UPDATE SET
     postDate = excluded.postDate,
     updatedAt = excluded.updatedAt,
     syncedAt = excluded.syncedAt,
-    flags = excluded.flags,
+    flags = excluded.flags | CASE
+      WHEN (excluded.flags & 4) == 0 AND EXISTS (
+        SELECT 1 FROM post AS sibling
+        INNER JOIN blockedWord AS bw ON bw.isDeleted = 0
+        WHERE sibling.id = excluded.id
+          AND sibling.sourceId != excluded.sourceId
+          AND bw.content != ''
+          AND (
+            instr(lower(sibling.title), lower(bw.content)) > 0 OR
+            instr(lower(sibling.description), lower(bw.content)) > 0
+          )
+      ) THEN 4
+      ELSE 0
+    END,
     remoteId = excluded.remoteId
 WHERE excluded.updatedAt > post.updatedAt;
 
@@ -1214,49 +1436,24 @@ WITH unreadPosts AS (
     AND f.enableNotifications = 1
     AND p.postDate > :postsAfter
     AND p.createdAt > :postsUpperBound
+),
+topFeeds AS (
+  SELECT
+    homepageLink,
+    icon,
+    CASE WHEN showFeedFavIcon IS NULL THEN 'null' WHEN showFeedFavIcon = 1 THEN 'true' ELSE 'false' END AS showFeedFavIconStr,
+    MAX(createdAt) AS maxSyncedAt
+  FROM unreadPosts
+  GROUP BY feedId
+  ORDER BY maxSyncedAt DESC
+  LIMIT 3
 )
 SELECT
-  COUNT(*) AS count,
-  COALESCE(
-    (
-      SELECT GROUP_CONCAT(homepageLink, '::')
-      FROM (
-        SELECT homepageLink, MAX(createdAt) AS maxSyncedAt
-        FROM unreadPosts
-        GROUP BY feedId
-        ORDER BY maxSyncedAt DESC
-        LIMIT 3
-      )
-    ),
-    ''
-  ) AS feedHomepageLinks,
-  COALESCE(
-    (
-      SELECT GROUP_CONCAT(icon, '::')
-      FROM (
-        SELECT icon, MAX(createdAt) AS maxSyncedAt
-        FROM unreadPosts
-        GROUP BY feedId
-        ORDER BY maxSyncedAt DESC
-        LIMIT 3
-      )
-    ),
-    ''
-  ) AS feedIcons,
-  COALESCE(
-    (
-      SELECT GROUP_CONCAT(CASE WHEN showFeedFavIcon IS NULL THEN 'null' WHEN showFeedFavIcon = 1 THEN 'true' ELSE 'false' END, '::')
-      FROM (
-        SELECT showFeedFavIcon, MAX(createdAt) AS maxSyncedAt
-        FROM unreadPosts
-        GROUP BY feedId
-        ORDER BY maxSyncedAt DESC
-        LIMIT 3
-      )
-    ),
-    ''
-  ) AS feedShowFavIconSettings
-FROM unreadPosts;
+  (SELECT COUNT(*) FROM unreadPosts) AS count,
+  COALESCE(GROUP_CONCAT(homepageLink, '::'), '') AS feedHomepageLinks,
+  COALESCE(GROUP_CONCAT(icon, '::'), '') AS feedIcons,
+  COALESCE(GROUP_CONCAT(showFeedFavIconStr, '::'), '') AS feedShowFavIconSettings
+FROM topFeeds;
 
 unreadSinceLastSyncPerFeed:
 WITH unreadPosts AS (

@@ -62,6 +62,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.chunked
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
@@ -120,6 +121,7 @@ class RssRepository(
     showWebsiteFavIcon: Boolean = true,
     enableNotifications: Boolean = true,
     updateFeed: Boolean = true,
+    updateWidgets: Boolean = true,
   ): String {
     val finalFeedId = feedId ?: nameBasedUuidOf(feedPayload.link).toString()
 
@@ -145,24 +147,26 @@ class RssRepository(
     val feedLastCleanUpAtEpochMilli =
       feedLastCleanUpAt?.toEpochMilliseconds() ?: Instant.DISTANT_PAST.toEpochMilliseconds()
 
-    withContext(dispatchersProvider.databaseWrite) {
-      feedPayload.posts
-        .filter { it.date >= feedLastCleanUpAtEpochMilli }
-        .chunked(POST_UPSERT_BATCH_SIZE)
-        .collect { batch -> upsertPostsBatch(batch, finalFeedId) }
-    }
+    feedPayload.posts
+      .filter { it.date >= feedLastCleanUpAtEpochMilli }
+      .flowOn(dispatchersProvider.default)
+      .chunked(POST_UPSERT_BATCH_SIZE)
+      .collect { batch -> upsertPostsBatch(batch, finalFeedId) }
 
-    widgetUpdater.updateUnreadWidget()
+    if (updateWidgets) {
+      widgetUpdater.updateUnreadWidget()
+    }
     return finalFeedId
   }
 
   private suspend fun upsertPostsBatch(posts: List<PostPayload>, feedId: String) {
     val now = Clock.System.now()
-    val postsWithReadingTime =
+    val preparedPosts =
       withContext(dispatchersProvider.default) {
         posts
           .map { postPayload ->
             async {
+              val postId = nameBasedUuidOf(postPayload.link).toString()
               val rawContentReadingTime = readingTimeCalculator.calculate(postPayload.rawContent)
               val htmlContentReadingTime =
                 if (postPayload.fullContent != null) {
@@ -171,57 +175,114 @@ class RssRepository(
                   null
                 }
 
-              postPayload to (rawContentReadingTime to htmlContentReadingTime)
+              PreparedPostUpsert(
+                postId = postId,
+                postPayload = postPayload,
+                rawContentReadingTime = rawContentReadingTime,
+                htmlContentReadingTime = htmlContentReadingTime,
+              )
             }
           }
           .awaitAll()
       }
 
-    transactionRunner.invoke {
-      val activeBlockedWords =
-        blockedWordsQueries.words { _, content, _, _ -> content.lowercase() }.executeAsList()
+    withContext(dispatchersProvider.databaseWrite) {
+      transactionRunner.invoke {
+        val activeBlockedWords =
+          blockedWordsQueries.words { _, content, _, _ -> content.lowercase() }.executeAsList()
 
-      postsWithReadingTime.forEach { (postPayload, readingTimes) ->
-        val postId = nameBasedUuidOf(postPayload.link).toString()
-        postQueries.upsert(
-          id = postId,
-          sourceId = feedId,
-          title = postPayload.title,
-          description = postPayload.description,
-          imageUrl = postPayload.imageUrl,
-          audioUrl = postPayload.audioUrl,
-          postDate = Instant.fromEpochMilliseconds(postPayload.date),
-          createdAt = now,
-          updatedAt = now,
-          syncedAt = now,
-          link = postPayload.link,
-          commentsLink = postPayload.commentsLink,
-          isDateParsedCorrectly = if (postPayload.isDateParsedCorrectly) 1 else 0,
-          remoteId = postPayload.remoteId,
-        )
-
-        val isBlocked =
-          activeBlockedWords.any { word ->
-            postPayload.title.lowercase().contains(word) ||
-              postPayload.description.orEmpty().lowercase().contains(word)
+        val blockedByOwnText =
+          if (activeBlockedWords.isEmpty()) {
+            BooleanArray(preparedPosts.size)
+          } else {
+            BooleanArray(preparedPosts.size) { index ->
+              val payload = preparedPosts[index].postPayload
+              matchesBlockedWords(payload.title, payload.description, activeBlockedWords)
+            }
           }
 
-        if (isBlocked) {
-          postQueries.markPostAsBlocked(postId)
-        } else {
-          postQueries.markPostAsUnblocked(postId)
-        }
+        val blockedBySiblingIds =
+          if (activeBlockedWords.isEmpty()) {
+            emptySet()
+          } else {
+            val candidateIds =
+              preparedPosts.indices
+                .asSequence()
+                .filterNot { blockedByOwnText[it] }
+                .map { preparedPosts[it].postId }
+                .distinct()
+                .toList()
 
-        postContentQueries.upsert(
-          id = postId,
-          feedContent = postPayload.rawContent,
-          feedContentLen = postPayload.rawContent.orEmpty().length.toLong(),
-          articleContent = postPayload.fullContent,
-          createdAt = now,
-          feedContentReadingTime = readingTimes.first.toLong(),
-          articleContentReadingTime = readingTimes.second?.toLong(),
-        )
+            if (candidateIds.isEmpty()) {
+              emptySet()
+            } else {
+              candidateIds
+                .chunked(SQLITE_BATCH_SIZE)
+                .flatMap { idsChunk ->
+                  postQueries
+                    .otherSourcePostsByIds(ids = idsChunk, sourceId = feedId) {
+                      id,
+                      title,
+                      description ->
+                      Triple(id, title, description)
+                    }
+                    .executeAsList()
+                }
+                .asSequence()
+                .filter { (_, title, description) ->
+                  matchesBlockedWords(title, description, activeBlockedWords)
+                }
+                .map { (id, _, _) -> id }
+                .toSet()
+            }
+          }
+
+        preparedPosts.forEachIndexed { index, prepared ->
+          val postPayload = prepared.postPayload
+          val isBlocked = blockedByOwnText[index] || prepared.postId in blockedBySiblingIds
+          val flags = if (isBlocked) setOf(PostFlag.Hidden) else emptySet()
+
+          postQueries.upsertFeedPost(
+            id = prepared.postId,
+            sourceId = feedId,
+            title = postPayload.title,
+            description = postPayload.description,
+            imageUrl = postPayload.imageUrl,
+            audioUrl = postPayload.audioUrl,
+            postDate = Instant.fromEpochMilliseconds(postPayload.date),
+            createdAt = now,
+            updatedAt = now,
+            syncedAt = now,
+            link = postPayload.link,
+            commentsLink = postPayload.commentsLink,
+            flags = flags,
+            isDateParsedCorrectly = if (postPayload.isDateParsedCorrectly) 1 else 0,
+            remoteId = postPayload.remoteId,
+          )
+
+          postContentQueries.upsert(
+            id = prepared.postId,
+            feedContent = postPayload.rawContent,
+            feedContentLen = postPayload.rawContent.orEmpty().length.toLong(),
+            articleContent = postPayload.fullContent,
+            createdAt = now,
+            feedContentReadingTime = prepared.rawContentReadingTime.toLong(),
+            articleContentReadingTime = prepared.htmlContentReadingTime?.toLong(),
+          )
+        }
       }
+    }
+  }
+
+  private fun matchesBlockedWords(
+    title: String,
+    description: String,
+    activeBlockedWords: List<String>,
+  ): Boolean {
+    val lowerTitle = title.lowercase()
+    val lowerDescription = description.lowercase()
+    return activeBlockedWords.any { word ->
+      lowerTitle.contains(word) || lowerDescription.contains(word)
     }
   }
 
@@ -722,6 +783,10 @@ class RssRepository(
     return postRepository.postOrNull(postId)
   }
 
+  suspend fun postsByIds(postIds: Set<String>): List<Post> {
+    return postRepository.postsByIds(postIds)
+  }
+
   suspend fun resolvedPostById(postId: String): ResolvedPost? {
     return postRepository.resolvedPostById(postId)
   }
@@ -1139,3 +1204,10 @@ class RssRepository(
     return searchQuery.replace("\"", "\"\"").run { "\"$this\"" }
   }
 }
+
+private data class PreparedPostUpsert(
+  val postId: String,
+  val postPayload: PostPayload,
+  val rawContentReadingTime: Int,
+  val htmlContentReadingTime: Int?,
+)

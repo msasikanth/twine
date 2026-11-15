@@ -136,8 +136,20 @@ class SyncRepository(
 
         postsSnapshot.forEach { post ->
           val isBlocked =
-            activeBlockedWords.any { word ->
-              post.title.lowercase().contains(word) || post.description.lowercase().contains(word)
+            if (activeBlockedWords.isEmpty()) {
+              false
+            } else {
+              matchesBlockedWords(post.title, post.description, activeBlockedWords) ||
+                postQueries
+                  .otherSourcePostsById(id = post.id, sourceId = post.sourceId) {
+                    siblingTitle,
+                    siblingDescription ->
+                    siblingTitle to siblingDescription
+                  }
+                  .executeAsList()
+                  .any { (siblingTitle, siblingDescription) ->
+                    matchesBlockedWords(siblingTitle, siblingDescription, activeBlockedWords)
+                  }
             }
           val finalFlags =
             if (isBlocked) {
@@ -166,6 +178,18 @@ class SyncRepository(
       }
     }
     widgetUpdater.updateUnreadWidget()
+  }
+
+  private fun matchesBlockedWords(
+    title: String,
+    description: String,
+    activeBlockedWords: List<String>,
+  ): Boolean {
+    val lowerTitle = title.lowercase()
+    val lowerDescription = description.lowercase()
+    return activeBlockedWords.any { word ->
+      lowerTitle.contains(word) || lowerDescription.contains(word)
+    }
   }
 
   suspend fun upsertFeeds(feeds: List<Feed>) {

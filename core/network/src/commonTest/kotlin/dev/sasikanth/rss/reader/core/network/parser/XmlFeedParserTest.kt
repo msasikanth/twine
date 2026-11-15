@@ -22,6 +22,7 @@ import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.AtomContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.RDFContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.RSSContentParser
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser
 import dev.sasikanth.rss.reader.core.network.utils.TestDispatchersProvider
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
@@ -846,5 +847,155 @@ class XmlFeedParserTest {
 
     // then
     assertFeedPayloadEquals(expectedFeedPayload, payload)
+  }
+
+  @Test
+  fun parsingRssItemWithBothDescriptionAndContentEncodedPreservesFullDescriptionAndFallbackImage() =
+    runTest {
+      val longBody = "a".repeat(4095) + "\uD83D\uDE80 tail-keyword " + "a".repeat(1000)
+      val rssXml =
+        """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+          <channel>
+            <title>Feed</title>
+            <link>https://example.com</link>
+            <description>Feed desc</description>
+            <item>
+              <title>Long Post</title>
+              <link>https://example.com/long-post</link>
+              <description><![CDATA[<p>Summary</p><img src="https://example.com/fallback.jpg" />]]></description>
+              <content:encoded><![CDATA[<p>$longBody</p>]]></content:encoded>
+              <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
+            </item>
+          </channel>
+        </rss>
+        """
+          .trimIndent()
+
+      val payload =
+        xmlFeedParser.parse(ByteReadChannel(rssXml.toByteArray()), feedUrl, Charsets.UTF8)
+      val posts = payload.posts.toList()
+
+      assertEquals(1, posts.size)
+      val post = posts.single()
+      assertEquals(longBody, post.description)
+      assertTrue((post.rawContent ?: "").contains(longBody))
+      assertEquals("https://example.com/fallback.jpg", post.imageUrl)
+    }
+
+  @Test
+  fun parsingAtomEntryWithSummaryAndContentPreservesFullDescriptionAndPrefersContent() = runTest {
+    val longBody = "b".repeat(4095) + "\uD83D\uDE80 atom-tail-keyword " + "b".repeat(1000)
+    val atomXml =
+      """
+      <?xml version="1.0" encoding="UTF-8"?>
+      <feed xmlns="http://www.w3.org/2005/Atom">
+        <title>Atom Feed</title>
+        <link rel="alternate" href="https://example.com" />
+        <entry>
+          <title>Atom Long Post</title>
+          <link rel="alternate" href="https://example.com/atom-long-post" />
+          <published>2023-05-25T09:00:00Z</published>
+          <summary type="html"><![CDATA[<p>Short summary</p><img src="https://example.com/summary.jpg" />]]></summary>
+          <content type="html"><![CDATA[<p>$longBody</p>]]></content>
+        </entry>
+      </feed>
+      """
+        .trimIndent()
+
+    val payload =
+      xmlFeedParser.parse(ByteReadChannel(atomXml.toByteArray()), feedUrl, Charsets.UTF8)
+    val posts = payload.posts.toList()
+
+    assertEquals(1, posts.size)
+    val post = posts.single()
+    assertEquals(longBody, post.description)
+    assertTrue((post.rawContent ?: "").contains(longBody))
+    assertEquals("https://example.com/summary.jpg", post.imageUrl)
+  }
+
+  @Test
+  fun resolveDeferredPostContentSkipsSecondaryParseWhenPrimaryHasHeroImageAndSecondaryLacksAudio() {
+    var parseCount = 0
+    val probe =
+      object : XmlContentParser() {
+        override val articleHtmlParser = ArticleHtmlParser()
+
+        override suspend fun parse(
+          feedUrl: String,
+          parser: org.kobjects.ktxml.api.XmlPullParser,
+        ): FeedPayload = error("unused")
+
+        override fun parsePostContentText(postHtmlContent: String): PostContent {
+          parseCount++
+          return super.parsePostContentText(postHtmlContent)
+        }
+
+        fun resolve(primary: String?, secondary: String?): Pair<String?, String?>? {
+          val result = resolveDeferredPostContent(primary, secondary) ?: return null
+          return result.heroImage to result.audioUrl
+        }
+      }
+
+    val noAudioSecondaryResult =
+      probe.resolve(
+        primary = """<p>Body</p><img src="https://example.com/primary.jpg" />""",
+        secondary = """<p>Summary</p><img src="https://example.com/secondary.jpg" />""",
+      )
+    assertEquals(1, parseCount)
+    assertEquals("https://example.com/primary.jpg" to null, noAudioSecondaryResult)
+
+    parseCount = 0
+    val audioSecondaryResult =
+      probe.resolve(
+        primary = """<p>Body</p><img src="https://example.com/primary.jpg" />""",
+        secondary =
+          """<p>Summary</p><audio><source src="https://example.com/episode.mp3" type="audio/mpeg" /></audio>""",
+      )
+    assertEquals(2, parseCount)
+    assertEquals(
+      "https://example.com/primary.jpg" to "https://example.com/episode.mp3",
+      audioSecondaryResult,
+    )
+
+    parseCount = 0
+    val fallbackImageResult =
+      probe.resolve(
+        primary = """<p>Body without image</p>""",
+        secondary = """<p>Summary</p><img src="https://example.com/secondary.jpg" />""",
+      )
+    assertEquals(2, parseCount)
+    assertEquals("https://example.com/secondary.jpg" to null, fallbackImageResult)
+  }
+
+  @Test
+  fun parsingRssItemWithPrimaryHeroImageAndSecondaryAudioExtractsBoth() = runTest {
+    val rssXml =
+      """
+      <?xml version="1.0" encoding="UTF-8"?>
+      <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+        <channel>
+          <title>Feed</title>
+          <link>https://example.com</link>
+          <description>Feed desc</description>
+          <item>
+            <title>Audio Post</title>
+            <link>https://example.com/audio-post</link>
+            <description><![CDATA[<p>Summary</p><img src="https://example.com/summary.jpg" /><audio><source src="https://example.com/episode.mp3" type="audio/mpeg" /></audio>]]></description>
+            <content:encoded><![CDATA[<p>Full article body</p><img src="https://example.com/content.jpg" />]]></content:encoded>
+            <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
+          </item>
+        </channel>
+      </rss>
+      """
+        .trimIndent()
+
+    val payload = xmlFeedParser.parse(ByteReadChannel(rssXml.toByteArray()), feedUrl, Charsets.UTF8)
+    val post = payload.posts.toList().single()
+
+    assertEquals("Full article body", post.description)
+    assertEquals("https://example.com/content.jpg", post.imageUrl)
+    assertEquals("https://example.com/episode.mp3", post.audioUrl)
   }
 }

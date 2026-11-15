@@ -55,7 +55,7 @@ class DefaultSyncCoordinator(
   dispatchersProvider: DispatchersProvider,
 ) : SyncCoordinator {
 
-  private val scope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
+  private val scope = CoroutineScope(SupervisorJob() + dispatchersProvider.io)
 
   @OptIn(ExperimentalCoroutinesApi::class)
   override val syncState: StateFlow<SyncState> =

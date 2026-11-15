@@ -77,13 +77,17 @@ class MinifluxSyncCoordinator(
   override val syncState: StateFlow<SyncState> = _syncState.asStateFlow()
 
   override suspend fun pull(): Boolean {
-    return syncMutex.withLock { pullInternal() }
+    return withContext(dispatchersProvider.io) { syncMutex.withLock { pullInternal() } }
   }
 
   override suspend fun pull(feedIds: List<String>): Boolean {
     return withContext(dispatchersProvider.io) {
       syncMutex.withLock {
+        val hasLastRefreshedAt = refreshPolicy.hasLastRefreshedAt()
         feedIds.forEach { feedId -> pullFeedInternal(feedId) }
+        if (!hasLastRefreshedAt) {
+          refreshPolicy.updateLastRefreshedAt()
+        }
         true
       }
     }
@@ -112,6 +116,7 @@ class MinifluxSyncCoordinator(
       val syncStartTime = Clock.System.now()
       val lastSyncedAt = refreshPolicy.fetchLastSyncedAt()
       val isInitialSync = lastSyncedAt == null
+      val hasLastRefreshedAt = refreshPolicy.hasLastRefreshedAt()
       updateSyncState(SyncState.InProgress(0f))
 
       // 1. Push local changes
@@ -142,6 +147,10 @@ class MinifluxSyncCoordinator(
       syncArticles(starred = true)
       syncStatuses(isInitialSync = isInitialSync)
 
+      if (!hasLastRefreshedAt || isInitialSync) {
+        refreshPolicy.updateLastRefreshedAt()
+      }
+
       updateSyncState(SyncState.Complete)
       widgetUpdater.updateUnreadWidget()
       true
@@ -154,14 +163,18 @@ class MinifluxSyncCoordinator(
 
   private suspend fun pullFeedInternal(feedId: String): Boolean {
     return try {
+      val hasLastRefreshedAt = refreshPolicy.hasLastRefreshedAt()
       updateSyncState(SyncState.InProgress(0f))
 
       // Push local changes for this feed before pulling
       pushChangesForFeed(feedId)
 
-      val feed = rssRepository.feed(feedId)
+      val feed = withContext(dispatchersProvider.databaseRead) { rssRepository.feed(feedId) }
       if (feed?.remoteId != null) {
         syncArticles(feedId = feed.remoteId!!.toLong())
+        if (!hasLastRefreshedAt) {
+          refreshPolicy.updateLastRefreshedAt()
+        }
         updateSyncState(SyncState.Complete)
         widgetUpdater.updateUnreadWidget()
       } else {
@@ -453,6 +466,7 @@ class MinifluxSyncCoordinator(
                 ),
               alwaysFetchSourceArticle = alwaysFetchSourceArticle,
               updateFeed = true,
+              updateWidgets = false,
             )
             .also {
               hasNewSubscriptions = true
@@ -563,7 +577,11 @@ class MinifluxSyncCoordinator(
       val existingPostsByRemoteId =
         rssRepository.postsByRemoteIds(remoteIds).associateBy { it.remoteId }
       val existingPostsByLink = rssRepository.postsByLinks(urls).associateBy { it.link }
-      val existingFeeds = rssRepository.feedsByRemoteIds(feedRemoteIds).associateBy { it.remoteId }
+      val existingFeeds =
+        withContext(dispatchersProvider.databaseRead) {
+            rssRepository.feedsByRemoteIds(feedRemoteIds)
+          }
+          .associateBy { it.remoteId }
 
       val postsToUpsertByFeed = mutableMapOf<String, MutableList<PostPayload>>()
 
@@ -578,7 +596,11 @@ class MinifluxSyncCoordinator(
         } else {
           val feed = existingFeeds[entry.feedId.toString()]
           if (feed != null) {
-            val htmlContent = articleHtmlParser.parse(entry.content)
+            val (htmlContent, postPubDateInMillis) =
+              withContext(dispatchersProvider.default) {
+                articleHtmlParser.parse(entry.content) to
+                  entry.publishedAt.dateStringToEpochMillis()
+              }
             val isVideoPost = UrlUtils.youTubeVideoId(entry.url) != null
             val fullContent =
               if (downloadFullContent && entry.url.isNotBlank() && !isVideoPost) {
@@ -586,7 +608,6 @@ class MinifluxSyncCoordinator(
               } else {
                 null
               }
-            val postPubDateInMillis = entry.publishedAt.dateStringToEpochMillis()
             val audioUrl =
               entry.enclosures.firstOrNull { it.mimeType.startsWith("audio/") }?.url
                 ?: htmlContent?.audioUrl
@@ -627,6 +648,7 @@ class MinifluxSyncCoordinator(
             ),
           feedId = feed.id,
           updateFeed = false,
+          updateWidgets = false,
         )
       }
 

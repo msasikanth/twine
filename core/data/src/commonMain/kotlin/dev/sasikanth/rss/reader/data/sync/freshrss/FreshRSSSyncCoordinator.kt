@@ -72,13 +72,17 @@ class FreshRSSSyncCoordinator(
   override val syncState: StateFlow<SyncState> = _syncState.asStateFlow()
 
   override suspend fun pull(): Boolean {
-    return syncMutex.withLock { pullInternal() }
+    return withContext(dispatchersProvider.io) { syncMutex.withLock { pullInternal() } }
   }
 
   override suspend fun pull(feedIds: List<String>): Boolean {
     return withContext(dispatchersProvider.io) {
       syncMutex.withLock {
+        val hasLastRefreshedAt = refreshPolicy.hasLastRefreshedAt()
         feedIds.forEach { feedId -> pullFeedInternal(feedId) }
+        if (!hasLastRefreshedAt) {
+          refreshPolicy.updateLastRefreshedAt()
+        }
         true
       }
     }
@@ -106,6 +110,7 @@ class FreshRSSSyncCoordinator(
     return try {
       val syncStartTime = Clock.System.now()
       val isInitialSync = refreshPolicy.fetchLastSyncedAt() == null
+      val hasLastRefreshedAt = refreshPolicy.hasLastRefreshedAt()
       updateSyncState(SyncState.InProgress(0f))
 
       // 1. Push local changes
@@ -131,6 +136,10 @@ class FreshRSSSyncCoordinator(
       syncArticles(streamId = FreshRssSource.USER_STATE_STARRED)
       syncStatuses(isInitialSync = isInitialSync)
 
+      if (!hasLastRefreshedAt || isInitialSync) {
+        refreshPolicy.updateLastRefreshedAt()
+      }
+
       updateSyncState(SyncState.Complete)
       widgetUpdater.updateUnreadWidget()
 
@@ -144,14 +153,18 @@ class FreshRSSSyncCoordinator(
 
   private suspend fun pullFeedInternal(feedId: String): Boolean {
     return try {
+      val hasLastRefreshedAt = refreshPolicy.hasLastRefreshedAt()
       updateSyncState(SyncState.InProgress(0f))
 
       // Push local changes for this feed before pulling
       pushChangesForFeed(feedId)
 
-      val feed = rssRepository.feed(feedId)
+      val feed = withContext(dispatchersProvider.databaseRead) { rssRepository.feed(feedId) }
       if (feed?.remoteId != null) {
         syncArticles(streamId = feed.remoteId!!)
+        if (!hasLastRefreshedAt) {
+          refreshPolicy.updateLastRefreshedAt()
+        }
         updateSyncState(SyncState.Complete)
         widgetUpdater.updateUnreadWidget()
       } else {
@@ -411,6 +424,7 @@ class FreshRSSSyncCoordinator(
                 ),
               alwaysFetchSourceArticle = alwaysFetchSourceArticle,
               updateFeed = true,
+              updateWidgets = false,
             )
             .also {
               hasNewSubscriptions = true
@@ -504,7 +518,11 @@ class FreshRSSSyncCoordinator(
       val existingPostsByRemoteId =
         rssRepository.postsByRemoteIds(remoteIds).associateBy { it.remoteId }
       val existingPostsByLink = rssRepository.postsByLinks(urls).associateBy { it.link }
-      val existingFeeds = rssRepository.feedsByRemoteIds(feedRemoteIds).associateBy { it.remoteId }
+      val existingFeeds =
+        withContext(dispatchersProvider.databaseRead) {
+            rssRepository.feedsByRemoteIds(feedRemoteIds)
+          }
+          .associateBy { it.remoteId }
 
       val postsToUpsertByFeed = mutableMapOf<String, MutableList<PostPayload>>()
 
@@ -524,7 +542,10 @@ class FreshRSSSyncCoordinator(
           val feed = existingFeeds[feedRemoteId]
 
           if (feed != null) {
-            val htmlContent = articleHtmlParser.parse(item.summary.content)
+            val htmlContent =
+              withContext(dispatchersProvider.default) {
+                articleHtmlParser.parse(item.summary.content)
+              }
             val isVideoPost = UrlUtils.youTubeVideoId(postLink) != null
             val fullContent =
               if (downloadFullContent && postLink.isNotBlank() && !isVideoPost) {
@@ -569,6 +590,7 @@ class FreshRSSSyncCoordinator(
             ),
           feedId = feed.id,
           updateFeed = false,
+          updateWidgets = false,
         )
       }
 

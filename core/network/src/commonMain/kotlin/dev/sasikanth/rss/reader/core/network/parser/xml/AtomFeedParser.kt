@@ -164,8 +164,10 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
 
     var title: String? = null
     var link: String? = null
-    var description: String? = null
-    var rawContent: String? = null
+    var rawContentHtml: String? = null
+    var rawSummaryHtml: String? = null
+    var mediaGroupDescription: String? = null
+    var mediaGroupImage: String? = null
     var date: String? = null
     var image: String? = null
     var audioUrl: String? = null
@@ -189,14 +191,11 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
           }
           parser.skipSubTree()
         }
-        TAG_CONTENT,
+        TAG_CONTENT -> {
+          rawContentHtml = parser.nextText().trimIndent()
+        }
         TAG_SUMMARY -> {
-          val postContent = parsePostContent(parser)
-
-          rawContent = postContent.rawContent
-          image = postContent.heroImage ?: image
-          description = postContent.textContent
-          audioUrl = audioUrl ?: postContent.audioUrl
+          rawSummaryHtml = parser.nextText().trimIndent()
         }
         TAG_PUBLISHED,
         TAG_UPDATED -> {
@@ -221,20 +220,24 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
         }
         TAG_MEDIA_GROUP -> {
           val mediaGroupResult = readMediaGroup(parser)
-          image = mediaGroupResult.image ?: image
-          description = description.orEmpty().ifBlank { mediaGroupResult.description }
+          mediaGroupImage = mediaGroupResult.image ?: mediaGroupImage
+          mediaGroupDescription =
+            mediaGroupDescription.orEmpty().ifBlank { mediaGroupResult.description }
         }
         else -> parser.skipSubTree()
       }
     }
 
+    val postContent =
+      resolveDeferredPostContent(primaryHtml = rawContentHtml, secondaryHtml = rawSummaryHtml)
+
     return createPostPayload(
       title = title,
       link = link,
-      description = description,
-      rawContent = rawContent,
-      imageUrl = image,
-      audioUrl = audioUrl,
+      description = postContent?.textContent?.ifBlank { null } ?: mediaGroupDescription,
+      rawContent = postContent?.rawContent,
+      imageUrl = mediaGroupImage ?: postContent?.heroImage ?: image,
+      audioUrl = audioUrl ?: postContent?.audioUrl,
       date = date,
       hostLink = hostLink,
     )
