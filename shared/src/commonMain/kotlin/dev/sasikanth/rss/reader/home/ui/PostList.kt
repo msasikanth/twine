@@ -174,7 +174,7 @@ internal fun PostsList(
     items(
       count = posts.itemCount,
       key = { index -> posts.peek(index)?.let(PostListKey::encode) ?: index },
-      contentType = { POST_ITEM_CONTENT_TYPE },
+      contentType = { postItemContentType(homeViewMode) },
     ) { index ->
       val post = posts[index] ?: return@items
       val highlighted = post.id == activeReaderPostId || index == selectedPostIndex
@@ -265,6 +265,9 @@ private fun LazyItemScope.animatePostItem(): Modifier =
       ),
     fadeOutSpec = tween(durationMillis = FADE_OUT_DURATION),
   )
+
+internal fun postItemContentType(homeViewMode: HomeViewMode): String =
+  "${POST_ITEM_CONTENT_TYPE}_${homeViewMode.name}"
 
 private const val FADE_IN_DURATION = 220
 private const val FADE_OUT_DURATION = 160

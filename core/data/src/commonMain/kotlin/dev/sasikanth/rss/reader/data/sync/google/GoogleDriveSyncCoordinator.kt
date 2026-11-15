@@ -16,6 +16,7 @@
  */
 package dev.sasikanth.rss.reader.data.sync.google
 
+import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.sync.FileCloudSyncService
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.SyncState
@@ -32,16 +33,21 @@ class GoogleDriveSyncCoordinator(
   private val fileCloudSyncService: FileCloudSyncService,
   private val googleDriveSyncProvider: GoogleDriveCloudServiceProvider,
   private val localSyncCoordinator: LocalSyncCoordinator,
+  private val refreshPolicy: RefreshPolicy,
 ) : SyncCoordinator {
 
   private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
   override val syncState: StateFlow<SyncState> = _syncState.asStateFlow()
 
   override suspend fun pull(): Boolean {
+    val hasLastRefreshedAt = refreshPolicy.hasLastRefreshedAt()
     _syncState.value = SyncState.InProgress(0f)
     val syncResult = fileCloudSyncService.sync(googleDriveSyncProvider)
     _syncState.value = SyncState.InProgress(0.5f)
     localSyncCoordinator.pull()
+    if (!hasLastRefreshedAt) {
+      refreshPolicy.updateLastRefreshedAt()
+    }
     _syncState.value = SyncState.Complete
     return syncResult
   }

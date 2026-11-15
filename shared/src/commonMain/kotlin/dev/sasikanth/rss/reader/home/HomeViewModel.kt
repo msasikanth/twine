@@ -45,9 +45,15 @@ import dev.sasikanth.rss.reader.media.AudioPlayer
 import dev.sasikanth.rss.reader.media.PlaybackState
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -56,8 +62,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -65,6 +71,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -117,7 +125,15 @@ class HomeViewModel(
   val openPost: SharedFlow<Pair<Int, ResolvedPost>>
     field = MutableSharedFlow<Pair<Int, ResolvedPost>>()
 
-  private var previousVisibleItems = emptyMap<String, Int>()
+  private val scrollReadPostsBuffer =
+    ScrollReadPostsBuffer(
+      scope = viewModelScope,
+      flushInterval = SCROLL_MARK_READ_FLUSH_INTERVAL,
+      markAsReadOnProvider = { settingsRepository.markAsReadOn.first() },
+      markPostsAsRead = { postIds ->
+        rssRepository.updatePostReadStatus(postIds = postIds, read = true)
+      },
+    )
 
   private val isFeaturedSectionVisible = MutableStateFlow(true)
   private val selectedPostResolveTrigger = MutableStateFlow(0)
@@ -191,37 +207,22 @@ class HomeViewModel(
       postId = postId,
       scrollOffset = event.firstVisibleItemOffset,
     )
+
+    scrollReadPostsBuffer.flushAsync()
   }
 
   private fun onVisiblePostsChanged(visiblePosts: Map<String, Int>, firstVisibleItemIndex: Int) {
-    val newlyHiddenIds = previousVisibleItems.keys - visiblePosts.keys
-    if (newlyHiddenIds.isNotEmpty()) {
-      val itemsHiddenFromTop =
-        newlyHiddenIds
-          .filter { id ->
-            val previousIndex = previousVisibleItems[id]
-            previousIndex != null && previousIndex < firstVisibleItemIndex
-          }
-          .toSet()
-
-      if (itemsHiddenFromTop.isNotEmpty()) {
-        markPostsAsReadByIds(itemsHiddenFromTop)
-      }
-    }
-    previousVisibleItems = visiblePosts
+    scrollReadPostsBuffer.onVisiblePostsChanged(visiblePosts, firstVisibleItemIndex)
   }
 
   private fun markPostsAsReadByIds(postIds: Set<String>) {
-    viewModelScope.launch {
-      val markPostsAsReadOn = settingsRepository.markAsReadOn.first()
-      if (markPostsAsReadOn != MarkAsReadOn.Scroll) return@launch
-
-      rssRepository.updatePostReadStatus(postIds = postIds, read = true)
-    }
+    scrollReadPostsBuffer.enqueue(postIds)
   }
 
   private fun onPostClicked(post: ResolvedPost) {
     viewModelScope.launch {
+      scrollReadPostsBuffer.flush()
+
       val postsAfter = postsThresholdTime(state.value.postsType)
       val activeSourceIds = activeSourceIds(state.value.activeSource)
       val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(state.value.postsType)
@@ -476,6 +477,7 @@ class HomeViewModel(
 
   private fun loadNewArticles() {
     viewModelScope.launch {
+      scrollReadPostsBuffer.flush()
       state.update { it.copy(unreadSinceLastSync = null) }
       refreshPolicy.updateLastRefreshedAt()
       _effects.emit(HomeEffect.RequestInAppRating)
@@ -491,13 +493,7 @@ class HomeViewModel(
   }
 
   private fun markFeaturedPostAsRead(postId: String) {
-    viewModelScope.launch {
-      val markPostsAsReadOn = settingsRepository.markAsReadOn.first()
-
-      if (markPostsAsReadOn != MarkAsReadOn.Scroll) return@launch
-
-      rssRepository.updatePostReadStatus(read = true, id = postId)
-    }
+    scrollReadPostsBuffer.enqueue(postId)
   }
 
   private fun markPostsAsRead(source: Source?) {
@@ -566,14 +562,23 @@ class HomeViewModel(
   }
 
   private fun refreshContent() {
-    if (state.value.unreadSinceLastSync?.hasNewArticles == true) {
-      loadNewArticles()
+    viewModelScope.launch {
+      scrollReadPostsBuffer.flush()
+      if (state.value.unreadSinceLastSync?.hasNewArticles == true) {
+        state.update { it.copy(unreadSinceLastSync = null) }
+        refreshPolicy.updateLastRefreshedAt()
+        _effects.emit(HomeEffect.RequestInAppRating)
+      }
+      when (val selectedSource = state.value.activeSource) {
+        is FeedGroup -> syncCoordinator.triggerPull(selectedSource.feedIds)
+        is Feed -> syncCoordinator.triggerPull(selectedSource.id)
+        else -> syncCoordinator.triggerPull()
+      }
     }
-    when (val selectedSource = state.value.activeSource) {
-      is FeedGroup -> syncCoordinator.triggerPull(selectedSource.feedIds)
-      is Feed -> syncCoordinator.triggerPull(selectedSource.id)
-      else -> syncCoordinator.triggerPull()
-    }
+  }
+
+  private companion object {
+    val SCROLL_MARK_READ_FLUSH_INTERVAL = 300.milliseconds
   }
 }
 
@@ -603,3 +608,87 @@ private data class HomeUnreadStatus(
   val unreadSinceLastSync: UnreadSinceLastSync?,
   val lastRefreshedAt: LocalDateTime?,
 )
+
+internal class ScrollReadPostsBuffer(
+  private val scope: CoroutineScope,
+  private val flushInterval: Duration,
+  private val markAsReadOnProvider: suspend () -> MarkAsReadOn,
+  private val markPostsAsRead: suspend (Set<String>) -> Unit,
+) {
+  private var previousVisibleItems = emptyMap<String, Int>()
+  private val pendingPostIds = MutableStateFlow<Set<String>>(emptySet())
+  private val flushMutex = Mutex()
+  private var scheduledFlushJob: Job? = null
+
+  fun onVisiblePostsChanged(visiblePosts: Map<String, Int>, firstVisibleItemIndex: Int) {
+    val newlyHiddenIds = previousVisibleItems.keys - visiblePosts.keys
+    if (newlyHiddenIds.isNotEmpty()) {
+      val itemsHiddenFromTop =
+        newlyHiddenIds
+          .filter { id ->
+            val previousIndex = previousVisibleItems[id]
+            previousIndex != null && previousIndex < firstVisibleItemIndex
+          }
+          .toSet()
+
+      if (itemsHiddenFromTop.isNotEmpty()) {
+        enqueue(itemsHiddenFromTop)
+      }
+    }
+    previousVisibleItems = visiblePosts
+  }
+
+  fun enqueue(postId: String) {
+    enqueue(setOf(postId))
+  }
+
+  fun enqueue(postIds: Set<String>) {
+    if (postIds.isEmpty()) return
+    pendingPostIds.update { it + postIds }
+    scheduleFlushIfNeeded()
+  }
+
+  private fun scheduleFlushIfNeeded() {
+    if (pendingPostIds.value.isEmpty()) return
+    if (scheduledFlushJob?.isActive == true) return
+
+    lateinit var job: Job
+    job =
+      scope.launch(start = CoroutineStart.LAZY) {
+        try {
+          delay(flushInterval)
+        } finally {
+          if (scheduledFlushJob === job) {
+            scheduledFlushJob = null
+          }
+        }
+        flush()
+      }
+    scheduledFlushJob = job
+    job.start()
+  }
+
+  fun flushAsync() {
+    if (pendingPostIds.value.isNotEmpty() || flushMutex.isLocked) {
+      scope.launch { flush() }
+    }
+  }
+
+  suspend fun flush() {
+    scheduledFlushJob?.cancel()
+    scheduledFlushJob = null
+
+    flushMutex.withLock {
+      val postIds = pendingPostIds.getAndUpdate { emptySet() }
+      if (postIds.isEmpty()) return@withLock
+
+      if (markAsReadOnProvider() == MarkAsReadOn.Scroll) {
+        markPostsAsRead(postIds)
+      }
+    }
+
+    if (pendingPostIds.value.isNotEmpty()) {
+      scheduleFlushIfNeeded()
+    }
+  }
+}

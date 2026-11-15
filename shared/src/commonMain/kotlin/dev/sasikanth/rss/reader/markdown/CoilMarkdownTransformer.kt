@@ -21,7 +21,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,41 +36,60 @@ import coil3.compose.AsyncImagePainter
 import coil3.compose.LocalPlatformContext
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
+import coil3.size.Dimension
 import com.mikepenz.markdown.model.ImageData
 import com.mikepenz.markdown.model.ImageTransformer
 import dev.sasikanth.rss.reader.reader.ui.LocalOnImageClick
+
+internal val MarkdownImageSize = coil3.size.Size(2048, Dimension.Undefined)
+private const val INLINE_IMAGE_MEMORY_CACHE_SUFFIX = "#reader_inline"
+
+internal fun inlineImageMemoryCacheKey(link: String): String =
+  "$link$INLINE_IMAGE_MEMORY_CACHE_SUFFIX"
 
 object CoilMarkdownTransformer : ImageTransformer {
 
   @Composable
   override fun transform(link: String): ImageData? {
+    val context = LocalPlatformContext.current
     val onImageClick = LocalOnImageClick.current
-    return rememberAsyncImagePainter(
-        model =
-          ImageRequest.Builder(LocalPlatformContext.current)
-            .data(link)
-            .size(coil3.size.Size.ORIGINAL)
-            .build()
-      )
-      .let {
-        ImageData(
-          painter = it,
-          modifier =
-            Modifier.padding(vertical = 8.dp).clip(MaterialTheme.shapes.large).clickable {
-              onImageClick(link)
-            },
-          alignment = Alignment.Center,
-        )
+    val model =
+      remember(context, link) {
+        ImageRequest.Builder(context)
+          .data(link)
+          .size(MarkdownImageSize)
+          .diskCacheKey(link)
+          .memoryCacheKey(inlineImageMemoryCacheKey(link))
+          .build()
       }
+
+    return rememberAsyncImagePainter(model = model).let { painter ->
+      ImageData(
+        painter = painter,
+        modifier =
+          Modifier.padding(vertical = 8.dp).clip(MaterialTheme.shapes.large).clickable {
+            onImageClick(link)
+          },
+        alignment = Alignment.Center,
+      )
+    }
   }
 
   @Composable
   override fun intrinsicSize(painter: Painter): Size {
-    var size by remember(painter) { mutableStateOf(painter.intrinsicSize) }
+    var size by
+      remember(painter) {
+        val initialSize =
+          (painter as? AsyncImagePainter)?.state?.value?.painter?.intrinsicSize
+            ?: painter.intrinsicSize
+        mutableStateOf(initialSize)
+      }
     if (painter is AsyncImagePainter) {
-      val painterState = painter.state.collectAsState()
-      val intrinsicSize = painterState.value.painter?.intrinsicSize
-      intrinsicSize?.also { size = it }
+      LaunchedEffect(painter) {
+        painter.state.collect { painterState ->
+          painterState.painter?.intrinsicSize?.let { size = it }
+        }
+      }
     }
     return size
   }

@@ -20,6 +20,7 @@ package dev.sasikanth.rss.reader.billing
 import com.revenuecat.purchases.kmp.LogLevel
 import com.revenuecat.purchases.kmp.Purchases
 import com.revenuecat.purchases.kmp.PurchasesConfiguration
+import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.initializers.Initializer
 import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.platform
@@ -27,7 +28,7 @@ import dev.sasikanth.rss.reader.utils.Constants
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-actual class BillingInitializer : Initializer {
+actual class BillingInitializer(private val appInfo: AppInfo) : Initializer {
 
   actual override fun initialize() {
     val publicApiKey =
@@ -37,7 +38,9 @@ actual class BillingInitializer : Initializer {
         "appl_zvvXwxUBoQIpsOIOQeKPJDYzkNh"
       }
 
-    Purchases.logLevel = LogLevel.DEBUG
+    if (appInfo.isDebugBuild) {
+      Purchases.logLevel = LogLevel.DEBUG
+    }
     Purchases.configure(
       PurchasesConfiguration.Builder(publicApiKey)
         .userDefaultsSuiteName(Constants.IOS_APP_GROUP)

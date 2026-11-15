@@ -102,8 +102,8 @@ class RDFContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
 
     var title: String? = null
     var link: String? = null
-    var description: String? = null
-    var rawContent: String? = null
+    var rawDescription: String? = null
+    var rawContentEncoded: String? = null
     var date: String? = null
     var image: String? = null
 
@@ -115,12 +115,11 @@ class RDFContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
         link.isNullOrBlank() && name == TAG_LINK -> {
           link = parser.nextText()
         }
-        name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
-          val postContent = parsePostContent(parser)
-
-          rawContent = postContent.rawContent
-          image = postContent.heroImage ?: image
-          description = postContent.textContent
+        name == TAG_DESCRIPTION -> {
+          rawDescription = parser.nextText().trimIndent()
+        }
+        name == TAG_CONTENT_ENCODED -> {
+          rawContentEncoded = parser.nextText().trimIndent()
         }
         name == TAG_PUB_DATE || name == TAG_DC_DATE -> {
           date = parser.nextText()
@@ -129,12 +128,15 @@ class RDFContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
       }
     }
 
+    val postContent =
+      resolveDeferredPostContent(primaryHtml = rawContentEncoded, secondaryHtml = rawDescription)
+
     return createPostPayload(
       title = title,
       link = link,
-      description = description,
-      rawContent = rawContent,
-      imageUrl = image,
+      description = postContent?.textContent,
+      rawContent = postContent?.rawContent,
+      imageUrl = postContent?.heroImage ?: image,
       audioUrl = null,
       date = date,
       hostLink = hostLink,

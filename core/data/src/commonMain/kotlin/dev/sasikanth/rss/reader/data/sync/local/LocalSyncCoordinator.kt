@@ -192,6 +192,7 @@ class LocalSyncCoordinator(
       feedId = feed.id,
       feedLastCleanUpAt = feed.lastCleanUpAt,
       updateFeed = false,
+      updateWidgets = false,
     )
 
     val finalPostCount = rssRepository.postsCountForFeed(feed.id)
@@ -207,6 +208,7 @@ class LocalSyncCoordinator(
 
   private suspend fun checkAndRefreshLastRefreshTime(block: suspend () -> Unit) {
     withContext(dispatchersProvider.default) {
+      val hasLastRefreshedAt = refreshPolicy.hasLastRefreshedAt()
       val activeSource = observableActiveSource.activeSource.firstOrNull()
       val postsType = settingsRepository.postsType.first()
       val lastRefreshedAtDateTime = refreshPolicy.lastRefreshedAtFlow.first()
@@ -228,7 +230,7 @@ class LocalSyncCoordinator(
 
       block()
 
-      if (allPostsCount == 0L) {
+      if (!hasLastRefreshedAt || allPostsCount == 0L) {
         refreshPolicy.updateLastRefreshedAt()
       }
     }

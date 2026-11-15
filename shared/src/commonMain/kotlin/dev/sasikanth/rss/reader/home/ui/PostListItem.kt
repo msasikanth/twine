@@ -70,6 +70,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
+import coil3.size.Size
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
@@ -88,6 +89,7 @@ private val CompactPostListDefaultPadding = PaddingValues(horizontal = 24.dp, ve
 private val PostItemCornerRadius = 24.dp
 private val PostItemShape = RoundedCornerShape(PostItemCornerRadius)
 private val FeedIconShape = RoundedCornerShape(25)
+private val PostListImageSize = Size(256, 256)
 
 internal val postListPadding: PaddingValues
   @Composable
@@ -197,6 +199,7 @@ internal fun PostListItem(
                 modifier = Modifier.aspectRatio(1f).clip(FeedIconShape),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
+                size = PostListImageSize,
               )
             }
           }
@@ -322,6 +325,7 @@ internal fun SimplePostListItem(
                 modifier = Modifier.aspectRatio(1f).clip(FeedIconShape),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
+                size = PostListImageSize,
               )
             }
           }
@@ -422,7 +426,17 @@ internal fun CompactPostListItem(
           .padding(contentPadding)
           .graphicsLayer { this.alpha = alpha },
     ) {
-      Box(modifier = Modifier.requiredSize(24.dp).graphicsLayer(compositingStrategy = Offscreen)) {
+      val showUnreadIndicator = postMetadataConfig.showUnreadIndicator && !readStatus
+      Box(
+        modifier =
+          Modifier.requiredSize(24.dp).let { base ->
+            if (showUnreadIndicator) {
+              base.graphicsLayer(compositingStrategy = Offscreen)
+            } else {
+              base
+            }
+          }
+      ) {
         FeedIcon(
           icon = item.feedIcon,
           homepageLink = item.feedHomepageLink,
@@ -434,7 +448,7 @@ internal fun CompactPostListItem(
               .align(Alignment.Center),
         )
 
-        if (!item.read) {
+        if (showUnreadIndicator) {
           Box(
             modifier =
               Modifier.align(Alignment.TopEnd)

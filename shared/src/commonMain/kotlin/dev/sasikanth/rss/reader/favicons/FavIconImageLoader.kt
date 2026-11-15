@@ -20,16 +20,25 @@ package dev.sasikanth.rss.reader.favicons
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.annotation.ExperimentalCoilApi
+import coil3.disk.DiskCache
+import coil3.memory.MemoryCache
 import coil3.network.CacheStrategy
 import coil3.network.ktor3.asNetworkClient
+import coil3.svg.SvgDecoder
 import io.ktor.client.HttpClient
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.updateAndGet
+import okio.Path.Companion.toPath
 
 object FavIconImageLoader {
 
   private val reference = atomic<ImageLoader?>(null)
+  private val configuredCachePath = atomic<String?>(null)
   private val httpClient = lazy { HttpClient() }
+
+  fun configure(cachePath: String) {
+    configuredCachePath.value = cachePath
+  }
 
   fun get(context: PlatformContext): ImageLoader {
     return reference.value ?: newImageLoader(context)
@@ -39,6 +48,7 @@ object FavIconImageLoader {
   private fun newImageLoader(context: PlatformContext): ImageLoader {
     var imageLoader: ImageLoader? = null
     val sharedHttpClient = httpClient
+    val cachePath = configuredCachePath.value
 
     return reference.updateAndGet { value ->
       when {
@@ -47,12 +57,27 @@ object FavIconImageLoader {
         else -> {
           ImageLoader.Builder(context)
             .components {
+              add(FavIconFetcher.SizeInterceptor)
+              add(SvgDecoder.Factory())
               add(
                 FavIconFetcher.Factory(
                   networkClient = { sharedHttpClient.value.asNetworkClient() },
                   cacheStrategy = { CacheStrategy.DEFAULT },
                 )
               )
+            }
+            .memoryCache { MemoryCache.Builder().maxSizePercent(context, percent = 0.05).build() }
+            .apply {
+              if (cachePath != null) {
+                diskCache {
+                  DiskCache.Builder()
+                    .directory(
+                      cachePath.toPath().resolve("dev_sasikanth_rss_reader_favicons_cache")
+                    )
+                    .maxSizePercent(0.02)
+                    .build()
+                }
+              }
             }
             .build()
             .also { imageLoader = it }

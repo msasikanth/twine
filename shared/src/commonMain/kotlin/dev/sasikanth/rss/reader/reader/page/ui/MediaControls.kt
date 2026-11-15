@@ -75,13 +75,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.Morph
 import com.mikepenz.markdown.compose.components.CurrentComponentsBridge.text
@@ -98,7 +105,7 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.toClipEntry
-import dev.sasikanth.rss.reader.utils.toShape
+import dev.sasikanth.rss.reader.utils.toComposePath
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -294,7 +301,7 @@ internal fun MediaControls(
         }
       }
 
-      val progress by animateFloatAsState(if (isPlaying) 1f else 0f)
+      val morphProgressState = animateFloatAsState(if (isPlaying) 1f else 0f)
       val buttonSize by
         animateDpAsState(
           if (isPlaying) {
@@ -311,30 +318,64 @@ internal fun MediaControls(
       val fabMorph = remember {
         Morph(start = MaterialShapes.Circle, end = MaterialShapes.Cookie9Sided)
       }
-      val infiniteTransition = rememberInfiniteTransition(label = "playButtonRotation")
-      val rotationAngle by
-        infiniteTransition.animateFloat(
-          initialValue = 0f,
-          targetValue = 360f,
-          animationSpec =
-            infiniteRepeatable(animation = tween(durationMillis = 6000, easing = LinearEasing)),
-          label = "playButtonRotatingAngle",
-        )
+      val rotationAngleState =
+        if (isPlaying) {
+          val infiniteTransition = rememberInfiniteTransition(label = "playButtonRotation")
+          infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec =
+              infiniteRepeatable(animation = tween(durationMillis = 6000, easing = LinearEasing)),
+            label = "playButtonRotatingAngle",
+          )
+        } else {
+          null
+        }
+      val morphShape =
+        remember(fabMorph) {
+          object : Shape {
+            private val path = Path()
+
+            override fun createOutline(
+              size: Size,
+              layoutDirection: LayoutDirection,
+              density: Density,
+            ): Outline {
+              fabMorph.toComposePath(
+                progress = morphProgressState.value,
+                scale = size.minDimension,
+                path = path,
+              )
+              return Outline.Generic(path)
+            }
+          }
+        }
+      val containerColor = AppTheme.colorScheme.primaryContainer
 
       Box(contentAlignment = Alignment.Center, modifier = Modifier.size(64.dp)) {
         // Rotating shape background
         Box(
           modifier =
             Modifier.size(buttonSize)
-              .graphicsLayer { rotationZ = if (isPlaying) rotationAngle else 0f }
-              .background(AppTheme.colorScheme.primaryContainer, fabMorph.toShape(progress))
+              .graphicsLayer { rotationZ = rotationAngleState?.value ?: 0f }
+              .drawWithCache {
+                val path = Path()
+                onDrawBehind {
+                  fabMorph.toComposePath(
+                    progress = morphProgressState.value,
+                    scale = size.minDimension,
+                    path = path,
+                  )
+                  drawPath(path = path, color = containerColor)
+                }
+              }
         )
 
         // Non-rotating icon
         Box(
           modifier =
             Modifier.matchParentSize()
-              .clip(fabMorph.toShape(progress))
+              .clip(morphShape)
               .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,

@@ -198,16 +198,8 @@ struct UnreadLargeProvider: TimelineProvider {
     private let feedIconMaxPixelSize = 24
     private let numberOfPosts = 4
 
-    let component = InjectApplicationComponent(uiViewControllerProvider: {
-        UIViewController()
-    })
-
-    init() {
-        component.initializers
-        .compactMap { ($0 as? any Initializer) }
-        .forEach { initializer in
-            initializer.initialize()
-        }
+    private var component: InjectApplicationComponent {
+        SharedWidgetComponent.instance
     }
 
     private func fetchImage(from urlString: String?, maxPixelSize: Int) async
@@ -383,18 +375,10 @@ struct LargeRefreshIntent: AppIntent {
     static var title: LocalizedStringResource = "Refresh"
 
     func perform() async throws -> some IntentResult {
-        let component = InjectApplicationComponent(uiViewControllerProvider: {
-            UIViewController()
-        })
-
-        component.initializers
-            .compactMap { ($0 as? any Initializer) }
-            .forEach { initializer in
-                initializer.initialize()
-            }
-
+        let component = SharedWidgetComponent.instance
         try await component.syncCoordinator.pull()
-        WidgetCenter.shared.reloadTimelines(ofKind: "TwineUnreadLargeWidget")
+        try? await component.processSyncedPosts()
+        WidgetCenter.shared.reloadAllTimelines()
         return .result()
     }
 }

@@ -35,6 +35,8 @@ sealed interface SettingsEvent {
 
   data class ToggleShowReaderView(val value: Boolean) : SettingsEvent
 
+  data class ToggleAlwaysFetchSourceArticle(val value: Boolean) : SettingsEvent
+
   data class ToggleAutoSync(val value: Boolean) : SettingsEvent
 
   data class ToggleShowFeedFavIcon(val value: Boolean) : SettingsEvent

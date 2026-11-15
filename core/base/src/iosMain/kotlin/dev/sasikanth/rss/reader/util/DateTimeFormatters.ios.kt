@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.util
 
+import kotlin.native.concurrent.ThreadLocal
 import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toNSDate
@@ -34,13 +35,16 @@ import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSLocale
 import platform.Foundation.timeIntervalSince1970
 
-private val dateFormatters by lazy {
-  dateFormatterPatterns.map { pattern ->
-    createDateFormatter(
-      pattern = pattern,
-      timeZone = if (hasTimeZonePattern(pattern)) null else TimeZone.UTC,
-    )
-  }
+@ThreadLocal
+private object ThreadLocalDateParsers {
+  val calendar = NSCalendar(NSCalendarIdentifierGregorian)
+  val formatters =
+    dateFormatterPatterns.map { pattern ->
+      createDateFormatter(
+        pattern = pattern,
+        timeZone = if (hasTimeZonePattern(pattern)) null else TimeZone.UTC,
+      )
+    }
 }
 
 @Throws(DateTimeFormatException::class)
@@ -49,11 +53,12 @@ actual fun String?.dateStringToEpochMillis(clock: Clock): Long? {
 
   try {
     val dateString = this.trim()
-    val date = dateFormatters.firstNotNullOfOrNull { it.dateFromString(dateString) }
+    val parsers = ThreadLocalDateParsers
+    val date = parsers.formatters.firstNotNullOfOrNull { it.dateFromString(dateString) }
 
     if (date != null) {
       val currentDate = clock.now().toNSDate()
-      val calendar = NSCalendar(NSCalendarIdentifierGregorian)
+      val calendar = parsers.calendar
 
       val currentYear = calendar.component(NSCalendarUnitYear, currentDate)
       val parsedYear = calendar.component(NSCalendarUnitYear, date)
@@ -70,7 +75,6 @@ actual fun String?.dateStringToEpochMillis(clock: Clock): Long? {
           date,
         )
 
-      // 2000 seems to be the default year for gregorian calendar in iOS?
       updatedDateComponents.year =
         if (parsedYear > 2000) {
           parsedYear

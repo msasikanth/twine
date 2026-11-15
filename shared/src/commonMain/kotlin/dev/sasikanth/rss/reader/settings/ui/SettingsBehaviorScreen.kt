@@ -16,11 +16,15 @@
  */
 package dev.sasikanth.rss.reader.settings.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -43,6 +47,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.PagingData
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.app.AppPlatform
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
@@ -71,6 +76,8 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.settingsAlwaysFetchSourceArticleSubtitle
+import twine.shared.generated.resources.settingsAlwaysFetchSourceArticleTitle
 import twine.shared.generated.resources.settingsBrowserTypeSubtitle
 import twine.shared.generated.resources.settingsBrowserTypeTitle
 import twine.shared.generated.resources.settingsConfirmMarkAllAsReadSubtitle
@@ -111,7 +118,7 @@ internal fun SettingsBehaviorScreen(
 
   SettingsBehaviorContent(
     state = state,
-    sources = viewModel.sources,
+    sources = { viewModel.sources },
     dispatch = viewModel::dispatch,
     snackbarHostState = snackbarHostState,
     goBack = goBack,
@@ -123,7 +130,7 @@ internal fun SettingsBehaviorScreen(
 @Composable
 private fun SettingsBehaviorContent(
   state: SettingsState,
-  sources: Flow<PagingData<Source>>,
+  sources: () -> Flow<PagingData<Source>>,
   dispatch: (SettingsEvent) -> Unit,
   snackbarHostState: SnackbarHostState,
   goBack: () -> Unit,
@@ -132,6 +139,9 @@ private fun SettingsBehaviorContent(
 ) {
   val layoutDirection = LocalLayoutDirection.current
   var showDefaultSourcePicker by remember { mutableStateOf(false) }
+  val sourceFlow = remember(sources) { sources() }
+  val defaultSources = sourceFlow.collectAsLazyPagingItems()
+  val defaultSourceListState = rememberLazyListState()
 
   Scaffold(
     modifier = modifier,
@@ -183,7 +193,9 @@ private fun SettingsBehaviorContent(
 
       if (showDefaultSourcePicker) {
         DefaultSourceSelectionSheet(
-          sources = sources,
+          sources = sourceFlow,
+          defaultSources = defaultSources,
+          listState = defaultSourceListState,
           selectedSourceId = state.defaultSource?.id,
           onSourceSelected = { dispatch(SettingsEvent.OnDefaultSourceChanged(it)) },
           onDismiss = { showDefaultSourcePicker = false },
@@ -209,6 +221,23 @@ private fun SettingsBehaviorContent(
             checked = state.showReaderView,
             onValueChanged = { newValue -> dispatch(SettingsEvent.ToggleShowReaderView(newValue)) },
           )
+        }
+
+        item {
+          AnimatedVisibility(
+            visible = state.showReaderView,
+            enter = expandVertically(),
+            exit = shrinkVertically(),
+          ) {
+            SettingsSwitchItem(
+              title = stringResource(Res.string.settingsAlwaysFetchSourceArticleTitle),
+              subtitle = stringResource(Res.string.settingsAlwaysFetchSourceArticleSubtitle),
+              checked = state.alwaysFetchSourceArticle,
+              onValueChanged = { newValue ->
+                dispatch(SettingsEvent.ToggleAlwaysFetchSourceArticle(newValue))
+              },
+            )
+          }
         }
 
         if (platform !is Platform.Desktop) {
@@ -300,7 +329,7 @@ private fun SettingsBehaviorPreview() {
               platform = AppPlatform.Android,
             )
         ),
-      sources = emptyFlow(),
+      sources = { emptyFlow() },
       dispatch = {},
       snackbarHostState = remember { SnackbarHostState() },
       goBack = {},

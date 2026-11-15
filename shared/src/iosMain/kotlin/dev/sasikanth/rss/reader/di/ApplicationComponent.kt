@@ -16,6 +16,7 @@
  */
 package dev.sasikanth.rss.reader.di
 
+import androidx.compose.ui.graphics.toArgb
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.app.AppPlatform
 import dev.sasikanth.rss.reader.app.isFoss
@@ -27,11 +28,18 @@ import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.utils.NewArticleNotifier
+import dev.sasikanth.rss.reader.data.utils.Constants
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.reader.readability.IosReadabilityRunner
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
+import dev.sasikanth.rss.reader.ui.SeedColorExtractor
+import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.experimental.ExperimentalNativeApi
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 import platform.Foundation.NSBundle
@@ -57,6 +65,39 @@ abstract class ApplicationComponent(
   abstract val widgetDataRepository: WidgetDataRepository
 
   abstract val billingHandler: BillingHandler
+
+  abstract val seedColorExtractor: SeedColorExtractor
+
+  abstract val dispatchersProvider: DispatchersProvider
+
+  suspend fun processSyncedPosts() {
+    withContext(dispatchersProvider.io) {
+      val posts =
+        rssRepository.postsWithImagesAndNoSeedColor(limit = Constants.NUMBER_OF_FEATURED_POSTS * 2)
+
+      val seedColorUpdates = coroutineScope {
+        posts
+          .filter { it.seedColor == null && !it.imageUrl.isNullOrBlank() }
+          .map { post ->
+            async {
+              val seedColor = seedColorExtractor.calculateSeedColor(post.imageUrl)
+              if (seedColor != null) {
+                post.id to seedColor.toArgb()
+              } else {
+                null
+              }
+            }
+          }
+          .awaitAll()
+          .filterNotNull()
+          .toMap()
+      }
+
+      if (seedColorUpdates.isNotEmpty()) {
+        rssRepository.updateSeedColors(seedColorUpdates)
+      }
+    }
+  }
 
   @Provides
   @AppScope

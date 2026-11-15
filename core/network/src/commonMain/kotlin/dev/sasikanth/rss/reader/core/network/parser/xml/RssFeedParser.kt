@@ -132,8 +132,10 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
 
     var title: String? = null
     var link: String? = null
-    var description: String? = null
-    var rawContent: String? = null
+    var rawDescription: String? = null
+    var rawContentEncoded: String? = null
+    var mediaGroupDescription: String? = null
+    var mediaGroupImage: String? = null
     var date: String? = null
     var image: String? = null
     var audioUrl: String? = null
@@ -165,13 +167,11 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
 
           parser.skipSubTree()
         }
-        name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
-          val postContent = parsePostContent(parser)
-
-          rawContent = postContent.rawContent
-          image = postContent.heroImage ?: image
-          description = postContent.textContent
-          audioUrl = audioUrl ?: postContent.audioUrl
+        name == TAG_DESCRIPTION -> {
+          rawDescription = parser.nextText().trimIndent()
+        }
+        name == TAG_CONTENT_ENCODED -> {
+          rawContentEncoded = parser.nextText().trimIndent()
         }
         name == TAG_PUB_DATE -> {
           date = parser.nextText()
@@ -197,20 +197,24 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
         }
         name == TAG_MEDIA_GROUP -> {
           val mediaGroupResult = readMediaGroup(parser)
-          image = mediaGroupResult.image ?: image
-          description = description.orEmpty().ifBlank { mediaGroupResult.description }
+          mediaGroupImage = mediaGroupResult.image ?: mediaGroupImage
+          mediaGroupDescription =
+            mediaGroupDescription.orEmpty().ifBlank { mediaGroupResult.description }
         }
         else -> parser.skipSubTree()
       }
     }
 
+    val postContent =
+      resolveDeferredPostContent(primaryHtml = rawContentEncoded, secondaryHtml = rawDescription)
+
     return createPostPayload(
       title = title,
       link = link,
-      description = description,
-      rawContent = rawContent,
-      imageUrl = image,
-      audioUrl = audioUrl,
+      description = postContent?.textContent?.ifBlank { null } ?: mediaGroupDescription,
+      rawContent = postContent?.rawContent,
+      imageUrl = mediaGroupImage ?: postContent?.heroImage ?: image,
+      audioUrl = audioUrl ?: postContent?.audioUrl,
       date = date,
       commentsLink = commentsLink,
       hostLink = hostLink,

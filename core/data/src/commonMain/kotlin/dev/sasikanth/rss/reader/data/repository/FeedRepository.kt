@@ -159,7 +159,20 @@ class FeedRepository(
 
   suspend fun updateFeedAlwaysFetchSource(feedId: String, newValue: Boolean) {
     withContext(dispatchersProvider.databaseWrite) {
-      feedQueries.updateAlwaysFetchSourceArticle(newValue, feedId)
+      feedQueries.updateAlwaysFetchSourceArticle(
+        alwaysFetchSourceArticle = newValue,
+        lastUpdatedAt = Clock.System.now(),
+        id = feedId,
+      )
+    }
+  }
+
+  suspend fun updateAllFeedsAlwaysFetchSource(newValue: Boolean) {
+    withContext(dispatchersProvider.databaseWrite) {
+      feedQueries.updateAlwaysFetchSourceArticleForAll(
+        alwaysFetchSourceArticle = newValue,
+        lastUpdatedAt = Clock.System.now(),
+      )
     }
   }
 

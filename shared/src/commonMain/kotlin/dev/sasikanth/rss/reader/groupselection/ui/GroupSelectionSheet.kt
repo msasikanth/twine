@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import dev.sasikanth.rss.reader.app.NavResultKey
 import dev.sasikanth.rss.reader.components.InverseButton
 import dev.sasikanth.rss.reader.components.ModalSheet
@@ -113,7 +114,7 @@ fun GroupSelectionSheet(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
       ) {
-        item {
+        item(key = "CreateGroupButton", contentType = "CreateGroupButton") {
           Box(
             modifier =
               Modifier.clip(MaterialTheme.shapes.large)
@@ -140,7 +141,11 @@ fun GroupSelectionSheet(
           }
         }
 
-        items(groups.itemCount) { index ->
+        items(
+          count = groups.itemCount,
+          key = groups.itemKey { it.id },
+          contentType = { "FeedGroupItem" },
+        ) { index ->
           val group = groups[index]
           if (group != null) {
             FeedGroupItem(

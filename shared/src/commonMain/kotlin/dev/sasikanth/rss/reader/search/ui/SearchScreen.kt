@@ -44,6 +44,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -88,6 +89,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
@@ -181,6 +183,7 @@ private fun SearchContent(
   modifier: Modifier = Modifier,
 ) {
   val listState = rememberLazyListState()
+  val sourcePickerListState = rememberLazyListState()
   val coroutineScope = rememberCoroutineScope()
   val showScrollToTop by
     remember(searchResults) {
@@ -249,7 +252,7 @@ private fun SearchContent(
           state = listState,
         ) {
           if (searchResults.itemCount > 0) {
-            item {
+            item(key = "SearchResultsHeader", contentType = "SubHeader") {
               SubHeader(
                 text =
                   pluralStringResource(
@@ -264,14 +267,8 @@ private fun SearchContent(
 
           items(
             count = searchResults.itemCount,
-            key = { index ->
-              val post = searchResults[index]
-              if (post != null) {
-                PostListKey.encode(post)
-              } else {
-                index
-              }
-            },
+            key = searchResults.itemKey { PostListKey.encode(it) },
+            contentType = { "PostListItem" },
           ) { index ->
             val post = searchResults[index]
             if (post != null) {
@@ -324,6 +321,7 @@ private fun SearchContent(
   if (showSourcePicker) {
     SourcePicker(
       sources = sources,
+      listState = sourcePickerListState,
       onSourceSelected = { source ->
         dispatch(SearchEvent.OnSourceChanged(source))
         showSourcePicker = false
@@ -499,6 +497,7 @@ private fun SourcePicker(
   sources: LazyPagingItems<Source>,
   onSourceSelected: (Source) -> Unit,
   onDismiss: () -> Unit,
+  listState: LazyListState = rememberLazyListState(),
 ) {
   val colorScheme = AppTheme.colorScheme
 
@@ -510,8 +509,12 @@ private fun SourcePicker(
     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
       SubHeader(text = stringResource(Res.string.feeds))
 
-      LazyColumn(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.5f)) {
-        items(count = sources.itemCount) { index ->
+      LazyColumn(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.5f), state = listState) {
+        items(
+          count = sources.itemCount,
+          key = sources.itemKey { it.id },
+          contentType = { sources.peek(it)?.sourceType },
+        ) { index ->
           val source = sources[index]
           if (source != null) {
             SourcePickerItem(source = source, onClick = { onSourceSelected(source) })
@@ -661,16 +664,14 @@ private fun SearchSortButton(
       Spacer(Modifier.requiredWidth(4.dp))
     }
 
-    if (isDropdownExpanded) {
-      SortDropdownMenu(
-        isDropdownExpanded = isDropdownExpanded,
-        onDismiss = { isDropdownExpanded = false },
-        onSortOrderChanged = {
-          onSortOrderChanged(it)
-          isDropdownExpanded = false
-        },
-      )
-    }
+    SortDropdownMenu(
+      isDropdownExpanded = isDropdownExpanded,
+      onDismiss = { isDropdownExpanded = false },
+      onSortOrderChanged = {
+        onSortOrderChanged(it)
+        isDropdownExpanded = false
+      },
+    )
   }
 }
 

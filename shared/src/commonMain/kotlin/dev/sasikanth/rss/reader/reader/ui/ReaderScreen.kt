@@ -18,9 +18,11 @@
 package dev.sasikanth.rss.reader.reader.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -58,6 +60,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalWithComputedDefaultOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -91,6 +94,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
@@ -156,6 +160,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.intellij.markdown.MarkdownTokenTypes
@@ -190,12 +195,14 @@ internal fun ReaderScreen(
   val appDynamicColorState = LocalDynamicColorState.current
   val shouldBlockImage = LocalBlockImage.current
 
-  val defaultLight = remember { appDynamicColorState.lightAppColorScheme }
-  val defaultDark = remember { appDynamicColorState.darkAppColorScheme }
+  val defaultLightValues =
+    remember(appDynamicColorState) { appDynamicColorState.lightAppColorScheme.peekValues() }
+  val defaultDarkValues =
+    remember(appDynamicColorState) { appDynamicColorState.darkAppColorScheme.peekValues() }
   val articleDynamicColorState =
     rememberDynamicColorState(
-      defaultLightAppColorScheme = defaultLight.toValues(),
-      defaultDarkAppColorScheme = defaultDark.toValues(),
+      defaultLightAppColorScheme = defaultLightValues,
+      defaultDarkAppColorScheme = defaultDarkValues,
     )
 
   val readerLinkHandler = remember {
@@ -212,19 +219,52 @@ internal fun ReaderScreen(
   // page gets clamped to 0 and the requested index is lost. Restore it exactly once,
   // as soon as the count is available, unless the user has already started swiping.
   val initialPostIndex = remember { state.activePostIndex }
+  val initialPostId = remember { state.activePostId }
   var initialPageRestored by rememberSaveable { mutableStateOf(false) }
-  var anchoredPostId by rememberSaveable { mutableStateOf<String?>(null) }
+  var initialTargetPage by rememberSaveable { mutableStateOf<Int?>(null) }
+  val navTransition = LocalNavAnimatedContentScopeOrNull.current?.transition
+  var hasInitialTransitionSettled by remember {
+    mutableStateOf(showCloseNavIcon || navTransition == null || !navTransition.isTransitioning)
+  }
+  var anchoredPostId by rememberSaveable {
+    mutableStateOf(initialPostId.takeIf { it.isNotBlank() })
+  }
   LaunchedEffect(posts.itemCount) {
     if (!initialPageRestored && posts.itemCount > 0) {
-      if (
-        initialPostIndex in 0 until posts.itemCount &&
-          pagerState.currentPage != initialPostIndex &&
-          !pagerState.isScrollInProgress
-      ) {
-        pagerState.scrollToPage(initialPostIndex)
+      if (!pagerState.isScrollInProgress) {
+        val targetPage =
+          resolveInitialReaderPage(
+            initialPostIndex = initialPostIndex,
+            initialPostId = initialPostId,
+            itemCount = posts.itemCount,
+            peekPostId = { index -> runCatching { posts.peek(index) }.getOrNull()?.id },
+          )
+        initialTargetPage = targetPage
+        if (pagerState.currentPage != targetPage) {
+          pagerState.scrollToPage(targetPage)
+        }
+      } else {
+        anchoredPostId = runCatching { posts.peek(pagerState.currentPage) }.getOrNull()?.id
       }
-      anchoredPostId = runCatching { posts.peek(pagerState.currentPage) }.getOrNull()?.id
       initialPageRestored = true
+    }
+  }
+
+  LaunchedEffect(navTransition, showCloseNavIcon, pagerState) {
+    if (!hasInitialTransitionSettled) {
+      if (showCloseNavIcon || navTransition == null) {
+        hasInitialTransitionSettled = true
+      } else {
+        snapshotFlow { !navTransition.isTransitioning || pagerState.isScrollInProgress }
+          .first { it }
+        hasInitialTransitionSettled = true
+      }
+    }
+  }
+
+  LaunchedEffect(hasInitialTransitionSettled) {
+    if (hasInitialTransitionSettled) {
+      viewModel.dispatch(ReaderEvent.OnInitialTransitionSettled)
     }
   }
 
@@ -232,7 +272,15 @@ internal fun ReaderScreen(
     snapshotFlow { pagerState.settledPage }
       .collect { page ->
         if (!initialPageRestored) return@collect
-        runCatching { posts.peek(page) }.getOrNull()?.let { anchoredPostId = it.id }
+        val postAtPage = runCatching { posts.peek(page) }.getOrNull() ?: return@collect
+        if (
+          anchoredPostId == initialPostId &&
+            page == initialTargetPage &&
+            postAtPage.id != initialPostId
+        ) {
+          return@collect
+        }
+        anchoredPostId = postAtPage.id
       }
   }
 
@@ -253,7 +301,9 @@ internal fun ReaderScreen(
           return@collect
         }
 
-        val anchorIndex = posts.indexOfPostNear(postId = anchor, page = page, itemCount = itemCount)
+        val anchorIndex =
+          posts.indexOfPostNear(postId = anchor, page = page, itemCount = itemCount)
+            ?: posts.indexOfPost(postId = anchor, itemCount = itemCount)
         if (anchorIndex != null && anchorIndex != page) {
           pagerState.scrollToPage(anchorIndex)
         }
@@ -281,23 +331,64 @@ internal fun ReaderScreen(
   // in the reader pane would clash with it.
   val isDynamicColorEnabled =
     state.selectedThemeVariant == ThemeVariant.Dynamic && !showCloseNavIcon
+  val settledPost = runCatching { posts.peek(pagerState.settledPage) }.getOrNull()
+  val isSettledPostLoaded = settledPost != null
 
-  LaunchedEffect(isDynamicColorEnabled) {
-    if (!isDynamicColorEnabled) {
+  LaunchedEffect(isDynamicColorEnabled, shouldBlockImage, articleDynamicColorState) {
+    if (!isDynamicColorEnabled || shouldBlockImage) {
       articleDynamicColorState.reset()
+    }
+  }
+
+  LaunchedEffect(
+    pagerState.settledPage,
+    posts.itemCount,
+    isSettledPostLoaded,
+    isDynamicColorEnabled,
+    shouldBlockImage,
+    hasInitialTransitionSettled,
+  ) {
+    if (!isDynamicColorEnabled || shouldBlockImage || posts.itemCount == 0) return@LaunchedEffect
+
+    val settledPage = pagerState.settledPage
+    val pageRange =
+      if (hasInitialTransitionSettled) {
+        (settledPage - 1).coerceAtLeast(0)..(settledPage + 1).coerceAtMost(posts.itemCount - 1)
+      } else {
+        settledPage.coerceIn(0, posts.itemCount - 1)..settledPage.coerceIn(0, posts.itemCount - 1)
+      }
+
+    for (page in pageRange) {
+      val imageUrl = runCatching { posts.peek(page) }.getOrNull()?.imageUrl
+      if (!imageUrl.isNullOrBlank()) {
+        launch { seedColorExtractor.calculateSeedColor(url = imageUrl) }
+      }
     }
   }
 
   pagerState.CollectItemTransition(
     posts.itemCount,
+    isSettledPostLoaded,
     isDynamicColorEnabled,
+    shouldBlockImage,
+    articleDynamicColorState,
     itemProvider = { index ->
-      if (shouldBlockImage || posts.itemCount == 0) null else posts.peek(index)
+      if (shouldBlockImage || index !in 0 until posts.itemCount) {
+        null
+      } else {
+        runCatching { posts.peek(index) }.getOrNull()
+      }
     },
   ) { fromItem, toItem, offset ->
     if (isDynamicColorEnabled) {
-      val fromSeedColor = seedColorExtractor.calculateSeedColor(url = fromItem?.imageUrl)
-      val toSeedColor = seedColorExtractor.calculateSeedColor(url = toItem?.imageUrl)
+      val fromUrl = fromItem?.imageUrl
+      val toUrl = toItem?.imageUrl
+      val fromSeedColor =
+        seedColorExtractor.cachedSeedColor(url = fromUrl)
+          ?: seedColorExtractor.calculateSeedColor(url = fromUrl)
+      val toSeedColor =
+        seedColorExtractor.cachedSeedColor(url = toUrl)
+          ?: seedColorExtractor.calculateSeedColor(url = toUrl)
 
       articleDynamicColorState.animate(
         fromSeedColor = fromSeedColor,
@@ -355,11 +446,13 @@ internal fun ReaderScreen(
       ReaderFont.Outfit -> OutfitFontFamily
     }
   val typography =
-    typography(
-      fontFamily = fontFamily,
-      fontScalingFactor = state.readerFontScaleFactor,
-      lineHeightScalingFactor = state.readerLineHeightScaleFactor,
-    )
+    remember(fontFamily, state.readerFontScaleFactor, state.readerLineHeightScaleFactor) {
+      typography(
+        fontFamily = fontFamily,
+        fontScalingFactor = state.readerFontScaleFactor,
+        lineHeightScalingFactor = state.readerLineHeightScaleFactor,
+      )
+    }
 
   CompositionLocalProvider(
     LocalDynamicColorState provides articleDynamicColorState,
@@ -539,163 +632,142 @@ internal fun ReaderScreen(
               bottom = readerActionsPanelBottomInset() + READER_ACTIONS_PANEL_COLLAPSED_HEIGHT,
             )
 
-          HorizontalPager(
-            modifier =
-              Modifier.widthIn(max = readerContentMaxWidth)
-                .fillMaxSize()
-                .align(Alignment.Center)
-                .iosBottomSafeAreaPadding(),
-            state = pagerState,
-            overscrollEffect = null,
-            beyondViewportPageCount = 1,
-            contentPadding =
-              PaddingValues(
-                start = paddingValues.calculateStartPadding(layoutDirection),
-                end = paddingValues.calculateEndPadding(layoutDirection),
-              ),
-            key = {
-              runCatching {
-                  val post = posts.peek(it)
-                  post?.let { post.id + post.sourceId }
-                }
-                .getOrNull() ?: it
-            },
-          ) { page ->
-            val readerPost = posts[page]
-
-            if (readerPost != null) {
-              val pageViewModel = pageViewModelFactory.invoke(readerPost)
-              val showFullArticle by pageViewModel.showFullArticle.collectAsStateWithLifecycle()
-              val highlightsBuilder =
-                remember(isDarkTheme) {
-                  Highlights.Builder().theme(SyntaxThemes.atom(darkMode = isDarkTheme))
-                }
-              val markdownComponents =
-                remember(isDarkTheme) {
-                  markdownComponents(
-                    text = { cm ->
-                      SafeMarkdownText(
-                        content = cm.node.safeUnescapedTextInNode(cm.content),
-                        node = cm.node,
-                        style = cm.typography.text,
-                      )
-                    },
-                    heading1 = { cm ->
-                      SafeMarkdownHeader(
-                        content = cm.content,
-                        node = cm.node,
-                        style = cm.typography.h1,
-                      )
-                    },
-                    heading2 = { cm ->
-                      SafeMarkdownHeader(
-                        content = cm.content,
-                        node = cm.node,
-                        style = cm.typography.h2,
-                      )
-                    },
-                    heading3 = { cm ->
-                      SafeMarkdownHeader(
-                        content = cm.content,
-                        node = cm.node,
-                        style = cm.typography.h3,
-                      )
-                    },
-                    heading4 = { cm ->
-                      SafeMarkdownHeader(
-                        content = cm.content,
-                        node = cm.node,
-                        style = cm.typography.h4,
-                      )
-                    },
-                    heading5 = { cm ->
-                      SafeMarkdownHeader(
-                        content = cm.content,
-                        node = cm.node,
-                        style = cm.typography.h5,
-                      )
-                    },
-                    heading6 = { cm ->
-                      SafeMarkdownHeader(
-                        content = cm.content,
-                        node = cm.node,
-                        style = cm.typography.h6,
-                      )
-                    },
-                    setextHeading1 = { cm ->
-                      SafeMarkdownHeader(
-                        content = cm.content,
-                        node = cm.node,
-                        style = cm.typography.h1,
-                        contentChildType = MarkdownTokenTypes.SETEXT_CONTENT,
-                      )
-                    },
-                    setextHeading2 = { cm ->
-                      SafeMarkdownHeader(
-                        content = cm.content,
-                        node = cm.node,
-                        style = cm.typography.h2,
-                        contentChildType = MarkdownTokenTypes.SETEXT_CONTENT,
-                      )
-                    },
-                    paragraph = { cm ->
-                      SafeMarkdownParagraph(
-                        content = cm.content,
-                        node = cm.node,
-                        style = cm.typography.paragraph,
-                      )
-                    },
-                    checkbox = { cm ->
-                      SafeMarkdownCheckBox(
-                        content = cm.content,
-                        node = cm.node,
-                        style = cm.typography.text,
-                      )
-                    },
-                    table = { cm -> ReaderMarkdownTable(cm) },
-                    codeBlock = { cm ->
-                      MarkdownHighlightedCodeBlock(
-                        content = cm.content,
-                        node = cm.node,
-                        highlightsBuilder = highlightsBuilder,
-                        showHeader = true,
-                      )
-                    },
-                    codeFence = { cm ->
-                      MarkdownHighlightedCodeFence(
-                        content = cm.content,
-                        node = cm.node,
-                        highlightsBuilder = highlightsBuilder,
-                        showHeader = true,
-                      )
-                    },
-                  )
-                }
-              ReaderPage(
-                modifier = Modifier.fillMaxSize(),
-                contentPaddingValues = readerContentPadding,
-                pageViewModel = pageViewModel,
-                readerPost = readerPost,
-                showFullArticle = showFullArticle,
-                page = page,
-                pagerState = pagerState,
-                markdownComponents = markdownComponents,
-                isDarkTheme = isDarkTheme,
-                themeVariant = state.selectedThemeVariant,
-                fromScreen = state.fromScreen,
-                onBookmarkClick = {
-                  viewModel.dispatch(
-                    ReaderEvent.TogglePostBookmark(
-                      postId = readerPost.id,
-                      currentBookmarkStatus = readerPost.bookmarked,
-                    )
+          val highlightsBuilder =
+            remember(isDarkTheme) {
+              Highlights.Builder().theme(SyntaxThemes.atom(darkMode = isDarkTheme))
+            }
+          val markdownComponents =
+            remember(isDarkTheme, highlightsBuilder) {
+              markdownComponents(
+                text = { cm ->
+                  SafeMarkdownText(
+                    content = cm.node.safeUnescapedTextInNode(cm.content),
+                    node = cm.node,
+                    style = cm.typography.text,
                   )
                 },
-                onMarkAsUnread = {
-                  viewModel.dispatch(ReaderEvent.OnMarkAsUnread(postId = readerPost.id))
+                heading1 = { cm ->
+                  SafeMarkdownHeader(content = cm.content, node = cm.node, style = cm.typography.h1)
                 },
-                onImageClick = onImageClick,
+                heading2 = { cm ->
+                  SafeMarkdownHeader(content = cm.content, node = cm.node, style = cm.typography.h2)
+                },
+                heading3 = { cm ->
+                  SafeMarkdownHeader(content = cm.content, node = cm.node, style = cm.typography.h3)
+                },
+                heading4 = { cm ->
+                  SafeMarkdownHeader(content = cm.content, node = cm.node, style = cm.typography.h4)
+                },
+                heading5 = { cm ->
+                  SafeMarkdownHeader(content = cm.content, node = cm.node, style = cm.typography.h5)
+                },
+                heading6 = { cm ->
+                  SafeMarkdownHeader(content = cm.content, node = cm.node, style = cm.typography.h6)
+                },
+                setextHeading1 = { cm ->
+                  SafeMarkdownHeader(
+                    content = cm.content,
+                    node = cm.node,
+                    style = cm.typography.h1,
+                    contentChildType = MarkdownTokenTypes.SETEXT_CONTENT,
+                  )
+                },
+                setextHeading2 = { cm ->
+                  SafeMarkdownHeader(
+                    content = cm.content,
+                    node = cm.node,
+                    style = cm.typography.h2,
+                    contentChildType = MarkdownTokenTypes.SETEXT_CONTENT,
+                  )
+                },
+                paragraph = { cm ->
+                  SafeMarkdownParagraph(
+                    content = cm.content,
+                    node = cm.node,
+                    style = cm.typography.paragraph,
+                  )
+                },
+                checkbox = { cm ->
+                  SafeMarkdownCheckBox(
+                    content = cm.content,
+                    node = cm.node,
+                    style = cm.typography.text,
+                  )
+                },
+                table = { cm -> ReaderMarkdownTable(cm) },
+                codeBlock = { cm ->
+                  MarkdownHighlightedCodeBlock(
+                    content = cm.content,
+                    node = cm.node,
+                    highlightsBuilder = highlightsBuilder,
+                    showHeader = true,
+                  )
+                },
+                codeFence = { cm ->
+                  MarkdownHighlightedCodeFence(
+                    content = cm.content,
+                    node = cm.node,
+                    highlightsBuilder = highlightsBuilder,
+                    showHeader = true,
+                  )
+                },
               )
+            }
+
+          if (posts.itemCount > 0) {
+            HorizontalPager(
+              modifier =
+                Modifier.widthIn(max = readerContentMaxWidth)
+                  .fillMaxSize()
+                  .align(Alignment.Center)
+                  .iosBottomSafeAreaPadding(),
+              state = pagerState,
+              overscrollEffect = null,
+              beyondViewportPageCount = if (hasInitialTransitionSettled) 1 else 0,
+              contentPadding =
+                PaddingValues(
+                  start = paddingValues.calculateStartPadding(layoutDirection),
+                  end = paddingValues.calculateEndPadding(layoutDirection),
+                ),
+              key = {
+                runCatching {
+                    val post = posts.peek(it)
+                    post?.let { post.id + post.sourceId }
+                  }
+                  .getOrNull() ?: it
+              },
+            ) { page ->
+              val readerPost = posts[page]
+
+              if (readerPost != null) {
+                val pageViewModel = pageViewModelFactory.invoke(readerPost)
+                val showFullArticle by pageViewModel.showFullArticle.collectAsStateWithLifecycle()
+                ReaderPage(
+                  modifier = Modifier.fillMaxSize(),
+                  contentPaddingValues = readerContentPadding,
+                  pageViewModel = pageViewModel,
+                  readerPost = readerPost,
+                  showFullArticle = showFullArticle,
+                  page = page,
+                  pagerState = pagerState,
+                  markdownComponents = markdownComponents,
+                  isDarkTheme = isDarkTheme,
+                  themeVariant = state.selectedThemeVariant,
+                  fromScreen = state.fromScreen,
+                  onBookmarkClick = {
+                    viewModel.dispatch(
+                      ReaderEvent.TogglePostBookmark(
+                        postId = readerPost.id,
+                        currentBookmarkStatus = readerPost.bookmarked,
+                      )
+                    )
+                  },
+                  onMarkAsUnread = {
+                    viewModel.dispatch(ReaderEvent.OnMarkAsUnread(postId = readerPost.id))
+                  },
+                  onImageClick = onImageClick,
+                )
+              }
             }
           }
 
@@ -710,12 +782,6 @@ internal fun ReaderScreen(
             )
           }
 
-          val settledPost =
-            try {
-              posts.peek(pagerState.settledPage)
-            } catch (_: IndexOutOfBoundsException) {
-              null
-            }
           if (settledPost != null) {
             val settledPageViewModel = pageViewModelFactory.invoke(settledPost)
             val showFullArticle by
@@ -1096,6 +1162,37 @@ private fun ReaderPanelPlayer(
   }
 }
 
+private val LocalNavAnimatedContentScopeOrNull =
+  compositionLocalWithComputedDefaultOf<AnimatedContentScope?> {
+    runCatching { LocalNavAnimatedContentScope.currentValue }.getOrNull()
+  }
+
+private val Transition<*>.isTransitioning: Boolean
+  get() = isRunning || currentState != targetState
+
+internal fun resolveInitialReaderPage(
+  initialPostIndex: Int,
+  initialPostId: String,
+  itemCount: Int,
+  peekPostId: (Int) -> String?,
+): Int {
+  if (itemCount <= 0) return 0
+  val clampedIndex = initialPostIndex.coerceIn(0, itemCount - 1)
+  if (initialPostId.isBlank()) return clampedIndex
+
+  if (peekPostId(clampedIndex) == initialPostId) {
+    return clampedIndex
+  }
+
+  for (index in 0 until itemCount) {
+    if (peekPostId(index) == initialPostId) {
+      return index
+    }
+  }
+
+  return clampedIndex
+}
+
 private const val ANCHOR_SEARCH_RADIUS = 25
 
 private fun LazyPagingItems<ResolvedPost>.indexOfPostNear(
@@ -1108,6 +1205,13 @@ private fun LazyPagingItems<ResolvedPost>.indexOfPostNear(
       if (index < 0 || index >= itemCount) continue
       if (runCatching { peek(index) }.getOrNull()?.id == postId) return index
     }
+  }
+  return null
+}
+
+private fun LazyPagingItems<ResolvedPost>.indexOfPost(postId: String, itemCount: Int): Int? {
+  for (index in 0 until itemCount) {
+    if (runCatching { peek(index) }.getOrNull()?.id == postId) return index
   }
   return null
 }

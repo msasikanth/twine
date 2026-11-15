@@ -13,7 +13,8 @@ END;
 
 CREATE TRIGGER IF NOT EXISTS
 feed_search_fts_AFTER_UPDATE
-AFTER UPDATE ON feed
+AFTER UPDATE OF name ON feed
+WHEN old.name != new.name
 BEGIN UPDATE OR IGNORE feed_search SET name = new.name WHERE id = new.id;
 END;
 

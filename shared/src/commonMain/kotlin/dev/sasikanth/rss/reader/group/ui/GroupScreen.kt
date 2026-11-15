@@ -55,7 +55,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.ContextActionItem
@@ -215,7 +214,7 @@ private fun GroupContent(
       items(
         count = feeds.itemCount,
         key = feeds.itemKey { it.id },
-        contentType = feeds.itemContentType { it.id },
+        contentType = { "FeedListItem" },
       ) { index ->
         val feed = feeds[index]
         if (feed != null) {

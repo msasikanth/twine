@@ -18,21 +18,29 @@
 package dev.sasikanth.rss.reader.data.sync
 
 import co.touchlab.kermit.Logger
+import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.local.PostFlag
 import dev.sasikanth.rss.reader.data.database.AppConfigQueries
+import dev.sasikanth.rss.reader.data.database.PostContentQueries
+import dev.sasikanth.rss.reader.data.database.PostQueries
+import dev.sasikanth.rss.reader.data.database.ReadingHistoryQueries
+import dev.sasikanth.rss.reader.data.database.TransactionRunner
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.BlockedWordsRepository
 import dev.sasikanth.rss.reader.data.repository.PostContentRepository
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.UserRepository
+import dev.sasikanth.rss.reader.data.utils.ReadingTimeCalculator
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import me.tatarka.inject.annotations.Inject
 
@@ -45,155 +53,183 @@ class FileCloudSyncService(
   private val userRepository: UserRepository,
   private val settingsRepository: SettingsRepository,
   private val appConfigQueries: AppConfigQueries,
+  private val postQueries: PostQueries,
+  private val postContentQueries: PostContentQueries,
+  private val readingHistoryQueries: ReadingHistoryQueries,
+  private val transactionRunner: TransactionRunner,
+  private val readingTimeCalculator: ReadingTimeCalculator,
+  private val widgetUpdater: WidgetUpdater,
   private val refreshPolicy: RefreshPolicy,
+  private val dispatchersProvider: DispatchersProvider,
 ) {
 
   private val json: Json = Json { ignoreUnknownKeys = true }
 
-  suspend fun sync(provider: FileCloudServiceProvider): Boolean {
-    try {
-      userRepository.updateLastSyncStatus("SYNCING")
-      val config = appConfigQueries.getSyncConfig().executeAsOneOrNull()
-      val currentSyncVersion = config?.syncFormatVersion?.toInt() ?: 1
-
-      val metadataFileName = "/twine_sync_metadata.json"
-      val remoteDataString =
-        provider.download(metadataFileName) ?: provider.download("/twine_sync_data.json")
-
-      if (remoteDataString != null) {
-        var remoteData = json.decodeFromString<SyncData>(remoteDataString)
-
-        if (remoteData.version < currentSyncVersion) {
-          remoteData = migrate(remoteData, currentSyncVersion)
-        }
-
-        val remotePosts = remoteData.posts.toMutableList()
-        remoteData.postChunks.forEach { chunkFileName ->
-          val chunkDataString = provider.download(chunkFileName)
-          if (chunkDataString != null) {
-            val chunkPosts = json.decodeFromString<List<PostSyncEntity>>(chunkDataString)
-            remotePosts.addAll(chunkPosts)
+  suspend fun sync(provider: FileCloudServiceProvider): Boolean =
+    withContext(dispatchersProvider.io) {
+      try {
+        val hasLastRefreshedAt = refreshPolicy.hasLastRefreshedAt()
+        userRepository.updateLastSyncStatus("SYNCING")
+        val config =
+          withContext(dispatchersProvider.databaseRead) {
+            appConfigQueries.getSyncConfig().executeAsOneOrNull()
           }
+        val currentSyncVersion = config?.syncFormatVersion?.toInt() ?: 1
+
+        val metadataFileName = "/twine_sync_metadata.json"
+        val remoteDataString =
+          provider.download(metadataFileName) ?: provider.download("/twine_sync_data.json")
+
+        if (remoteDataString != null) {
+          var remoteData =
+            withContext(dispatchersProvider.default) {
+              json.decodeFromString<SyncData>(remoteDataString)
+            }
+
+          if (remoteData.version < currentSyncVersion) {
+            remoteData = migrate(remoteData, currentSyncVersion)
+          }
+
+          val remotePosts = remoteData.posts.toMutableList()
+          remoteData.postChunks.forEach { chunkFileName ->
+            val chunkDataString = provider.download(chunkFileName)
+            if (chunkDataString != null) {
+              val chunkPosts =
+                withContext(dispatchersProvider.default) {
+                  json.decodeFromString<List<PostSyncEntity>>(chunkDataString)
+                }
+              remotePosts.addAll(chunkPosts)
+            }
+          }
+
+          merge(remoteData.copy(posts = remotePosts))
         }
 
-        merge(remoteData.copy(posts = remotePosts))
-      }
-
-      val feeds =
-        rssRepository.allFeedsBlocking().map {
-          FeedSyncEntity(
-            id = it.id,
-            name = it.name,
-            icon = it.icon,
-            description = it.description,
-            link = it.link,
-            homepageLink = it.homepageLink,
-            pinnedPosition = it.pinnedPosition,
-            pinnedAt = it.pinnedAt?.toEpochMilliseconds(),
-            lastCleanUpAt = it.lastCleanUpAt?.toEpochMilliseconds(),
-            alwaysFetchSourceArticle = it.alwaysFetchSourceArticle,
-            showFeedFavIcon = it.showFeedFavIcon,
-            hideFromAllFeeds = it.hideFromAllFeeds,
-            lastUpdatedAt = it.lastUpdatedAt?.toEpochMilliseconds(),
-            isDeleted = it.isDeleted,
-          )
-        }
-
-      val groups =
-        rssRepository.allFeedGroupsBlocking().map {
-          GroupSyncEntity(
-            id = it.id,
-            name = it.name,
-            feedIds = it.feedIds,
-            pinnedPosition = it.pinnedPosition,
-            pinnedAt = it.pinnedAt?.toEpochMilliseconds(),
-            updatedAt = it.updatedAt.toEpochMilliseconds(),
-            isDeleted = it.isDeleted,
-          )
-        }
-
-      val bookmarks = rssRepository.allBookmarkIdsBlocking()
-
-      val blockedWords =
-        blockedWordsRepository.allBlockedWordsBlocking().map {
-          BlockedWordSyncEntity(
-            id = it.id.toString(),
-            content = it.content,
-            isDeleted = it.isDeleted,
-            updatedAt = it.updatedAt.toEpochMilliseconds(),
-          )
-        }
-
-      val readPosts = rssRepository.allReadPostsBlocking()
-
-      val bookmarkedPosts =
-        rssRepository.allBookmarkIdsBlocking().mapNotNull { rssRepository.postOrNull(it) }
-      val postChunks = mutableListOf<String>()
-      val chunkSize = 500
-
-      bookmarkedPosts.chunked(chunkSize).forEachIndexed { index, postsChunk ->
-        val chunkFileName = "/twine_posts_chunk_$index.json"
-        val postsSyncEntities =
-          postsChunk.map {
-            val content = postContentRepository.postContent(it.id).firstOrNull()
-            PostSyncEntity(
+        val feeds =
+          rssRepository.allFeedsBlocking().map {
+            FeedSyncEntity(
               id = it.id,
-              sourceId = it.sourceId,
-              title = it.title,
+              name = it.name,
+              icon = it.icon,
               description = it.description,
-              imageUrl = it.imageUrl,
-              postDate = it.postDate.toEpochMilliseconds(),
-              createdAt = it.createdAt.toEpochMilliseconds(),
-              updatedAt = it.updatedAt.toEpochMilliseconds(),
-              syncedAt = it.syncedAt.toEpochMilliseconds(),
               link = it.link,
-              commentsLink = it.commentsLink,
-              audioUrl = it.audioUrl,
-              flags = it.flags,
-              feedContent = content?.feedContent,
-              articleContent = content?.articleContent,
+              homepageLink = it.homepageLink,
+              pinnedPosition = it.pinnedPosition,
+              pinnedAt = it.pinnedAt?.toEpochMilliseconds(),
+              lastCleanUpAt = it.lastCleanUpAt?.toEpochMilliseconds(),
+              alwaysFetchSourceArticle = it.alwaysFetchSourceArticle,
+              showFeedFavIcon = it.showFeedFavIcon,
+              hideFromAllFeeds = it.hideFromAllFeeds,
+              lastUpdatedAt = it.lastUpdatedAt?.toEpochMilliseconds(),
+              isDeleted = it.isDeleted,
             )
           }
-        val serializedChunk = json.encodeToString(postsSyncEntities)
-        if (provider.upload(chunkFileName, serializedChunk)) {
-          postChunks.add(chunkFileName)
-        }
-      }
 
-      val syncData =
-        SyncData(
-          version = currentSyncVersion,
-          feeds = feeds,
-          groups = groups,
-          bookmarks = bookmarks,
-          blockedWords = blockedWords,
-          postChunks = postChunks,
-          readPosts = readPosts,
-        )
+        val groups =
+          rssRepository.allFeedGroupsBlocking().map {
+            GroupSyncEntity(
+              id = it.id,
+              name = it.name,
+              feedIds = it.feedIds,
+              pinnedPosition = it.pinnedPosition,
+              pinnedAt = it.pinnedAt?.toEpochMilliseconds(),
+              updatedAt = it.updatedAt.toEpochMilliseconds(),
+              isDeleted = it.isDeleted,
+            )
+          }
 
-      val serializedData = json.encodeToString(syncData)
-      val result = provider.upload(metadataFileName, serializedData)
+        val bookmarks = rssRepository.allBookmarkIdsBlocking()
 
-      if (result) {
-        appConfigQueries.updateLastSyncedFormatVersion(currentSyncVersion.toLong())
-        userRepository.updateLastSyncStatus("SUCCESS")
-        refreshPolicy.updateLastSyncedAt()
+        val blockedWords =
+          blockedWordsRepository.allBlockedWordsBlocking().map {
+            BlockedWordSyncEntity(
+              id = it.id.toString(),
+              content = it.content,
+              isDeleted = it.isDeleted,
+              updatedAt = it.updatedAt.toEpochMilliseconds(),
+            )
+          }
 
-        val allFiles = provider.listFiles("/twine_")
-        val activeFiles = postChunks + metadataFileName
-        allFiles.forEach { file ->
-          if (file !in activeFiles && file != "/twine_sync_data.json") {
-            provider.deleteFile(file)
+        val readPosts = rssRepository.allReadPostsBlocking()
+
+        val bookmarkedPosts =
+          bookmarks
+            .chunked(SQLITE_BATCH_SIZE)
+            .flatMap { chunk -> rssRepository.postsByIds(chunk.toSet()) }
+            .distinctBy { it.id }
+        val postChunks = mutableListOf<String>()
+        val chunkSize = 500
+
+        bookmarkedPosts.chunked(chunkSize).forEachIndexed { index, postsChunk ->
+          val chunkFileName = "/twine_posts_chunk_$index.json"
+          val postsSyncEntities =
+            postsChunk.map {
+              val content = postContentRepository.postContent(it.id).firstOrNull()
+              PostSyncEntity(
+                id = it.id,
+                sourceId = it.sourceId,
+                title = it.title,
+                description = it.description,
+                imageUrl = it.imageUrl,
+                postDate = it.postDate.toEpochMilliseconds(),
+                createdAt = it.createdAt.toEpochMilliseconds(),
+                updatedAt = it.updatedAt.toEpochMilliseconds(),
+                syncedAt = it.syncedAt.toEpochMilliseconds(),
+                link = it.link,
+                commentsLink = it.commentsLink,
+                audioUrl = it.audioUrl,
+                flags = it.flags,
+                feedContent = content?.feedContent,
+                articleContent = content?.articleContent,
+              )
+            }
+          val serializedChunk =
+            withContext(dispatchersProvider.default) { json.encodeToString(postsSyncEntities) }
+          if (provider.upload(chunkFileName, serializedChunk)) {
+            postChunks.add(chunkFileName)
           }
         }
+
+        val syncData =
+          SyncData(
+            version = currentSyncVersion,
+            feeds = feeds,
+            groups = groups,
+            bookmarks = bookmarks,
+            blockedWords = blockedWords,
+            postChunks = postChunks,
+            readPosts = readPosts,
+          )
+
+        val serializedData =
+          withContext(dispatchersProvider.default) { json.encodeToString(syncData) }
+        val result = provider.upload(metadataFileName, serializedData)
+
+        if (result) {
+          withContext(dispatchersProvider.databaseWrite) {
+            appConfigQueries.updateLastSyncedFormatVersion(currentSyncVersion.toLong())
+          }
+          userRepository.updateLastSyncStatus("SUCCESS")
+          refreshPolicy.updateLastSyncedAt()
+
+          val allFiles = provider.listFiles("/twine_")
+          val activeFiles = postChunks + metadataFileName
+          allFiles.forEach { file ->
+            if (file !in activeFiles && file != "/twine_sync_data.json") {
+              provider.deleteFile(file)
+            }
+          }
+        }
+        if (!hasLastRefreshedAt && (remoteDataString != null || result)) {
+          refreshPolicy.updateLastRefreshedAt()
+        }
+        result
+      } catch (e: Exception) {
+        Logger.e(e) { "Failed to sync with ${provider.cloudService}" }
+        userRepository.updateLastSyncStatus("FAILURE")
+        false
       }
-      return result
-    } catch (e: Exception) {
-      Logger.e(e) { "Failed to sync with ${provider.cloudService}" }
-      userRepository.updateLastSyncStatus("FAILURE")
-      return false
     }
-  }
 
   internal fun migrate(remoteData: SyncData, toVersion: Int): SyncData {
     return remoteData.copy(version = toVersion)
@@ -297,31 +333,70 @@ class FileCloudSyncService(
       }
     rssRepository.upsertPosts(remotePosts)
 
-    remoteData.readPosts.forEach { remoteReadPost ->
-      val localPost = rssRepository.postOrNull(remoteReadPost.id)
-      if (localPost != null) {
-        val remoteUpdatedAt = Instant.fromEpochMilliseconds(remoteReadPost.updatedAt)
-        val localUpdatedAt = localPost.updatedAt
+    val remotePostsWithContent =
+      filteredRemotePosts.filter { it.feedContent != null || it.articleContent != null }
+    val contentUpserts =
+      if (remotePostsWithContent.isNotEmpty()) {
+        withContext(dispatchersProvider.default) {
+          remotePostsWithContent.map { remotePost ->
+            val feedReadingTime = readingTimeCalculator.calculate(remotePost.feedContent).toLong()
+            val articleReadingTime =
+              remotePost.articleContent?.let { readingTimeCalculator.calculate(it).toLong() }
+            Triple(remotePost, feedReadingTime, articleReadingTime)
+          }
+        }
+      } else {
+        emptyList()
+      }
 
-        if (remoteUpdatedAt > localUpdatedAt) {
-          rssRepository.updatePostReadStatus(read = true, id = remoteReadPost.id)
+    val postIdsToMarkRead =
+      if (remoteData.readPosts.isNotEmpty()) {
+        val remoteReadByPostId = remoteData.readPosts.associateBy { it.id }
+        val localPosts =
+          remoteReadByPostId.keys.chunked(SQLITE_BATCH_SIZE).flatMap { chunk ->
+            rssRepository.postsByIds(chunk.toSet())
+          }
+        localPosts
+          .filter { localPost ->
+            val remoteReadPost = remoteReadByPostId[localPost.id] ?: return@filter false
+            Instant.fromEpochMilliseconds(remoteReadPost.updatedAt) > localPost.updatedAt
+          }
+          .map { it.id }
+          .distinct()
+      } else {
+        emptyList()
+      }
+
+    if (postIdsToMarkRead.isNotEmpty() || contentUpserts.isNotEmpty()) {
+      val now = Clock.System.now()
+      withContext(dispatchersProvider.databaseWrite) {
+        transactionRunner.invoke {
+          postIdsToMarkRead.chunked(SQLITE_BATCH_SIZE).forEach { chunk ->
+            postQueries.updatePostsReadStatus(read = 1L, updatedAt = now, ids = chunk)
+            readingHistoryQueries.insertReadingHistoryForPosts(readAt = now, postIds = chunk)
+          }
+
+          contentUpserts.forEach { (remotePost, feedReadingTime, articleReadingTime) ->
+            postContentQueries.upsert(
+              id = remotePost.id,
+              feedContent = remotePost.feedContent,
+              feedContentLen = remotePost.feedContent?.length?.toLong() ?: 0L,
+              articleContent = remotePost.articleContent,
+              createdAt = Instant.fromEpochMilliseconds(remotePost.createdAt),
+              feedContentReadingTime = feedReadingTime,
+              articleContentReadingTime = articleReadingTime,
+            )
+          }
         }
       }
     }
 
-    filteredRemotePosts.forEach { remotePost ->
-      if (remotePost.feedContent != null || remotePost.articleContent != null) {
-        postContentRepository.upsert(
-          postId = remotePost.id,
-          feedContent = remotePost.feedContent,
-          articleContent = remotePost.articleContent,
-          createdAt = Instant.fromEpochMilliseconds(remotePost.createdAt),
-        )
-      }
-    }
+    widgetUpdater.updateUnreadWidget()
   }
 
   companion object {
+    private const val SQLITE_BATCH_SIZE = 990
+
     internal fun filterPosts(
       remotePosts: List<PostSyncEntity>,
       cleanUpAtByFeed: Map<String, Instant>,

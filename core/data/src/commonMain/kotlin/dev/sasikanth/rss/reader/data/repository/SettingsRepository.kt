@@ -33,6 +33,7 @@ import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
@@ -50,6 +51,7 @@ class SettingsRepository(
   private val postsTypeKey = stringPreferencesKey("posts_type")
   private val postsSortOrderKey = stringPreferencesKey("posts_sort_order")
   private val showReaderViewKey = booleanPreferencesKey("pref_show_reader_view")
+  private val alwaysFetchSourceArticleKey = booleanPreferencesKey("always_fetch_source_article")
   private val feedsSortOrderKey = stringPreferencesKey("pref_feeds_sort_order")
   private val hideFeedsWithoutUnreadPostsKey =
     booleanPreferencesKey("pref_hide_feeds_without_unread_posts")
@@ -85,130 +87,195 @@ class SettingsRepository(
   private val defaultSourceIdKey = stringPreferencesKey("default_source_id")
 
   val browserType: Flow<BrowserType> =
-    dataStore.data.map { preferences ->
-      mapToBrowserType(preferences[browserTypeKey]) ?: BrowserType.Default
-    }
+    dataStore.data
+      .map { preferences -> mapToBrowserType(preferences[browserTypeKey]) ?: BrowserType.Default }
+      .distinctUntilChanged()
 
   val showUnreadPostsCount: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[showUnreadPostsCountKey] ?: true }
+    dataStore.data
+      .map { preferences -> preferences[showUnreadPostsCountKey] ?: true }
+      .distinctUntilChanged()
 
   val postsDeletionPeriod: Flow<Period> =
-    dataStore.data.map { preferences ->
-      mapToPostsDeletionPeriod(preferences[postsDeletionPeriodKey]) ?: Period.ONE_MONTH
-    }
+    dataStore.data
+      .map { preferences ->
+        mapToPostsDeletionPeriod(preferences[postsDeletionPeriodKey]) ?: Period.ONE_MONTH
+      }
+      .distinctUntilChanged()
 
   val showReaderView: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[showReaderViewKey] ?: true }
+    dataStore.data
+      .map { preferences -> preferences[showReaderViewKey] ?: true }
+      .distinctUntilChanged()
+
+  val alwaysFetchSourceArticle: Flow<Boolean> =
+    dataStore.data
+      .map { preferences -> preferences[alwaysFetchSourceArticleKey] ?: false }
+      .distinctUntilChanged()
 
   val postsType: Flow<PostsType> =
-    dataStore.data.map { preferences -> mapToPostsType(preferences[postsTypeKey]) ?: PostsType.ALL }
+    dataStore.data
+      .map { preferences -> mapToPostsType(preferences[postsTypeKey]) ?: PostsType.ALL }
+      .distinctUntilChanged()
 
   val postsSortOrder: Flow<PostsSortOrder> =
-    dataStore.data.map { preferences ->
-      mapToPostsSortOrder(preferences[postsSortOrderKey]) ?: PostsSortOrder.Latest
-    }
+    dataStore.data
+      .map { preferences ->
+        mapToPostsSortOrder(preferences[postsSortOrderKey]) ?: PostsSortOrder.Latest
+      }
+      .distinctUntilChanged()
 
   val feedsSortOrder: Flow<FeedsOrderBy> =
-    dataStore.data.map { preferences ->
-      mapToFeedsOrderBy(preferences[feedsSortOrderKey]) ?: FeedsOrderBy.Latest
-    }
+    dataStore.data
+      .map { preferences ->
+        mapToFeedsOrderBy(preferences[feedsSortOrderKey]) ?: FeedsOrderBy.Latest
+      }
+      .distinctUntilChanged()
 
   val hideFeedsWithoutUnreadPosts: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[hideFeedsWithoutUnreadPostsKey] ?: false }
+    dataStore.data
+      .map { preferences -> preferences[hideFeedsWithoutUnreadPostsKey] ?: false }
+      .distinctUntilChanged()
 
   val hideGroupedFeeds: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[hideGroupedFeedsKey] ?: false }
+    dataStore.data
+      .map { preferences -> preferences[hideGroupedFeedsKey] ?: false }
+      .distinctUntilChanged()
 
   val appThemeMode: Flow<AppThemeMode> =
-    dataStore.data.map { preferences ->
-      mapToAppThemeMode(preferences[appThemeModeKey]) ?: AppThemeMode.Auto
-    }
+    dataStore.data
+      .map { preferences -> mapToAppThemeMode(preferences[appThemeModeKey]) ?: AppThemeMode.Auto }
+      .distinctUntilChanged()
 
   val useAmoled: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[useAmoledKey] ?: false }
+    dataStore.data.map { preferences -> preferences[useAmoledKey] ?: false }.distinctUntilChanged()
 
   val isOnboardingDone: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[isOnboardingDoneKey] ?: false }
+    dataStore.data
+      .map { preferences -> preferences[isOnboardingDoneKey] ?: false }
+      .distinctUntilChanged()
 
   val enableAutoSync: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[enableAutoSyncKey] ?: true }
+    dataStore.data
+      .map { preferences -> preferences[enableAutoSyncKey] ?: true }
+      .distinctUntilChanged()
 
   val showFeedFavIcon: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[showFeedFavIconKey] ?: true }
+    dataStore.data
+      .map { preferences -> preferences[showFeedFavIconKey] ?: true }
+      .distinctUntilChanged()
 
   val showPinnedSources: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[showPinnedSourcesKey] ?: true }
+    dataStore.data
+      .map { preferences -> preferences[showPinnedSourcesKey] ?: true }
+      .distinctUntilChanged()
 
   val showFeaturedSection: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[showFeaturedSectionKey] ?: true }
+    dataStore.data
+      .map { preferences -> preferences[showFeaturedSectionKey] ?: true }
+      .distinctUntilChanged()
 
   val markAsReadOn: Flow<MarkAsReadOn> =
-    dataStore.data.map { preferences -> mapToMarkAsReadOnType(preferences[markPostsAsReadOnKey]) }
+    dataStore.data
+      .map { preferences -> mapToMarkAsReadOnType(preferences[markPostsAsReadOnKey]) }
+      .distinctUntilChanged()
 
   val confirmMarkAllAsRead: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[confirmMarkAllAsReadKey] ?: true }
+    dataStore.data
+      .map { preferences -> preferences[confirmMarkAllAsReadKey] ?: true }
+      .distinctUntilChanged()
 
   val audioMarkAsReadThreshold: Flow<AudioMarkAsReadThreshold> =
-    dataStore.data.map { preferences ->
-      mapToAudioMarkAsReadThreshold(preferences[audioMarkAsReadThresholdKey])
-    }
+    dataStore.data
+      .map { preferences ->
+        mapToAudioMarkAsReadThreshold(preferences[audioMarkAsReadThresholdKey])
+      }
+      .distinctUntilChanged()
 
   val homeViewMode: Flow<HomeViewMode> =
-    dataStore.data.map { preferences -> mapToHomeViewMode(preferences[homeViewModeKey]) }
+    dataStore.data
+      .map { preferences -> mapToHomeViewMode(preferences[homeViewModeKey]) }
+      .distinctUntilChanged()
 
   val readerFontScaleFactor: Flow<Float> =
-    dataStore.data.map { preferences -> preferences[readerFontScaleFactorKey] ?: 1f }
+    dataStore.data
+      .map { preferences -> preferences[readerFontScaleFactorKey] ?: 1f }
+      .distinctUntilChanged()
 
   val readerLineHeightScaleFactor: Flow<Float> =
-    dataStore.data.map { preferences -> preferences[readerLineHeightScaleFactorKey] ?: 1f }
+    dataStore.data
+      .map { preferences -> preferences[readerLineHeightScaleFactorKey] ?: 1f }
+      .distinctUntilChanged()
 
   val readerFontStyle: Flow<ReaderFont> =
-    dataStore.data.map { preferences -> mapToReaderFont(preferences[readerFontStyleKey]) }
+    dataStore.data
+      .map { preferences -> mapToReaderFont(preferences[readerFontStyleKey]) }
+      .distinctUntilChanged()
 
   val themeVariant: Flow<ThemeVariant> =
-    dataStore.data.map { preferences -> mapToThemeVariant(preferences[themeVariantKey]) }
+    dataStore.data
+      .map { preferences -> mapToThemeVariant(preferences[themeVariantKey]) }
+      .distinctUntilChanged()
 
   val blockImages: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[blockImagesKey] ?: false }
+    dataStore.data
+      .map { preferences -> preferences[blockImagesKey] ?: false }
+      .distinctUntilChanged()
 
   val enableNotifications: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[enableNotificationsKey] ?: false }
+    dataStore.data
+      .map { preferences -> preferences[enableNotificationsKey] ?: false }
+      .distinctUntilChanged()
 
   val groupByFeedNotifications: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[groupByFeedNotificationsKey] ?: false }
+    dataStore.data
+      .map { preferences -> preferences[groupByFeedNotificationsKey] ?: false }
+      .distinctUntilChanged()
 
   val downloadFullContent: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[downloadFullContentKey] ?: false }
+    dataStore.data
+      .map { preferences -> preferences[downloadFullContentKey] ?: false }
+      .distinctUntilChanged()
 
   val lastReviewPromptDate: Flow<Instant?> =
-    dataStore.data.map { preferences ->
-      preferences[lastReviewPromptDateKey]?.let(Instant::fromEpochMilliseconds)
-    }
+    dataStore.data
+      .map { preferences ->
+        preferences[lastReviewPromptDateKey]?.let(Instant::fromEpochMilliseconds)
+      }
+      .distinctUntilChanged()
 
   val installDate: Flow<Instant?> =
-    dataStore.data.map { preferences ->
-      preferences[installDateKey]?.let(Instant::fromEpochMilliseconds)
-    }
+    dataStore.data
+      .map { preferences -> preferences[installDateKey]?.let(Instant::fromEpochMilliseconds) }
+      .distinctUntilChanged()
 
   val userSessionCount: Flow<Int> =
-    dataStore.data.map { preferences -> preferences[userSessionCountKey] ?: 0 }
+    dataStore.data
+      .map { preferences -> preferences[userSessionCountKey] ?: 0 }
+      .distinctUntilChanged()
 
   val appIcon: Flow<AppIcon> =
-    dataStore.data.map { preferences -> mapToAppIcon(preferences[appIconKey]) }
+    dataStore.data
+      .map { preferences -> mapToAppIcon(preferences[appIconKey]) }
+      .distinctUntilChanged()
 
   val discoveryFeedsCache: Flow<Pair<Instant?, String?>> =
-    dataStore.data.map { preferences ->
-      val lastFetchTime =
-        preferences[discoveryFeedsLastFetchTimeKey]?.let(Instant::fromEpochMilliseconds)
-      val cache = preferences[discoveryFeedsCacheKey]
-      lastFetchTime to cache
-    }
+    dataStore.data
+      .map { preferences ->
+        val lastFetchTime =
+          preferences[discoveryFeedsLastFetchTimeKey]?.let(Instant::fromEpochMilliseconds)
+        val cache = preferences[discoveryFeedsCacheKey]
+        lastFetchTime to cache
+      }
+      .distinctUntilChanged()
 
   val lastSeenChangelogVersion: Flow<String?> =
-    dataStore.data.map { preferences -> preferences[lastSeenChangelogVersionKey] }
+    dataStore.data
+      .map { preferences -> preferences[lastSeenChangelogVersionKey] }
+      .distinctUntilChanged()
 
   val defaultSourceId: Flow<String?> =
-    dataStore.data.map { preferences -> preferences[defaultSourceIdKey] }
+    dataStore.data.map { preferences -> preferences[defaultSourceIdKey] }.distinctUntilChanged()
 
   suspend fun enableAutoSyncImmediate(): Boolean {
     return enableAutoSync.first()
@@ -252,6 +319,10 @@ class SettingsRepository(
 
   suspend fun toggleShowReaderView(value: Boolean) {
     dataStore.edit { preferences -> preferences[showReaderViewKey] = value }
+  }
+
+  suspend fun toggleAlwaysFetchSourceArticle(value: Boolean) {
+    dataStore.edit { preferences -> preferences[alwaysFetchSourceArticleKey] = value }
   }
 
   suspend fun updateAppTheme(value: AppThemeMode) {

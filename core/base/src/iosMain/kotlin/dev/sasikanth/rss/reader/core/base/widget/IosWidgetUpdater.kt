@@ -17,12 +17,83 @@
 
 package dev.sasikanth.rss.reader.core.base.widget
 
+import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.util.DispatchersProvider
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
+import platform.Foundation.NSLock
 
-@Inject
-class IosWidgetUpdater : WidgetUpdater {
+@AppScope
+class IosWidgetUpdater
+internal constructor(dispatchersProvider: DispatchersProvider, private val timeSource: TimeSource) :
+  WidgetUpdater {
+
+  @Inject
+  constructor(
+    dispatchersProvider: DispatchersProvider
+  ) : this(dispatchersProvider, TimeSource.Monotonic)
+
+  private val scope = CoroutineScope(SupervisorJob() + dispatchersProvider.default)
+  private val lock = NSLock()
+  private var lastReloadMark: TimeMark? = null
+  private var trailingJob: Job? = null
 
   override fun updateUnreadWidget() {
-    IosWidgetUpdateBridge.update()
+    var fireImmediately = false
+
+    lock.lock()
+    try {
+      val previousMark = lastReloadMark
+      val elapsed = previousMark?.elapsedNow()
+      if (elapsed == null || elapsed >= COALESCE_WINDOW) {
+        lastReloadMark = timeSource.markNow()
+        trailingJob?.cancel()
+        trailingJob = null
+        fireImmediately = true
+      } else if (trailingJob?.isActive != true) {
+        val remaining = (COALESCE_WINDOW - elapsed).coerceAtLeast(Duration.ZERO)
+        trailingJob =
+          scope.launch {
+            delay(remaining)
+            onTrailingWindowElapsed(isStillActive = { isActive })
+          }
+      }
+    } finally {
+      lock.unlock()
+    }
+
+    if (fireImmediately) {
+      IosWidgetUpdateBridge.update()
+    }
+  }
+
+  private fun onTrailingWindowElapsed(isStillActive: () -> Boolean) {
+    var shouldFire = false
+    lock.lock()
+    try {
+      if (isStillActive()) {
+        lastReloadMark = timeSource.markNow()
+        trailingJob = null
+        shouldFire = true
+      }
+    } finally {
+      lock.unlock()
+    }
+    if (shouldFire) {
+      IosWidgetUpdateBridge.update()
+    }
+  }
+
+  private companion object {
+    val COALESCE_WINDOW = 2.seconds
   }
 }

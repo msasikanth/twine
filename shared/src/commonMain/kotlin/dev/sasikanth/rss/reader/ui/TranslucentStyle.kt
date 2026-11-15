@@ -17,13 +17,48 @@
 
 package dev.sasikanth.rss.reader.ui
 
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 
-data class TranslucentStyle(val background: Color, val foreground: Color, val outline: Color)
+@Stable
+class TranslucentStyle(
+  private val backgroundGetter: () -> Color,
+  private val foregroundGetter: () -> Color,
+  private val outlineGetter: () -> Color,
+) {
+  constructor(
+    background: Color,
+    foreground: Color,
+    outline: Color,
+  ) : this({ background }, { foreground }, { outline })
 
-@Immutable class TranslucentStyles(val default: TranslucentStyle, val prominent: TranslucentStyle)
+  val background: Color
+    get() = backgroundGetter()
+
+  val foreground: Color
+    get() = foregroundGetter()
+
+  val outline: Color
+    get() = outlineGetter()
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is TranslucentStyle) return false
+    return background == other.background &&
+      foreground == other.foreground &&
+      outline == other.outline
+  }
+
+  override fun hashCode(): Int {
+    var result = background.hashCode()
+    result = 31 * result + foreground.hashCode()
+    result = 31 * result + outline.hashCode()
+    return result
+  }
+}
+
+@Stable class TranslucentStyles(val default: TranslucentStyle, val prominent: TranslucentStyle)
 
 internal val LocalTranslucentStyles =
   compositionLocalOf<TranslucentStyles> {

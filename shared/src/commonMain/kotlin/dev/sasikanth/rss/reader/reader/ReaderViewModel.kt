@@ -20,6 +20,7 @@ package dev.sasikanth.rss.reader.reader
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
@@ -46,9 +47,12 @@ import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Search
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.UnreadWidget
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -79,6 +83,7 @@ class ReaderViewModel(
   private val observableSelectedPost: ObservableSelectedPost,
   private val observableActiveReaderPost: ObservableActiveReaderPost,
   private val observableActiveSource: ObservableActiveSource,
+  private val readerSessionRegistry: ReaderSessionRegistry,
   @Assisted private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -91,9 +96,24 @@ class ReaderViewModel(
       (readerScreenArgs.fromScreen == Home || readerScreenArgs.fromScreen == AudioPlayer) &&
         observableActiveSource.currentActiveSource?.id == initialActiveSourceId
 
-  private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
-  private val _openedPostItems = MutableStateFlow(emptySet<String>())
   private val readerScreenArgs = savedStateHandle.get<ReaderScreenArgs>("readerScreenArgs")!!
+  private val sessionCoordinator =
+    ReaderPostSessionCoordinator(
+      sessionScope = viewModelScope,
+      exitDispatcher = dispatchersProvider.main,
+      initialPostIndex = readerScreenArgs.postIndex,
+      initialPostId = readerScreenArgs.postId,
+      observableActiveReaderPost = observableActiveReaderPost,
+      observableSelectedPost = observableSelectedPost,
+      sessionRegistry = readerSessionRegistry,
+      canPublishSelectedPost = { canPublishSelectedPost },
+    )
+  private val coroutineScope: CoroutineScope
+    get() = sessionCoordinator.exitScope
+
+  private val _openedPostItems: StateFlow<Set<String>>
+    get() = sessionCoordinator.openedPostItems
+
   private val defaultReaderState =
     ReaderState.default(
       initialPostIndex = readerScreenArgs.postIndex,
@@ -111,10 +131,6 @@ class ReaderViewModel(
   private var audioProgressAutoSaveJob: Job? = null
 
   init {
-    if (canPublishSelectedPost) {
-      observableActiveReaderPost.addOpenedPost(readerScreenArgs.postId)
-    }
-    observableActiveReaderPost.updateActivePost(readerScreenArgs.postId)
     init()
     observePlaybackForAutoSave()
   }
@@ -127,7 +143,7 @@ class ReaderViewModel(
         audioProgressAutoSaveJob?.cancel()
         audioProgressAutoSaveJob =
           if (isPlaying) {
-            coroutineScope.launch {
+            viewModelScope.launch {
               while (true) {
                 delay(10.seconds)
                 saveAudioProgress()
@@ -138,7 +154,7 @@ class ReaderViewModel(
             null
           }
       }
-      .launchIn(coroutineScope)
+      .launchIn(viewModelScope)
   }
 
   val playbackState: StateFlow<PlaybackState>
@@ -208,30 +224,30 @@ class ReaderViewModel(
       ReaderEvent.MarkOpenPaywallDone -> {
         _state.update { it.copy(openPaywall = false) }
       }
+      ReaderEvent.OnInitialTransitionSettled -> sessionCoordinator.onInitialTransitionSettled()
       is ReaderEvent.OnMarkAsUnread -> onMarkAsUnreadAndExit(postId = event.postId)
     }
   }
 
   private fun onMarkAsUnreadAndExit(postId: String) {
-    coroutineScope.launch {
-      _openedPostItems.update { it - postId }
+    sessionCoordinator.onMarkAsUnread(postId) {
       rssRepository.updatePostReadStatus(read = false, id = postId)
       _exitScreen.emit(true)
     }
   }
 
   private fun updateFontLineHeightFactor(fontLineHeightFactor: Float) {
-    coroutineScope.launch {
+    viewModelScope.launch {
       settingsRepository.updateReaderLineHeightScaleFactor(fontLineHeightFactor)
     }
   }
 
   private fun updateFontScaleFactor(fontScaleFactor: Float) {
-    coroutineScope.launch { settingsRepository.updateReaderFontScaleFactor(fontScaleFactor) }
+    viewModelScope.launch { settingsRepository.updateReaderFontScaleFactor(fontScaleFactor) }
   }
 
   private fun updateReaderFont(font: ReaderFont) {
-    coroutineScope.launch {
+    viewModelScope.launch {
       if (font.isPremium && !billingHandler.isSubscribed()) {
         _state.update { it.copy(openPaywall = true) }
       } else {
@@ -241,7 +257,7 @@ class ReaderViewModel(
   }
 
   private fun updateThemeVariant(themeVariant: ThemeVariant) {
-    coroutineScope.launch {
+    viewModelScope.launch {
       if (themeVariant.isPremium && !billingHandler.isSubscribed()) {
         _state.update { it.copy(openPaywall = true) }
       } else {
@@ -251,65 +267,58 @@ class ReaderViewModel(
   }
 
   private fun updatePanelContent(panelContent: ReaderPanelContent) {
-    coroutineScope.launch { _state.update { it.copy(panelContent = panelContent) } }
+    viewModelScope.launch { _state.update { it.copy(panelContent = panelContent) } }
   }
 
   private fun postPageChange(postIndex: Int, post: ResolvedPost) {
-    _openedPostItems.update { it + post.id }
+    if (sessionCoordinator.shouldIgnorePageChange(post.id)) return
+
     _state.update { it.copy(activePostIndex = postIndex, activePostId = post.id) }
 
     // Only readers backed by the home posts list publish the selection; indexes from
     // Search/Bookmarks/Widget belong to a different list, and posts there may not even
     // be in home's current filters, which would scroll home somewhere surprising. Same
     // reasoning applies to which posts the home list should keep pinned while read.
-    if (canPublishSelectedPost) {
-      observableSelectedPost.updateSelectedPost(postIndex, post.id)
-      observableActiveReaderPost.addOpenedPost(post.id)
-    }
-    observableActiveReaderPost.updateActivePost(post.id)
-
-    coroutineScope.launch {
-      if (post.audioUrl == null) {
-        rssRepository.updatePostReadStatus(read = true, id = post.id)
-      }
-    }
+    sessionCoordinator.onPostPageChanged(
+      postId = post.id,
+      postIndex = postIndex,
+      shouldMarkReadImmediately = !post.read && post.audioUrl == null,
+      markPostRead = { rssRepository.updatePostReadStatus(read = true, id = post.id) },
+    )
   }
 
-  private fun markPostsAsRead(): Job {
-    return coroutineScope.launch {
-      val openedPostItems = _openedPostItems.value
-      if (openedPostItems.isEmpty()) return@launch
+  private suspend fun markPostsAsRead(openedPostItems: Set<String>) {
+    if (openedPostItems.isEmpty()) return
 
-      val audioMarkAsReadThreshold = settingsRepository.audioMarkAsReadThreshold.first()
-      val posts = postRepository.postsByIds(openedPostItems)
-      val playbackState = audioPlayer.playbackState.value
-      val thresholdValue = audioMarkAsReadThreshold.value
+    val audioMarkAsReadThreshold = settingsRepository.audioMarkAsReadThreshold.first()
+    val posts = postRepository.postsByIds(openedPostItems)
+    val playbackState = audioPlayer.playbackState.value
+    val thresholdValue = audioMarkAsReadThreshold.value
 
-      val postsToMarkAsRead = buildSet {
-        for (post in posts) {
-          val postId = post.id
-          if (post.audioUrl != null) {
-            val isPlaying = playbackState.playingPostId == postId
-            val progress = if (isPlaying) playbackState.currentPosition else post.audioProgress
-            val duration = if (isPlaying) playbackState.duration else post.audioDuration
+    val postsToMarkAsRead = buildSet {
+      for (post in posts) {
+        val postId = post.id
+        if (post.audioUrl != null) {
+          val isPlaying = playbackState.playingPostId == postId
+          val progress = if (isPlaying) playbackState.currentPosition else post.audioProgress
+          val duration = if (isPlaying) playbackState.duration else post.audioDuration
 
-            if (duration > 0 && (progress.toFloat() / duration.toFloat()) >= thresholdValue) {
-              add(postId)
-            }
-          } else {
+          if (duration > 0 && (progress.toFloat() / duration.toFloat()) >= thresholdValue) {
             add(postId)
           }
+        } else {
+          add(postId)
         }
       }
+    }
 
-      if (postsToMarkAsRead.isNotEmpty()) {
-        rssRepository.updatePostReadStatus(postIds = postsToMarkAsRead, read = true)
-      }
+    if (postsToMarkAsRead.isNotEmpty()) {
+      rssRepository.updatePostReadStatus(postIds = postsToMarkAsRead, read = true)
     }
   }
 
   private fun init() {
-    coroutineScope.launch {
+    viewModelScope.launch {
       if (readerScreenArgs.fromScreen == Home || readerScreenArgs.fromScreen == AudioPlayer) {
         val allPostsPagingData =
           allPostsPager
@@ -321,7 +330,7 @@ class ReaderViewModel(
                   .toList()
               }
             )
-            .cachedIn(coroutineScope)
+            .cachedIn(viewModelScope)
         _state.update { it.copy(posts = allPostsPagingData) }
       } else {
         val posts =
@@ -346,7 +355,7 @@ class ReaderViewModel(
               }
             }
             .flow
-            .cachedIn(coroutineScope)
+            .cachedIn(viewModelScope)
 
         _state.update { it.copy(posts = posts) }
       }
@@ -380,7 +389,7 @@ class ReaderViewModel(
             )
           }
         }
-        .launchIn(coroutineScope)
+        .launchIn(viewModelScope)
     }
   }
 
@@ -391,15 +400,121 @@ class ReaderViewModel(
   }
 
   override fun onCleared() {
-    observableActiveReaderPost.clearIfActive(_state.value.activePostId)
+    super.onCleared()
+    sessionCoordinator.onClear { openedPostIds -> markPostsAsRead(openedPostIds) }
+  }
+}
 
-    if (canPublishSelectedPost) {
-      observableSelectedPost.updateSelectedPost(
-        index = _state.value.activePostIndex,
-        postId = _state.value.activePostId,
-      )
+internal class ReaderPostSessionCoordinator(
+  private val sessionScope: CoroutineScope,
+  exitDispatcher: CoroutineDispatcher,
+  initialPostIndex: Int = 0,
+  initialPostId: String = "",
+  private val observableActiveReaderPost: ObservableActiveReaderPost = ObservableActiveReaderPost(),
+  private val observableSelectedPost: ObservableSelectedPost = ObservableSelectedPost(),
+  private val sessionRegistry: ReaderSessionRegistry = ReaderSessionRegistry(),
+  private val canPublishSelectedPost: () -> Boolean = { false },
+  initialTransitionSettled: Boolean = false,
+) {
+  private val exitJob = SupervisorJob()
+  val exitScope = CoroutineScope(exitJob + exitDispatcher)
+
+  private val _openedPostItems = MutableStateFlow(emptySet<String>())
+  val openedPostItems: StateFlow<Set<String>> = _openedPostItems
+
+  private val sessionToken = sessionRegistry.register()
+  private var activePostIndex = initialPostIndex
+  private var activePostId = initialPostId
+
+  private val markedUnreadPostIds = mutableSetOf<String>()
+  private var isExiting = false
+
+  private val initialTransitionGate =
+    CompletableDeferred<Unit>().apply {
+      if (initialTransitionSettled) {
+        complete(Unit)
+      }
+    }
+  private var pageSettleJob: Job? = null
+
+  init {
+    publishActivePost(initialPostId)
+  }
+
+  fun ownsActiveReaderPost(): Boolean = sessionRegistry.isActive(sessionToken)
+
+  fun onInitialTransitionSettled() {
+    initialTransitionGate.complete(Unit)
+  }
+
+  fun shouldIgnorePageChange(postId: String): Boolean {
+    return isExiting || postId in markedUnreadPostIds
+  }
+
+  fun onPostPageChanged(
+    postId: String,
+    shouldMarkReadImmediately: Boolean,
+    postIndex: Int = activePostIndex,
+    onSettled: () -> Unit = {},
+    markPostRead: suspend () -> Unit,
+  ) {
+    if (shouldIgnorePageChange(postId)) return
+
+    activePostIndex = postIndex
+    activePostId = postId
+    if (ownsActiveReaderPost()) {
+      publishActivePost(postId)
     }
 
-    markPostsAsRead().invokeOnCompletion { super.onCleared() }
+    _openedPostItems.update { it + postId }
+    pageSettleJob?.cancel()
+    pageSettleJob =
+      sessionScope.launch {
+        initialTransitionGate.await()
+        if (shouldIgnorePageChange(postId)) return@launch
+        if (canPublishSelectedPost() && ownsActiveReaderPost()) {
+          observableSelectedPost.updateSelectedPost(postIndex, postId)
+        }
+        onSettled()
+        if (shouldMarkReadImmediately && postId in _openedPostItems.value) {
+          markPostRead()
+        }
+      }
+  }
+
+  fun onMarkAsUnread(postId: String, markUnreadAndExit: suspend () -> Unit) {
+    isExiting = true
+    markedUnreadPostIds.add(postId)
+    pageSettleJob?.cancel()
+    _openedPostItems.update { it - postId }
+    exitScope.launch { markUnreadAndExit() }
+  }
+
+  fun onClear(markOpenedPostsAsRead: suspend (Set<String>) -> Unit) {
+    val ownsActivePost = ownsActiveReaderPost()
+    sessionRegistry.unregister(sessionToken)
+    isExiting = true
+    pageSettleJob?.cancel()
+
+    if (ownsActivePost) {
+      observableActiveReaderPost.clearIfActive(observableActiveReaderPost.activePostId.value)
+      if (canPublishSelectedPost()) {
+        observableSelectedPost.updateSelectedPost(index = activePostIndex, postId = activePostId)
+      }
+    }
+
+    val openedIds = _openedPostItems.value - markedUnreadPostIds
+    if (openedIds.isNotEmpty()) {
+      exitScope.launch { markOpenedPostsAsRead(openedIds) }
+    }
+    exitJob.complete()
+    exitJob.invokeOnCompletion { exitScope.cancel() }
+  }
+
+  private fun publishActivePost(postId: String) {
+    if (canPublishSelectedPost()) {
+      observableActiveReaderPost.addOpenedPost(postId)
+    }
+    observableActiveReaderPost.updateActivePost(postId)
   }
 }

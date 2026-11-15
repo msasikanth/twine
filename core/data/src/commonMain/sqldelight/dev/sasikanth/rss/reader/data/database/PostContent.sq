@@ -18,7 +18,11 @@ ON CONFLICT (id) DO UPDATE SET
   feedContentLen = CASE WHEN COALESCE(postContent.feedContentLen, 0) < COALESCE(length(excluded.feedContent), 0) THEN excluded.feedContentLen ELSE postContent.feedContentLen END,
   feedContentReadingTime = CASE WHEN COALESCE(postContent.feedContentLen, 0) < COALESCE(length(excluded.feedContent), 0) THEN excluded.feedContentReadingTime ELSE postContent.feedContentReadingTime END,
   articleContent = COALESCE(excluded.articleContent, postContent.articleContent),
-  articleContentReadingTime = COALESCE(excluded.articleContentReadingTime, postContent.articleContentReadingTime);
+  articleContentReadingTime = COALESCE(excluded.articleContentReadingTime, postContent.articleContentReadingTime)
+WHERE
+  COALESCE(postContent.feedContentLen, 0) < COALESCE(length(excluded.feedContent), 0) OR
+  (excluded.articleContent IS NOT NULL AND excluded.articleContent IS NOT postContent.articleContent) OR
+  (excluded.articleContentReadingTime IS NOT NULL AND excluded.articleContentReadingTime IS NOT postContent.articleContentReadingTime);
 
 getByPostId:
 SELECT * FROM postContent

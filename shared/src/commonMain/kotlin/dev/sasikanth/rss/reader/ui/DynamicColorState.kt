@@ -65,7 +65,16 @@ internal class DynamicColorState(
 
   suspend fun animate(fromSeedColor: Color?, toSeedColor: Color?, progress: Float) {
     val seedColorsChanged = fromSeedColor != lastFromSeedColor || toSeedColor != lastToSeedColor
-    if (!seedColorsChanged && (progress - lastProgress).absoluteValue < 0.02f) {
+    val isSettled = fromSeedColor == toSeedColor || progress <= EPSILON || progress >= 1f - EPSILON
+    val wasSettled =
+      lastFromSeedColor == lastToSeedColor ||
+        lastProgress <= EPSILON ||
+        lastProgress >= 1f - EPSILON
+    if (
+      !seedColorsChanged &&
+        isSettled == wasSettled &&
+        (progress - lastProgress).absoluteValue < 0.02f
+    ) {
       return
     }
 
@@ -137,9 +146,16 @@ internal class DynamicColorState(
         light to dark
       }
 
+    val isAnimating = !isSettled
     withContext(Dispatchers.Main.immediate) {
-      lightAppColorScheme.updateFrom(interpolatedLight)
-      darkAppColorScheme.updateFrom(interpolatedDark)
+      lightAppColorScheme.updateFromWithAnimationState(
+        values = interpolatedLight,
+        isAnimating = isAnimating,
+      )
+      darkAppColorScheme.updateFromWithAnimationState(
+        values = interpolatedDark,
+        isAnimating = isAnimating,
+      )
     }
   }
 

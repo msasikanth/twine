@@ -173,7 +173,10 @@ abstract class XmlContentParser {
   }
 
   protected fun parsePostContent(parser: XmlPullParser): PostContent {
-    val postHtmlContent = parser.nextText().trimIndent()
+    return parsePostContentText(parser.nextText().trimIndent())
+  }
+
+  protected open fun parsePostContentText(postHtmlContent: String): PostContent {
     val htmlContent = articleHtmlParser.parse(htmlContent = postHtmlContent)
 
     if (htmlContent == null) {
@@ -194,6 +197,36 @@ abstract class XmlContentParser {
       textContent = htmlContent.textContent.ifBlank { null } ?: postHtmlContent.trim(),
       audioUrl = htmlContent.audioUrl,
     )
+  }
+
+  protected fun resolveDeferredPostContent(
+    primaryHtml: String?,
+    secondaryHtml: String?,
+  ): PostContent? {
+    val nonBlankPrimary = primaryHtml?.ifBlank { null }
+    val nonBlankSecondary = secondaryHtml?.ifBlank { null }
+    val selectedHtml = nonBlankPrimary ?: nonBlankSecondary ?: return null
+    val parsedPrimary = parsePostContentText(selectedHtml)
+
+    if (
+      nonBlankPrimary != null &&
+        nonBlankSecondary != null &&
+        ((parsedPrimary.heroImage == null &&
+          nonBlankSecondary.contains("<img", ignoreCase = true)) ||
+          (parsedPrimary.audioUrl == null &&
+            (nonBlankSecondary.contains("<audio", ignoreCase = true) ||
+              nonBlankSecondary.contains("<source", ignoreCase = true))))
+    ) {
+      val parsedSecondary = parsePostContentText(nonBlankSecondary)
+      return PostContent(
+        rawContent = parsedPrimary.rawContent,
+        heroImage = parsedPrimary.heroImage ?: parsedSecondary.heroImage,
+        textContent = parsedPrimary.textContent,
+        audioUrl = parsedPrimary.audioUrl ?: parsedSecondary.audioUrl,
+      )
+    }
+
+    return parsedPrimary
   }
 
   protected fun readMediaGroup(parser: XmlPullParser): MediaGroupResult {

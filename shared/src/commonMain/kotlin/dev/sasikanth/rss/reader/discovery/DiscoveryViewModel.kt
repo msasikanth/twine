@@ -109,6 +109,7 @@ class DiscoveryViewModel(
               title = feed.name,
               feedPayload = result.feedPayload,
               showWebsiteFavIcon = settingsRepository.showFeedFavIcon.first() && !feed.useFeedIcon,
+              alwaysFetchSourceArticle = settingsRepository.alwaysFetchSourceArticle.first(),
             )
             hasAddedFeeds = true
           }

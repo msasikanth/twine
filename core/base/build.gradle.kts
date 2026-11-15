@@ -74,7 +74,10 @@ kotlin {
       }
     }
 
-    iosMain.dependencies { implementation(libs.crashkios.bugsnag) }
+    iosMain.dependencies {
+      implementation(libs.crashkios.bugsnag)
+      implementation(libs.ksoup)
+    }
   }
 
   compilerOptions {

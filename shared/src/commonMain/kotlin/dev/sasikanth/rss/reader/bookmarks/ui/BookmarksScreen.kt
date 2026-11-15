@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import dev.sasikanth.rss.reader.bookmarks.BookmarksEvent
 import dev.sasikanth.rss.reader.bookmarks.BookmarksState
 import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
@@ -53,6 +54,7 @@ import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.home.ui.PostListItem
+import dev.sasikanth.rss.reader.home.ui.PostListKey
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.BookmarkStacks
@@ -120,7 +122,11 @@ private fun BookmarksContent(
               ),
             state = listState,
           ) {
-            items(count = bookmarks.itemCount) { index ->
+            items(
+              count = bookmarks.itemCount,
+              key = bookmarks.itemKey { PostListKey.encode(it) },
+              contentType = { "PostListItem" },
+            ) { index ->
               val post = bookmarks[index]
               if (post != null) {
                 PostListItem(

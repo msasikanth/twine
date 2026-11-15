@@ -42,6 +42,9 @@ class BlockedWordsRepository(
   private val postQueries: PostQueries,
   private val dispatchersProvider: DispatchersProvider,
 ) {
+  private companion object {
+    private const val SQLITE_BATCH_SIZE = 990
+  }
 
   suspend fun addWord(word: String) {
     withContext(dispatchersProvider.databaseWrite) {
@@ -119,15 +122,19 @@ class BlockedWordsRepository(
 
     val postsToUnblock =
       blockedPosts
-        .filter { (_, title, description) ->
-          val titleLower = title.lowercase()
-          val descLower = description.lowercase()
-          activeBlockedWords.none { word -> titleLower.contains(word) || descLower.contains(word) }
+        .groupBy { it.first }
+        .filter { (_, rows) ->
+          rows.none { (_, title, description) ->
+            val titleLower = title.lowercase()
+            val descLower = description.lowercase()
+            activeBlockedWords.any { word -> titleLower.contains(word) || descLower.contains(word) }
+          }
         }
-        .map { it.first }
+        .keys
+        .toList()
 
     if (postsToUnblock.isNotEmpty()) {
-      postQueries.unblockPosts(postsToUnblock)
+      postsToUnblock.chunked(SQLITE_BATCH_SIZE).forEach { chunk -> postQueries.unblockPosts(chunk) }
     }
   }
 }

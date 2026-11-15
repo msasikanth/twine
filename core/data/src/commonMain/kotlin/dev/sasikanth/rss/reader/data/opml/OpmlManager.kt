@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.data.opml
 
 import co.touchlab.kermit.Logger
 import co.touchlab.stately.concurrency.AtomicInt
+import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.data.repository.RssRepository
@@ -34,13 +35,16 @@ import io.github.vinceglb.filekit.dialogs.openFilePicker
 import io.github.vinceglb.filekit.dialogs.openFileSaver
 import io.github.vinceglb.filekit.readBytes
 import io.github.vinceglb.filekit.write
+import kotlin.concurrent.Volatile
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.delay
@@ -50,7 +54,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -64,16 +67,19 @@ class OpmlManager(
   private val rssRepository: RssRepository,
   private val feedFetcher: FeedFetcher,
   private val settingsRepository: SettingsRepository,
+  private val widgetUpdater: WidgetUpdater,
 ) {
 
   private val job = SupervisorJob()
-  private val coroutineScope = CoroutineScope(job + dispatchersProvider.main)
+  private val coroutineScope = CoroutineScope(job + dispatchersProvider.io)
 
   private val _result = MutableSharedFlow<OpmlResult>(replay = 1)
   val result: SharedFlow<OpmlResult> = _result
 
-  private var feedLinksBeforeImport = emptySet<String>()
-  private var groupIdsBeforeImport = emptySet<String>()
+  @Volatile private var activeImportJob: Job? = null
+  @Volatile private var feedLinksBeforeImport = emptySet<String>()
+  @Volatile private var groupIdsBeforeImport = emptySet<String>()
+  @Volatile private var hasImportBaselineSnapshot = false
 
   companion object {
     private const val IMPORT_CHUNKS = 6
@@ -87,15 +93,16 @@ class OpmlManager(
     return try {
       coroutineScope
         .async {
-          val file = FileKit.openFilePicker(type = FileKitType.File())
+          val file =
+            withContext(dispatchersProvider.main) {
+              FileKit.openFilePicker(type = FileKitType.File())
+            }
 
           val opmlXmlContent =
             withContext(dispatchersProvider.io) { file?.readBytes()?.decodeToString() }
 
-          Logger.i { opmlXmlContent.orEmpty() }
-
           if (!opmlXmlContent.isNullOrBlank()) {
-            sourcesOpml.decode(opmlXmlContent)
+            withContext(dispatchersProvider.default) { sourcesOpml.decode(opmlXmlContent) }
           } else {
             null
           }
@@ -114,20 +121,48 @@ class OpmlManager(
 
   suspend fun import(sources: List<OpmlSource>) {
     try {
-      _result.emit(OpmlResult.InProgress.Importing(0))
+      hasImportBaselineSnapshot = false
+      val importJob =
+        coroutineScope.launch(dispatchersProvider.io) {
+          try {
+            _result.emit(OpmlResult.InProgress.Importing(0))
 
-      feedLinksBeforeImport =
-        rssRepository.allFeedsBlocking().filterNot { it.isDeleted }.map { it.link }.toSet()
-      groupIdsBeforeImport = rssRepository.allFeedGroupsBlocking().map { it.id }.toSet()
+            val (initialFeedLinks, initialGroupIds) =
+              withContext(dispatchersProvider.databaseRead) {
+                val links =
+                  rssRepository
+                    .allFeedsBlocking()
+                    .filterNot { it.isDeleted }
+                    .map { it.link }
+                    .toSet()
+                val groupIds = rssRepository.allFeedGroupsBlocking().map { it.id }.toSet()
+                links to groupIds
+              }
+            feedLinksBeforeImport = initialFeedLinks
+            groupIdsBeforeImport = initialGroupIds
+            hasImportBaselineSnapshot = true
 
-      coroutineScope
-        .launch(dispatchersProvider.io) {
-          addOpmlSources(sources)
-            .onEach { progress -> _result.emit(OpmlResult.InProgress.Importing(progress)) }
-            .onCompletion { _result.emit(OpmlResult.Idle) }
-            .collect()
+            addOpmlSources(sources)
+              .onEach { progress -> _result.emit(OpmlResult.InProgress.Importing(progress)) }
+              .collect()
+
+            widgetUpdater.updateUnreadWidget()
+            _result.emit(OpmlResult.Idle)
+          } catch (e: CancellationException) {
+            throw e
+          } catch (e: Exception) {
+            CrashReporter.log(e)
+            _result.emit(OpmlResult.Error.UnknownFailure(e))
+          }
         }
-        .join()
+      activeImportJob = importJob
+      try {
+        importJob.join()
+      } finally {
+        if (activeImportJob === importJob) {
+          activeImportJob = null
+        }
+      }
     } catch (e: Exception) {
       if (e is CancellationException) {
         return
@@ -145,42 +180,54 @@ class OpmlManager(
       val opmlString =
         coroutineScope
           .async(dispatchersProvider.io) {
-            val feeds = rssRepository.allFeedsBlocking().filterNot { it.isDeleted }
-            val feedGroups = rssRepository.allFeedGroupsBlocking().filterNot { it.isDeleted }
-            val opmlSources = mutableListOf<OpmlSource>()
-
-            val feedsById = feeds.associateBy { it.id }
-
-            feedGroups.forEach { feedGroup ->
-              val feedsInGroup =
-                feedGroup.feedIds.mapNotNull { feedId ->
-                  feedsById[feedId]?.let { feed -> OpmlFeed(title = feed.name, link = feed.link) }
-                }
-
-              val opmlFeedGroup = OpmlFeedGroup(title = feedGroup.name, feeds = feedsInGroup)
-              opmlSources.add(opmlFeedGroup)
-            }
-
-            feeds.forEach { feed ->
-              if (feedGroups.none { it.feedIds.contains(feed.id) }) {
-                opmlSources.add(OpmlFeed(title = feed.name, link = feed.link))
+            val (feeds, feedGroups) =
+              withContext(dispatchersProvider.databaseRead) {
+                val activeFeeds = rssRepository.allFeedsBlocking().filterNot { it.isDeleted }
+                val activeGroups = rssRepository.allFeedGroupsBlocking().filterNot { it.isDeleted }
+                activeFeeds to activeGroups
               }
-            }
+            withContext(dispatchersProvider.default) {
+              val opmlSources = mutableListOf<OpmlSource>()
+              val feedsById = feeds.associateBy { it.id }
 
-            sourcesOpml.encode(opmlSources)
+              feedGroups.forEach { feedGroup ->
+                val feedsInGroup =
+                  feedGroup.feedIds.mapNotNull { feedId ->
+                    feedsById[feedId]?.let { feed -> OpmlFeed(title = feed.name, link = feed.link) }
+                  }
+
+                val opmlFeedGroup = OpmlFeedGroup(title = feedGroup.name, feeds = feedsInGroup)
+                opmlSources.add(opmlFeedGroup)
+              }
+
+              feeds.forEach { feed ->
+                if (feedGroups.none { it.feedIds.contains(feed.id) }) {
+                  opmlSources.add(OpmlFeed(title = feed.name, link = feed.link))
+                }
+              }
+
+              sourcesOpml.encode(opmlSources)
+            }
           }
           .await()
 
       _result.emit(OpmlResult.InProgress.Exporting(50))
 
-      coroutineScope.launch {
-        val file =
-          FileKit.openFileSaver(
-            suggestedName = BACKUP_FILE_NAME,
-            defaultExtension = BACKUP_FILE_EXTENSION,
-          )
-        file?.write(opmlString.encodeToByteArray())
-      }
+      coroutineScope
+        .async {
+          val file =
+            withContext(dispatchersProvider.main) {
+              FileKit.openFileSaver(
+                suggestedName = BACKUP_FILE_NAME,
+                defaultExtension = BACKUP_FILE_EXTENSION,
+              )
+            }
+          if (file != null) {
+            val bytes = withContext(dispatchersProvider.default) { opmlString.encodeToByteArray() }
+            withContext(dispatchersProvider.io) { file.write(bytes) }
+          }
+        }
+        .await()
 
       _result.emit(OpmlResult.Idle)
     } catch (e: Exception) {
@@ -194,25 +241,35 @@ class OpmlManager(
   }
 
   fun cancel() {
+    activeImportJob = null
     job.cancelChildren()
+    widgetUpdater.updateUnreadWidget()
     _result.tryEmit(OpmlResult.Idle)
   }
 
   suspend fun cancelAndRollbackImport() {
+    val importJob = activeImportJob
     job.cancelChildren()
+    importJob?.cancelAndJoin()
 
-    val importedFeeds =
-      rssRepository.allFeedsBlocking().filterNot {
-        it.isDeleted || feedLinksBeforeImport.contains(it.link)
+    if (hasImportBaselineSnapshot) {
+      val importedSources =
+        withContext(dispatchersProvider.databaseRead) {
+          val importedFeeds =
+            rssRepository.allFeedsBlocking().filterNot {
+              it.isDeleted || feedLinksBeforeImport.contains(it.link)
+            }
+          val importedGroups =
+            rssRepository.allFeedGroupsBlocking().filterNot { groupIdsBeforeImport.contains(it.id) }
+          (importedFeeds + importedGroups).toSet()
+        }
+
+      if (importedSources.isNotEmpty()) {
+        rssRepository.deleteSources(importedSources)
       }
-    val importedGroups =
-      rssRepository.allFeedGroupsBlocking().filterNot { groupIdsBeforeImport.contains(it.id) }
-    val importedSources = (importedFeeds + importedGroups).toSet()
-
-    if (importedSources.isNotEmpty()) {
-      rssRepository.deleteSources(importedSources)
     }
 
+    widgetUpdater.updateUnreadWidget()
     _result.emit(OpmlResult.Idle)
   }
 
@@ -281,6 +338,8 @@ class OpmlManager(
       feedPayload = feedFetcherResult.feedPayload,
       title = feed.title,
       showWebsiteFavIcon = settingsRepository.showFeedFavIcon.first(),
+      alwaysFetchSourceArticle = settingsRepository.alwaysFetchSourceArticle.first(),
+      updateWidgets = false,
     )
   }
 

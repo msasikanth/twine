@@ -76,7 +76,7 @@ SELECT
   f.lastCleanUpAt,
   f.alwaysFetchSourceArticle,
   f.pinnedPosition,
-  COUNT(CASE WHEN (p.flags & 2) == 0 AND (p.flags & 4) == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+  COUNT(p.id) AS numberOfUnreadPosts,
   f.showFeedFavIcon,
   f.hideFromAllFeeds,
   f.isDeleted,
@@ -84,7 +84,7 @@ SELECT
   f.remoteId,
   f.syncError
 FROM feed f
-LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :postsUpperBound
+LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :postsUpperBound AND (p.flags & 2) == 0 AND (p.flags & 4) == 0
 WHERE f.id = :id AND f.isDeleted = 0
 GROUP BY f.id
 ORDER BY pinnedAt DESC, f.createdAt DESC LIMIT 1;
@@ -117,7 +117,10 @@ updateLastCleanUpAt:
 UPDATE feed SET lastCleanUpAt = :lastCleanUpAt WHERE id = :id;
 
 updateAlwaysFetchSourceArticle:
-UPDATE feed SET alwaysFetchSourceArticle = :alwaysFetchSourceArticle WHERE id = :id;
+UPDATE feed SET alwaysFetchSourceArticle = :alwaysFetchSourceArticle, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
+
+updateAlwaysFetchSourceArticleForAll:
+UPDATE feed SET alwaysFetchSourceArticle = :alwaysFetchSourceArticle, lastUpdatedAt = :lastUpdatedAt;
 
 updateShowFeedFavIcon:
 UPDATE feed SET showFeedFavIcon = :showFeedFavIcon WHERE id = :id;

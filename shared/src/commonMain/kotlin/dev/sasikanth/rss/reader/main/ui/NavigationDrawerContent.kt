@@ -31,11 +31,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -63,6 +62,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -82,7 +82,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.ContextActionItem
 import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
@@ -287,31 +289,67 @@ private fun ExpandedDrawerContent(
         remember(state.selectedSources) { state.selectedSources.mapTo(mutableSetOf()) { it.id } }
       val isInSearchMode = searchQuery.text.length >= Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
 
-      val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
       val lazyListState =
         rememberLazyListState(
           initialFirstVisibleItemIndex = scrollIndex,
           initialFirstVisibleItemScrollOffset = scrollOffset,
         )
       val translucentStyle = LocalTranslucentStyles.current
+      val currentScrollIndex by rememberUpdatedState(scrollIndex)
+      val currentScrollOffset by rememberUpdatedState(scrollOffset)
+      val currentIsInSearchMode by rememberUpdatedState(isInSearchMode)
+      var pendingRestoreScroll by remember {
+        mutableStateOf(
+          if (scrollIndex > 0 || scrollOffset > 0) scrollIndex to scrollOffset else null
+        )
+      }
 
-      LaunchedEffect(lazyListState) {
+      LaunchedEffect(lazyListState, allSources) {
         snapshotFlow {
-            lazyListState.firstVisibleItemIndex to lazyListState.firstVisibleItemScrollOffset
+            DrawerScrollSnapshot(
+              itemCount = allSources.itemCount,
+              refreshState = allSources.loadState.refresh,
+              index = lazyListState.firstVisibleItemIndex,
+              offset = lazyListState.firstVisibleItemScrollOffset,
+              isInSearchMode = currentIsInSearchMode,
+            )
           }
-          .collect { (index, offset) -> onScrollPositionChanged(index, offset) }
+          .collect { snapshot ->
+            if (snapshot.isInSearchMode) {
+              if (pendingRestoreScroll == null) {
+                pendingRestoreScroll = currentScrollIndex to currentScrollOffset
+              }
+            } else if (snapshot.itemCount > 0) {
+              val savedScroll = pendingRestoreScroll
+              if (savedScroll != null) {
+                pendingRestoreScroll = null
+                if (snapshot.index != savedScroll.first || snapshot.offset != savedScroll.second) {
+                  lazyListState.scrollToItem(savedScroll.first, savedScroll.second)
+                  return@collect
+                }
+              }
+              onScrollPositionChanged(snapshot.index, snapshot.offset)
+            } else if (snapshot.refreshState is LoadState.Loading) {
+              if (
+                pendingRestoreScroll == null && (currentScrollIndex > 0 || currentScrollOffset > 0)
+              ) {
+                pendingRestoreScroll = currentScrollIndex to currentScrollOffset
+              }
+            } else if (snapshot.refreshState is LoadState.NotLoading) {
+              pendingRestoreScroll = null
+              onScrollPositionChanged(snapshot.index, snapshot.offset)
+            }
+          }
       }
 
       LazyColumn(
-        modifier =
-          Modifier.fillMaxSize()
-            .padding(bottom = if (imeBottomPadding > 0.dp) imeBottomPadding else 0.dp),
+        modifier = Modifier.fillMaxSize().imePadding(),
         state = lazyListState,
         contentPadding = PaddingValues(bottom = 100.dp),
         overscrollEffect = null,
       ) {
         if (showCloseIcon) {
-          item {
+          item(key = "CloseButtonHeader", contentType = "Header") {
             Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
               CircularIconButton(
                 modifier = Modifier.align(Alignment.CenterStart),
@@ -324,10 +362,16 @@ private fun ExpandedDrawerContent(
             Spacer(Modifier.requiredHeight(16.dp))
           }
         } else {
-          item { Spacer(Modifier.requiredHeight(16.dp)) }
+          item(key = "TopSpacerHeader", contentType = "Header") {
+            Spacer(Modifier.requiredHeight(16.dp))
+          }
         }
 
-        items(MainDestination.entries) { destination ->
+        items(
+          items = MainDestination.entries,
+          key = { it.name },
+          contentType = { "MainDestination" },
+        ) { destination ->
           val selected =
             if (destination == MainDestination.Home) {
               selectedDestination == destination && state.activeSource == null
@@ -626,7 +670,11 @@ private fun CollapsedDrawerContent(
         .padding(vertical = 16.dp),
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {
-    items(MainDestination.entries) { destination ->
+    items(
+      items = MainDestination.entries,
+      key = { it.name },
+      contentType = { "MainDestination" },
+    ) { destination ->
       val selected =
         if (destination == MainDestination.Home) {
           selectedDestination == destination && state.activeSource == null
@@ -661,7 +709,7 @@ private fun CollapsedDrawerContent(
     }
 
     if (state.pinnedSources.isNotEmpty()) {
-      item {
+      item(key = "PinnedSourcesDivider", contentType = "Divider") {
         Spacer(Modifier.requiredHeight(16.dp))
 
         HorizontalDivider(
@@ -672,7 +720,11 @@ private fun CollapsedDrawerContent(
         Spacer(Modifier.requiredHeight(16.dp))
       }
 
-      items(state.pinnedSources) { source ->
+      items(
+        items = state.pinnedSources,
+        key = { "PinnedSource:${it.id}" },
+        contentType = { it.sourceType },
+      ) { source ->
         val selected = state.activeSource?.id == source.id
         Box(modifier = Modifier.padding(bottom = 8.dp)) {
           PinnedSourceIcon(
@@ -696,7 +748,7 @@ private fun CollapsedDrawerContent(
     }
 
     if (sources.itemCount > 0) {
-      item {
+      item(key = "AllSourcesDivider", contentType = "Divider") {
         Spacer(Modifier.requiredHeight(16.dp))
 
         HorizontalDivider(
@@ -707,7 +759,23 @@ private fun CollapsedDrawerContent(
         Spacer(Modifier.requiredHeight(16.dp))
       }
 
-      items(sources.itemCount) { index ->
+      items(
+        count = sources.itemCount,
+        key =
+          sources.itemKey {
+            when (it) {
+              SourceListItem.Separator -> "Separator"
+              is SourceListItem.SourceItem -> it.source.id
+            }
+          },
+        contentType = { index ->
+          when (val item = sources.peek(index)) {
+            SourceListItem.Separator -> "Separator"
+            is SourceListItem.SourceItem -> item.source.sourceType
+            null -> null
+          }
+        },
+      ) { index ->
         val sourceItem = sources[index]
         if (sourceItem is SourceListItem.SourceItem) {
           val source = sourceItem.source
@@ -957,6 +1025,14 @@ private fun NoFeeds() {
     }
   }
 }
+
+private data class DrawerScrollSnapshot(
+  val itemCount: Int,
+  val refreshState: LoadState,
+  val index: Int,
+  val offset: Int,
+  val isInSearchMode: Boolean,
+)
 
 @Preview(locale = "en")
 @Composable

@@ -33,17 +33,20 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @Stable
 @Inject
 class GroupViewModel(
@@ -115,25 +118,24 @@ class GroupViewModel(
   }
 
   private fun init() {
+    val feeds =
+      _state
+        .mapNotNull { state -> state.group?.let { group -> group.feedIds to state.feedsOrderBy } }
+        .distinctUntilChanged()
+        .flatMapLatest { (feedIds, feedsOrderBy) ->
+          Pager(config = PagingConfig(pageSize = 20)) {
+              rssRepository.feedsInGroup(feedIds = feedIds, orderBy = feedsOrderBy)
+            }
+            .flow
+        }
+        .cachedIn(viewModelScope)
+    _state.update { it.copy(feeds = feeds) }
+
     rssRepository
       .groupById(groupId)
       .onEach { group ->
         groupName = groupName.copy(text = group.name)
         _state.update { it.copy(group = group) }
-      }
-      .combine(state) { group, state -> Pair(group, state) }
-      .distinctUntilChanged { old, new ->
-        old.first.feedIds == new.first.feedIds && old.second.feedsOrderBy == new.second.feedsOrderBy
-      }
-      .onEach { (group, state) ->
-        val feeds =
-          Pager(config = PagingConfig(pageSize = 20)) {
-              rssRepository.feedsInGroup(feedIds = group.feedIds, orderBy = state.feedsOrderBy)
-            }
-            .flow
-            .cachedIn(viewModelScope)
-
-        _state.update { it.copy(feeds = feeds) }
       }
       .launchIn(viewModelScope)
   }

@@ -30,14 +30,15 @@ actual class LoggingInitializer actual constructor(private val appInfo: AppInfo)
 
   @OptIn(ExperimentalKermitApi::class)
   actual override fun initialize() {
+    val minSeverity = if (appInfo.isDebugBuild) Severity.Info else Severity.Warn
     val loggers =
       if (appInfo.isDebugBuild) {
         listOf(platformLogWriter(NoTagFormatter))
       } else {
-        listOf(platformLogWriter(NoTagFormatter), BugsnagLogWriter())
+        listOf(platformLogWriter(NoTagFormatter), BugsnagLogWriter(minSeverity = Severity.Warn))
       }
 
     Logger.setLogWriters(loggers)
-    Logger.setMinSeverity(Severity.Info)
+    Logger.setMinSeverity(minSeverity)
   }
 }

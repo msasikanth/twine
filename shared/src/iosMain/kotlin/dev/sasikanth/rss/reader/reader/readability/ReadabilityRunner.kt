@@ -15,10 +15,6 @@
  *
  */
 
-/*
- * Copyright 2026 Sasikanth Miriyampalli
- */
-
 package dev.sasikanth.rss.reader.reader.readability
 
 import co.touchlab.kermit.Logger
@@ -29,11 +25,13 @@ import dev.sasikanth.rss.reader.reader.redability.ReaderHTML
 import dev.sasikanth.rss.reader.reader.redability.fallbackReadabilityResult
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.concurrent.AtomicInt
+import kotlin.coroutines.Continuation
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.ObjCSignatureOverride
 import kotlinx.cinterop.readValue
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -45,20 +43,34 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import me.tatarka.inject.annotations.Inject
-import platform.Foundation.NSURL
-import platform.WebKit.*
+import platform.CoreGraphics.CGRectZero
+import platform.Foundation.NSError
+import platform.WebKit.WKNavigation
+import platform.WebKit.WKNavigationDelegateProtocol
+import platform.WebKit.WKProcessPool
+import platform.WebKit.WKScriptMessage
+import platform.WebKit.WKScriptMessageHandlerProtocol
+import platform.WebKit.WKUserContentController
+import platform.WebKit.WKWebView
+import platform.WebKit.WKWebViewConfiguration
+import platform.WebKit.WKWebsiteDataStore
 import platform.darwin.NSObject
 
 private val PARSE_TIMEOUT = 15.seconds
+private const val MESSAGE_HANDLER_NAME = "readabilityMessageHandler"
 
 @Inject
 @AppScope
 class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider) :
   ReadabilityRunner {
 
-  private val semaphore = Semaphore(permits = 3)
-  private val pool = mutableListOf<WKWebView>()
+  private val semaphore = Semaphore(permits = 2)
+  private val pool = mutableListOf<PooledWebView>()
   private val poolMutex = Mutex()
+  private val shellMutex = Mutex()
+  private var cachedShell: String? = null
+  private val nextRequestId = AtomicInt(0)
+
   private val json = Json {
     ignoreUnknownKeys = true
     isLenient = true
@@ -73,134 +85,349 @@ class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider)
     if (content.isBlank()) return ReadabilityResult(content = content)
 
     return semaphore.withPermit {
-      val htmlShell = withContext(dispatchersProvider.default) { ReaderHTML.createOrGet() }
+      val requestId = nextRequestId.addAndGet(1)
+      val okPrefix = "$requestId:OK:"
+      val errorPrefix = "$requestId:ERROR:"
 
-      // Using your Json.encodeToString based asJSString logic directly here
-      val linkJs = Json.encodeToString(link.orEmpty())
-      val imageJs = Json.encodeToString(image.orEmpty())
-      val contentJs = Json.encodeToString(content)
+      val (htmlShell, executionScript) =
+        withContext(dispatchersProvider.default) {
+          val shell =
+            shellMutex.withLock {
+              cachedShell ?: ReaderHTML.createOrGet().also { cachedShell = it }
+            }
+          val linkJs = Json.encodeToString(link.orEmpty())
+          val imageJs = Json.encodeToString(image.orEmpty())
+          val contentJs = Json.encodeToString(content)
 
-      val executionScript =
-        """
+          val script =
+            """
             (function() {
                 try {
                     if (typeof parseReaderContent === 'undefined') {
-                        window.webkit.messageHandlers.readabilityMessageHandler.postMessage("ERROR:parseReaderContent undefined");
+                        window.webkit.messageHandlers.readabilityMessageHandler.postMessage("$errorPrefix" + "parseReaderContent undefined");
                         return;
                     }
                     parseReaderContent($linkJs, $imageJs, $contentJs)
                         .then(res => {
-                            window.webkit.messageHandlers.readabilityMessageHandler.postMessage(JSON.stringify(res));
+                            window.webkit.messageHandlers.readabilityMessageHandler.postMessage("$okPrefix" + JSON.stringify(res));
                         })
                         .catch(err => {
-                            window.webkit.messageHandlers.readabilityMessageHandler.postMessage("ERROR:" + err);
+                            window.webkit.messageHandlers.readabilityMessageHandler.postMessage("$errorPrefix" + err);
                         });
                 } catch (e) {
-                    window.webkit.messageHandlers.readabilityMessageHandler.postMessage("ERROR:" + e.message);
+                    window.webkit.messageHandlers.readabilityMessageHandler.postMessage("$errorPrefix" + e.message);
                 }
             })();
-        """
-          .trimIndent()
+            """
+              .trimIndent()
 
-      withContext(dispatchersProvider.main) {
-        val webView = getOrCreateWebView()
+          shell to script
+        }
 
+      val rawResult =
         try {
-          withTimeoutOrNull(PARSE_TIMEOUT) {
-            awaitParsedContent(webView, htmlShell, link, executionScript)
-          }
-            ?: run {
-              Logger.e { "Timed out running readability pipeline, falling back to raw content" }
-              withContext(dispatchersProvider.default) { fallbackReadabilityResult(content) }
+          withContext(dispatchersProvider.main) {
+            val pooled = getOrCreateWebView()
+            var completedCleanly = false
+            try {
+              val payload =
+                withTimeoutOrNull(PARSE_TIMEOUT) {
+                  var result: String? = null
+                  for (attempt in 0..1) {
+                    try {
+                      result =
+                        awaitParsedJson(
+                          pooled = pooled,
+                          htmlShell = htmlShell,
+                          okPrefix = okPrefix,
+                          errorPrefix = errorPrefix,
+                          executionScript = executionScript,
+                        )
+                      break
+                    } catch (e: CancellationException) {
+                      throw e
+                    } catch (e: RetryableWebViewException) {
+                      pooled.loadGeneration++
+                      pooled.isShellLoaded = false
+                      pooled.webView.stopLoading()
+                      if (attempt == 1) throw e
+                    }
+                  }
+                  result
+                }
+
+              if (payload == null) {
+                Logger.e { "Timed out running readability pipeline, falling back to raw content" }
+              } else {
+                completedCleanly = true
+              }
+
+              payload
+            } finally {
+              withContext(NonCancellable) {
+                pooled.clearActiveCallbacks()
+                if (completedCleanly && pooled.isShellLoaded) {
+                  returnWebViewToPool(pooled)
+                } else {
+                  pooled.dispose()
+                }
+              }
             }
+          }
         } catch (e: CancellationException) {
           throw e
         } catch (e: Exception) {
           Logger.e(e) { "Failed to run readability pipeline, falling back to raw content" }
-          withContext(dispatchersProvider.default) { fallbackReadabilityResult(content) }
-        } finally {
-          withContext(NonCancellable) {
-            cleanupWebView(webView)
-            returnWebViewToPool(webView)
+          null
+        }
+
+      withContext(dispatchersProvider.default) {
+        if (rawResult != null) {
+          try {
+            json.decodeFromString<ReadabilityResult>(rawResult)
+          } catch (e: Exception) {
+            Logger.e(e) { "Failed to decode readability payload, falling back to raw content" }
+            fallbackReadabilityResult(content)
           }
+        } else {
+          fallbackReadabilityResult(content)
         }
       }
     }
   }
 
-  private suspend fun awaitParsedContent(
-    webView: WKWebView,
+  private suspend fun awaitParsedJson(
+    pooled: PooledWebView,
     htmlShell: String,
-    link: String?,
+    okPrefix: String,
+    errorPrefix: String,
     executionScript: String,
-  ): ReadabilityResult = suspendCancellableCoroutine { continuation ->
+  ): String = suspendCancellableCoroutine { continuation ->
+    val generation = ++pooled.loadGeneration
     val isFinished = AtomicInt(0)
+    var scriptStarted = false
+    var expectedNavigation: WKNavigation? = null
 
-    // We create the handler and ensure it is held strongly during this scope
-    val handler = ReaderJSHandler { result ->
-      if (result == "READY") {
-        webView.evaluateJavaScript(executionScript) { _, error ->
-          if (error != null && isFinished.compareAndSet(0, 1)) {
-            continuation.resumeWithException(
-              Exception("JS Execution Error: ${error.localizedDescription}")
-            )
-          }
-        }
-        return@ReaderJSHandler
+    fun triggerEvaluationOnce() {
+      if (generation != pooled.loadGeneration || scriptStarted || isFinished.value != 0) return
+      scriptStarted = true
+      pooled.isShellLoaded = true
+      evaluateExecutionScript(
+        pooled = pooled,
+        generation = generation,
+        executionScript = executionScript,
+        isFinished = isFinished,
+        continuation = continuation,
+      )
+    }
+
+    pooled.activeAbort = { cause ->
+      if (generation == pooled.loadGeneration && isFinished.compareAndSet(0, 1)) {
+        continuation.resumeWithException(cause)
       }
+    }
 
-      if (isFinished.compareAndSet(0, 1)) {
-        if (result.startsWith("ERROR:")) {
-          continuation.resumeWithException(Exception(result))
-        } else {
-          try {
-            continuation.resume(json.decodeFromString<ReadabilityResult>(result))
-          } catch (e: Exception) {
-            continuation.resumeWithException(e)
-          }
+    pooled.navigationDelegate.onFinishNavigation = { navigation ->
+      if (
+        generation == pooled.loadGeneration &&
+          !pooled.isShellLoaded &&
+          expectedNavigation != null &&
+          navigation == expectedNavigation
+      ) {
+        triggerEvaluationOnce()
+      }
+    }
+
+    pooled.navigationDelegate.onFailNavigation = { navigation, error ->
+      if (
+        generation == pooled.loadGeneration &&
+          !pooled.isShellLoaded &&
+          expectedNavigation != null &&
+          navigation == expectedNavigation
+      ) {
+        pooled.isShellLoaded = false
+        if (isFinished.compareAndSet(0, 1)) {
+          continuation.resumeWithException(
+            Exception("Shell navigation failed: ${error.localizedDescription}")
+          )
         }
       }
     }
 
-    val userController = webView.configuration.userContentController
-    userController.addScriptMessageHandler(handler, "readabilityMessageHandler")
-
-    webView.loadHTMLString(htmlShell, baseURL = link?.let { NSURL.URLWithString(it) })
+    pooled.handler.onMessage = { message ->
+      if (generation == pooled.loadGeneration) {
+        when {
+          message == "READY" && !pooled.isShellLoaded && expectedNavigation != null -> {
+            triggerEvaluationOnce()
+          }
+          message.startsWith(okPrefix) -> {
+            if (isFinished.compareAndSet(0, 1)) {
+              continuation.resume(message.substring(okPrefix.length))
+            }
+          }
+          message.startsWith(errorPrefix) -> {
+            val errorDetail = message.substring(errorPrefix.length)
+            val undefinedShell = errorDetail.contains("parseReaderContent undefined")
+            if (undefinedShell) {
+              pooled.isShellLoaded = false
+            }
+            if (isFinished.compareAndSet(0, 1)) {
+              val exception =
+                if (undefinedShell) {
+                  RetryableWebViewException(errorDetail)
+                } else {
+                  Exception(errorDetail)
+                }
+              continuation.resumeWithException(exception)
+            }
+          }
+        }
+      }
+    }
 
     continuation.invokeOnCancellation { isFinished.value = 1 }
+
+    if (pooled.isShellLoaded) {
+      scriptStarted = true
+      evaluateExecutionScript(
+        pooled = pooled,
+        generation = generation,
+        executionScript = executionScript,
+        isFinished = isFinished,
+        continuation = continuation,
+      )
+    } else {
+      expectedNavigation = pooled.webView.loadHTMLString(htmlShell, baseURL = null)
+    }
   }
 
-  private fun cleanupWebView(webView: WKWebView) {
-    webView.stopLoading()
-    webView.configuration.userContentController.apply {
-      removeScriptMessageHandlerForName("readabilityMessageHandler")
-      removeAllUserScripts()
+  private fun evaluateExecutionScript(
+    pooled: PooledWebView,
+    generation: Long,
+    executionScript: String,
+    isFinished: AtomicInt,
+    continuation: Continuation<String>,
+  ) {
+    pooled.webView.evaluateJavaScript(executionScript) { _, error ->
+      if (error != null && generation == pooled.loadGeneration) {
+        pooled.isShellLoaded = false
+        if (isFinished.compareAndSet(0, 1)) {
+          continuation.resumeWithException(
+            RetryableWebViewException("JS Execution Error: ${error.localizedDescription}")
+          )
+        }
+      }
     }
   }
 
   @OptIn(ExperimentalForeignApi::class)
-  private suspend fun getOrCreateWebView(): WKWebView =
+  private suspend fun getOrCreateWebView(): PooledWebView =
     poolMutex.withLock {
       if (pool.isNotEmpty()) {
         pool.removeAt(0)
       } else {
-        val config = WKWebViewConfiguration()
-        WKWebView(frame = platform.CoreGraphics.CGRectZero.readValue(), configuration = config)
+        val handler = ReaderJSHandler()
+        val navigationDelegate = ReaderNavigationDelegate()
+        val userContentController =
+          WKUserContentController().apply { addScriptMessageHandler(handler, MESSAGE_HANDLER_NAME) }
+        val config =
+          WKWebViewConfiguration().apply {
+            websiteDataStore = WKWebsiteDataStore.nonPersistentDataStore()
+            processPool = WKProcessPool()
+            this.userContentController = userContentController
+          }
+        val webView = WKWebView(frame = CGRectZero.readValue(), configuration = config)
+        PooledWebView(
+          webView = webView,
+          handler = handler,
+          navigationDelegate = navigationDelegate,
+          userContentController = userContentController,
+        )
       }
     }
 
-  private suspend fun returnWebViewToPool(webView: WKWebView) =
-    poolMutex.withLock { pool.add(webView) }
+  private suspend fun returnWebViewToPool(pooled: PooledWebView) =
+    poolMutex.withLock { pool.add(pooled) }
+
+  private class PooledWebView(
+    val webView: WKWebView,
+    val handler: ReaderJSHandler,
+    val navigationDelegate: ReaderNavigationDelegate,
+    val userContentController: WKUserContentController,
+    var isShellLoaded: Boolean = false,
+    var loadGeneration: Long = 0L,
+  ) {
+    var activeAbort: ((Throwable) -> Unit)? = null
+
+    init {
+      webView.navigationDelegate = navigationDelegate
+      navigationDelegate.onProcessTerminated = {
+        isShellLoaded = false
+        val abort = activeAbort
+        activeAbort = null
+        abort?.invoke(RetryableWebViewException("WKWebView WebContent process terminated"))
+        loadGeneration++
+      }
+    }
+
+    fun clearActiveCallbacks() {
+      handler.onMessage = null
+      activeAbort = null
+      navigationDelegate.onFinishNavigation = null
+      navigationDelegate.onFailNavigation = null
+    }
+
+    fun dispose() {
+      loadGeneration++
+      isShellLoaded = false
+      clearActiveCallbacks()
+      navigationDelegate.onProcessTerminated = null
+      webView.navigationDelegate = null
+      webView.stopLoading()
+      userContentController.removeScriptMessageHandlerForName(MESSAGE_HANDLER_NAME)
+    }
+  }
 }
 
-// Ensure this remains a top-level or internal class so it isn't collected
-class ReaderJSHandler(private val onResult: (String) -> Unit) :
-  NSObject(), WKScriptMessageHandlerProtocol {
+private class RetryableWebViewException(message: String) : Exception(message)
+
+internal class ReaderJSHandler : NSObject(), WKScriptMessageHandlerProtocol {
+  var onMessage: ((String) -> Unit)? = null
+
   override fun userContentController(
     userContentController: WKUserContentController,
     didReceiveScriptMessage: WKScriptMessage,
   ) {
-    val body = didReceiveScriptMessage.body as? String ?: ""
-    onResult(body)
+    val body = didReceiveScriptMessage.body as? String ?: return
+    onMessage?.invoke(body)
+  }
+}
+
+internal class ReaderNavigationDelegate : NSObject(), WKNavigationDelegateProtocol {
+  var onFinishNavigation: ((WKNavigation?) -> Unit)? = null
+  var onFailNavigation: ((WKNavigation?, NSError) -> Unit)? = null
+  var onProcessTerminated: (() -> Unit)? = null
+
+  @ObjCSignatureOverride
+  override fun webView(webView: WKWebView, didFinishNavigation: WKNavigation?) {
+    onFinishNavigation?.invoke(didFinishNavigation)
+  }
+
+  @ObjCSignatureOverride
+  override fun webView(webView: WKWebView, didFailNavigation: WKNavigation?, withError: NSError) {
+    onFailNavigation?.invoke(didFailNavigation, withError)
+  }
+
+  @ObjCSignatureOverride
+  override fun webView(
+    webView: WKWebView,
+    didFailProvisionalNavigation: WKNavigation?,
+    withError: NSError,
+  ) {
+    onFailNavigation?.invoke(didFailProvisionalNavigation, withError)
+  }
+
+  override fun webViewWebContentProcessDidTerminate(webView: WKWebView) {
+    onProcessTerminated?.invoke()
   }
 }

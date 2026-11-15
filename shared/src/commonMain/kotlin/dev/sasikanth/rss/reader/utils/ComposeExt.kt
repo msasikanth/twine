@@ -37,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -188,10 +189,13 @@ internal enum class KeyboardState {
 
 @Composable
 internal fun keyboardVisibilityAsState(): State<KeyboardState> {
-  return rememberUpdatedState(
-    if (WindowInsets.ime.getBottom(LocalDensity.current) > 0) KeyboardState.Opened
-    else KeyboardState.Closed
-  )
+  val density = LocalDensity.current
+  val ime = WindowInsets.ime
+  return remember(density, ime) {
+    derivedStateOf {
+      if (ime.getBottom(density) > 0) KeyboardState.Opened else KeyboardState.Closed
+    }
+  }
 }
 
 internal class Ref(var value: Int)

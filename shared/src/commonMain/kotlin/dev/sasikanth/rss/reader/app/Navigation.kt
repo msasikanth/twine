@@ -30,6 +30,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.window.core.layout.WindowSizeClass
+import androidx.window.core.layout.computeWindowSizeClass
 import dev.sasikanth.rss.reader.about.ui.AboutScreen
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionViewModel
 import dev.sasikanth.rss.reader.accountselection.ui.AccountSelectionScreen
@@ -350,13 +352,44 @@ fun EntryProviderScope<NavKey>.mainScreen(
 // Inside a list-detail split the Main entry only gets the list pane, so screens under it
 // must adapt to the pane's size rather than the window's.
 @Composable
-private fun PaneSizeClassProvider(content: @Composable () -> Unit) {
-  BoxWithConstraints {
-    val paneSizeClass =
-      remember(maxWidth, maxHeight) {
-        WindowSizeClass(widthDp = maxWidth.value, heightDp = maxHeight.value)
+private fun PaneSizeClassProvider(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+  val movableContent = remember {
+    movableContentOf { currentContent: @Composable () -> Unit -> currentContent() }
+  }
+  val rootWindowSizeClass = LocalRootWindowSizeClass.current
+  val isSplitCapableWindow =
+    rootWindowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
+  if (!isSplitCapableWindow) {
+    if (modifier == Modifier) {
+      movableContent(content)
+    } else {
+      Box(modifier = modifier) { movableContent(content) }
+    }
+  } else {
+    BoxWithConstraints(modifier = modifier) {
+      val widthDp =
+        if (constraints.hasBoundedWidth) {
+          maxWidth.value
+        } else {
+          rootWindowSizeClass.minWidthDp.toFloat()
+        }
+      val heightDp =
+        if (constraints.hasBoundedHeight) {
+          maxHeight.value
+        } else {
+          rootWindowSizeClass.minHeightDp.toFloat()
+        }
+      val paneSizeClass =
+        remember(widthDp, heightDp) {
+          WindowSizeClass.BREAKPOINTS_V2.computeWindowSizeClass(
+            widthDp = widthDp,
+            heightDp = heightDp,
+          )
+        }
+      CompositionLocalProvider(LocalWindowSizeClass provides paneSizeClass) {
+        movableContent(content)
       }
-    CompositionLocalProvider(LocalWindowSizeClass provides paneSizeClass) { content() }
+    }
   }
 }
 

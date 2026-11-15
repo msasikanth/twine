@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.ui
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -204,59 +205,70 @@ internal fun typography(
   )
 }
 
+internal val DefaultTypography: Typography
+  @Composable
+  get() {
+    val fontFamily = OutfitFontFamily
+    return remember(fontFamily) { typography(fontFamily) }
+  }
+
 internal val ComicNeueFontFamily: FontFamily
   @Composable
-  get() =
-    FontFamily(
-      Font(Res.font.comic_neue_regular, weight = FontWeight.Normal),
-      Font(Res.font.comic_neue_regular, weight = FontWeight.Medium),
-      Font(Res.font.comic_neue_bold, weight = FontWeight.Bold),
-    )
+  get() {
+    val regular = Font(Res.font.comic_neue_regular, weight = FontWeight.Normal)
+    val medium = Font(Res.font.comic_neue_regular, weight = FontWeight.Medium)
+    val bold = Font(Res.font.comic_neue_bold, weight = FontWeight.Bold)
+    return remember(regular, medium, bold) { FontFamily(regular, medium, bold) }
+  }
 
 internal val GoogleSansFontFamily: FontFamily
-  @Composable get() = FontFamily(Font(Res.font.google_sans))
+  @Composable
+  get() {
+    val regular = Font(Res.font.google_sans)
+    return remember(regular) { FontFamily(regular) }
+  }
 
 internal val OutfitFontFamily: FontFamily
   @Composable
-  get() =
-    FontFamily(
-      Font(Res.font.outfit_regular, weight = FontWeight.Normal),
-      Font(Res.font.outfit_medium, weight = FontWeight.Medium),
-      Font(Res.font.outfit_bold, weight = FontWeight.Bold),
-    )
+  get() {
+    val regular = Font(Res.font.outfit_regular, weight = FontWeight.Normal)
+    val medium = Font(Res.font.outfit_medium, weight = FontWeight.Medium)
+    val bold = Font(Res.font.outfit_bold, weight = FontWeight.Bold)
+    return remember(regular, medium, bold) { FontFamily(regular, medium, bold) }
+  }
 
 internal val GolosFontFamily: FontFamily
   @Composable
-  get() =
-    FontFamily(
-      Font(Res.font.golos_regular, weight = FontWeight.Normal),
-      Font(Res.font.golos_medium, weight = FontWeight.Medium),
-      Font(Res.font.golos_bold, weight = FontWeight.Bold),
-    )
+  get() {
+    val regular = Font(Res.font.golos_regular, weight = FontWeight.Normal)
+    val medium = Font(Res.font.golos_medium, weight = FontWeight.Medium)
+    val bold = Font(Res.font.golos_bold, weight = FontWeight.Bold)
+    return remember(regular, medium, bold) { FontFamily(regular, medium, bold) }
+  }
 
 internal val LoraFontFamily: FontFamily
   @Composable
-  get() =
-    FontFamily(
-      Font(Res.font.lora_regular, weight = FontWeight.Normal),
-      Font(Res.font.lora_medium, weight = FontWeight.Medium),
-      Font(Res.font.lora_bold, weight = FontWeight.Bold),
-    )
+  get() {
+    val regular = Font(Res.font.lora_regular, weight = FontWeight.Normal)
+    val medium = Font(Res.font.lora_medium, weight = FontWeight.Medium)
+    val bold = Font(Res.font.lora_bold, weight = FontWeight.Bold)
+    return remember(regular, medium, bold) { FontFamily(regular, medium, bold) }
+  }
 
 internal val MerriWeatherFontFamily: FontFamily
   @Composable
-  get() =
-    FontFamily(
-      Font(Res.font.merriweather_regular, weight = FontWeight.Normal),
-      Font(Res.font.merriweather_medium, weight = FontWeight.Medium),
-      Font(Res.font.merriweather_bold, weight = FontWeight.Bold),
-    )
+  get() {
+    val regular = Font(Res.font.merriweather_regular, weight = FontWeight.Normal)
+    val medium = Font(Res.font.merriweather_medium, weight = FontWeight.Medium)
+    val bold = Font(Res.font.merriweather_bold, weight = FontWeight.Bold)
+    return remember(regular, medium, bold) { FontFamily(regular, medium, bold) }
+  }
 
 internal val RobotoSerifFontFamily: FontFamily
   @Composable
-  get() =
-    FontFamily(
-      Font(Res.font.roboto_serif_regular, weight = FontWeight.Normal),
-      Font(Res.font.roboto_serif_medium, weight = FontWeight.Medium),
-      Font(Res.font.robot_serif_bold, weight = FontWeight.Bold),
-    )
+  get() {
+    val regular = Font(Res.font.roboto_serif_regular, weight = FontWeight.Normal)
+    val medium = Font(Res.font.roboto_serif_medium, weight = FontWeight.Medium)
+    val bold = Font(Res.font.robot_serif_bold, weight = FontWeight.Bold)
+    return remember(regular, medium, bold) { FontFamily(regular, medium, bold) }
+  }
