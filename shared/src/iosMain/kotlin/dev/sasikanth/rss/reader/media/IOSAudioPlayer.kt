@@ -21,6 +21,7 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.readValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -36,23 +37,64 @@ import me.tatarka.inject.annotations.Inject
 import platform.AVFAudio.AVAudioSession
 import platform.AVFAudio.AVAudioSessionCategoryPlayback
 import platform.AVFAudio.setActive
-import platform.AVFoundation.*
-import platform.CoreMedia.*
-import platform.Foundation.*
-import platform.MediaPlayer.*
+import platform.AVFoundation.AVPlayer
+import platform.AVFoundation.AVPlayerItem
+import platform.AVFoundation.AVPlayerItemDidPlayToEndTimeNotification
+import platform.AVFoundation.AVPlayerItemStatusFailed
+import platform.AVFoundation.AVPlayerTimeControlStatusPlaying
+import platform.AVFoundation.AVPlayerTimeControlStatusWaitingToPlayAtSpecifiedRate
+import platform.AVFoundation.currentItem
+import platform.AVFoundation.currentTime
+import platform.AVFoundation.duration
+import platform.AVFoundation.pause
+import platform.AVFoundation.playImmediatelyAtRate
+import platform.AVFoundation.replaceCurrentItemWithPlayerItem
+import platform.AVFoundation.seekToTime
+import platform.AVFoundation.timeControlStatus
+import platform.CoreMedia.CMTimeGetSeconds
+import platform.CoreMedia.CMTimeMakeWithSeconds
+import platform.CoreMedia.kCMTimeZero
+import platform.Foundation.NSCachesDirectory
+import platform.Foundation.NSFileManager
+import platform.Foundation.NSHTTPURLResponse
+import platform.Foundation.NSNotificationCenter
+import platform.Foundation.NSURL
+import platform.Foundation.NSURLSession
+import platform.Foundation.NSURLSessionDownloadTask
+import platform.Foundation.NSUserDomainMask
+import platform.Foundation.dataTaskWithURL
+import platform.Foundation.downloadTaskWithURL
+import platform.MediaPlayer.MPChangePlaybackPositionCommandEvent
+import platform.MediaPlayer.MPMediaItemArtwork
+import platform.MediaPlayer.MPMediaItemPropertyArtist
+import platform.MediaPlayer.MPMediaItemPropertyArtwork
+import platform.MediaPlayer.MPMediaItemPropertyPlaybackDuration
+import platform.MediaPlayer.MPMediaItemPropertyTitle
+import platform.MediaPlayer.MPNowPlayingInfoCenter
+import platform.MediaPlayer.MPNowPlayingInfoPropertyElapsedPlaybackTime
+import platform.MediaPlayer.MPNowPlayingInfoPropertyPlaybackRate
+import platform.MediaPlayer.MPRemoteCommandCenter
+import platform.MediaPlayer.MPRemoteCommandHandlerStatusSuccess
 import platform.UIKit.UIImage
 import platform.darwin.dispatch_async
 import platform.darwin.dispatch_get_main_queue
 
 @OptIn(ExperimentalForeignApi::class)
-@Inject
 @AppScope
-class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : AudioPlayer {
+class IOSAudioPlayer
+internal constructor(
+  private val dispatchersProvider: DispatchersProvider,
+  private val platformPlayer: PlatformAudioPlayer,
+) : AudioPlayer {
+
+  @Inject
+  constructor(
+    dispatchersProvider: DispatchersProvider
+  ) : this(dispatchersProvider, AvPlatformAudioPlayer())
 
   private val _playbackState = MutableStateFlow(PlaybackState.Idle)
   override val playbackState: StateFlow<PlaybackState> = _playbackState.asStateFlow()
 
-  private val player = AVPlayer()
   private val scope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
   private var progressJob: Job? = null
   private var playingUrl: String? = null
@@ -61,6 +103,12 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   private var playingArtist: String? = null
   private var playingCoverUrl: String? = null
   private var playJob: Job? = null
+  private var downloadTask: NSURLSessionDownloadTask? = null
+  private var pendingLocalCacheUrl: NSURL? = null
+  private var currentSeekId: Long = 0L
+  private var activePositionSeekId: Long = 0L
+  private var pendingSeekPositionMillis: Long? = null
+  private var pendingAutoPlayAfterSeek: Boolean = false
   private var sleepTimerJob: Job? = null
   private var sleepTimerRemainingMillis: Long? = null
   private var selectedSleepTimerOption: SleepTimerOption = SleepTimerOption.None
@@ -74,15 +122,15 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   init {
     setupRemoteCommands()
 
-    NSNotificationCenter.defaultCenter.addObserverForName(
-      AVPlayerItemDidPlayToEndTimeNotification,
-      null,
-      null,
-    ) {
-      if (_playbackState.value.sleepTimerRemaining == -1L) {
-        setSleepTimer(SleepTimerOption.None)
+    platformPlayer.observePlaybackEnd { finishedItemMatchesCurrent ->
+      scope.launch {
+        if (!finishedItemMatchesCurrent()) return@launch
+
+        if (_playbackState.value.sleepTimerRemaining == -1L) {
+          setSleepTimer(SleepTimerOption.None)
+        }
+        stop()
       }
-      stop()
     }
   }
 
@@ -95,6 +143,13 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     initialPosition: Long,
   ) {
     playJob?.cancel()
+    downloadTask?.cancel()
+    downloadTask = null
+    pendingLocalCacheUrl = null
+    pendingSeekPositionMillis = null
+    pendingAutoPlayAfterSeek = false
+    activePositionSeekId = ++currentSeekId
+
     playJob =
       scope.launch {
         playingUrl = url
@@ -129,18 +184,22 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   ) {
     val nsUrl = NSURL.URLWithString(remoteUrl) ?: return
     val task =
-      NSURLSession.sharedSession.downloadTaskWithURL(nsUrl) { location, _, _ ->
-        if (location != null) {
-          fileManager.moveItemAtURL(location, localUrl, null)
-          dispatch_async(dispatch_get_main_queue()) {
-            if (playingUrl == remoteUrl && _playbackState.value.isPlaying) {
-              val currentPos = _playbackState.value.currentPosition
-              playInternal(localUrl, title, artist, coverUrl, currentPos)
-            }
-          }
+      NSURLSession.sharedSession.downloadTaskWithURL(nsUrl) { location, response, error ->
+        val statusValid =
+          (response as? NSHTTPURLResponse)?.statusCode?.let { it in 200..299 } ?: true
+        if (error != null || !statusValid || location == null) return@downloadTaskWithURL
+
+        val localPath = localUrl.path
+        if (localPath != null && fileManager.fileExistsAtPath(localPath)) {
+          fileManager.removeItemAtURL(localUrl, null)
         }
+        val moved = fileManager.moveItemAtURL(location, localUrl, null)
+        if (!moved) return@downloadTaskWithURL
+
+        scope.launch { onLocalCacheReady(remoteUrl, localUrl) }
       }
-    task.priority = 0.0f // NSURLSessionTaskPriorityLow
+    task.priority = 0.0f
+    downloadTask = task
 
     scope.launch {
       delay(3000)
@@ -149,10 +208,32 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
       }
     }
 
-    // While downloading, we can start playing from the remote URL if we want streaming + caching,
-    // but AVPlayer can't easily switch from remote to local seamlessly or use a shared cache.
-    // For simplicity, we play the remote URL first, and subsequent plays will use the local file.
     playInternal(nsUrl, title, artist, coverUrl, initialPosition)
+  }
+
+  internal fun onLocalCacheReady(remoteUrl: String, localUrl: NSURL) {
+    if (playingUrl != remoteUrl) return
+    downloadTask = null
+
+    when {
+      platformPlayer.timeControlStatus == AVPlayerTimeControlStatusPlaying -> {
+        pendingLocalCacheUrl = localUrl
+      }
+      !_playbackState.value.isPlaying -> {
+        swapToLocalCacheItem(
+          localUrl = localUrl,
+          positionMillis = currentPositionMillisOrZero(),
+          shouldPlay = false,
+        )
+      }
+      else -> {
+        swapToLocalCacheItem(
+          localUrl = localUrl,
+          positionMillis = currentPositionMillisOrZero(),
+          shouldPlay = true,
+        )
+      }
+    }
   }
 
   private fun playInternal(
@@ -162,35 +243,112 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     coverUrl: String?,
     initialPosition: Long,
   ) {
-    val audioSession = AVAudioSession.sharedInstance()
-    audioSession.setCategory(AVAudioSessionCategoryPlayback, null)
-    audioSession.setActive(true, null)
-
-    val playerItem = AVPlayerItem(uRL = url)
-    player.replaceCurrentItemWithPlayerItem(playerItem)
+    platformPlayer.activatePlaybackSession()
+    platformPlayer.replaceCurrentItemWithUrl(url)
 
     if (initialPosition > 0) {
-      val cmTime = CMTimeMakeWithSeconds(initialPosition.toDouble() / 1000.0, 1000)
-      player.seekToTime(cmTime)
+      val targetPosition = initialPosition.coerceAtLeast(0L)
+      val seekId = ++currentSeekId
+      activePositionSeekId = seekId
+      pendingSeekPositionMillis = targetPosition
+      platformPlayer.seekTo(positionMillis = targetPosition, zeroTolerance = false) {
+        scope.launch {
+          if (seekId == activePositionSeekId) {
+            pendingSeekPositionMillis = null
+            if (playingUrl != null) {
+              updatePlaybackState(syncNowPlaying = true)
+            }
+          }
+        }
+      }
     }
 
-    player.playImmediatelyAtRate(currentSpeed)
+    platformPlayer.playImmediatelyAtRate(currentSpeed)
 
-    updateNowPlayingInfo(title, artist, coverUrl)
+    updateNowPlayingInfo(title, artist, coverUrl, initialPosition)
     startProgressUpdate()
+  }
+
+  private fun swapToLocalCacheItem(localUrl: NSURL, positionMillis: Long, shouldPlay: Boolean) {
+    pendingLocalCacheUrl = null
+    val targetPosition = positionMillis.coerceAtLeast(0L)
+    val seekId = ++currentSeekId
+    activePositionSeekId = seekId
+
+    if (targetPosition > 0L || !shouldPlay) {
+      platformPlayer.pause()
+    }
+    if (!shouldPlay) {
+      stopProgressUpdate()
+    }
+
+    platformPlayer.replaceCurrentItemWithUrl(localUrl)
+
+    if (shouldPlay) {
+      platformPlayer.activatePlaybackSession()
+    }
+
+    if (targetPosition > 0L) {
+      pendingSeekPositionMillis = targetPosition
+      pendingAutoPlayAfterSeek = shouldPlay
+      platformPlayer.seekTo(positionMillis = targetPosition, zeroTolerance = true) {
+        scope.launch {
+          if (seekId == activePositionSeekId) {
+            val autoPlay = pendingAutoPlayAfterSeek && seekId == currentSeekId
+            pendingSeekPositionMillis = null
+            pendingAutoPlayAfterSeek = false
+            if (playingUrl != null) {
+              if (autoPlay) {
+                platformPlayer.playImmediatelyAtRate(currentSpeed)
+                startProgressUpdate()
+              }
+              updatePlaybackState(syncNowPlaying = true)
+            }
+          }
+        }
+      }
+    } else {
+      pendingSeekPositionMillis = null
+      pendingAutoPlayAfterSeek = false
+      if (shouldPlay) {
+        platformPlayer.playImmediatelyAtRate(currentSpeed)
+        startProgressUpdate()
+      }
+    }
+
+    updatePlaybackState(syncNowPlaying = true)
   }
 
   override fun pause() {
     playJob?.cancel()
-    player.pause()
+    val positionBeforePause = currentPositionMillisOrZero()
+    ++currentSeekId
+    pendingAutoPlayAfterSeek = false
+    platformPlayer.pause()
     stopProgressUpdate()
-    updatePlaybackState()
+
+    val cachedUrl = pendingLocalCacheUrl
+    if (cachedUrl != null) {
+      swapToLocalCacheItem(
+        localUrl = cachedUrl,
+        positionMillis = positionBeforePause,
+        shouldPlay = false,
+      )
+    } else {
+      updatePlaybackState(syncNowPlaying = true)
+    }
   }
 
   override fun stop() {
     playJob?.cancel()
-    player.pause()
-    player.replaceCurrentItemWithPlayerItem(null)
+    downloadTask?.cancel()
+    downloadTask = null
+    pendingLocalCacheUrl = null
+    pendingSeekPositionMillis = null
+    pendingAutoPlayAfterSeek = false
+    activePositionSeekId = ++currentSeekId
+    platformPlayer.pause()
+    platformPlayer.replaceCurrentItemWithUrl(null)
     stopProgressUpdate()
     sleepTimerJob?.cancel()
     sleepTimerRemainingMillis = null
@@ -200,31 +358,75 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     playingTitle = null
     playingArtist = null
     playingCoverUrl = null
+    platformPlayer.setNowPlayingInfo(null)
     _playbackState.value = PlaybackState.Idle
   }
 
   override fun resume() {
-    val audioSession = AVAudioSession.sharedInstance()
-    audioSession.setCategory(AVAudioSessionCategoryPlayback, null)
-    audioSession.setActive(true, null)
+    val cachedUrl = pendingLocalCacheUrl
+    if (cachedUrl != null) {
+      swapToLocalCacheItem(
+        localUrl = cachedUrl,
+        positionMillis = currentPositionMillisOrZero(),
+        shouldPlay = true,
+      )
+      return
+    }
 
-    player.playImmediatelyAtRate(currentSpeed)
+    platformPlayer.activatePlaybackSession()
+    platformPlayer.playImmediatelyAtRate(currentSpeed)
     startProgressUpdate()
-    updatePlaybackState()
+    updatePlaybackState(syncNowPlaying = true)
   }
 
   override fun seekTo(position: Long) {
-    val cmTime = CMTimeMakeWithSeconds(position.toDouble() / 1000.0, 1000)
-    player.seekToTime(cmTime)
-    updatePlaybackState()
+    val targetPosition = position.coerceAtLeast(0L)
+    val cachedUrl = pendingLocalCacheUrl
+    if (cachedUrl != null) {
+      val wasPlaying = _playbackState.value.isPlaying
+      swapToLocalCacheItem(
+        localUrl = cachedUrl,
+        positionMillis = targetPosition,
+        shouldPlay = wasPlaying,
+      )
+      return
+    }
+
+    if (!platformPlayer.hasCurrentItem) {
+      _playbackState.update { it.copy(currentPosition = targetPosition) }
+      return
+    }
+
+    val seekId = ++currentSeekId
+    activePositionSeekId = seekId
+    val zeroTolerance = pendingAutoPlayAfterSeek
+    pendingSeekPositionMillis = targetPosition
+    _playbackState.update { it.copy(currentPosition = targetPosition) }
+
+    platformPlayer.seekTo(positionMillis = targetPosition, zeroTolerance = zeroTolerance) {
+      scope.launch {
+        if (seekId == activePositionSeekId) {
+          val autoPlay = pendingAutoPlayAfterSeek && seekId == currentSeekId
+          pendingSeekPositionMillis = null
+          pendingAutoPlayAfterSeek = false
+          if (playingUrl != null) {
+            if (autoPlay) {
+              platformPlayer.playImmediatelyAtRate(currentSpeed)
+              startProgressUpdate()
+            }
+            updatePlaybackState(syncNowPlaying = true)
+          }
+        }
+      }
+    }
   }
 
   override fun setPlaybackSpeed(speed: Float) {
     currentSpeed = speed
-    if (player.timeControlStatus == AVPlayerTimeControlStatusPlaying) {
-      player.playImmediatelyAtRate(speed)
+    if (platformPlayer.timeControlStatus == AVPlayerTimeControlStatusPlaying) {
+      platformPlayer.playImmediatelyAtRate(speed)
     }
-    updatePlaybackState()
+    updatePlaybackState(syncNowPlaying = true)
   }
 
   override fun setSleepTimer(option: SleepTimerOption) {
@@ -233,9 +435,7 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     selectedSleepTimerOption = option
 
     when (option) {
-      SleepTimerOption.None -> {
-        // No-op
-      }
+      SleepTimerOption.None -> Unit
       SleepTimerOption.EndOfTrack -> {
         sleepTimerRemainingMillis = -1L
       }
@@ -247,57 +447,55 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
             while (sleepTimerRemainingMillis!! > 0) {
               delay(1000)
               sleepTimerRemainingMillis = sleepTimerRemainingMillis!! - 1000
-              updatePlaybackState()
+              updatePlaybackState(syncNowPlaying = false)
             }
             pause()
             setSleepTimer(SleepTimerOption.None)
           }
       }
     }
-    updatePlaybackState()
+    updatePlaybackState(syncNowPlaying = false)
   }
 
   private fun setupRemoteCommands() {
-    val commandCenter = MPRemoteCommandCenter.sharedCommandCenter()
-    commandCenter.playCommand.setEnabled(true)
-    commandCenter.playCommand.addTargetWithHandler {
-      resume()
-      MPRemoteCommandHandlerStatusSuccess
-    }
-
-    commandCenter.pauseCommand.setEnabled(true)
-    commandCenter.pauseCommand.addTargetWithHandler {
-      pause()
-      MPRemoteCommandHandlerStatusSuccess
-    }
-
-    commandCenter.changePlaybackPositionCommand.setEnabled(true)
-    commandCenter.changePlaybackPositionCommand.addTargetWithHandler { event ->
-      val position = (event as? MPChangePlaybackPositionCommandEvent)?.positionTime ?: 0.0
-      seekTo((position * 1000).toLong())
-      MPRemoteCommandHandlerStatusSuccess
-    }
+    platformPlayer.setupRemoteCommands(
+      onPlay = { resume() },
+      onPause = { pause() },
+      onSeekToMillis = { positionMillis -> seekTo(positionMillis) },
+    )
   }
 
-  private fun updateNowPlayingInfo(title: String, artist: String, coverUrl: String?) {
-    val nowPlayingInfo =
-      (MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo ?: emptyMap<Any?, Any?>())
-        .toMutableMap()
+  private fun updateNowPlayingInfo(
+    title: String,
+    artist: String,
+    coverUrl: String?,
+    initialPositionMillis: Long = 0L,
+  ) {
+    val nowPlayingInfo = mutableMapOf<Any?, Any?>()
     nowPlayingInfo[MPMediaItemPropertyTitle] = title
     nowPlayingInfo[MPMediaItemPropertyArtist] = artist
 
-    val durationSeconds =
-      CMTimeGetSeconds(player.currentItem?.duration ?: CMTimeMakeWithSeconds(0.0, 1))
+    val durationSeconds = platformPlayer.currentItemDurationSeconds
     if (!durationSeconds.isNaN() && durationSeconds > 0) {
       nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = durationSeconds
     }
 
-    nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] =
-      CMTimeGetSeconds(player.currentTime())
+    val currentPositionSeconds =
+      if (initialPositionMillis > 0L) {
+        initialPositionMillis.toDouble() / 1000.0
+      } else {
+        val raw = platformPlayer.currentTimeSeconds
+        if (raw.isNaN() || raw < 0.0) 0.0 else raw
+      }
+    nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentPositionSeconds
     nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] =
-      if (player.timeControlStatus == AVPlayerTimeControlStatusPlaying) 1.0 else 0.0
+      if (platformPlayer.timeControlStatus == AVPlayerTimeControlStatusPlaying) {
+        currentSpeed.toDouble()
+      } else {
+        0.0
+      }
 
-    MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo = nowPlayingInfo
+    platformPlayer.setNowPlayingInfo(nowPlayingInfo)
 
     if (coverUrl != null) {
       loadArtwork(coverUrl)
@@ -313,11 +511,11 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
           if (image != null) {
             val artwork = MPMediaItemArtwork(image.size) { _ -> image }
             dispatch_async(dispatch_get_main_queue()) {
+              if (playingCoverUrl != url) return@dispatch_async
               val nowPlayingInfo =
-                (MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo ?: emptyMap<Any?, Any?>())
-                  .toMutableMap()
+                (platformPlayer.getNowPlayingInfo() ?: emptyMap<Any?, Any?>()).toMutableMap()
               nowPlayingInfo[MPMediaItemPropertyArtwork] = artwork
-              MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo = nowPlayingInfo
+              platformPlayer.setNowPlayingInfo(nowPlayingInfo)
             }
           }
         }
@@ -325,18 +523,58 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     task.resume()
   }
 
-  private fun updatePlaybackState() {
-    val currentItem = player.currentItem
-    val durationSeconds = if (currentItem != null) CMTimeGetSeconds(currentItem.duration) else 0.0
-    val duration = if (durationSeconds.isNaN()) 0L else (durationSeconds * 1000).toLong()
-    val currentPositionSeconds = CMTimeGetSeconds(player.currentTime())
-    val currentPosition = (currentPositionSeconds * 1000).toLong()
+  private fun currentPositionMillisOrZero(): Long {
+    pendingSeekPositionMillis?.let {
+      return it
+    }
+    val rawSeconds = platformPlayer.currentTimeSeconds
+    return if (rawSeconds.isNaN() || rawSeconds < 0.0) {
+      _playbackState.value.currentPosition.coerceAtLeast(0L)
+    } else {
+      (rawSeconds * 1000).toLong()
+    }
+  }
 
-    val isPlaying =
-      player.timeControlStatus == AVPlayerTimeControlStatusPlaying ||
-        player.timeControlStatus == AVPlayerTimeControlStatusWaitingToPlayAtSpecifiedRate
+  private fun updatePlaybackState(syncNowPlaying: Boolean = false) {
+    val cachedUrl = pendingLocalCacheUrl
+    if (
+      cachedUrl != null &&
+        pendingSeekPositionMillis == null &&
+        (platformPlayer.timeControlStatus ==
+          AVPlayerTimeControlStatusWaitingToPlayAtSpecifiedRate ||
+          platformPlayer.isCurrentItemFailed)
+    ) {
+      swapToLocalCacheItem(
+        localUrl = cachedUrl,
+        positionMillis = _playbackState.value.currentPosition,
+        shouldPlay = true,
+      )
+      return
+    }
+
+    val previousState = _playbackState.value
+    val durationSeconds =
+      if (platformPlayer.hasCurrentItem) platformPlayer.currentItemDurationSeconds else 0.0
+    val duration =
+      if (durationSeconds.isNaN() || durationSeconds < 0) 0L else (durationSeconds * 1000).toLong()
+
+    val pendingPosition = pendingSeekPositionMillis
+    val currentPosition: Long
+    val currentPositionSeconds: Double
+    if (pendingPosition != null) {
+      currentPosition = pendingPosition
+      currentPositionSeconds = pendingPosition.toDouble() / 1000.0
+    } else {
+      val rawPositionSeconds = platformPlayer.currentTimeSeconds
+      currentPositionSeconds =
+        if (rawPositionSeconds.isNaN() || rawPositionSeconds < 0) 0.0 else rawPositionSeconds
+      currentPosition = (currentPositionSeconds * 1000).toLong()
+    }
+
+    val isActivelyPlaying = platformPlayer.timeControlStatus == AVPlayerTimeControlStatusPlaying
     val buffering =
-      player.timeControlStatus == AVPlayerTimeControlStatusWaitingToPlayAtSpecifiedRate
+      platformPlayer.timeControlStatus == AVPlayerTimeControlStatusWaitingToPlayAtSpecifiedRate
+    val isPlaying = isActivelyPlaying || buffering || pendingAutoPlayAfterSeek
 
     _playbackState.update {
       it.copy(
@@ -355,16 +593,34 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
       )
     }
 
-    // Update system media player
+    if (
+      syncNowPlaying ||
+        previousState.duration != duration ||
+        previousState.isPlaying != isPlaying ||
+        previousState.buffering != buffering
+    ) {
+      syncNowPlayingPlaybackState(
+        currentPositionSeconds = currentPositionSeconds,
+        durationSeconds = durationSeconds,
+        isActivelyPlaying = isActivelyPlaying,
+      )
+    }
+  }
+
+  private fun syncNowPlayingPlaybackState(
+    currentPositionSeconds: Double,
+    durationSeconds: Double,
+    isActivelyPlaying: Boolean,
+  ) {
     val nowPlayingInfo =
-      (MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo ?: emptyMap<Any?, Any?>())
-        .toMutableMap()
+      (platformPlayer.getNowPlayingInfo() ?: emptyMap<Any?, Any?>()).toMutableMap()
     nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentPositionSeconds
     if (!durationSeconds.isNaN() && durationSeconds > 0) {
       nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = durationSeconds
     }
-    nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = if (isPlaying) 1.0 else 0.0
-    MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo = nowPlayingInfo
+    nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] =
+      if (isActivelyPlaying) currentSpeed.toDouble() else 0.0
+    platformPlayer.setNowPlayingInfo(nowPlayingInfo)
   }
 
   private fun startProgressUpdate() {
@@ -372,7 +628,7 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     progressJob =
       scope.launch {
         while (true) {
-          updatePlaybackState()
+          updatePlaybackState(syncNowPlaying = false)
           delay(1000)
         }
       }
@@ -381,5 +637,134 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   private fun stopProgressUpdate() {
     progressJob?.cancel()
     progressJob = null
+  }
+}
+
+@OptIn(ExperimentalForeignApi::class)
+internal interface PlatformAudioPlayer {
+  val hasCurrentItem: Boolean
+  val isCurrentItemFailed: Boolean
+  val timeControlStatus: Long
+  val currentItemDurationSeconds: Double
+  val currentTimeSeconds: Double
+
+  fun activatePlaybackSession()
+
+  fun replaceCurrentItemWithUrl(url: NSURL?)
+
+  fun pause()
+
+  fun playImmediatelyAtRate(rate: Float)
+
+  fun seekTo(positionMillis: Long, zeroTolerance: Boolean, onComplete: () -> Unit)
+
+  fun observePlaybackEnd(onNotification: (finishedItemMatchesCurrent: () -> Boolean) -> Unit)
+
+  fun setupRemoteCommands(onPlay: () -> Unit, onPause: () -> Unit, onSeekToMillis: (Long) -> Unit)
+
+  fun getNowPlayingInfo(): Map<Any?, Any?>?
+
+  fun setNowPlayingInfo(info: Map<Any?, Any?>?)
+}
+
+@OptIn(ExperimentalForeignApi::class)
+private class AvPlatformAudioPlayer : PlatformAudioPlayer {
+  private val player = AVPlayer()
+
+  override val hasCurrentItem: Boolean
+    get() = player.currentItem != null
+
+  override val isCurrentItemFailed: Boolean
+    get() = player.currentItem?.status == AVPlayerItemStatusFailed
+
+  override val timeControlStatus: Long
+    get() = player.timeControlStatus
+
+  override val currentItemDurationSeconds: Double
+    get() = CMTimeGetSeconds(player.currentItem?.duration ?: CMTimeMakeWithSeconds(0.0, 1))
+
+  override val currentTimeSeconds: Double
+    get() = CMTimeGetSeconds(player.currentTime())
+
+  override fun activatePlaybackSession() {
+    val audioSession = AVAudioSession.sharedInstance()
+    audioSession.setCategory(AVAudioSessionCategoryPlayback, null)
+    audioSession.setActive(true, null)
+  }
+
+  override fun replaceCurrentItemWithUrl(url: NSURL?) {
+    player.replaceCurrentItemWithPlayerItem(url?.let { AVPlayerItem(uRL = it) })
+  }
+
+  override fun pause() {
+    player.pause()
+  }
+
+  override fun playImmediatelyAtRate(rate: Float) {
+    player.playImmediatelyAtRate(rate)
+  }
+
+  override fun seekTo(positionMillis: Long, zeroTolerance: Boolean, onComplete: () -> Unit) {
+    val cmTime = CMTimeMakeWithSeconds(positionMillis.toDouble() / 1000.0, 1000)
+    if (zeroTolerance) {
+      player.seekToTime(
+        time = cmTime,
+        toleranceBefore = kCMTimeZero.readValue(),
+        toleranceAfter = kCMTimeZero.readValue(),
+      ) { _ ->
+        onComplete()
+      }
+    } else {
+      player.seekToTime(cmTime) { _ -> onComplete() }
+    }
+  }
+
+  override fun observePlaybackEnd(
+    onNotification: (finishedItemMatchesCurrent: () -> Boolean) -> Unit
+  ) {
+    NSNotificationCenter.defaultCenter.addObserverForName(
+      AVPlayerItemDidPlayToEndTimeNotification,
+      null,
+      null,
+    ) { notification ->
+      onNotification {
+        val currentItem = player.currentItem ?: return@onNotification false
+        val finishedItem = notification?.`object` as? AVPlayerItem
+        finishedItem == null || finishedItem == currentItem
+      }
+    }
+  }
+
+  override fun setupRemoteCommands(
+    onPlay: () -> Unit,
+    onPause: () -> Unit,
+    onSeekToMillis: (Long) -> Unit,
+  ) {
+    val commandCenter = MPRemoteCommandCenter.sharedCommandCenter()
+    commandCenter.playCommand.setEnabled(true)
+    commandCenter.playCommand.addTargetWithHandler {
+      onPlay()
+      MPRemoteCommandHandlerStatusSuccess
+    }
+
+    commandCenter.pauseCommand.setEnabled(true)
+    commandCenter.pauseCommand.addTargetWithHandler {
+      onPause()
+      MPRemoteCommandHandlerStatusSuccess
+    }
+
+    commandCenter.changePlaybackPositionCommand.setEnabled(true)
+    commandCenter.changePlaybackPositionCommand.addTargetWithHandler { event ->
+      val position = (event as? MPChangePlaybackPositionCommandEvent)?.positionTime ?: 0.0
+      onSeekToMillis((position * 1000).toLong())
+      MPRemoteCommandHandlerStatusSuccess
+    }
+  }
+
+  override fun getNowPlayingInfo(): Map<Any?, Any?>? =
+    MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo
+
+  override fun setNowPlayingInfo(info: Map<Any?, Any?>?) {
+    MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo = info
   }
 }

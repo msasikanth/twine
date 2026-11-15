@@ -17,15 +17,29 @@
 
 package dev.sasikanth.rss.reader.utils
 
+import kotlin.native.concurrent.ThreadLocal
 import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSLocale
 import platform.Foundation.currentLocale
+import platform.Foundation.localeIdentifier
+
+@ThreadLocal
+private object ReadingTrendDateFormatters {
+  var localeId: String? = null
+  val parser = NSDateFormatter().apply { dateFormat = "yyyy-MM-dd" }
+  val output = NSDateFormatter().apply { dateFormat = "dd-MMM-yy" }
+}
 
 actual fun String.formatReadingTrendDate(): String {
-  val formatter = NSDateFormatter()
-  formatter.locale = NSLocale.currentLocale()
-  formatter.dateFormat = "yyyy-MM-dd"
-  val parsedDate = formatter.dateFromString(this) ?: return this
-  formatter.dateFormat = "dd-MMM-yy"
-  return formatter.stringFromDate(parsedDate)
+  val currentLocale = NSLocale.currentLocale()
+  val currentLocaleId = currentLocale.localeIdentifier
+  val cache = ReadingTrendDateFormatters
+  if (cache.localeId != currentLocaleId) {
+    cache.parser.locale = currentLocale
+    cache.output.locale = currentLocale
+    cache.localeId = currentLocaleId
+  }
+
+  val parsedDate = cache.parser.dateFromString(this) ?: return this
+  return cache.output.stringFromDate(parsedDate)
 }

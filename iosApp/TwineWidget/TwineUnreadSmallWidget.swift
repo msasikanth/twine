@@ -272,16 +272,8 @@ struct UnreadSmallProvider: TimelineProvider {
     private let postImageMaxPixelSize = 300
     private let feedIconMaxPixelSize = 24
 
-    let component = InjectApplicationComponent(uiViewControllerProvider: {
-        UIViewController()
-    })
-
-    init() {
-        component.initializers
-            .compactMap { ($0 as! any Initializer) }
-            .forEach { initializer in
-                initializer.initialize()
-            }
+    private var component: InjectApplicationComponent {
+        SharedWidgetComponent.instance
     }
 
     private func fetchImage(from urlString: String?, maxPixelSize: Int) async

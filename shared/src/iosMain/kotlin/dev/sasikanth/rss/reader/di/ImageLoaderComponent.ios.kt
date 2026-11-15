@@ -17,11 +17,41 @@
 
 package dev.sasikanth.rss.reader.di
 
+import coil3.ImageLoader
 import coil3.PlatformContext
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.initializers.Initializer
+import kotlin.concurrent.AtomicInt
+import me.tatarka.inject.annotations.IntoSet
 import me.tatarka.inject.annotations.Provides
+import platform.Foundation.NSNotificationCenter
+import platform.Foundation.NSOperationQueue
+import platform.UIKit.UIApplicationDidReceiveMemoryWarningNotification
+import platform.darwin.NSObjectProtocol
 
 actual interface ImageLoaderPlatformComponent {
 
   @Provides @AppScope fun providePlatformContext(): PlatformContext = PlatformContext.INSTANCE
+
+  @IntoSet
+  @Provides
+  @AppScope
+  fun providesImageLoaderMemoryWarningInitializer(imageLoader: ImageLoader): Initializer =
+    object : Initializer {
+      private val registered = AtomicInt(0)
+      private val observers = mutableListOf<NSObjectProtocol>()
+
+      override fun initialize() {
+        if (!registered.compareAndSet(0, 1)) return
+
+        observers +=
+          NSNotificationCenter.defaultCenter.addObserverForName(
+            name = UIApplicationDidReceiveMemoryWarningNotification,
+            `object` = null,
+            queue = NSOperationQueue.mainQueue,
+          ) { _ ->
+            imageLoader.memoryCache?.clear()
+          }
+      }
+    }
 }

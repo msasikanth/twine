@@ -23,6 +23,7 @@ import app.cash.sqldelight.driver.native.wrapConnection
 import co.touchlab.kermit.Logger
 import co.touchlab.sqliter.DatabaseConfiguration
 import co.touchlab.sqliter.JournalMode
+import co.touchlab.sqliter.SynchronousFlag
 import dev.sasikanth.rss.reader.data.utils.Constants.APP_GROUP
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -44,27 +45,41 @@ actual class DriverFactory(private val codeMigrations: Array<AfterVersion>) {
     val extendedConfig =
       DatabaseConfiguration.Extended(
         foreignKeyConstraints = true,
+        busyTimeout = 5_000,
         basePath = appGroupDatabasePath(),
+        synchronousFlag = SynchronousFlag.NORMAL,
+      )
+
+    val lifecycleConfig =
+      DatabaseConfiguration.Lifecycle(
+        onCreateConnection = { connection ->
+          connection.rawExecSql("PRAGMA temp_store = MEMORY; PRAGMA mmap_size = 67108864;")
+        }
       )
 
     return NativeSqliteDriver(
-      DatabaseConfiguration(
-        name = DB_NAME,
-        version = ReaderDatabase.Schema.version.toInt(),
-        journalMode = JournalMode.WAL,
-        create = { connection -> wrapConnection(connection) { ReaderDatabase.Schema.create(it) } },
-        upgrade = { connection, oldVersion, newVersion ->
-          wrapConnection(connection) {
-            ReaderDatabase.Schema.migrate(
-              driver = it,
-              oldVersion = oldVersion.toLong(),
-              newVersion = newVersion.toLong(),
-              callbacks = codeMigrations,
-            )
-          }
-        },
-        extendedConfig = extendedConfig,
-      )
+      configuration =
+        DatabaseConfiguration(
+          name = DB_NAME,
+          version = ReaderDatabase.Schema.version.toInt(),
+          journalMode = JournalMode.WAL,
+          create = { connection ->
+            wrapConnection(connection) { ReaderDatabase.Schema.create(it) }
+          },
+          upgrade = { connection, oldVersion, newVersion ->
+            wrapConnection(connection) {
+              ReaderDatabase.Schema.migrate(
+                driver = it,
+                oldVersion = oldVersion.toLong(),
+                newVersion = newVersion.toLong(),
+                callbacks = codeMigrations,
+              )
+            }
+          },
+          extendedConfig = extendedConfig,
+          lifecycleConfig = lifecycleConfig,
+        ),
+      maxReaderConnections = 4,
     )
   }
 
@@ -88,12 +103,8 @@ actual class DriverFactory(private val codeMigrations: Array<AfterVersion>) {
     val appDatabaseWalPath = NSURL.fileURLWithPath("$appDatabasePath-wal")
     val appDatabaseShmPath = NSURL.fileURLWithPath("$appDatabasePath-shm")
 
-    val groupDatabaseWalPath =
-      NSURL.fileURLWithPath(groupDatabasePath).URLByAppendingPathComponent("$groupDatabasePath-wal")
-        ?: return
-    val groupDatabaseSgnPath =
-      NSURL.fileURLWithPath(groupDatabasePath).URLByAppendingPathComponent("$groupDatabasePath-shm")
-        ?: return
+    val groupDatabaseWalPath = NSURL.fileURLWithPath("$groupDatabasePath-wal")
+    val groupDatabaseShmPath = NSURL.fileURLWithPath("$groupDatabasePath-shm")
 
     fileManager.moveItemAtURL(
       srcURL = NSURL.fileURLWithPath(appDatabasePath),
@@ -105,7 +116,11 @@ actual class DriverFactory(private val codeMigrations: Array<AfterVersion>) {
       toURL = groupDatabaseWalPath,
       error = null,
     )
-    fileManager.moveItemAtURL(appDatabaseShmPath, toURL = groupDatabaseSgnPath, error = null)
+    fileManager.moveItemAtURL(
+      srcURL = appDatabaseShmPath,
+      toURL = groupDatabaseShmPath,
+      error = null,
+    )
   }
 
   private fun appDatabasePath(): String {
