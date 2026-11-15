@@ -223,15 +223,9 @@ internal fun FeedGroupItem(
         ) {
           DropdownMenu(
             expanded = showDropdownMenu,
-            onDismissRequest = {
-              showDropdownMenu = false
-              contextMenuOffset = null
-            },
+            onDismissRequest = { showDropdownMenu = false },
           ) {
-            contextMenu {
-              showDropdownMenu = false
-              contextMenuOffset = null
-            }
+            contextMenu { showDropdownMenu = false }
           }
         }
       }

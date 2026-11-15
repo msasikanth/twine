@@ -26,6 +26,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -34,27 +35,31 @@ import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
-@OptIn(FlowPreview::class)
+@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @Stable
 @Inject
 class SearchViewModel(private val rssRepository: RssRepository) : ViewModel() {
 
-  val sources =
+  val sources by lazy {
     Pager(config = PagingConfig(pageSize = 20)) { rssRepository.sources() }
       .flow
       .cachedIn(viewModelScope)
+  }
 
   var searchQuery by mutableStateOf(TextFieldValue())
     private set
@@ -71,7 +76,29 @@ class SearchViewModel(private val rssRepository: RssRepository) : ViewModel() {
   var onlyUnread by mutableStateOf(false)
     private set
 
-  private val _state = MutableStateFlow(SearchState.DEFAULT)
+  private val activeSearch = MutableStateFlow<ActiveSearch?>(null)
+
+  private val searchResultsFlow =
+    activeSearch
+      .flatMapLatest { search ->
+        if (search == null) {
+          flowOf(PagingData.empty())
+        } else {
+          Pager(config = PagingConfig(pageSize = 20)) {
+              rssRepository.search(
+                searchQuery = search.query,
+                sortOrder = search.sortOrder,
+                sourceIds = search.sourceIds,
+                onlyBookmarked = search.onlyBookmarked,
+                onlyUnread = search.onlyUnread,
+              )
+            }
+            .flow
+        }
+      }
+      .cachedIn(viewModelScope)
+
+  private val _state = MutableStateFlow(SearchState.DEFAULT.copy(searchResults = searchResultsFlow))
   val state: StateFlow<SearchState>
     get() = _state
 
@@ -167,7 +194,7 @@ class SearchViewModel(private val rssRepository: RssRepository) : ViewModel() {
   }
 
   private fun clearSearchResults() {
-    _state.update { it.reset() }
+    activeSearch.value = null
   }
 
   private fun searchPosts(
@@ -177,21 +204,23 @@ class SearchViewModel(private val rssRepository: RssRepository) : ViewModel() {
     onlyBookmarked: Boolean,
     onlyUnread: Boolean,
   ) {
-    val searchResults =
-      Pager(config = PagingConfig(pageSize = 20)) {
-          rssRepository.search(
-            searchQuery = query,
-            sortOrder = sortOrder,
-            sourceIds = sourceIds,
-            onlyBookmarked = onlyBookmarked,
-            onlyUnread = onlyUnread,
-          )
-        }
-        .flow
-        .cachedIn(viewModelScope)
-
-    _state.update { it.copy(searchResults = searchResults) }
+    activeSearch.value =
+      ActiveSearch(
+        query = query,
+        sortOrder = sortOrder,
+        sourceIds = sourceIds,
+        onlyBookmarked = onlyBookmarked,
+        onlyUnread = onlyUnread,
+      )
   }
+
+  private data class ActiveSearch(
+    val query: String,
+    val sortOrder: SearchSortOrder,
+    val sourceIds: List<String>,
+    val onlyBookmarked: Boolean,
+    val onlyUnread: Boolean,
+  )
 
   private data class SearchParameters(
     val searchQuery: TextFieldValue,

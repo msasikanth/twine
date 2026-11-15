@@ -33,6 +33,8 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
@@ -60,6 +62,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import androidx.paging.filter
@@ -124,6 +127,8 @@ internal fun DefaultSourceSelectionSheet(
   selectedSourceId: String?,
   onSourceSelected: (String?) -> Unit,
   onDismiss: () -> Unit,
+  defaultSources: LazyPagingItems<Source> = sources.collectAsLazyPagingItems(),
+  listState: LazyListState = rememberLazyListState(),
 ) {
   val sheetContainerColor = AppTheme.colorScheme.surfaceContainerLow
 
@@ -133,25 +138,33 @@ internal fun DefaultSourceSelectionSheet(
     contentColor = AppTheme.colorScheme.onSurface,
   ) {
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
-    val filteredSources =
-      remember(sources) {
-        combine(sources, snapshotFlow { searchQuery.text }) { pagingData, query ->
-          if (query.isBlank()) {
-            pagingData
-          } else {
-            pagingData.filter { source ->
-              val name =
-                when (source) {
-                  is Feed -> source.name
-                  is FeedGroup -> source.name
-                  else -> ""
+    val isSearching = searchQuery.text.isNotBlank()
+    val searchListState = rememberLazyListState()
+    val sourceItems =
+      if (isSearching) {
+        val filteredSources =
+          remember(sources) {
+            combine(sources, snapshotFlow { searchQuery.text }) { pagingData, query ->
+              if (query.isBlank()) {
+                pagingData
+              } else {
+                pagingData.filter { source ->
+                  val name =
+                    when (source) {
+                      is Feed -> source.name
+                      is FeedGroup -> source.name
+                      else -> ""
+                    }
+                  name.contains(query, ignoreCase = true)
                 }
-              name.contains(query, ignoreCase = true)
+              }
             }
           }
-        }
+        filteredSources.collectAsLazyPagingItems()
+      } else {
+        defaultSources
       }
-    val sourceItems = filteredSources.collectAsLazyPagingItems()
+    val activeListState = if (isSearching) searchListState else listState
 
     Column(modifier = Modifier.fillMaxWidth()) {
       Text(
@@ -180,6 +193,7 @@ internal fun DefaultSourceSelectionSheet(
 
       LazyColumn(
         modifier = Modifier.weight(1f, fill = false),
+        state = activeListState,
         contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp),
       ) {
         if (searchQuery.text.isBlank()) {
@@ -198,7 +212,7 @@ internal fun DefaultSourceSelectionSheet(
         items(
           count = sourceItems.itemCount,
           key = sourceItems.itemKey { it.id },
-          contentType = { sourceItems[it]?.sourceType },
+          contentType = { sourceItems.peek(it)?.sourceType },
         ) { index ->
           when (val source = sourceItems[index]) {
             is FeedGroup -> {

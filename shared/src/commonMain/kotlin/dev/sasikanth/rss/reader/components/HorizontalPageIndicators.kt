@@ -17,7 +17,6 @@
 
 package dev.sasikanth.rss.reader.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -26,23 +25,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.PageIndicatorDefaults.MaxNumberOfIndicators
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /**
  * A horizontal indicator for a Pager, representing the currently active page and total pages drawn
@@ -83,47 +82,48 @@ fun HorizontalPageIndicators(
   spacing: Dp = 8.dp,
   indicatorShape: Shape = CircleShape,
 ) {
-  // We want to bring offset to 0..1 range.
-  // However, it can come in any range. It might be for example selectedPage = 1, with offset 2.5
-  // We can't work with these offsets, thus should normalize them so that offset will be
-  // in 0..1 range. For example selectedPage = 3, offset = -1.5 -> could transform it
-  // to selectedPage = 1, offset = 0.5
-  // Other example: selectedPage = 1, offset = 2.5 -> selectedPage = 3, offset = 0.5
-  val normalizedSelectedPage: Int =
-    (pageIndicatorState.selectedPage + pageIndicatorState.pageOffset).toInt()
-  val normalizedOffset =
-    pageIndicatorState.selectedPage + pageIndicatorState.pageOffset - normalizedSelectedPage
-
   val horizontalPadding = spacing / 2
-  val spacerDefaultSize = (indicatorSize + spacing).value
+  val spacerDefaultSize = indicatorSize + spacing
 
-  val pagesOnScreen = minOf(MaxNumberOfIndicators, pageIndicatorState.pageCount)
+  val totalPages = pageIndicatorState.pageCount
+  val pagesOnScreen = minOf(MaxNumberOfIndicators, totalPages)
   val pagesState =
-    remember(pageIndicatorState.pageCount) {
-      PagesState(totalPages = pageIndicatorState.pageCount, pagesOnScreen = pagesOnScreen)
-    }
-  pagesState.recalculateState(normalizedSelectedPage, normalizedOffset)
+    remember(totalPages) { PagesState(totalPages = totalPages, pagesOnScreen = pagesOnScreen) }
+
+  fun syncPagesState(): Float {
+    val selectedPage = pageIndicatorState.selectedPage
+    val pageOffset = pageIndicatorState.pageOffset
+    val normalizedSelectedPage = (selectedPage + pageOffset).toInt()
+    val normalizedOffset = selectedPage + pageOffset - normalizedSelectedPage
+    pagesState.recalculateState(normalizedSelectedPage, normalizedOffset)
+    return normalizedOffset
+  }
 
   val indicatorFactory: @Composable (Int) -> Unit = { page ->
-    // An external box with a fixed indicatorSize - let us remain the same size for
-    // an indicator even if it's shrinked for smooth animations
     Box(modifier = Modifier.padding(horizontal = horizontalPadding).size(indicatorSize)) {
       Box(
         modifier =
           Modifier.fillMaxSize()
             .align(Alignment.Center)
-            .scale(pagesState.sizeRatio(page))
-            .clip(indicatorShape)
-            .alpha(pagesState.alpha(page))
-            // Interpolation between unselected and selected colors depending
-            // on selectedPageRatio
-            .background(
-              lerp(
-                unselectedColor,
-                selectedColor,
-                pagesState.calculateSelectedRatio(page, normalizedOffset),
+            .graphicsLayer {
+              syncPagesState()
+              val scale = pagesState.sizeRatio(page)
+              scaleX = scale
+              scaleY = scale
+              alpha = pagesState.alpha(page)
+              shape = indicatorShape
+              clip = true
+            }
+            .drawBehind {
+              val normalizedOffset = syncPagesState()
+              drawRect(
+                lerp(
+                  unselectedColor,
+                  selectedColor,
+                  pagesState.calculateSelectedRatio(page, normalizedOffset),
+                )
               )
-            )
+            }
       )
     }
   }
@@ -131,15 +131,31 @@ fun HorizontalPageIndicators(
   val spacerLeft =
     @Composable {
       Spacer(
-        Modifier.width((pagesState.leftSpacerSizeRatio * spacerDefaultSize).dp)
-          .height(indicatorSize)
+        Modifier.height(indicatorSize).layout { measurable, constraints ->
+          syncPagesState()
+          val widthPx =
+            (pagesState.leftSpacerSizeRatio * spacerDefaultSize.toPx())
+              .roundToInt()
+              .coerceAtLeast(0)
+          val placeable =
+            measurable.measure(constraints.copy(minWidth = widthPx, maxWidth = widthPx))
+          layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
+        }
       )
     }
   val spacerRight =
     @Composable {
       Spacer(
-        Modifier.width((pagesState.rightSpacerSizeRatio * spacerDefaultSize).dp)
-          .height(indicatorSize)
+        Modifier.height(indicatorSize).layout { measurable, constraints ->
+          syncPagesState()
+          val widthPx =
+            (pagesState.rightSpacerSizeRatio * spacerDefaultSize.toPx())
+              .roundToInt()
+              .coerceAtLeast(0)
+          val placeable =
+            measurable.measure(constraints.copy(minWidth = widthPx, maxWidth = widthPx))
+          layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
+        }
       )
     }
 
@@ -212,6 +228,8 @@ class PagesState(val totalPages: Int, val pagesOnScreen: Int) {
 
   // An offset in pages, basically meaning how many pages are hidden to the left.
   private var hiddenPagesToTheLeft = 0
+  private var lastSelectedPage = Int.MIN_VALUE
+  private var lastOffset = Float.NaN
 
   // A default size of spacers - invisible items to the left and to the right of
   // visible indicators, used for smooth transitions
@@ -266,6 +284,10 @@ class PagesState(val totalPages: Int, val pagesOnScreen: Int) {
   // Main function responsible for recalculation of all parameters regarding
   // to the [selectedPage] and [offset]
   fun recalculateState(selectedPage: Int, offset: Float) {
+    if (selectedPage == lastSelectedPage && offset == lastOffset) return
+    lastSelectedPage = selectedPage
+    lastOffset = offset
+
     val pageWithOffset = selectedPage + offset
 
     // Calculating offsetInPages relating to the [selectedPage].

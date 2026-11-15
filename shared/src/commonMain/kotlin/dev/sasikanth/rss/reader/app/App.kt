@@ -16,12 +16,14 @@
  */
 package dev.sasikanth.rss.reader.app
 
+import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.Transition
+import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -45,6 +47,7 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -55,10 +58,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.DropShadowScope
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.onKeyEvent
@@ -68,16 +75,19 @@ import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.defaultTransitionSpec
 import androidx.navigationevent.NavigationEventTransitionState
@@ -142,6 +152,11 @@ import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.ShortcutDispatcher
 import dev.sasikanth.rss.reader.utils.horizontalResizePointerIcon
 import dev.sasikanth.rss.reader.utils.updateWindowBackdropColor
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -166,6 +181,7 @@ typealias App =
   ExperimentalMaterial3WindowSizeClassApi::class,
   ExperimentalMaterial3AdaptiveApi::class,
   ExperimentalSerializationApi::class,
+  FlowPreview::class,
 )
 fun App(
   audioPlayer: AudioPlayer,
@@ -306,25 +322,31 @@ fun App(
         }
       }
     val navigationEventDispatcherOwner = LocalNavigationEventDispatcherOwner.current
-    val navigationTransitionState by
-      remember(navigationEventDispatcherOwner) {
-          navigationEventDispatcherOwner?.navigationEventDispatcher?.transitionState ?: emptyFlow()
-        }
-        .collectAsStateWithLifecycle(NavigationEventTransitionState.Idle)
-    val backProgress =
-      (navigationTransitionState as? NavigationEventTransitionState.InProgress)
-        ?.latestEvent
-        ?.progress ?: 0f
     val maxScreenCornerRadius =
       if (platform == Platform.Apple) {
         38.dp
       } else {
         36.dp
       }
-    val screenCornerRadius =
-      animateDpAsState(
-        targetValue = maxScreenCornerRadius * LinearOutSlowInEasing.transform(backProgress)
-      )
+    val screenCornerRadius = remember { Animatable(0.dp, Dp.VectorConverter) }
+    LaunchedEffect(navigationEventDispatcherOwner, maxScreenCornerRadius) {
+      val transitionFlow =
+        navigationEventDispatcherOwner?.navigationEventDispatcher?.transitionState ?: emptyFlow()
+      transitionFlow.collectLatest { state ->
+        when (state) {
+          is NavigationEventTransitionState.InProgress -> {
+            val targetRadius =
+              maxScreenCornerRadius * LinearOutSlowInEasing.transform(state.latestEvent.progress)
+            screenCornerRadius.snapTo(targetRadius)
+          }
+          is NavigationEventTransitionState.Idle -> {
+            if (screenCornerRadius.value > 0.dp) {
+              screenCornerRadius.animateTo(0.dp)
+            }
+          }
+        }
+      }
+    }
     val screenModifier = remember {
       val screenShape =
         object : Shape {
@@ -333,18 +355,47 @@ fun App(
             layoutDirection: LayoutDirection,
             density: Density,
           ): Outline {
-            return RoundedCornerShape(screenCornerRadius.value)
-              .createOutline(size, layoutDirection, density)
+            val cornerRadius = screenCornerRadius.value
+            return if (cornerRadius > 0.dp) {
+              RoundedCornerShape(cornerRadius).createOutline(size, layoutDirection, density)
+            } else {
+              RectangleShape.createOutline(size, layoutDirection, density)
+            }
           }
         }
 
       Modifier.fillMaxSize()
         .let {
           if (platform == Platform.Apple) {
-            it.dropShadow(shape = screenShape) {
-              screenCornerRadius.value
-              color = Color.Black.copy(alpha = 0.1f)
-              radius = 32.dp.toPx()
+            it.composed {
+              val rootTransition = LocalRootNavTransition.current
+              val localTransition =
+                if (rootTransition != null) {
+                  LocalNavAnimatedContentScope.current.transition
+                } else {
+                  null
+                }
+              val dropShadowBlock =
+                remember(rootTransition, localTransition) {
+                  val block: DropShadowScope.() -> Unit = {
+                    val cornerRadius = screenCornerRadius.value
+                    val isTransitionActive =
+                      cornerRadius > 0.dp ||
+                        rootTransition.isTransitionActive() ||
+                        localTransition.isTransitionActive()
+                    if (isTransitionActive) {
+                      alpha = 1f
+                      color = Color.Black.copy(alpha = 0.1f)
+                      radius = 32.dp.toPx()
+                    } else {
+                      alpha = 0f
+                      color = Color.Transparent
+                      radius = 0f
+                    }
+                  }
+                  block
+                }
+              Modifier.dropShadow(shape = screenShape, block = dropShadowBlock)
             }
           } else {
             it
@@ -352,7 +403,7 @@ fun App(
         }
         .graphicsLayer {
           val cornerRadius = screenCornerRadius.value
-          shape = RoundedCornerShape(cornerRadius)
+          shape = if (cornerRadius > 0.dp) RoundedCornerShape(cornerRadius) else RectangleShape
           clip = cornerRadius > 0.dp
         }
     }
@@ -392,8 +443,14 @@ fun App(
     }
 
     AppTheme(useDarkTheme = useDarkTheme, overriddenColorScheme = overriddenColorScheme) {
-      val windowBackdropColor = AppTheme.colorScheme.backdrop
-      LaunchedEffect(windowBackdropColor) { updateWindowBackdropColor(windowBackdropColor) }
+      val appColorScheme = AppTheme.colorScheme
+      LaunchedEffect(appColorScheme) {
+        updateWindowBackdropColor(appColorScheme.backdrop)
+        snapshotFlow { appColorScheme.backdrop }
+          .debounce(100.milliseconds)
+          .distinctUntilChanged()
+          .collect { color -> updateWindowBackdropColor(color) }
+      }
 
       // Inline side navigation (rail or expanded drawer) only exists at large widths;
       // below that the navigation is a modal drawer overlaying content, so the list
@@ -405,154 +462,174 @@ fun App(
       val navigationWidth = if (isSideNavigationExpanded.value) 360.dp else 80.dp
       val listPaneWidth = if (hasInlineNavigation) navigationWidth + 420.dp else 420.dp
 
-      val entryProvider = entryProvider {
-        placeholderScreen(
-          modifier = screenModifier,
-          placeholderViewModel = placeholderViewModel,
-          navigator = navigator,
-        )
-
-        onboardingScreen(
-          modifier = screenModifier,
-          onboardingViewModel = onboardingViewModel,
-          navigator = navigator,
-        )
-
-        accountSelectionScreen(
-          modifier = screenModifier,
-          accountSelectionViewModel = accountSelectionViewModel,
-          navigator = navigator,
-        )
-
-        mainScreen(
-          navigator = navigator,
-          useDarkTheme = useDarkTheme,
-          toggleLightStatusBar = toggleLightStatusBar,
-          toggleLightNavBar = toggleLightNavBar,
-          homeViewModel = homeViewModel,
-          feedsViewModel = feedsViewModel,
-          searchViewModel = searchViewModel,
-          bookmarksViewModel = bookmarksViewModel,
-          settingsViewModel = settingsViewModel,
-          discoveryViewModel = discoveryViewModel,
-          openPost = openPost,
-          openCurrentlyPlaying = {
+      val openCurrentlyPlaying =
+        remember(audioPlayer, appViewModel) {
+          {
             val playingPostId = audioPlayer.playbackState.value.playingPostId
             if (playingPostId != null) {
               appViewModel.onCurrentlyPlayingDeepLink(playingPostId)
             }
-          },
-          screenModifier = screenModifier,
-          isSideNavigationExpanded = isSideNavigationExpanded,
-        )
+          }
+        }
+      val openChangelog = remember(appViewModel) { { appViewModel.openChangelog() } }
 
-        freshRssLoginScreen(
-          modifier = screenModifier,
-          freshRssLoginViewModel = freshRssLoginViewModel,
-          navigator = navigator,
-        )
+      val entryProvider =
+        remember(
+          navigator,
+          screenModifier,
+          useDarkTheme,
+          toggleLightStatusBar,
+          toggleLightNavBar,
+          openPost,
+          openCurrentlyPlaying,
+          openChangelog,
+          isSideNavigationExpanded,
+          isReaderPaneExpanded,
+        ) {
+          entryProvider {
+            placeholderScreen(
+              modifier = screenModifier,
+              placeholderViewModel = placeholderViewModel,
+              navigator = navigator,
+            )
 
-        minifluxLoginScreen(
-          modifier = screenModifier,
-          minifluxLoginViewModel = minifluxLoginViewModel,
-          navigator = navigator,
-        )
+            onboardingScreen(
+              modifier = screenModifier,
+              onboardingViewModel = onboardingViewModel,
+              navigator = navigator,
+            )
 
-        bazQuxLoginScreen(
-          modifier = screenModifier,
-          bazQuxLoginViewModel = bazQuxLoginViewModel,
-          navigator = navigator,
-        )
+            accountSelectionScreen(
+              modifier = screenModifier,
+              accountSelectionViewModel = accountSelectionViewModel,
+              navigator = navigator,
+            )
 
-        readerScreen(
-          readerViewModel = readerViewModel,
-          readerPageViewModel = readerPageViewModel,
-          navigator = navigator,
-          toggleLightStatusBar = toggleLightStatusBar,
-          toggleLightNavBar = toggleLightNavBar,
-          modifier = screenModifier,
-          isReaderPaneExpanded = isReaderPaneExpanded,
-        )
+            mainScreen(
+              navigator = navigator,
+              useDarkTheme = useDarkTheme,
+              toggleLightStatusBar = toggleLightStatusBar,
+              toggleLightNavBar = toggleLightNavBar,
+              homeViewModel = homeViewModel,
+              feedsViewModel = feedsViewModel,
+              searchViewModel = searchViewModel,
+              bookmarksViewModel = bookmarksViewModel,
+              settingsViewModel = settingsViewModel,
+              discoveryViewModel = discoveryViewModel,
+              openPost = openPost,
+              openCurrentlyPlaying = openCurrentlyPlaying,
+              screenModifier = screenModifier,
+              isSideNavigationExpanded = isSideNavigationExpanded,
+            )
 
-        addFeedScreen(addFeedViewModel = addFeedViewModel, navigator = navigator)
+            freshRssLoginScreen(
+              modifier = screenModifier,
+              freshRssLoginViewModel = freshRssLoginViewModel,
+              navigator = navigator,
+            )
 
-        discoveryScreen(
-          discoveryViewModel = discoveryViewModel,
-          navigator = navigator,
-          screenModifier = screenModifier,
-        )
+            minifluxLoginScreen(
+              modifier = screenModifier,
+              minifluxLoginViewModel = minifluxLoginViewModel,
+              navigator = navigator,
+            )
 
-        opmlImportScreen(
-          opmlImportViewModel = opmlImportViewModel,
-          navigator = navigator,
-          modifier = screenModifier,
-        )
+            bazQuxLoginScreen(
+              modifier = screenModifier,
+              bazQuxLoginViewModel = bazQuxLoginViewModel,
+              navigator = navigator,
+            )
 
-        aboutScreen(modifier = screenModifier, navigator = navigator)
+            readerScreen(
+              readerViewModel = readerViewModel,
+              readerPageViewModel = readerPageViewModel,
+              navigator = navigator,
+              toggleLightStatusBar = toggleLightStatusBar,
+              toggleLightNavBar = toggleLightNavBar,
+              modifier = screenModifier,
+              isReaderPaneExpanded = isReaderPaneExpanded,
+            )
 
-        feedGroupScreen(
-          modifier = screenModifier,
-          groupViewModel = groupViewModel,
-          navigator = navigator,
-        )
+            addFeedScreen(addFeedViewModel = addFeedViewModel, navigator = navigator)
 
-        blockedWordsScreen(
-          modifier = screenModifier,
-          blockedWordsViewModel = blockedWordsViewModel,
-          navigator = navigator,
-        )
+            discoveryScreen(
+              discoveryViewModel = discoveryViewModel,
+              navigator = navigator,
+              screenModifier = screenModifier,
+            )
 
-        paywallScreen(
-          modifier = screenModifier,
-          premiumPaywallViewModel = premiumPaywallViewModel,
-          navigator = navigator,
-        )
+            opmlImportScreen(
+              opmlImportViewModel = opmlImportViewModel,
+              navigator = navigator,
+              modifier = screenModifier,
+            )
 
-        imageViewerScreen(
-          modifier = screenModifier,
-          navigator = navigator,
-          toggleLightStatusBar = toggleLightStatusBar,
-          toggleLightNavBar = toggleLightNavBar,
-        )
+            aboutScreen(modifier = screenModifier, navigator = navigator)
 
-        settingsAppearanceScreen(
-          modifier = screenModifier,
-          settingsViewModel = settingsViewModel,
-          navigator = navigator,
-        )
+            feedGroupScreen(
+              modifier = screenModifier,
+              groupViewModel = groupViewModel,
+              navigator = navigator,
+            )
 
-        settingsBehaviorScreen(
-          modifier = screenModifier,
-          settingsViewModel = settingsViewModel,
-          navigator = navigator,
-        )
+            blockedWordsScreen(
+              modifier = screenModifier,
+              blockedWordsViewModel = blockedWordsViewModel,
+              navigator = navigator,
+            )
 
-        settingsServicesScreen(
-          modifier = screenModifier,
-          settingsViewModel = settingsViewModel,
-          navigator = navigator,
-        )
+            paywallScreen(
+              modifier = screenModifier,
+              premiumPaywallViewModel = premiumPaywallViewModel,
+              navigator = navigator,
+            )
 
-        settingsDataScreen(
-          statisticsViewModel = statisticsViewModel,
-          navigator = navigator,
-          modifier = screenModifier,
-        )
+            imageViewerScreen(
+              modifier = screenModifier,
+              navigator = navigator,
+              toggleLightStatusBar = toggleLightStatusBar,
+              toggleLightNavBar = toggleLightNavBar,
+            )
 
-        settingsAppInfoScreen(
-          modifier = screenModifier,
-          settingsViewModel = settingsViewModel,
-          openChangelog = { appViewModel.openChangelog() },
-          navigator = navigator,
-        )
+            settingsAppearanceScreen(
+              modifier = screenModifier,
+              settingsViewModel = settingsViewModel,
+              navigator = navigator,
+            )
 
-        feedInfoDialog(feedViewModel = feedViewModel, navigator = navigator)
+            settingsBehaviorScreen(
+              modifier = screenModifier,
+              settingsViewModel = settingsViewModel,
+              navigator = navigator,
+            )
 
-        groupSelectionDialog(
-          groupSelectionViewModel = groupSelectionViewModel,
-          navigator = navigator,
-        )
-      }
+            settingsServicesScreen(
+              modifier = screenModifier,
+              settingsViewModel = settingsViewModel,
+              navigator = navigator,
+            )
+
+            settingsDataScreen(
+              statisticsViewModel = statisticsViewModel,
+              navigator = navigator,
+              modifier = screenModifier,
+            )
+
+            settingsAppInfoScreen(
+              modifier = screenModifier,
+              settingsViewModel = settingsViewModel,
+              openChangelog = openChangelog,
+              navigator = navigator,
+            )
+
+            feedInfoDialog(feedViewModel = feedViewModel, navigator = navigator)
+
+            groupSelectionDialog(
+              groupSelectionViewModel = groupSelectionViewModel,
+              navigator = navigator,
+            )
+          }
+        }
 
       val density = LocalDensity.current
       val windowWidth = with(density) { LocalWindowInfo.current.containerSize.width.toDp() }
@@ -652,11 +729,20 @@ fun App(
           Modifier
         }
 
+      val rootNavTransitionDecorator = remember {
+        NavEntryDecorator<NavKey> { entry ->
+          val rootTransition = LocalNavAnimatedContentScope.current.transition
+          CompositionLocalProvider(LocalRootNavTransition provides rootTransition) {
+            entry.Content()
+          }
+        }
+      }
+
       Box(modifier = Modifier.fillMaxSize()) {
         NavDisplay(
           modifier =
             Modifier.fillMaxSize()
-              .background(AppTheme.colorScheme.backdrop)
+              .drawBehind { drawRect(appColorScheme.backdrop) }
               .then(rootShortcutModifier),
           backStack = backStack,
           entryProvider = entryProvider,
@@ -664,6 +750,7 @@ fun App(
             listOf(
               rememberSaveableStateHolderNavEntryDecorator(),
               rememberViewModelStoreNavEntryDecorator(),
+              rootNavTransitionDecorator,
             ),
           sceneStrategies = listOf(bottomSheetSceneStrategy, listDetailSceneStrategy),
           transitionSpec = {
@@ -691,6 +778,12 @@ fun App(
       }
     }
   }
+}
+
+private val LocalRootNavTransition = compositionLocalOf<Transition<EnterExitState>?> { null }
+
+private fun Transition<EnterExitState>?.isTransitionActive(): Boolean {
+  return this != null && (isRunning || currentState != targetState)
 }
 
 private fun AppNavigator.navigateToReaderOrOpenLink(

@@ -33,8 +33,8 @@ import androidx.compose.ui.layout.ContentScale
 import coil3.SingletonImageLoader
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
-import coil3.size.Dimension
 import coil3.size.Size
+import dev.sasikanth.rss.reader.favicons.DEFAULT_FAVICON_SIZE_PX
 import dev.sasikanth.rss.reader.favicons.FavIconImageLoader
 import dev.sasikanth.rss.reader.resources.icons.RSS
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -49,7 +49,7 @@ internal fun FeedIcon(
   contentDescription: String?,
   modifier: Modifier = Modifier,
   contentScale: ContentScale = ContentScale.Fit,
-  size: Size = Size(Dimension.Undefined, 500),
+  size: Size = Size(DEFAULT_FAVICON_SIZE_PX, DEFAULT_FAVICON_SIZE_PX),
 ) {
   val useFavIcon = showFeedFavIcon
   val shouldBlockImage = LocalBlockImage.current
@@ -67,9 +67,15 @@ internal fun FeedIcon(
       val loadFavIcon = useFavIcon || useFallback
 
       val imageRequest =
-        remember(icon, homepageLink, loadFavIcon, size) {
+        remember(context, icon, homepageLink, loadFavIcon, size) {
           val url = if (loadFavIcon) homepageLink else icon
-          ImageRequest.Builder(context).data(url).diskCacheKey(url).size(size).build()
+          val memoryCacheKey = "$url#${size.width}x${size.height}"
+          ImageRequest.Builder(context)
+            .data(url)
+            .diskCacheKey(url)
+            .memoryCacheKey(memoryCacheKey)
+            .size(size)
+            .build()
         }
 
       val imageLoader =

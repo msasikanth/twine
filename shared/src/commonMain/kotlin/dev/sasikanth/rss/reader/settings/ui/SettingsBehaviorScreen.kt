@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -46,6 +47,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.PagingData
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.app.AppPlatform
 import dev.sasikanth.rss.reader.components.SimpleTopAppBar
@@ -116,7 +118,7 @@ internal fun SettingsBehaviorScreen(
 
   SettingsBehaviorContent(
     state = state,
-    sources = viewModel.sources,
+    sources = { viewModel.sources },
     dispatch = viewModel::dispatch,
     snackbarHostState = snackbarHostState,
     goBack = goBack,
@@ -128,7 +130,7 @@ internal fun SettingsBehaviorScreen(
 @Composable
 private fun SettingsBehaviorContent(
   state: SettingsState,
-  sources: Flow<PagingData<Source>>,
+  sources: () -> Flow<PagingData<Source>>,
   dispatch: (SettingsEvent) -> Unit,
   snackbarHostState: SnackbarHostState,
   goBack: () -> Unit,
@@ -137,6 +139,9 @@ private fun SettingsBehaviorContent(
 ) {
   val layoutDirection = LocalLayoutDirection.current
   var showDefaultSourcePicker by remember { mutableStateOf(false) }
+  val sourceFlow = remember(sources) { sources() }
+  val defaultSources = sourceFlow.collectAsLazyPagingItems()
+  val defaultSourceListState = rememberLazyListState()
 
   Scaffold(
     modifier = modifier,
@@ -188,7 +193,9 @@ private fun SettingsBehaviorContent(
 
       if (showDefaultSourcePicker) {
         DefaultSourceSelectionSheet(
-          sources = sources,
+          sources = sourceFlow,
+          defaultSources = defaultSources,
+          listState = defaultSourceListState,
           selectedSourceId = state.defaultSource?.id,
           onSourceSelected = { dispatch(SettingsEvent.OnDefaultSourceChanged(it)) },
           onDismiss = { showDefaultSourcePicker = false },
@@ -322,7 +329,7 @@ private fun SettingsBehaviorPreview() {
               platform = AppPlatform.Android,
             )
         ),
-      sources = emptyFlow(),
+      sources = { emptyFlow() },
       dispatch = {},
       snackbarHostState = remember { SnackbarHostState() },
       goBack = {},

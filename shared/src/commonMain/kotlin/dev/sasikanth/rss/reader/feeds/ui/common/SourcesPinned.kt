@@ -94,7 +94,11 @@ internal fun LazyListScope.pinnedSources(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 16.dp).animateItem(),
       ) {
-        items(items = pinnedSources, key = { "PinnedSource: ${it.id}" }) { source ->
+        items(
+          items = pinnedSources,
+          key = { "PinnedSource: ${it.id}" },
+          contentType = { it.sourceType },
+        ) { source ->
           ReorderableItem(state = reorderableLazyRowState, key = "PinnedSource: ${source.id}") {
             isDragging ->
             val haptic = LocalHapticFeedback.current
@@ -128,6 +132,7 @@ private fun PinnedSourceItem(
   isDragging: Boolean,
   modifier: Modifier = Modifier,
 ) {
+  val colorScheme = AppTheme.colorScheme
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
     Box(
       modifier =
@@ -203,8 +208,8 @@ private fun PinnedSourceItem(
                 onClick = { onRemoveClick(source) },
               ),
           shape = CircleShape,
-          color = AppTheme.colorScheme.inverseSurface,
-          contentColor = AppTheme.colorScheme.inverseOnSurface,
+          color = colorScheme.inverseSurface,
+          contentColor = colorScheme.inverseOnSurface,
         ) {
           Icon(
             imageVector = TwineIcons.Remove,

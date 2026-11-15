@@ -56,11 +56,12 @@ internal fun AsyncImage(
   } else {
     val model =
       remember(context, url, size, crossfade) {
+        val memoryCacheKey = "$url#${size.width}x${size.height}"
         ImageRequest.Builder(context)
           .data(url)
           .size(size)
           .diskCacheKey(url)
-          .memoryCacheKey(url)
+          .memoryCacheKey(memoryCacheKey)
           .crossfade(crossfade)
           .decoderCoroutineContext(imageDecoderDispatcher)
           .build()

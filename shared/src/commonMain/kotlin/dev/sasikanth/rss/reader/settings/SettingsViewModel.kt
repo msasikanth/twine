@@ -88,12 +88,13 @@ class SettingsViewModel(
   val availableProviders: Set<CloudServiceProvider>,
 ) : ViewModel() {
 
-  val sources: Flow<PagingData<Source>> =
+  val sources: Flow<PagingData<Source>> by lazy {
     Pager(config = PagingConfig(pageSize = 20)) {
         rssRepository.sources(orderBy = FeedsOrderBy.Alphabetical)
       }
       .flow
       .cachedIn(viewModelScope)
+  }
 
   private val _state = MutableStateFlow(SettingsState.default(appInfo))
   val state: StateFlow<SettingsState>

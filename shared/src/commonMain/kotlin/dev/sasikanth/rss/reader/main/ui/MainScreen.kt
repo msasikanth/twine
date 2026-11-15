@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -382,13 +383,21 @@ private fun MainScreenContent(
   settingsContent: @Composable () -> Unit,
   discoveryContent: @Composable () -> Unit,
 ) {
+  val currentHomeContent by rememberUpdatedState(homeContent)
+  val currentSearchContent by rememberUpdatedState(searchContent)
+  val currentBookmarksContent by rememberUpdatedState(bookmarksContent)
+  val currentSettingsContent by rememberUpdatedState(settingsContent)
+  val currentDiscoveryContent by rememberUpdatedState(discoveryContent)
+
   val entryProvider =
-    entryProvider<NavKey> {
-      entry<Screen.MainHome> { homeContent() }
-      entry<Screen.MainSearch> { searchContent() }
-      entry<Screen.MainBookmarks> { bookmarksContent() }
-      entry<Screen.MainSettings> { settingsContent() }
-      entry<Screen.MainDiscovery> { discoveryContent() }
+    remember(navigator) {
+      entryProvider<NavKey> {
+        entry<Screen.MainHome> { currentHomeContent() }
+        entry<Screen.MainSearch> { currentSearchContent() }
+        entry<Screen.MainBookmarks> { currentBookmarksContent() }
+        entry<Screen.MainSettings> { currentSettingsContent() }
+        entry<Screen.MainDiscovery> { currentDiscoveryContent() }
+      }
     }
 
   NavDisplay(

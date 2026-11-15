@@ -210,7 +210,7 @@ internal fun PinnedSourcesBottomBar(
       contentPadding = PaddingValues(start = 8.dp, end = 8.dp),
     ) {
       if (pinnedSources.isEmpty()) {
-        item {
+        item(key = "NoPinnedSourcesPlaceholder", contentType = "NoPinnedSourcesPlaceholder") {
           Box(
             modifier = Modifier.fillParentMaxWidth().padding(16.dp),
             contentAlignment = Alignment.Center,
@@ -225,7 +225,11 @@ internal fun PinnedSourcesBottomBar(
         }
       }
 
-      items(count = pinnedSources.size, key = { pinnedSources[it].id }) { index ->
+      items(
+        count = pinnedSources.size,
+        key = { pinnedSources[it].id },
+        contentType = { pinnedSources[it].sourceType },
+      ) { index ->
         val source = pinnedSources[index]
         ReorderableItem(state = reorderableLazyRowState, key = source.id) { isDragging ->
           val haptic = LocalHapticFeedback.current

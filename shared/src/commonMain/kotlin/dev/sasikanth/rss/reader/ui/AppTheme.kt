@@ -25,6 +25,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
@@ -33,18 +34,22 @@ import dev.sasikanth.rss.reader.utils.LocalAmoledSetting
 import dev.sasikanth.rss.reader.utils.LocalRelativeDateFormatter
 import dev.sasikanth.rss.reader.utils.rememberRelativeDateFormatter
 
+private val DarkMaterialColorScheme = darkColorScheme()
+private val LightMaterialColorScheme = lightColorScheme()
+
 @Composable
 internal fun AppTheme(
   useDarkTheme: Boolean = false,
-  typography: Typography = typography(OutfitFontFamily),
+  typography: Typography = DefaultTypography,
   overriddenColorScheme: AppColorScheme? = null,
   content: @Composable () -> Unit,
 ) {
   val useAmoled = LocalAmoledSetting.current
+  val isAmoled = useDarkTheme && useAmoled
 
   CompositionLocalProvider(LocalIsDarkTheme provides useDarkTheme) {
     MaterialTheme(
-      colorScheme = if (useDarkTheme) darkColorScheme() else lightColorScheme(),
+      colorScheme = if (useDarkTheme) DarkMaterialColorScheme else LightMaterialColorScheme,
       typography = typography,
     ) {
       val dynamicColorState = LocalDynamicColorState.current
@@ -53,43 +58,63 @@ internal fun AppTheme(
           ?: if (useDarkTheme) dynamicColorState.darkAppColorScheme
           else dynamicColorState.lightAppColorScheme
 
-      // We read a property from the source color scheme to ensure that AppTheme recomposes
-      // whenever the dynamic colors change. This allows us to update the stable color scheme
-      // instance that is provided to the rest of the app.
-      val sourceColorValues = sourceColorScheme.toValues()
-
       val colorScheme =
         remember(useDarkTheme, overriddenColorScheme) {
-          AppColorScheme(sourceColorValues).apply {
-            updateFrom(sourceColorValues, amoled = useDarkTheme && useAmoled)
+          val initialValues = sourceColorScheme.peekValues()
+          AppColorScheme(initialValues).apply {
+            updateFromWithAnimationState(
+              values = initialValues,
+              amoled = isAmoled,
+              isAnimating = sourceColorScheme.isAnimating,
+            )
           }
         }
 
-      SideEffect { colorScheme.updateFrom(sourceColorValues, amoled = useDarkTheme && useAmoled) }
+      SideEffect {
+        colorScheme.updateFromWithAnimationState(
+          values = sourceColorScheme.peekValues(),
+          amoled = isAmoled,
+          isAnimating = sourceColorScheme.isAnimating,
+        )
+      }
 
-      val onSurface = colorScheme.onSurface
+      DisposableEffect(sourceColorScheme, colorScheme, isAmoled) {
+        val disposeObserver =
+          sourceColorScheme.observeValues { values, isAnimating ->
+            colorScheme.updateFromWithAnimationState(
+              values = values,
+              amoled = isAmoled,
+              isAnimating = isAnimating,
+            )
+          }
+        onDispose { disposeObserver() }
+      }
+
       val localTranslucentStyles =
-        remember(onSurface) {
+        remember(colorScheme) {
           TranslucentStyles(
             default =
               TranslucentStyle(
-                background = onSurface.copy(alpha = 0.08f),
-                outline = onSurface.copy(alpha = 0.16f),
-                foreground = onSurface,
+                backgroundGetter = { colorScheme.onSurface.copy(alpha = 0.08f) },
+                foregroundGetter = { colorScheme.onSurface },
+                outlineGetter = { colorScheme.onSurface.copy(alpha = 0.16f) },
               ),
             prominent =
               TranslucentStyle(
-                background = onSurface.copy(alpha = 0.16f),
-                outline = onSurface.copy(alpha = 0.16f),
-                foreground = onSurface,
+                backgroundGetter = { colorScheme.onSurface.copy(alpha = 0.16f) },
+                foregroundGetter = { colorScheme.onSurface },
+                outlineGetter = { colorScheme.onSurface.copy(alpha = 0.16f) },
               ),
           )
         }
 
       @Suppress("DEPRECATION")
       val rippleConfiguration =
-        remember(colorScheme.secondary) {
-          RippleConfiguration(color = colorScheme.secondary, rippleAlpha = DefaultRippleAlpha)
+        remember(colorScheme.settledSecondary) {
+          RippleConfiguration(
+            color = colorScheme.settledSecondary,
+            rippleAlpha = DefaultRippleAlpha,
+          )
         }
 
       CompositionLocalProvider(

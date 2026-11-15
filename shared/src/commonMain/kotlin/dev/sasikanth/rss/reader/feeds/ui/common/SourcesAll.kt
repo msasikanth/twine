@@ -117,7 +117,7 @@ internal fun LazyListScope.allSources(
           }
         },
       contentType = {
-        when (val sourceItem = sources[it]) {
+        when (val sourceItem = sources.peek(it)) {
           SourceListItem.Separator -> "Separator"
           is SourceListItem.SourceItem -> {
             if (sourceItem.source.sourceType == SourceType.FeedGroup) {
@@ -301,7 +301,7 @@ internal fun LazyListScope.allSources(
       }
     }
   } else if (hideFeedsWithoutUnreadPosts && sources.loadState.refresh is LoadState.NotLoading) {
-    item { NoUnreadFeeds() }
+    item(key = "NoUnreadFeeds", contentType = "NoUnreadFeeds") { NoUnreadFeeds() }
   }
 }
 

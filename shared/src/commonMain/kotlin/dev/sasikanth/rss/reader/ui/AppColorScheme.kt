@@ -83,6 +83,15 @@ data class AppColorValues(
 @Stable
 class AppColorScheme(values: AppColorValues) {
 
+  private var rawValues: AppColorValues = values
+  private val listeners = mutableListOf<(values: AppColorValues, isAnimating: Boolean) -> Unit>()
+
+  internal var isAnimating: Boolean = false
+    private set
+
+  internal var settledSecondary by mutableStateOf(values.secondary)
+    private set
+
   var primary by mutableStateOf(values.primary)
     internal set
 
@@ -179,32 +188,86 @@ class AppColorScheme(values: AppColorValues) {
       error = error,
     )
 
+  internal fun peekValues(): AppColorValues = rawValues
+
+  internal fun observeValues(
+    listener: (values: AppColorValues, isAnimating: Boolean) -> Unit
+  ): () -> Unit {
+    listeners.add(listener)
+    return { listeners.remove(listener) }
+  }
+
   fun copy(): AppColorScheme = AppColorScheme(toValues())
 
   fun updateFrom(values: AppColorValues, amoled: Boolean = false) {
+    updateFromWithAnimationState(values = values, amoled = amoled, isAnimating = false)
+  }
+
+  internal fun updateFromWithAnimationState(
+    values: AppColorValues,
+    amoled: Boolean = false,
+    isAnimating: Boolean = false,
+  ) {
+    val nextSurface = if (amoled) Color.Black else values.surface
+    val nextSurfaceContainer = if (amoled) Color.Black else values.surfaceContainer
+    val nextSurfaceContainerLow = if (amoled) Color.Black else values.surfaceContainerLow
+    val nextSurfaceContainerLowest = if (amoled) Color.Black else values.surfaceContainerLowest
+    val nextSurfaceContainerHigh = if (amoled) Color(0xFF1D201F) else values.surfaceContainerHigh
+    val nextSurfaceContainerHighest =
+      if (amoled) Color(0xFF272B29) else values.surfaceContainerHighest
+    val nextBackdrop = if (amoled) Color.Black else values.backdrop
+    val nextBottomSheet = if (amoled) Color.Black else values.bottomSheet
+
+    rawValues =
+      if (amoled) {
+        values.copy(
+          surface = nextSurface,
+          surfaceContainer = nextSurfaceContainer,
+          surfaceContainerLow = nextSurfaceContainerLow,
+          surfaceContainerLowest = nextSurfaceContainerLowest,
+          surfaceContainerHigh = nextSurfaceContainerHigh,
+          surfaceContainerHighest = nextSurfaceContainerHighest,
+          backdrop = nextBackdrop,
+          bottomSheet = nextBottomSheet,
+        )
+      } else {
+        values
+      }
+    this.isAnimating = isAnimating
+
     primary = values.primary
     onPrimary = values.onPrimary
     secondary = values.secondary
+    if (!isAnimating) {
+      settledSecondary = values.secondary
+    }
     outline = values.outline
     outlineVariant = values.outlineVariant
     primaryContainer = values.primaryContainer
     onPrimaryContainer = values.onPrimaryContainer
-    surface = if (amoled) Color.Black else values.surface
+    surface = nextSurface
     onSurface = values.onSurface
     onSurfaceVariant = values.onSurfaceVariant
-    surfaceContainer = if (amoled) Color.Black else values.surfaceContainer
-    surfaceContainerLow = if (amoled) Color.Black else values.surfaceContainerLow
-    surfaceContainerLowest = if (amoled) Color.Black else values.surfaceContainerLowest
-    surfaceContainerHigh = if (amoled) Color(0xFF1D201F) else values.surfaceContainerHigh
-    surfaceContainerHighest = if (amoled) Color(0xFF272B29) else values.surfaceContainerHighest
+    surfaceContainer = nextSurfaceContainer
+    surfaceContainerLow = nextSurfaceContainerLow
+    surfaceContainerLowest = nextSurfaceContainerLowest
+    surfaceContainerHigh = nextSurfaceContainerHigh
+    surfaceContainerHighest = nextSurfaceContainerHighest
     inversePrimary = values.inversePrimary
     inverseSurface = values.inverseSurface
     inverseOnSurface = values.inverseOnSurface
-    backdrop = if (amoled) Color.Black else values.backdrop
-    bottomSheet = if (amoled) Color.Black else values.bottomSheet
+    backdrop = nextBackdrop
+    bottomSheet = nextBottomSheet
     bottomSheetInverse = values.bottomSheetInverse
     bottomSheetBorder = values.bottomSheetBorder
     error = values.error
+
+    if (listeners.isNotEmpty()) {
+      val currentValues = rawValues
+      for (i in 0 until listeners.size) {
+        listeners[i].invoke(currentValues, isAnimating)
+      }
+    }
   }
 }
 

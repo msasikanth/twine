@@ -25,6 +25,7 @@ import coil3.svg.SvgDecoder
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.components.image.YouTubeThumbnailInterceptor
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.favicons.FavIconImageLoader
 import me.tatarka.inject.annotations.Provides
 import okio.Path.Companion.toPath
 
@@ -37,12 +38,14 @@ interface ImageLoaderComponent : ImageLoaderPlatformComponent {
   @Provides
   @AppScope
   fun imageLoader(platformContext: PlatformContext, appInfo: AppInfo): ImageLoader {
+    FavIconImageLoader.configure(cachePath = appInfo.cachePath())
+
     return ImageLoader.Builder(platformContext)
       .components {
         add(SvgDecoder.Factory())
         add(YouTubeThumbnailInterceptor())
       }
-      .memoryCache { MemoryCache.Builder().maxSizePercent(platformContext, percent = 0.25).build() }
+      .memoryCache { MemoryCache.Builder().maxSizePercent(platformContext, percent = 0.20).build() }
       .diskCache {
         DiskCache.Builder()
           .directory(appInfo.cachePath().toPath().resolve("dev_sasikanth_rss_reader_images_cache"))
