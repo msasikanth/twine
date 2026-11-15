@@ -103,6 +103,8 @@
   <string name="settingsPostsDeletionPeriodNever">从不</string>
   <string name="settingsShowReaderViewTitle">启用阅读器视图</string>
   <string name="settingsShowReaderViewSubtitle">文章将以简化、易读的视图呈现</string>
+  <string name="settingsAlwaysFetchSourceArticleTitle">Fetch full articles in reader view</string>
+  <string name="settingsAlwaysFetchSourceArticleSubtitle">Updates all existing and newly added feeds. You can still change it per feed at any time.</string>
   <string name="settingsConfirmMarkAllAsReadTitle">Confirm mark all as read</string>
   <string name="settingsConfirmMarkAllAsReadSubtitle">Ask for confirmation before marking all articles as read</string>
   <string name="settingsThemeAuto">自动</string>
