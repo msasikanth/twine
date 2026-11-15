@@ -446,6 +446,59 @@ class RssRepositoryTest {
   }
 
   @Test
+  fun updateAllFeedsAlwaysFetchSourceShouldUpdateAllFeeds() = runTest {
+    // given
+    database.feedQueries.upsert(
+      id = "feed-1",
+      name = "Feed 1",
+      icon = "icon",
+      description = "description",
+      homepageLink = "homepage",
+      createdAt = Instant.fromEpochMilliseconds(0),
+      link = "link-1",
+      alwaysFetchSourceArticle = false,
+      showFeedFavIcon = false,
+      lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+      enableNotifications = true,
+    )
+    database.feedQueries.upsert(
+      id = "feed-2",
+      name = "Feed 2",
+      icon = "icon",
+      description = "description",
+      homepageLink = "homepage",
+      createdAt = Instant.fromEpochMilliseconds(0),
+      link = "link-2",
+      alwaysFetchSourceArticle = true,
+      showFeedFavIcon = false,
+      lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+      enableNotifications = true,
+    )
+
+    // when - enable for all
+    repository.updateAllFeedsAlwaysFetchSource(true)
+
+    // then
+    var feed1 = repository.feed(feedId = "feed-1", postsAfter = Instant.DISTANT_PAST).first()
+    var feed2 = repository.feed(feedId = "feed-2", postsAfter = Instant.DISTANT_PAST).first()
+    assertEquals(true, feed1.alwaysFetchSourceArticle)
+    assertEquals(true, feed2.alwaysFetchSourceArticle)
+
+    // when - override single feed, then disable for all
+    repository.updateFeedAlwaysFetchSource("feed-1", false)
+    feed1 = repository.feed(feedId = "feed-1", postsAfter = Instant.DISTANT_PAST).first()
+    assertEquals(false, feed1.alwaysFetchSourceArticle)
+
+    repository.updateAllFeedsAlwaysFetchSource(false)
+
+    // then
+    feed1 = repository.feed(feedId = "feed-1", postsAfter = Instant.DISTANT_PAST).first()
+    feed2 = repository.feed(feedId = "feed-2", postsAfter = Instant.DISTANT_PAST).first()
+    assertEquals(false, feed1.alwaysFetchSourceArticle)
+    assertEquals(false, feed2.alwaysFetchSourceArticle)
+  }
+
+  @Test
   fun postPositionShouldMatchIndexInAllPostsForAllSortOrders() = runTest {
     // given
     val feedId = "feed-1"

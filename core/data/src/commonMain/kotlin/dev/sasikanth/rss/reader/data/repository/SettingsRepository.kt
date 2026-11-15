@@ -50,6 +50,7 @@ class SettingsRepository(
   private val postsTypeKey = stringPreferencesKey("posts_type")
   private val postsSortOrderKey = stringPreferencesKey("posts_sort_order")
   private val showReaderViewKey = booleanPreferencesKey("pref_show_reader_view")
+  private val alwaysFetchSourceArticleKey = booleanPreferencesKey("always_fetch_source_article")
   private val feedsSortOrderKey = stringPreferencesKey("pref_feeds_sort_order")
   private val hideFeedsWithoutUnreadPostsKey =
     booleanPreferencesKey("pref_hide_feeds_without_unread_posts")
@@ -99,6 +100,9 @@ class SettingsRepository(
 
   val showReaderView: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[showReaderViewKey] ?: true }
+
+  val alwaysFetchSourceArticle: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[alwaysFetchSourceArticleKey] ?: false }
 
   val postsType: Flow<PostsType> =
     dataStore.data.map { preferences -> mapToPostsType(preferences[postsTypeKey]) ?: PostsType.ALL }
@@ -252,6 +256,10 @@ class SettingsRepository(
 
   suspend fun toggleShowReaderView(value: Boolean) {
     dataStore.edit { preferences -> preferences[showReaderViewKey] = value }
+  }
+
+  suspend fun toggleAlwaysFetchSourceArticle(value: Boolean) {
+    dataStore.edit { preferences -> preferences[alwaysFetchSourceArticleKey] = value }
   }
 
   suspend fun updateAppTheme(value: AppThemeMode) {

@@ -117,7 +117,10 @@ updateLastCleanUpAt:
 UPDATE feed SET lastCleanUpAt = :lastCleanUpAt WHERE id = :id;
 
 updateAlwaysFetchSourceArticle:
-UPDATE feed SET alwaysFetchSourceArticle = :alwaysFetchSourceArticle WHERE id = :id;
+UPDATE feed SET alwaysFetchSourceArticle = :alwaysFetchSourceArticle, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
+
+updateAlwaysFetchSourceArticleForAll:
+UPDATE feed SET alwaysFetchSourceArticle = :alwaysFetchSourceArticle, lastUpdatedAt = :lastUpdatedAt;
 
 updateShowFeedFavIcon:
 UPDATE feed SET showFeedFavIcon = :showFeedFavIcon WHERE id = :id;

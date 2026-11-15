@@ -831,6 +831,10 @@ class RssRepository(
     feedRepository.updateFeedAlwaysFetchSource(feedId, newValue)
   }
 
+  suspend fun updateAllFeedsAlwaysFetchSource(newValue: Boolean) {
+    feedRepository.updateAllFeedsAlwaysFetchSource(newValue)
+  }
+
   suspend fun updateFeedShowFavIcon(feedId: String, newValue: Boolean) {
     feedRepository.updateFeedShowFavIcon(feedId, newValue)
   }
