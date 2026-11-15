@@ -103,6 +103,8 @@
   <string name="settingsPostsDeletionPeriodNever">Hiçbir zaman</string>
   <string name="settingsShowReaderViewTitle">Okuma modunu etkinleştir</string>
   <string name="settingsShowReaderViewSubtitle">Yazılar gözü yormayan, sade ve temiz bir düzenle sunulur</string>
+  <string name="settingsAlwaysFetchSourceArticleTitle">Fetch full articles in reader view</string>
+  <string name="settingsAlwaysFetchSourceArticleSubtitle">Updates all existing and newly added feeds. You can still change it per feed at any time.</string>
   <string name="settingsConfirmMarkAllAsReadTitle">Tümünü okundu işaretlerken onay sor</string>
   <string name="settingsConfirmMarkAllAsReadSubtitle">Tüm yazılar tek seferde okundu olarak işaretlenmeden önce onayınızı alır</string>
   <string name="settingsThemeAuto">Sistem varsayılanı</string>
