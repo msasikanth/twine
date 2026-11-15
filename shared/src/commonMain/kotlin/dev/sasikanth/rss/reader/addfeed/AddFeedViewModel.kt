@@ -178,11 +178,13 @@ class AddFeedViewModel(
               val showWebsiteFavIcon =
                 settingsRepository.showFeedFavIcon.first() &&
                   !UrlUtils.prefersFeedProvidedIcon(feedPayload.link)
+              val alwaysFetchSourceArticle = settingsRepository.alwaysFetchSourceArticle.first()
               val feedId =
                 rssRepository.upsertFeedWithPosts(
                   feedPayload = feedPayload,
                   title = title,
                   showWebsiteFavIcon = showWebsiteFavIcon,
+                  alwaysFetchSourceArticle = alwaysFetchSourceArticle,
                 )
               _state.update {
                 it.copy(
@@ -193,7 +195,7 @@ class AddFeedViewModel(
                       icon = feedPayload.icon,
                       homepageLink = feedPayload.homepageLink,
                       showFeedFavIcon = showWebsiteFavIcon,
-                      alwaysFetchSourceArticle = false,
+                      alwaysFetchSourceArticle = alwaysFetchSourceArticle,
                       enableNotifications = true,
                     )
                 )

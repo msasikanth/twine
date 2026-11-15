@@ -367,6 +367,8 @@ class FreshRSSSyncCoordinator(
       localGroups.filter { it.remoteId != null }.associateBy { it.remoteId!! }
     val localGroupsByName = localGroups.associateBy { it.name }
 
+    val alwaysFetchSourceArticle = settingsRepository.alwaysFetchSourceArticle.first()
+
     subscriptions.forEach { subscription ->
       val localFeed = localFeedsByRemoteId[subscription.id] ?: localFeedsByLink[subscription.url]
 
@@ -407,6 +409,7 @@ class FreshRSSSyncCoordinator(
                   link = subscription.url,
                   posts = emptyFlow(),
                 ),
+              alwaysFetchSourceArticle = alwaysFetchSourceArticle,
               updateFeed = true,
             )
             .also {

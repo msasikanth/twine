@@ -391,6 +391,8 @@ class MinifluxSyncCoordinator(
       localGroups.filter { it.remoteId != null }.associateBy { it.remoteId!! }
     val localGroupsByName = localGroups.associateBy { it.name }
 
+    val alwaysFetchSourceArticle = settingsRepository.alwaysFetchSourceArticle.first()
+
     remoteFeeds.forEach { remoteFeed ->
       val localFeed =
         localFeedsByRemoteId[remoteFeed.id.toString()] ?: localFeedsByLink[remoteFeed.feedUrl]
@@ -449,6 +451,7 @@ class MinifluxSyncCoordinator(
                   link = remoteFeed.feedUrl,
                   posts = emptyFlow(),
                 ),
+              alwaysFetchSourceArticle = alwaysFetchSourceArticle,
               updateFeed = true,
             )
             .also {

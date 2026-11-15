@@ -281,6 +281,7 @@ class OpmlManager(
       feedPayload = feedFetcherResult.feedPayload,
       title = feed.title,
       showWebsiteFavIcon = settingsRepository.showFeedFavIcon.first(),
+      alwaysFetchSourceArticle = settingsRepository.alwaysFetchSourceArticle.first(),
     )
   }
 
