@@ -103,6 +103,8 @@
   <string name="settingsPostsDeletionPeriodNever">Никогда</string>
   <string name="settingsShowReaderViewTitle">Включить режим чтения</string>
   <string name="settingsShowReaderViewSubtitle">Статьи будут представлены в упрощенном, удобном для чтения виде</string>
+  <string name="settingsAlwaysFetchSourceArticleTitle">Fetch full articles in reader view</string>
+  <string name="settingsAlwaysFetchSourceArticleSubtitle">Updates all existing and newly added feeds. You can still change it per feed at any time.</string>
   <string name="settingsConfirmMarkAllAsReadTitle">Confirm mark all as read</string>
   <string name="settingsConfirmMarkAllAsReadSubtitle">Ask for confirmation before marking all articles as read</string>
   <string name="settingsThemeAuto">Авто</string>
