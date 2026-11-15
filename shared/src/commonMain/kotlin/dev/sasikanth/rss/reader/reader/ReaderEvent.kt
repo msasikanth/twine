@@ -42,5 +42,7 @@ sealed interface ReaderEvent {
 
   data object MarkOpenPaywallDone : ReaderEvent
 
+  data object OnInitialTransitionSettled : ReaderEvent
+
   data class OnMarkAsUnread(val postId: String) : ReaderEvent
 }

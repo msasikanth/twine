@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -27,12 +28,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -43,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.toSize
 import com.mikepenz.markdown.annotator.AnnotatorSettings
-import com.mikepenz.markdown.annotator.annotatorSettings
+import com.mikepenz.markdown.annotator.DefaultAnnotatorSettings
 import com.mikepenz.markdown.annotator.buildMarkdownAnnotatedString
 import com.mikepenz.markdown.compose.LocalImageTransformer
 import com.mikepenz.markdown.compose.LocalImageWidth
@@ -54,14 +60,18 @@ import com.mikepenz.markdown.compose.LocalMarkdownComponents
 import com.mikepenz.markdown.compose.LocalMarkdownExtendedSpans
 import com.mikepenz.markdown.compose.LocalMarkdownInlineContent
 import com.mikepenz.markdown.compose.LocalMarkdownTypography
+import com.mikepenz.markdown.compose.LocalReferenceLinkHandler
 import com.mikepenz.markdown.compose.components.MarkdownComponentModel
 import com.mikepenz.markdown.compose.elements.material.MarkdownBasicText
 import com.mikepenz.markdown.compose.extendedspans.ExtendedSpans
 import com.mikepenz.markdown.compose.extendedspans.drawBehind
 import com.mikepenz.markdown.model.ImageTransformer
 import com.mikepenz.markdown.model.ImageWidth
+import com.mikepenz.markdown.model.MarkdownAnnotator
 import com.mikepenz.markdown.model.MarkdownAnnotatorConfig
+import com.mikepenz.markdown.model.ReferenceLinkHandler
 import com.mikepenz.markdown.utils.MARKDOWN_TAG_IMAGE_URL
+import com.mikepenz.markdown.utils.codeSpanStyle
 import com.mikepenz.markdown.utils.getUnescapedTextInNode
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes
@@ -69,6 +79,50 @@ import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.findChildOfType
 import org.intellij.markdown.ast.getTextInNode
+
+internal val LocalMarkdownAnnotatorSettings = compositionLocalOf<AnnotatorSettings?> { null }
+
+@Composable
+internal fun rememberAnnotatorSettings(
+  linkTextSpanStyle: TextLinkStyles = LocalMarkdownTypography.current.textLink,
+  codeSpanStyle: SpanStyle = LocalMarkdownTypography.current.codeSpanStyle,
+  annotator: MarkdownAnnotator = LocalMarkdownAnnotator.current,
+  referenceLinkHandler: ReferenceLinkHandler? = LocalReferenceLinkHandler.current,
+  uriHandler: UriHandler = LocalUriHandler.current,
+  highlightSpanStyle: SpanStyle =
+    LocalMarkdownColors.current.let {
+      SpanStyle(color = it.highlightText, background = it.highlightBackground)
+    },
+): AnnotatorSettings {
+  return remember(
+    linkTextSpanStyle,
+    codeSpanStyle,
+    annotator,
+    referenceLinkHandler,
+    uriHandler,
+    highlightSpanStyle,
+  ) {
+    DefaultAnnotatorSettings(
+      linkTextSpanStyle = linkTextSpanStyle,
+      codeSpanStyle = codeSpanStyle,
+      annotator = annotator,
+      referenceLinkHandler = referenceLinkHandler,
+      linkInteractionListener = { link ->
+        val annotationUrl = (link as? LinkAnnotation.Url)?.url
+        if (annotationUrl != null) {
+          val foundReference =
+            referenceLinkHandler?.find(annotationUrl)?.takeIf { it.isNotEmpty() } ?: annotationUrl
+          try {
+            uriHandler.openUri(foundReference)
+          } catch (t: Throwable) {
+            println("Could not open the provided url: $foundReference // ${t.message}")
+          }
+        }
+      },
+      highlightSpanStyle = highlightSpanStyle,
+    )
+  }
+}
 
 @Composable
 fun SafeMarkdownText(
@@ -87,18 +141,22 @@ fun SafeMarkdownText(
   style: TextStyle,
   modifier: Modifier = Modifier,
   contentChildType: IElementType? = null,
-  annotatorSettings: AnnotatorSettings = annotatorSettings(),
+  annotatorSettings: AnnotatorSettings =
+    LocalMarkdownAnnotatorSettings.current ?: rememberAnnotatorSettings(),
 ) {
   val childNode = contentChildType?.run(node::findChildOfType) ?: node
-  val styledText = buildAnnotatedString {
-    pushStyle(style.toSpanStyle())
-    buildMarkdownAnnotatedString(
-      content = content,
-      node = childNode,
-      annotatorSettings = annotatorSettings,
-    )
-    pop()
-  }
+  val styledText =
+    remember(content, childNode, style, annotatorSettings) {
+      buildAnnotatedString {
+        pushStyle(style.toSpanStyle())
+        buildMarkdownAnnotatedString(
+          content = content,
+          node = childNode,
+          annotatorSettings = annotatorSettings,
+        )
+        pop()
+      }
+    }
 
   SafeMarkdownText(
     content = styledText,
@@ -162,46 +220,56 @@ fun SafeMarkdownText(
 
   val inlineImageAsBlock = annotatorConfig.inlineImageAsBlock
   val imageNodes = remember(node) { collectImageNodes(node) }
+  val hasInlineImages = imageNodes.isNotEmpty()
   val resolved by
-    remember(
-      node,
-      inlineContent.inlineContent,
-      content,
-      transformer,
-      inlineImageWidth,
-      lineHeightPx,
-      inlineImageAsBlock,
-      imageNodes,
-      density,
-    ) {
-      derivedStateOf {
-        val blocks = mutableListOf<BlockImageRange>()
-        val map =
-          inlineContent.inlineContent +
-            buildImageInlineContent(
-              content = content,
-              node = node,
-              transformer = transformer,
-              density = density,
-              containerSize = containerSize.value,
-              inlineImageWidth = inlineImageWidth,
-              imageSizeByLink = imageSizeByLink,
-              lineHeightPx = lineHeightPx,
-              inlineImageAsBlock = inlineImageAsBlock,
-              imageNodes = imageNodes,
-              onBlockImage = { range -> blocks += range },
-              imageSizeChanged = { link, size -> imageSizeByLink += (link to size) },
-            )
-        map to blocks.sortedBy { it.start }
+    if (!hasInlineImages) {
+      remember(inlineContent.inlineContent) {
+        mutableStateOf(inlineContent.inlineContent to emptyList<BlockImageRange>())
+      }
+    } else {
+      remember(
+        node,
+        inlineContent.inlineContent,
+        content,
+        transformer,
+        inlineImageWidth,
+        lineHeightPx,
+        inlineImageAsBlock,
+        imageNodes,
+        density,
+      ) {
+        derivedStateOf {
+          val blocks = mutableListOf<BlockImageRange>()
+          val map =
+            inlineContent.inlineContent +
+              buildImageInlineContent(
+                content = content,
+                node = node,
+                transformer = transformer,
+                density = density,
+                containerSize = containerSize.value,
+                inlineImageWidth = inlineImageWidth,
+                imageSizeByLink = imageSizeByLink,
+                lineHeightPx = lineHeightPx,
+                inlineImageAsBlock = inlineImageAsBlock,
+                imageNodes = imageNodes,
+                onBlockImage = { range -> blocks += range },
+                imageSizeChanged = { link, size -> imageSizeByLink += (link to size) },
+              )
+          map to blocks.sortedBy { it.start }
+        }
       }
     }
   val resolvedInlineContent = resolved.first
   val blockImageRanges = resolved.second
 
   val containerModifier: @Composable (Modifier) -> Modifier = { base ->
-    base
-      .semantics { isTraversalGroup = true }
-      .onPlaced { coordinates -> containerSize.updateFromParent(coordinates) }
+    val semanticsModifier = base.semantics { isTraversalGroup = true }
+    if (hasInlineImages) {
+      semanticsModifier.onPlaced { coordinates -> containerSize.updateFromParent(coordinates) }
+    } else {
+      semanticsModifier
+    }
   }
 
   val textSegment: @Composable (AnnotatedString, Modifier) -> Unit = { segment, segmentModifier ->
@@ -209,7 +277,8 @@ fun SafeMarkdownText(
       if (extendedSpans != null) remember(segment) { extendedSpans.extend(segment) } else segment
     val segmentDrawModifier =
       if (extendedSpans != null) segmentModifier.drawBehind(extendedSpans) else segmentModifier
-    val hasSegmentLinks = segment.getLinkAnnotations(0, segment.length).isNotEmpty()
+    val hasSegmentLinks =
+      remember(segment) { segment.getLinkAnnotations(0, segment.length).isNotEmpty() }
     val finalModifier =
       if (hasSegmentLinks) {
         segmentDrawModifier.semantics(mergeDescendants = true) {}
@@ -230,14 +299,17 @@ fun SafeMarkdownText(
   }
 
   if (blockImageRanges.isEmpty()) {
-    val hasLinks = content.getLinkAnnotations(0, content.length).isNotEmpty()
+    val hasLinks = remember(content) { content.getLinkAnnotations(0, content.length).isNotEmpty() }
     if (hasLinks) {
       Box(modifier = containerModifier(modifier)) { textSegment(content, Modifier) }
     } else {
-      textSegment(
-        content,
-        modifier.onPlaced { coordinates -> containerSize.updateFromParent(coordinates) },
-      )
+      val segmentModifier =
+        if (hasInlineImages) {
+          modifier.onPlaced { coordinates -> containerSize.updateFromParent(coordinates) }
+        } else {
+          modifier
+        }
+      textSegment(content, segmentModifier)
     }
   } else {
     val components = LocalMarkdownComponents.current
@@ -268,17 +340,21 @@ fun SafeMarkdownParagraph(
   node: ASTNode,
   modifier: Modifier = Modifier,
   style: TextStyle = LocalMarkdownTypography.current.paragraph,
-  annotatorSettings: AnnotatorSettings = annotatorSettings(),
+  annotatorSettings: AnnotatorSettings =
+    LocalMarkdownAnnotatorSettings.current ?: rememberAnnotatorSettings(),
 ) {
-  val styledText = buildAnnotatedString {
-    pushStyle(style.toSpanStyle())
-    buildMarkdownAnnotatedString(
-      content = content,
-      node = node,
-      annotatorSettings = annotatorSettings,
-    )
-    pop()
-  }
+  val styledText =
+    remember(content, node, style, annotatorSettings) {
+      buildAnnotatedString {
+        pushStyle(style.toSpanStyle())
+        buildMarkdownAnnotatedString(
+          content = content,
+          node = node,
+          annotatorSettings = annotatorSettings,
+        )
+        pop()
+      }
+    }
 
   SafeMarkdownText(
     content = styledText,
@@ -335,7 +411,7 @@ private fun MutableState<Size>.updateFromParent(coordinates: LayoutCoordinates) 
   }
 }
 
-private fun collectImageNodes(root: ASTNode): List<ASTNode> {
+internal fun collectImageNodes(root: ASTNode): List<ASTNode> {
   val list = mutableListOf<ASTNode>()
 
   fun visit(node: ASTNode) {

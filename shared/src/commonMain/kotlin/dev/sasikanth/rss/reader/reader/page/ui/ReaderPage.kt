@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -73,6 +74,8 @@ import dev.sasikanth.rss.reader.app.LocalSnackbarHostState
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
+import dev.sasikanth.rss.reader.markdown.LocalMarkdownAnnotatorSettings
+import dev.sasikanth.rss.reader.markdown.rememberAnnotatorSettings
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
@@ -182,10 +185,61 @@ private fun ReaderPageContent(
       }
     }
 
+  val primaryColor = AppTheme.colorScheme.primary
+  val onSurfaceColor = AppTheme.colorScheme.onSurface
+  val outlineVariantColor = AppTheme.colorScheme.outlineVariant
   val textSelectionColors =
-    TextSelectionColors(
-      handleColor = AppTheme.colorScheme.primary,
-      backgroundColor = AppTheme.colorScheme.primary.copy(alpha = 0.4f),
+    remember(primaryColor) {
+      TextSelectionColors(
+        handleColor = primaryColor,
+        backgroundColor = primaryColor.copy(alpha = 0.4f),
+      )
+    }
+  val referenceLinkHandler = remember { ReferenceLinkHandlerImpl() }
+  val padding = markdownPadding(block = 12.dp)
+  val dimens = markdownDimens(tableCellWidth = 140.dp, tableCellPadding = 12.dp)
+  val annotator =
+    remember(shouldBlockImage) {
+      markdownAnnotator(
+        annotate = { _, node -> node.type == MarkdownElementTypes.IMAGE && shouldBlockImage }
+      )
+    }
+  val animations = markdownAnimations(animateTextSize = { this })
+  val colors =
+    markdownColor(
+      text = onSurfaceColor,
+      codeBackground = onSurfaceColor.copy(alpha = 0.1f),
+      dividerColor = outlineVariantColor,
+      tableBackground = onSurfaceColor.copy(alpha = 0.02f),
+    )
+  val typography =
+    markdownTypography(
+      h1 = MaterialTheme.typography.displaySmall,
+      h2 = MaterialTheme.typography.headlineLarge,
+      h3 = MaterialTheme.typography.headlineMedium,
+      h4 = MaterialTheme.typography.headlineSmall,
+      h5 = MaterialTheme.typography.titleLarge,
+      h6 = MaterialTheme.typography.titleMedium,
+      textLink =
+        TextLinkStyles(
+          MaterialTheme.typography.bodyLarge
+            .copy(
+              fontWeight = FontWeight.Bold,
+              textDecoration = TextDecoration.Underline,
+              color = AppTheme.colorScheme.primary,
+            )
+            .toSpanStyle()
+        ),
+    )
+  val annotatorSettings =
+    rememberAnnotatorSettings(
+      linkTextSpanStyle = typography.textLink,
+      codeSpanStyle =
+        typography.inlineCode.copy(background = colors.inlineCodeBackground).toSpanStyle(),
+      annotator = annotator,
+      referenceLinkHandler = referenceLinkHandler,
+      highlightSpanStyle =
+        SpanStyle(color = colors.highlightText, background = colors.highlightBackground),
     )
 
   CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColors) {
@@ -194,45 +248,15 @@ private fun ReaderPageContent(
         CompositionLocalProvider(
           LocalOnImageClick provides onImageClick,
           LocalMarkdownComponents provides markdownComponents,
-          LocalReferenceLinkHandler provides ReferenceLinkHandlerImpl(),
-          LocalMarkdownPadding provides markdownPadding(block = 12.dp),
-          LocalMarkdownDimens provides
-            markdownDimens(tableCellWidth = 140.dp, tableCellPadding = 12.dp),
+          LocalReferenceLinkHandler provides referenceLinkHandler,
+          LocalMarkdownPadding provides padding,
+          LocalMarkdownDimens provides dimens,
           LocalImageTransformer provides CoilMarkdownTransformer,
-          LocalMarkdownAnnotator provides
-            markdownAnnotator(
-              annotate = { _, node ->
-                // skipping images when "block images" is enabled
-                node.type == MarkdownElementTypes.IMAGE && shouldBlockImage
-              }
-            ),
-          LocalMarkdownAnimations provides markdownAnimations(animateTextSize = { this }),
-          LocalMarkdownColors provides
-            markdownColor(
-              text = AppTheme.colorScheme.onSurface,
-              codeBackground = AppTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-              dividerColor = AppTheme.colorScheme.outlineVariant,
-              tableBackground = AppTheme.colorScheme.onSurface.copy(alpha = 0.02f),
-            ),
-          LocalMarkdownTypography provides
-            markdownTypography(
-              h1 = MaterialTheme.typography.displaySmall,
-              h2 = MaterialTheme.typography.headlineLarge,
-              h3 = MaterialTheme.typography.headlineMedium,
-              h4 = MaterialTheme.typography.headlineSmall,
-              h5 = MaterialTheme.typography.titleLarge,
-              h6 = MaterialTheme.typography.titleMedium,
-              textLink =
-                TextLinkStyles(
-                  MaterialTheme.typography.bodyLarge
-                    .copy(
-                      fontWeight = FontWeight.Bold,
-                      textDecoration = TextDecoration.Underline,
-                      color = AppTheme.colorScheme.primary,
-                    )
-                    .toSpanStyle()
-                ),
-            ),
+          LocalMarkdownAnnotator provides annotator,
+          LocalMarkdownAnimations provides animations,
+          LocalMarkdownColors provides colors,
+          LocalMarkdownTypography provides typography,
+          LocalMarkdownAnnotatorSettings provides annotatorSettings,
         ) {
           LazyColumn(
             modifier =
@@ -318,8 +342,11 @@ private fun ReaderPageContent(
 
             when (markdownContentState) {
               is State.Success -> {
-                items(items = markdownContentState.node.children, key = { it.markdownNodeKey() }) {
-                  node ->
+                items(
+                  items = markdownContentState.node.children,
+                  key = { it.markdownNodeKey() },
+                  contentType = { it.type.name },
+                ) { node ->
                   Box(modifier = Modifier.padding(horizontal = 24.dp)) {
                     MarkdownElement(
                       node = node,

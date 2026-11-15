@@ -48,10 +48,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import coil3.size.Dimension
@@ -71,6 +74,7 @@ import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
+import kotlin.math.roundToInt
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -112,7 +116,7 @@ internal fun FeaturedSection(
   val blurEffect =
     remember(density) {
       if (canBlurImage) {
-        val blurRadius = 70.dp
+        val blurRadius = 70.dp / BLUR_DOWNSCALE_FACTOR
         val blurRadiusPx = with(density) { blurRadius.toPx() }
         BlurEffect(radiusX = blurRadiusPx, radiusY = blurRadiusPx, edgeTreatment = TileMode.Decal)
       } else {
@@ -318,7 +322,34 @@ private fun FeaturedSectionBackground(
   Box(
     modifier =
       modifier
-        .graphicsLayer { renderEffect = blurEffect }
+        .layout { measurable, constraints ->
+          val fullWidth = constraints.maxWidth
+          val fullHeight =
+            if (constraints.hasBoundedHeight) {
+              constraints.maxHeight
+            } else {
+              constraints.minHeight
+            }
+          if (fullWidth <= 0 || fullHeight <= 0) {
+            val placeable = measurable.measure(Constraints.fixed(0, 0))
+            layout(0, 0) { placeable.place(0, 0) }
+          } else {
+            val scaledWidth = (fullWidth / BLUR_DOWNSCALE_FACTOR).roundToInt().coerceAtLeast(1)
+            val scaledHeight = (fullHeight / BLUR_DOWNSCALE_FACTOR).roundToInt().coerceAtLeast(1)
+            val placeable = measurable.measure(Constraints.fixed(scaledWidth, scaledHeight))
+            val scaleXFactor = fullWidth.toFloat() / scaledWidth.toFloat()
+            val scaleYFactor = fullHeight.toFloat() / scaledHeight.toFloat()
+
+            layout(fullWidth, fullHeight) {
+              placeable.placeWithLayer(0, 0) {
+                transformOrigin = TransformOrigin(0f, 0f)
+                scaleX = scaleXFactor
+                scaleY = scaleYFactor
+                renderEffect = blurEffect
+              }
+            }
+          }
+        }
         .drawWithCache {
           val scrim =
             Brush.verticalGradient(
@@ -375,4 +406,5 @@ private fun calculateContentAlpha(pageOffset: Float): Float {
   return EaseInSine.transform(offsetAbsolute.inverse())
 }
 
+private const val BLUR_DOWNSCALE_FACTOR = 8f
 private val BackgroundBlurImageSize = Size(Dimension.Undefined, height = 100) // Downscaled for blur

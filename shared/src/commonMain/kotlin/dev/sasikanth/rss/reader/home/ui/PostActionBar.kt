@@ -39,9 +39,7 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -262,10 +260,16 @@ private fun SourceInfo(
         .clickable(onClick = onSourceClick, enabled = config.enablePostSource),
     verticalAlignment = Alignment.CenterVertically,
   ) {
+    val showUnreadIndicator = config.showUnreadIndicator && !postRead
     Box(
       modifier =
-        Modifier.requiredSize(18.dp)
-          .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+        Modifier.requiredSize(18.dp).let { base ->
+          if (showUnreadIndicator) {
+            base.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+          } else {
+            base
+          }
+        }
     ) {
       FeedIcon(
         icon = feedIcon,
@@ -289,7 +293,7 @@ private fun SourceInfo(
             .align(Alignment.Center),
       )
 
-      if (!postRead) {
+      if (showUnreadIndicator) {
         Box(
           modifier =
             Modifier.align(Alignment.TopEnd)
