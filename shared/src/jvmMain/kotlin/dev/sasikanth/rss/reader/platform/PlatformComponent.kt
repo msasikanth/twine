@@ -28,4 +28,6 @@ actual interface PlatformComponent {
   @Provides fun JvmAppIconManager.bind(): AppIconManager = this
 
   @Provides fun JvmAudioPlayer.bind(): AudioPlayer = this
+
+  @Provides fun JvmImageDownloader.bind(): ImageDownloader = this
 }

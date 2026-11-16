@@ -228,7 +228,10 @@ class FavIconFetcherFactoryTest {
 
       assertFailsWith<OkioIOException> { newFetcher().fetch() }
       assertEquals(1, htmlNetworkCalls)
-      assertTrue(requestedFavIconUrls.single().startsWith("https://www.google.com/s2/favicons"))
+      assertEquals(
+        "https://www.google.com/s2/favicons?domain=blog.example.com&sz=180",
+        requestedFavIconUrls.single(),
+      )
 
       isOnline = true
       newFetcher().fetch()

@@ -51,6 +51,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
+import kotlinx.io.Buffer
+import kotlinx.io.Source
+import kotlinx.io.readByteArray
 import me.tatarka.inject.annotations.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -69,8 +72,10 @@ class FeedFetcher(
   companion object {
     private const val MAX_REDIRECTS_ALLOWED = 5
     private const val FULL_CONTENT_CONCURRENCY = 3
+    private const val SNIFF_PREFIX_BYTES = 512
 
     private val XHTML_CONTENT_TYPE = ContentType("application", "xhtml+xml")
+    private val XML_SNIFF_PREFIXES = listOf("<?xml", "<rss", "<feed", "<rdf:RDF")
   }
 
   private fun ContentType.isXml() = contentSubtype.endsWith("xml", ignoreCase = true)
@@ -171,36 +176,88 @@ class FeedFetcher(
       // and there are rare scenarios where a feed doesn't have any content-type at all. In both
       // cases we default to trying to parse them as XML and if it fails, it fails.
       contentType == null || contentType.isXml() -> {
-        val responseCharset =
-          try {
-            response.contentType()?.parameter("charset")
-          } catch (e: BadContentTypeFormatException) {
-            Charsets.UTF8.name
-          }
-        val charset = Charset.forName(responseCharset ?: Charsets.UTF8.name)
-
-        var feedPayload =
-          xmlFeedParser.parse(feedUrl = url, content = responseChannel, charset = charset)
-
-        if (fetchFullContent) {
-          feedPayload = fetchFullContentForPosts(feedPayload)
-        }
-
-        return FeedFetchResult.Success(feedPayload)
+        return parseXmlFeed(
+          response = response,
+          content = responseChannel,
+          url = url,
+          fetchFullContent = fetchFullContent,
+        )
       }
       contentType == ContentType.Application.Json -> {
-        val jsonSource = responseChannel.readBuffer()
-        var feedPayload = jsonFeedParser.parse(content = jsonSource, feedUrl = url)
+        return parseJsonFeed(
+          content = responseChannel.readBuffer(),
+          url = url,
+          fetchFullContent = fetchFullContent,
+        )
+      }
+      contentType == ContentType.Text.Plain -> {
+        val bytes = responseChannel.readBuffer().readByteArray()
+        val charset = resolveCharset(response)
+        val prefix = decodeSniffPrefix(bytes, charset)
 
-        if (fetchFullContent) {
-          feedPayload = fetchFullContentForPosts(feedPayload)
+        when {
+          XML_SNIFF_PREFIXES.any { prefix.startsWith(it, ignoreCase = true) } -> {
+            return parseXmlFeed(
+              response = response,
+              content = ByteReadChannel(bytes),
+              url = url,
+              fetchFullContent = fetchFullContent,
+            )
+          }
+          prefix.startsWith("{") -> {
+            val buffer = Buffer().apply { write(bytes) }
+            return parseJsonFeed(content = buffer, url = url, fetchFullContent = fetchFullContent)
+          }
         }
-
-        return FeedFetchResult.Success(feedPayload)
       }
     }
 
     throw UnsupportedOperationException("Unsupported content type: $contentType")
+  }
+
+  private fun resolveCharset(response: HttpResponse): Charset {
+    val responseCharset =
+      try {
+        response.contentType()?.parameter("charset")
+      } catch (e: BadContentTypeFormatException) {
+        Charsets.UTF8.name
+      }
+    return Charset.forName(responseCharset ?: Charsets.UTF8.name)
+  }
+
+  private fun decodeSniffPrefix(bytes: ByteArray, charset: Charset): String {
+    val length = minOf(bytes.size, SNIFF_PREFIX_BYTES)
+    return buildString { charset.decode(this, bytes, 0, length) }.removePrefix("\uFEFF").trimStart()
+  }
+
+  private suspend fun parseXmlFeed(
+    response: HttpResponse,
+    content: ByteReadChannel,
+    url: String,
+    fetchFullContent: Boolean,
+  ): FeedFetchResult {
+    val charset = resolveCharset(response)
+    var feedPayload = xmlFeedParser.parse(feedUrl = url, content = content, charset = charset)
+
+    if (fetchFullContent) {
+      feedPayload = fetchFullContentForPosts(feedPayload)
+    }
+
+    return FeedFetchResult.Success(feedPayload)
+  }
+
+  private suspend fun parseJsonFeed(
+    content: Source,
+    url: String,
+    fetchFullContent: Boolean,
+  ): FeedFetchResult {
+    var feedPayload = jsonFeedParser.parse(content = content, feedUrl = url)
+
+    if (fetchFullContent) {
+      feedPayload = fetchFullContentForPosts(feedPayload)
+    }
+
+    return FeedFetchResult.Success(feedPayload)
   }
 
   private fun fetchFullContentForPosts(feedPayload: FeedPayload): FeedPayload {

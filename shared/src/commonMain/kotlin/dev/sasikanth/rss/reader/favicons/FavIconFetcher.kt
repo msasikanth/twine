@@ -286,7 +286,7 @@ internal constructor(
   private fun fallbackFaviconUrl(url: String): String {
     val domain =
       url.removePrefix("https://").removePrefix("http://").removePrefix("www.").substringBefore("/")
-    return "https://www.google.com/s2/favicons?domain=${domain}&sz=${DEFAULT_FAVICON_SIZE_PX}"
+    return "https://www.google.com/s2/favicons?domain=${domain}&sz=180"
   }
 
   /** From Unfurl https://github.com/saket/unfurl */

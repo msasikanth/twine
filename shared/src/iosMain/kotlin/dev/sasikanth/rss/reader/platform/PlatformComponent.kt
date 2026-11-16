@@ -34,4 +34,6 @@ actual interface PlatformComponent {
   @Provides fun IosAppIconManager.bind(): AppIconManager = this
 
   @Provides fun IOSAudioPlayer.bind(): AudioPlayer = this
+
+  @Provides fun IOSImageDownloader.bind(): ImageDownloader = this
 }

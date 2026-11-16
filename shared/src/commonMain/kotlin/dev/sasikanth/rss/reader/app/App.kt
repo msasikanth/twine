@@ -117,7 +117,9 @@ import dev.sasikanth.rss.reader.miniflux.MinifluxLoginViewModel
 import dev.sasikanth.rss.reader.onboarding.OnboardingViewModel
 import dev.sasikanth.rss.reader.opmlimport.OpmlImportViewModel
 import dev.sasikanth.rss.reader.placeholder.PlaceholderViewModel
+import dev.sasikanth.rss.reader.platform.ImageDownloader
 import dev.sasikanth.rss.reader.platform.LinkHandler
+import dev.sasikanth.rss.reader.platform.LocalImageDownloader
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.premium.PremiumPaywallViewModel
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
@@ -187,6 +189,7 @@ fun App(
   audioPlayer: AudioPlayer,
   shareHandler: ShareHandler,
   linkHandler: LinkHandler,
+  imageDownloader: ImageDownloader,
   inAppRating: InAppRating,
   imageLoader: ImageLoader,
   seedColorExtractor: SeedColorExtractor,
@@ -242,6 +245,7 @@ fun App(
     LocalShareHandler provides shareHandler,
     LocalSnackbarHostState provides snackbarHostState,
     LocalLinkHandler provides linkHandler,
+    LocalImageDownloader provides imageDownloader,
     LocalInAppRating provides inAppRating,
     LocalDynamicColorState provides dynamicColorState,
     LocalShowFeedFavIconSetting provides appState.showFeedFavIcon,

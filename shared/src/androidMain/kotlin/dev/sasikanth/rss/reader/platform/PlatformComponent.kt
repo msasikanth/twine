@@ -34,4 +34,6 @@ actual interface PlatformComponent {
   @Provides fun AndroidAppIconManager.bind(): AppIconManager = this
 
   @Provides fun AndroidAudioPlayer.bind(): AudioPlayer = this
+
+  @Provides fun AndroidImageDownloader.bind(): ImageDownloader = this
 }
