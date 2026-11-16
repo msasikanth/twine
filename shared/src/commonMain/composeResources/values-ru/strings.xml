@@ -20,6 +20,10 @@
   <string name="buttonAll">ВСЕ</string>
   <string name="buttonAddFeed">Добавить канал</string>
   <string name="buttonGoBack">Назад</string>
+  <string name="downloadImage">Download image</string>
+  <string name="imageSaved">Image saved</string>
+  <string name="imageSaveFailed">Failed to save image</string>
+  <string name="imageSavePermissionDenied">Permission denied to save image</string>
   <string name="buttonCancel">Отмена</string>
   <string name="buttonAdd">Добавить</string>
   <string name="buttonChange">Готово</string>
