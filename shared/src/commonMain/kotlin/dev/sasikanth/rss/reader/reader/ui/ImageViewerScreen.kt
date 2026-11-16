@@ -17,15 +17,23 @@
 
 package dev.sasikanth.rss.reader.reader.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,13 +46,22 @@ import com.skydoves.landscapist.components.rememberImageComponent
 import com.skydoves.landscapist.zoomable.ZoomableConfig
 import com.skydoves.landscapist.zoomable.ZoomablePlugin
 import com.skydoves.landscapist.zoomable.rememberZoomableState
+import dev.sasikanth.rss.reader.app.LocalSnackbarHostState
 import dev.sasikanth.rss.reader.components.CircularIconButton
+import dev.sasikanth.rss.reader.platform.ImageDownloadResult
+import dev.sasikanth.rss.reader.platform.LocalImageDownloader
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
+import dev.sasikanth.rss.reader.resources.icons.Download
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonGoBack
+import twine.shared.generated.resources.downloadImage
+import twine.shared.generated.resources.imageSaveFailed
+import twine.shared.generated.resources.imageSavePermissionDenied
+import twine.shared.generated.resources.imageSaved
 
 @Composable
 internal fun ImageViewerScreen(
@@ -54,19 +71,56 @@ internal fun ImageViewerScreen(
   toggleLightNavBar: (Boolean) -> Unit,
   modifier: Modifier = Modifier,
 ) {
+  val imageDownloader = LocalImageDownloader.current
+  val snackbarHostState = LocalSnackbarHostState.current
+  val coroutineScope = rememberCoroutineScope()
+  val imageSavedMessage = stringResource(Res.string.imageSaved)
+  val imageSaveFailedMessage = stringResource(Res.string.imageSaveFailed)
+  val imageSavePermissionDeniedMessage = stringResource(Res.string.imageSavePermissionDenied)
+  var isDownloading by remember { mutableStateOf(false) }
+
   DisposableEffect(Unit) {
     toggleLightStatusBar(false)
     toggleLightNavBar(false)
     onDispose {}
   }
 
-  ImageViewerContent(imageUrl = imageUrl, onBack = onBack, modifier = modifier)
+  ImageViewerContent(
+    imageUrl = imageUrl,
+    isDownloading = isDownloading,
+    onBack = onBack,
+    onDownloadClick = {
+      if (isDownloading || imageUrl.isBlank()) return@ImageViewerContent
+      isDownloading = true
+      coroutineScope.launch {
+        val result =
+          try {
+            imageDownloader.download(imageUrl)
+          } finally {
+            isDownloading = false
+          }
+        val message =
+          when (result) {
+            ImageDownloadResult.Success -> imageSavedMessage
+            ImageDownloadResult.PermissionDenied -> imageSavePermissionDeniedMessage
+            ImageDownloadResult.Failure -> imageSaveFailedMessage
+            ImageDownloadResult.Cancelled -> null
+          }
+        if (message != null) {
+          snackbarHostState.showSnackbar(message)
+        }
+      }
+    },
+    modifier = modifier,
+  )
 }
 
 @Composable
 private fun ImageViewerContent(
   imageUrl: String,
+  isDownloading: Boolean,
   onBack: () -> Unit,
+  onDownloadClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Scaffold(
@@ -83,6 +137,30 @@ private fun ImageViewerContent(
             contentColor = Color.White,
             onClick = onBack,
           )
+        },
+        actions = {
+          if (isDownloading) {
+            Box(
+              modifier =
+                Modifier.size(40.dp).background(Color.Black.copy(alpha = 0.65f), CircleShape),
+              contentAlignment = Alignment.Center,
+            ) {
+              CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                color = Color.White,
+                strokeWidth = 2.dp,
+              )
+            }
+          } else {
+            CircularIconButton(
+              icon = TwineIcons.Download,
+              label = stringResource(Res.string.downloadImage),
+              enabled = imageUrl.isNotBlank(),
+              backgroundColor = Color.Black.copy(alpha = 0.65f),
+              contentColor = Color.White,
+              onClick = onDownloadClick,
+            )
+          }
         },
         contentPadding = PaddingValues(horizontal = 12.dp),
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
@@ -110,5 +188,7 @@ private fun ImageViewerContent(
 @Preview(locale = "en")
 @Composable
 private fun ImageViewerPreview() {
-  AppTheme { ImageViewerContent(imageUrl = "", onBack = {}) }
+  AppTheme {
+    ImageViewerContent(imageUrl = "", isDownloading = false, onBack = {}, onDownloadClick = {})
+  }
 }
