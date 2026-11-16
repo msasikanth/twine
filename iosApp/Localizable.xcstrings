@@ -18,13 +18,13 @@
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : " • %@"
+            "state" : "translated",
+            "value" : " %@"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : " • %@"
           }
         },
@@ -59,14 +59,14 @@
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : " • %dm read"
+            "state" : "translated",
+            "value" : " %d मिनट का पाठ"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : " • %dm read"
+            "state" : "translated",
+            "value" : " • Читать %dм"
           }
         },
         "tr" : {
@@ -95,19 +95,19 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Entrée suivante"
+            "value" : "Article suivant"
           }
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Next Post"
+            "state" : "translated",
+            "value" : "अगला पोस्ट"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Next Post"
+            "state" : "translated",
+            "value" : "Следующий пост"
           }
         },
         "tr" : {
@@ -367,14 +367,14 @@
             "plural" : {
               "one" : {
                 "stringUnit" : {
-                  "state" : "new",
-                  "value" : "%@: 1 new article"
+                  "state" : "translated",
+                  "value" : "%@: 1 नया लेख"
                 }
               },
               "other" : {
                 "stringUnit" : {
-                  "state" : "new",
-                  "value" : "%@: %lld new articles"
+                  "state" : "translated",
+                  "value" : "%@: %lld नए लेख"
                 }
               }
             }
@@ -385,26 +385,26 @@
             "plural" : {
               "few" : {
                 "stringUnit" : {
-                  "state" : "new",
-                  "value" : "%@: %lld new articles"
+                  "state" : "translated",
+                  "value" : "%@: %lld новые статьи"
                 }
               },
               "many" : {
                 "stringUnit" : {
-                  "state" : "new",
-                  "value" : "%@: %lld new articles"
+                  "state" : "translated",
+                  "value" : "%@: %lld новых статей"
                 }
               },
               "one" : {
                 "stringUnit" : {
-                  "state" : "new",
-                  "value" : "%@: 1 new article"
+                  "state" : "translated",
+                  "value" : "%@: 1 новая статья"
                 }
               },
               "other" : {
                 "stringUnit" : {
-                  "state" : "new",
-                  "value" : "%@: %lld new articles"
+                  "state" : "translated",
+                  "value" : "%@: %lld новых статей"
                 }
               }
             }
@@ -459,14 +459,14 @@
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Previous Post"
+            "state" : "translated",
+            "value" : "पिछली पोस्ट"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Previous Post"
+            "state" : "translated",
+            "value" : "Предыдущий пост"
           }
         },
         "tr" : {
@@ -500,14 +500,14 @@
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Refresh"
+            "state" : "translated",
+            "value" : "रिफ्रेश"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Refresh"
+            "state" : "translated",
+            "value" : "Обновить"
           }
         },
         "tr" : {
@@ -635,19 +635,19 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dernières"
+            "value" : "Derniers"
           }
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Latest"
+            "state" : "translated",
+            "value" : "नवीनतम"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Latest"
+            "state" : "translated",
+            "value" : "Последние"
           }
         },
         "tr" : {
@@ -729,19 +729,19 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Montre 5 non lue récente"
+            "value" : "Affiche 5 non lus récents dans un carrousel"
           }
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Shows 5 recent unread in a carousel"
+            "state" : "translated",
+            "value" : "हाल ही के 5 बिना पढ़े मैसेज कैरोसेल में दिखाता है"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Shows 5 recent unread in a carousel"
+            "state" : "translated",
+            "value" : "Показывает 5 недавних непрочитанных в карусели"
           }
         },
         "tr" : {
@@ -780,14 +780,14 @@
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Shows a list of recent unread articles"
+            "state" : "translated",
+            "value" : "हाल ही में नहीं पढ़े गए लेखों की सूची दिखाता है"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Shows a list of recent unread articles"
+            "state" : "translated",
+            "value" : "Показывает список недавних непрочитанных статей"
           }
         },
         "tr" : {
@@ -826,14 +826,14 @@
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Recent unread (Large)"
+            "state" : "translated",
+            "value" : "हाल ही में अपठित (बड़ा)"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Recent unread (Large)"
+            "state" : "translated",
+            "value" : "Недавние непрочитанные (Большой)"
           }
         },
         "tr" : {
@@ -872,14 +872,14 @@
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Shows recent unread articles with more details"
+            "state" : "translated",
+            "value" : "हाल के अपठित लेखों को और अधिक जानकारी के साथ दिखाता है"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Shows recent unread articles with more details"
+            "state" : "translated",
+            "value" : "Показывает недавние непрочитанные статьи с подробностями"
           }
         },
         "tr" : {
@@ -918,14 +918,14 @@
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Recent unread (Medium)"
+            "state" : "translated",
+            "value" : "हाल ही में अपठित (मध्यम)"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Recent unread (Medium)"
+            "state" : "translated",
+            "value" : "Недавние непрочитанные (Средний)"
           }
         },
         "tr" : {
@@ -964,14 +964,14 @@
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Recent unread (Small)"
+            "state" : "translated",
+            "value" : "हाल ही में अपठित (छोटा)"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Recent unread (Small)"
+            "state" : "translated",
+            "value" : "Недавние непрочитанные (Маленький)"
           }
         },
         "tr" : {
