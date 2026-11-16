@@ -998,4 +998,60 @@ class XmlFeedParserTest {
     assertEquals("https://example.com/content.jpg", post.imageUrl)
     assertEquals("https://example.com/episode.mp3", post.audioUrl)
   }
+
+  @Test
+  fun parsingAtomFeedWithXhtmlContentAndSummaryShouldWorkCorrectly() = runTest {
+    val atomXml =
+      """
+      <?xml version="1.0" encoding="utf-8"?>
+      <feed xmlns="http://www.w3.org/2005/Atom">
+        <id>https://example.com/releases#changelog</id>
+        <link href="https://example.com/releases#changelog" />
+        <title>Changelog</title>
+        <updated>2026-11-13T00:00:00Z</updated>
+        <entry>
+          <id>https://example.com/releases#2026111300</id>
+          <link href="https://example.com/releases#2026111300" />
+          <title>2026111300</title>
+          <updated>2026-11-13T00:00:00Z</updated>
+          <published>2026-11-13T00:00:00Z</published>
+          <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Tags:</p><ul><li><a href="https://example.com/tag/2026111300">2026111300</a> (Pixel &amp; generic)</li></ul><p>1 &lt; 2 &amp; 3 &gt; 0</p><br /><img src="https://example.com/release.png" alt="Release &quot;1&quot;" /></div></content>
+        </entry>
+        <entry>
+          <id>https://example.com/releases#2026110800</id>
+          <link href="https://example.com/releases#2026110800" />
+          <title>2026110800</title>
+          <updated>2026-11-08T00:00:00Z</updated>
+          <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Previous release summary</p></div></summary>
+        </entry>
+      </feed>
+      """
+        .trimIndent()
+
+    val payload =
+      xmlFeedParser.parse(ByteReadChannel(atomXml.toByteArray()), feedUrl, Charsets.UTF8)
+    val posts = payload.posts.toList()
+
+    assertEquals(2, posts.size)
+
+    val first = posts[0]
+    assertEquals("2026111300", first.title)
+    assertEquals("https://example.com/releases#2026111300", first.link)
+    assertTrue(first.description.contains("Tags:"))
+    assertTrue(first.description.contains("2026111300 (Pixel & generic)"))
+    assertTrue(first.description.contains("1 < 2 & 3 > 0"))
+    assertTrue((first.rawContent ?: "").contains("<p>Tags:</p>"))
+    assertTrue(
+      (first.rawContent ?: "").contains(
+        "<a href=\"https://example.com/tag/2026111300\">2026111300</a>"
+      )
+    )
+    assertTrue((first.rawContent ?: "").contains("1 &lt; 2 &amp; 3 &gt; 0"))
+    assertEquals("https://example.com/release.png", first.imageUrl)
+
+    val second = posts[1]
+    assertEquals("2026110800", second.title)
+    assertEquals("Previous release summary", second.description)
+    assertTrue((second.rawContent ?: "").contains("<p>Previous release summary</p>"))
+  }
 }
