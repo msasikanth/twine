@@ -192,10 +192,10 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
           parser.skipSubTree()
         }
         TAG_CONTENT -> {
-          rawContentHtml = parser.nextText().trimIndent()
+          rawContentHtml = readAtomContent(parser)
         }
         TAG_SUMMARY -> {
-          rawSummaryHtml = parser.nextText().trimIndent()
+          rawSummaryHtml = readAtomContent(parser)
         }
         TAG_PUBLISHED,
         TAG_UPDATED -> {
@@ -241,6 +241,105 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
       date = date,
       hostLink = hostLink,
     )
+  }
+
+  private fun readAtomContent(parser: XmlPullParser): String {
+    val type = parser.getAttributeValue(parser.namespace, XmlFeedParser.ATTR_TYPE)
+    val isXhtml = type == "xhtml" || type == "application/xhtml+xml"
+    val builder = StringBuilder()
+    var depth = 1
+    val emptyTagStack = mutableListOf<Boolean>()
+
+    while (depth > 0) {
+      when (parser.next()) {
+        EventType.START_TAG -> {
+          depth++
+          val isEmpty = parser.isEmptyElementTag
+          emptyTagStack.add(isEmpty)
+          val isOuterXhtmlDiv =
+            isXhtml && depth == 2 && (parser.name == "div" || parser.name == "xhtml:div")
+          if (!isOuterXhtmlDiv) {
+            builder.append('<').append(parser.name)
+            for (i in 0 until parser.attributeCount) {
+              val attrName = parser.getAttributeName(i)
+              val attrPrefix = parser.getAttributePrefix(i)
+              val attrValue = parser.getAttributeValue(i)
+              builder.append(' ')
+              if (!attrPrefix.isNullOrEmpty()) {
+                builder.append(attrPrefix).append(':')
+              }
+              builder
+                .append(attrName)
+                .append("=\"")
+                .append(escapeHtmlAttribute(attrValue))
+                .append('"')
+            }
+            if (isEmpty) {
+              builder.append(" />")
+            } else {
+              builder.append('>')
+            }
+          }
+        }
+        EventType.END_TAG -> {
+          val isOuterXhtmlDiv =
+            isXhtml && depth == 2 && (parser.name == "div" || parser.name == "xhtml:div")
+          depth--
+          if (depth > 0) {
+            val wasEmpty = emptyTagStack.removeAt(emptyTagStack.lastIndex)
+            if (!isOuterXhtmlDiv && !wasEmpty) {
+              builder.append("</").append(parser.name).append('>')
+            }
+          }
+        }
+        EventType.TEXT,
+        EventType.CDSECT,
+        EventType.ENTITY_REF -> {
+          val text = parser.text
+          if (depth > 1 || isXhtml) {
+            builder.append(escapeHtmlText(text))
+          } else {
+            builder.append(text)
+          }
+        }
+        EventType.IGNORABLE_WHITESPACE -> {
+          builder.append(parser.text)
+        }
+        EventType.END_DOCUMENT -> break
+        else -> {}
+      }
+    }
+
+    return builder.toString().trimIndent()
+  }
+
+  private fun escapeHtmlText(text: String): String {
+    if ('&' !in text && '<' !in text && '>' !in text) return text
+    return buildString(text.length) {
+      for (ch in text) {
+        when (ch) {
+          '&' -> append("&amp;")
+          '<' -> append("&lt;")
+          '>' -> append("&gt;")
+          else -> append(ch)
+        }
+      }
+    }
+  }
+
+  private fun escapeHtmlAttribute(value: String): String {
+    if ('&' !in value && '"' !in value && '<' !in value && '>' !in value) return value
+    return buildString(value.length) {
+      for (ch in value) {
+        when (ch) {
+          '&' -> append("&amp;")
+          '"' -> append("&quot;")
+          '<' -> append("&lt;")
+          '>' -> append("&gt;")
+          else -> append(ch)
+        }
+      }
+    }
   }
 
   private fun readAtomLink(tagName: String, parser: XmlPullParser): String? {
