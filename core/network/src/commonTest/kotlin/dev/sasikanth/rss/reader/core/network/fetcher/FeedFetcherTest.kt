@@ -25,7 +25,10 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.RDFContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.RSSContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser
 import dev.sasikanth.rss.reader.core.network.utils.TestDispatchersProvider
+import dev.sasikanth.rss.reader.core.network.utils.atomXmlContent
 import dev.sasikanth.rss.reader.core.network.utils.feedUrl
+import dev.sasikanth.rss.reader.core.network.utils.jsonFeed
+import dev.sasikanth.rss.reader.core.network.utils.rdfXmlContent
 import dev.sasikanth.rss.reader.core.network.utils.rssXmlContent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -41,7 +44,10 @@ import kotlinx.coroutines.test.runTest
 
 class FeedFetcherTest {
 
-  private fun fetcherRespondingWith(contentType: String?): FeedFetcher {
+  private fun fetcherRespondingWith(
+    contentType: String?,
+    content: String = rssXmlContent,
+  ): FeedFetcher {
     val dispatchersProvider = TestDispatchersProvider()
     val articleHtmlParser = ArticleHtmlParser()
     val httpClient =
@@ -50,7 +56,7 @@ class FeedFetcherTest {
           dispatcher = dispatchersProvider.io
           addHandler {
             respond(
-              content = ByteReadChannel(rssXmlContent.toByteArray()),
+              content = ByteReadChannel(content.toByteArray()),
               headers =
                 if (contentType == null) headersOf()
                 else headersOf(HttpHeaders.ContentType, contentType),
@@ -92,8 +98,10 @@ class FeedFetcherTest {
     )
   }
 
-  private suspend fun fetchWithContentType(contentType: String?): FeedFetchResult =
-    fetcherRespondingWith(contentType).fetch(feedUrl)
+  private suspend fun fetchWithContentType(
+    contentType: String?,
+    content: String = rssXmlContent,
+  ): FeedFetchResult = fetcherRespondingWith(contentType, content).fetch(feedUrl)
 
   @Test
   fun feedsServedWithAVendorPrefixedXmlContentTypeShouldBeParsed() = runTest {
@@ -136,6 +144,42 @@ class FeedFetcherTest {
   fun feedsServedWithANonXmlContentTypeShouldStillBeRejected() = runTest {
     // when
     val result = fetchWithContentType("application/octet-stream")
+
+    // then
+    assertTrue(result is FeedFetchResult.Error)
+    assertTrue(result.exception is UnsupportedOperationException)
+  }
+
+  @Test
+  fun xmlFeedsServedAsTextPlainShouldBeParsed() = runTest {
+    val cases =
+      listOf(
+        "text/plain" to rssXmlContent,
+        "text/plain; charset=utf-8" to "\uFEFF  \n$rssXmlContent",
+        "text/plain; charset=utf-8" to atomXmlContent,
+        "text/plain" to rdfXmlContent,
+      )
+
+    cases.forEach { (contentType, content) ->
+      val result = fetchWithContentType(contentType, content)
+
+      assertTrue(result is FeedFetchResult.Success, "expected success for $contentType")
+    }
+  }
+
+  @Test
+  fun jsonFeedServedAsTextPlainShouldBeParsed() = runTest {
+    // when
+    val result = fetchWithContentType("text/plain; charset=utf-8", jsonFeed)
+
+    // then
+    assertTrue(result is FeedFetchResult.Success)
+  }
+
+  @Test
+  fun nonFeedTextPlainContentShouldBeRejected() = runTest {
+    // when
+    val result = fetchWithContentType("text/plain; charset=utf-8", "Just some plain text")
 
     // then
     assertTrue(result is FeedFetchResult.Error)
