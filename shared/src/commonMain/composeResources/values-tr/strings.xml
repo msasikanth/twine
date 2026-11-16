@@ -20,6 +20,10 @@
   <string name="buttonAll">TÜMÜ</string>
   <string name="buttonAddFeed">Akış ekle</string>
   <string name="buttonGoBack">Geri dön</string>
+  <string name="downloadImage">Download image</string>
+  <string name="imageSaved">Image saved</string>
+  <string name="imageSaveFailed">Failed to save image</string>
+  <string name="imageSavePermissionDenied">Permission denied to save image</string>
   <string name="buttonCancel">Vazgeç</string>
   <string name="buttonAdd">Ekle</string>
   <string name="buttonChange">Tamam</string>
