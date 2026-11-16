@@ -18,6 +18,8 @@
 package dev.sasikanth.rss.reader.core.network
 
 import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Document
+import com.fleeksoft.ksoup.nodes.Element
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.core.model.local.User
 import dev.sasikanth.rss.reader.core.network.miniflux.MinifluxSource
@@ -31,6 +33,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.withContext
@@ -166,17 +169,73 @@ class FullArticleFetcher(
           throw Exception("JavaScript is required to view this content")
         }
 
-        cleanHtml(htmlContent)
+        val fragment = runCatching { Url(url).fragment.ifBlank { null } }.getOrNull()
+        cleanHtml(htmlContent, fragment)
       }
   }
 
-  private fun cleanHtml(htmlContent: String): String {
+  private fun cleanHtml(htmlContent: String, fragment: String? = null): String {
     return Ksoup.parse(htmlContent)
-      .also {
-        it.head().remove()
-        it.select("script, style, noscript").remove()
+      .also { document ->
+        document.head().remove()
+        document.select("script, style, noscript").remove()
+
+        if (!fragment.isNullOrBlank()) {
+          val fragmentHtml = extractFragmentHtml(document, fragment)
+          if (fragmentHtml != null) {
+            document.body().html(fragmentHtml)
+          }
+        }
       }
       .html()
+  }
+
+  private fun extractFragmentHtml(document: Document, fragment: String): String? {
+    val rawTarget =
+      document.getElementById(fragment)
+        ?: document.getElementsByAttributeValue("name", fragment).firstOrNull()
+        ?: return null
+
+    val target =
+      if (
+        rawTarget.tagName() == "a" &&
+          rawTarget.text().isBlank() &&
+          headingLevel(rawTarget.parent()) != null
+      ) {
+        rawTarget.parent()!!
+      } else {
+        rawTarget
+      }
+
+    val targetHeadingLevel = headingLevel(target)
+    if (targetHeadingLevel != null) {
+      return buildString {
+        append(target.outerHtml())
+        var sibling = target.nextElementSibling()
+        while (sibling != null) {
+          val siblingHeadingLevel = headingLevel(sibling)
+          if (siblingHeadingLevel != null && siblingHeadingLevel <= targetHeadingLevel) {
+            break
+          }
+          append(sibling.outerHtml())
+          sibling = sibling.nextElementSibling()
+        }
+      }
+    }
+
+    if (target.text().isBlank() && target.childrenSize() == 0) {
+      return null
+    }
+
+    return target.outerHtml()
+  }
+
+  private fun headingLevel(element: Element?): Int? {
+    val tagName = element?.tagName() ?: return null
+    if (tagName.length == 2 && tagName[0] == 'h' && tagName[1] in '1'..'6') {
+      return tagName[1].digitToInt()
+    }
+    return null
   }
 
   private fun isJsRequired(html: String): Boolean {
