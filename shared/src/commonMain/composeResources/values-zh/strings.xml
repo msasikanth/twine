@@ -20,6 +20,10 @@
   <string name="buttonAll">全部</string>
   <string name="buttonAddFeed">添加来源</string>
   <string name="buttonGoBack">返回</string>
+  <string name="downloadImage">Download image</string>
+  <string name="imageSaved">Image saved</string>
+  <string name="imageSaveFailed">Failed to save image</string>
+  <string name="imageSavePermissionDenied">Permission denied to save image</string>
   <string name="buttonCancel">取消</string>
   <string name="buttonAdd">添加</string>
   <string name="buttonChange">完成</string>
