@@ -20,6 +20,10 @@
   <string name="buttonAll">ALLE</string>
   <string name="buttonAddFeed">Feed hinzufügen</string>
   <string name="buttonGoBack">Zurück</string>
+  <string name="downloadImage">Download image</string>
+  <string name="imageSaved">Image saved</string>
+  <string name="imageSaveFailed">Failed to save image</string>
+  <string name="imageSavePermissionDenied">Permission denied to save image</string>
   <string name="buttonCancel">Abbrechen</string>
   <string name="buttonAdd">Hinzufügen</string>
   <string name="buttonChange">Fertig</string>
