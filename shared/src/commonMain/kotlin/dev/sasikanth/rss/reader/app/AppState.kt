@@ -27,6 +27,7 @@ import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 data class AppState(
   val appThemeMode: AppThemeMode,
   val useAmoled: Boolean,
+  val useSystemFont: Boolean,
   val themeVariant: ThemeVariant,
   val showFeedFavIcon: Boolean,
   val homeViewMode: HomeViewMode,
@@ -44,6 +45,7 @@ data class AppState(
       AppState(
         appThemeMode = AppThemeMode.Auto,
         useAmoled = false,
+        useSystemFont = false,
         themeVariant = ThemeVariant.Dynamic,
         showFeedFavIcon = true,
         homeViewMode = HomeViewMode.Default,

@@ -116,6 +116,8 @@ import twine.shared.generated.resources.settingsShowUnreadCountTitle
 import twine.shared.generated.resources.settingsThemeAuto
 import twine.shared.generated.resources.settingsThemeDark
 import twine.shared.generated.resources.settingsThemeLight
+import twine.shared.generated.resources.settingsUseSystemFontSubtitle
+import twine.shared.generated.resources.settingsUseSystemFontTitle
 import twine.shared.generated.resources.showFeedFavIconDesc
 import twine.shared.generated.resources.showFeedFavIconTitle
 import twine.shared.generated.resources.themeVariantAmber
@@ -232,6 +234,15 @@ private fun SettingsAppearanceContent(
               onValueChanged = { newValue -> dispatch(SettingsEvent.ToggleAmoled(newValue)) },
             )
           }
+        }
+
+        item {
+          SettingsSwitchItem(
+            title = stringResource(Res.string.settingsUseSystemFontTitle),
+            subtitle = stringResource(Res.string.settingsUseSystemFontSubtitle),
+            checked = state.useSystemFont,
+            onValueChanged = { newValue -> dispatch(SettingsEvent.ToggleUseSystemFont(newValue)) },
+          )
         }
 
         if (platform !is Platform.Desktop) {

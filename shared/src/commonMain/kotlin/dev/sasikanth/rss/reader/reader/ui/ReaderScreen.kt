@@ -89,6 +89,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.coerceAtLeast
@@ -444,6 +445,7 @@ internal fun ReaderScreen(
       ReaderFont.Merriweather -> MerriWeatherFontFamily
       ReaderFont.RobotoSerif -> RobotoSerifFontFamily
       ReaderFont.Outfit -> OutfitFontFamily
+      ReaderFont.System -> FontFamily.Default
     }
   val typography =
     remember(fontFamily, state.readerFontScaleFactor, state.readerLineHeightScaleFactor) {
