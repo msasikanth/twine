@@ -40,6 +40,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.VerticalDragHandle
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
+import androidx.compose.material3.adaptive.layout.PaneScaffoldDirective
 import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
 import androidx.compose.material3.adaptive.layout.rememberPaneExpansionState
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
@@ -47,7 +48,9 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -639,22 +642,48 @@ fun App(
       val windowWidth = with(density) { LocalWindowInfo.current.containerSize.width.toDp() }
       val minReaderPaneWidth = 360.dp
       val minListPaneContentWidth = 320.dp
+      val isSplitCapableWindow =
+        windowInfo.windowSizeClass.isWidthAtLeastBreakpoint(
+          WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
+        )
+      val hasReaderOnBackStack by remember {
+        derivedStateOf { backStack.any { it is Screen.Reader } }
+      }
+      val isReaderExpanded =
+        isSplitCapableWindow && isReaderPaneExpanded.value && hasReaderOnBackStack
+      val baseDirective = remember(windowInfo) { calculatePaneScaffoldDirective(windowInfo) }
       val paneScaffoldDirective =
-        remember(
-          windowInfo,
-          windowWidth,
-          isReaderPaneExpanded.value,
-          isSideNavigationExpanded.value,
-        ) {
-          val directive = calculatePaneScaffoldDirective(windowInfo)
-          val requiredTwoPaneWidth =
-            listPaneWidth + directive.horizontalPartitionSpacerSize + minReaderPaneWidth
-          when {
-            isReaderPaneExpanded.value -> directive.copy(maxHorizontalPartitions = 1)
-            windowWidth < requiredTwoPaneWidth -> directive.copy(maxHorizontalPartitions = 1)
-            else -> directive
-          }
+        remember(baseDirective, windowWidth, listPaneWidth, isReaderExpanded) {
+          calculateReaderPaneScaffoldDirective(
+            baseDirective = baseDirective,
+            windowWidth = windowWidth,
+            listPaneWidth = listPaneWidth,
+            minReaderPaneWidth = minReaderPaneWidth,
+            isReaderExpanded = isReaderExpanded,
+          )
         }
+      var hasEnteredListDetailScaffold by remember {
+        mutableStateOf(
+          shouldUseListDetailForSinglePane(
+            isDesktop = platform == Platform.Desktop,
+            isSplitCapableWindow = isSplitCapableWindow,
+            hasEnteredListDetailScaffold = false,
+            isReaderExpanded = isReaderExpanded,
+          )
+        )
+      }
+      SideEffect {
+        if (paneScaffoldDirective.maxHorizontalPartitions > 1 && !hasEnteredListDetailScaffold) {
+          hasEnteredListDetailScaffold = true
+        }
+      }
+      val shouldHandleSinglePaneLayout =
+        shouldUseListDetailForSinglePane(
+          isDesktop = platform == Platform.Desktop,
+          isSplitCapableWindow = isSplitCapableWindow,
+          hasEnteredListDetailScaffold = hasEnteredListDetailScaffold,
+          isReaderExpanded = isReaderExpanded,
+        )
 
       var listPaneContentWidth by rememberSaveable { mutableStateOf(420f) }
       val navigationPaneWidth = if (hasInlineNavigation) navigationWidth else 0.dp
@@ -662,13 +691,13 @@ fun App(
         with(density) {
           val min = (navigationPaneWidth + minListPaneContentWidth).roundToPx()
           val max =
-            (windowWidth - paneScaffoldDirective.horizontalPartitionSpacerSize - minReaderPaneWidth)
+            (windowWidth - baseDirective.horizontalPartitionSpacerSize - minReaderPaneWidth)
               .roundToPx()
               .coerceAtLeast(min)
           min..max
         }
       val halfSpacerPx =
-        with(density) { paneScaffoldDirective.horizontalPartitionSpacerSize.roundToPx() } / 2
+        with(density) { baseDirective.horizontalPartitionSpacerSize.roundToPx() } / 2
       val dividerCenterPx = remember { mutableFloatStateOf(Float.NaN) }
       val paneExpansionState =
         rememberPaneExpansionState(
@@ -693,6 +722,7 @@ fun App(
       }
       val listDetailSceneStrategy =
         rememberListDetailSceneStrategy<NavKey>(
+          shouldHandleSinglePaneLayout = shouldHandleSinglePaneLayout,
           directive = paneScaffoldDirective,
           paneExpansionState = paneExpansionState,
           paneExpansionDragHandle = { state ->
@@ -805,4 +835,35 @@ private fun AppNavigator.navigateToReaderOrOpenLink(
   } else {
     openLink()
   }
+}
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+internal fun calculateReaderPaneScaffoldDirective(
+  baseDirective: PaneScaffoldDirective,
+  windowWidth: Dp,
+  listPaneWidth: Dp,
+  minReaderPaneWidth: Dp,
+  isReaderExpanded: Boolean,
+): PaneScaffoldDirective {
+  val requiredTwoPaneWidth =
+    listPaneWidth + baseDirective.horizontalPartitionSpacerSize + minReaderPaneWidth
+  return when {
+    isReaderExpanded ->
+      baseDirective.copy(
+        maxHorizontalPartitions = 1,
+        horizontalPartitionSpacerSize = 0.dp,
+        excludedBounds = emptyList(),
+      )
+    windowWidth < requiredTwoPaneWidth -> baseDirective.copy(maxHorizontalPartitions = 1)
+    else -> baseDirective
+  }
+}
+
+internal fun shouldUseListDetailForSinglePane(
+  isDesktop: Boolean,
+  isSplitCapableWindow: Boolean,
+  hasEnteredListDetailScaffold: Boolean,
+  isReaderExpanded: Boolean,
+): Boolean {
+  return isDesktop || isSplitCapableWindow || hasEnteredListDetailScaffold || isReaderExpanded
 }
