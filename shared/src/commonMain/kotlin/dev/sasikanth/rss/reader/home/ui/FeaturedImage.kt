@@ -17,24 +17,46 @@
 
 package dev.sasikanth.rss.reader.home.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.computedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.ScaleFactor
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
-import dev.sasikanth.rss.reader.components.image.AsyncImage
-import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
+import coil3.BitmapImage
+import coil3.compose.AsyncImage as CoilAsyncImage
+import coil3.compose.AsyncImagePainter
+import coil3.compose.LocalPlatformContext
+import coil3.memory.MemoryCache
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import coil3.size.Dimension
+import coil3.size.Size as CoilSize
+import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
+import dev.sasikanth.rss.reader.utils.disableAnimation
+
+private val FeaturedCardImageSize = CoilSize(960, 540)
+private val UnlockedFeaturedImageSize = CoilSize(Dimension.Undefined, 500)
+
+private class MemoryCacheKeyRef {
+  var key: MemoryCache.Key? = null
+}
 
 @Composable
 fun FeaturedImage(
@@ -42,6 +64,7 @@ fun FeaturedImage(
   modifier: Modifier = Modifier,
   alignment: Alignment = Alignment.Center,
   unlockAspectRatio: Boolean = false,
+  isActiveAndSettled: () -> Boolean = { true },
 ) {
   val sizeClass = LocalWindowSizeClass.current
   val imageMaxHeight =
@@ -66,20 +89,86 @@ fun FeaturedImage(
       widthBiasedScale
     }
 
-  imageUrl?.let { imageUrl ->
-    val translucentStyle = LocalTranslucentStyles.current
+  imageUrl?.let { url ->
+    if (LocalBlockImage.current) return@let
 
-    AsyncImage(
-      url = imageUrl,
+    val context = LocalPlatformContext.current
+    val colorScheme = AppTheme.colorScheme
+    val imageSize = if (unlockAspectRatio) UnlockedFeaturedImageSize else FeaturedCardImageSize
+    val urlMayBeAnimated = remember(url) { mayBeAnimatedUrl(url) }
+    var confirmedStatic by remember(url) { mutableStateOf(false) }
+    val lastLoadedCacheKey = remember(url, imageSize) { MemoryCacheKeyRef() }
+
+    val shouldDisableAnimation =
+      if (!urlMayBeAnimated) {
+        true
+      } else if (confirmedStatic) {
+        false
+      } else {
+        val activeAndSettled by
+          remember(isActiveAndSettled) { computedStateOf { isActiveAndSettled() } }
+        !activeAndSettled
+      }
+
+    val model =
+      remember(context, url, imageSize, shouldDisableAnimation) {
+        val memoryCacheKey = "$url#${imageSize.width}x${imageSize.height}"
+        val placeholderKey = lastLoadedCacheKey.key
+        ImageRequest.Builder(context)
+          .data(url)
+          .size(imageSize)
+          .diskCacheKey(url)
+          .memoryCacheKey(memoryCacheKey)
+          .apply {
+            if (shouldDisableAnimation) {
+              disableAnimation()
+            }
+            placeholderKey?.let { placeholderMemoryCacheKey(it) }
+          }
+          .crossfade(placeholderKey == null)
+          .build()
+      }
+
+    val onState: ((AsyncImagePainter.State) -> Unit)? =
+      remember(urlMayBeAnimated, shouldDisableAnimation, lastLoadedCacheKey) {
+        if (!urlMayBeAnimated) {
+          null
+        } else {
+          { state ->
+            if (state is AsyncImagePainter.State.Success) {
+              lastLoadedCacheKey.key = state.result.memoryCacheKey
+              if (!shouldDisableAnimation && state.result.image is BitmapImage) {
+                confirmedStatic = true
+              }
+            }
+          }
+        }
+      }
+
+    CoilAsyncImage(
+      model = model,
       modifier =
         Modifier.then(adaptiveImageModifier)
-          .background(translucentStyle.prominent.background)
+          .drawBehind { drawRect(colorScheme.settledOnSurface.copy(alpha = 0.16f)) }
           .then(modifier),
       contentDescription = null,
       contentScale = adaptiveContentScale,
       alignment = alignment,
+      onState = onState,
     )
   }
+}
+
+private fun mayBeAnimatedUrl(url: String): Boolean {
+  val lowerUrl = url.lowercase()
+  if (lowerUrl.contains(".gif") || lowerUrl.contains("format=gif")) return true
+  val path = lowerUrl.substringBefore('?').substringBefore('#')
+  return !(path.endsWith(".jpg") ||
+    path.endsWith(".jpeg") ||
+    path.endsWith(".png") ||
+    path.endsWith(".svg") ||
+    path.endsWith(".bmp") ||
+    path.endsWith(".avif"))
 }
 
 internal val widthBiasedScale =

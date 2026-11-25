@@ -19,11 +19,9 @@
 
 package dev.sasikanth.rss.reader.home.ui
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,38 +40,43 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy.Companion.Offscreen
+import androidx.compose.ui.geometry.Size as ComposeSize
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import coil3.size.Size
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
+import dev.sasikanth.rss.reader.resources.icons.Platform
+import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
@@ -115,6 +118,66 @@ internal val compactPostListPadding: PaddingValues
     }
   }
 
+private class LazyFloatAnimTracker(
+  var lastTarget: Float,
+  var hasChanged: Boolean = false,
+  var animatable: Animatable<Float, AnimationVector1D>? = null,
+)
+
+@Composable
+private fun rememberLazyAnimatedFloat(key: Any, targetValue: Float): State<Float> {
+  val state = remember(key) { mutableFloatStateOf(targetValue) }
+  val tracker = remember(key) { LazyFloatAnimTracker(targetValue) }
+  if (tracker.lastTarget != targetValue) {
+    tracker.hasChanged = true
+    tracker.lastTarget = targetValue
+  }
+  if (tracker.hasChanged) {
+    LaunchedEffect(key, targetValue) {
+      val anim = tracker.animatable ?: Animatable(state.floatValue).also { tracker.animatable = it }
+      anim.animateTo(targetValue) { state.floatValue = value }
+    }
+  }
+  return state
+}
+
+@Composable
+private inline fun DesktopContextMenuHost(
+  isDesktop: Boolean,
+  modifier: Modifier,
+  contextMenuOffset: Offset?,
+  postLink: String,
+  postRead: Boolean,
+  config: PostMetadataConfig,
+  showDropdown: Boolean,
+  noinline onDismissRequest: () -> Unit,
+  noinline onTogglePostRead: () -> Unit,
+  content: @Composable (Modifier) -> Unit,
+) {
+  if (isDesktop) {
+    Box(modifier = Modifier.then(modifier)) {
+      content(Modifier)
+
+      contextMenuOffset?.let { offset ->
+        Box(
+          modifier = Modifier.offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
+        ) {
+          PostActionsContextMenu(
+            postLink = postLink,
+            postRead = postRead,
+            config = config,
+            expanded = showDropdown,
+            onDismissRequest = onDismissRequest,
+            togglePostReadClick = onTogglePostRead,
+          )
+        }
+      }
+    }
+  } else {
+    content(modifier)
+  }
+}
+
 @Composable
 internal fun PostListItem(
   item: ResolvedPost,
@@ -129,26 +192,66 @@ internal fun PostListItem(
   postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
   contentPadding: PaddingValues = postListPadding,
   blockImages: Boolean = LocalBlockImage.current,
+  applyHorizontalSystemBarInsets: Boolean = true,
+  actionLabels: PostActionLabels? = null,
 ) {
-  var readStatus by remember(item.read) { mutableStateOf(item.read) }
-  val alpha by
-    animateFloatAsState(
-      if (readStatus && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
-      else Constants.ITEM_UNREAD_ALPHA
+  var readStatus by remember(item.id, item.read) { mutableStateOf(item.read) }
+  val readAlpha =
+    rememberLazyAnimatedFloat(
+      key = item.id,
+      targetValue =
+        if (readStatus && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
+        else Constants.ITEM_UNREAD_ALPHA,
     )
-  var showDropdown by remember { mutableStateOf(false) }
-  var contextMenuOffset by remember { mutableStateOf<Offset?>(null) }
+  var showDropdown by remember(item.id) { mutableStateOf(false) }
+  var contextMenuOffset by remember(item.id) { mutableStateOf<Offset?>(null) }
   val showImage = !(item.imageUrl.isNullOrBlank())
-  val highlightColor =
-    animateColorAsState(
-      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest
-      else AppTheme.colorScheme.backdrop
-    )
+  val highlightAlpha =
+    rememberLazyAnimatedFloat(key = item.id, targetValue = if (highlighted) 1f else 0f)
+  val colorScheme = AppTheme.colorScheme
+  val unreadCutoutColor =
+    remember(colorScheme, highlightAlpha) {
+      {
+        val currentHighlightAlpha = highlightAlpha.value
+        if (currentHighlightAlpha > 0f) {
+          colorScheme.surfaceContainerHighest
+            .copy(alpha = currentHighlightAlpha)
+            .compositeOver(colorScheme.backdrop)
+        } else {
+          colorScheme.backdrop
+        }
+      }
+    }
+  val horizontalInsetsModifier =
+    if (applyHorizontalSystemBarInsets) {
+      val systemBars = WindowInsets.systemBars
+      val horizontalInsets = remember(systemBars) { systemBars.only(WindowInsetsSides.Horizontal) }
+      Modifier.windowInsetsPadding(horizontalInsets)
+    } else {
+      Modifier
+    }
 
-  Box(modifier = Modifier.then(modifier)) {
+  DesktopContextMenuHost(
+    isDesktop = platform is Platform.Desktop,
+    modifier = modifier,
+    contextMenuOffset = contextMenuOffset,
+    postLink = item.link,
+    postRead = readStatus,
+    config = postMetadataConfig,
+    showDropdown = showDropdown,
+    onDismissRequest = {
+      showDropdown = false
+      contextMenuOffset = null
+    },
+    onTogglePostRead = {
+      readStatus = !readStatus
+      updatePostReadStatus(readStatus)
+    },
+  ) { itemModifier ->
     Column(
       modifier =
-        Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+        itemModifier
+          .then(horizontalInsetsModifier)
           .padding(contentPadding)
           .clip(PostItemShape)
           .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
@@ -156,13 +259,28 @@ internal fun PostListItem(
             contextMenuOffset = offset
             showDropdown = true
           }
-          .drawBehind {
-            drawRoundRect(
-              color = highlightColor.value,
-              cornerRadius = CornerRadius(PostItemCornerRadius.toPx()),
-            )
+          .drawWithCache {
+            val cornerRadius = CornerRadius(PostItemCornerRadius.toPx())
+            onDrawBehind {
+              val currentHighlightAlpha = highlightAlpha.value
+              if (currentHighlightAlpha > 0f) {
+                drawRoundRect(
+                  color = colorScheme.surfaceContainerHighest.copy(alpha = currentHighlightAlpha),
+                  cornerRadius = cornerRadius,
+                )
+              }
+            }
           }
-          .graphicsLayer { this.alpha = alpha }
+          .then(
+            if (reduceReadItemAlpha) {
+              Modifier.graphicsLayer {
+                this.alpha = readAlpha.value
+                compositingStrategy = CompositingStrategy.ModulateAlpha
+              }
+            } else {
+              Modifier
+            }
+          )
           .semantics { contentDescription = item.title.ifBlank { item.description } }
           .padding(horizontal = 24.dp, vertical = 8.dp)
     ) {
@@ -172,7 +290,7 @@ internal fun PostListItem(
             modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
             style = MaterialTheme.typography.titleMedium,
             text = item.title.ifBlank { item.description },
-            color = AppTheme.colorScheme.onSurface,
+            color = { colorScheme.onSurface },
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
           )
@@ -184,7 +302,7 @@ internal fun PostListItem(
               modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
               style = MaterialTheme.typography.bodyMedium,
               text = item.description,
-              color = AppTheme.colorScheme.onSurfaceVariant,
+              color = { colorScheme.onSurfaceVariant },
               maxLines = 2,
               overflow = TextOverflow.Ellipsis,
             )
@@ -230,26 +348,9 @@ internal fun PostListItem(
         onDropdownChange = { showDropdown = it },
         config = postMetadataConfig,
         onSourceClick = onPostSourceClick,
+        actionLabels = actionLabels,
+        unreadIndicatorCutoutColor = unreadCutoutColor,
       )
-    }
-
-    contextMenuOffset?.let { offset ->
-      Box(modifier = Modifier.offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }) {
-        PostActionsContextMenu(
-          postLink = item.link,
-          postRead = readStatus,
-          config = postMetadataConfig,
-          expanded = showDropdown,
-          onDismissRequest = {
-            showDropdown = false
-            contextMenuOffset = null
-          },
-          togglePostReadClick = {
-            readStatus = !readStatus
-            updatePostReadStatus(readStatus)
-          },
-        )
-      }
     }
   }
 }
@@ -268,26 +369,66 @@ internal fun SimplePostListItem(
   postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
   contentPadding: PaddingValues = postListPadding,
   blockImages: Boolean = LocalBlockImage.current,
+  applyHorizontalSystemBarInsets: Boolean = true,
+  actionLabels: PostActionLabels? = null,
 ) {
-  var readStatus by remember(item.read) { mutableStateOf(item.read) }
-  val alpha by
-    animateFloatAsState(
-      if (readStatus && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
-      else Constants.ITEM_UNREAD_ALPHA
+  var readStatus by remember(item.id, item.read) { mutableStateOf(item.read) }
+  val readAlpha =
+    rememberLazyAnimatedFloat(
+      key = item.id,
+      targetValue =
+        if (readStatus && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
+        else Constants.ITEM_UNREAD_ALPHA,
     )
-  var showDropdown by remember { mutableStateOf(false) }
-  var contextMenuOffset by remember { mutableStateOf<Offset?>(null) }
+  var showDropdown by remember(item.id) { mutableStateOf(false) }
+  var contextMenuOffset by remember(item.id) { mutableStateOf<Offset?>(null) }
   val showImage = !(item.imageUrl.isNullOrBlank())
-  val highlightColor =
-    animateColorAsState(
-      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest
-      else AppTheme.colorScheme.backdrop
-    )
+  val highlightAlpha =
+    rememberLazyAnimatedFloat(key = item.id, targetValue = if (highlighted) 1f else 0f)
+  val colorScheme = AppTheme.colorScheme
+  val unreadCutoutColor =
+    remember(colorScheme, highlightAlpha) {
+      {
+        val currentHighlightAlpha = highlightAlpha.value
+        if (currentHighlightAlpha > 0f) {
+          colorScheme.surfaceContainerHighest
+            .copy(alpha = currentHighlightAlpha)
+            .compositeOver(colorScheme.backdrop)
+        } else {
+          colorScheme.backdrop
+        }
+      }
+    }
+  val horizontalInsetsModifier =
+    if (applyHorizontalSystemBarInsets) {
+      val systemBars = WindowInsets.systemBars
+      val horizontalInsets = remember(systemBars) { systemBars.only(WindowInsetsSides.Horizontal) }
+      Modifier.windowInsetsPadding(horizontalInsets)
+    } else {
+      Modifier
+    }
 
-  Box(modifier = Modifier.then(modifier)) {
+  DesktopContextMenuHost(
+    isDesktop = platform is Platform.Desktop,
+    modifier = modifier,
+    contextMenuOffset = contextMenuOffset,
+    postLink = item.link,
+    postRead = readStatus,
+    config = postMetadataConfig,
+    showDropdown = showDropdown,
+    onDismissRequest = {
+      showDropdown = false
+      contextMenuOffset = null
+    },
+    onTogglePostRead = {
+      readStatus = !readStatus
+      updatePostReadStatus(readStatus)
+    },
+  ) { itemModifier ->
     Column(
       modifier =
-        Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+        itemModifier
+          .then(horizontalInsetsModifier)
           .padding(contentPadding)
           .clip(PostItemShape)
           .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
@@ -295,13 +436,28 @@ internal fun SimplePostListItem(
             contextMenuOffset = offset
             showDropdown = true
           }
-          .drawBehind {
-            drawRoundRect(
-              color = highlightColor.value,
-              cornerRadius = CornerRadius(PostItemCornerRadius.toPx()),
-            )
+          .drawWithCache {
+            val cornerRadius = CornerRadius(PostItemCornerRadius.toPx())
+            onDrawBehind {
+              val currentHighlightAlpha = highlightAlpha.value
+              if (currentHighlightAlpha > 0f) {
+                drawRoundRect(
+                  color = colorScheme.surfaceContainerHighest.copy(alpha = currentHighlightAlpha),
+                  cornerRadius = cornerRadius,
+                )
+              }
+            }
           }
-          .graphicsLayer { this.alpha = alpha }
+          .then(
+            if (reduceReadItemAlpha) {
+              Modifier.graphicsLayer {
+                this.alpha = readAlpha.value
+                compositingStrategy = CompositingStrategy.ModulateAlpha
+              }
+            } else {
+              Modifier
+            }
+          )
           .semantics { contentDescription = item.title.ifBlank { item.description } }
           .padding(horizontal = 24.dp, vertical = 4.dp)
     ) {
@@ -311,7 +467,7 @@ internal fun SimplePostListItem(
             modifier = Modifier.padding(end = if (showImage) 16.dp else 0.dp),
             style = MaterialTheme.typography.titleMedium,
             text = item.title.ifBlank { item.description },
-            color = AppTheme.colorScheme.onSurface,
+            color = { colorScheme.onSurface },
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
           )
@@ -356,26 +512,9 @@ internal fun SimplePostListItem(
         onDropdownChange = { showDropdown = it },
         config = postMetadataConfig,
         onSourceClick = onPostSourceClick,
+        actionLabels = actionLabels,
+        unreadIndicatorCutoutColor = unreadCutoutColor,
       )
-    }
-
-    contextMenuOffset?.let { offset ->
-      Box(modifier = Modifier.offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }) {
-        PostActionsContextMenu(
-          postLink = item.link,
-          postRead = readStatus,
-          config = postMetadataConfig,
-          expanded = showDropdown,
-          onDismissRequest = {
-            showDropdown = false
-            contextMenuOffset = null
-          },
-          togglePostReadClick = {
-            readStatus = !readStatus
-            updatePostReadStatus(readStatus)
-          },
-        )
-      }
     }
   }
 }
@@ -392,48 +531,102 @@ internal fun CompactPostListItem(
   highlighted: Boolean = false,
   postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
   contentPadding: PaddingValues = compactPostListPadding,
+  actionLabels: PostActionLabels? = null,
 ) {
-  var readStatus by remember(item.read) { mutableStateOf(item.read) }
-  val alpha by
-    animateFloatAsState(
-      if (readStatus && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
-      else Constants.ITEM_UNREAD_ALPHA
+  var readStatus by remember(item.id, item.read) { mutableStateOf(item.read) }
+  val readAlpha =
+    rememberLazyAnimatedFloat(
+      key = item.id,
+      targetValue =
+        if (readStatus && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
+        else Constants.ITEM_UNREAD_ALPHA,
     )
-  var showDropdown by remember { mutableStateOf(false) }
-  var contextMenuOffset by remember { mutableStateOf<Offset?>(null) }
-  val highlightColor =
-    animateColorAsState(
-      if (highlighted) AppTheme.colorScheme.surfaceContainerHighest
-      else AppTheme.colorScheme.backdrop
-    )
+  var showDropdown by remember(item.id) { mutableStateOf(false) }
+  var contextMenuOffset by remember(item.id) { mutableStateOf<Offset?>(null) }
+  val highlightAlpha =
+    rememberLazyAnimatedFloat(key = item.id, targetValue = if (highlighted) 1f else 0f)
+  val colorScheme = AppTheme.colorScheme
+  val errorColor = MaterialTheme.colorScheme.error
+  val unreadCutoutColor =
+    remember(colorScheme, highlightAlpha) {
+      {
+        val currentHighlightAlpha = highlightAlpha.value
+        if (currentHighlightAlpha > 0f) {
+          colorScheme.surfaceContainerHighest
+            .copy(alpha = currentHighlightAlpha)
+            .compositeOver(colorScheme.backdrop)
+        } else {
+          colorScheme.backdrop
+        }
+      }
+    }
 
-  Box(modifier = Modifier.then(modifier)) {
+  DesktopContextMenuHost(
+    isDesktop = platform is Platform.Desktop,
+    modifier = modifier,
+    contextMenuOffset = contextMenuOffset,
+    postLink = item.link,
+    postRead = readStatus,
+    config = postMetadataConfig,
+    showDropdown = showDropdown,
+    onDismissRequest = {
+      showDropdown = false
+      contextMenuOffset = null
+    },
+    onTogglePostRead = {
+      readStatus = !readStatus
+      updatePostReadStatus(readStatus)
+    },
+  ) { itemModifier ->
     Row(
       verticalAlignment = Alignment.CenterVertically,
       modifier =
-        Modifier.clip(PostItemShape)
+        itemModifier
+          .clip(PostItemShape)
           .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
           .onDesktopContextMenu { offset ->
             contextMenuOffset = offset
             showDropdown = true
           }
-          .drawBehind {
-            drawRoundRect(
-              color = highlightColor.value,
-              cornerRadius = CornerRadius(PostItemCornerRadius.toPx()),
-            )
+          .drawWithCache {
+            val cornerRadius = CornerRadius(PostItemCornerRadius.toPx())
+            onDrawBehind {
+              val currentHighlightAlpha = highlightAlpha.value
+              if (currentHighlightAlpha > 0f) {
+                drawRoundRect(
+                  color = colorScheme.surfaceContainerHighest.copy(alpha = currentHighlightAlpha),
+                  cornerRadius = cornerRadius,
+                )
+              }
+            }
           }
           .padding(contentPadding)
-          .graphicsLayer { this.alpha = alpha },
+          .then(
+            if (reduceReadItemAlpha) {
+              Modifier.graphicsLayer {
+                this.alpha = readAlpha.value
+                compositingStrategy = CompositingStrategy.ModulateAlpha
+              }
+            } else {
+              Modifier
+            }
+          ),
     ) {
       val showUnreadIndicator = postMetadataConfig.showUnreadIndicator && !readStatus
       Box(
         modifier =
-          Modifier.requiredSize(24.dp).let { base ->
-            if (showUnreadIndicator) {
-              base.graphicsLayer(compositingStrategy = Offscreen)
-            } else {
-              base
+          Modifier.requiredSize(24.dp).drawWithCache {
+            val dotRadius = 4.dp.toPx()
+            val haloRadius = 5.dp.toPx()
+            val dotCenterX =
+              if (layoutDirection == LayoutDirection.Ltr) size.width - dotRadius else dotRadius
+            val dotCenter = Offset(dotCenterX, dotRadius)
+            onDrawWithContent {
+              drawContent()
+              if (showUnreadIndicator) {
+                drawCircle(color = unreadCutoutColor(), radius = haloRadius, center = dotCenter)
+                drawCircle(color = errorColor, radius = dotRadius, center = dotCenter)
+              }
             }
           }
       ) {
@@ -444,23 +637,27 @@ internal fun CompactPostListItem(
           contentDescription = null,
           modifier =
             Modifier.requiredSize(20.dp)
-              .border(1.dp, AppTheme.colorScheme.outlineVariant, FeedIconShape)
+              .drawWithCache {
+                val strokeWidth = 1.dp.toPx()
+                val halfStroke = strokeWidth / 2f
+                val borderTopLeft = Offset(halfStroke, halfStroke)
+                val borderSize = ComposeSize(size.width - strokeWidth, size.height - strokeWidth)
+                val borderCornerRadius =
+                  CornerRadius((size.minDimension * 0.25f - halfStroke).coerceAtLeast(0f))
+                val borderStyle = Stroke(width = strokeWidth)
+                onDrawWithContent {
+                  drawContent()
+                  drawRoundRect(
+                    color = colorScheme.outlineVariant,
+                    topLeft = borderTopLeft,
+                    size = borderSize,
+                    cornerRadius = borderCornerRadius,
+                    style = borderStyle,
+                  )
+                }
+              }
               .align(Alignment.Center),
         )
-
-        if (showUnreadIndicator) {
-          Box(
-            modifier =
-              Modifier.align(Alignment.TopEnd)
-                .requiredSize(8.dp)
-                .dropShadow(CircleShape) {
-                  color = Color.Black
-                  spread = 1.dp.toPx()
-                  blendMode = BlendMode.DstOut
-                }
-                .background(MaterialTheme.colorScheme.error, CircleShape)
-          )
-        }
       }
 
       Spacer(Modifier.requiredWidth(16.dp))
@@ -468,7 +665,7 @@ internal fun CompactPostListItem(
       Text(
         text = item.title.ifBlank { item.description },
         style = MaterialTheme.typography.titleMedium,
-        color = AppTheme.colorScheme.onSurface,
+        color = { colorScheme.onSurface },
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier.weight(1f),
@@ -486,28 +683,10 @@ internal fun CompactPostListItem(
         onDropdownChange = { showDropdown = it },
         onBookmarkClick = onPostBookmarkClick,
         onCommentsClick = onPostCommentsClick,
+        actionLabels = actionLabels,
       ) {
         readStatus = !readStatus
         updatePostReadStatus(readStatus)
-      }
-    }
-
-    contextMenuOffset?.let { offset ->
-      Box(modifier = Modifier.offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }) {
-        PostActionsContextMenu(
-          postLink = item.link,
-          postRead = readStatus,
-          config = postMetadataConfig,
-          expanded = showDropdown,
-          onDismissRequest = {
-            showDropdown = false
-            contextMenuOffset = null
-          },
-          togglePostReadClick = {
-            readStatus = !readStatus
-            updatePostReadStatus(readStatus)
-          },
-        )
       }
     }
   }

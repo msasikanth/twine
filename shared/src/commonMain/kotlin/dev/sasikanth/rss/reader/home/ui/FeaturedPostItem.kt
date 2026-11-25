@@ -18,7 +18,7 @@
 
 package dev.sasikanth.rss.reader.home.ui
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
@@ -52,6 +54,9 @@ import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.formatRelativeTime
 import kotlin.math.roundToInt
 
+private val FeaturedItemExpandedPadding = PaddingValues(horizontal = 64.dp)
+private val FeaturedItemCompactPadding = PaddingValues(0.dp)
+
 private val featuredItemPadding: PaddingValues
   @Composable
   @ReadOnlyComposable
@@ -59,8 +64,8 @@ private val featuredItemPadding: PaddingValues
     val sizeClass = LocalWindowSizeClass.current
     return when {
       sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) ->
-        PaddingValues(horizontal = 64.dp)
-      else -> PaddingValues(0.dp)
+        FeaturedItemExpandedPadding
+      else -> FeaturedItemCompactPadding
     }
   }
 
@@ -86,10 +91,19 @@ internal fun FeaturedPostItem(
   modifier: Modifier = Modifier,
   featuredImage: @Composable () -> Unit,
 ) {
-  var readStatus by remember(item.read) { mutableStateOf(item.read) }
-  val alpha by
-    animateFloatAsState(if (readStatus) Constants.ITEM_READ_ALPHA else Constants.ITEM_UNREAD_ALPHA)
+  var readStatus by remember(item.id, item.read) { mutableStateOf(item.read) }
+  val targetAlpha = if (readStatus) Constants.ITEM_READ_ALPHA else Constants.ITEM_UNREAD_ALPHA
+  val initialAlpha = remember(item.id) { targetAlpha }
+  var hasAlphaTransitioned by remember(item.id) { mutableStateOf(false) }
+  val alphaAnimatable = remember(item.id) { Animatable(initialAlpha) }
+  if (hasAlphaTransitioned || targetAlpha != initialAlpha) {
+    LaunchedEffect(item.id, targetAlpha) {
+      hasAlphaTransitioned = true
+      alphaAnimatable.animateTo(targetAlpha)
+    }
+  }
   var showDropdown by remember { mutableStateOf(false) }
+  val colorScheme = AppTheme.colorScheme
 
   Column(
     modifier =
@@ -97,7 +111,10 @@ internal fun FeaturedPostItem(
         .padding(featuredItemPadding)
         .clip(MaterialTheme.shapes.extraLarge)
         .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
-        .graphicsLayer { this.alpha = alpha * contentAlphaProvider.invoke() }
+        .graphicsLayer {
+          compositingStrategy = CompositingStrategy.ModulateAlpha
+          this.alpha = alphaAnimatable.value * contentAlphaProvider.invoke()
+        }
   ) {
     val density = LocalDensity.current
     val titleTextStyle = MaterialTheme.typography.headlineMedium
@@ -121,7 +138,7 @@ internal fun FeaturedPostItem(
         },
       text = item.title.ifBlank { item.description },
       style = titleTextStyle,
-      color = AppTheme.colorScheme.onSurfaceVariant,
+      color = { colorScheme.onSurfaceVariant },
       maxLines = titleMaxLines,
       overflow = TextOverflow.Ellipsis,
       onTextLayout = { textLayoutResult ->
@@ -140,7 +157,7 @@ internal fun FeaturedPostItem(
     Text(
       text = item.description,
       style = MaterialTheme.typography.bodyMedium,
-      color = AppTheme.colorScheme.outline,
+      color = { colorScheme.outline },
       minLines = 3,
       maxLines = 3,
       overflow = TextOverflow.Ellipsis,

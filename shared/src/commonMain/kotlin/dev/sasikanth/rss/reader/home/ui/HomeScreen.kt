@@ -48,6 +48,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
@@ -97,6 +98,7 @@ import dev.sasikanth.rss.reader.feeds.FeedsState
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.feeds.ui.pinned.NowPlayingBottomBar
 import dev.sasikanth.rss.reader.feeds.ui.pinned.PinnedSourcesBottomBar
+import dev.sasikanth.rss.reader.feeds.ui.pinned.PinnedSourcesBottomBarScrollBehavior
 import dev.sasikanth.rss.reader.feeds.ui.pinned.rememberPinnedSourcesBottomBarScrollBehavior
 import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeEvent
@@ -110,6 +112,7 @@ import dev.sasikanth.rss.reader.resources.icons.Newsstand
 import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.platform
+import dev.sasikanth.rss.reader.ui.AppColorScheme
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.getOverriddenColorScheme
@@ -124,13 +127,18 @@ import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
@@ -149,6 +157,20 @@ private class KeyRepeatGuard(var armed: Boolean = false)
 
 private const val NO_POST_SELECTED = -1
 
+@Immutable
+private data class HomePinnedBarState(
+  val pinnedSources: ImmutableList<Source>,
+  val activeSource: Source?,
+  val canShowUnreadPostsCount: Boolean,
+)
+
+private fun FeedsState.toHomePinnedBarState() =
+  HomePinnedBarState(
+    pinnedSources = pinnedSources,
+    activeSource = activeSource,
+    canShowUnreadPostsCount = canShowUnreadPostsCount,
+  )
+
 @OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
 @Composable
 internal fun HomeScreen(
@@ -161,19 +183,30 @@ internal fun HomeScreen(
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
-  val feedsState by feedsViewModel.state.collectAsStateWithLifecycle()
+  val initialPinnedSourceIds =
+    remember(feedsViewModel) {
+      feedsViewModel.state.value.pinnedSources.map { it.id }.toPersistentSet()
+    }
+  val pinnedSourceIds by
+    remember(feedsViewModel) {
+        feedsViewModel.state
+          .map { feedsState -> feedsState.pinnedSources.map { it.id }.toPersistentSet() }
+          .distinctUntilChanged()
+      }
+      .collectAsStateWithLifecycle(initialValue = initialPinnedSourceIds)
   val shouldBlockImage = LocalBlockImage.current
   val inAppRating = LocalInAppRating.current
 
   LaunchedEffect(Unit) {
-    viewModel.effects.collect { effect ->
-      when (effect) {
-        HomeEffect.RequestInAppRating -> inAppRating.request()
+    launch {
+      viewModel.effects.collect { effect ->
+        when (effect) {
+          HomeEffect.RequestInAppRating -> inAppRating.request()
+        }
       }
     }
+    launch { viewModel.openPost.collect { (index, post) -> openPost(index, post) } }
   }
-
-  LaunchedEffect(Unit) { viewModel.openPost.collect { (index, post) -> openPost(index, post) } }
 
   // Keyed to the window, not the pane, so the featured section stays hidden when this
   // screen is squeezed into a split's list pane.
@@ -231,7 +264,8 @@ internal fun HomeScreen(
 
   HomeContent(
     state = state,
-    feedsState = feedsState,
+    pinnedSourceIds = pinnedSourceIds,
+    feedsStateFlow = feedsViewModel.state,
     posts = postsProvider,
     featuredPosts = featuredPosts,
     dispatch = viewModel::dispatch,
@@ -244,6 +278,7 @@ internal fun HomeScreen(
     onTogglePlayback = viewModel::togglePlayback,
     onOpenCurrentlyPlaying = openCurrentlyPlaying,
     onStopPlayback = viewModel::stopPlayback,
+    onScrollStateChanged = viewModel::onScrollStateChanged,
   )
 }
 
@@ -251,7 +286,8 @@ internal fun HomeScreen(
 @Composable
 private fun HomeContent(
   state: HomeState,
-  feedsState: FeedsState,
+  pinnedSourceIds: ImmutableSet<String>,
+  feedsStateFlow: StateFlow<FeedsState>,
   posts: () -> LazyPagingItems<ResolvedPost>?,
   featuredPosts: ImmutableList<FeaturedPostItem>,
   dispatch: (HomeEvent) -> Unit,
@@ -264,6 +300,7 @@ private fun HomeContent(
   onStopPlayback: () -> Unit,
   modifier: Modifier = Modifier,
   activeReaderPostId: String? = null,
+  onScrollStateChanged: (Boolean) -> Unit = {},
 ) {
   val linkHandler = LocalLinkHandler.current
   val coroutineScope = rememberCoroutineScope()
@@ -291,7 +328,7 @@ private fun HomeContent(
   val hasInlineNavigation =
     rootSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)
   val isActiveSourceInPinnedSources =
-    state.activeSource == null || feedsState.pinnedSources.any { it.id == state.activeSource.id }
+    state.activeSource == null || state.activeSource.id in pinnedSourceIds
   val canShowBottomBar =
     platform !is Platform.Desktop && state.showPinnedSources && isActiveSourceInPinnedSources
   val systemDynamicDarkColors =
@@ -444,60 +481,20 @@ private fun HomeContent(
   Scaffold(
     modifier = modifier,
     bottomBar = {
-      val scaffoldBottomPadding =
-        if (platform == Platform.Desktop) {
-          16.dp
-        } else {
-          0.dp
-        }
-
-      val bottomBarModifier =
-        remember(scaffoldBottomPadding) { Modifier.padding(bottom = scaffoldBottomPadding) }
-
-      Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
-        AppTheme(useDarkTheme = true, overriddenColorScheme = overriddenDarkColorScheme) {
-          AnimatedVisibility(
-            visible = canShowBottomBar,
-            enter = slideInVertically { it } + fadeIn(),
-            exit = slideOutVertically { it } + fadeOut(),
-          ) {
-            PinnedSourcesBottomBar(
-              modifier = bottomBarModifier,
-              pinnedSources = feedsState.pinnedSources,
-              activeSource = feedsState.activeSource,
-              canShowUnreadPostsCount = feedsState.canShowUnreadPostsCount,
-              onSourceClick = onSourceClick,
-              onHomeSelected = onHomeSelected,
-              onPinnedSourceOrderChanged = onPinnedSourceOrderChanged,
-              scrollBehavior = bottomBarScrollState,
-              nowPlayingChip = {
-                NowPlayingChip(
-                  playbackState = playbackState,
-                  onPlayPauseClick = onTogglePlayback,
-                  onOpenClick = onOpenCurrentlyPlaying,
-                  onStopClick = onStopPlayback,
-                )
-              },
-            )
-          }
-
-          AnimatedVisibility(
-            visible = !canShowBottomBar && hasActiveTrack,
-            enter = slideInVertically { it } + fadeIn(),
-            exit = slideOutVertically { it } + fadeOut(),
-          ) {
-            NowPlayingBottomBar(modifier = bottomBarModifier) {
-              NowPlayingChip(
-                playbackState = playbackState,
-                onPlayPauseClick = onTogglePlayback,
-                onOpenClick = onOpenCurrentlyPlaying,
-                onStopClick = onStopPlayback,
-                expanded = true,
-              )
-            }
-          }
-        }
-      }
+      HomeBottomBar(
+        canShowBottomBar = canShowBottomBar,
+        hasActiveTrack = hasActiveTrack,
+        overriddenDarkColorScheme = overriddenDarkColorScheme,
+        feedsStateFlow = feedsStateFlow,
+        onSourceClick = onSourceClick,
+        onHomeSelected = onHomeSelected,
+        onPinnedSourceOrderChanged = onPinnedSourceOrderChanged,
+        bottomBarScrollState = bottomBarScrollState,
+        playbackState = playbackState,
+        onTogglePlayback = onTogglePlayback,
+        onOpenCurrentlyPlaying = onOpenCurrentlyPlaying,
+        onStopPlayback = onStopPlayback,
+      )
     },
   ) { scaffoldPadding ->
     val colorScheme = AppTheme.colorScheme
@@ -645,7 +642,10 @@ private fun HomeContent(
           // The last item leaving is still an item animation, so the list has to outlive it.
           // Switching straight to the empty state disposes the LazyColumn in the same frame and
           // the exit never runs.
-          val hasNoContent = featuredPosts.isEmpty() && (posts?.itemCount ?: 0) == 0
+          val hasNoContent by
+            remember(featuredPosts, posts) {
+              computedStateOf { featuredPosts.isEmpty() && (posts?.itemCount ?: 0) == 0 }
+            }
           var showEmptyState by remember { mutableStateOf(hasNoContent) }
           LaunchedEffect(hasNoContent) {
             if (hasNoContent) {
@@ -666,7 +666,7 @@ private fun HomeContent(
             showEmptyState && hasNoContent -> {
               PullToRefreshContent(
                 pullToRefreshState = pullToRefreshState,
-                state = state,
+                isRefreshing = state.isSyncing,
                 paddingValues = paddingValues,
                 onRefresh = { dispatch(HomeEvent.OnSwipeToRefresh) },
               ) {
@@ -676,27 +676,38 @@ private fun HomeContent(
             else -> {
               PullToRefreshContent(
                 pullToRefreshState = pullToRefreshState,
-                state = state,
+                isRefreshing = state.isSyncing,
                 paddingValues = paddingValues,
                 onRefresh = { dispatch(HomeEvent.OnSwipeToRefresh) },
               ) {
-                val backdropColor = AppTheme.colorScheme.backdrop
                 val listScrimModifier =
-                  remember(backdropColor) {
+                  remember(colorScheme) {
                     Modifier.fillMaxSize().drawWithCache {
                       val scrimHeight = size.height * BOTTOM_SCRIM_FRACTION
                       val scrimTop = size.height - scrimHeight
-                      val brush =
-                        Brush.verticalGradient(
-                          0f to Color.Transparent,
-                          1f to backdropColor,
-                          startY = scrimTop,
-                          endY = size.height,
-                        )
                       val scrimOffset = Offset(0f, scrimTop)
                       val scrimSize = Size(size.width, scrimHeight)
+                      var lastBackdrop = Color.Unspecified
+                      var cachedBrush: Brush? = null
                       onDrawWithContent {
                         drawContent()
+                        val backdrop = colorScheme.backdrop
+                        val existingBrush = cachedBrush
+                        val brush =
+                          if (backdrop == lastBackdrop && existingBrush != null) {
+                            existingBrush
+                          } else {
+                            Brush.verticalGradient(
+                                0f to Color.Transparent,
+                                1f to backdrop,
+                                startY = scrimTop,
+                                endY = size.height,
+                              )
+                              .also {
+                                lastBackdrop = backdrop
+                                cachedBrush = it
+                              }
+                          }
                         drawRect(brush = brush, topLeft = scrimOffset, size = scrimSize)
                       }
                     }
@@ -735,6 +746,7 @@ private fun HomeContent(
                   },
                   activeReaderPostId = activeReaderPostId,
                   selectedPostIndex = selectedPostIndex,
+                  onScrollStateChanged = onScrollStateChanged,
                   modifier = listScrimModifier,
                 )
               }
@@ -787,16 +799,121 @@ private fun HomeContent(
 }
 
 @Composable
+private fun HomeBottomBar(
+  canShowBottomBar: Boolean,
+  hasActiveTrack: Boolean,
+  overriddenDarkColorScheme: AppColorScheme?,
+  feedsStateFlow: StateFlow<FeedsState>,
+  onSourceClick: (Source) -> Unit,
+  onHomeSelected: () -> Unit,
+  onPinnedSourceOrderChanged: (List<Source>) -> Unit,
+  bottomBarScrollState: PinnedSourcesBottomBarScrollBehavior,
+  playbackState: StateFlow<PlaybackState>,
+  onTogglePlayback: () -> Unit,
+  onOpenCurrentlyPlaying: () -> Unit,
+  onStopPlayback: () -> Unit,
+) {
+  val scaffoldBottomPadding =
+    if (platform == Platform.Desktop) {
+      16.dp
+    } else {
+      0.dp
+    }
+
+  val bottomBarModifier =
+    remember(scaffoldBottomPadding) { Modifier.padding(bottom = scaffoldBottomPadding) }
+
+  Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
+    AppTheme(useDarkTheme = true, overriddenColorScheme = overriddenDarkColorScheme) {
+      AnimatedVisibility(
+        visible = canShowBottomBar,
+        enter = slideInVertically { it } + fadeIn(),
+        exit = slideOutVertically { it } + fadeOut(),
+      ) {
+        PinnedSourcesBottomBarHost(
+          feedsStateFlow = feedsStateFlow,
+          onSourceClick = onSourceClick,
+          onHomeSelected = onHomeSelected,
+          onPinnedSourceOrderChanged = onPinnedSourceOrderChanged,
+          scrollBehavior = bottomBarScrollState,
+          playbackState = playbackState,
+          onTogglePlayback = onTogglePlayback,
+          onOpenCurrentlyPlaying = onOpenCurrentlyPlaying,
+          onStopPlayback = onStopPlayback,
+          modifier = bottomBarModifier,
+        )
+      }
+
+      AnimatedVisibility(
+        visible = !canShowBottomBar && hasActiveTrack,
+        enter = slideInVertically { it } + fadeIn(),
+        exit = slideOutVertically { it } + fadeOut(),
+      ) {
+        NowPlayingBottomBar(modifier = bottomBarModifier) {
+          NowPlayingChip(
+            playbackState = playbackState,
+            onPlayPauseClick = onTogglePlayback,
+            onOpenClick = onOpenCurrentlyPlaying,
+            onStopClick = onStopPlayback,
+            expanded = true,
+          )
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun PinnedSourcesBottomBarHost(
+  feedsStateFlow: StateFlow<FeedsState>,
+  onSourceClick: (Source) -> Unit,
+  onHomeSelected: () -> Unit,
+  onPinnedSourceOrderChanged: (List<Source>) -> Unit,
+  scrollBehavior: PinnedSourcesBottomBarScrollBehavior,
+  playbackState: StateFlow<PlaybackState>,
+  onTogglePlayback: () -> Unit,
+  onOpenCurrentlyPlaying: () -> Unit,
+  onStopPlayback: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val initialBarState = remember(feedsStateFlow) { feedsStateFlow.value.toHomePinnedBarState() }
+  val barState by
+    remember(feedsStateFlow) {
+        feedsStateFlow.map { it.toHomePinnedBarState() }.distinctUntilChanged()
+      }
+      .collectAsStateWithLifecycle(initialValue = initialBarState)
+
+  PinnedSourcesBottomBar(
+    modifier = modifier,
+    pinnedSources = barState.pinnedSources,
+    activeSource = barState.activeSource,
+    canShowUnreadPostsCount = barState.canShowUnreadPostsCount,
+    onSourceClick = onSourceClick,
+    onHomeSelected = onHomeSelected,
+    onPinnedSourceOrderChanged = onPinnedSourceOrderChanged,
+    scrollBehavior = scrollBehavior,
+    nowPlayingChip = {
+      NowPlayingChip(
+        playbackState = playbackState,
+        onPlayPauseClick = onTogglePlayback,
+        onOpenClick = onOpenCurrentlyPlaying,
+        onStopClick = onStopPlayback,
+      )
+    },
+  )
+}
+
+@Composable
 private fun PullToRefreshContent(
   pullToRefreshState: PullToRefreshState,
-  state: HomeState,
+  isRefreshing: Boolean,
   paddingValues: PaddingValues,
   onRefresh: () -> Unit,
   content: @Composable () -> Unit,
 ) {
   PullToRefreshBox(
     state = pullToRefreshState,
-    isRefreshing = state.isSyncing,
+    isRefreshing = isRefreshing,
     onRefresh = onRefresh,
     // Desktop has no pull gesture, but the indicator still follows isSyncing, so keyboard and
     // background syncs get the same feedback as a pull on mobile.
@@ -805,7 +922,7 @@ private fun PullToRefreshContent(
       Indicator(
         modifier =
           Modifier.align(Alignment.TopCenter).padding(top = paddingValues.calculateTopPadding()),
-        isRefreshing = state.isSyncing,
+        isRefreshing = isRefreshing,
         containerColor = AppTheme.colorScheme.surfaceContainerHigh,
         color = AppTheme.colorScheme.primary,
         state = pullToRefreshState,
@@ -913,7 +1030,8 @@ private fun HomePreview() {
   AppTheme {
     HomeContent(
       state = HomeState.default(),
-      feedsState = FeedsState.DEFAULT,
+      pinnedSourceIds = persistentSetOf(),
+      feedsStateFlow = remember { MutableStateFlow(FeedsState.DEFAULT) },
       posts = { null },
       featuredPosts = persistentListOf(),
       dispatch = {},
