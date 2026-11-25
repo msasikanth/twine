@@ -35,12 +35,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
+
+private class DropdownExpandTracker(var everExpanded: Boolean = false)
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -51,6 +54,12 @@ internal fun DropdownMenu(
   offset: DpOffset = DpOffset.Zero,
   content: @Composable ColumnScope.() -> Unit,
 ) {
+  val tracker = remember { DropdownExpandTracker(expanded) }
+  if (expanded) {
+    tracker.everExpanded = true
+  }
+  if (!tracker.everExpanded) return
+
   androidx.compose.material3.DropdownMenu(
     expanded = expanded,
     onDismissRequest = onDismissRequest,

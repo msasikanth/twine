@@ -47,8 +47,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -101,18 +100,18 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
               radius = 8.dp.toPx()
               spread = 0f
             }
-            .drawBehind {
+            .drawWithCache {
               val outline = shape.createOutline(size, layoutDirection, this)
-              drawOutline(outline = outline, color = colorScheme.bottomSheet)
-            }
-            .drawWithContent {
-              drawContent()
-              val outline = shape.createOutline(size, layoutDirection, this)
-              drawOutline(
-                outline = outline,
-                color = colorScheme.bottomSheetBorder,
-                style = Stroke(width = 1.dp.toPx()),
-              )
+              val borderStroke = Stroke(width = 1.dp.toPx())
+              onDrawWithContent {
+                drawOutline(outline = outline, color = colorScheme.bottomSheet)
+                drawContent()
+                drawOutline(
+                  outline = outline,
+                  color = colorScheme.bottomSheetBorder,
+                  style = borderStroke,
+                )
+              }
             }
             .padding(4.dp),
       ) {
@@ -206,9 +205,9 @@ private fun OverlappedFeedIcons(
         if (!homepageLink.isNullOrBlank() || !icon.isNullOrBlank()) {
           Box(
             modifier =
-              Modifier.drawBehind {
+              Modifier.drawWithCache {
                   val outline = extraSmallShape.createOutline(size, layoutDirection, this)
-                  drawOutline(outline, colorScheme.bottomSheet)
+                  onDrawBehind { drawOutline(outline, colorScheme.bottomSheet) }
                 }
                 .padding(horizontal = 2.dp, vertical = 1.dp)
           ) {

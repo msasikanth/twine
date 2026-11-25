@@ -37,7 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -59,6 +59,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.util.packInts
+import androidx.compose.ui.util.unpackInt1
+import androidx.compose.ui.util.unpackInt2
 import androidx.graphics.shapes.Morph
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.resources.icons.Platform
@@ -165,10 +168,12 @@ fun Instant.formatRelativeTime(): String {
     seconds < 3600 -> stringResource(Res.string.unit_minutes, duration.inWholeMinutes)
     seconds < 86400 -> stringResource(Res.string.unit_hours, duration.inWholeHours)
     days < 7 -> stringResource(Res.string.unit_days, days)
-    else ->
-      LocalRelativeDateFormatter.current.format(
-        this.toLocalDateTime(TimeZone.currentSystemDefault())
-      )
+    else -> {
+      val formatter = LocalRelativeDateFormatter.current
+      remember(this, formatter) {
+        formatter.format(this.toLocalDateTime(TimeZone.currentSystemDefault()))
+      }
+    }
   }
 }
 
@@ -192,7 +197,7 @@ internal fun keyboardVisibilityAsState(): State<KeyboardState> {
   val density = LocalDensity.current
   val ime = WindowInsets.ime
   return remember(density, ime) {
-    derivedStateOf {
+    computedStateOf {
       if (ime.getBottom(density) > 0) KeyboardState.Opened else KeyboardState.Closed
     }
   }
@@ -226,14 +231,13 @@ fun <T> PagerState.CollectItemTransition(
   LaunchedEffect(this, *key) {
     snapshotFlow {
         val page = currentPage
-        val offset = currentPageOffsetFraction
-
-        // Quantize offset to 2 decimal places to throttle transitions
-        val quantizedOffset = (offset * 100).toInt() / 100f
-        page to quantizedOffset
+        val quantizedSteps = (currentPageOffsetFraction * 100).toInt()
+        packInts(page, quantizedSteps)
       }
       .distinctUntilChanged()
-      .collect { (page, offset) ->
+      .collect { packed ->
+        val page = unpackInt1(packed)
+        val offset = unpackInt2(packed) / 100f
         val activeItem = currentItemProvider(page)
         if (activeItem == null) return@collect
 
@@ -243,20 +247,16 @@ fun <T> PagerState.CollectItemTransition(
 
         when {
           offset < -Constants.EPSILON -> {
-            // Swiping backward (toward previous page)
             fromItem = currentItemProvider(page - 1) ?: activeItem
             toItem = activeItem
-            // Convert negative offset to positive progress (0 to 1)
             normalizedOffset = 1f + offset
           }
           offset > Constants.EPSILON -> {
-            // Swiping forward (toward next page)
             fromItem = activeItem
             toItem = currentItemProvider(page + 1) ?: activeItem
             normalizedOffset = offset
           }
           else -> {
-            // No significant offset, stay on current item
             fromItem = activeItem
             toItem = activeItem
             normalizedOffset = 0f
@@ -311,7 +311,9 @@ fun Morph.toComposePath(progress: Float, scale: Float = 1f, path: Path = Path())
 @Composable
 fun Modifier.iosBottomSafeAreaPadding(): Modifier =
   if (platform is Platform.Apple) {
-    windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+    val safeDrawing = WindowInsets.safeDrawing
+    val bottomInsets = remember(safeDrawing) { safeDrawing.only(WindowInsetsSides.Bottom) }
+    windowInsetsPadding(bottomInsets)
   } else {
     this
   }

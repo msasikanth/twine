@@ -89,8 +89,23 @@ class AppColorScheme(values: AppColorValues) {
   internal var isAnimating: Boolean = false
     private set
 
+  internal var settledPrimary by mutableStateOf(values.primary)
+    internal set
+
   internal var settledSecondary by mutableStateOf(values.secondary)
     private set
+
+  internal var settledOnSurface by mutableStateOf(values.onSurface)
+    internal set
+
+  internal var settledOnSurfaceVariant by mutableStateOf(values.onSurfaceVariant)
+    internal set
+
+  internal var settledOutlineVariant by mutableStateOf(values.outlineVariant)
+    internal set
+
+  internal var settledInverseOnSurface by mutableStateOf(values.inverseOnSurface)
+    internal set
 
   var primary by mutableStateOf(values.primary)
     internal set
@@ -218,7 +233,7 @@ class AppColorScheme(values: AppColorValues) {
     val nextBackdrop = if (amoled) Color.Black else values.backdrop
     val nextBottomSheet = if (amoled) Color.Black else values.bottomSheet
 
-    rawValues =
+    val nextRawValues =
       if (amoled) {
         values.copy(
           surface = nextSurface,
@@ -233,13 +248,23 @@ class AppColorScheme(values: AppColorValues) {
       } else {
         values
       }
+    if (nextRawValues == rawValues && this.isAnimating == isAnimating) {
+      return
+    }
+
+    rawValues = nextRawValues
     this.isAnimating = isAnimating
 
     primary = values.primary
     onPrimary = values.onPrimary
     secondary = values.secondary
     if (!isAnimating) {
+      settledPrimary = values.primary
       settledSecondary = values.secondary
+      settledOnSurface = values.onSurface
+      settledOnSurfaceVariant = values.onSurfaceVariant
+      settledOutlineVariant = values.outlineVariant
+      settledInverseOnSurface = values.inverseOnSurface
     }
     outline = values.outline
     outlineVariant = values.outlineVariant

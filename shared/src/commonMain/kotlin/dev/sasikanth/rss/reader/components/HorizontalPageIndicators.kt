@@ -17,31 +17,27 @@
 
 package dev.sasikanth.rss.reader.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.PageIndicatorDefaults.MaxNumberOfIndicators
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 /**
  * A horizontal indicator for a Pager, representing the currently active page and total pages drawn
@@ -76,95 +72,87 @@ import kotlin.math.roundToInt
 fun HorizontalPageIndicators(
   pageIndicatorState: PageIndicatorState,
   modifier: Modifier = Modifier,
-  selectedColor: Color = AppTheme.colorScheme.onSurface,
-  unselectedColor: Color = AppTheme.colorScheme.outline,
+  selectedColor: Color = Color.Unspecified,
+  unselectedColor: Color = Color.Unspecified,
   indicatorSize: Dp = 8.dp,
   spacing: Dp = 8.dp,
   indicatorShape: Shape = CircleShape,
 ) {
-  val horizontalPadding = spacing / 2
-  val spacerDefaultSize = indicatorSize + spacing
+  val colorScheme = AppTheme.colorScheme
+  val slotWidth = indicatorSize + spacing
 
   val totalPages = pageIndicatorState.pageCount
   val pagesOnScreen = minOf(MaxNumberOfIndicators, totalPages)
   val pagesState =
     remember(totalPages) { PagesState(totalPages = totalPages, pagesOnScreen = pagesOnScreen) }
+  val totalWidth = slotWidth * (pagesOnScreen + 2)
 
-  fun syncPagesState(): Float {
-    val selectedPage = pageIndicatorState.selectedPage
-    val pageOffset = pageIndicatorState.pageOffset
-    val normalizedSelectedPage = (selectedPage + pageOffset).toInt()
-    val normalizedOffset = selectedPage + pageOffset - normalizedSelectedPage
-    pagesState.recalculateState(normalizedSelectedPage, normalizedOffset)
-    return normalizedOffset
-  }
+  Box(
+    modifier =
+      modifier.size(width = totalWidth, height = indicatorSize).drawWithCache {
+        val indicatorSizePx = indicatorSize.toPx()
+        val halfIndicatorPx = indicatorSizePx / 2f
+        val slotWidthPx = slotWidth.toPx()
+        val contentWidthPx = (pagesOnScreen + 2) * slotWidthPx
+        val startX = (size.width - contentWidthPx) / 2f
+        val cy = size.height - halfIndicatorPx
+        val customOutline =
+          if (indicatorShape == CircleShape) {
+            null
+          } else {
+            indicatorShape.createOutline(
+              size = Size(indicatorSizePx, indicatorSizePx),
+              layoutDirection = layoutDirection,
+              density = this,
+            )
+          }
 
-  val indicatorFactory: @Composable (Int) -> Unit = { page ->
-    Box(modifier = Modifier.padding(horizontal = horizontalPadding).size(indicatorSize)) {
-      Box(
-        modifier =
-          Modifier.fillMaxSize()
-            .align(Alignment.Center)
-            .graphicsLayer {
-              syncPagesState()
-              val scale = pagesState.sizeRatio(page)
-              scaleX = scale
-              scaleY = scale
-              alpha = pagesState.alpha(page)
-              shape = indicatorShape
-              clip = true
-            }
-            .drawBehind {
-              val normalizedOffset = syncPagesState()
-              drawRect(
-                lerp(
-                  unselectedColor,
-                  selectedColor,
-                  pagesState.calculateSelectedRatio(page, normalizedOffset),
-                )
+        onDrawBehind {
+          val selectedPage = pageIndicatorState.selectedPage
+          val pageOffset = pageIndicatorState.pageOffset
+          val normalizedSelectedPage = (selectedPage + pageOffset).toInt()
+          val normalizedOffset = selectedPage + pageOffset - normalizedSelectedPage
+          pagesState.recalculateState(normalizedSelectedPage, normalizedOffset)
+
+          val resolvedSelected =
+            if (selectedColor == Color.Unspecified) colorScheme.onSurface else selectedColor
+          val resolvedUnselected =
+            if (unselectedColor == Color.Unspecified) colorScheme.outline else unselectedColor
+
+          val leftSpacerWidth = pagesState.leftSpacerSizeRatio * slotWidthPx
+          val isRtl = layoutDirection == LayoutDirection.Rtl
+
+          for (page in 0..pagesOnScreen) {
+            val dotAlpha = pagesState.alpha(page)
+            val dotScale = pagesState.sizeRatio(page)
+            if (dotAlpha <= 0f || dotScale <= 0f) continue
+
+            val ltrCx = startX + leftSpacerWidth + (page + 0.5f) * slotWidthPx
+            val cx = if (isRtl) size.width - ltrCx else ltrCx
+            val dotColor =
+              lerp(
+                resolvedUnselected,
+                resolvedSelected,
+                pagesState.calculateSelectedRatio(page, normalizedOffset),
               )
+
+            if (customOutline == null) {
+              drawCircle(
+                color = dotColor,
+                radius = halfIndicatorPx * dotScale,
+                center = Offset(cx, cy),
+                alpha = dotAlpha,
+              )
+            } else {
+              translate(left = cx - halfIndicatorPx, top = cy - halfIndicatorPx) {
+                scale(scale = dotScale, pivot = Offset(halfIndicatorPx, halfIndicatorPx)) {
+                  drawOutline(outline = customOutline, color = dotColor, alpha = dotAlpha)
+                }
+              }
             }
-      )
-    }
-  }
-
-  val spacerLeft =
-    @Composable {
-      Spacer(
-        Modifier.height(indicatorSize).layout { measurable, constraints ->
-          syncPagesState()
-          val widthPx =
-            (pagesState.leftSpacerSizeRatio * spacerDefaultSize.toPx())
-              .roundToInt()
-              .coerceAtLeast(0)
-          val placeable =
-            measurable.measure(constraints.copy(minWidth = widthPx, maxWidth = widthPx))
-          layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
+          }
         }
-      )
-    }
-  val spacerRight =
-    @Composable {
-      Spacer(
-        Modifier.height(indicatorSize).layout { measurable, constraints ->
-          syncPagesState()
-          val widthPx =
-            (pagesState.rightSpacerSizeRatio * spacerDefaultSize.toPx())
-              .roundToInt()
-              .coerceAtLeast(0)
-          val placeable =
-            measurable.measure(constraints.copy(minWidth = widthPx, maxWidth = widthPx))
-          layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
-        }
-      )
-    }
-
-  LinearPageIndicator(
-    modifier = modifier,
-    pagesOnScreen = pagesOnScreen,
-    indicatorFactory = indicatorFactory,
-    spacerLeft = spacerLeft,
-    spacerRight = spacerRight,
+      }
   )
 }
 
@@ -186,28 +174,6 @@ interface PageIndicatorState {
 
   /** Total number of pages */
   val pageCount: Int
-}
-
-@Composable
-private fun LinearPageIndicator(
-  modifier: Modifier,
-  pagesOnScreen: Int,
-  indicatorFactory: @Composable (Int) -> Unit,
-  spacerLeft: @Composable () -> Unit,
-  spacerRight: @Composable () -> Unit,
-) {
-  Row(
-    modifier = modifier,
-    horizontalArrangement = Arrangement.Center,
-    verticalAlignment = Alignment.Bottom,
-  ) {
-    // drawing 1 extra spacer for transition
-    spacerLeft()
-    for (page in 0..pagesOnScreen) {
-      indicatorFactory(page)
-    }
-    spacerRight()
-  }
 }
 
 /**

@@ -35,6 +35,7 @@ import kotlinx.coroutines.IO
 // Shared across all image requests so the parallelism limit is global instead of
 // allocating a new limited dispatcher per request.
 private val imageDecoderDispatcher = Dispatchers.IO.limitedParallelism(4)
+private val DefaultAsyncImageSize = Size(Dimension.Undefined, 500)
 
 @Composable
 internal fun AsyncImage(
@@ -42,7 +43,7 @@ internal fun AsyncImage(
   contentDescription: String?,
   modifier: Modifier = Modifier,
   contentScale: ContentScale = ContentScale.Fit,
-  size: Size = Size(Dimension.Undefined, 500),
+  size: Size = DefaultAsyncImageSize,
   colorFilter: ColorFilter? = null,
   alignment: Alignment = Alignment.Center,
   crossfade: Boolean = true,
@@ -66,6 +67,12 @@ internal fun AsyncImage(
           .decoderCoroutineContext(imageDecoderDispatcher)
           .build()
       }
+    val onState: ((AsyncImagePainter.State) -> Unit)? =
+      remember(onSuccess) {
+        onSuccess?.let { callback ->
+          { state -> if (state is AsyncImagePainter.State.Success) callback() }
+        }
+      }
     coil3.compose.AsyncImage(
       model = model,
       contentDescription = contentDescription,
@@ -73,10 +80,7 @@ internal fun AsyncImage(
       contentScale = contentScale,
       colorFilter = colorFilter,
       alignment = alignment,
-      onState =
-        onSuccess?.let { callback ->
-          { state -> if (state is AsyncImagePainter.State.Success) callback() }
-        },
+      onState = onState,
     )
   }
 }
