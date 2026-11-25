@@ -54,6 +54,8 @@ import dev.sasikanth.rss.reader.blockedwords.BlockedWordsViewModel
 import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
 import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
+import dev.sasikanth.rss.reader.debug.DebugSettingsViewModel
+import dev.sasikanth.rss.reader.debug.ui.DebugSettingsScreen
 import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
 import dev.sasikanth.rss.reader.discovery.ui.DiscoveryScreen
 import dev.sasikanth.rss.reader.feed.FeedViewModel
@@ -314,6 +316,7 @@ fun EntryProviderScope<NavKey>.mainScreen(
             openServicesSettings = { navigator.navigate(Screen.SettingsServices) },
             openDataSettings = { navigator.navigate(Screen.SettingsData) },
             openAppInfoSettings = { navigator.navigate(Screen.SettingsAppInfo) },
+            openDebugSettings = { navigator.navigate(Screen.SettingsDebug) },
             openPaywall = { navigator.navigate(Screen.Paywall) },
             modifier = screenModifier,
           )
@@ -422,6 +425,25 @@ fun EntryProviderScope<NavKey>.settingsAppInfoScreen(
       goBack = { navigator.goBack() },
       openAbout = { navigator.navigate(Screen.About) },
       openChangelog = openChangelog,
+    )
+  }
+}
+
+fun EntryProviderScope<NavKey>.settingsDebugScreen(
+  debugSettingsViewModel: () -> DebugSettingsViewModel,
+  openChangelog: () -> Unit,
+  navigator: AppNavigator,
+  modifier: Modifier = Modifier,
+) {
+  entry<Screen.SettingsDebug> {
+    val viewModel = viewModel { debugSettingsViewModel() }
+    DebugSettingsScreen(
+      modifier = modifier,
+      viewModel = viewModel,
+      goBack = { navigator.goBack() },
+      openPaywall = { navigator.navigate(Screen.Paywall) },
+      openChangelog = openChangelog,
+      navigateToOnboarding = { navigator.navigateToOnboarding() },
     )
   }
 }

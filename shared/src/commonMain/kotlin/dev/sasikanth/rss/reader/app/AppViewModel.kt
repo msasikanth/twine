@@ -19,18 +19,21 @@ package dev.sasikanth.rss.reader.app
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
+import dev.sasikanth.rss.reader.data.repository.DebugSettingsRepository
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.auth.OAuthManager
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
+import dev.sasikanth.rss.reader.debug.toKermitSeverity
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
@@ -46,6 +49,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
@@ -59,6 +63,7 @@ class AppViewModel(
   private val refreshPolicy: RefreshPolicy,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
+  private val debugSettingsRepository: DebugSettingsRepository,
   private val observableActiveSource: ObservableActiveSource,
   private val syncCoordinator: SyncCoordinator,
   private val oAuthManager: OAuthManager,
@@ -111,6 +116,24 @@ class AppViewModel(
         }
       }
       .launchIn(viewModelScope)
+
+    if (appInfo.isDebugBuild) {
+      combine(
+          debugSettingsRepository.showFpsOverlay,
+          debugSettingsRepository.showWindowSizeOverlay,
+          ::Pair,
+        )
+        .onEach { (showFpsOverlay, showWindowSizeOverlay) ->
+          _state.update {
+            it.copy(showFpsOverlay = showFpsOverlay, showWindowSizeOverlay = showWindowSizeOverlay)
+          }
+        }
+        .launchIn(viewModelScope)
+
+      debugSettingsRepository.logSeverity
+        .onEach { severity -> Logger.setMinSeverity(severity.toKermitSeverity()) }
+        .launchIn(viewModelScope)
+    }
   }
 
   fun onPostOpened(postId: String) {

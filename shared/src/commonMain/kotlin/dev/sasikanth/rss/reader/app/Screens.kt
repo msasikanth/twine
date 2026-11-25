@@ -65,6 +65,8 @@ sealed interface Screen : NavKey {
 
   @Serializable data object SettingsAppInfo : Screen
 
+  @Serializable data object SettingsDebug : Screen
+
   @Serializable data object AccountSelection : Screen
 
   @Serializable data class Discovery(val isFromOnboarding: Boolean = false) : Screen

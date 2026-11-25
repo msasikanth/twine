@@ -47,6 +47,7 @@ import dev.sasikanth.rss.reader.resources.icons.Appearance
 import dev.sasikanth.rss.reader.resources.icons.Behaviors
 import dev.sasikanth.rss.reader.resources.icons.Changelog
 import dev.sasikanth.rss.reader.resources.icons.Sync
+import dev.sasikanth.rss.reader.resources.icons.Tune
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsState
@@ -77,6 +78,7 @@ internal fun SettingsScreen(
   openServicesSettings: () -> Unit,
   openDataSettings: () -> Unit,
   openAppInfoSettings: () -> Unit,
+  openDebugSettings: () -> Unit,
   openPaywall: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
@@ -101,6 +103,7 @@ internal fun SettingsScreen(
     openServicesSettings = openServicesSettings,
     openDataSettings = openDataSettings,
     openAppInfoSettings = openAppInfoSettings,
+    openDebugSettings = openDebugSettings,
     openPaywall = openPaywall,
     modifier = modifier,
   )
@@ -115,6 +118,7 @@ private fun SettingsContent(
   openServicesSettings: () -> Unit,
   openDataSettings: () -> Unit,
   openAppInfoSettings: () -> Unit,
+  openDebugSettings: () -> Unit,
   openPaywall: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
@@ -178,6 +182,17 @@ private fun SettingsContent(
           )
         }
 
+        if (state.appInfo.isDebugBuild) {
+          item {
+            SettingsNavigationItem(
+              title = "Developer Settings",
+              subtitle = "FPS overlay, caches, sync & diagnostics",
+              icon = TwineIcons.Tune,
+              onClick = openDebugSettings,
+            )
+          }
+        }
+
         item {
           if (!state.appInfo.isFoss && state.subscriptionResult != null) {
             SettingsDivider(horizontalInsets = 24.dp)
@@ -228,6 +243,7 @@ private fun SettingsPreview() {
       openServicesSettings = {},
       openDataSettings = {},
       openAppInfoSettings = {},
+      openDebugSettings = {},
       openPaywall = {},
     )
   }

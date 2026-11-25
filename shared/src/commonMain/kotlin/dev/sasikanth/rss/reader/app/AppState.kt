@@ -29,6 +29,8 @@ data class AppState(
   val blockImages: Boolean,
   val showChangelog: Boolean,
   val versionName: String,
+  val showFpsOverlay: Boolean = false,
+  val showWindowSizeOverlay: Boolean = false,
 ) {
 
   companion object {
@@ -42,6 +44,8 @@ data class AppState(
         blockImages = false,
         showChangelog = false,
         versionName = "",
+        showFpsOverlay = false,
+        showWindowSizeOverlay = false,
       )
   }
 }

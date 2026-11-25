@@ -117,6 +117,8 @@ import dev.sasikanth.rss.reader.changelog.ui.ChangelogSheet
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
+import dev.sasikanth.rss.reader.debug.DebugSettingsViewModel
+import dev.sasikanth.rss.reader.debug.ui.DebugPerformanceOverlay
 import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
 import dev.sasikanth.rss.reader.feed.FeedViewModel
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
@@ -218,6 +220,7 @@ fun App(
   searchViewModel: () -> SearchViewModel,
   bookmarksViewModel: () -> BookmarksViewModel,
   settingsViewModel: () -> SettingsViewModel,
+  debugSettingsViewModel: () -> DebugSettingsViewModel,
   accountSelectionViewModel: () -> AccountSelectionViewModel,
   freshRssLoginViewModel: () -> FreshRssLoginViewModel,
   minifluxLoginViewModel: () -> MinifluxLoginViewModel,
@@ -686,6 +689,13 @@ fun App(
               navigator = navigator,
             )
 
+            settingsDebugScreen(
+              modifier = screenModifier,
+              debugSettingsViewModel = debugSettingsViewModel,
+              openChangelog = openChangelog,
+              navigator = navigator,
+            )
+
             feedInfoDialog(feedViewModel = feedViewModel, navigator = navigator)
 
             groupSelectionDialog(
@@ -838,6 +848,14 @@ fun App(
           modifier =
             Modifier.align(Alignment.BottomCenter).windowInsetsPadding(WindowInsets.safeDrawing),
         )
+
+        if (appState.showFpsOverlay || appState.showWindowSizeOverlay) {
+          DebugPerformanceOverlay(
+            showFps = appState.showFpsOverlay,
+            showWindowSize = appState.showWindowSizeOverlay,
+            modifier = Modifier.fillMaxSize(),
+          )
+        }
       }
 
       if (appState.showChangelog) {
