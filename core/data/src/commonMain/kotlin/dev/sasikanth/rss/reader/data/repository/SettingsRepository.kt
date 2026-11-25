@@ -58,6 +58,7 @@ class SettingsRepository(
   private val hideGroupedFeedsKey = booleanPreferencesKey("pref_hide_grouped_feeds")
   private val appThemeModeKey = stringPreferencesKey("pref_app_theme_mode_v2")
   private val useAmoledKey = booleanPreferencesKey("use_amoled")
+  private val useSystemFontKey = booleanPreferencesKey("pref_use_system_font")
   private val enableAutoSyncKey = booleanPreferencesKey("enable_auto_sync")
   private val showFeedFavIconKey = booleanPreferencesKey("show_feed_fav_icon")
   private val feedFavIconDefaultsAppliedKey =
@@ -149,6 +150,11 @@ class SettingsRepository(
 
   val useAmoled: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[useAmoledKey] ?: false }.distinctUntilChanged()
+
+  val useSystemFont: Flow<Boolean> =
+    dataStore.data
+      .map { preferences -> preferences[useSystemFontKey] ?: false }
+      .distinctUntilChanged()
 
   val isOnboardingDone: Flow<Boolean> =
     dataStore.data
@@ -335,6 +341,10 @@ class SettingsRepository(
 
   suspend fun toggleAmoled(value: Boolean) {
     dataStore.edit { preferences -> preferences[useAmoledKey] = value }
+  }
+
+  suspend fun toggleUseSystemFont(value: Boolean) {
+    dataStore.edit { preferences -> preferences[useSystemFontKey] = value }
   }
 
   suspend fun completeOnboarding() {
@@ -613,6 +623,7 @@ enum class ReaderFont(val value: String) {
   Lora("Lora"),
   Merriweather("Merriweather"),
   Outfit("Outfit"),
+  System("System"),
 }
 
 val ReaderFont.isPremium: Boolean

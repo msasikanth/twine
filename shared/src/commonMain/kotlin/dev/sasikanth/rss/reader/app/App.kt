@@ -153,6 +153,7 @@ import dev.sasikanth.rss.reader.utils.LocalInAppRating
 import dev.sasikanth.rss.reader.utils.LocalRootWindowSizeClass
 import dev.sasikanth.rss.reader.utils.LocalShortcutDispatcher
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
+import dev.sasikanth.rss.reader.utils.LocalUseSystemFont
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.ShortcutDispatcher
 import dev.sasikanth.rss.reader.utils.horizontalResizePointerIcon
@@ -255,6 +256,7 @@ fun App(
     LocalSeedColorExtractor provides seedColorExtractor,
     LocalBlockImage provides appState.blockImages,
     LocalAmoledSetting provides appState.useAmoled,
+    LocalUseSystemFont provides appState.useSystemFont,
   ) {
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val useDarkTheme =

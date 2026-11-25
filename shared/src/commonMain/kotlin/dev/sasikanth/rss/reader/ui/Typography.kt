@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.sp
+import dev.sasikanth.rss.reader.utils.LocalUseSystemFont
 import org.jetbrains.compose.resources.Font
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.comic_neue_bold
@@ -208,7 +209,7 @@ internal fun typography(
 internal val DefaultTypography: Typography
   @Composable
   get() {
-    val fontFamily = OutfitFontFamily
+    val fontFamily = if (LocalUseSystemFont.current) FontFamily.Default else OutfitFontFamily
     return remember(fontFamily) { typography(fontFamily) }
   }
 

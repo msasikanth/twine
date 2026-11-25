@@ -64,6 +64,7 @@ import dev.sasikanth.rss.reader.data.repository.ReaderFont.Lora
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.Merriweather
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.Outfit
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.RobotoSerif
+import dev.sasikanth.rss.reader.data.repository.ReaderFont.System
 import dev.sasikanth.rss.reader.data.repository.isDynamicThemeSupported
 import dev.sasikanth.rss.reader.data.repository.isPremium
 import dev.sasikanth.rss.reader.resources.icons.CustomTypography
@@ -85,6 +86,7 @@ import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.readerCustomisationsTypeface
+import twine.shared.generated.resources.readerFontSystem
 import twine.shared.generated.resources.themeVariantColorScheme
 
 @Composable
@@ -155,11 +157,14 @@ internal fun ReaderCustomizationsContent(
             Merriweather -> MerriWeatherFontFamily
             RobotoSerif -> RobotoSerifFontFamily
             Outfit -> OutfitFontFamily
+            System -> FontFamily.Default
           }
 
         TypefaceChip(
           selected = fontStyle == selectedFont,
-          label = fontStyle.value,
+          label =
+            if (fontStyle == System) stringResource(Res.string.readerFontSystem)
+            else fontStyle.value,
           fontFamily = fontFamily,
           isPremium = fontStyle.isPremium,
           isSubscribed = isSubscribed,

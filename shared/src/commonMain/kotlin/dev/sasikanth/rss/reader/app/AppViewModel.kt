@@ -94,17 +94,25 @@ class AppViewModel(
 
     combine(
         combine(
-          combine(settingsRepository.appThemeMode, settingsRepository.useAmoled, ::Pair),
+          combine(
+            settingsRepository.appThemeMode,
+            settingsRepository.useAmoled,
+            settingsRepository.useSystemFont,
+            ::Triple,
+          ),
           combine(
             settingsRepository.themeVariant,
             settingsRepository.showFeedFavIcon,
             settingsRepository.homeViewMode,
             ::Triple,
           ),
-        ) { (appThemeMode, useAmoled), (themeVariant, showFeedFavIcon, homeViewMode) ->
+        ) { themeSettings, homeSettings ->
+          val (appThemeMode, useAmoled, useSystemFont) = themeSettings
+          val (themeVariant, showFeedFavIcon, homeViewMode) = homeSettings
           AppAppearanceSettings(
             appThemeMode = appThemeMode,
             useAmoled = useAmoled,
+            useSystemFont = useSystemFont,
             themeVariant = themeVariant,
             showFeedFavIcon = showFeedFavIcon,
             homeViewMode = homeViewMode,
@@ -123,6 +131,7 @@ class AppViewModel(
           it.copy(
             appThemeMode = appearanceSettings.appThemeMode,
             useAmoled = appearanceSettings.useAmoled,
+            useSystemFont = appearanceSettings.useSystemFont,
             themeVariant = appearanceSettings.themeVariant,
             showFeedFavIcon = appearanceSettings.showFeedFavIcon,
             homeViewMode = appearanceSettings.homeViewMode,
@@ -291,6 +300,7 @@ class AppViewModel(
 private data class AppAppearanceSettings(
   val appThemeMode: AppThemeMode,
   val useAmoled: Boolean,
+  val useSystemFont: Boolean,
   val themeVariant: ThemeVariant,
   val showFeedFavIcon: Boolean,
   val homeViewMode: HomeViewMode,

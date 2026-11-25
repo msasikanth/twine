@@ -118,6 +118,8 @@
   <string name="settingsThemeDark">Dark</string>
   <string name="settingsAmoledTitle">AMOLED theme</string>
   <string name="settingsAmoledSubtitle">Changes the background to pure black.</string>
+  <string name="settingsUseSystemFontTitle">Use system font</string>
+  <string name="settingsUseSystemFontSubtitle">Uses your device’s default font for the app interface</string>
   <string name="settingsBlockImagesTitle">Disable all images</string>
   <string name="settingsBlockImagesSubtitle">Twine will not load or display any images</string>
   <string name="feeds">Feeds</string>
@@ -247,6 +249,7 @@
   <string name="twinePremiumDesc">Go Premium: Unlock everything and fuel future development.</string>
   <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium.\nThanks for supporting ❤️</string>
   <string name="readerCustomisationsTypeface">Typeface</string>
+  <string name="readerFontSystem">System</string>
   <string name="themeVariantColorScheme">Color scheme</string>
   <string name="themeVariantDynamic">Dynamic</string>
   <string name="themeVariantSystemDynamic">Material You</string>

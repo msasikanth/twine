@@ -128,7 +128,12 @@ class SettingsViewModel(
           )
         },
         combine(
-          combine(settingsRepository.appThemeMode, settingsRepository.useAmoled, ::Pair),
+          combine(
+            settingsRepository.appThemeMode,
+            settingsRepository.useAmoled,
+            settingsRepository.useSystemFont,
+            ::Triple,
+          ),
           combine(
             settingsRepository.themeVariant,
             settingsRepository.showFeedFavIcon,
@@ -137,10 +142,11 @@ class SettingsViewModel(
             settingsRepository.showPinnedSources,
             ::SettingsGroup2,
           ),
-        ) { (appThemeMode, useAmoled), group2 ->
+        ) { (appThemeMode, useAmoled, useSystemFont), group2 ->
           SettingsGroupCombined(
             appThemeMode = appThemeMode,
             useAmoled = useAmoled,
+            useSystemFont = useSystemFont,
             themeVariant = group2.themeVariant,
             showFeedFavIcon = group2.showFeedFavIcon,
             showFeaturedSection = group2.showFeaturedSection,
@@ -174,6 +180,7 @@ class SettingsViewModel(
           appThemeMode = combinedGroup.appThemeMode,
           themeVariant = combinedGroup.themeVariant,
           useAmoled = combinedGroup.useAmoled,
+          useSystemFont = combinedGroup.useSystemFont,
           enableAutoSync = group3.enableAutoSync,
           showFeedFavIcon = combinedGroup.showFeedFavIcon,
           showFeaturedSection = combinedGroup.showFeaturedSection,
@@ -203,6 +210,7 @@ class SettingsViewModel(
             appThemeMode = settings.appThemeMode,
             themeVariant = settings.themeVariant,
             useAmoled = settings.useAmoled,
+            useSystemFont = settings.useSystemFont,
             enableAutoSync = settings.enableAutoSync,
             showFeedFavIcon = settings.showFeedFavIcon,
             showFeaturedSection = settings.showFeaturedSection,
@@ -283,6 +291,7 @@ class SettingsViewModel(
       is SettingsEvent.OnAppThemeModeChanged -> onAppThemeModeChanged(event.appThemeMode)
       is SettingsEvent.OnThemeVariantChanged -> onThemeVariantChanged(event.themeVariant)
       is SettingsEvent.ToggleAmoled -> toggleAmoled(event.value)
+      is SettingsEvent.ToggleUseSystemFont -> toggleUseSystemFont(event.value)
       is SettingsEvent.MarkAsReadOnChanged -> markAsReadOnChanged(event.newMarkAsReadOn)
       is SettingsEvent.ToggleConfirmMarkAllAsRead -> toggleConfirmMarkAllAsRead(event.value)
       is SettingsEvent.AudioMarkAsReadThresholdChanged ->
@@ -456,6 +465,10 @@ class SettingsViewModel(
     viewModelScope.launch { settingsRepository.toggleAmoled(value) }
   }
 
+  private fun toggleUseSystemFont(value: Boolean) {
+    viewModelScope.launch { settingsRepository.toggleUseSystemFont(value) }
+  }
+
   private fun toggleShowReaderView(value: Boolean) {
     viewModelScope.launch { settingsRepository.toggleShowReaderView(value) }
   }
@@ -540,6 +553,7 @@ private data class Settings(
   val appThemeMode: AppThemeMode,
   val themeVariant: ThemeVariant,
   val useAmoled: Boolean,
+  val useSystemFont: Boolean,
   val enableAutoSync: Boolean,
   val showFeedFavIcon: Boolean,
   val showFeaturedSection: Boolean,
@@ -578,6 +592,7 @@ private data class SettingsGroup2(
 private data class SettingsGroupCombined(
   val appThemeMode: AppThemeMode,
   val useAmoled: Boolean,
+  val useSystemFont: Boolean,
   val themeVariant: ThemeVariant,
   val showFeedFavIcon: Boolean,
   val showFeaturedSection: Boolean,
