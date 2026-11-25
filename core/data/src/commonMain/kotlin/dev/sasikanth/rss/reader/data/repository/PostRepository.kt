@@ -568,6 +568,22 @@ class PostRepository(
     }
   }
 
+  suspend fun totalPostsCount(): Long {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.totalPostsCount().executeAsOne()
+    }
+  }
+
+  suspend fun totalUnreadPostsCount(): Long {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.totalUnreadPostsCount().executeAsOne()
+    }
+  }
+
+  suspend fun clearSeedColors() {
+    withContext(dispatchersProvider.databaseWrite) { postQueries.clearSeedColors() }
+  }
+
   private fun mapToResolvedPost(
     id: String,
     sourceId: String,

@@ -1200,10 +1200,40 @@ class RssRepository(
     return readingHistoryRepository.getReadingStatistics(startDate)
   }
 
+  suspend fun resetFeedsRefreshMetadata() {
+    feedRepository.resetFeedsRefreshMetadata()
+  }
+
+  suspend fun clearSeedColors() {
+    postRepository.clearSeedColors()
+  }
+
+  suspend fun databaseStats(): DatabaseStats {
+    return withContext(dispatchersProvider.databaseRead) {
+      DatabaseStats(
+        feedsCount = feedQueries.numberOfFeeds().executeAsOne(),
+        groupsCount = feedGroupQueries.count().executeAsOne(),
+        postsCount = postQueries.totalPostsCount().executeAsOne(),
+        unreadPostsCount = postQueries.totalUnreadPostsCount().executeAsOne(),
+        bookmarksCount = bookmarkRepository.bookmarksCount(),
+        cachedArticlesCount = postContentQueries.cachedArticleContentCount().executeAsOne(),
+      )
+    }
+  }
+
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace("\"", "\"\"").run { "\"$this\"" }
   }
 }
+
+data class DatabaseStats(
+  val feedsCount: Long,
+  val groupsCount: Long,
+  val postsCount: Long,
+  val unreadPostsCount: Long,
+  val bookmarksCount: Long,
+  val cachedArticlesCount: Long,
+)
 
 private data class PreparedPostUpsert(
   val postId: String,

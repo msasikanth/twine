@@ -34,3 +34,12 @@ WHERE id = :id;
 
 deleteAll:
 DELETE FROM postContent;
+
+cachedArticleContentCount:
+SELECT COUNT(*) FROM postContent
+WHERE articleContent IS NOT NULL;
+
+clearArticleContent:
+UPDATE postContent
+SET articleContent = NULL, articleContentReadingTime = NULL
+WHERE articleContent IS NOT NULL;

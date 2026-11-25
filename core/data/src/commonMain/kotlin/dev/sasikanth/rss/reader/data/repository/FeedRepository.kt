@@ -395,6 +395,10 @@ class FeedRepository(
       }
     }
   }
+
+  suspend fun resetFeedsRefreshMetadata() {
+    withContext(dispatchersProvider.databaseWrite) { feedQueries.resetFeedsRefreshMetadata() }
+  }
 }
 
 data class FeedSyncMetadataUpdate(

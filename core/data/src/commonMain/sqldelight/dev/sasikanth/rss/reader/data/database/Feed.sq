@@ -221,3 +221,8 @@ UPDATE feed SET consecutiveFetchErrors = 0 WHERE id = :id AND consecutiveFetchEr
 
 updateSyncError:
 UPDATE feed SET syncError = :syncError WHERE id = :id AND syncError IS NOT :syncError;
+
+resetFeedsRefreshMetadata:
+UPDATE feed
+SET lastUpdatedAt = NULL, refreshInterval = '1h', consecutiveFetchErrors = 0, syncError = NULL
+WHERE isDeleted = 0;

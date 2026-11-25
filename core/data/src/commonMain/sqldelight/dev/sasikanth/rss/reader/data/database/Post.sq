@@ -1483,3 +1483,13 @@ SELECT
   CASE WHEN showFeedFavIcon IS NULL THEN 'null' WHEN showFeedFavIcon = 1 THEN 'true' ELSE 'false' END AS showFeedFavIconStr
 FROM unreadPosts
 GROUP BY feedId;
+
+totalPostsCount:
+SELECT COUNT(*) FROM post;
+
+totalUnreadPostsCount:
+SELECT COUNT(*) FROM post
+WHERE (flags & 2) == 0 AND (flags & 4) == 0;
+
+clearSeedColors:
+UPDATE post SET seedColor = NULL WHERE seedColor IS NOT NULL;
