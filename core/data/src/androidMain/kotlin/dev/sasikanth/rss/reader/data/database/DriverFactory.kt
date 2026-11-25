@@ -42,6 +42,9 @@ actual class DriverFactory(
           override fun onConfigure(db: SupportSQLiteDatabase) {
             super.onConfigure(db)
             db.enableWriteAheadLogging()
+            db.execSQL("PRAGMA synchronous = NORMAL;")
+            db.execSQL("PRAGMA temp_store = MEMORY;")
+            db.execSQL("PRAGMA cache_size = -16000;")
           }
 
           override fun onCreate(db: SupportSQLiteDatabase) {

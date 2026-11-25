@@ -78,6 +78,9 @@ import platform.MediaPlayer.MPRemoteCommandHandlerStatusSuccess
 import platform.UIKit.UIImage
 import platform.darwin.dispatch_async
 import platform.darwin.dispatch_get_main_queue
+import platform.darwin.dispatch_queue_attr_make_with_qos_class
+import platform.darwin.dispatch_queue_create
+import platform.posix.QOS_CLASS_USER_INITIATED
 
 @OptIn(ExperimentalForeignApi::class)
 @AppScope
@@ -670,6 +673,11 @@ internal interface PlatformAudioPlayer {
 @OptIn(ExperimentalForeignApi::class)
 private class AvPlatformAudioPlayer : PlatformAudioPlayer {
   private val player = AVPlayer()
+  private val audioSessionQueue =
+    dispatch_queue_create(
+      label = "dev.sasikanth.rss.reader.audio_session",
+      attr = dispatch_queue_attr_make_with_qos_class(null, QOS_CLASS_USER_INITIATED, 0),
+    )
 
   override val hasCurrentItem: Boolean
     get() = player.currentItem != null
@@ -687,9 +695,13 @@ private class AvPlatformAudioPlayer : PlatformAudioPlayer {
     get() = CMTimeGetSeconds(player.currentTime())
 
   override fun activatePlaybackSession() {
-    val audioSession = AVAudioSession.sharedInstance()
-    audioSession.setCategory(AVAudioSessionCategoryPlayback, null)
-    audioSession.setActive(true, null)
+    dispatch_async(audioSessionQueue) {
+      val audioSession = AVAudioSession.sharedInstance()
+      if (audioSession.category != AVAudioSessionCategoryPlayback) {
+        audioSession.setCategory(AVAudioSessionCategoryPlayback, null)
+      }
+      audioSession.setActive(true, null)
+    }
   }
 
   override fun replaceCurrentItemWithUrl(url: NSURL?) {

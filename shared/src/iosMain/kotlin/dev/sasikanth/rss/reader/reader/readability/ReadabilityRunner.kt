@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.reader.readability
 
+import androidx.collection.lruCache
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -47,7 +48,6 @@ import platform.CoreGraphics.CGRectZero
 import platform.Foundation.NSError
 import platform.WebKit.WKNavigation
 import platform.WebKit.WKNavigationDelegateProtocol
-import platform.WebKit.WKProcessPool
 import platform.WebKit.WKScriptMessage
 import platform.WebKit.WKScriptMessageHandlerProtocol
 import platform.WebKit.WKUserContentController
@@ -57,6 +57,7 @@ import platform.WebKit.WKWebsiteDataStore
 import platform.darwin.NSObject
 
 private val PARSE_TIMEOUT = 15.seconds
+private const val RESULT_CACHE_MAX_SIZE = 16
 private const val MESSAGE_HANDLER_NAME = "readabilityMessageHandler"
 
 @Inject
@@ -64,12 +65,13 @@ private const val MESSAGE_HANDLER_NAME = "readabilityMessageHandler"
 class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider) :
   ReadabilityRunner {
 
-  private val semaphore = Semaphore(permits = 2)
+  private val semaphore = Semaphore(permits = 1)
   private val pool = mutableListOf<PooledWebView>()
   private val poolMutex = Mutex()
   private val shellMutex = Mutex()
   private var cachedShell: String? = null
   private val nextRequestId = AtomicInt(0)
+  private val resultCache = lruCache<ReadabilityCacheKey, ReadabilityResult>(RESULT_CACHE_MAX_SIZE)
 
   private val json = Json {
     ignoreUnknownKeys = true
@@ -84,7 +86,18 @@ class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider)
   ): ReadabilityResult {
     if (content.isBlank()) return ReadabilityResult(content = content)
 
+    val cacheKey =
+      withContext(dispatchersProvider.default) {
+        buildCacheKey(link = link, image = image, content = content)
+      }
+    resultCache[cacheKey]?.let {
+      return it
+    }
+
     return semaphore.withPermit {
+      resultCache[cacheKey]?.let {
+        return@withPermit it
+      }
       val requestId = nextRequestId.addAndGet(1)
       val okPrefix = "$requestId:OK:"
       val errorPrefix = "$requestId:ERROR:"
@@ -184,7 +197,9 @@ class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider)
       withContext(dispatchersProvider.default) {
         if (rawResult != null) {
           try {
-            json.decodeFromString<ReadabilityResult>(rawResult)
+            json.decodeFromString<ReadabilityResult>(rawResult).also {
+              resultCache.put(cacheKey, it)
+            }
           } catch (e: Exception) {
             Logger.e(e) { "Failed to decode readability payload, falling back to raw content" }
             fallbackReadabilityResult(content)
@@ -333,7 +348,6 @@ class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider)
         val config =
           WKWebViewConfiguration().apply {
             websiteDataStore = WKWebsiteDataStore.nonPersistentDataStore()
-            processPool = WKProcessPool()
             this.userContentController = userContentController
           }
         val webView = WKWebView(frame = CGRectZero.readValue(), configuration = config)
@@ -430,4 +444,26 @@ internal class ReaderNavigationDelegate : NSObject(), WKNavigationDelegateProtoc
   override fun webViewWebContentProcessDidTerminate(webView: WKWebView) {
     onProcessTerminated?.invoke()
   }
+}
+
+private data class ReadabilityCacheKey(
+  val link: String?,
+  val image: String?,
+  val contentLength: Int,
+  val primaryHash: Int,
+  val secondaryHash: Long,
+)
+
+private fun buildCacheKey(link: String?, image: String?, content: String): ReadabilityCacheKey {
+  var fnv = -3750763034362895579L
+  for (i in 0 until content.length) {
+    fnv = (fnv xor content[i].code.toLong()) * 1099511628211L
+  }
+  return ReadabilityCacheKey(
+    link = link,
+    image = image,
+    contentLength = content.length,
+    primaryHash = content.hashCode(),
+    secondaryHash = fnv,
+  )
 }
