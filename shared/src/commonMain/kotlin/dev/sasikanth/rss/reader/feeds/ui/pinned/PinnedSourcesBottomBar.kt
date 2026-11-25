@@ -36,17 +36,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -84,16 +82,18 @@ internal fun NowPlayingBottomBar(
         .padding(horizontal = 32.dp)
         .shadow(elevation = 4.dp, shape = shape)
         .clip(shape)
-        .drawBehind { drawRect(colorScheme.bottomSheet) }
-        .drawWithContent {
-          drawContent()
-
+        .drawWithCache {
           val outline = shape.createOutline(size, layoutDirection, this)
-          drawOutline(
-            outline = outline,
-            color = colorScheme.bottomSheetBorder,
-            style = Stroke(width = 1.dp.toPx()),
-          )
+          val borderStroke = Stroke(width = 1.dp.toPx())
+          onDrawWithContent {
+            drawRect(colorScheme.bottomSheet)
+            drawContent()
+            drawOutline(
+              outline = outline,
+              color = colorScheme.bottomSheetBorder,
+              style = borderStroke,
+            )
+          }
         }
         .fillMaxWidth()
         .height(PINNED_SOURCES_BOTTOM_BAR_HEIGHT),
@@ -117,6 +117,7 @@ internal fun PinnedSourcesBottomBar(
 ) {
   val shape = CircleShape
   val colorScheme = AppTheme.colorScheme
+  val haptic = LocalHapticFeedback.current
 
   val lazyListState = rememberLazyListState()
   val reorderableLazyRowState =
@@ -129,12 +130,12 @@ internal fun PinnedSourcesBottomBar(
       },
     )
 
-  val startFade by
+  val startFadeState =
     animateFloatAsState(
       targetValue = if (lazyListState.canScrollBackward) 1f else 0f,
       animationSpec = tween(durationMillis = 200),
     )
-  val endFade by
+  val endFadeState =
     animateFloatAsState(
       targetValue = if (lazyListState.canScrollForward) 1f else 0f,
       animationSpec = tween(durationMillis = 200),
@@ -155,16 +156,18 @@ internal fun PinnedSourcesBottomBar(
         .padding(horizontal = 32.dp)
         .shadow(elevation = 4.dp, shape = shape)
         .clip(shape)
-        .drawBehind { drawRect(colorScheme.bottomSheet) }
-        .drawWithContent {
-          drawContent()
-
+        .drawWithCache {
           val outline = shape.createOutline(size, layoutDirection, this)
-          drawOutline(
-            outline = outline,
-            color = colorScheme.bottomSheetBorder,
-            style = Stroke(width = 1.dp.toPx()),
-          )
+          val borderStroke = Stroke(width = 1.dp.toPx())
+          onDrawWithContent {
+            drawRect(colorScheme.bottomSheet)
+            drawContent()
+            drawOutline(
+              outline = outline,
+              color = colorScheme.bottomSheetBorder,
+              style = borderStroke,
+            )
+          }
         }
         .fillMaxWidth()
         .height(PINNED_SOURCES_BOTTOM_BAR_HEIGHT),
@@ -178,31 +181,51 @@ internal fun PinnedSourcesBottomBar(
         Modifier.weight(1f).fillMaxHeight().drawWithCache {
           val fadeWidth = BOTTOM_BAR_FADE_WIDTH.toPx()
           val fadeSize = size.copy(width = fadeWidth)
-          val startBrush =
+          val startMask =
+            Brush.horizontalGradient(colorStops = StartFadeStops, startX = 0f, endX = fadeWidth)
+          val endMask =
             Brush.horizontalGradient(
-              colorStops = fadeStops(colorScheme.bottomSheet, reversed = false),
-              startX = 0f,
-              endX = fadeWidth,
-            )
-          val endBrush =
-            Brush.horizontalGradient(
-              colorStops = fadeStops(colorScheme.bottomSheet, reversed = true),
+              colorStops = EndFadeStops,
               startX = size.width - fadeWidth,
               endX = size.width,
             )
           val endTopLeft = Offset(size.width - fadeWidth, 0f)
+          var lastBottomSheet = Color.Unspecified
+          var cachedFadeFilter: ColorFilter? = null
 
           onDrawWithContent {
             drawContent()
 
-            val start = startFade
-            if (start > 0f) {
-              drawRect(brush = startBrush, size = fadeSize, alpha = start)
-            }
+            val start = startFadeState.value
+            val end = endFadeState.value
+            if (start > 0f || end > 0f) {
+              val bottomSheet = colorScheme.bottomSheet
+              val fadeFilter =
+                if (bottomSheet == lastBottomSheet) {
+                  cachedFadeFilter
+                } else {
+                  lastBottomSheet = bottomSheet
+                  ColorFilter.tint(bottomSheet).also { cachedFadeFilter = it }
+                }
 
-            val end = endFade
-            if (end > 0f) {
-              drawRect(brush = endBrush, topLeft = endTopLeft, size = fadeSize, alpha = end)
+              if (start > 0f) {
+                drawRect(
+                  brush = startMask,
+                  size = fadeSize,
+                  alpha = start,
+                  colorFilter = fadeFilter,
+                )
+              }
+
+              if (end > 0f) {
+                drawRect(
+                  brush = endMask,
+                  topLeft = endTopLeft,
+                  size = fadeSize,
+                  alpha = end,
+                  colorFilter = fadeFilter,
+                )
+              }
             }
           }
         },
@@ -218,7 +241,7 @@ internal fun PinnedSourcesBottomBar(
             Text(
               text = stringResource(Res.string.noPinnedSources),
               style = MaterialTheme.typography.labelLarge,
-              color = colorScheme.onSurfaceVariant,
+              color = { colorScheme.onSurfaceVariant },
               textAlign = TextAlign.Center,
             )
           }
@@ -232,8 +255,6 @@ internal fun PinnedSourcesBottomBar(
       ) { index ->
         val source = pinnedSources[index]
         ReorderableItem(state = reorderableLazyRowState, key = source.id) { isDragging ->
-          val haptic = LocalHapticFeedback.current
-
           SourceItem(
             source = source,
             activeSource = activeSource,
@@ -305,12 +326,14 @@ private fun SourceItem(
 }
 
 private val BOTTOM_BAR_FADE_WIDTH = 40.dp
+private val FadeAlphas = floatArrayOf(1f, 0.94f, 0.78f, 0.5f, 0.22f, 0.06f, 0f)
+private val StartFadeStops = fadeStops(reversed = false)
+private val EndFadeStops = fadeStops(reversed = true)
 
-private fun fadeStops(color: Color, reversed: Boolean): Array<Pair<Float, Color>> {
-  val alphas = floatArrayOf(1f, 0.94f, 0.78f, 0.5f, 0.22f, 0.06f, 0f)
-  return Array(alphas.size) { index ->
-    val position = index / (alphas.size - 1).toFloat()
-    val alpha = if (reversed) alphas[alphas.size - 1 - index] else alphas[index]
-    position to color.copy(alpha = alpha)
+private fun fadeStops(reversed: Boolean): Array<Pair<Float, Color>> {
+  return Array(FadeAlphas.size) { index ->
+    val position = index / (FadeAlphas.size - 1).toFloat()
+    val alpha = if (reversed) FadeAlphas[FadeAlphas.size - 1 - index] else FadeAlphas[index]
+    position to Color.White.copy(alpha = alpha)
   }
 }

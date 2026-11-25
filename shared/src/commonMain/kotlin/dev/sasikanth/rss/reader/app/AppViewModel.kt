@@ -21,13 +21,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
-import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
-import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
-import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -94,43 +91,22 @@ class AppViewModel(
 
     combine(
         combine(
-          combine(settingsRepository.appThemeMode, settingsRepository.useAmoled, ::Pair),
-          combine(
-            settingsRepository.themeVariant,
-            settingsRepository.showFeedFavIcon,
-            settingsRepository.homeViewMode,
-            ::Triple,
-          ),
-        ) { (appThemeMode, useAmoled), (themeVariant, showFeedFavIcon, homeViewMode) ->
-          AppAppearanceSettings(
-            appThemeMode = appThemeMode,
-            useAmoled = useAmoled,
-            themeVariant = themeVariant,
-            showFeedFavIcon = showFeedFavIcon,
-            homeViewMode = homeViewMode,
-          )
-        },
-        combine(
-          settingsRepository.showReaderView,
-          settingsRepository.blockImages,
-          observableActiveSource.activeSource,
-          settingsRepository.postsType,
-          settingsRepository.postsSortOrder,
-          ::AppContentSettings,
+          settingsRepository.appThemeMode,
+          settingsRepository.useAmoled,
+          settingsRepository.themeVariant,
+          settingsRepository.showFeedFavIcon,
+          ::AppAppearanceSettings,
         ),
-      ) { appearanceSettings, contentSettings ->
+        combine(settingsRepository.showReaderView, settingsRepository.blockImages, ::Pair),
+      ) { appearanceSettings, (showReaderView, blockImages) ->
         _state.update {
           it.copy(
             appThemeMode = appearanceSettings.appThemeMode,
             useAmoled = appearanceSettings.useAmoled,
             themeVariant = appearanceSettings.themeVariant,
             showFeedFavIcon = appearanceSettings.showFeedFavIcon,
-            homeViewMode = appearanceSettings.homeViewMode,
-            showReaderView = contentSettings.showReaderView,
-            blockImages = contentSettings.blockImages,
-            activeSource = contentSettings.activeSource,
-            postsType = contentSettings.postsType,
-            postsSortOrder = contentSettings.postsSortOrder,
+            showReaderView = showReaderView,
+            blockImages = blockImages,
           )
         }
       }
@@ -156,9 +132,8 @@ class AppViewModel(
     viewModelScope.launch {
       val post = rssRepository.resolvedPostById(playingPostId) ?: return@launch
 
-      val currentState = _state.value
-      val activeSource = currentState.activeSource
-      val postsType = currentState.postsType
+      val activeSource = observableActiveSource.currentActiveSource
+      val postsType = settingsRepository.postsType.first()
 
       val isInActiveSource =
         when (activeSource) {
@@ -186,11 +161,12 @@ class AppViewModel(
       if (!isInActiveSource || !isReadStatusCompatible || !isDateCompatible) {
         observableActiveSource.clearSelection()
         settingsRepository.updatePostsType(PostsType.ALL)
-        _state.filter { it.activeSource == null && it.postsType == PostsType.ALL }.first()
+        settingsRepository.postsType.filter { it == PostsType.ALL }.first()
       }
 
-      val finalState = _state.value
-      val finalPostsType = finalState.postsType
+      val finalActiveSource = observableActiveSource.currentActiveSource
+      val finalPostsType = settingsRepository.postsType.first()
+      val finalPostsSortOrder = settingsRepository.postsSortOrder.first()
       val finalLastRefreshedAt = refreshPolicy.fetchLastRefreshedAt()
       val finalPostsAfter =
         if (finalLastRefreshedAt != null) {
@@ -203,9 +179,9 @@ class AppViewModel(
         }
 
       val finalActiveSourceIds =
-        when (val source = finalState.activeSource) {
-          is Feed -> listOf(source.id)
-          is FeedGroup -> source.feedIds
+        when (finalActiveSource) {
+          is Feed -> listOf(finalActiveSource.id)
+          is FeedGroup -> finalActiveSource.feedIds
           else -> emptyList()
         }
       val finalUnreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(finalPostsType)
@@ -216,7 +192,7 @@ class AppViewModel(
           postId = playingPostId,
           sourceId = post.sourceId,
           activeSourceIds = finalActiveSourceIds,
-          postsSortOrder = finalState.postsSortOrder,
+          postsSortOrder = finalPostsSortOrder,
           unreadOnly = finalUnreadOnly,
           after = finalPostsAfter,
           postsUpperBound = postsUpperBound,
@@ -293,13 +269,4 @@ private data class AppAppearanceSettings(
   val useAmoled: Boolean,
   val themeVariant: ThemeVariant,
   val showFeedFavIcon: Boolean,
-  val homeViewMode: HomeViewMode,
-)
-
-private data class AppContentSettings(
-  val showReaderView: Boolean,
-  val blockImages: Boolean,
-  val activeSource: Source?,
-  val postsType: PostsType,
-  val postsSortOrder: PostsSortOrder,
 )

@@ -17,7 +17,7 @@
 
 package dev.sasikanth.rss.reader.feeds.ui
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.combinedClickable
@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,7 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
@@ -82,17 +83,20 @@ internal fun FeedGroupItem(
   modifier: Modifier = Modifier,
   interactionSource: MutableInteractionSource? = null,
   dropdownMenuContent: (@Composable ColumnScope.(onDismiss: () -> Unit) -> Unit)? = null,
+  haptic: HapticFeedback = LocalHapticFeedback.current,
 ) {
-  val haptic = LocalHapticFeedback.current
+  val colorScheme = AppTheme.colorScheme
   val translucentStyle = LocalTranslucentStyles.current
-  val backgroundColor by
-    animateColorAsState(
-      if (selected) {
-        translucentStyle.default.background
-      } else {
-        Color.Transparent
-      }
-    )
+  val targetSelectionAlpha = if (selected) 1f else 0f
+  val initialSelectionAlpha = remember { targetSelectionAlpha }
+  var hasSelectionTransitioned by remember { mutableStateOf(false) }
+  val selectionAlpha = remember { Animatable(initialSelectionAlpha) }
+  if (hasSelectionTransitioned || targetSelectionAlpha != initialSelectionAlpha) {
+    LaunchedEffect(targetSelectionAlpha) {
+      hasSelectionTransitioned = true
+      selectionAlpha.animateTo(targetSelectionAlpha)
+    }
+  }
   var showDropdownMenu by remember { mutableStateOf(false) }
   var contextMenuOffset by remember { mutableStateOf<Offset?>(null) }
 
@@ -101,7 +105,13 @@ internal fun FeedGroupItem(
       Modifier.fillMaxWidth()
         .then(modifier)
         .clip(MaterialTheme.shapes.large)
-        .drawBehind { drawRect(backgroundColor) }
+        .drawBehind {
+          val alpha = selectionAlpha.value
+          if (alpha > 0f) {
+            val color = translucentStyle.default.background
+            drawRect(color.copy(alpha = color.alpha * alpha))
+          }
+        }
         .combinedClickable(
           interactionSource = interactionSource ?: remember { MutableInteractionSource() },
           indication = LocalIndication.current,
@@ -132,7 +142,6 @@ internal fun FeedGroupItem(
   ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
       val iconSize = 16.dp
-      val iconSpacing = 2.dp
 
       FeedGroupIconGrid(
         feedHomepageLinks = feedGroup.feedHomepageLinks,
@@ -148,7 +157,7 @@ internal fun FeedGroupItem(
         Text(
           text = feedGroup.name,
           style = MaterialTheme.typography.titleSmall,
-          color = AppTheme.colorScheme.onSurface,
+          color = { colorScheme.onSurface },
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
@@ -167,7 +176,7 @@ internal fun FeedGroupItem(
         Text(
           text = text,
           style = MaterialTheme.typography.bodySmall,
-          color = AppTheme.colorScheme.onSurfaceVariant,
+          color = { colorScheme.onSurfaceVariant },
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )

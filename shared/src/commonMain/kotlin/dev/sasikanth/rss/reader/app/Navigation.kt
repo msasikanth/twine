@@ -17,9 +17,7 @@
 
 package dev.sasikanth.rss.reader.app
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,18 +27,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.window.core.layout.WindowSizeClass
-import androidx.window.core.layout.computeWindowSizeClass
 import dev.sasikanth.rss.reader.about.ui.AboutScreen
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionViewModel
 import dev.sasikanth.rss.reader.accountselection.ui.AccountSelectionScreen
@@ -112,6 +112,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.readerPanePlaceholder
@@ -185,6 +186,7 @@ fun EntryProviderScope<NavKey>.mainScreen(
   openCurrentlyPlaying: () -> Unit,
   screenModifier: Modifier,
   isSideNavigationExpanded: MutableState<Boolean>,
+  listPaneSizeClass: State<WindowSizeClass>,
 ) {
   entry<Screen.Main>(
     metadata = ListDetailSceneStrategy.listPane(detailPlaceholder = { ReaderPanePlaceholder() })
@@ -193,39 +195,36 @@ fun EntryProviderScope<NavKey>.mainScreen(
     val startTab = mainRoute.startTab
     val feedsViewModel = viewModel { feedsViewModel() }
 
-    // Navigation 3 has no simple `hasRoute` backstack scanner for inside nested graphs since we
-    // replaced it with Navigator
-    // But mainScreen is almost always active when it's rendered, so canHandleBack is true.
     val isMainActive = true
 
-    val isDetailOpen = navigator.backStack.lastOrNull() !is Screen.Main
+    val isDetailOpen by
+      remember(navigator) { derivedStateOf { navigator.backStack.lastOrNull() !is Screen.Main } }
 
-    LaunchedEffect(useDarkTheme) {
+    SideEffect(useDarkTheme, toggleLightStatusBar, toggleLightNavBar) {
       toggleLightStatusBar(!useDarkTheme)
       toggleLightNavBar(!useDarkTheme)
     }
 
-    PaneSizeClassProvider {
+    CompositionLocalProvider(LocalWindowSizeClass provides listPaneSizeClass.value) {
       MainScreen(
         feedsViewModel = feedsViewModel,
         startTab = startTab,
         homeContent = { openDrawer ->
           val viewModel = viewModel { homeViewModel() }
 
-          // In a split the reader stays visible across feed switches; close the stale one.
           LaunchedEffect(Unit) {
-            viewModel.state
-              .map { it.activeSource?.id }
-              .distinctUntilChanged()
-              .drop(1)
-              .collect {
-                if (navigator.backStack.lastOrNull() is Screen.Reader) {
-                  navigator.goBack()
+            launch {
+              viewModel.state
+                .map { it.activeSource?.id }
+                .distinctUntilChanged()
+                .drop(1)
+                .collect {
+                  if (navigator.backStack.lastOrNull() is Screen.Reader) {
+                    navigator.goBack()
+                  }
                 }
-              }
-          }
+            }
 
-          LaunchedEffect(Unit) {
             navigator
               .result(SELECTED_GROUPS_KEY)
               .onEach { selectedGroupIds ->
@@ -235,9 +234,7 @@ fun EntryProviderScope<NavKey>.mainScreen(
                 }
               }
               .launchIn(this)
-          }
 
-          LaunchedEffect(Unit) {
             feedsViewModel.state
               .mapNotNull { it.openGroupSelection }
               .onEach { selectedGroupIds ->
@@ -291,8 +288,6 @@ fun EntryProviderScope<NavKey>.mainScreen(
                 navigator.consumeResult(FRESH_RSS_LOGIN_SUCCESS_KEY)
               }
               .launchIn(this)
-          }
-          LaunchedEffect(Unit) {
             navigator
               .result(MINIFLUX_LOGIN_SUCCESS_KEY)
               .filter { it }
@@ -301,8 +296,6 @@ fun EntryProviderScope<NavKey>.mainScreen(
                 navigator.consumeResult(MINIFLUX_LOGIN_SUCCESS_KEY)
               }
               .launchIn(this)
-          }
-          LaunchedEffect(Unit) {
             navigator
               .result(BAZQUX_LOGIN_SUCCESS_KEY)
               .filter { it }
@@ -345,50 +338,6 @@ fun EntryProviderScope<NavKey>.mainScreen(
         isSideNavigationExpanded = isSideNavigationExpanded.value,
         setSideNavigationExpanded = { isSideNavigationExpanded.value = it },
       )
-    }
-  }
-}
-
-// Inside a list-detail split the Main entry only gets the list pane, so screens under it
-// must adapt to the pane's size rather than the window's.
-@Composable
-private fun PaneSizeClassProvider(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-  val movableContent = remember {
-    movableContentOf { currentContent: @Composable () -> Unit -> currentContent() }
-  }
-  val rootWindowSizeClass = LocalRootWindowSizeClass.current
-  val isSplitCapableWindow =
-    rootWindowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
-  if (!isSplitCapableWindow) {
-    if (modifier == Modifier) {
-      movableContent(content)
-    } else {
-      Box(modifier = modifier) { movableContent(content) }
-    }
-  } else {
-    BoxWithConstraints(modifier = modifier) {
-      val widthDp =
-        if (constraints.hasBoundedWidth) {
-          maxWidth.value
-        } else {
-          rootWindowSizeClass.minWidthDp.toFloat()
-        }
-      val heightDp =
-        if (constraints.hasBoundedHeight) {
-          maxHeight.value
-        } else {
-          rootWindowSizeClass.minHeightDp.toFloat()
-        }
-      val paneSizeClass =
-        remember(widthDp, heightDp) {
-          WindowSizeClass.BREAKPOINTS_V2.computeWindowSizeClass(
-            widthDp = widthDp,
-            heightDp = heightDp,
-          )
-        }
-      CompositionLocalProvider(LocalWindowSizeClass provides paneSizeClass) {
-        movableContent(content)
-      }
     }
   }
 }
@@ -545,18 +494,9 @@ fun EntryProviderScope<NavKey>.readerScreen(
   isReaderPaneExpanded: MutableState<Boolean>,
 ) {
   entry<Screen.Reader>(metadata = ListDetailSceneStrategy.detailPane()) { route ->
-    // Since we don't have NavBackStackEntry savedStateHandle easily,
-    // ReaderViewModel doesn't receive args automatically via savedStateHandle.
-    // We can manually pass it via factory.
-    // However, `feedViewModel(it.savedStateHandle)` relies on it.
-    // A quick hack is to inject ReaderScreenArgs or just let KMP viewModel provide an empty handle
-    // and rely on a workaround, or better:
-    // With entry<Screen.Reader>, `route` is already the decoded Screen.Reader object!
-    // Since twine expects ReaderScreenArgs in the ViewModel from SavedStateHandle... wait!
-    // `val viewModel = viewModel { readerViewModel(it.savedStateHandle) }`
-    // We can create a fake SavedStateHandle containing ReaderScreenArgs:
-    val savedStateHandle = SavedStateHandle(mapOf("readerScreenArgs" to route.readerScreenArgs))
-    val viewModel = viewModel { readerViewModel(savedStateHandle) }
+    val viewModel = viewModel {
+      readerViewModel(SavedStateHandle(mapOf("readerScreenArgs" to route.readerScreenArgs)))
+    }
 
     val isSplitCapableWindow =
       LocalRootWindowSizeClass.current.isWidthAtLeastBreakpoint(
@@ -664,8 +604,9 @@ fun EntryProviderScope<NavKey>.feedGroupScreen(
   navigator: AppNavigator,
 ) {
   entry<Screen.FeedGroup> { feedGroupRoute ->
-    val savedStateHandle = SavedStateHandle(mapOf("id" to feedGroupRoute.groupId))
-    val viewModel = viewModel { groupViewModel(savedStateHandle) }
+    val viewModel = viewModel {
+      groupViewModel(SavedStateHandle(mapOf("id" to feedGroupRoute.groupId)))
+    }
 
     LaunchedEffect(Unit) {
       navigator
@@ -752,22 +693,24 @@ fun EntryProviderScope<NavKey>.feedInfoDialog(
   navigator: AppNavigator,
 ) {
   entry<Modals.FeedInfo>(metadata = BottomSheetSceneStrategy.bottomSheet()) { modalRoute ->
-    val savedStateHandle = SavedStateHandle(mapOf("feedId" to modalRoute.feedId))
-    val viewModel = viewModel { feedViewModel(savedStateHandle) }
+    val viewModel = viewModel {
+      feedViewModel(SavedStateHandle(mapOf("feedId" to modalRoute.feedId)))
+    }
     FeedInfoBottomSheet(feedViewModel = viewModel, dismiss = { navigator.goBack() })
   }
 }
 
 @Composable
 private fun ReaderPanePlaceholder(modifier: Modifier = Modifier) {
+  val colorScheme = AppTheme.colorScheme
   Box(
-    modifier = modifier.fillMaxSize().background(AppTheme.colorScheme.backdrop),
+    modifier = modifier.fillMaxSize().drawBehind { drawRect(colorScheme.backdrop) },
     contentAlignment = Alignment.Center,
   ) {
     Text(
       text = stringResource(Res.string.readerPanePlaceholder),
       style = MaterialTheme.typography.labelLarge,
-      color = AppTheme.colorScheme.onSurfaceVariant,
+      color = colorScheme.onSurfaceVariant,
     )
   }
 }
@@ -777,9 +720,11 @@ fun EntryProviderScope<NavKey>.groupSelectionDialog(
   navigator: AppNavigator,
 ) {
   entry<Modals.GroupSelection>(metadata = BottomSheetSceneStrategy.bottomSheet()) { modalRoute ->
-    val savedStateHandle =
-      SavedStateHandle(mapOf("selectedGroupIds" to modalRoute.selectedGroupIds))
-    val viewModel = viewModel { groupSelectionViewModel(savedStateHandle) }
+    val viewModel = viewModel {
+      groupSelectionViewModel(
+        SavedStateHandle(mapOf("selectedGroupIds" to modalRoute.selectedGroupIds))
+      )
+    }
     GroupSelectionSheet(
       viewModel = viewModel,
       dismiss = { navigator.goBack() },

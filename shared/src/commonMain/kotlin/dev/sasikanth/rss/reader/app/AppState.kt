@@ -17,24 +17,16 @@
 
 package dev.sasikanth.rss.reader.app
 
-import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
-import dev.sasikanth.rss.reader.core.model.local.PostsType
-import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
-import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 
 data class AppState(
   val appThemeMode: AppThemeMode,
   val useAmoled: Boolean,
   val themeVariant: ThemeVariant,
   val showFeedFavIcon: Boolean,
-  val homeViewMode: HomeViewMode,
   val showReaderView: Boolean,
   val blockImages: Boolean,
-  val activeSource: Source?,
-  val postsType: PostsType,
-  val postsSortOrder: PostsSortOrder,
   val showChangelog: Boolean,
   val versionName: String,
 ) {
@@ -46,12 +38,8 @@ data class AppState(
         useAmoled = false,
         themeVariant = ThemeVariant.Dynamic,
         showFeedFavIcon = true,
-        homeViewMode = HomeViewMode.Default,
         showReaderView = false,
         blockImages = false,
-        activeSource = null,
-        postsType = PostsType.ALL,
-        postsSortOrder = PostsSortOrder.Latest,
         showChangelog = false,
         versionName = "",
       )

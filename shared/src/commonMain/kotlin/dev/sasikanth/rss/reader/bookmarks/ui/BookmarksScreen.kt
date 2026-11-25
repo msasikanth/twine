@@ -39,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
@@ -60,12 +61,20 @@ import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.BookmarkStacks
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmarks
 import twine.shared.generated.resources.bookmarksPlaceholder
+
+private val BookmarksPostMetadataConfig =
+  PostMetadataConfig.DEFAULT.copy(
+    showUnreadIndicator = false,
+    showToggleReadUnreadOption = false,
+    enablePostSource = false,
+  )
 
 @Composable
 internal fun BookmarksScreen(
@@ -96,23 +105,23 @@ private fun BookmarksContent(
 ) {
   val listState = rememberLazyListState()
   val coroutineScope = rememberCoroutineScope()
+  val hasBookmarks by remember(bookmarks) { derivedStateOf { bookmarks.itemCount > 0 } }
   val showScrollToTop by
-    remember(bookmarks) {
-      derivedStateOf {
-        val hasContent = bookmarks.itemCount > 0
-        hasContent && listState.firstVisibleItemIndex > 0
-      }
+    remember(bookmarks, listState) {
+      derivedStateOf { hasBookmarks && listState.firstVisibleItemIndex > 0 }
     }
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
+  val colorScheme = AppTheme.colorScheme
+  val blockImages = LocalBlockImage.current
 
   Scaffold(
-    modifier = modifier,
+    modifier = modifier.drawBehind { drawRect(colorScheme.backdrop) },
     topBar = {
       SimpleTopAppBar(title = stringResource(Res.string.bookmarks), onBackClick = goBack)
     },
     content = { padding ->
-      if (bookmarks.itemCount > 0) {
+      if (hasBookmarks) {
         Box(modifier = Modifier.fillMaxSize().iosBottomSafeAreaPadding()) {
           LazyColumn(
             contentPadding =
@@ -122,8 +131,9 @@ private fun BookmarksContent(
               ),
             state = listState,
           ) {
+            val itemCount = bookmarks.itemCount
             items(
-              count = bookmarks.itemCount,
+              count = itemCount,
               key = bookmarks.itemKey { PostListKey.encode(it) },
               contentType = { "PostListItem" },
             ) { index ->
@@ -136,23 +146,17 @@ private fun BookmarksContent(
                   onPostCommentsClick = {
                     post.commentsLink?.let { coroutineScope.launch { linkHandler.openLink(it) } }
                   },
-                  onPostSourceClick = {
-                    // no-op
-                  },
+                  onPostSourceClick = {},
                   updatePostReadStatus = { updatedReadStatus ->
                     dispatch(BookmarksEvent.UpdatePostReadStatus(post.id, updatedReadStatus))
                   },
-                  postMetadataConfig =
-                    PostMetadataConfig.DEFAULT.copy(
-                      showUnreadIndicator = false,
-                      showToggleReadUnreadOption = false,
-                      enablePostSource = false,
-                    ),
+                  postMetadataConfig = BookmarksPostMetadataConfig,
+                  blockImages = blockImages,
                 )
-                if (index != bookmarks.itemCount - 1) {
+                if (index != itemCount - 1) {
                   HorizontalDivider(
                     modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
-                    color = AppTheme.colorScheme.outlineVariant,
+                    color = colorScheme.outlineVariant,
                   )
                 }
               }
@@ -182,7 +186,7 @@ private fun BookmarksContent(
               imageVector = TwineIcons.BookmarkStacks,
               contentDescription = null,
               modifier = Modifier.size(80.dp),
-              tint = AppTheme.colorScheme.onSurface,
+              tint = colorScheme.onSurface,
             )
 
             Spacer(Modifier.requiredHeight(16.dp))
@@ -190,13 +194,13 @@ private fun BookmarksContent(
             Text(
               text = stringResource(Res.string.bookmarksPlaceholder),
               style = MaterialTheme.typography.labelLarge,
-              color = AppTheme.colorScheme.onSurfaceVariant,
+              color = colorScheme.onSurfaceVariant,
             )
           }
         }
       }
     },
-    containerColor = AppTheme.colorScheme.backdrop,
+    containerColor = Color.Transparent,
     contentColor = Color.Unspecified,
   )
 }

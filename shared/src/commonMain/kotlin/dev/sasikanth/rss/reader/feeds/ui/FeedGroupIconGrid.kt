@@ -17,25 +17,31 @@
 
 package dev.sasikanth.rss.reader.feeds.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.dropShadow
-import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.compositeOver
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.FeedIcon
+import dev.sasikanth.rss.reader.ui.AppColorScheme
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
+import dev.sasikanth.rss.reader.ui.TranslucentStyle
+
+private val FeedGroupIconShape = RoundedCornerShape(25)
 
 @Composable
 internal fun FeedGroupIconGrid(
@@ -44,84 +50,90 @@ internal fun FeedGroupIconGrid(
   feedShowFavIconSettings: List<Boolean>,
   iconSize: Dp = 14.dp,
   modifier: Modifier = Modifier,
+  cutoutColor: (() -> Color)? = null,
 ) {
-  val containerSize = iconSize * 2
+  val colorScheme = AppTheme.colorScheme
   val translucentStyle = LocalTranslucentStyles.current.default
 
-  Box(
-    modifier =
-      modifier
-        .requiredSize(containerSize)
-        .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-  ) {
-    val placeholderColor = translucentStyle.background.compositeOver(AppTheme.colorScheme.backdrop)
-    val iconShape = RoundedCornerShape(25)
+  Layout(
+    modifier = modifier.requiredSize(iconSize * 2),
+    content = {
+      FeedGroupSlotIcon(
+        index = 2,
+        feedHomepageLinks = feedHomepageLinks,
+        feedIconLinks = feedIconLinks,
+        feedShowFavIconSettings = feedShowFavIconSettings,
+        colorScheme = colorScheme,
+        translucentStyle = translucentStyle,
+      )
 
-    // Top-right
-    FeedIcon(
-      index = 2,
-      feedHomepageLinks = feedHomepageLinks,
-      feedIconLinks = feedIconLinks,
-      feedShowFavIconSettings = feedShowFavIconSettings,
-      iconShape = iconShape,
-      placeholderColor = placeholderColor,
-      modifier = Modifier.requiredSize(iconSize).align(Alignment.TopEnd),
-    )
-
-    // Middle
-    Box(
-      modifier = Modifier.requiredSize(iconSize + 1.dp).align(Alignment.Center),
-      contentAlignment = Alignment.Center,
-    ) {
-      FeedIcon(
+      FeedGroupSlotIcon(
         index = 1,
         feedHomepageLinks = feedHomepageLinks,
         feedIconLinks = feedIconLinks,
         feedShowFavIconSettings = feedShowFavIconSettings,
-        iconShape = iconShape,
-        placeholderColor = placeholderColor,
-        modifier =
-          Modifier.dropShadow(iconShape) {
-              color = Color.Black
-              spread = 1.dp.toPx()
-              blendMode = BlendMode.DstOut
-            }
-            .requiredSize(iconSize),
+        colorScheme = colorScheme,
+        translucentStyle = translucentStyle,
+        modifier = Modifier.drawSiblingHalo(colorScheme, cutoutColor),
       )
-    }
 
-    // Bottom-left
-    Box(
-      modifier = Modifier.requiredSize(iconSize + 1.dp).align(Alignment.BottomStart),
-      contentAlignment = Alignment.Center,
-    ) {
-      FeedIcon(
+      FeedGroupSlotIcon(
         index = 0,
         feedHomepageLinks = feedHomepageLinks,
         feedIconLinks = feedIconLinks,
         feedShowFavIconSettings = feedShowFavIconSettings,
-        iconShape = iconShape,
-        placeholderColor = placeholderColor,
-        modifier =
-          Modifier.dropShadow(iconShape) {
-              color = Color.Black
-              spread = 1.dp.toPx()
-              blendMode = BlendMode.DstOut
-            }
-            .requiredSize(iconSize),
+        colorScheme = colorScheme,
+        translucentStyle = translucentStyle,
+        modifier = Modifier.drawSiblingHalo(colorScheme, cutoutColor),
       )
+    },
+  ) { measurables, constraints ->
+    val iconPx = iconSize.roundToPx()
+    val defaultContainerPx = (iconSize * 2).roundToPx()
+    val containerWidth = constraints.constrainWidth(defaultContainerPx)
+    val containerHeight = constraints.constrainHeight(defaultContainerPx)
+    val childConstraints = Constraints.fixed(iconPx, iconPx)
+
+    val topRight = measurables[0].measure(childConstraints)
+    val middle = measurables[1].measure(childConstraints)
+    val bottomLeft = measurables[2].measure(childConstraints)
+
+    layout(containerWidth, containerHeight) {
+      topRight.placeRelative(x = containerWidth - iconPx, y = 0)
+      middle.placeRelative(x = (containerWidth - iconPx) / 2, y = (containerHeight - iconPx) / 2)
+      bottomLeft.placeRelative(x = 0, y = containerHeight - iconPx)
     }
   }
 }
 
+private fun Modifier.drawSiblingHalo(
+  colorScheme: AppColorScheme,
+  cutoutColor: (() -> Color)?,
+): Modifier = drawWithCache {
+  val spread = 1.dp.toPx()
+  val haloTopLeft = Offset(-spread, -spread)
+  val haloSize = Size(size.width + spread * 2f, size.height + spread * 2f)
+  val radius = minOf(size.width, size.height) * 0.25f + spread
+  val haloCornerRadius = CornerRadius(radius, radius)
+  onDrawBehind {
+    val color = cutoutColor?.invoke() ?: colorScheme.backdrop
+    drawRoundRect(
+      color = color,
+      topLeft = haloTopLeft,
+      size = haloSize,
+      cornerRadius = haloCornerRadius,
+    )
+  }
+}
+
 @Composable
-private fun FeedIcon(
+private fun FeedGroupSlotIcon(
   index: Int,
   feedHomepageLinks: List<String>,
   feedIconLinks: List<String>,
   feedShowFavIconSettings: List<Boolean>,
-  iconShape: Shape,
-  placeholderColor: Color,
+  colorScheme: AppColorScheme,
+  translucentStyle: TranslucentStyle,
   modifier: Modifier = Modifier,
 ) {
   val homepageLink = feedHomepageLinks.getOrNull(index)
@@ -137,6 +149,14 @@ private fun FeedIcon(
       modifier = modifier,
     )
   } else {
-    Box(modifier.background(placeholderColor, iconShape))
+    Box(
+      modifier.drawWithCache {
+        val outline = FeedGroupIconShape.createOutline(size, layoutDirection, this)
+        onDrawBehind {
+          val placeholderColor = translucentStyle.background.compositeOver(colorScheme.backdrop)
+          drawOutline(outline, placeholderColor)
+        }
+      }
+    )
   }
 }

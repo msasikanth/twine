@@ -16,7 +16,7 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.combinedClickable
@@ -35,6 +35,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,7 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -70,6 +71,8 @@ import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.feedSyncErrorTitle
 
+private val FeedListItemShape = RoundedCornerShape(16.dp)
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun FeedListItem(
@@ -84,17 +87,20 @@ internal fun FeedListItem(
   modifier: Modifier = Modifier,
   interactionSource: MutableInteractionSource? = null,
   dropdownMenuContent: (@Composable ColumnScope.(onDismiss: () -> Unit) -> Unit)? = null,
+  haptic: HapticFeedback = LocalHapticFeedback.current,
 ) {
-  val haptic = LocalHapticFeedback.current
+  val colorScheme = AppTheme.colorScheme
   val translucentStyle = LocalTranslucentStyles.current
-  val backgroundColor by
-    animateColorAsState(
-      if (isFeedSelected) {
-        translucentStyle.default.background
-      } else {
-        Color.Transparent
-      }
-    )
+  val targetSelectionAlpha = if (isFeedSelected) 1f else 0f
+  val initialSelectionAlpha = remember { targetSelectionAlpha }
+  var hasSelectionTransitioned by remember { mutableStateOf(false) }
+  val selectionAlpha = remember { Animatable(initialSelectionAlpha) }
+  if (hasSelectionTransitioned || targetSelectionAlpha != initialSelectionAlpha) {
+    LaunchedEffect(targetSelectionAlpha) {
+      hasSelectionTransitioned = true
+      selectionAlpha.animateTo(targetSelectionAlpha)
+    }
+  }
   var showDropdownMenu by remember { mutableStateOf(false) }
   var contextMenuOffset by remember { mutableStateOf<Offset?>(null) }
 
@@ -102,8 +108,14 @@ internal fun FeedListItem(
     modifier =
       Modifier.fillMaxWidth()
         .then(modifier)
-        .clip(RoundedCornerShape(16.dp))
-        .drawBehind { drawRect(backgroundColor) }
+        .clip(FeedListItemShape)
+        .drawBehind {
+          val alpha = selectionAlpha.value
+          if (alpha > 0f) {
+            val color = translucentStyle.default.background
+            drawRect(color.copy(alpha = color.alpha * alpha))
+          }
+        }
         .combinedClickable(
           interactionSource = interactionSource ?: remember { MutableInteractionSource() },
           indication = LocalIndication.current,
@@ -150,7 +162,7 @@ internal fun FeedListItem(
         modifier = Modifier.weight(1f),
         text = feed.name,
         style = MaterialTheme.typography.bodyMedium,
-        color = AppTheme.colorScheme.onSurface,
+        color = { colorScheme.onSurface },
         maxLines = 1,
         overflow = TextOverflow.Clip,
       )

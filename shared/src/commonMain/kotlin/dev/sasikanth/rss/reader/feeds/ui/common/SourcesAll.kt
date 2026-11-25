@@ -41,6 +41,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedback
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextAlign
@@ -98,6 +100,7 @@ internal fun LazyListScope.allSources(
   activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
   isInMultiSelectMode: Boolean,
+  haptic: HapticFeedback? = null,
   onSourceClick: (Source) -> Unit,
   onToggleSourceSelection: (Source) -> Unit,
   onPinClick: (Source) -> Unit,
@@ -155,6 +158,7 @@ internal fun LazyListScope.allSources(
                 onFeedGroupSelected = onToggleSourceSelection,
                 onFeedGroupClick = onSourceClick,
                 onPinClick = onPinClick,
+                haptic = haptic ?: LocalHapticFeedback.current,
                 modifier =
                   Modifier.padding(
                       start = startPadding,
@@ -234,6 +238,7 @@ internal fun LazyListScope.allSources(
                 onFeedSelected = onToggleSourceSelection,
                 onPinClick = onPinClick,
                 onSyncErrorClick = onSourceEditClick,
+                haptic = haptic ?: LocalHapticFeedback.current,
                 modifier =
                   Modifier.padding(
                       start = startPadding,
@@ -307,11 +312,12 @@ internal fun LazyListScope.allSources(
 
 @Composable
 private fun NoUnreadFeeds() {
+  val colorScheme = AppTheme.colorScheme
   Text(
     modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 24.dp),
     text = stringResource(Res.string.feedsNoUnread),
     style = MaterialTheme.typography.labelLarge,
-    color = AppTheme.colorScheme.onSurfaceVariant,
+    color = { colorScheme.onSurfaceVariant },
     textAlign = TextAlign.Center,
   )
 }
@@ -330,6 +336,7 @@ internal fun AllFeedsHeader(
   showAddButton: Boolean = true,
   onAddNewFeedClick: (() -> Unit)? = null,
 ) {
+  val colorScheme = AppTheme.colorScheme
   Row(
     modifier =
       Modifier.then(modifier).padding(horizontal = 24.dp).padding(top = 8.dp, bottom = 16.dp),
@@ -348,13 +355,13 @@ internal fun AllFeedsHeader(
       Text(
         text = allFeedsLabel,
         style = MaterialTheme.typography.titleMedium,
-        color = AppTheme.colorScheme.onSurface,
+        color = { colorScheme.onSurface },
       )
 
       Text(
         text = stringResource(Res.string.sourcesCount, visibleFeedsCount),
         style = MaterialTheme.typography.bodySmall,
-        color = AppTheme.colorScheme.onSurfaceVariant,
+        color = { colorScheme.onSurfaceVariant },
       )
     }
 
@@ -446,10 +453,11 @@ internal fun AllFeedsHeader(
 
 @Composable
 private fun DropdownMenuSectionTitle(text: String) {
+  val colorScheme = AppTheme.colorScheme
   Text(
     modifier = Modifier.padding(horizontal = 20.dp).padding(top = 12.dp, bottom = 4.dp),
     text = text,
     style = MaterialTheme.typography.labelMedium,
-    color = AppTheme.colorScheme.onSurfaceVariant,
+    color = { colorScheme.onSurfaceVariant },
   )
 }
