@@ -17,8 +17,8 @@
 
 package dev.sasikanth.rss.reader.reader.ui
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,23 +37,34 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorProducer
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.offset
 import dev.sasikanth.rss.reader.components.ThemeVariantIconButton
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
@@ -87,6 +98,11 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.readerCustomisationsTypeface
 import twine.shared.generated.resources.themeVariantColorScheme
 
+private val CustomizationsPillShape = RoundedCornerShape(50)
+private val ThemeVariantRowPadding = PaddingValues(horizontal = 28.dp, vertical = 8.dp)
+private val TypefaceRowPadding =
+  PaddingValues(start = 28.dp, top = 8.dp, end = 28.dp, bottom = 16.dp)
+
 @Composable
 internal fun ReaderCustomizationsContent(
   selectedFont: ReaderFont,
@@ -100,9 +116,12 @@ internal fun ReaderCustomizationsContent(
   onFontScaleFactorChange: (Float) -> Unit,
   onFontLineHeightFactorChange: (Float) -> Unit,
 ) {
+  val colorScheme = AppTheme.colorScheme
   Column(
     modifier =
-      Modifier.fillMaxWidth().background(AppTheme.colorScheme.bottomSheet).padding(vertical = 16.dp)
+      Modifier.fillMaxWidth()
+        .drawBehind { drawRect(colorScheme.bottomSheet) }
+        .padding(vertical = 16.dp)
   ) {
     ColorSchemeHeader()
 
@@ -117,11 +136,12 @@ internal fun ReaderCustomizationsContent(
 
     LazyRow(
       state = themeVariantListState,
-      contentPadding = PaddingValues(horizontal = 28.dp, vertical = 8.dp),
+      contentPadding = ThemeVariantRowPadding,
       horizontalArrangement = Arrangement.spacedBy(16.dp),
       verticalAlignment = Alignment.Top,
     ) {
-      items(availableThemeVariants) { themeVariant ->
+      items(items = availableThemeVariants, key = { it.name }, contentType = { "theme-variant" }) {
+        themeVariant ->
         ThemeVariantIconButton(
           themeVariant = themeVariant,
           selected = themeVariant == selectedThemeVariant,
@@ -141,11 +161,12 @@ internal fun ReaderCustomizationsContent(
 
     LazyRow(
       state = typefaceListState,
-      contentPadding = PaddingValues(start = 28.dp, top = 8.dp, end = 28.dp, bottom = 16.dp),
+      contentPadding = TypefaceRowPadding,
       horizontalArrangement = Arrangement.spacedBy(12.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      items(ReaderFont.entries) { fontStyle ->
+      items(items = ReaderFont.entries, key = { it.name }, contentType = { "reader-font" }) {
+        fontStyle ->
         val fontFamily =
           when (fontStyle) {
             ComicNeue -> ComicNeueFontFamily
@@ -216,9 +237,9 @@ private fun FontLineHeightStepper(
         Box(
           modifier =
             Modifier.requiredSize(24.dp)
-              .shadow(elevation = 2.dp, shape = RoundedCornerShape(50))
-              .background(AppTheme.colorScheme.inverseSurface, RoundedCornerShape(50))
-              .border(1.dp, AppTheme.colorScheme.secondary, RoundedCornerShape(50))
+              .shadow(elevation = 2.dp, shape = CustomizationsPillShape)
+              .background(AppTheme.colorScheme.inverseSurface, CustomizationsPillShape)
+              .border(1.dp, AppTheme.colorScheme.secondary, CustomizationsPillShape)
         )
       },
       track = {
@@ -271,9 +292,9 @@ private fun FontScaleStepper(
         Box(
           modifier =
             Modifier.requiredSize(24.dp)
-              .shadow(elevation = 2.dp, shape = RoundedCornerShape(50))
-              .background(AppTheme.colorScheme.inverseSurface, RoundedCornerShape(50))
-              .border(1.dp, AppTheme.colorScheme.secondary, RoundedCornerShape(50))
+              .shadow(elevation = 2.dp, shape = CustomizationsPillShape)
+              .background(AppTheme.colorScheme.inverseSurface, CustomizationsPillShape)
+              .border(1.dp, AppTheme.colorScheme.secondary, CustomizationsPillShape)
         )
       },
       track = {
@@ -324,42 +345,86 @@ private fun TypefaceChip(
   onClick: () -> Unit,
   fontFamily: FontFamily = FontFamily.Default,
 ) {
-  val chipOuterPadding by animateDpAsState(if (!selected) 4.dp else 0.dp)
-  val chipPadding by animateDpAsState(if (selected) 4.dp else 0.dp)
+  val chipOuterPaddingState = animateDpAsState(if (!selected) 4.dp else 0.dp)
+  val chipPaddingState = animateDpAsState(if (selected) 4.dp else 0.dp)
+  val selectionProgressState = animateFloatAsState(if (selected) 1f else 0f)
   val translucentStyle = LocalTranslucentStyles.current
+  val colorScheme = AppTheme.colorScheme
+  val baseTextStyle = LocalTextStyle.current
+  val labelStyle =
+    remember(baseTextStyle, fontFamily) { baseTextStyle.copy(fontFamily = fontFamily) }
+  val contentColorProducer =
+    remember(colorScheme, selectionProgressState) {
+      ColorProducer {
+        val progress = selectionProgressState.value
+        when {
+          progress <= 0f -> colorScheme.onSurface
+          progress >= 1f -> colorScheme.inverseOnSurface
+          else -> lerp(colorScheme.onSurface, colorScheme.inverseOnSurface, progress)
+        }
+      }
+    }
 
   Box(
     modifier =
       Modifier.then(modifier)
-        .clip(RoundedCornerShape(50))
+        .clip(CustomizationsPillShape)
         .clickable { onClick() }
-        .padding(vertical = chipOuterPadding)
-        .background(translucentStyle.default.background, RoundedCornerShape(50))
-        .border(1.dp, AppTheme.colorScheme.secondary, RoundedCornerShape(50))
-        .padding(chipPadding)
+        .layout { measurable, constraints ->
+          val vPadPx = chipOuterPaddingState.value.roundToPx()
+          val placeable = measurable.measure(constraints.offset(vertical = -vPadPx * 2))
+          layout(placeable.width, placeable.height + vPadPx * 2) {
+            placeable.placeRelative(0, vPadPx)
+          }
+        }
+        .drawWithCache {
+          val outline = CustomizationsPillShape.createOutline(size, layoutDirection, this)
+          val stroke = Stroke(width = 1.dp.toPx())
+          onDrawWithContent {
+            drawOutline(outline = outline, color = translucentStyle.default.background)
+            drawContent()
+            drawOutline(outline = outline, color = colorScheme.secondary, style = stroke)
+          }
+        }
+        .layout { measurable, constraints ->
+          val padPx = chipPaddingState.value.roundToPx()
+          val placeable =
+            measurable.measure(constraints.offset(horizontal = -padPx * 2, vertical = -padPx * 2))
+          layout(placeable.width + padPx * 2, placeable.height + padPx * 2) {
+            placeable.placeRelative(padPx, padPx)
+          }
+        }
   ) {
-    val background by
-      animateColorAsState(if (selected) AppTheme.colorScheme.inverseSurface else Color.Transparent)
-    val contentColor by
-      animateColorAsState(
-        if (selected) AppTheme.colorScheme.inverseOnSurface else AppTheme.colorScheme.onSurface
-      )
-
     Row(
       modifier =
-        Modifier.background(background, RoundedCornerShape(50))
+        Modifier.clip(CustomizationsPillShape)
+          .drawBehind {
+            val progress = selectionProgressState.value
+            if (progress > 0f) {
+              val bgColor =
+                if (progress >= 1f) {
+                  colorScheme.inverseSurface
+                } else {
+                  lerp(Color.Transparent, colorScheme.inverseSurface, progress)
+                }
+              drawRect(bgColor)
+            }
+          }
           .padding(horizontal = 20.dp, vertical = 8.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      Text(text = label, color = contentColor, fontFamily = fontFamily)
+      BasicText(text = label, style = labelStyle, color = contentColorProducer)
 
       if (isPremium && !isSubscribed) {
-        Icon(
-          modifier = Modifier.requiredSize(16.dp),
-          imageVector = TwineIcons.StarShine,
-          contentDescription = null,
-          tint = contentColor,
+        val starPainter = rememberVectorPainter(TwineIcons.StarShine)
+        Spacer(
+          modifier =
+            Modifier.requiredSize(16.dp).drawBehind {
+              with(starPainter) {
+                draw(size = size, colorFilter = ColorFilter.tint(contentColorProducer()))
+              }
+            }
         )
       }
     }

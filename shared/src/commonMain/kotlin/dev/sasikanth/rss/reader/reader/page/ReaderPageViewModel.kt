@@ -22,7 +22,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import com.mikepenz.markdown.model.State
-import com.mikepenz.markdown.model.parseMarkdownFlow
+import com.mikepenz.markdown.model.parseMarkdown
 import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
@@ -41,9 +41,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -51,6 +51,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
+import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
+import org.intellij.markdown.parser.CancellationToken
+import org.intellij.markdown.parser.MarkdownParser
+
+private val SharedGfmFlavour = GFMFlavourDescriptor()
+private val SharedMarkdownParser =
+  MarkdownParser(flavour = SharedGfmFlavour, cancellationToken = CancellationToken.NonCancellable)
 
 @Stable
 @Inject
@@ -68,12 +75,13 @@ class ReaderPageViewModel(
     _contentState
       .filter { it.isNotBlank() }
       .distinctUntilChanged()
-      .flatMapLatest {
-        parseMarkdownFlow(it).onEach { state ->
-          if (state !is State.Loading) {
-            isParsingContent.value = false
+      .mapLatest { content ->
+        parseMarkdown(content = content, flavour = SharedGfmFlavour, parser = SharedMarkdownParser)
+          .also { state ->
+            if (state !is State.Loading) {
+              isParsingContent.value = false
+            }
           }
-        }
       }
       .flowOn(dispatchersProvider.default)
       .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), State.Loading())
@@ -224,11 +232,9 @@ class ReaderPageViewModel(
   }
 
   private fun onParsingComplete(result: ReadabilityResult) {
-    viewModelScope.launch {
-      _contentState.update { it -> result.content ?: it }
-      _excerptState.update { it -> result.excerpt ?: it }
-      isParsingContent.value = false
-    }
+    _contentState.update { result.content ?: it }
+    _excerptState.update { result.excerpt ?: it }
+    isParsingContent.value = false
   }
 }
 

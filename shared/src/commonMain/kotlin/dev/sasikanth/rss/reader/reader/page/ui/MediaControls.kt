@@ -21,7 +21,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
@@ -67,6 +66,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,21 +77,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.Morph
-import com.mikepenz.markdown.compose.components.CurrentComponentsBridge.text
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.components.IconButton
 import dev.sasikanth.rss.reader.components.ModalSheet
 import dev.sasikanth.rss.reader.media.PlaybackState
@@ -107,6 +102,9 @@ import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.toClipEntry
 import dev.sasikanth.rss.reader.utils.toComposePath
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -123,10 +121,54 @@ import twine.shared.generated.resources.sleep_timer_end_of_track
 import twine.shared.generated.resources.sleep_timer_minutes
 import twine.shared.generated.resources.sleep_timer_off
 
+private val ExtendedControlsAnimationSpec =
+  spring<IntSize>(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioMediumBouncy)
+private val PlayButtonScaleAnimationSpec =
+  spring<Float>(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioMediumBouncy)
+private val SleepTimerMinutes = listOf(15, 30, 45, 60)
+private val SleepTimerItemShape = RoundedCornerShape(12.dp)
+private val MediaBannerShape = RoundedCornerShape(16.dp)
+private val MediaHintShape = RoundedCornerShape(8.dp)
+private const val PLAY_BUTTON_IDLE_SCALE = 56f / 64f
+
+@Immutable
+private data class MediaTransportState(
+  val isPlaying: Boolean = false,
+  val isBuffering: Boolean = false,
+  val showExtendedControls: Boolean = false,
+  val playbackSpeed: Float = 1f,
+)
+
+@Immutable
+private data class PlaybackProgress(val currentPosition: Long = 0L, val duration: Long = 0L)
+
+private fun PlaybackState.toMediaTransportState(settledPostId: String): MediaTransportState =
+  if (playingPostId == settledPostId) {
+    MediaTransportState(
+      isPlaying = isPlaying,
+      isBuffering = buffering,
+      showExtendedControls = duration > 0,
+      playbackSpeed = playbackSpeed,
+    )
+  } else {
+    MediaTransportState()
+  }
+
+private fun PlaybackState.toPlaybackProgress(settledPostId: String): PlaybackProgress =
+  if (playingPostId == settledPostId) {
+    PlaybackProgress(currentPosition = currentPosition, duration = duration)
+  } else {
+    PlaybackProgress()
+  }
+
+private fun PlaybackState.toSleepTimerRemaining(settledPostId: String): Long? =
+  if (playingPostId == settledPostId) sleepTimerRemaining else null
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun MediaControls(
-  playbackState: PlaybackState,
+  playbackStateFlow: StateFlow<PlaybackState>,
+  settledPostId: String,
   onPlayClick: () -> Unit,
   onPauseClick: () -> Unit,
   onSeek: (Long) -> Unit,
@@ -137,21 +179,20 @@ internal fun MediaControls(
   modifier: Modifier = Modifier,
 ) {
   val haptic = LocalHapticFeedback.current
-  val isPlaying = playbackState.isPlaying || playbackState.buffering
-  // While the user is scrubbing, the slider follows the drag instead of the player
-  // position. Seeking happens once on release; issuing a seek per drag tick fights
-  // async seeks (AVPlayer reports stale positions mid-seek, snapping the thumb back).
-  var scrubProgress by remember { mutableStateOf<Float?>(null) }
-  val playerProgress =
-    if (playbackState.duration > 0) {
-      (playbackState.currentPosition.toFloat() / playbackState.duration.toFloat()).coerceIn(0f, 1f)
-    } else {
-      0f
+  val initialTransportState =
+    remember(playbackStateFlow, settledPostId) {
+      playbackStateFlow.value.toMediaTransportState(settledPostId)
     }
-  val progress = scrubProgress ?: playerProgress
-  val showExtendedControls = playbackState.duration > 0
-  val extendedControlsAnimationSpec =
-    spring<IntSize>(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioMediumBouncy)
+  val transportState by
+    remember(playbackStateFlow, settledPostId) {
+        playbackStateFlow
+          .map { state -> state.toMediaTransportState(settledPostId) }
+          .distinctUntilChanged()
+      }
+      .collectAsStateWithLifecycle(initialTransportState)
+
+  val isPlaying = transportState.isPlaying || transportState.isBuffering
+  val showExtendedControls = transportState.showExtendedControls
 
   Column(
     modifier =
@@ -160,67 +201,14 @@ internal fun MediaControls(
   ) {
     AnimatedVisibility(
       visible = showExtendedControls,
-      enter = fadeIn() + expandVertically(animationSpec = extendedControlsAnimationSpec),
-      exit = fadeOut() + shrinkVertically(animationSpec = extendedControlsAnimationSpec),
+      enter = fadeIn() + expandVertically(animationSpec = ExtendedControlsAnimationSpec),
+      exit = fadeOut() + shrinkVertically(animationSpec = ExtendedControlsAnimationSpec),
     ) {
-      Column {
-        val translucentStyle = LocalTranslucentStyles.current
-        val sliderColors =
-          SliderDefaults.colors(
-            activeTrackColor = AppTheme.colorScheme.primaryContainer,
-            inactiveTrackColor = translucentStyle.prominent.background,
-          )
-        val sliderState = rememberSliderState(value = progress)
-        sliderState.value = progress
-
-        Slider(
-          modifier = Modifier.padding(top = 8.dp),
-          state = sliderState,
-          onValueChange = {
-            val newPosition = (it * playbackState.duration).toLong()
-            val previousPosition = (progress * playbackState.duration).toLong()
-            if (newPosition / 1000 != previousPosition / 1000) {
-              haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-            }
-            scrubProgress = it
-          },
-          onValueChangeFinished = {
-            scrubProgress?.let { onSeek((it * playbackState.duration).toLong()) }
-            scrubProgress = null
-          },
-          thumb = {
-            Box(
-              modifier =
-                Modifier.requiredSize(24.dp)
-                  .shadow(elevation = 2.dp, shape = CircleShape)
-                  .background(AppTheme.colorScheme.inverseSurface, CircleShape)
-                  .border(1.dp, AppTheme.colorScheme.secondary, CircleShape)
-            )
-          },
-          track = {
-            SliderDefaults.Track(
-              sliderState = it,
-              thumbTrackGapSize = 0.dp,
-              colors = sliderColors,
-              drawStopIndicator = null,
-            )
-          },
-        )
-
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
-          Text(
-            text = formatDuration((progress * playbackState.duration).toLong()),
-            style = MaterialTheme.typography.labelSmall,
-            color = AppTheme.colorScheme.onSurfaceVariant,
-          )
-          Spacer(Modifier.weight(1f))
-          Text(
-            text = formatDuration(playbackState.duration),
-            style = MaterialTheme.typography.labelSmall,
-            color = AppTheme.colorScheme.onSurfaceVariant,
-          )
-        }
-      }
+      MediaPlaybackScrubber(
+        playbackStateFlow = playbackStateFlow,
+        settledPostId = settledPostId,
+        onSeek = onSeek,
+      )
     }
 
     Row(
@@ -238,14 +226,14 @@ internal fun MediaControls(
           enter =
             fadeIn() +
               expandIn(
-                animationSpec = extendedControlsAnimationSpec,
+                animationSpec = ExtendedControlsAnimationSpec,
                 expandFrom = Alignment.Center,
                 clip = false,
               ),
           exit =
             fadeOut() +
               shrinkOut(
-                animationSpec = extendedControlsAnimationSpec,
+                animationSpec = ExtendedControlsAnimationSpec,
                 shrinkTowards = Alignment.Center,
                 clip = false,
               ),
@@ -253,11 +241,11 @@ internal fun MediaControls(
           TextButton(
             onClick = {
               haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-              onPlaybackSpeedChange(playbackState.playbackSpeed)
+              onPlaybackSpeedChange(transportState.playbackSpeed)
             }
           ) {
             AnimatedContent(
-              targetState = playbackState.playbackSpeed,
+              targetState = transportState.playbackSpeed,
               transitionSpec = {
                 (fadeIn() + scaleIn() + slideInVertically()).togetherWith(
                   (fadeOut() + scaleOut() + slideOutVertically { it / 2 })
@@ -278,14 +266,14 @@ internal fun MediaControls(
           enter =
             fadeIn() +
               expandIn(
-                animationSpec = extendedControlsAnimationSpec,
+                animationSpec = ExtendedControlsAnimationSpec,
                 expandFrom = Alignment.Center,
                 clip = false,
               ),
           exit =
             fadeOut() +
               shrinkOut(
-                animationSpec = extendedControlsAnimationSpec,
+                animationSpec = ExtendedControlsAnimationSpec,
                 shrinkTowards = Alignment.Center,
                 clip = false,
               ),
@@ -302,18 +290,10 @@ internal fun MediaControls(
       }
 
       val morphProgressState = animateFloatAsState(if (isPlaying) 1f else 0f)
-      val buttonSize by
-        animateDpAsState(
-          if (isPlaying) {
-            64.dp
-          } else {
-            56.dp
-          },
-          animationSpec =
-            spring(
-              stiffness = Spring.StiffnessMedium,
-              dampingRatio = Spring.DampingRatioMediumBouncy,
-            ),
+      val buttonScaleState =
+        animateFloatAsState(
+          targetValue = if (isPlaying) 1f else PLAY_BUTTON_IDLE_SCALE,
+          animationSpec = PlayButtonScaleAnimationSpec,
         )
       val fabMorph = remember {
         Morph(start = MaterialShapes.Circle, end = MaterialShapes.Cookie9Sided)
@@ -331,51 +311,39 @@ internal fun MediaControls(
         } else {
           null
         }
-      val morphShape =
-        remember(fabMorph) {
-          object : Shape {
-            private val path = Path()
-
-            override fun createOutline(
-              size: Size,
-              layoutDirection: LayoutDirection,
-              density: Density,
-            ): Outline {
-              fabMorph.toComposePath(
-                progress = morphProgressState.value,
-                scale = size.minDimension,
-                path = path,
-              )
-              return Outline.Generic(path)
-            }
-          }
-        }
-      val containerColor = AppTheme.colorScheme.primaryContainer
+      val colorScheme = AppTheme.colorScheme
 
       Box(contentAlignment = Alignment.Center, modifier = Modifier.size(64.dp)) {
-        // Rotating shape background
         Box(
           modifier =
-            Modifier.size(buttonSize)
-              .graphicsLayer { rotationZ = rotationAngleState?.value ?: 0f }
+            Modifier.matchParentSize()
+              .graphicsLayer {
+                val scale = buttonScaleState.value
+                scaleX = scale
+                scaleY = scale
+                rotationZ = rotationAngleState?.value ?: 0f
+              }
               .drawWithCache {
                 val path = Path()
+                var lastProgress = Float.NaN
+                var lastScale = Float.NaN
                 onDrawBehind {
-                  fabMorph.toComposePath(
-                    progress = morphProgressState.value,
-                    scale = size.minDimension,
-                    path = path,
-                  )
-                  drawPath(path = path, color = containerColor)
+                  val progress = morphProgressState.value
+                  val scale = size.minDimension
+                  if (progress != lastProgress || scale != lastScale) {
+                    fabMorph.toComposePath(progress = progress, scale = scale, path = path)
+                    lastProgress = progress
+                    lastScale = scale
+                  }
+                  drawPath(path = path, color = colorScheme.primaryContainer)
                 }
               }
         )
 
-        // Non-rotating icon
         Box(
           modifier =
             Modifier.matchParentSize()
-              .clip(morphShape)
+              .clip(CircleShape)
               .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -386,7 +354,7 @@ internal fun MediaControls(
               ),
           contentAlignment = Alignment.Center,
         ) {
-          if (playbackState.buffering) {
+          if (transportState.isBuffering) {
             CircularProgressIndicator(
               modifier = Modifier.size(32.dp),
               color = AppTheme.colorScheme.onPrimaryContainer,
@@ -415,14 +383,14 @@ internal fun MediaControls(
           enter =
             fadeIn() +
               expandIn(
-                animationSpec = extendedControlsAnimationSpec,
+                animationSpec = ExtendedControlsAnimationSpec,
                 expandFrom = Alignment.Center,
                 clip = false,
               ),
           exit =
             fadeOut() +
               shrinkOut(
-                animationSpec = extendedControlsAnimationSpec,
+                animationSpec = ExtendedControlsAnimationSpec,
                 shrinkTowards = Alignment.Center,
                 clip = false,
               ),
@@ -442,40 +410,157 @@ internal fun MediaControls(
           enter =
             fadeIn() +
               expandIn(
-                animationSpec = extendedControlsAnimationSpec,
+                animationSpec = ExtendedControlsAnimationSpec,
                 expandFrom = Alignment.Center,
                 clip = false,
               ),
           exit =
             fadeOut() +
               shrinkOut(
-                animationSpec = extendedControlsAnimationSpec,
+                animationSpec = ExtendedControlsAnimationSpec,
                 shrinkTowards = Alignment.Center,
                 clip = false,
               ),
         ) {
-          val sleepTimerRemaining = playbackState.sleepTimerRemaining
-          val text =
-            if (sleepTimerRemaining != null && sleepTimerRemaining > 0) {
-              formatDuration(sleepTimerRemaining)
-            } else if (sleepTimerRemaining == -1L) {
-              stringResource(Res.string.sleep_timer_end_of_track)
-            } else {
-              stringResource(Res.string.sleep_timer)
-            }
-
-          IconButton(
-            icon = TwineIcons.Timer,
-            contentDescription = text,
-            onClick = {
-              haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-              onSleepTimerClick()
-            },
+          SleepTimerButton(
+            playbackStateFlow = playbackStateFlow,
+            settledPostId = settledPostId,
+            onSleepTimerClick = onSleepTimerClick,
           )
         }
       }
     }
   }
+}
+
+@Composable
+private fun MediaPlaybackScrubber(
+  playbackStateFlow: StateFlow<PlaybackState>,
+  settledPostId: String,
+  onSeek: (Long) -> Unit,
+) {
+  val haptic = LocalHapticFeedback.current
+  val initialProgress =
+    remember(playbackStateFlow, settledPostId) {
+      playbackStateFlow.value.toPlaybackProgress(settledPostId)
+    }
+  val playbackProgress by
+    remember(playbackStateFlow, settledPostId) {
+        playbackStateFlow
+          .map { state -> state.toPlaybackProgress(settledPostId) }
+          .distinctUntilChanged()
+      }
+      .collectAsStateWithLifecycle(initialProgress)
+
+  // While the user is scrubbing, the slider follows the drag instead of the player
+  // position. Seeking happens once on release; issuing a seek per drag tick fights
+  // async seeks (AVPlayer reports stale positions mid-seek, snapping the thumb back).
+  var scrubProgress by remember { mutableStateOf<Float?>(null) }
+  val duration = playbackProgress.duration
+  val playerProgress =
+    if (duration > 0) {
+      (playbackProgress.currentPosition.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
+    } else {
+      0f
+    }
+  val progress = scrubProgress ?: playerProgress
+
+  Column {
+    val translucentStyle = LocalTranslucentStyles.current
+    val sliderColors =
+      SliderDefaults.colors(
+        activeTrackColor = AppTheme.colorScheme.primaryContainer,
+        inactiveTrackColor = translucentStyle.prominent.background,
+      )
+    val sliderState = rememberSliderState(value = progress)
+    sliderState.value = progress
+
+    Slider(
+      modifier = Modifier.padding(top = 8.dp),
+      state = sliderState,
+      onValueChange = {
+        val newPosition = (it * duration).toLong()
+        val previousPosition = (progress * duration).toLong()
+        if (newPosition / 1000 != previousPosition / 1000) {
+          haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        }
+        scrubProgress = it
+      },
+      onValueChangeFinished = {
+        scrubProgress?.let { onSeek((it * duration).toLong()) }
+        scrubProgress = null
+      },
+      thumb = {
+        Box(
+          modifier =
+            Modifier.requiredSize(24.dp)
+              .shadow(elevation = 2.dp, shape = CircleShape)
+              .background(AppTheme.colorScheme.inverseSurface, CircleShape)
+              .border(1.dp, AppTheme.colorScheme.secondary, CircleShape)
+        )
+      },
+      track = {
+        SliderDefaults.Track(
+          sliderState = it,
+          thumbTrackGapSize = 0.dp,
+          colors = sliderColors,
+          drawStopIndicator = null,
+        )
+      },
+    )
+
+    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+      Text(
+        text = formatDuration((progress * duration).toLong()),
+        style = MaterialTheme.typography.labelSmall,
+        color = AppTheme.colorScheme.onSurfaceVariant,
+      )
+      Spacer(Modifier.weight(1f))
+      Text(
+        text = formatDuration(duration),
+        style = MaterialTheme.typography.labelSmall,
+        color = AppTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+  }
+}
+
+@Composable
+private fun SleepTimerButton(
+  playbackStateFlow: StateFlow<PlaybackState>,
+  settledPostId: String,
+  onSleepTimerClick: () -> Unit,
+) {
+  val haptic = LocalHapticFeedback.current
+  val initialSleepTimerRemaining =
+    remember(playbackStateFlow, settledPostId) {
+      playbackStateFlow.value.toSleepTimerRemaining(settledPostId)
+    }
+  val sleepTimerRemaining by
+    remember(playbackStateFlow, settledPostId) {
+        playbackStateFlow
+          .map { state -> state.toSleepTimerRemaining(settledPostId) }
+          .distinctUntilChanged()
+      }
+      .collectAsStateWithLifecycle(initialSleepTimerRemaining)
+
+  val text =
+    if (sleepTimerRemaining != null && sleepTimerRemaining!! > 0) {
+      formatDuration(sleepTimerRemaining!!)
+    } else if (sleepTimerRemaining == -1L) {
+      stringResource(Res.string.sleep_timer_end_of_track)
+    } else {
+      stringResource(Res.string.sleep_timer)
+    }
+
+  IconButton(
+    icon = TwineIcons.Timer,
+    contentDescription = text,
+    onClick = {
+      haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+      onSleepTimerClick()
+    },
+  )
 }
 
 internal fun formatDuration(duration: Long): String {
@@ -492,7 +577,7 @@ internal fun formatDuration(duration: Long): String {
 
 @Composable
 internal fun SleepTimerBottomSheet(
-  playbackState: PlaybackState,
+  selectedOption: SleepTimerOption,
   onOptionSelected: (SleepTimerOption) -> Unit,
   onDismiss: () -> Unit,
 ) {
@@ -512,25 +597,23 @@ internal fun SleepTimerBottomSheet(
         modifier = Modifier.padding(bottom = 16.dp),
       )
 
-      val currentOption = playbackState.selectedSleepTimerOption
-
       SleepTimerOptionItem(
         label = stringResource(Res.string.sleep_timer_off),
-        isSelected = currentOption is SleepTimerOption.None,
+        isSelected = selectedOption is SleepTimerOption.None,
         onClick = { onOptionSelected(SleepTimerOption.None) },
       )
 
       SleepTimerOptionItem(
         label = stringResource(Res.string.sleep_timer_end_of_track),
-        isSelected = currentOption is SleepTimerOption.EndOfTrack,
+        isSelected = selectedOption is SleepTimerOption.EndOfTrack,
         onClick = { onOptionSelected(SleepTimerOption.EndOfTrack) },
       )
 
-      listOf(15, 30, 45, 60).forEach { minutes ->
+      SleepTimerMinutes.forEach { minutes ->
         val option = SleepTimerOption.Minutes(minutes)
         SleepTimerOptionItem(
           label = stringResource(Res.string.sleep_timer_minutes, minutes),
-          isSelected = currentOption == option,
+          isSelected = selectedOption == option,
           onClick = { onOptionSelected(option) },
         )
       }
@@ -543,7 +626,7 @@ internal fun SleepTimerOptionItem(label: String, isSelected: Boolean, onClick: (
   Row(
     modifier =
       Modifier.fillMaxWidth()
-        .clip(RoundedCornerShape(12.dp))
+        .clip(SleepTimerItemShape)
         .clickable(onClick = onClick)
         .padding(vertical = 12.dp),
     verticalAlignment = Alignment.CenterVertically,
@@ -577,7 +660,7 @@ internal fun MediaUnavailableBanner(installationHint: String?, modifier: Modifie
     modifier =
       modifier
         .fillMaxWidth()
-        .background(AppTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+        .background(AppTheme.colorScheme.surface, MediaBannerShape)
         .padding(16.dp),
     verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
@@ -597,7 +680,7 @@ internal fun MediaUnavailableBanner(installationHint: String?, modifier: Modifie
       Row(
         modifier =
           Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(MediaHintShape)
             .background(AppTheme.colorScheme.surfaceContainerHigh)
             .clickable {
               coroutineScope.launch {

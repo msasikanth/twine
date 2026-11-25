@@ -36,18 +36,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorProducer
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mikepenz.markdown.compose.LocalImageTransformer
@@ -64,9 +71,9 @@ import com.mikepenz.markdown.compose.components.MarkdownComponents
 import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
+import com.mikepenz.markdown.model.DefaultMarkdownAnimation
 import com.mikepenz.markdown.model.ReferenceLinkHandlerImpl
 import com.mikepenz.markdown.model.State
-import com.mikepenz.markdown.model.markdownAnimations
 import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.markdownDimens
 import com.mikepenz.markdown.model.markdownPadding
@@ -75,6 +82,8 @@ import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
 import dev.sasikanth.rss.reader.markdown.LocalMarkdownAnnotatorSettings
+import dev.sasikanth.rss.reader.markdown.LocalMarkdownTextColorProducer
+import dev.sasikanth.rss.reader.markdown.LocalReaderContentWidth
 import dev.sasikanth.rss.reader.markdown.rememberAnnotatorSettings
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
@@ -95,6 +104,76 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.shareLinkCopied
 
 private const val TOP_SCRIM_OPAQUE_THRESHOLD = 200f
+private val ReaderHorizontalPadding = 48.dp
+private val NoOpAnimateTextSize: Modifier.() -> Modifier = { this }
+private val ReaderMarkdownAnimations = DefaultMarkdownAnimation(NoOpAnimateTextSize)
+
+private class ReaderFadeScrimCache {
+  private var backdrop: Color = Color.Unspecified
+  private var size: Size = Size.Unspecified
+  private var topScrimSolidPx: Float = Float.NaN
+  private var topScrimFadePx: Float = Float.NaN
+  private var bottomScrimHeightPx: Float = Float.NaN
+
+  var topBrush: Brush? = null
+    private set
+
+  var topScrimSize: Size = Size.Zero
+    private set
+
+  var bottomBrush: Brush? = null
+    private set
+
+  var bottomScrimOffset: Offset = Offset.Zero
+    private set
+
+  var bottomScrimSize: Size = Size.Zero
+    private set
+
+  fun updateIfNeeded(
+    backdrop: Color,
+    size: Size,
+    topScrimSolidPx: Float,
+    topScrimFadePx: Float,
+    bottomScrimHeightPx: Float,
+  ) {
+    if (
+      this.backdrop == backdrop &&
+        this.size == size &&
+        this.topScrimSolidPx == topScrimSolidPx &&
+        this.topScrimFadePx == topScrimFadePx &&
+        this.bottomScrimHeightPx == bottomScrimHeightPx
+    ) {
+      return
+    }
+
+    this.backdrop = backdrop
+    this.size = size
+    this.topScrimSolidPx = topScrimSolidPx
+    this.topScrimFadePx = topScrimFadePx
+    this.bottomScrimHeightPx = bottomScrimHeightPx
+
+    val topScrimHeight = topScrimSolidPx + topScrimFadePx
+    topBrush =
+      smoothVerticalFade(
+        color = backdrop,
+        endY = topScrimHeight,
+        solidFraction = if (topScrimHeight > 0f) topScrimSolidPx / topScrimHeight else 0f,
+      )
+    topScrimSize = size.copy(height = topScrimHeight)
+
+    val bottomScrimTop = size.height - bottomScrimHeightPx
+    bottomBrush =
+      smoothVerticalFade(
+        color = backdrop,
+        startY = bottomScrimTop,
+        endY = size.height,
+        reversed = true,
+      )
+    bottomScrimOffset = Offset(0f, bottomScrimTop)
+    bottomScrimSize = size.copy(height = bottomScrimHeightPx)
+  }
+}
 
 @Composable
 internal fun ReaderPage(
@@ -169,11 +248,14 @@ private fun ReaderPageContent(
   val coroutineScope = rememberCoroutineScope()
 
   val listState = rememberLazyListState()
-  val backdropColor = AppTheme.colorScheme.backdrop
+  val colorScheme = AppTheme.colorScheme
   val density = LocalDensity.current
-  val topScrimSolidPx = with(density) { contentPaddingValues.calculateTopPadding().toPx() }
+  val topPadding = contentPaddingValues.calculateTopPadding()
+  val bottomPadding = contentPaddingValues.calculateBottomPadding()
+  val topScrimSolidPx = with(density) { topPadding.toPx() }
   val topScrimFadePx = with(density) { 72.dp.toPx() }
   val bottomScrimHeightPx = with(density) { 96.dp.toPx() }
+  val scrimCache = remember { ReaderFadeScrimCache() }
   val topScrimAlphaProvider =
     remember(listState) {
       {
@@ -185,14 +267,14 @@ private fun ReaderPageContent(
       }
     }
 
-  val primaryColor = AppTheme.colorScheme.primary
-  val onSurfaceColor = AppTheme.colorScheme.onSurface
-  val outlineVariantColor = AppTheme.colorScheme.outlineVariant
+  val settledPrimary = colorScheme.settledPrimary
+  val settledOnSurface = colorScheme.settledOnSurface
+  val settledOutlineVariant = colorScheme.settledOutlineVariant
   val textSelectionColors =
-    remember(primaryColor) {
+    remember(settledPrimary) {
       TextSelectionColors(
-        handleColor = primaryColor,
-        backgroundColor = primaryColor.copy(alpha = 0.4f),
+        handleColor = settledPrimary,
+        backgroundColor = settledPrimary.copy(alpha = 0.4f),
       )
     }
   val referenceLinkHandler = remember { ReferenceLinkHandlerImpl() }
@@ -204,43 +286,59 @@ private fun ReaderPageContent(
         annotate = { _, node -> node.type == MarkdownElementTypes.IMAGE && shouldBlockImage }
       )
     }
-  val animations = markdownAnimations(animateTextSize = { this })
   val colors =
     markdownColor(
-      text = onSurfaceColor,
-      codeBackground = onSurfaceColor.copy(alpha = 0.1f),
-      dividerColor = outlineVariantColor,
-      tableBackground = onSurfaceColor.copy(alpha = 0.02f),
+      text = settledOnSurface,
+      codeBackground = settledOnSurface.copy(alpha = 0.1f),
+      dividerColor = settledOutlineVariant,
+      tableBackground = settledOnSurface.copy(alpha = 0.02f),
     )
+  val materialTypography = MaterialTheme.typography
+  val textLinkStyles =
+    remember(materialTypography.bodyLarge, settledPrimary) {
+      TextLinkStyles(
+        materialTypography.bodyLarge
+          .copy(
+            fontWeight = FontWeight.Bold,
+            textDecoration = TextDecoration.Underline,
+            color = settledPrimary,
+          )
+          .toSpanStyle()
+      )
+    }
   val typography =
     markdownTypography(
-      h1 = MaterialTheme.typography.displaySmall,
-      h2 = MaterialTheme.typography.headlineLarge,
-      h3 = MaterialTheme.typography.headlineMedium,
-      h4 = MaterialTheme.typography.headlineSmall,
-      h5 = MaterialTheme.typography.titleLarge,
-      h6 = MaterialTheme.typography.titleMedium,
-      textLink =
-        TextLinkStyles(
-          MaterialTheme.typography.bodyLarge
-            .copy(
-              fontWeight = FontWeight.Bold,
-              textDecoration = TextDecoration.Underline,
-              color = AppTheme.colorScheme.primary,
-            )
-            .toSpanStyle()
-        ),
+      h1 = materialTypography.displaySmall,
+      h2 = materialTypography.headlineLarge,
+      h3 = materialTypography.headlineMedium,
+      h4 = materialTypography.headlineSmall,
+      h5 = materialTypography.titleLarge,
+      h6 = materialTypography.titleMedium,
+      textLink = textLinkStyles,
     )
+  val codeSpanStyle =
+    remember(typography.inlineCode, colors.inlineCodeBackground) {
+      typography.inlineCode.copy(background = colors.inlineCodeBackground).toSpanStyle()
+    }
+  val highlightSpanStyle =
+    remember(colors.highlightText, colors.highlightBackground) {
+      SpanStyle(color = colors.highlightText, background = colors.highlightBackground)
+    }
   val annotatorSettings =
     rememberAnnotatorSettings(
       linkTextSpanStyle = typography.textLink,
-      codeSpanStyle =
-        typography.inlineCode.copy(background = colors.inlineCodeBackground).toSpanStyle(),
+      codeSpanStyle = codeSpanStyle,
       annotator = annotator,
       referenceLinkHandler = referenceLinkHandler,
-      highlightSpanStyle =
-        SpanStyle(color = colors.highlightText, background = colors.highlightBackground),
+      highlightSpanStyle = highlightSpanStyle,
     )
+  val markdownTextColorProducer = remember(colorScheme) { ColorProducer { colorScheme.onSurface } }
+  val readerContentWidth = remember { mutableStateOf(Dp.Unspecified) }
+  val readerContentWidthProvider = remember(readerContentWidth) { { readerContentWidth.value } }
+  val lazyColumnContentPadding =
+    remember(topPadding, bottomPadding) {
+      PaddingValues(top = topPadding, bottom = bottomPadding + 24.dp)
+    }
 
   CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColors) {
     SelectionContainer {
@@ -253,49 +351,53 @@ private fun ReaderPageContent(
           LocalMarkdownDimens provides dimens,
           LocalImageTransformer provides CoilMarkdownTransformer,
           LocalMarkdownAnnotator provides annotator,
-          LocalMarkdownAnimations provides animations,
+          LocalMarkdownAnimations provides ReaderMarkdownAnimations,
           LocalMarkdownColors provides colors,
           LocalMarkdownTypography provides typography,
           LocalMarkdownAnnotatorSettings provides annotatorSettings,
+          LocalMarkdownTextColorProducer provides markdownTextColorProducer,
+          LocalReaderContentWidth provides readerContentWidthProvider,
         ) {
           LazyColumn(
             modifier =
-              Modifier.fillMaxSize().drawWithCache {
-                val topScrimHeight = topScrimSolidPx + topScrimFadePx
-                val topBrush =
-                  smoothVerticalFade(
-                    color = backdropColor,
-                    endY = topScrimHeight,
-                    solidFraction = topScrimSolidPx / topScrimHeight,
-                  )
-                val topScrimSize = size.copy(height = topScrimHeight)
-
-                val bottomScrimTop = size.height - bottomScrimHeightPx
-                val bottomBrush =
-                  smoothVerticalFade(
-                    color = backdropColor,
-                    startY = bottomScrimTop,
-                    endY = size.height,
-                    reversed = true,
-                  )
-                val bottomScrimOffset = Offset(0f, bottomScrimTop)
-                val bottomScrimSize = size.copy(height = bottomScrimHeightPx)
-
-                onDrawWithContent {
-                  drawContent()
-                  drawRect(brush = topBrush, size = topScrimSize, alpha = topScrimAlphaProvider())
-                  drawRect(brush = bottomBrush, topLeft = bottomScrimOffset, size = bottomScrimSize)
+              Modifier.fillMaxSize()
+                .onSizeChanged { intSize ->
+                  val widthDp =
+                    with(density) {
+                      (intSize.width.toDp() - ReaderHorizontalPadding).coerceAtLeast(0.dp)
+                    }
+                  if (readerContentWidth.value != widthDp) {
+                    readerContentWidth.value = widthDp
+                  }
                 }
-              },
+                .drawWithContent {
+                  drawContent()
+                  scrimCache.updateIfNeeded(
+                    backdrop = colorScheme.backdrop,
+                    size = size,
+                    topScrimSolidPx = topScrimSolidPx,
+                    topScrimFadePx = topScrimFadePx,
+                    bottomScrimHeightPx = bottomScrimHeightPx,
+                  )
+                  scrimCache.topBrush?.let { brush ->
+                    val alpha = topScrimAlphaProvider()
+                    if (alpha > 0f) {
+                      drawRect(brush = brush, size = scrimCache.topScrimSize, alpha = alpha)
+                    }
+                  }
+                  scrimCache.bottomBrush?.let { brush ->
+                    drawRect(
+                      brush = brush,
+                      topLeft = scrimCache.bottomScrimOffset,
+                      size = scrimCache.bottomScrimSize,
+                    )
+                  }
+                },
             state = listState,
             overscrollEffect = null,
-            contentPadding =
-              PaddingValues(
-                top = contentPaddingValues.calculateTopPadding(),
-                bottom = contentPaddingValues.calculateBottomPadding() + 24.dp,
-              ),
+            contentPadding = lazyColumnContentPadding,
           ) {
-            item(key = "reader-header") {
+            item(key = "reader-header", contentType = "reader-header") {
               PostHeader(
                 modifier = Modifier.padding(bottom = 40.dp),
                 readerPost = readerPost,
@@ -326,7 +428,7 @@ private fun ReaderPageContent(
             }
 
             if (!readerPost.audioUrl.isNullOrBlank() && !isAudioPlayerAvailable) {
-              item(key = "podcast-player-unavailable") {
+              item(key = "podcast-player-unavailable", contentType = "podcast-player-unavailable") {
                 DisableSelection {
                   MediaUnavailableBanner(
                     installationHint = audioPlayerInstallationHint,
@@ -337,7 +439,9 @@ private fun ReaderPageContent(
             }
 
             if (contentParsingProgress == ReaderProcessingProgress.Loading) {
-              item(key = "progress-indicator") { ProgressIndicator() }
+              item(key = "progress-indicator", contentType = "progress-indicator") {
+                ProgressIndicator()
+              }
             }
 
             when (markdownContentState) {
