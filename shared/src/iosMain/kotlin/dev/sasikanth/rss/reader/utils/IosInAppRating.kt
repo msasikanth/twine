@@ -32,21 +32,23 @@ import platform.UIKit.UIWindowScene
 @AppScope
 class IosInAppRating(private val settingsRepository: SettingsRepository) : InAppRating {
 
-  override suspend fun request() {
+  override suspend fun request(ignoreCriteria: Boolean) {
     val now = Clock.System.now()
-    val installDate = settingsRepository.installDate.firstOrNull() ?: now
-    val lastPromptDate =
-      settingsRepository.lastReviewPromptDate.firstOrNull() ?: Instant.DISTANT_PAST
-    val sessionCount = settingsRepository.userSessionCount.first()
-    val canShowReviewPrompt =
-      canShowReviewPrompt(
-        currentTime = now,
-        installDate = installDate,
-        lastPromptDate = lastPromptDate,
-        sessionCount = sessionCount,
-      )
+    if (!ignoreCriteria) {
+      val installDate = settingsRepository.installDate.firstOrNull() ?: now
+      val lastPromptDate =
+        settingsRepository.lastReviewPromptDate.firstOrNull() ?: Instant.DISTANT_PAST
+      val sessionCount = settingsRepository.userSessionCount.first()
+      val canShowReviewPrompt =
+        canShowReviewPrompt(
+          currentTime = now,
+          installDate = installDate,
+          lastPromptDate = lastPromptDate,
+          sessionCount = sessionCount,
+        )
 
-    if (!canShowReviewPrompt) return
+      if (!canShowReviewPrompt) return
+    }
 
     val scene =
       UIApplication.sharedApplication.connectedScenes
@@ -55,7 +57,9 @@ class IosInAppRating(private val settingsRepository: SettingsRepository) : InApp
 
     if (scene != null) {
       SKStoreReviewController.requestReviewInScene(scene)
-      settingsRepository.updateLastReviewPromptDate(now)
+      if (!ignoreCriteria) {
+        settingsRepository.updateLastReviewPromptDate(now)
+      }
     }
   }
 }

@@ -25,6 +25,8 @@ import com.revenuecat.purchases.kmp.ktx.awaitRestore
 import com.revenuecat.purchases.kmp.models.CacheFetchPolicy
 import com.revenuecat.purchases.kmp.models.PackageType as RCPackageType
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.data.repository.DebugSettingsRepository
+import dev.sasikanth.rss.reader.data.repository.DebugSubscriptionOverride
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.ENTITLEMENT_PREMIUM
@@ -40,17 +42,14 @@ import twine.shared.generated.resources.premiumPaywallPackageYearly
 @AppScope
 actual class BillingHandler(
   private val appInfo: AppInfo,
+  private val debugSettingsRepository: DebugSettingsRepository,
   private val dispatchersProvider: DispatchersProvider,
 ) {
 
   private val purchases by lazy { Purchases.sharedInstance }
 
   actual suspend fun isSubscribed(): Boolean {
-    return if (!appInfo.isDebugBuild) {
-      customerResult() is SubscriptionResult.Subscribed
-    } else {
-      true
-    }
+    return customerResult() is SubscriptionResult.Subscribed
   }
 
   actual suspend fun canSubscribe(): Boolean {
@@ -59,7 +58,11 @@ actual class BillingHandler(
 
   actual suspend fun customerResult(): SubscriptionResult {
     if (appInfo.isDebugBuild) {
-      return SubscriptionResult.Subscribed
+      return when (debugSettingsRepository.subscriptionOverrideImmediate()) {
+        DebugSubscriptionOverride.ForcePro -> SubscriptionResult.Subscribed
+        DebugSubscriptionOverride.ForceFree -> SubscriptionResult.NotSubscribed
+        DebugSubscriptionOverride.Default -> SubscriptionResult.Subscribed
+      }
     }
 
     try {

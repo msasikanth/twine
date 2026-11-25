@@ -51,6 +51,12 @@ object FavIconImageLoader {
     reference.value?.memoryCache?.clear()
   }
 
+  fun clearCache(context: PlatformContext) {
+    val loader = get(context)
+    loader.memoryCache?.clear()
+    loader.diskCache?.clear()
+  }
+
   @OptIn(ExperimentalCoilApi::class)
   private fun newImageLoader(context: PlatformContext): ImageLoader {
     var imageLoader: ImageLoader? = null

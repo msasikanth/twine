@@ -24,6 +24,9 @@ import com.revenuecat.purchases.kmp.ktx.awaitPurchase
 import com.revenuecat.purchases.kmp.ktx.awaitRestore
 import com.revenuecat.purchases.kmp.models.CacheFetchPolicy
 import com.revenuecat.purchases.kmp.models.PackageType as RCPackageType
+import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.data.repository.DebugSettingsRepository
+import dev.sasikanth.rss.reader.data.repository.DebugSubscriptionOverride
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.ENTITLEMENT_PREMIUM
@@ -37,7 +40,11 @@ import twine.shared.generated.resources.premiumPaywallPackageYearly
 
 @Inject
 @AppScope
-actual class BillingHandler(private val dispatchersProvider: DispatchersProvider) {
+actual class BillingHandler(
+  private val appInfo: AppInfo,
+  private val debugSettingsRepository: DebugSettingsRepository,
+  private val dispatchersProvider: DispatchersProvider,
+) {
 
   private val purchases by lazy { Purchases.sharedInstance }
 
@@ -50,6 +57,14 @@ actual class BillingHandler(private val dispatchersProvider: DispatchersProvider
   }
 
   actual suspend fun customerResult(): SubscriptionResult {
+    if (appInfo.isDebugBuild) {
+      when (debugSettingsRepository.subscriptionOverrideImmediate()) {
+        DebugSubscriptionOverride.ForcePro -> return SubscriptionResult.Subscribed
+        DebugSubscriptionOverride.ForceFree -> return SubscriptionResult.NotSubscribed
+        DebugSubscriptionOverride.Default -> Unit
+      }
+    }
+
     try {
       val customerInfo =
         withContext(dispatchersProvider.io) {

@@ -90,6 +90,10 @@ class SeedColorExtractor(
       lruCache[url]
     }
 
+  fun clearCache() {
+    lruCache.evictAll()
+  }
+
   private suspend fun extractSeedColor(url: String): Color? {
     val request =
       ImageRequest.Builder(platformContext.value)
