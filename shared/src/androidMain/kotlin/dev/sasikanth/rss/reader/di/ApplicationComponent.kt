@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.di
 
 import android.content.Context
 import android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE
+import android.content.pm.PackageManager
 import android.os.Build
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.app.AppPlatform
@@ -61,7 +62,13 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
   fun providesAppInfo(context: Context): AppInfo {
     val packageManager = context.packageManager
     val packageInfo = packageManager.getPackageInfo(context.packageName, 0)
-    val applicationInfo = packageManager.getApplicationInfo(context.packageName, 0)
+    val applicationInfo =
+      packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+    val isDebugSettingsEnabled =
+      applicationInfo.metaData?.getBoolean(
+        "dev.sasikanth.rss.reader.ENABLE_DEBUG_SETTINGS",
+        false,
+      ) == true
 
     val versionCode =
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -73,7 +80,7 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
     return AppInfo(
       versionName = packageInfo.versionName ?: "0.0.1",
       versionCode = versionCode,
-      isDebugBuild = (applicationInfo.flags and FLAG_DEBUGGABLE) != 0,
+      isDebugBuild = ((applicationInfo.flags and FLAG_DEBUGGABLE) != 0) || isDebugSettingsEnabled,
       isFoss = isFoss,
       isGoogleDriveSupported = isGoogleDriveSupported,
       cachePath = { context.cacheDir.absolutePath },

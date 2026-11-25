@@ -16,7 +16,7 @@ import com.bugsnag.android.Bugsnag
 
 object BugsnagInitializer {
   fun start(application: Application) {
-    if (!BuildConfig.DEBUG) {
+    if (!BuildConfig.DEBUG && !BuildConfig.ENABLE_DEBUG_SETTINGS) {
       Bugsnag.start(application)
       enableBugsnag()
     }
