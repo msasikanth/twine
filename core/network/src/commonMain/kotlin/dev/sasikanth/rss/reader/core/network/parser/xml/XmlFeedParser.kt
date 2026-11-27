@@ -111,6 +111,9 @@ class XmlFeedParser(
     internal const val TAG_MEDIA_CONTENT = "media:content"
     internal const val TAG_MEDIA_DESCRIPTION = "media:description"
     internal const val TAG_MEDIA_THUMBNAIL = "media:thumbnail"
+    internal const val TAG_PODCAST_CHAPTERS = "podcast:chapters"
+    internal const val TAG_PSC_CHAPTERS = "psc:chapters"
+    internal const val TAG_PSC_CHAPTER = "psc:chapter"
 
     internal const val ATTR_URL = "url"
     internal const val ATTR_TYPE = "type"
@@ -119,6 +122,9 @@ class XmlFeedParser(
     internal const val ATTR_REL = "rel"
     internal const val ATTR_HREF = "href"
     internal const val ATTR_RDF_RESOURCE = "rdf:resource"
+    internal const val ATTR_START = "start"
+    internal const val ATTR_TITLE = "title"
+    internal const val ATTR_IMAGE = "image"
 
     internal const val ATTR_VALUE_ALTERNATE = "alternate"
 

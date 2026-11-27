@@ -83,6 +83,13 @@ class JsonFeedParser(
                 .firstOrNull { it.mimeType.startsWith("image/", ignoreCase = true) }
                 ?.url
                 ?.ifBlank { null }
+            val chaptersUrl =
+              jsonFeedPost.attachments
+                .firstOrNull { it.mimeType.equals("application/json+chapters", ignoreCase = true) }
+                ?.url
+                ?.trim()
+                ?.ifBlank { null }
+                ?.let { UrlUtils.safeUrl(host, it) }
 
             emit(
               PostPayload(
@@ -101,6 +108,7 @@ class JsonFeedParser(
                 date = postPublishedAt ?: Clock.System.now().toEpochMilliseconds(),
                 commentsLink = null,
                 isDateParsedCorrectly = postPublishedAt != null,
+                chaptersUrl = chaptersUrl,
               )
             )
           }

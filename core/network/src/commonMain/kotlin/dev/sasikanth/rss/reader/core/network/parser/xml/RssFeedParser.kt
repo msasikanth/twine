@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.core.network.parser.xml
 
+import dev.sasikanth.rss.reader.core.model.local.MediaChapter
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
@@ -36,7 +37,9 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_CONTENT
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_GROUP
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_THUMBNAIL
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PODCAST_CHAPTERS
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PODCAST_IMAGES
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PSC_CHAPTERS
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PUB_DATE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_RSS_CHANNEL
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_RSS_ITEM
@@ -174,6 +177,8 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
     var audioUrl: String? = null
     var mediaContentAudioUrl: String? = null
     var commentsLink: String? = null
+    var chaptersUrl: String? = null
+    var chapters: List<MediaChapter> = emptyList()
 
     forEachChildTag(parser, TAG_RSS_ITEM) { name ->
       when {
@@ -267,6 +272,18 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
           mediaGroupDescription =
             mediaGroupDescription.orEmpty().ifBlank { mediaGroupResult.description }
         }
+        name == TAG_PODCAST_CHAPTERS -> {
+          val parsedUrl = readPodcastChaptersUrl(parser, hostLink)
+          if (chaptersUrl.isNullOrBlank() && parsedUrl != null) {
+            chaptersUrl = parsedUrl
+          }
+        }
+        name == TAG_PSC_CHAPTERS -> {
+          val parsedChapters = readPodloveChapters(parser, hostLink)
+          if (chapters.isEmpty() && parsedChapters.isNotEmpty()) {
+            chapters = parsedChapters
+          }
+        }
         else -> parser.skipSubTree()
       }
     }
@@ -293,6 +310,8 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
       date = date,
       commentsLink = commentsLink,
       hostLink = hostLink,
+      chaptersUrl = chaptersUrl,
+      chapters = chapters,
     )
   }
 }

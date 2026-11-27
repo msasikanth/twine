@@ -1190,4 +1190,115 @@ class XmlFeedParserTest {
     assertEquals("https://example.com/rdf-cover.png", payload.coverArtUrl)
     assertEquals("https://example.com/rdf-cover.png", payload.icon)
   }
+
+  @Test
+  fun parsesPodcasting2AndPodloveChaptersInRssAndAtomItems() = runTest {
+    val rssXml =
+      """
+      <?xml version="1.0" encoding="UTF-8"?>
+      <rss version="2.0"
+        xmlns:podcast="https://podcastindex.org/namespace/1.0"
+        xmlns:psc="http://podlove.org/simple-chapters">
+        <channel>
+          <title>Chapter Podcast</title>
+          <link>https://example.com</link>
+          <description>Desc</description>
+          <item>
+            <title>Episode 1</title>
+            <link>https://example.com/ep1</link>
+            <enclosure url="https://example.com/ep1.mp3" type="audio/mpeg" length="1000" />
+            <podcast:chapters url="/chapters/ep1.json" type="application/json+chapters" />
+            <psc:chapters version="1.2">
+              <psc:chapter start="00:00:00.000" title="Welcome" href="https://example.com/welcome" />
+              <psc:chapter start="00:05:30" title="Sponsor: Sentry" image="/img/sponsor.png" />
+            </psc:chapters>
+          </item>
+        </channel>
+      </rss>
+      """
+        .trimIndent()
+
+    val rssPosts =
+      xmlFeedParser
+        .parse(ByteReadChannel(rssXml.toByteArray()), feedUrl, Charsets.UTF8)
+        .posts
+        .toList()
+    val rssPost = rssPosts.single()
+
+    assertEquals("http://example.com/chapters/ep1.json", rssPost.chaptersUrl)
+    assertEquals(2, rssPost.chapters.size)
+    assertEquals("Welcome", rssPost.chapters[0].title)
+    assertEquals(0L, rssPost.chapters[0].timestampMs)
+    assertEquals(false, rssPost.chapters[0].isSponsor)
+    assertEquals("https://example.com/welcome", rssPost.chapters[0].url)
+    assertEquals("Sponsor: Sentry", rssPost.chapters[1].title)
+    assertEquals(330_000L, rssPost.chapters[1].timestampMs)
+    assertEquals(true, rssPost.chapters[1].isSponsor)
+    assertEquals("http://example.com/img/sponsor.png", rssPost.chapters[1].imageUrl)
+
+    val atomXml =
+      """
+      <?xml version="1.0" encoding="UTF-8"?>
+      <feed xmlns="http://www.w3.org/2005/Atom"
+        xmlns:podcast="https://podcastindex.org/namespace/1.0"
+        xmlns:psc="http://podlove.org/simple-chapters">
+        <title>Atom Chapters</title>
+        <link href="https://example.com" rel="alternate" />
+        <entry>
+          <title>Atom Ep</title>
+          <link rel="alternate" href="https://example.com/atom-ep" />
+          <summary>Summary</summary>
+          <podcast:chapters url="https://cdn.example.com/atom-ep.json" type="application/json+chapters" />
+          <psc:chapters version="1.2">
+            <psc:chapter start="01:00" title="Intro" />
+          </psc:chapters>
+        </entry>
+      </feed>
+      """
+        .trimIndent()
+
+    val atomPost =
+      xmlFeedParser
+        .parse(ByteReadChannel(atomXml.toByteArray()), feedUrl, Charsets.UTF8)
+        .posts
+        .toList()
+        .single()
+    assertEquals("https://cdn.example.com/atom-ep.json", atomPost.chaptersUrl)
+    assertEquals(1, atomPost.chapters.size)
+    assertEquals(60_000L, atomPost.chapters[0].timestampMs)
+    assertEquals("Intro", atomPost.chapters[0].title)
+  }
+
+  @Test
+  fun youtubeAtomFeedIgnoresShockwaveFlashMediaContentAndUsesThumbnail() = runTest {
+    val ytAtomXml =
+      """
+      <?xml version="1.0" encoding="UTF-8"?>
+      <feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
+        <title>3Blue1Brown</title>
+        <link rel="alternate" href="https://www.youtube.com/channel/UCYO_jab_esuFRV4b17AJtAw" />
+        <entry>
+          <title>What if AI solved the Riemann Hypothesis?</title>
+          <link rel="alternate" href="https://www.youtube.com/watch?v=zqzk43bSdDI" />
+          <published>2026-11-22T15:00:00Z</published>
+          <media:group>
+            <media:title>What if AI solved the Riemann Hypothesis?</media:title>
+            <media:content url="https://www.youtube.com/v/zqzk43bSdDI?version=3" type="application/x-shockwave-flash" width="640" height="390" />
+            <media:thumbnail url="https://i1.ytimg.com/vi/zqzk43bSdDI/hqdefault.jpg" width="480" height="360" />
+            <media:description>Intro text</media:description>
+          </media:group>
+        </entry>
+      </feed>
+      """
+        .trimIndent()
+
+    val post =
+      xmlFeedParser
+        .parse(ByteReadChannel(ytAtomXml.toByteArray()), feedUrl, Charsets.UTF8)
+        .posts
+        .toList()
+        .single()
+
+    assertEquals("https://i1.ytimg.com/vi/zqzk43bSdDI/maxresdefault.jpg", post.imageUrl)
+  }
 }

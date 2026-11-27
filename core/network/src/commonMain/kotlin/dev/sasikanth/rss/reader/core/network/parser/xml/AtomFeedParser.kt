@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.core.network.parser.xml
 
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.parseSource
+import dev.sasikanth.rss.reader.core.model.local.MediaChapter
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
@@ -40,7 +41,9 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_GROUP
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_THUMBNAIL
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_NAME
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PODCAST_CHAPTERS
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PODCAST_IMAGES
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PSC_CHAPTERS
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PUBLISHED
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_SUBTITLE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_SUMMARY
@@ -213,6 +216,8 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
     var enclosureImage: String? = null
     var audioUrl: String? = null
     var mediaContentAudioUrl: String? = null
+    var chaptersUrl: String? = null
+    var chapters: List<MediaChapter> = emptyList()
 
     forEachChildTag(parser, TAG_ATOM_ENTRY) { tagName ->
       when (tagName) {
@@ -301,6 +306,18 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
           mediaGroupDescription =
             mediaGroupDescription.orEmpty().ifBlank { mediaGroupResult.description }
         }
+        TAG_PODCAST_CHAPTERS -> {
+          val parsedUrl = readPodcastChaptersUrl(parser, hostLink)
+          if (chaptersUrl.isNullOrBlank() && parsedUrl != null) {
+            chaptersUrl = parsedUrl
+          }
+        }
+        TAG_PSC_CHAPTERS -> {
+          val parsedChapters = readPodloveChapters(parser, hostLink)
+          if (chapters.isEmpty() && parsedChapters.isNotEmpty()) {
+            chapters = parsedChapters
+          }
+        }
         else -> parser.skipSubTree()
       }
     }
@@ -325,6 +342,8 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
       audioUrl = audioUrl ?: mediaContentAudioUrl ?: mediaGroupAudioUrl ?: postContent?.audioUrl,
       date = date,
       hostLink = hostLink,
+      chaptersUrl = chaptersUrl,
+      chapters = chapters,
     )
   }
 
