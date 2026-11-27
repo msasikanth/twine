@@ -77,6 +77,7 @@ class RDFContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
       name = title,
       description = description,
       icon = iconUrl,
+      coverArtUrl = iconUrl,
       homepageLink = link,
       link = feedUrl,
       posts =

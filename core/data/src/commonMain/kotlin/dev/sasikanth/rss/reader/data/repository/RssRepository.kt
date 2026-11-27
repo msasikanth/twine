@@ -140,6 +140,7 @@ class RssRepository(
           createdAt = Clock.System.now(),
           lastUpdatedAt = Clock.System.now(),
           enableNotifications = enableNotifications,
+          coverArtUrl = feedPayload.coverArtUrl,
         )
       }
     }
@@ -519,6 +520,20 @@ class RssRepository(
     feedRepository.updateFeedSyncError(feedId, syncError)
   }
 
+  suspend fun updateFeedCoverArt(feedId: String, coverArtUrl: String) {
+    withContext(dispatchersProvider.databaseWrite) {
+      feedQueries.updateCoverArtUrl(coverArtUrl = coverArtUrl, id = feedId)
+    }
+  }
+
+  suspend fun audioFeedsMissingCoverArt(limit: Long = 10): List<Pair<String, String>> {
+    return withContext(dispatchersProvider.databaseRead) {
+      feedQueries
+        .audioFeedsMissingCoverArt(limit = limit) { id, link -> id to link }
+        .executeAsList()
+    }
+  }
+
   /** Search feeds, returns all feeds if [searchQuery] is empty */
   fun searchFeed(
     searchQuery: String,
@@ -623,7 +638,9 @@ class RssRepository(
             articleContentReadingTime: Long?,
             seedColor: Long?,
             audioProgress: Long,
-            audioDuration: Long ->
+            audioDuration: Long,
+            feedCoverArtUrl: String?,
+            feedLink: String ->
             ResolvedPost(
               id = id,
               sourceId = sourceId,
@@ -646,6 +663,8 @@ class RssRepository(
               seedColor = seedColor?.toInt(),
               audioProgress = audioProgress,
               audioDuration = audioDuration,
+              feedCoverArtUrl = feedCoverArtUrl,
+              feedLink = feedLink,
             )
           },
         )

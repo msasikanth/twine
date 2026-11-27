@@ -607,6 +607,8 @@ class PostRepository(
     seedColor: Long?,
     audioProgress: Long,
     audioDuration: Long,
+    feedCoverArtUrl: String?,
+    feedLink: String,
   ): ResolvedPost {
     return ResolvedPost(
       id = id,
@@ -631,6 +633,8 @@ class PostRepository(
       remoteId = remoteId,
       audioProgress = audioProgress,
       audioDuration = audioDuration,
+      feedCoverArtUrl = feedCoverArtUrl,
+      feedLink = feedLink,
     )
   }
 }

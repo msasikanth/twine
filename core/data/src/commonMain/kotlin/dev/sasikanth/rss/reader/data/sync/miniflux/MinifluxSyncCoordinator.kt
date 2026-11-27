@@ -609,8 +609,13 @@ class MinifluxSyncCoordinator(
                 null
               }
             val audioUrl =
-              entry.enclosures.firstOrNull { it.mimeType.startsWith("audio/") }?.url
-                ?: htmlContent?.audioUrl
+              entry.enclosures
+                .firstOrNull { it.mimeType.startsWith("audio/", ignoreCase = true) }
+                ?.url ?: htmlContent?.audioUrl
+            val enclosureImage =
+              entry.enclosures
+                .firstOrNull { it.mimeType.startsWith("image/", ignoreCase = true) }
+                ?.url
             val postPayload =
               PostPayload(
                 title = entry.title,
@@ -618,7 +623,8 @@ class MinifluxSyncCoordinator(
                 description = htmlContent?.textContent ?: "",
                 rawContent = htmlContent?.cleanedHtml ?: entry.content,
                 imageUrl =
-                  UrlUtils.upgradeYouTubeThumbnail(htmlContent?.heroImage)
+                  enclosureImage
+                    ?: UrlUtils.upgradeYouTubeThumbnail(htmlContent?.heroImage)
                     ?: UrlUtils.youTubeThumbnail(entry.url),
                 audioUrl = audioUrl,
                 date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
@@ -645,6 +651,7 @@ class MinifluxSyncCoordinator(
               homepageLink = feed.homepageLink,
               link = feed.link,
               posts = flowOf(*posts.toTypedArray()),
+              coverArtUrl = feed.coverArtUrl,
             ),
           feedId = feed.id,
           updateFeed = false,

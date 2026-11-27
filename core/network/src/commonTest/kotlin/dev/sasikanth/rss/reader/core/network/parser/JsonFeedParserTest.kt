@@ -37,6 +37,7 @@ class JsonFeedParserTest {
   private suspend fun assertFeedPayloadEquals(expected: FeedPayload, actual: FeedPayload) {
     assertEquals(expected.name, actual.name)
     assertEquals(expected.icon, actual.icon)
+    assertEquals(expected.coverArtUrl, actual.coverArtUrl)
     assertEquals(expected.description, actual.description)
     assertEquals(expected.homepageLink, actual.homepageLink)
     assertEquals(expected.link, actual.link)
@@ -56,6 +57,7 @@ class JsonFeedParserTest {
       FeedPayload(
         name = "Tech Insights Blog",
         icon = "https://example.com/icon.png",
+        coverArtUrl = "https://example.com/icon.png",
         description = "The latest insights and news from the tech world",
         homepageLink = "https://example.com",
         link = "https://example.com/feed.json",
@@ -180,5 +182,52 @@ class JsonFeedParserTest {
     val post = posts.single()
     assertEquals(longBody, post.description)
     assertTrue((post.rawContent ?: "").contains(longBody))
+  }
+
+  @Test
+  fun parsingJsonFeedSupportsLowercaseFaviconBannerImageAndImageAttachments() = runTest {
+    val rawJson =
+      """
+      {
+        "version": "https://jsonfeed.org/version/1.1",
+        "title": "Podcast JSON",
+        "home_page_url": "https://example.com",
+        "feed_url": "https://example.com/feed.json",
+        "favicon": "https://example.com/favicon.png",
+        "items": [
+          {
+            "id": "1",
+            "url": "https://example.com/1",
+            "title": "Banner Item",
+            "banner_image": "https://example.com/banner.jpg",
+            "content_html": "<p>Body</p><img src=\"https://example.com/inline.jpg\"/>",
+            "attachments": [
+              { "url": "https://example.com/attach.jpg", "mime_type": "image/jpeg" },
+              { "url": "https://example.com/ep1.mp3", "mime_type": "audio/mpeg" }
+            ]
+          },
+          {
+            "id": "2",
+            "url": "https://example.com/2",
+            "title": "Attachment Image Item",
+            "content_html": "<p>Body</p><img src=\"https://example.com/inline2.jpg\"/>",
+            "attachments": [
+              { "url": "https://example.com/attach2.png", "mime_type": "image/png" }
+            ]
+          }
+        ]
+      }
+      """
+        .trimIndent()
+
+    val payload =
+      parser.parse(ByteReadChannel(rawJson).readBuffer(), "https://example.com/feed.json")
+    val posts = payload.posts.toList()
+
+    assertEquals("https://example.com/favicon.png", payload.icon)
+    assertEquals(null, payload.coverArtUrl)
+    assertEquals("https://example.com/banner.jpg", posts[0].imageUrl)
+    assertEquals("https://example.com/ep1.mp3", posts[0].audioUrl)
+    assertEquals("https://example.com/attach2.png", posts[1].imageUrl)
   }
 }

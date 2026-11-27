@@ -59,6 +59,21 @@ object UrlUtils {
         "([\\w\\-]{11})(?:[?&#/].*)?$"
     )
 
+  private val vimeoVideoIdRegex =
+    Regex(
+      "^(?:https?:)?(?://)?(?:www\\.|player\\.)?vimeo\\.com/" +
+        "(?:(?:channels/[^/]+/|groups/[^/]+/videos/|album/\\d+/video/|video/)?(\\d+))(?:[/?#].*)?$",
+      RegexOption.IGNORE_CASE,
+    )
+
+  private val peerTubeRegex =
+    Regex(
+      "^(?:https?:)?(?://)?[^/]+/(?:videos/(?:watch|embed)/[A-Za-z0-9_-]+|w/[A-Za-z0-9]{6,})(?:[/?#].*)?$",
+      RegexOption.IGNORE_CASE,
+    )
+
+  private val directVideoExtensions = listOf(".mp4", ".m4v", ".webm", ".mov", ".mkv", ".m3u8")
+
   fun isYouTubeLink(url: String): Boolean {
     return youtubeRegex.matches(url)
   }
@@ -66,6 +81,42 @@ object UrlUtils {
   fun youTubeVideoId(url: String?): String? {
     if (url.isNullOrBlank()) return null
     return youtubeVideoIdRegex.find(url.trim())?.groupValues?.getOrNull(1)
+  }
+
+  fun vimeoVideoId(url: String?): String? {
+    if (url.isNullOrBlank()) return null
+    return vimeoVideoIdRegex.find(url.trim())?.groupValues?.getOrNull(1)
+  }
+
+  fun isPeerTubeLink(url: String?): Boolean {
+    if (url.isNullOrBlank()) return false
+    return peerTubeRegex.matches(url.trim())
+  }
+
+  fun isDirectVideoUrl(url: String?): Boolean {
+    if (url.isNullOrBlank()) return false
+    val path = url.trim().substringBefore('?').substringBefore('#')
+    return directVideoExtensions.any { path.endsWith(it, ignoreCase = true) }
+  }
+
+  fun videoProviderName(url: String?): String? {
+    if (url.isNullOrBlank()) return null
+    return when {
+      youTubeVideoId(url) != null -> "YouTube"
+      vimeoVideoId(url) != null -> "Vimeo"
+      isPeerTubeLink(url) -> "PeerTube"
+      isDirectVideoUrl(url) -> "Video"
+      else -> null
+    }
+  }
+
+  fun isLowResFaviconUrl(url: String?): Boolean {
+    val normalized = url?.trim()?.lowercase() ?: return true
+    if (normalized.isEmpty()) return true
+    return normalized.startsWith("data:") ||
+      normalized.contains("icon.horse/icon/") ||
+      normalized.contains("google.com/s2/favicons") ||
+      normalized.contains("gstatic.com/favicon")
   }
 
   fun youTubeThumbnail(url: String?): String? {

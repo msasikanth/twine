@@ -22,7 +22,8 @@ CREATE TABLE feed(
   remoteId TEXT,
   enableNotifications INTEGER AS Boolean NOT NULL DEFAULT 1,
   consecutiveFetchErrors INTEGER NOT NULL DEFAULT 0,
-  syncError TEXT
+  syncError TEXT,
+  coverArtUrl TEXT
 );
 
 CREATE INDEX feed_link_index ON feed(link);
@@ -33,8 +34,8 @@ CREATE INDEX feed_isDeleted_hideFromAllFeeds_index ON feed(isDeleted, hideFromAl
 CREATE INDEX feed_remoteId_index ON feed(remoteId) WHERE remoteId IS NOT NULL;
 
 upsert:
-INSERT INTO feed(id, name, icon, description, homepageLink, createdAt, link, alwaysFetchSourceArticle, showFeedFavIcon, lastUpdatedAt, enableNotifications)
-VALUES (:id, :name, :icon, :description, :homepageLink, :createdAt, :link, :alwaysFetchSourceArticle, :showFeedFavIcon, :lastUpdatedAt, :enableNotifications)
+INSERT INTO feed(id, name, icon, description, homepageLink, createdAt, link, alwaysFetchSourceArticle, showFeedFavIcon, lastUpdatedAt, enableNotifications, coverArtUrl)
+VALUES (:id, :name, :icon, :description, :homepageLink, :createdAt, :link, :alwaysFetchSourceArticle, :showFeedFavIcon, :lastUpdatedAt, :enableNotifications, :coverArtUrl)
 ON CONFLICT(id) DO
 UPDATE SET
 icon = excluded.icon,
@@ -45,7 +46,8 @@ alwaysFetchSourceArticle = excluded.alwaysFetchSourceArticle,
 showFeedFavIcon = excluded.showFeedFavIcon,
 enableNotifications = excluded.enableNotifications,
 isDeleted = 0,
-lastUpdatedAt = :lastUpdatedAt;
+lastUpdatedAt = :lastUpdatedAt,
+coverArtUrl = COALESCE(excluded.coverArtUrl, feed.coverArtUrl);
 
 markAsDeleted:
 UPDATE feed SET isDeleted = 1, pinnedAt = NULL, pinnedPosition = 0.0, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
@@ -82,7 +84,8 @@ SELECT
   f.isDeleted,
   f.enableNotifications,
   f.remoteId,
-  f.syncError
+  f.syncError,
+  f.coverArtUrl
 FROM feed f
 LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :postsUpperBound AND (p.flags & 2) == 0 AND (p.flags & 4) == 0
 WHERE f.id = :id AND f.isDeleted = 0
@@ -160,7 +163,8 @@ SELECT
   f.isDeleted,
   f.enableNotifications,
   f.remoteId,
-  f.syncError
+  f.syncError,
+  f.coverArtUrl
 FROM feed f
 WHERE f.id IN :feedIds AND f.isDeleted = 0
 ORDER BY
@@ -195,8 +199,8 @@ deleteAll:
 DELETE FROM feed;
 
 upsertSyncFeed:
-INSERT INTO feed(id, name, icon, description, link, homepageLink, createdAt, pinnedAt, lastCleanUpAt, alwaysFetchSourceArticle, lastUpdatedAt, isDeleted, hideFromAllFeeds, enableNotifications, remoteId)
-VALUES (:id, :name, :icon, :description, :link, :homepageLink, :createdAt, :pinnedAt, :lastCleanUpAt, :alwaysFetchSourceArticle, :lastUpdatedAt, :isDeleted, :hideFromAllFeeds, :enableNotifications, :remoteId)
+INSERT INTO feed(id, name, icon, description, link, homepageLink, createdAt, pinnedAt, lastCleanUpAt, alwaysFetchSourceArticle, lastUpdatedAt, isDeleted, hideFromAllFeeds, enableNotifications, remoteId, coverArtUrl)
+VALUES (:id, :name, :icon, :description, :link, :homepageLink, :createdAt, :pinnedAt, :lastCleanUpAt, :alwaysFetchSourceArticle, :lastUpdatedAt, :isDeleted, :hideFromAllFeeds, :enableNotifications, :remoteId, :coverArtUrl)
 ON CONFLICT(id) DO
 UPDATE SET
     name = excluded.name,
@@ -210,8 +214,22 @@ UPDATE SET
     isDeleted = excluded.isDeleted,
     hideFromAllFeeds = excluded.hideFromAllFeeds,
     enableNotifications = excluded.enableNotifications,
-    remoteId = excluded.remoteId
+    remoteId = excluded.remoteId,
+    coverArtUrl = COALESCE(excluded.coverArtUrl, feed.coverArtUrl)
 WHERE excluded.lastUpdatedAt > feed.lastUpdatedAt OR feed.lastUpdatedAt IS NULL OR feed.remoteId IS NULL;
+
+updateCoverArtUrl:
+UPDATE feed SET coverArtUrl = :coverArtUrl WHERE id = :id;
+
+audioFeedsMissingCoverArt:
+SELECT DISTINCT f.id, f.link
+FROM feed f
+INNER JOIN post p ON p.sourceId = f.id
+WHERE f.isDeleted = 0
+  AND f.coverArtUrl IS NULL
+  AND p.audioUrl IS NOT NULL
+  AND p.audioUrl != ''
+LIMIT :limit;
 
 incrementFetchErrors:
 UPDATE feed SET consecutiveFetchErrors = consecutiveFetchErrors + 1 WHERE id = :id;

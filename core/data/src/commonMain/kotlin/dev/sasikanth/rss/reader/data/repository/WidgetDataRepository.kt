@@ -79,7 +79,9 @@ class WidgetDataRepository(
           _: Long?,
           _: Long?,
           _: Long,
-          _: Long ->
+          _: Long,
+          _: String?,
+          _: String ->
           WidgetPost(
             id = id,
             title = title,
@@ -125,7 +127,9 @@ class WidgetDataRepository(
             _: Long?,
             _: Long?,
             _: Long,
-            _: Long ->
+            _: Long,
+            _: String?,
+            _: String ->
             WidgetPost(
               id = id,
               title = title,
@@ -176,7 +180,9 @@ class WidgetDataRepository(
             articleContentReadingTime: Long?,
             seedColor: Long?,
             audioProgress: Long,
-            audioDuration: Long ->
+            audioDuration: Long,
+            feedCoverArtUrl: String?,
+            feedLink: String ->
             ResolvedPost(
               id = id,
               sourceId = sourceId,
@@ -200,6 +206,8 @@ class WidgetDataRepository(
               remoteId = remoteId,
               audioProgress = audioProgress,
               audioDuration = audioDuration,
+              feedCoverArtUrl = feedCoverArtUrl,
+              feedLink = feedLink,
             )
           },
         )

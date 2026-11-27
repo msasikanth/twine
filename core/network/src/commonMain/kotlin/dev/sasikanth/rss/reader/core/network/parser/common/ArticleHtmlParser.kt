@@ -17,6 +17,7 @@
 package dev.sasikanth.rss.reader.core.network.parser.common
 
 import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.safety.Cleaner
 import com.fleeksoft.ksoup.safety.Safelist
 import dev.sasikanth.rss.reader.logging.CrashReporter
@@ -31,13 +32,17 @@ class ArticleHtmlParser {
     private const val TAG_IMG = "img"
     private const val TAG_FIGCAPTION = "figcaption"
     private const val ATTR_SRC = "src"
+    private const val ATTR_WIDTH = "width"
+    private const val ATTR_HEIGHT = "height"
     private const val TAG_AUDIO = "audio"
     private const val TAG_SOURCE = "source"
     private const val ATTR_TYPE = "type"
 
     private const val MAX_CONTENT_SIZE = 5 * 1024 * 1024 // 5MB
+    private const val MIN_HERO_IMAGE_DIMENSION = 16
 
     private val gifRegex = Regex("\\.gif(\\?.*)?$", RegexOption.IGNORE_CASE)
+    private val trackingFilenameRegex = Regex("(?:^|[._-])1x1(?:[._-]|$)", RegexOption.IGNORE_CASE)
   }
 
   private val allowedContentTags by lazy {
@@ -61,17 +66,20 @@ class ArticleHtmlParser {
       val body = cleanedHtmlDocument.body().first()
       var firstGifImage: String? = null
       val heroImage =
-        body.firstNotNullOfOrNull { element ->
-          if (element.tagName() != TAG_IMG) return@firstNotNullOfOrNull null
+        originalHtmlDocument.body().select(TAG_IMG).firstNotNullOfOrNull { element ->
+          val imageUrl =
+            element.attr(ATTR_SRC).trim().removeSurrounding("\"").ifBlank {
+              return@firstNotNullOfOrNull null
+            }
+          if (isTrackingOrTinyImage(element, imageUrl)) return@firstNotNullOfOrNull null
 
-          val imageUrl = element.attr(ATTR_SRC)
           if (gifRegex.containsMatchIn(imageUrl)) {
             if (firstGifImage == null) {
-              firstGifImage = imageUrl.removeSurrounding("\"")
+              firstGifImage = imageUrl
             }
             null
           } else {
-            imageUrl.removeSurrounding("\"")
+            imageUrl
           }
         } ?: firstGifImage
 
@@ -93,6 +101,22 @@ class ArticleHtmlParser {
       CrashReporter.log(e)
       null
     }
+  }
+
+  private fun isTrackingOrTinyImage(element: Element, imageUrl: String): Boolean {
+    if (imageUrl.startsWith("data:", ignoreCase = true)) return true
+
+    val width = element.attr(ATTR_WIDTH).trim().removeSuffix("px").trim().toIntOrNull()
+    if (width != null && width <= MIN_HERO_IMAGE_DIMENSION) return true
+
+    val height = element.attr(ATTR_HEIGHT).trim().removeSuffix("px").trim().toIntOrNull()
+    if (height != null && height <= MIN_HERO_IMAGE_DIMENSION) return true
+
+    val path = imageUrl.substringBefore('?').substringBefore('#')
+    val filename = path.substringAfterLast('/')
+    return filename.equals("pixel.gif", ignoreCase = true) ||
+      path.contains("/1x1/") ||
+      trackingFilenameRegex.containsMatchIn(filename)
   }
 
   data class Result(

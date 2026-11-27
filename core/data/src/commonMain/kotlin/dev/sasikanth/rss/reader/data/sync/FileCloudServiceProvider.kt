@@ -122,6 +122,7 @@ data class FeedSyncEntity(
   val hideFromAllFeeds: Boolean = false,
   val lastUpdatedAt: Long? = null,
   val isDeleted: Boolean = false,
+  val coverArtUrl: String? = null,
 )
 
 @Serializable

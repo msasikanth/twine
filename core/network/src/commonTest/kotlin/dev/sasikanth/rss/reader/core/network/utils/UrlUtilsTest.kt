@@ -165,4 +165,84 @@ class UrlUtilsTest {
     assertNull(UrlUtils.youTubeThumbnailFallback("https://example.com/image.jpg"))
     assertNull(UrlUtils.youTubeThumbnailFallback(null))
   }
+
+  @Test
+  fun isLowResFaviconUrl_shouldDetectLowResAndBlankUrls() {
+    assertTrue(UrlUtils.isLowResFaviconUrl(null))
+    assertTrue(UrlUtils.isLowResFaviconUrl(""))
+    assertTrue(UrlUtils.isLowResFaviconUrl("   "))
+    assertTrue(UrlUtils.isLowResFaviconUrl("data:image/png;base64,iVBORw0KGgo="))
+    assertTrue(UrlUtils.isLowResFaviconUrl("DATA:image/x-icon;base64,AAAA"))
+    assertTrue(UrlUtils.isLowResFaviconUrl("https://icon.horse/icon/example.com"))
+    assertTrue(
+      UrlUtils.isLowResFaviconUrl("https://www.google.com/s2/favicons?domain=example.com&sz=180")
+    )
+    assertTrue(UrlUtils.isLowResFaviconUrl("https://t0.gstatic.com/faviconV2?client=SOCIAL"))
+
+    assertFalse(UrlUtils.isLowResFaviconUrl("https://example.com/podcast-cover.jpg"))
+    assertFalse(UrlUtils.isLowResFaviconUrl("https://cdn.example.com/favicon-3000.png"))
+  }
+
+  @Test
+  fun vimeoVideoId_shouldExtractIdsFromSupportedUrlShapes() {
+    assertEquals("123456789", UrlUtils.vimeoVideoId("https://vimeo.com/123456789"))
+    assertEquals("123456789", UrlUtils.vimeoVideoId("https://vimeo.com/123456789?share=copy"))
+    assertEquals(
+      "123456789",
+      UrlUtils.vimeoVideoId("https://player.vimeo.com/video/123456789?h=abc"),
+    )
+    assertEquals(
+      "123456789",
+      UrlUtils.vimeoVideoId("https://vimeo.com/channels/staffpicks/123456789"),
+    )
+    assertEquals(
+      "123456789",
+      UrlUtils.vimeoVideoId("https://vimeo.com/groups/shortfilms/videos/123456789"),
+    )
+    assertEquals("123456789", UrlUtils.vimeoVideoId("https://vimeo.com/album/42/video/123456789"))
+
+    assertNull(UrlUtils.vimeoVideoId(null))
+    assertNull(UrlUtils.vimeoVideoId("https://vimeo.com/channels/staffpicks"))
+    assertNull(UrlUtils.vimeoVideoId("https://example.com/123456789"))
+  }
+
+  @Test
+  fun isPeerTubeLink_shouldMatchPeerTubeUrlsOnly() {
+    assertTrue(UrlUtils.isPeerTubeLink("https://framatube.org/w/u6s6N8fT6q8j7kL9mN2pQ3"))
+    assertTrue(
+      UrlUtils.isPeerTubeLink(
+        "https://peertube.tv/videos/watch/9c9de5e8-0a1e-4b3a-9c12-1234567890ab"
+      )
+    )
+    assertTrue(
+      UrlUtils.isPeerTubeLink(
+        "https://tilvids.com/videos/embed/9c9de5e8-0a1e-4b3a-9c12-1234567890ab?autoplay=1"
+      )
+    )
+
+    assertFalse(UrlUtils.isPeerTubeLink(null))
+    assertFalse(UrlUtils.isPeerTubeLink("https://en.wikipedia.org/w/index.php?title=RSS"))
+    assertFalse(UrlUtils.isPeerTubeLink("https://example.com/blog/watch/article"))
+  }
+
+  @Test
+  fun isDirectVideoUrl_and_videoProviderName_shouldClassifyVideoLinks() {
+    assertTrue(UrlUtils.isDirectVideoUrl("https://cdn.example.com/video.mp4"))
+    assertTrue(UrlUtils.isDirectVideoUrl("https://cdn.example.com/clip.WEBM?token=1#t=5"))
+    assertTrue(UrlUtils.isDirectVideoUrl("https://cdn.example.com/stream.m3u8"))
+    assertFalse(UrlUtils.isDirectVideoUrl("https://cdn.example.com/episode.mp3"))
+
+    assertEquals(
+      "YouTube",
+      UrlUtils.videoProviderName("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
+    )
+    assertEquals("Vimeo", UrlUtils.videoProviderName("https://vimeo.com/123456789"))
+    assertEquals(
+      "PeerTube",
+      UrlUtils.videoProviderName("https://framatube.org/w/u6s6N8fT6q8j7kL9mN2pQ3"),
+    )
+    assertEquals("Video", UrlUtils.videoProviderName("https://cdn.example.com/video.mov"))
+    assertNull(UrlUtils.videoProviderName("https://www.youtube.com/@TomScottGo"))
+    assertNull(UrlUtils.videoProviderName("https://example.com/article"))
+  }
 }

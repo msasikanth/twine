@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.posts
 
 import androidx.compose.ui.graphics.toArgb
 import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.data.sync.PodcastCoverArtCoordinator
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.SyncState
 import dev.sasikanth.rss.reader.data.utils.Constants
@@ -40,6 +41,7 @@ class PostSyncProcessor(
   private val rssRepository: RssRepository,
   private val syncCoordinator: SyncCoordinator,
   private val seedColorExtractor: SeedColorExtractor,
+  private val podcastCoverArtCoordinator: PodcastCoverArtCoordinator,
   dispatchersProvider: DispatchersProvider,
 ) {
 
@@ -50,9 +52,14 @@ class PostSyncProcessor(
       .onEach { syncState ->
         if (syncState is SyncState.Complete) {
           calculateSeedColors()
+          enrichPodcastCoverArt()
         }
       }
       .launchIn(scope)
+  }
+
+  private fun enrichPodcastCoverArt() {
+    scope.launch { podcastCoverArtCoordinator.enrichAudioFeedsMissingCoverArt() }
   }
 
   private fun calculateSeedColors() {

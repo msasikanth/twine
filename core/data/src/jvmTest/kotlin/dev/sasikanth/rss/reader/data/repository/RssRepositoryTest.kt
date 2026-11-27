@@ -183,6 +183,7 @@ class RssRepositoryTest {
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
       enableNotifications = true,
+      coverArtUrl = null,
     )
 
     val now = Instant.fromEpochMilliseconds(1000000000)
@@ -231,6 +232,7 @@ class RssRepositoryTest {
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
       enableNotifications = true,
+      coverArtUrl = null,
     )
 
     val now = Instant.fromEpochMilliseconds(1000000000)
@@ -309,6 +311,7 @@ class RssRepositoryTest {
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
       enableNotifications = true,
+      coverArtUrl = null,
     )
 
     val now = Instant.fromEpochMilliseconds(1000000000)
@@ -386,6 +389,7 @@ class RssRepositoryTest {
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
       enableNotifications = true,
+      coverArtUrl = null,
     )
 
     insertPost(id = "post-1", sourceId = feedId, postDate = Instant.fromEpochMilliseconds(0))
@@ -419,6 +423,7 @@ class RssRepositoryTest {
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
       enableNotifications = true,
+      coverArtUrl = null,
     )
     database.feedQueries.upsert(
       id = "feed-2",
@@ -432,6 +437,7 @@ class RssRepositoryTest {
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
       enableNotifications = true,
+      coverArtUrl = null,
     )
 
     // when
@@ -460,6 +466,7 @@ class RssRepositoryTest {
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
       enableNotifications = true,
+      coverArtUrl = null,
     )
     database.feedQueries.upsert(
       id = "feed-2",
@@ -473,6 +480,7 @@ class RssRepositoryTest {
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
       enableNotifications = true,
+      coverArtUrl = null,
     )
 
     // when - enable for all
@@ -514,6 +522,7 @@ class RssRepositoryTest {
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
       enableNotifications = true,
+      coverArtUrl = null,
     )
 
     val now = Instant.fromEpochMilliseconds(1000000000)
@@ -581,6 +590,7 @@ class RssRepositoryTest {
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
       enableNotifications = true,
+      coverArtUrl = null,
     )
 
     val now = Instant.fromEpochMilliseconds(1000000000)
@@ -640,6 +650,7 @@ class RssRepositoryTest {
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
       enableNotifications = true,
+      coverArtUrl = null,
     )
 
     insertPost(id = "post-1", sourceId = feedId, postDate = Instant.fromEpochMilliseconds(0))
@@ -687,6 +698,7 @@ class RssRepositoryTest {
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
       enableNotifications = true,
+      coverArtUrl = null,
     )
 
     database.postQueries.upsert(
@@ -750,6 +762,7 @@ class RssRepositoryTest {
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
       enableNotifications = true,
+      coverArtUrl = null,
     )
 
     blockedWordsRepository.addWord("spam")
@@ -955,6 +968,106 @@ class RssRepositoryTest {
     )
   }
 
+  @Test
+  fun coverArtUrlShouldPersistAndProjectOntoFeedAndResolvedPostWithoutPollutingFeaturedPosts() =
+    runTest {
+      val podcastFeedLink = "https://podcast.example.com/feed.xml"
+      val podcastFeedId =
+        repository.upsertFeedWithPosts(
+          feedPayload =
+            dev.sasikanth.rss.reader.core.model.remote.FeedPayload(
+              name = "Podcast Show",
+              icon = "https://podcast.example.com/show.jpg",
+              coverArtUrl = "https://podcast.example.com/show.jpg",
+              description = "Show description",
+              homepageLink = "https://podcast.example.com",
+              link = podcastFeedLink,
+              posts =
+                kotlinx.coroutines.flow.flowOf(
+                  dev.sasikanth.rss.reader.core.model.remote.PostPayload(
+                    title = "Episode 1",
+                    link = "https://podcast.example.com/ep1",
+                    description = "Episode notes",
+                    rawContent = null,
+                    fullContent = null,
+                    imageUrl = null,
+                    audioUrl = "https://podcast.example.com/ep1.mp3",
+                    date = 1_000L,
+                    commentsLink = null,
+                    isDateParsedCorrectly = true,
+                  )
+                ),
+            )
+        )
+
+      val feed = repository.feed(podcastFeedId)!!
+      assertEquals("https://podcast.example.com/show.jpg", feed.coverArtUrl)
+
+      val epId =
+        dev.sasikanth.rss.reader.util.nameBasedUuidOf("https://podcast.example.com/ep1").toString()
+      val resolved = repository.resolvedPostById(epId)!!
+      assertEquals("https://podcast.example.com/show.jpg", resolved.feedCoverArtUrl)
+      assertEquals(podcastFeedLink, resolved.feedLink)
+      assertEquals(null, resolved.imageUrl)
+
+      val featured =
+        repository
+          .featuredPosts(activeSourceIds = emptyList(), postsSortOrder = PostsSortOrder.Latest)
+          .first()
+      assertEquals(emptyList(), featured)
+
+      assertEquals(emptyList(), repository.audioFeedsMissingCoverArt())
+
+      val missingFeedId =
+        repository.upsertFeedWithPosts(
+          feedPayload =
+            dev.sasikanth.rss.reader.core.model.remote.FeedPayload(
+              name = "Miniflux Podcast",
+              icon = "data:image/png;base64,AAAA",
+              coverArtUrl = null,
+              description = "",
+              homepageLink = "https://missing.example.com",
+              link = "https://missing.example.com/rss.xml",
+              posts =
+                kotlinx.coroutines.flow.flowOf(
+                  dev.sasikanth.rss.reader.core.model.remote.PostPayload(
+                    title = "Missing Art Ep",
+                    link = "https://missing.example.com/ep1",
+                    description = "Notes",
+                    rawContent = null,
+                    fullContent = null,
+                    imageUrl = null,
+                    audioUrl = "https://missing.example.com/ep1.mp3",
+                    date = 2_000L,
+                    commentsLink = null,
+                    isDateParsedCorrectly = true,
+                  )
+                ),
+            )
+        )
+
+      assertEquals(
+        listOf(missingFeedId to "https://missing.example.com/rss.xml"),
+        repository.audioFeedsMissingCoverArt(),
+      )
+
+      repository.applyFeedsSyncMetadata(
+        listOf(
+          FeedSyncMetadataUpdate(
+            feedId = missingFeedId,
+            fetchSucceeded = true,
+            coverArtUrl = "https://missing.example.com/cover.jpg",
+          )
+        )
+      )
+
+      assertEquals(
+        "https://missing.example.com/cover.jpg",
+        repository.feed(missingFeedId)?.coverArtUrl,
+      )
+      assertEquals(emptyList(), repository.audioFeedsMissingCoverArt())
+    }
+
   private val postDate = Instant.fromEpochMilliseconds(1000)
   private val postsAfter = Instant.fromEpochMilliseconds(0)
   private val postsUpperBound = Instant.fromEpochMilliseconds(Long.MAX_VALUE / 2)
@@ -991,6 +1104,7 @@ class RssRepositoryTest {
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0),
       enableNotifications = true,
+      coverArtUrl = null,
     )
   }
 

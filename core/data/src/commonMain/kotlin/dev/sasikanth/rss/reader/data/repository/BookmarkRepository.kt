@@ -120,6 +120,8 @@ class BookmarkRepository(
     seedColor: Long?,
     audioProgress: Long,
     audioDuration: Long,
+    feedCoverArtUrl: String?,
+    feedLink: String,
   ): ResolvedPost {
     return ResolvedPost(
       id = id,
@@ -143,6 +145,8 @@ class BookmarkRepository(
       seedColor = seedColor?.toInt(),
       audioProgress = audioProgress,
       audioDuration = audioDuration,
+      feedCoverArtUrl = feedCoverArtUrl,
+      feedLink = feedLink,
     )
   }
 }

@@ -45,4 +45,5 @@ data class Feed(
   val remoteId: String? = null,
   val consecutiveFetchErrors: Long = 0L,
   val syncError: String? = null,
+  val coverArtUrl: String? = null,
 ) : Source

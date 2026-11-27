@@ -122,6 +122,7 @@ class FileCloudSyncService(
               hideFromAllFeeds = it.hideFromAllFeeds,
               lastUpdatedAt = it.lastUpdatedAt?.toEpochMilliseconds(),
               isDeleted = it.isDeleted,
+              coverArtUrl = it.coverArtUrl,
             )
           }
 
@@ -264,6 +265,7 @@ class FileCloudSyncService(
             isDeleted = it.isDeleted,
             alwaysFetchSourceArticle = it.alwaysFetchSourceArticle,
             hideFromAllFeeds = localFeed?.hideFromAllFeeds ?: false,
+            coverArtUrl = it.coverArtUrl ?: localFeed?.coverArtUrl,
           )
         } else {
           null
