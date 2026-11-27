@@ -108,7 +108,6 @@ internal fun AmbientBlurredBackdrop(
   Box(
     modifier =
       modifier
-        .clipToBounds()
         .layout { measurable, constraints ->
           val fullWidth = constraints.maxWidth
           val fullHeight =
