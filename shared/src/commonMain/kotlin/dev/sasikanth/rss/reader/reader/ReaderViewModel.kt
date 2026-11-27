@@ -53,16 +53,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -128,33 +125,8 @@ class ReaderViewModel(
   val exitScreen: SharedFlow<Boolean>
     get() = _exitScreen
 
-  private var audioProgressAutoSaveJob: Job? = null
-
   init {
     init()
-    observePlaybackForAutoSave()
-  }
-
-  private fun observePlaybackForAutoSave() {
-    audioPlayer.playbackState
-      .map { it.isPlaying }
-      .distinctUntilChanged()
-      .onEach { isPlaying ->
-        audioProgressAutoSaveJob?.cancel()
-        audioProgressAutoSaveJob =
-          if (isPlaying) {
-            viewModelScope.launch {
-              while (true) {
-                delay(10.seconds)
-                saveAudioProgress()
-              }
-            }
-          } else {
-            saveAudioProgress()
-            null
-          }
-      }
-      .launchIn(viewModelScope)
   }
 
   val playbackState: StateFlow<PlaybackState>
@@ -167,6 +139,10 @@ class ReaderViewModel(
 
   fun resumeAudio() {
     audioPlayer.resume()
+  }
+
+  fun stopAudio() {
+    audioPlayer.stop()
   }
 
   fun seekAudio(position: Long) {
@@ -273,7 +249,19 @@ class ReaderViewModel(
   private fun postPageChange(postIndex: Int, post: ResolvedPost) {
     if (sessionCoordinator.shouldIgnorePageChange(post.id)) return
 
-    _state.update { it.copy(activePostIndex = postIndex, activePostId = post.id) }
+    _state.update { currentState ->
+      val nextPanelContent =
+        when (val panel = currentState.panelContent) {
+          is ReaderPanelContent.Player if panel.targetPostId != post.id ->
+            ReaderPanelContent.Actions
+          else -> panel
+        }
+      currentState.copy(
+        activePostIndex = postIndex,
+        activePostId = post.id,
+        panelContent = nextPanelContent,
+      )
+    }
 
     // Only readers backed by the home posts list publish the selection; indexes from
     // Search/Bookmarks/Widget belong to a different list, and posts there may not even

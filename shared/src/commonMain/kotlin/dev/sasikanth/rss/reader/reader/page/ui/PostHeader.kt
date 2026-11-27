@@ -46,7 +46,6 @@ import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostActionBar
-import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.home.ui.featuredImageMemoryCacheKey
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.ui.ImageClickEvent
@@ -54,13 +53,6 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.formatRelativeTime
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
-
-private val ReaderPostMetadataConfig =
-  PostMetadataConfig(
-    showUnreadIndicator = false,
-    showToggleReadUnreadOption = true,
-    enablePostSource = false,
-  )
 
 @Composable
 internal fun PostHeader(
@@ -72,9 +64,8 @@ internal fun PostHeader(
   darkTheme: Boolean,
   themeVariant: ThemeVariant,
   fromScreen: ReaderScreenArgs.FromScreen,
-  onCommentsClick: () -> Unit,
-  onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
+  onCommentsClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
   onImageClick: (ImageClickEvent) -> Unit,
   modifier: Modifier = Modifier,
@@ -161,6 +152,12 @@ internal fun PostHeader(
       Spacer(Modifier.requiredHeight(12.dp))
 
       DisableSelection {
+        val readingTime =
+          if (showFullArticle) {
+            readerPost.articleContentReadingTime ?: readerPost.feedContentReadingTime
+          } else {
+            readerPost.feedContentReadingTime
+          } ?: 0
         var showDropdown by remember { mutableStateOf(false) }
 
         PostActionBar(
@@ -173,7 +170,7 @@ internal fun PostHeader(
           postLink = readerPost.link,
           postBookmarked = readerPost.bookmarked,
           commentsLink = readerPost.commentsLink,
-          postReadingTimeEstimate = readerPost.feedContentReadingTime ?: 0,
+          postReadingTimeEstimate = readingTime,
           onBookmarkClick = onBookmarkClick,
           onCommentsClick = onCommentsClick,
           onTogglePostReadClick = onMarkAsUnread,
@@ -182,9 +179,7 @@ internal fun PostHeader(
           hideMarkAsOptions = fromScreen == ReaderScreenArgs.FromScreen.Bookmarks,
           config = ReaderPostMetadataConfig,
           onDropdownChange = { showDropdown = it },
-          onSourceClick = {
-            // no-op
-          },
+          onSourceClick = {},
         )
       }
     }

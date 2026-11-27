@@ -70,8 +70,10 @@ import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.media.PlaybackState
 import dev.sasikanth.rss.reader.resources.icons.Pause
 import dev.sasikanth.rss.reader.resources.icons.Play
+import dev.sasikanth.rss.reader.resources.icons.RSS
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -343,13 +345,27 @@ private fun Artwork(
           ),
       contentAlignment = Alignment.Center,
     ) {
-      if (!coverUrl.isNullOrBlank()) {
+      if (!coverUrl.isNullOrBlank() && !LocalBlockImage.current) {
         AsyncImage(
           url = coverUrl,
           contentDescription = null,
           contentScale = ContentScale.Crop,
           modifier = Modifier.requiredSize(ARTWORK_SIZE),
         )
+      } else {
+        Box(
+          modifier =
+            Modifier.requiredSize(ARTWORK_SIZE)
+              .background(AppTheme.colorScheme.surfaceContainerHigh),
+          contentAlignment = Alignment.Center,
+        ) {
+          Icon(
+            modifier = Modifier.requiredSize(20.dp),
+            imageVector = TwineIcons.RSS,
+            contentDescription = null,
+            tint = AppTheme.colorScheme.onSurfaceVariant,
+          )
+        }
       }
 
       if (isBuffering) {

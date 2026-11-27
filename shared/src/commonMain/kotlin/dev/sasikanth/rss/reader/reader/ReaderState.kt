@@ -64,8 +64,11 @@ data class ReaderState(
   }
 }
 
-enum class ReaderPanelContent {
-  Actions,
-  Customizations,
-  Player,
+@Immutable
+sealed interface ReaderPanelContent {
+  data object Actions : ReaderPanelContent
+
+  data object Customizations : ReaderPanelContent
+
+  data class Player(val targetPostId: String) : ReaderPanelContent
 }

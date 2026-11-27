@@ -22,12 +22,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.TextSelectionColors
@@ -35,12 +34,14 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -77,40 +78,45 @@ import com.mikepenz.markdown.model.State
 import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.markdownDimens
 import com.mikepenz.markdown.model.markdownPadding
-import dev.sasikanth.rss.reader.app.LocalSnackbarHostState
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
+import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
 import dev.sasikanth.rss.reader.markdown.LocalMarkdownAnnotatorSettings
 import dev.sasikanth.rss.reader.markdown.LocalMarkdownTextColorProducer
 import dev.sasikanth.rss.reader.markdown.LocalReaderContentWidth
 import dev.sasikanth.rss.reader.markdown.rememberAnnotatorSettings
+import dev.sasikanth.rss.reader.media.PlaybackState
+import dev.sasikanth.rss.reader.media.SleepTimerOption
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.reader.ReaderContentType
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
 import dev.sasikanth.rss.reader.reader.page.ReaderProcessingProgress
 import dev.sasikanth.rss.reader.reader.ui.ImageClickEvent
 import dev.sasikanth.rss.reader.reader.ui.LocalOnImageClick
-import dev.sasikanth.rss.reader.share.LocalShareHandler
-import dev.sasikanth.rss.reader.share.ShareResult
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalImageSharedElementScopeKey
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.smoothVerticalFade
 import kotlin.time.Instant
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
-import org.jetbrains.compose.resources.stringResource
-import twine.shared.generated.resources.Res
-import twine.shared.generated.resources.shareLinkCopied
 
 private const val TOP_SCRIM_OPAQUE_THRESHOLD = 200f
-private val ReaderHorizontalPadding = 48.dp
+internal val ReaderHorizontalPadding = 48.dp
+internal val ReaderPostMetadataConfig =
+  PostMetadataConfig(
+    showUnreadIndicator = false,
+    showToggleReadUnreadOption = true,
+    enablePostSource = false,
+  )
 private val NoOpAnimateTextSize: Modifier.() -> Modifier = { this }
 private val ReaderMarkdownAnimations = DefaultMarkdownAnimation(NoOpAnimateTextSize)
 
-private class ReaderFadeScrimCache {
+internal class ReaderFadeScrimCache {
   private var backdrop: Color = Color.Unspecified
   private var size: Size = Size.Unspecified
   private var topScrimSolidPx: Float = Float.NaN
@@ -185,93 +191,149 @@ internal fun ReaderPage(
   page: Int,
   pagerState: PagerState,
   markdownComponents: MarkdownComponents,
+  playbackStateFlow: StateFlow<PlaybackState>,
   isDarkTheme: Boolean,
   themeVariant: ThemeVariant,
   fromScreen: ReaderScreenArgs.FromScreen,
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
   onImageClick: (ImageClickEvent) -> Unit,
+  onWatchVideo: (String) -> Unit,
+  onOpenWebsite: () -> Unit,
+  onPauseAudio: () -> Unit,
+  onResumeAudio: () -> Unit,
+  onSeekAudio: (Long) -> Unit,
+  onSeekForward: () -> Unit,
+  onSeekBackward: () -> Unit,
+  onPlaybackSpeedChange: (Float) -> Unit,
+  onSleepTimerOptionSelected: (SleepTimerOption) -> Unit,
+  onHeroVisibilityChanged: (Boolean) -> Unit,
   modifier: Modifier = Modifier,
   contentPaddingValues: PaddingValues = PaddingValues(),
 ) {
   val markdownContentState by pageViewModel.contentState.collectAsStateWithLifecycle()
   val excerptState by pageViewModel.excerptState.collectAsStateWithLifecycle()
   val contentParsingProgress by pageViewModel.parsingProgress.collectAsStateWithLifecycle()
+  val resolvedCoverArtUrl by pageViewModel.resolvedCoverArtUrl.collectAsStateWithLifecycle()
+  val chapters by pageViewModel.chapters.collectAsStateWithLifecycle()
 
-  ReaderPageContent(
-    markdownContentState = markdownContentState,
-    excerptState = excerptState,
-    contentParsingProgress = contentParsingProgress,
-    isAudioPlayerAvailable = pageViewModel.audioPlayer.isAvailable,
-    audioPlayerInstallationHint = pageViewModel.audioPlayer.installationHint,
-    readerPost = readerPost,
-    showFullArticle = showFullArticle,
-    page = page,
-    pagerState = pagerState,
-    markdownComponents = markdownComponents,
-    isDarkTheme = isDarkTheme,
-    themeVariant = themeVariant,
-    fromScreen = fromScreen,
-    onBookmarkClick = onBookmarkClick,
-    onMarkAsUnread = onMarkAsUnread,
-    onImageClick = onImageClick,
-    modifier = modifier,
-    contentPaddingValues = contentPaddingValues,
-  )
-}
-
-@Composable
-private fun ReaderPageContent(
-  markdownContentState: State,
-  excerptState: String?,
-  contentParsingProgress: ReaderProcessingProgress,
-  isAudioPlayerAvailable: Boolean,
-  audioPlayerInstallationHint: String?,
-  readerPost: ResolvedPost,
-  showFullArticle: Boolean,
-  page: Int,
-  pagerState: PagerState,
-  markdownComponents: MarkdownComponents,
-  isDarkTheme: Boolean,
-  themeVariant: ThemeVariant,
-  fromScreen: ReaderScreenArgs.FromScreen,
-  onBookmarkClick: () -> Unit,
-  onMarkAsUnread: () -> Unit,
-  onImageClick: (ImageClickEvent) -> Unit,
-  modifier: Modifier = Modifier,
-  contentPaddingValues: PaddingValues = PaddingValues(),
-) {
   val linkHandler = LocalLinkHandler.current
-  val sharedHandler = LocalShareHandler.current
-  val snackbarHostState = LocalSnackbarHostState.current
-  val linkCopiedLabel = stringResource(Res.string.shareLinkCopied)
-  val shouldBlockImage = LocalBlockImage.current
-
   val coroutineScope = rememberCoroutineScope()
-
-  val listState = rememberLazyListState()
-  val colorScheme = AppTheme.colorScheme
-  val density = LocalDensity.current
-  val topPadding = contentPaddingValues.calculateTopPadding()
-  val bottomPadding = contentPaddingValues.calculateBottomPadding()
-  val topScrimSolidPx = with(density) { topPadding.toPx() }
-  val topScrimFadePx = with(density) { 72.dp.toPx() }
-  val bottomScrimHeightPx = with(density) { 96.dp.toPx() }
-  val scrimCache = remember { ReaderFadeScrimCache() }
-  val topScrimAlphaProvider =
-    remember(listState) {
+  val contentType = pageViewModel.contentType
+  val onCommentsClick =
+    remember(readerPost.commentsLink, linkHandler) {
       {
-        if (listState.firstVisibleItemIndex == 0) {
-          (listState.firstVisibleItemScrollOffset / TOP_SCRIM_OPAQUE_THRESHOLD).coerceIn(0f, 1f)
-        } else {
-          1f
+        val commentsLink = readerPost.commentsLink
+        if (!commentsLink.isNullOrBlank()) {
+          coroutineScope.launch { linkHandler.openLink(commentsLink) }
         }
+        Unit
       }
     }
 
+  LaunchedEffect(contentType, readerPost.id) {
+    if (contentType !is ReaderContentType.Podcast) {
+      onHeroVisibilityChanged(true)
+    }
+  }
+
+  ProvideReaderMarkdownLocals(
+    markdownComponents = markdownComponents,
+    onImageClick = onImageClick,
+  ) { updateContentWidth ->
+    Box(modifier = modifier.clipToBounds()) {
+      when (contentType) {
+        ReaderContentType.Article -> {
+          ArticleReaderPage(
+            modifier = Modifier.fillMaxSize(),
+            readerPost = readerPost,
+            showFullArticle = showFullArticle,
+            page = page,
+            pagerState = pagerState,
+            excerpt = excerptState,
+            markdownContentState = markdownContentState,
+            contentParsingProgress = contentParsingProgress,
+            markdownComponents = markdownComponents,
+            isDarkTheme = isDarkTheme,
+            themeVariant = themeVariant,
+            fromScreen = fromScreen,
+            contentPaddingValues = contentPaddingValues,
+            onBookmarkClick = onBookmarkClick,
+            onCommentsClick = onCommentsClick,
+            onMarkAsUnread = onMarkAsUnread,
+            onOpenWebsite = onOpenWebsite,
+            onImageClick = onImageClick,
+            onContentWidthChanged = updateContentWidth,
+          )
+        }
+        is ReaderContentType.Podcast -> {
+          PodcastReaderPage(
+            modifier = Modifier.fillMaxSize(),
+            readerPost = readerPost,
+            contentType = contentType,
+            resolvedCoverArtUrl = resolvedCoverArtUrl,
+            chapters = chapters,
+            markdownContentState = markdownContentState,
+            contentParsingProgress = contentParsingProgress,
+            markdownComponents = markdownComponents,
+            playbackStateFlow = playbackStateFlow,
+            audioPlayerInstallationHint = pageViewModel.audioPlayer.installationHint,
+            fromScreen = fromScreen,
+            contentPaddingValues = contentPaddingValues,
+            onBookmarkClick = onBookmarkClick,
+            onCommentsClick = onCommentsClick,
+            onMarkAsUnread = onMarkAsUnread,
+            onImageClick = onImageClick,
+            onPlayClick = pageViewModel::playAudio,
+            onPlayAtClick = pageViewModel::playAudioAt,
+            onPauseClick = onPauseAudio,
+            onResumeClick = onResumeAudio,
+            onSeek = onSeekAudio,
+            onSeekForward = onSeekForward,
+            onSeekBackward = onSeekBackward,
+            onPlaybackSpeedChange = onPlaybackSpeedChange,
+            onSleepTimerOptionSelected = onSleepTimerOptionSelected,
+            onOpenWebsite = onOpenWebsite,
+            onHeroVisibilityChanged = onHeroVisibilityChanged,
+            onContentWidthChanged = updateContentWidth,
+          )
+        }
+        is ReaderContentType.Video -> {
+          VideoReaderPage(
+            modifier = Modifier.fillMaxSize(),
+            readerPost = readerPost,
+            contentType = contentType,
+            chapters = chapters,
+            markdownContentState = markdownContentState,
+            contentParsingProgress = contentParsingProgress,
+            markdownComponents = markdownComponents,
+            isDarkTheme = isDarkTheme,
+            fromScreen = fromScreen,
+            contentPaddingValues = contentPaddingValues,
+            onWatchVideo = onWatchVideo,
+            onBookmarkClick = onBookmarkClick,
+            onCommentsClick = onCommentsClick,
+            onMarkAsUnread = onMarkAsUnread,
+            onContentWidthChanged = updateContentWidth,
+          )
+        }
+      }
+    }
+  }
+}
+
+@Composable
+internal fun ProvideReaderMarkdownLocals(
+  markdownComponents: MarkdownComponents,
+  onImageClick: (ImageClickEvent) -> Unit,
+  content: @Composable (updateContentWidth: (Dp) -> Unit) -> Unit,
+) {
+  val shouldBlockImage = LocalBlockImage.current
+  val colorScheme = AppTheme.colorScheme
   val settledPrimary = colorScheme.settledPrimary
   val settledOnSurface = colorScheme.settledOnSurface
   val settledOutlineVariant = colorScheme.settledOutlineVariant
+
   val textSelectionColors =
     remember(settledPrimary) {
       TextSelectionColors(
@@ -337,152 +399,121 @@ private fun ReaderPageContent(
   val markdownTextColorProducer = remember(colorScheme) { ColorProducer { colorScheme.onSurface } }
   val readerContentWidth = remember { mutableStateOf(Dp.Unspecified) }
   val readerContentWidthProvider = remember(readerContentWidth) { { readerContentWidth.value } }
-  val lazyColumnContentPadding =
-    remember(topPadding, bottomPadding) {
-      PaddingValues(top = topPadding, bottom = bottomPadding + 24.dp)
+  val updateContentWidth =
+    remember(readerContentWidth) {
+      { widthDp: Dp ->
+        if (readerContentWidth.value != widthDp) {
+          readerContentWidth.value = widthDp
+        }
+      }
     }
 
   CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColors) {
     SelectionContainer {
-      Box(modifier = modifier) {
-        CompositionLocalProvider(
-          LocalOnImageClick provides onImageClick,
-          LocalMarkdownComponents provides markdownComponents,
-          LocalReferenceLinkHandler provides referenceLinkHandler,
-          LocalMarkdownPadding provides padding,
-          LocalMarkdownDimens provides dimens,
-          LocalImageTransformer provides CoilMarkdownTransformer,
-          LocalMarkdownAnnotator provides annotator,
-          LocalMarkdownAnimations provides ReaderMarkdownAnimations,
-          LocalMarkdownColors provides colors,
-          LocalMarkdownTypography provides typography,
-          LocalMarkdownAnnotatorSettings provides annotatorSettings,
-          LocalMarkdownTextColorProducer provides markdownTextColorProducer,
-          LocalReaderContentWidth provides readerContentWidthProvider,
-        ) {
-          LazyColumn(
-            modifier =
-              Modifier.fillMaxSize()
-                .onSizeChanged { intSize ->
-                  val widthDp =
-                    with(density) {
-                      (intSize.width.toDp() - ReaderHorizontalPadding).coerceAtLeast(0.dp)
-                    }
-                  if (readerContentWidth.value != widthDp) {
-                    readerContentWidth.value = widthDp
-                  }
-                }
-                .drawWithContent {
-                  drawContent()
-                  scrimCache.updateIfNeeded(
-                    backdrop = colorScheme.backdrop,
-                    size = size,
-                    topScrimSolidPx = topScrimSolidPx,
-                    topScrimFadePx = topScrimFadePx,
-                    bottomScrimHeightPx = bottomScrimHeightPx,
-                  )
-                  scrimCache.topBrush?.let { brush ->
-                    val alpha = topScrimAlphaProvider()
-                    if (alpha > 0f) {
-                      drawRect(brush = brush, size = scrimCache.topScrimSize, alpha = alpha)
-                    }
-                  }
-                  scrimCache.bottomBrush?.let { brush ->
-                    drawRect(
-                      brush = brush,
-                      topLeft = scrimCache.bottomScrimOffset,
-                      size = scrimCache.bottomScrimSize,
-                    )
-                  }
-                },
-            state = listState,
-            overscrollEffect = null,
-            contentPadding = lazyColumnContentPadding,
-          ) {
-            item(key = "reader-header", contentType = "reader-header") {
-              PostHeader(
-                modifier = Modifier.padding(bottom = 40.dp),
-                readerPost = readerPost,
-                showFullArticle = showFullArticle,
-                page = page,
-                pagerState = pagerState,
-                excerpt = excerptState ?: "",
-                darkTheme = isDarkTheme,
-                themeVariant = themeVariant,
-                fromScreen = fromScreen,
-                onCommentsClick = {
-                  val commentsLink = readerPost.commentsLink
-                  if (commentsLink != null) {
-                    coroutineScope.launch { linkHandler.openLink(commentsLink) }
-                  }
-                },
-                onShareClick = {
-                  coroutineScope.launch {
-                    if (sharedHandler.share(readerPost.link) == ShareResult.CopiedToClipboard) {
-                      snackbarHostState.showSnackbar(linkCopiedLabel)
-                    }
-                  }
-                },
-                onBookmarkClick = onBookmarkClick,
-                onMarkAsUnread = onMarkAsUnread,
-                onImageClick = onImageClick,
-              )
-            }
-
-            if (!readerPost.audioUrl.isNullOrBlank() && !isAudioPlayerAvailable) {
-              item(key = "podcast-player-unavailable", contentType = "podcast-player-unavailable") {
-                DisableSelection {
-                  MediaUnavailableBanner(
-                    installationHint = audioPlayerInstallationHint,
-                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 40.dp),
-                  )
-                }
-              }
-            }
-
-            if (contentParsingProgress == ReaderProcessingProgress.Loading) {
-              item(key = "progress-indicator", contentType = "progress-indicator") {
-                ProgressIndicator()
-              }
-            }
-
-            when (markdownContentState) {
-              is State.Success -> {
-                items(
-                  items = markdownContentState.node.children,
-                  key = { it.markdownNodeKey() },
-                  contentType = { it.type.name },
-                ) { node ->
-                  CompositionLocalProvider(
-                    LocalImageSharedElementScopeKey provides
-                      "${readerPost.id}:${node.markdownNodeKey()}"
-                  ) {
-                    Box(modifier = Modifier.padding(horizontal = 24.dp)) {
-                      MarkdownElement(
-                        node = node,
-                        components = markdownComponents,
-                        content = markdownContentState.content,
-                        includeSpacer = true,
-                      )
-                    }
-                  }
-                }
-              }
-              else -> {
-                // no-op
-              }
-            }
-          }
-        }
+      CompositionLocalProvider(
+        LocalOnImageClick provides onImageClick,
+        LocalMarkdownComponents provides markdownComponents,
+        LocalReferenceLinkHandler provides referenceLinkHandler,
+        LocalMarkdownPadding provides padding,
+        LocalMarkdownDimens provides dimens,
+        LocalImageTransformer provides CoilMarkdownTransformer,
+        LocalMarkdownAnnotator provides annotator,
+        LocalMarkdownAnimations provides ReaderMarkdownAnimations,
+        LocalMarkdownColors provides colors,
+        LocalMarkdownTypography provides typography,
+        LocalMarkdownAnnotatorSettings provides annotatorSettings,
+        LocalMarkdownTextColorProducer provides markdownTextColorProducer,
+        LocalReaderContentWidth provides readerContentWidthProvider,
+      ) {
+        content(updateContentWidth)
       }
     }
   }
 }
 
 @Composable
-private fun ProgressIndicator() {
+internal fun Modifier.readerContentWidthAndScrims(
+  listState: LazyListState,
+  topPadding: Dp,
+  onContentWidthChanged: (Dp) -> Unit,
+  horizontalPadding: Dp = ReaderHorizontalPadding,
+): Modifier {
+  val colorScheme = AppTheme.colorScheme
+  val density = LocalDensity.current
+  val topScrimSolidPx = with(density) { topPadding.toPx() }
+  val topScrimFadePx = with(density) { 72.dp.toPx() }
+  val bottomScrimHeightPx = with(density) { 96.dp.toPx() }
+  val scrimCache = remember { ReaderFadeScrimCache() }
+  val topScrimAlphaProvider =
+    remember(listState) {
+      {
+        if (listState.firstVisibleItemIndex == 0) {
+          (listState.firstVisibleItemScrollOffset / TOP_SCRIM_OPAQUE_THRESHOLD).coerceIn(0f, 1f)
+        } else {
+          1f
+        }
+      }
+    }
+
+  return this.onSizeChanged { intSize ->
+      val widthDp = with(density) { (intSize.width.toDp() - horizontalPadding).coerceAtLeast(0.dp) }
+      onContentWidthChanged(widthDp)
+    }
+    .drawWithContent {
+      drawContent()
+      scrimCache.updateIfNeeded(
+        backdrop = colorScheme.backdrop,
+        size = size,
+        topScrimSolidPx = topScrimSolidPx,
+        topScrimFadePx = topScrimFadePx,
+        bottomScrimHeightPx = bottomScrimHeightPx,
+      )
+      scrimCache.topBrush?.let { brush ->
+        val alpha = topScrimAlphaProvider()
+        if (alpha > 0f) {
+          drawRect(brush = brush, size = scrimCache.topScrimSize, alpha = alpha)
+        }
+      }
+      scrimCache.bottomBrush?.let { brush ->
+        drawRect(
+          brush = brush,
+          topLeft = scrimCache.bottomScrimOffset,
+          size = scrimCache.bottomScrimSize,
+        )
+      }
+    }
+}
+
+internal fun LazyListScope.readerMarkdownItems(
+  postId: String,
+  markdownContentState: State.Success,
+  markdownComponents: MarkdownComponents,
+  horizontalPadding: Dp = 24.dp,
+) {
+  items(
+    items = markdownContentState.node.children,
+    key = { it.markdownNodeKey() },
+    contentType = { it.type.name },
+  ) { node ->
+    CompositionLocalProvider(
+      LocalImageSharedElementScopeKey provides "$postId:${node.markdownNodeKey()}"
+    ) {
+      Box(modifier = Modifier.padding(horizontal = horizontalPadding)) {
+        MarkdownElement(
+          node = node,
+          components = markdownComponents,
+          content = markdownContentState.content,
+          includeSpacer = true,
+        )
+      }
+    }
+  }
+}
+
+@Composable
+internal fun ReaderProgressIndicator(modifier: Modifier = Modifier) {
   Box(
-    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+    modifier = modifier.fillMaxWidth().padding(vertical = 16.dp),
     contentAlignment = Alignment.Center,
   ) {
     LinearProgressIndicator(
@@ -492,50 +523,66 @@ private fun ProgressIndicator() {
   }
 }
 
-private fun ASTNode.markdownNodeKey(): String {
+internal fun ASTNode.markdownNodeKey(): String {
   return "${type.name}:$startOffset:$endOffset"
 }
+
+internal fun nextPlaybackSpeed(currentSpeed: Float): Float =
+  when (currentSpeed) {
+    0.5f -> 1.0f
+    1.0f -> 1.5f
+    1.5f -> 2.0f
+    2.0f -> 0.5f
+    else -> 1.0f
+  }
 
 @Preview(locale = "en")
 @Composable
 private fun ReaderPagePreview() {
-  AppTheme {
-    ReaderPageContent(
-      markdownContentState = State.Loading(),
-      excerptState = null,
-      contentParsingProgress = ReaderProcessingProgress.Idle,
-      readerPost =
-        ResolvedPost(
-          id = "",
-          sourceId = "",
-          title = "Post Title",
-          description = "Post Description",
-          link = "",
-          imageUrl = null,
-          audioUrl = null,
-          date = Instant.fromEpochMilliseconds(0),
-          createdAt = Instant.fromEpochMilliseconds(0),
-          commentsLink = null,
-          flags = emptySet(),
-          feedName = "Feed Name",
-          feedIcon = "",
-          feedHomepageLink = "",
-          alwaysFetchFullArticle = false,
-          showFeedFavIcon = true,
-          feedContentReadingTime = 0,
-        ),
-      showFullArticle = false,
-      page = 0,
-      pagerState = rememberPagerState { 1 },
-      markdownComponents = markdownComponents(),
-      isDarkTheme = false,
-      themeVariant = ThemeVariant.Dynamic,
-      fromScreen = ReaderScreenArgs.FromScreen.Home,
-      onBookmarkClick = {},
-      onMarkAsUnread = {},
-      onImageClick = {},
-      isAudioPlayerAvailable = true,
-      audioPlayerInstallationHint = null,
+  val samplePost =
+    ResolvedPost(
+      id = "",
+      sourceId = "",
+      title = "Post Title",
+      description = "Post Description",
+      link = "",
+      imageUrl = null,
+      audioUrl = null,
+      date = Instant.fromEpochMilliseconds(0),
+      createdAt = Instant.fromEpochMilliseconds(0),
+      commentsLink = null,
+      flags = emptySet(),
+      feedName = "Feed Name",
+      feedIcon = "",
+      feedHomepageLink = "",
+      alwaysFetchFullArticle = false,
+      showFeedFavIcon = true,
+      feedContentReadingTime = 0,
     )
+  val components = markdownComponents()
+
+  AppTheme {
+    ProvideReaderMarkdownLocals(markdownComponents = components, onImageClick = {}) { updateWidth ->
+      ArticleReaderPage(
+        readerPost = samplePost,
+        showFullArticle = false,
+        page = 0,
+        pagerState = rememberPagerState { 1 },
+        excerpt = "",
+        markdownContentState = State.Loading(),
+        contentParsingProgress = ReaderProcessingProgress.Idle,
+        markdownComponents = components,
+        isDarkTheme = false,
+        themeVariant = ThemeVariant.Dynamic,
+        fromScreen = ReaderScreenArgs.FromScreen.Home,
+        contentPaddingValues = PaddingValues(),
+        onBookmarkClick = {},
+        onCommentsClick = {},
+        onMarkAsUnread = {},
+        onOpenWebsite = {},
+        onImageClick = {},
+        onContentWidthChanged = updateWidth,
+      )
+    }
   }
 }
