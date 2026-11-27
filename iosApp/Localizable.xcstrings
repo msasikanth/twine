@@ -72,7 +72,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : " • %d dk. okuma"
+            "value" : " • %d dk okuma"
           }
         },
         "zh-Hans" : {
@@ -159,7 +159,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Akışındaki yeniliklere göz at."
+            "value" : "Akışlarınızdaki yeni içeriklere göz atın."
           }
         },
         "zh-Hans" : {
@@ -280,13 +280,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Bugün okumadığın bir yazı var"
+                  "value" : "Bugün okunmamış bir yazınız var"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Bugün okumadığın %lld yazı var"
+                  "value" : "Bugün okunmamış %lld yazınız var"
                 }
               }
             }
@@ -700,7 +700,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Araç takımları yalnızca Premium kullanıcılara özel. Kullanmak için lütfen uygulama içinden abone ol."
+            "value" : "Araç takımları yalnızca Premium üyelere özeldir. Kullanmak için uygulama içinden abone olabilirsiniz."
           }
         },
         "zh-Hans" : {
@@ -747,7 +747,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Okunmamış son 5 yazıyı kaydırmalı olarak gösterir."
+            "value" : "Okunmamış son 5 yazıyı kaydırılabilir vitrinde gösterir"
           }
         },
         "zh-Hans" : {
@@ -793,7 +793,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Okunmamış son yazıların geniş bir listesini sunar."
+            "value" : "Okunmamış son yazıları liste halinde gösterir"
           }
         },
         "zh-Hans" : {
@@ -839,7 +839,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Son Okunmayanlar (Büyük)"
+            "value" : "Okunmamış Yazılar (Büyük)"
           }
         },
         "zh-Hans" : {
@@ -885,7 +885,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Okunmamış son yazıları biraz daha detaylı gösterir."
+            "value" : "Okunmamış son yazıları daha fazla ayrıntıyla gösterir"
           }
         },
         "zh-Hans" : {
@@ -931,7 +931,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Son Okunmayanlar (Orta)"
+            "value" : "Okunmamış Yazılar (Orta)"
           }
         },
         "zh-Hans" : {
@@ -977,7 +977,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Son Okunmayanlar (Küçük)"
+            "value" : "Okunmamış Yazılar (Küçük)"
           }
         },
         "zh-Hans" : {
