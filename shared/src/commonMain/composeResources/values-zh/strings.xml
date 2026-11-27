@@ -175,7 +175,6 @@
   <string name="addToGroup">添加到分组</string>
   <string name="removeSources">删除来源</string>
   <string name="removeSourcesDesc">你想删除选定来源吗？</string>
-  <string name="noPinnedSources">没有钉选的来源/分组</string>
   <string name="databaseMaintainenceTitle">请稍候……</string>
   <string name="databaseMaintainenceSubtitle">正在维护数据库，请不要关闭应用</string>
   <string name="cdLoadFullArticle">加载完整文章</string>

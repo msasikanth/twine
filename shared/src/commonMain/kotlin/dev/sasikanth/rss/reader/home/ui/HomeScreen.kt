@@ -330,7 +330,10 @@ private fun HomeContent(
   val isActiveSourceInPinnedSources =
     state.activeSource == null || state.activeSource.id in pinnedSourceIds
   val canShowBottomBar =
-    platform !is Platform.Desktop && state.showPinnedSources && isActiveSourceInPinnedSources
+    platform !is Platform.Desktop &&
+      state.showPinnedSources &&
+      pinnedSourceIds.isNotEmpty() &&
+      isActiveSourceInPinnedSources
   val systemDynamicDarkColors =
     if (state.themeVariant == ThemeVariant.SystemDynamic) {
       systemDynamicColorScheme(true)
@@ -345,6 +348,12 @@ private fun HomeContent(
     rememberPinnedSourcesBottomBarScrollBehavior(
       canScroll = { canShowBottomBar && !hasActiveTrack }
     )
+
+  LaunchedEffect(canShowBottomBar) {
+    if (canShowBottomBar) {
+      bottomBarScrollState.state.heightOffset = 0f
+    }
+  }
 
   LaunchedEffect(hasActiveTrack) {
     if (hasActiveTrack && bottomBarScrollState.state.heightOffset != 0f) {
@@ -783,9 +792,13 @@ private fun HomeContent(
             )
             .graphicsLayer {
               translationY =
-                bottomBarScrollState.state.heightOffset
-                  .unaryMinus()
-                  .coerceAtMost(PINNED_SOURCES_BOTTOM_BAR_HEIGHT.toPx())
+                if (canShowBottomBar) {
+                  bottomBarScrollState.state.heightOffset
+                    .unaryMinus()
+                    .coerceAtMost(PINNED_SOURCES_BOTTOM_BAR_HEIGHT.toPx())
+                } else {
+                  0f
+                }
             },
         onLoadNewArticlesClick = {
           revealTopOfList()

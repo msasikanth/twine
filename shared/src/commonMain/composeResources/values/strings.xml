@@ -208,7 +208,6 @@
   <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">Delete sources</string>
   <string name="removeSourcesDesc">Do you want to delete selected sources?</string>
-  <string name="noPinnedSources">No pinned feeds/groups</string>
   <string name="databaseMaintainenceTitle">Please wait...</string>
   <string name="databaseMaintainenceSubtitle">Performing database maintainence, don't close the app</string>
   <string name="cdLoadFullArticle">Load full article</string>
