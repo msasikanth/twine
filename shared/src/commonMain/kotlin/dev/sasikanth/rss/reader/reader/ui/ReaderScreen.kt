@@ -18,7 +18,6 @@
 package dev.sasikanth.rss.reader.reader.ui
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -66,7 +65,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.compositionLocalWithComputedDefaultOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -99,7 +97,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
@@ -148,6 +145,7 @@ import dev.sasikanth.rss.reader.ui.GoogleSansFontFamily
 import dev.sasikanth.rss.reader.ui.LocalAppColorScheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalIsDarkTheme
+import dev.sasikanth.rss.reader.ui.LocalNavAnimatedContentScopeOrNull
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.ui.LoraFontFamily
@@ -202,7 +200,7 @@ internal fun ReaderScreen(
   pageViewModelFactory: @Composable (ResolvedPost) -> ReaderPageViewModel,
   onBack: () -> Unit,
   openPaywall: () -> Unit,
-  onImageClick: (String) -> Unit,
+  onImageClick: (ImageClickEvent) -> Unit,
   toggleLightStatusBar: (Boolean) -> Unit,
   toggleLightNavBar: (Boolean) -> Unit,
   modifier: Modifier = Modifier,
@@ -1347,11 +1345,6 @@ private fun ReaderPanelPlayer(
     )
   }
 }
-
-private val LocalNavAnimatedContentScopeOrNull =
-  compositionLocalWithComputedDefaultOf<AnimatedContentScope?> {
-    runCatching { LocalNavAnimatedContentScope.currentValue }.getOrNull()
-  }
 
 private val Transition<*>.isTransitioning: Boolean
   get() = isRunning || currentState != targetState

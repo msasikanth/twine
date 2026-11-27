@@ -89,10 +89,12 @@ import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
 import dev.sasikanth.rss.reader.reader.page.ReaderProcessingProgress
+import dev.sasikanth.rss.reader.reader.ui.ImageClickEvent
 import dev.sasikanth.rss.reader.reader.ui.LocalOnImageClick
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.share.ShareResult
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalImageSharedElementScopeKey
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.smoothVerticalFade
 import kotlin.time.Instant
@@ -188,7 +190,7 @@ internal fun ReaderPage(
   fromScreen: ReaderScreenArgs.FromScreen,
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
-  onImageClick: (String) -> Unit,
+  onImageClick: (ImageClickEvent) -> Unit,
   modifier: Modifier = Modifier,
   contentPaddingValues: PaddingValues = PaddingValues(),
 ) {
@@ -235,7 +237,7 @@ private fun ReaderPageContent(
   fromScreen: ReaderScreenArgs.FromScreen,
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
-  onImageClick: (String) -> Unit,
+  onImageClick: (ImageClickEvent) -> Unit,
   modifier: Modifier = Modifier,
   contentPaddingValues: PaddingValues = PaddingValues(),
 ) {
@@ -451,13 +453,18 @@ private fun ReaderPageContent(
                   key = { it.markdownNodeKey() },
                   contentType = { it.type.name },
                 ) { node ->
-                  Box(modifier = Modifier.padding(horizontal = 24.dp)) {
-                    MarkdownElement(
-                      node = node,
-                      components = markdownComponents,
-                      content = markdownContentState.content,
-                      includeSpacer = true,
-                    )
+                  CompositionLocalProvider(
+                    LocalImageSharedElementScopeKey provides
+                      "${readerPost.id}:${node.markdownNodeKey()}"
+                  ) {
+                    Box(modifier = Modifier.padding(horizontal = 24.dp)) {
+                      MarkdownElement(
+                        node = node,
+                        components = markdownComponents,
+                        content = markdownContentState.content,
+                        includeSpacer = true,
+                      )
+                    }
                   }
                 }
               }

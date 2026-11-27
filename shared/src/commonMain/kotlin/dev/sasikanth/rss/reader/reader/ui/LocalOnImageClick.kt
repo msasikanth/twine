@@ -17,6 +17,16 @@
 
 package dev.sasikanth.rss.reader.reader.ui
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 
-val LocalOnImageClick = staticCompositionLocalOf<(String) -> Unit> { {} }
+@Immutable
+data class ImageClickEvent(
+  val imageUrl: String,
+  val sharedElementKey: String = imageUrl,
+  val memoryCacheKey: String? = null,
+  val sourceCornerRadiusDp: Float = 0f,
+  val sourceAspectRatio: Float = 0f,
+)
+
+val LocalOnImageClick = staticCompositionLocalOf<(ImageClickEvent) -> Unit> { {} }

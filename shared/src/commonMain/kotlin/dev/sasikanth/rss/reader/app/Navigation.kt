@@ -17,6 +17,12 @@
 
 package dev.sasikanth.rss.reader.app
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +46,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.metadata
+import androidx.navigation3.ui.NavDisplay
 import androidx.window.core.layout.WindowSizeClass
 import dev.sasikanth.rss.reader.about.ui.AboutScreen
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionViewModel
@@ -530,7 +538,17 @@ fun EntryProviderScope<NavKey>.readerScreen(
       pageViewModelFactory = { post -> viewModel(key = post.id) { readerPageViewModel(post) } },
       onBack = { navigator.goBack() },
       openPaywall = { navigator.navigate(Screen.Paywall) },
-      onImageClick = { imageUrl -> navigator.navigate(Screen.ImageViewer(imageUrl)) },
+      onImageClick = { event ->
+        navigator.navigate(
+          Screen.ImageViewer(
+            imageUrl = event.imageUrl,
+            sharedElementKey = event.sharedElementKey,
+            memoryCacheKey = event.memoryCacheKey,
+            sourceCornerRadiusDp = event.sourceCornerRadiusDp,
+            sourceAspectRatio = event.sourceAspectRatio,
+          )
+        )
+      },
       toggleLightStatusBar = toggleLightStatusBar,
       toggleLightNavBar = toggleLightNavBar,
       modifier = modifier,
@@ -698,11 +716,28 @@ fun EntryProviderScope<NavKey>.imageViewerScreen(
   toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  entry<Screen.ImageViewer> { imageViewerRoute ->
-    val imageUrl = imageViewerRoute.imageUrl
+  entry<Screen.ImageViewer>(
+    metadata =
+      metadata {
+        put(NavDisplay.TransitionKey) {
+          fadeIn(animationSpec = tween(durationMillis = 300)) togetherWith
+            ExitTransition.KeepUntilTransitionsFinished
+        }
+        put(NavDisplay.PopTransitionKey) {
+          EnterTransition.None togetherWith fadeOut(animationSpec = tween(durationMillis = 250))
+        }
+        put(NavDisplay.PredictivePopTransitionKey) {
+          EnterTransition.None togetherWith fadeOut(animationSpec = tween(durationMillis = 250))
+        }
+      }
+  ) { imageViewerRoute ->
     ImageViewerScreen(
       modifier = modifier,
-      imageUrl = imageUrl,
+      imageUrl = imageViewerRoute.imageUrl,
+      sharedElementKey = imageViewerRoute.sharedElementKey,
+      memoryCacheKey = imageViewerRoute.memoryCacheKey,
+      sourceCornerRadiusDp = imageViewerRoute.sourceCornerRadiusDp,
+      sourceAspectRatio = imageViewerRoute.sourceAspectRatio,
       onBack = { navigator.goBack() },
       toggleLightStatusBar = toggleLightStatusBar,
       toggleLightNavBar = toggleLightNavBar,

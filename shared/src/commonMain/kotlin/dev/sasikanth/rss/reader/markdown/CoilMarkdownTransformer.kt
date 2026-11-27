@@ -17,8 +17,11 @@
 
 package dev.sasikanth.rss.reader.markdown
 
+import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.core.animateDp
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -28,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
@@ -38,7 +42,13 @@ import coil3.request.ImageRequest
 import coil3.size.Dimension
 import com.mikepenz.markdown.model.ImageData
 import com.mikepenz.markdown.model.ImageTransformer
+import dev.sasikanth.rss.reader.reader.ui.ImageClickEvent
 import dev.sasikanth.rss.reader.reader.ui.LocalOnImageClick
+import dev.sasikanth.rss.reader.ui.ImageViewerBoundsTransform
+import dev.sasikanth.rss.reader.ui.ImageViewerCornerRadiusSpec
+import dev.sasikanth.rss.reader.ui.LocalImageSharedElementScopeKey
+import dev.sasikanth.rss.reader.ui.LocalNavAnimatedContentScopeOrNull
+import dev.sasikanth.rss.reader.ui.LocalSharedTransitionScope
 
 internal val MarkdownImageSize = coil3.size.Size(2048, Dimension.Undefined)
 private const val INLINE_IMAGE_MEMORY_CACHE_SUFFIX = "#reader_inline"
@@ -61,21 +71,79 @@ object CoilMarkdownTransformer : ImageTransformer {
           MarkdownImageSize
         }
       }
+    val memoryCacheKey = inlineImageMemoryCacheKey(link)
     val model =
       remember(context, link, requestSize) {
         ImageRequest.Builder(context)
           .data(link)
           .size(requestSize)
           .diskCacheKey(link)
-          .memoryCacheKey(inlineImageMemoryCacheKey(link))
+          .memoryCacheKey(memoryCacheKey)
           .build()
       }
 
-    val shape = MaterialTheme.shapes.large
+    val scopeKey = LocalImageSharedElementScopeKey.current
+    val sharedElementKey = if (scopeKey != null) "$scopeKey:$link" else link
+    val targetShape = MaterialTheme.shapes.large
+    val targetCornerRadius = 16.dp
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+    val animatedVisibilityScope = LocalNavAnimatedContentScopeOrNull.current
+
+    val (sharedElementModifier, clipShape) =
+      if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+        with(sharedTransitionScope) {
+          val sharedContentState = rememberSharedContentState(key = sharedElementKey)
+          val cornerRadius by
+            animatedVisibilityScope.transition.animateDp(
+              transitionSpec = { ImageViewerCornerRadiusSpec },
+              label = "markdownImageCornerRadius",
+            ) { state ->
+              if (state != EnterExitState.Visible && sharedContentState.isMatchFound) {
+                0.dp
+              } else {
+                targetCornerRadius
+              }
+            }
+          val shape =
+            if (cornerRadius == targetCornerRadius) {
+              targetShape
+            } else {
+              RoundedCornerShape(cornerRadius)
+            }
+          val sharedModifier =
+            Modifier.sharedElement(
+              sharedContentState = sharedContentState,
+              animatedVisibilityScope = animatedVisibilityScope,
+              boundsTransform = ImageViewerBoundsTransform,
+            )
+          sharedModifier to shape
+        }
+      } else {
+        Modifier to targetShape
+      }
+
     return rememberAsyncImagePainter(model = model).let { painter ->
       ImageData(
         painter = painter,
-        modifier = Modifier.padding(vertical = 8.dp).clip(shape).clickable { onImageClick(link) },
+        modifier =
+          Modifier.padding(vertical = 8.dp).then(sharedElementModifier).clip(clipShape).clickable {
+            val intrinsic = painter.intrinsicSize
+            val sourceAspectRatio =
+              if (intrinsic.isSpecified && intrinsic.width > 0f && intrinsic.height > 0f) {
+                intrinsic.width / intrinsic.height
+              } else {
+                0f
+              }
+            onImageClick(
+              ImageClickEvent(
+                imageUrl = link,
+                sharedElementKey = sharedElementKey,
+                memoryCacheKey = memoryCacheKey,
+                sourceCornerRadiusDp = 16f,
+                sourceAspectRatio = sourceAspectRatio,
+              )
+            )
+          },
         alignment = Alignment.Center,
       )
     }

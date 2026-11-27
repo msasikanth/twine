@@ -47,7 +47,9 @@ import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostActionBar
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
+import dev.sasikanth.rss.reader.home.ui.featuredImageMemoryCacheKey
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
+import dev.sasikanth.rss.reader.reader.ui.ImageClickEvent
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.formatRelativeTime
@@ -74,7 +76,7 @@ internal fun PostHeader(
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
-  onImageClick: (String) -> Unit,
+  onImageClick: (ImageClickEvent) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Column(modifier = Modifier.fillMaxWidth().then(modifier)) {
@@ -83,15 +85,30 @@ internal fun PostHeader(
     val postImage = readerPost.imageUrl
 
     if (!postImage.isNullOrBlank()) {
+      val unlockAspectRatio = UrlUtils.isUnconstrainedMedia(postImage)
+      val sharedElementKey = "header:${readerPost.id}:$postImage"
+      val memoryCacheKey = featuredImageMemoryCacheKey(postImage, unlockAspectRatio)
+      val sourceCornerRadiusDp = if (unlockAspectRatio) 8f else 28f
+      val sourceAspectRatio = if (unlockAspectRatio) 0f else 16f / 9f
+
       Box(
         modifier =
           Modifier.padding(horizontal = 16.dp).align(Alignment.CenterHorizontally).clickable {
-            onImageClick(postImage)
+            onImageClick(
+              ImageClickEvent(
+                imageUrl = postImage,
+                sharedElementKey = sharedElementKey,
+                memoryCacheKey = memoryCacheKey,
+                sourceCornerRadiusDp = sourceCornerRadiusDp,
+                sourceAspectRatio = sourceAspectRatio,
+              )
+            )
           }
       ) {
         FeaturedImage(
           imageUrl = postImage,
-          unlockAspectRatio = UrlUtils.isUnconstrainedMedia(postImage),
+          unlockAspectRatio = unlockAspectRatio,
+          sharedElementKey = sharedElementKey,
           alignment =
             remember(page, pagerState) {
               ParallaxAlignment(

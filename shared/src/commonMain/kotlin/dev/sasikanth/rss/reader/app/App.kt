@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.app
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Transition
@@ -150,6 +151,7 @@ import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
+import dev.sasikanth.rss.reader.ui.LocalSharedTransitionScope
 import dev.sasikanth.rss.reader.ui.SeedColorExtractor
 import dev.sasikanth.rss.reader.ui.darkAppColorScheme
 import dev.sasikanth.rss.reader.ui.getOverriddenColorScheme
@@ -652,7 +654,7 @@ fun App(
             )
 
             imageViewerScreen(
-              modifier = screenModifier,
+              modifier = Modifier.fillMaxSize(),
               navigator = navigator,
               toggleLightStatusBar = toggleLightStatusBar,
               toggleLightNavBar = toggleLightNavBar,
@@ -814,47 +816,51 @@ fun App(
           listOf(bottomSheetSceneStrategy, listDetailSceneStrategy)
         }
 
-      Box(modifier = Modifier.fillMaxSize()) {
-        NavDisplay(
-          modifier =
-            Modifier.fillMaxSize()
-              .drawBehind { drawRect(appColorScheme.backdrop) }
-              .then(rootShortcutModifier),
-          backStack = backStack,
-          entryProvider = entryProvider,
-          entryDecorators = entryDecorators,
-          sceneStrategies = sceneStrategies,
-          transitionSpec = {
-            if (initialState.entries.any { it.contentKey == Screen.Placeholder.toString() }) {
-              fadeIn() togetherWith fadeOut()
-            } else if (platform == Platform.Android) {
-              AndroidNavEnterTransition togetherWith ExitTransition.KeepUntilTransitionsFinished
-            } else {
-              defaultTransitionSpec<NavKey>().invoke(this)
-            }
-          },
-          popTransitionSpec = {
-            if (platform == Platform.Android) {
-              EnterTransition.None togetherWith AndroidNavPopExitTransition
-            } else {
-              defaultPopTransitionSpec<NavKey>().invoke(this)
-            }
-          },
-          onBack = { navigator.goBack() },
-        )
+      SharedTransitionLayout {
+        CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+          Box(modifier = Modifier.fillMaxSize()) {
+            NavDisplay(
+              modifier =
+                Modifier.fillMaxSize()
+                  .drawBehind { drawRect(appColorScheme.backdrop) }
+                  .then(rootShortcutModifier),
+              backStack = backStack,
+              entryProvider = entryProvider,
+              entryDecorators = entryDecorators,
+              sceneStrategies = sceneStrategies,
+              transitionSpec = {
+                if (initialState.entries.any { it.contentKey == Screen.Placeholder.toString() }) {
+                  fadeIn() togetherWith fadeOut()
+                } else if (platform == Platform.Android) {
+                  AndroidNavEnterTransition togetherWith ExitTransition.KeepUntilTransitionsFinished
+                } else {
+                  defaultTransitionSpec<NavKey>().invoke(this)
+                }
+              },
+              popTransitionSpec = {
+                if (platform == Platform.Android) {
+                  EnterTransition.None togetherWith AndroidNavPopExitTransition
+                } else {
+                  defaultPopTransitionSpec<NavKey>().invoke(this)
+                }
+              },
+              onBack = { navigator.goBack() },
+            )
 
-        SnackbarHost(
-          hostState = snackbarHostState,
-          modifier =
-            Modifier.align(Alignment.BottomCenter).windowInsetsPadding(WindowInsets.safeDrawing),
-        )
+            SnackbarHost(
+              hostState = snackbarHostState,
+              modifier =
+                Modifier.align(Alignment.BottomCenter).windowInsetsPadding(WindowInsets.safeDrawing),
+            )
 
-        if (appState.showFpsOverlay || appState.showWindowSizeOverlay) {
-          DebugPerformanceOverlay(
-            showFps = appState.showFpsOverlay,
-            showWindowSize = appState.showWindowSizeOverlay,
-            modifier = Modifier.fillMaxSize(),
-          )
+            if (appState.showFpsOverlay || appState.showWindowSizeOverlay) {
+              DebugPerformanceOverlay(
+                showFps = appState.showFpsOverlay,
+                showWindowSize = appState.showWindowSizeOverlay,
+                modifier = Modifier.fillMaxSize(),
+              )
+            }
+          }
         }
       }
 

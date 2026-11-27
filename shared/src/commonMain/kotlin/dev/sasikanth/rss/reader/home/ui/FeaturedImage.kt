@@ -17,9 +17,12 @@
 
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.core.animateDp
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.computedStateOf
@@ -47,12 +50,21 @@ import coil3.request.crossfade
 import coil3.size.Dimension
 import coil3.size.Size as CoilSize
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.ImageViewerBoundsTransform
+import dev.sasikanth.rss.reader.ui.ImageViewerCornerRadiusSpec
+import dev.sasikanth.rss.reader.ui.LocalNavAnimatedContentScopeOrNull
+import dev.sasikanth.rss.reader.ui.LocalSharedTransitionScope
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.disableAnimation
 
 private val FeaturedCardImageSize = CoilSize(960, 540)
 private val UnlockedFeaturedImageSize = CoilSize(Dimension.Undefined, 500)
+
+internal fun featuredImageMemoryCacheKey(url: String, unlockAspectRatio: Boolean): String {
+  val imageSize = if (unlockAspectRatio) UnlockedFeaturedImageSize else FeaturedCardImageSize
+  return "$url#${imageSize.width}x${imageSize.height}"
+}
 
 private class MemoryCacheKeyRef {
   var key: MemoryCache.Key? = null
@@ -65,6 +77,7 @@ fun FeaturedImage(
   alignment: Alignment = Alignment.Center,
   unlockAspectRatio: Boolean = false,
   isActiveAndSettled: () -> Boolean = { true },
+  sharedElementKey: String? = null,
 ) {
   val sizeClass = LocalWindowSizeClass.current
   val imageMaxHeight =
@@ -74,14 +87,19 @@ fun FeaturedImage(
       else -> Dp.Unspecified
     }
 
-  val adaptiveImageModifier =
+  val adaptiveSizeModifier =
     if (unlockAspectRatio) {
-      Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
+      Modifier.fillMaxWidth()
     } else {
-      Modifier.aspectRatio(16f / 9f)
-        .heightIn(max = imageMaxHeight)
-        .clip(MaterialTheme.shapes.extraLarge)
+      Modifier.aspectRatio(16f / 9f).heightIn(max = imageMaxHeight)
     }
+  val targetShape =
+    if (unlockAspectRatio) {
+      MaterialTheme.shapes.small
+    } else {
+      MaterialTheme.shapes.extraLarge
+    }
+  val targetCornerRadius = if (unlockAspectRatio) 8.dp else 28.dp
   val adaptiveContentScale =
     if (unlockAspectRatio) {
       ContentScale.FillWidth
@@ -111,8 +129,8 @@ fun FeaturedImage(
       }
 
     val model =
-      remember(context, url, imageSize, shouldDisableAnimation) {
-        val memoryCacheKey = "$url#${imageSize.width}x${imageSize.height}"
+      remember(context, url, imageSize, unlockAspectRatio, shouldDisableAnimation) {
+        val memoryCacheKey = featuredImageMemoryCacheKey(url, unlockAspectRatio)
         val placeholderKey = lastLoadedCacheKey.key
         ImageRequest.Builder(context)
           .data(url)
@@ -145,10 +163,49 @@ fun FeaturedImage(
         }
       }
 
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+    val animatedVisibilityScope = LocalNavAnimatedContentScopeOrNull.current
+    val (sharedElementModifier, clipShape) =
+      if (
+        sharedElementKey != null && sharedTransitionScope != null && animatedVisibilityScope != null
+      ) {
+        with(sharedTransitionScope) {
+          val sharedContentState = rememberSharedContentState(key = sharedElementKey)
+          val cornerRadius by
+            animatedVisibilityScope.transition.animateDp(
+              transitionSpec = { ImageViewerCornerRadiusSpec },
+              label = "featuredImageCornerRadius",
+            ) { state ->
+              if (state != EnterExitState.Visible && sharedContentState.isMatchFound) {
+                0.dp
+              } else {
+                targetCornerRadius
+              }
+            }
+          val shape =
+            if (cornerRadius == targetCornerRadius) {
+              targetShape
+            } else {
+              RoundedCornerShape(cornerRadius)
+            }
+          val sharedModifier =
+            Modifier.sharedElement(
+              sharedContentState = sharedContentState,
+              animatedVisibilityScope = animatedVisibilityScope,
+              boundsTransform = ImageViewerBoundsTransform,
+            )
+          sharedModifier to shape
+        }
+      } else {
+        Modifier to targetShape
+      }
+
     CoilAsyncImage(
       model = model,
       modifier =
-        Modifier.then(adaptiveImageModifier)
+        Modifier.then(adaptiveSizeModifier)
+          .then(sharedElementModifier)
+          .clip(clipShape)
           .drawBehind { drawRect(colorScheme.settledOnSurface.copy(alpha = 0.16f)) }
           .then(modifier),
       contentDescription = null,
