@@ -13,8 +13,6 @@ package dev.sasikanth.rss.reader.platform
 
 import dev.sasikanth.rss.reader.app.AppIconManager
 import dev.sasikanth.rss.reader.app.JvmAppIconManager
-import dev.sasikanth.rss.reader.media.AudioPlayer
-import dev.sasikanth.rss.reader.media.JvmAudioPlayer
 import dev.sasikanth.rss.reader.utils.InAppRating
 import dev.sasikanth.rss.reader.utils.JvmInAppRating
 import me.tatarka.inject.annotations.Provides
@@ -26,8 +24,6 @@ actual interface PlatformComponent {
   @Provides fun JvmInAppRating.bind(): InAppRating = this
 
   @Provides fun JvmAppIconManager.bind(): AppIconManager = this
-
-  @Provides fun JvmAudioPlayer.bind(): AudioPlayer = this
 
   @Provides fun JvmImageDownloader.bind(): ImageDownloader = this
 }
