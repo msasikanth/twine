@@ -144,7 +144,7 @@
   <string name="removeFeed">Akışı kaldır</string>
   <string name="delete">Sil</string>
   <string name="removeFeedDesc"><b>"%1$s"</b> akışını silmek istediğinizden emin misiniz?</string>
-  <string name="alwaysFetchSourceArticle">Fetch full articles in reader view</string>
+  <string name="alwaysFetchSourceArticle">Okuyucu modunda her zaman yazının tamamını çek</string>
   <string name="enableNotifications">Bildirimleri aç</string>
   <string name="getFeedInfo">Bilgi Al</string>
   <string name="newTag">Yeni etiket</string>
@@ -203,15 +203,14 @@
   <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">Kaynakları sil</string>
   <string name="removeSourcesDesc">Seçilen kaynakları silmek istediğinizden emin misiniz?</string>
-  <string name="noPinnedSources">Sabitlenmiş akış veya grup yok</string>
   <string name="databaseMaintainenceTitle">Lütfen bekleyin…</string>
   <string name="databaseMaintainenceSubtitle">Veritabanı bakımı yapılıyor, uygulamayı kapatmayın</string>
   <string name="cdLoadFullArticle">Tüm makaleyi yükle</string>
   <string name="cdWatchVideo">Videoyu izle</string>
   <string name="enableAutoSyncTitle">Arka planda eşzamanlama</string>
   <string name="enableAutoSyncDesc">Yeni yazılar siz uygulamada değilken de sessizce indirilir</string>
-  <string name="showFeedFavIconTitle">Use website icons for new feeds</string>
-  <string name="showFeedFavIconDesc">Sets which icon newly added feeds start with. You can change it per feed at any time.</string>
+  <string name="showFeedFavIconTitle">Site ikonunu göster</string>
+  <string name="showFeedFavIconDesc">Açık olduğunda, standart akış ikonu yerine sitenin kendi simgesi (favicon) gösterilir.</string>
   <string name="settingsShowFeaturedSectionTitle">Öne çıkanlar bölümü</string>
   <string name="settingsShowFeaturedSectionSubtitle">En yeni yazıları ana ekranda kaydırılabilir bir vitrin olarak listeler</string>
   <string name="hidePostsFromHome">"Ana Sayfa"da gösterme</string>
@@ -230,6 +229,8 @@
   <string name="audioMarkAsReadThreshold75">%%%75</string>
   <string name="audioMarkAsReadThreshold90">%%%90</string>
   <string name="audioMarkAsReadThreshold100">%%%100</string>
+  <string name="settingsSkipSponsorChaptersTitle">Skip sponsor chapters</string>
+  <string name="settingsSkipSponsorChaptersSubtitle">Automatically skip podcast chapters marked as sponsors or ad breaks</string>
   <string name="noReaderContent">Okuyucuda gösterilecek bir metin bulunamadı. Makaleyi çekmeyi deneyebilir veya doğrudan web sitesine göz atabilirsiniz.</string>
   <string name="pullToClose">Kapatmak için aşağı çekin</string>
   <string name="readerSettings">Okuyucu ayarları</string>
@@ -434,4 +435,13 @@
   <string name="keyboardShortcutsOpenPost">Yazıyı aç</string>
   <string name="settingsDefaultSourceTitle">Default source</string>
   <string name="settingsDefaultSourceSubtitle">Choose the feed or group to open on startup</string>
+  <string name="readerShowNotes">Show notes</string>
+  <string name="readerChapters">Chapters</string>
+  <string name="readerChapterSponsor">Sponsor</string>
+  <string name="readerSkipSponsorChapters">Skip sponsor chapters</string>
+  <string name="readerExpandPlayer">Expand player</string>
+  <string name="readerLoadEpisodePage">Load episode page</string>
+  <string name="readerCollapseEpisodePage">Show feed notes</string>
+  <string name="readerNowPlaying">Now playing</string>
+  <string name="readerOpenCurrentEpisode">Open current episode</string>
 </resources>
