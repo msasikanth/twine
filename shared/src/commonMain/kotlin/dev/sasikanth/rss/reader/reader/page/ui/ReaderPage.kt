@@ -307,7 +307,6 @@ internal fun ReaderPage(
             modifier = Modifier.fillMaxSize(),
             readerPost = readerPost,
             contentType = contentType,
-            chapters = chapters,
             markdownContentState = markdownContentState,
             contentParsingProgress = contentParsingProgress,
             markdownComponents = markdownComponents,

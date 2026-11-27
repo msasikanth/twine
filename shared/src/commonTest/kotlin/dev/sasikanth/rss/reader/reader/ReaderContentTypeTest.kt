@@ -90,38 +90,6 @@ class ReaderContentTypeTest {
   }
 
   @Test
-  fun buildVideoUrlAtTimestampHandlesSupportedProviders() {
-    assertEquals(
-      "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      buildVideoUrlAtTimestamp("https://www.youtube.com/watch?v=dQw4w9WgXcQ", 0L),
-    )
-    assertEquals(
-      "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=95",
-      buildVideoUrlAtTimestamp("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=12", 95L),
-    )
-    assertEquals(
-      "https://youtu.be/dQw4w9WgXcQ?t=95",
-      buildVideoUrlAtTimestamp("https://youtu.be/dQw4w9WgXcQ", 95L),
-    )
-    assertEquals(
-      "https://www.youtube.com/embed/dQw4w9WgXcQ?start=95",
-      buildVideoUrlAtTimestamp("https://www.youtube.com/embed/dQw4w9WgXcQ", 95L),
-    )
-    assertEquals(
-      "https://vimeo.com/123456789#t=95s",
-      buildVideoUrlAtTimestamp("https://vimeo.com/123456789", 95L),
-    )
-    assertEquals(
-      "https://peertube.example.org/videos/watch/abc123_xyz?start=95",
-      buildVideoUrlAtTimestamp("https://peertube.example.org/videos/watch/abc123_xyz", 95L),
-    )
-    assertEquals(
-      "https://media.example.org/clips/demo.mp4",
-      buildVideoUrlAtTimestamp("https://media.example.org/clips/demo.mp4", 95L),
-    )
-  }
-
-  @Test
   fun extractTimestampChaptersHandlesRangesLinksTrailingAndSponsorTags() {
     val notes =
       """

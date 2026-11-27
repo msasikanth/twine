@@ -36,8 +36,6 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -72,13 +70,11 @@ import dev.sasikanth.rss.reader.components.AmbientImageBackdrop
 import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.components.image.FeedIcon
-import dev.sasikanth.rss.reader.core.model.local.MediaChapter
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.home.ui.PostActions
 import dev.sasikanth.rss.reader.reader.ReaderContentType
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
-import dev.sasikanth.rss.reader.reader.buildVideoUrlAtTimestamp
 import dev.sasikanth.rss.reader.reader.page.ReaderProcessingProgress
 import dev.sasikanth.rss.reader.resources.icons.Play
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -86,17 +82,14 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalImageSharedElementScopeKey
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.formatRelativeTime
-import dev.sasikanth.rss.reader.utils.scrollOnMouseWheel
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.cdWatchVideo
 import twine.shared.generated.resources.readLess
 import twine.shared.generated.resources.readMore
-import twine.shared.generated.resources.readerChapterSponsor
 
 private val VideoHeroShape = RoundedCornerShape(20.dp)
 private val DescriptionCardShape = RoundedCornerShape(20.dp)
-private val ChapterChipShape = RoundedCornerShape(12.dp)
 private val VideoHeroScrim = Color.Black.copy(alpha = 0.18f)
 private val VideoPlayButtonBackground = Color.Black.copy(alpha = 0.62f)
 private val VideoPlayButtonBorder = Color.White.copy(alpha = 0.24f)
@@ -109,7 +102,6 @@ private const val LONG_DESCRIPTION_BLOCK_THRESHOLD = 4
 internal fun VideoReaderPage(
   readerPost: ResolvedPost,
   contentType: ReaderContentType.Video,
-  chapters: List<MediaChapter>,
   markdownContentState: State,
   contentParsingProgress: ReaderProcessingProgress,
   markdownComponents: MarkdownComponents,
@@ -243,38 +235,6 @@ internal fun VideoReaderPage(
       }
     }
 
-    if (chapters.isNotEmpty()) {
-      item(key = "video-chapters", contentType = "video-chapters") {
-        DisableSelection {
-          val rowState = rememberLazyListState()
-          LazyRow(
-            modifier = Modifier.fillMaxWidth().padding(top = 16.dp).scrollOnMouseWheel(rowState),
-            state = rowState,
-            contentPadding = PaddingValues(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-          ) {
-            items(
-              items = chapters,
-              key = { chapter -> "${chapter.timestampMs}:${chapter.title}" },
-              contentType = { "video-chapter-chip" },
-            ) { chapter ->
-              VideoChapterChip(
-                chapter = chapter,
-                onClick = {
-                  val targetUrl =
-                    buildVideoUrlAtTimestamp(
-                      videoUrl = contentType.videoUrl,
-                      timestampSeconds = chapter.timestampMs / 1000L,
-                    )
-                  onWatchVideo(targetUrl)
-                },
-              )
-            }
-          }
-        }
-      }
-    }
-
     if (contentParsingProgress == ReaderProcessingProgress.Loading) {
       item(key = "progress-indicator", contentType = "progress-indicator") {
         ReaderProgressIndicator(modifier = Modifier.padding(top = 16.dp))
@@ -361,59 +321,6 @@ private fun VideoHeroSurface(
         color = Color.White,
         maxLines = 1,
       )
-    }
-  }
-}
-
-@Composable
-private fun VideoChapterChip(
-  chapter: MediaChapter,
-  onClick: () -> Unit,
-  modifier: Modifier = Modifier,
-) {
-  val colorScheme = AppTheme.colorScheme
-
-  Row(
-    modifier =
-      modifier
-        .clip(ChapterChipShape)
-        .background(colorScheme.surfaceContainerHigh)
-        .semantics { role = Role.Button }
-        .clickable(onClick = onClick)
-        .padding(horizontal = 12.dp, vertical = 8.dp),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
-  ) {
-    Text(
-      text = chapter.formattedTime,
-      style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
-      color = if (chapter.isSponsor) colorScheme.onSurfaceVariant else colorScheme.primary,
-      maxLines = 1,
-    )
-
-    Text(
-      modifier = Modifier.widthIn(max = 220.dp),
-      text = chapter.title,
-      style = MaterialTheme.typography.labelMedium,
-      color = if (chapter.isSponsor) colorScheme.onSurfaceVariant else colorScheme.onSurface,
-      maxLines = 1,
-      overflow = TextOverflow.Ellipsis,
-    )
-
-    if (chapter.isSponsor) {
-      Box(
-        modifier =
-          Modifier.background(colorScheme.secondary.copy(alpha = 0.16f), CircleShape)
-            .padding(horizontal = 6.dp, vertical = 2.dp),
-        contentAlignment = Alignment.Center,
-      ) {
-        Text(
-          text = stringResource(Res.string.readerChapterSponsor),
-          style = MaterialTheme.typography.labelSmall,
-          color = colorScheme.onSurfaceVariant,
-          maxLines = 1,
-        )
-      }
     }
   }
 }

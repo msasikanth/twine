@@ -113,7 +113,7 @@ class ReaderPageViewModel(
   val chapters: StateFlow<List<MediaChapter>> =
     combine(_contentState, postContentRepository.postContent(readerPost.id)) { markdown, postContent
         ->
-        if (contentType is ReaderContentType.Article) {
+        if (contentType !is ReaderContentType.Podcast) {
           emptyList()
         } else {
           val structuredChapters =

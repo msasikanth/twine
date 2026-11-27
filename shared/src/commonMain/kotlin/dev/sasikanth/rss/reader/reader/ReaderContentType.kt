@@ -22,7 +22,6 @@ import dev.sasikanth.rss.reader.core.model.local.MediaChapter
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.isSponsorChapterTitle
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
-import io.ktor.http.URLBuilder
 
 @Immutable
 sealed interface ReaderContentType {
@@ -320,34 +319,4 @@ private fun cleanChapterTitle(rawRemainder: String): String? {
   if (ClockOrTimezonePrefixRegex.matches(stripped)) return null
 
   return stripped
-}
-
-fun buildVideoUrlAtTimestamp(videoUrl: String, timestampSeconds: Long): String {
-  if (videoUrl.isBlank() || timestampSeconds <= 0L) return videoUrl
-
-  return runCatching {
-      when {
-        UrlUtils.youTubeVideoId(videoUrl) != null -> {
-          URLBuilder(videoUrl)
-            .apply {
-              if (pathSegments.any { it.equals("embed", ignoreCase = true) }) {
-                parameters["start"] = timestampSeconds.toString()
-              } else {
-                parameters["t"] = timestampSeconds.toString()
-              }
-            }
-            .buildString()
-        }
-        UrlUtils.vimeoVideoId(videoUrl) != null -> {
-          URLBuilder(videoUrl).apply { fragment = "t=${timestampSeconds}s" }.buildString()
-        }
-        UrlUtils.isPeerTubeLink(videoUrl) -> {
-          URLBuilder(videoUrl)
-            .apply { parameters["start"] = timestampSeconds.toString() }
-            .buildString()
-        }
-        else -> videoUrl
-      }
-    }
-    .getOrDefault(videoUrl)
 }
