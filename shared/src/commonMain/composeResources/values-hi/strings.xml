@@ -144,7 +144,7 @@
   <string name="removeFeed">Remove feed</string>
   <string name="delete">Delete</string>
   <string name="removeFeedDesc">Do you want to remove <b>"%1$s"</b>?</string>
-  <string name="alwaysFetchSourceArticle">Fetch full articles in reader view</string>
+  <string name="alwaysFetchSourceArticle">Always fetch full articles in reader view</string>
   <string name="enableNotifications">सूचनाएं सक्षम करें</string>
   <string name="getFeedInfo">Get Info</string>
   <string name="newTag">New tag</string>
@@ -203,15 +203,14 @@
   <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">Delete sources</string>
   <string name="removeSourcesDesc">Do you want to delete selected sources?</string>
-  <string name="noPinnedSources">No pinned feeds/groups</string>
   <string name="databaseMaintainenceTitle">Please wait...</string>
   <string name="databaseMaintainenceSubtitle">Performing database maintainence, don't close the app</string>
   <string name="cdLoadFullArticle">Load full article</string>
   <string name="cdWatchVideo">Watch video</string>
   <string name="enableAutoSyncTitle">Enable auto sync</string>
   <string name="enableAutoSyncDesc">When turned-on, feeds will be updated in the background</string>
-  <string name="showFeedFavIconTitle">Use website icons for new feeds</string>
-  <string name="showFeedFavIconDesc">Sets which icon newly added feeds start with. You can change it per feed at any time.</string>
+  <string name="showFeedFavIconTitle">Show feed fav icon</string>
+  <string name="showFeedFavIconDesc">When turned-off, the feed icon will be displayed instead of the website's favicon</string>
   <string name="settingsShowFeaturedSectionTitle">चुनिंदा सेक्शन दिखाएँ</string>
   <string name="settingsShowFeaturedSectionSubtitle">सबसे हाल के लेखों के साथ एक कैरोसेल प्रदर्शित करता है</string>
   <string name="hidePostsFromHome">"होम" से छिपाएँ</string>
@@ -230,6 +229,8 @@
   <string name="audioMarkAsReadThreshold75">75%</string>
   <string name="audioMarkAsReadThreshold90">90%</string>
   <string name="audioMarkAsReadThreshold100">100%</string>
+  <string name="settingsSkipSponsorChaptersTitle">Skip sponsor chapters</string>
+  <string name="settingsSkipSponsorChaptersSubtitle">Automatically skip podcast chapters marked as sponsors or ad breaks</string>
   <string name="noReaderContent">No content to display in the reader, please try fetching article or visiting the website.</string>
   <string name="pullToClose">Pull down to close</string>
   <string name="readerSettings">Reader screen settings</string>
@@ -396,7 +397,7 @@
   <string name="premiumPaywallTitle">Unlock Twine Pro</string>
   <string name="premiumPaywallSubtitle">Get access to all premium features and support the development of Twine.</string>
   <string name="premiumPaywallFeature1Title">Unlimited feeds</string>
-  <string name="premiumPaywallFeature1Desc">Add more than %1$d feeds, and enable OPML importing.</string>
+  <string name="premiumPaywallFeature1Desc">Add more than 30 feeds, and enable OPML importing.</string>
   <string name="premiumPaywallFeature2Title">Cloud sync</string>
   <string name="premiumPaywallFeature2Desc">Unlock Miniflux, FreshRSS and other cloud integrations.</string>
   <string name="premiumPaywallFeature3Title">Themes</string>
@@ -434,4 +435,13 @@
   <string name="keyboardShortcutsOpenPost">Open article</string>
   <string name="settingsDefaultSourceTitle">Default source</string>
   <string name="settingsDefaultSourceSubtitle">Choose the feed or group to open on startup</string>
+  <string name="readerShowNotes">Show notes</string>
+  <string name="readerChapters">Chapters</string>
+  <string name="readerChapterSponsor">Sponsor</string>
+  <string name="readerSkipSponsorChapters">Skip sponsor chapters</string>
+  <string name="readerExpandPlayer">Expand player</string>
+  <string name="readerLoadEpisodePage">Load episode page</string>
+  <string name="readerCollapseEpisodePage">Show feed notes</string>
+  <string name="readerNowPlaying">Now playing</string>
+  <string name="readerOpenCurrentEpisode">Open current episode</string>
 </resources>
