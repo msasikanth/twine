@@ -23,13 +23,16 @@ import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import com.mikepenz.markdown.model.State
 import com.mikepenz.markdown.model.parseMarkdown
+import dev.sasikanth.rss.reader.core.model.local.MediaChapter
 import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.data.repository.PostContentRepository
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.sync.PodcastChaptersCoordinator
 import dev.sasikanth.rss.reader.data.sync.PodcastCoverArtCoordinator
 import dev.sasikanth.rss.reader.media.AudioPlayer
-import dev.sasikanth.rss.reader.reader.MediaChapter
+import dev.sasikanth.rss.reader.media.AudioSponsorSkipper
 import dev.sasikanth.rss.reader.reader.ReaderContentType
 import dev.sasikanth.rss.reader.reader.classifyReaderContent
 import dev.sasikanth.rss.reader.reader.extractTimestampChapters
@@ -48,7 +51,6 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -73,6 +75,9 @@ class ReaderPageViewModel(
   private val fullArticleFetcher: FullArticleFetcher,
   private val readabilityRunner: ReadabilityRunner,
   private val podcastCoverArtCoordinator: PodcastCoverArtCoordinator,
+  private val podcastChaptersCoordinator: PodcastChaptersCoordinator,
+  private val settingsRepository: SettingsRepository,
+  private val audioSponsorSkipper: AudioSponsorSkipper,
   val audioPlayer: AudioPlayer,
   @Assisted private val readerPost: ResolvedPost,
 ) : ViewModel() {
@@ -81,6 +86,13 @@ class ReaderPageViewModel(
 
   private val _resolvedCoverArtUrl = MutableStateFlow(readerPost.resolvePodcastHeroArtworkUrl())
   val resolvedCoverArtUrl: StateFlow<String?> = _resolvedCoverArtUrl
+
+  val skipSponsorChapters: StateFlow<Boolean> =
+    settingsRepository.skipSponsorChapters.stateIn(
+      viewModelScope,
+      SharingStarted.WhileSubscribed(5000),
+      false,
+    )
 
   private val _contentState = MutableStateFlow("")
   val contentState =
@@ -99,17 +111,29 @@ class ReaderPageViewModel(
       .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), State.Loading())
 
   val chapters: StateFlow<List<MediaChapter>> =
-    _contentState
-      .map { markdown ->
+    combine(_contentState, postContentRepository.postContent(readerPost.id)) { markdown, postContent
+        ->
         if (contentType is ReaderContentType.Article) {
           emptyList()
         } else {
-          val descriptionChapters = extractTimestampChapters(readerPost.description)
-          val markdownChapters =
-            if (markdown.isNotBlank()) extractTimestampChapters(markdown) else emptyList()
-          (markdownChapters + descriptionChapters)
-            .distinctBy { it.timestampMs }
-            .sortedBy { it.timestampMs }
+          val structuredChapters =
+            PodcastChaptersCoordinator.decodeChaptersJson(postContent?.chaptersJson)
+          if (structuredChapters.isNotEmpty()) {
+            structuredChapters
+          } else {
+            val descriptionChapters = extractTimestampChapters(readerPost.description)
+            val markdownChapters =
+              if (markdown.isNotBlank()) extractTimestampChapters(markdown) else emptyList()
+            (markdownChapters + descriptionChapters)
+              .distinctBy { it.timestampMs }
+              .sortedBy { it.timestampMs }
+          }
+        }
+      }
+      .distinctUntilChanged()
+      .onEach { resolvedChapters ->
+        if (contentType is ReaderContentType.Podcast) {
+          audioSponsorSkipper.registerChapters(readerPost.id, resolvedChapters)
         }
       }
       .flowOn(dispatchersProvider.default)
@@ -164,6 +188,27 @@ class ReaderPageViewModel(
         }
       }
     }
+    if (contentType is ReaderContentType.Podcast) {
+      viewModelScope.launch {
+        podcastChaptersCoordinator.loadChaptersIfNeeded(
+          postId = readerPost.id,
+          createdAt = readerPost.createdAt,
+          chaptersUrl = null,
+          audioUrl = contentType.audioUrl,
+        )
+      }
+    }
+  }
+
+  fun toggleSkipSponsorChapters(value: Boolean) {
+    viewModelScope.launch { settingsRepository.toggleSkipSponsorChapters(value) }
+  }
+
+  fun playChapter(chapter: MediaChapter) {
+    if (chapter.isSponsor) {
+      audioSponsorSkipper.allowSponsorChapter(readerPost.id, chapter.timestampMs)
+    }
+    playAudioAt(chapter.timestampMs)
   }
 
   fun toggleFullArticle() {

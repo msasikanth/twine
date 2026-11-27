@@ -72,10 +72,10 @@ import dev.sasikanth.rss.reader.components.AmbientImageBackdrop
 import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.components.image.FeedIcon
+import dev.sasikanth.rss.reader.core.model.local.MediaChapter
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.home.ui.PostActions
-import dev.sasikanth.rss.reader.reader.MediaChapter
 import dev.sasikanth.rss.reader.reader.ReaderContentType
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.buildVideoUrlAtTimestamp
@@ -92,6 +92,7 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.cdWatchVideo
 import twine.shared.generated.resources.readLess
 import twine.shared.generated.resources.readMore
+import twine.shared.generated.resources.readerChapterSponsor
 
 private val VideoHeroShape = RoundedCornerShape(20.dp)
 private val DescriptionCardShape = RoundedCornerShape(20.dp)
@@ -130,8 +131,8 @@ internal fun VideoReaderPage(
 
   val thumbnailUrl =
     remember(readerPost.imageUrl, contentType.videoUrl) {
-      UrlUtils.upgradeYouTubeThumbnail(readerPost.imageUrl)
-        ?: UrlUtils.youTubeThumbnail(contentType.videoUrl)
+      UrlUtils.youTubeThumbnail(contentType.videoUrl)
+        ?: UrlUtils.upgradeYouTubeThumbnail(readerPost.imageUrl)
     }
 
   val colorScheme = AppTheme.colorScheme
@@ -386,7 +387,7 @@ private fun VideoChapterChip(
     Text(
       text = chapter.formattedTime,
       style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
-      color = colorScheme.primary,
+      color = if (chapter.isSponsor) colorScheme.onSurfaceVariant else colorScheme.primary,
       maxLines = 1,
     )
 
@@ -394,10 +395,26 @@ private fun VideoChapterChip(
       modifier = Modifier.widthIn(max = 220.dp),
       text = chapter.title,
       style = MaterialTheme.typography.labelMedium,
-      color = colorScheme.onSurface,
+      color = if (chapter.isSponsor) colorScheme.onSurfaceVariant else colorScheme.onSurface,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
     )
+
+    if (chapter.isSponsor) {
+      Box(
+        modifier =
+          Modifier.background(colorScheme.secondary.copy(alpha = 0.16f), CircleShape)
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+        contentAlignment = Alignment.Center,
+      ) {
+        Text(
+          text = stringResource(Res.string.readerChapterSponsor),
+          style = MaterialTheme.typography.labelSmall,
+          color = colorScheme.onSurfaceVariant,
+          maxLines = 1,
+        )
+      }
+    }
   }
 }
 

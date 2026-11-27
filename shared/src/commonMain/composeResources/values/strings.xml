@@ -474,6 +474,8 @@
   <string name="readerWatchVideo">Watch</string>
   <string name="readerShowNotes">Show notes</string>
   <string name="readerChapters">Chapters</string>
+  <string name="readerChapterSponsor">Sponsor</string>
+  <string name="readerSkipSponsorChapters">Skip sponsor chapters</string>
   <string name="readerExpandPlayer">Expand player</string>
   <string name="readerLoadEpisodePage">Load episode page</string>
   <string name="readerCollapseEpisodePage">Show feed notes</string>

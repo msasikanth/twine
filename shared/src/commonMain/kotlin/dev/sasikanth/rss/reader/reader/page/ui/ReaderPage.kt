@@ -216,6 +216,7 @@ internal fun ReaderPage(
   val contentParsingProgress by pageViewModel.parsingProgress.collectAsStateWithLifecycle()
   val resolvedCoverArtUrl by pageViewModel.resolvedCoverArtUrl.collectAsStateWithLifecycle()
   val chapters by pageViewModel.chapters.collectAsStateWithLifecycle()
+  val skipSponsorChapters by pageViewModel.skipSponsorChapters.collectAsStateWithLifecycle()
 
   val linkHandler = LocalLinkHandler.current
   val coroutineScope = rememberCoroutineScope()
@@ -273,6 +274,7 @@ internal fun ReaderPage(
             contentType = contentType,
             resolvedCoverArtUrl = resolvedCoverArtUrl,
             chapters = chapters,
+            skipSponsorChapters = skipSponsorChapters,
             markdownContentState = markdownContentState,
             contentParsingProgress = contentParsingProgress,
             markdownComponents = markdownComponents,
@@ -286,6 +288,8 @@ internal fun ReaderPage(
             onImageClick = onImageClick,
             onPlayClick = pageViewModel::playAudio,
             onPlayAtClick = pageViewModel::playAudioAt,
+            onChapterClick = pageViewModel::playChapter,
+            onToggleSkipSponsorChapters = pageViewModel::toggleSkipSponsorChapters,
             onPauseClick = onPauseAudio,
             onResumeClick = onResumeAudio,
             onSeek = onSeekAudio,

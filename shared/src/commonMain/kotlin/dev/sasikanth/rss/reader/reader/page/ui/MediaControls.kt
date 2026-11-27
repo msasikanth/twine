@@ -78,6 +78,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -96,6 +100,7 @@ import androidx.graphics.shapes.Morph
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.components.AdaptiveSheet
 import dev.sasikanth.rss.reader.components.IconButton
+import dev.sasikanth.rss.reader.core.model.local.MediaChapter
 import dev.sasikanth.rss.reader.media.PlaybackState
 import dev.sasikanth.rss.reader.media.SleepTimerOption
 import dev.sasikanth.rss.reader.resources.icons.Forward30
@@ -492,6 +497,7 @@ internal fun MediaPlaybackScrubber(
   settledPostId: String,
   onSeek: (Long) -> Unit,
   modifier: Modifier = Modifier,
+  chapters: List<MediaChapter> = emptyList(),
   fallbackPosition: Long = 0L,
   fallbackDuration: Long = 0L,
   onSeekBeforePlay: ((Long) -> Unit)? = null,
@@ -594,14 +600,77 @@ internal fun MediaPlaybackScrubber(
         )
       },
       track = {
-        SliderDefaults.Track(
-          modifier = Modifier.height(6.dp),
-          sliderState = it,
-          enabled = canSeek,
-          thumbTrackGapSize = 4.dp,
-          colors = sliderColors,
-          drawStopIndicator = null,
-        )
+        val sponsorColor = colorScheme.secondary.copy(alpha = 0.55f)
+        val tickColor = colorScheme.backdrop.copy(alpha = 0.65f)
+        Box(
+          modifier =
+            Modifier.fillMaxWidth().height(6.dp).clip(CircleShape).let { base ->
+              if (duration > 0L && chapters.size >= 2) {
+                base.drawWithContent {
+                  drawContent()
+                  val trackWidth = size.width
+                  val trackHeight = size.height
+                  if (trackWidth <= 0f || trackHeight <= 0f) return@drawWithContent
+
+                  val durationFloat = duration.toFloat()
+                  val tickWidth = 2.dp.toPx()
+
+                  chapters.forEachIndexed { index, chapter ->
+                    if (chapter.isSponsor) {
+                      val endMs =
+                        chapter.endTimestampMs ?: chapters.getOrNull(index + 1)?.timestampMs
+                      if (endMs != null && endMs > chapter.timestampMs) {
+                        val startX =
+                          (chapter.timestampMs.toFloat() / durationFloat * trackWidth).coerceIn(
+                            0f,
+                            trackWidth,
+                          )
+                        val endX =
+                          (endMs.toFloat() / durationFloat * trackWidth).coerceIn(
+                            startX,
+                            trackWidth,
+                          )
+                        if (endX - startX > 0f) {
+                          drawRoundRect(
+                            color = sponsorColor,
+                            topLeft = Offset(startX, 0f),
+                            size = Size(endX - startX, trackHeight),
+                            cornerRadius = CornerRadius(trackHeight / 2f, trackHeight / 2f),
+                          )
+                        }
+                      }
+                    }
+                  }
+
+                  chapters.forEach { chapter ->
+                    if (chapter.timestampMs > 0L && chapter.timestampMs < duration) {
+                      val x =
+                        (chapter.timestampMs.toFloat() / durationFloat * trackWidth).coerceIn(
+                          0f,
+                          (trackWidth - tickWidth).coerceAtLeast(0f),
+                        )
+                      drawRect(
+                        color = tickColor,
+                        topLeft = Offset(x, 0f),
+                        size = Size(tickWidth, trackHeight),
+                      )
+                    }
+                  }
+                }
+              } else {
+                base
+              }
+            }
+        ) {
+          SliderDefaults.Track(
+            modifier = Modifier.height(6.dp),
+            sliderState = it,
+            enabled = canSeek,
+            thumbTrackGapSize = 4.dp,
+            colors = sliderColors,
+            drawStopIndicator = null,
+          )
+        }
       },
     )
 

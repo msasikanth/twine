@@ -74,14 +74,15 @@ import com.mikepenz.markdown.compose.components.MarkdownComponents
 import com.mikepenz.markdown.model.State
 import dev.sasikanth.rss.reader.components.AmbientImageBackdrop
 import dev.sasikanth.rss.reader.components.InverseButton
+import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.ToggleableButtonGroup
 import dev.sasikanth.rss.reader.components.ToggleableButtonItem
 import dev.sasikanth.rss.reader.components.image.FeedIcon
+import dev.sasikanth.rss.reader.core.model.local.MediaChapter
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.home.ui.PostActions
 import dev.sasikanth.rss.reader.media.PlaybackState
 import dev.sasikanth.rss.reader.media.SleepTimerOption
-import dev.sasikanth.rss.reader.reader.MediaChapter
 import dev.sasikanth.rss.reader.reader.ReaderContentType
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.page.ReaderProcessingProgress
@@ -98,8 +99,10 @@ import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.openWebsite
+import twine.shared.generated.resources.readerChapterSponsor
 import twine.shared.generated.resources.readerChapters
 import twine.shared.generated.resources.readerShowNotes
+import twine.shared.generated.resources.readerSkipSponsorChapters
 
 private const val HERO_ARTWORK_KEY = "podcast-hero-artwork"
 private const val HERO_CONTROLS_KEY = "podcast-hero-controls"
@@ -117,6 +120,7 @@ internal fun PodcastReaderPage(
   contentType: ReaderContentType.Podcast,
   resolvedCoverArtUrl: String?,
   chapters: List<MediaChapter>,
+  skipSponsorChapters: Boolean,
   markdownContentState: State,
   contentParsingProgress: ReaderProcessingProgress,
   markdownComponents: MarkdownComponents,
@@ -130,6 +134,8 @@ internal fun PodcastReaderPage(
   onImageClick: (ImageClickEvent) -> Unit,
   onPlayClick: () -> Unit,
   onPlayAtClick: (Long) -> Unit,
+  onChapterClick: (MediaChapter) -> Unit,
+  onToggleSkipSponsorChapters: (Boolean) -> Unit,
   onPauseClick: () -> Unit,
   onResumeClick: () -> Unit,
   onSeek: (Long) -> Unit,
@@ -240,6 +246,7 @@ internal fun PodcastReaderPage(
             isPlayerAvailable = contentType.isPlayerAvailable,
             audioPlayerInstallationHint = audioPlayerInstallationHint,
             playbackStateFlow = playbackStateFlow,
+            chapters = chapters,
             onPlayClick = handlePlayClick,
             onPlayAtClick = onPlayAtClick,
             onPauseClick = onPauseClick,
@@ -273,9 +280,11 @@ internal fun PodcastReaderPage(
           onTabSelected = { selectedTab = it },
           activeChapterIndex = activeChapterIndex,
           isPlayerAvailable = contentType.isPlayerAvailable,
+          skipSponsorChapters = skipSponsorChapters,
+          onToggleSkipSponsorChapters = onToggleSkipSponsorChapters,
           onChapterClick = { chapter ->
             if (contentType.isPlayerAvailable) {
-              onPlayAtClick(chapter.timestampMs)
+              onChapterClick(chapter)
             }
           },
           markdownContentState = markdownContentState,
@@ -351,6 +360,7 @@ internal fun PodcastReaderPage(
           isPlayerAvailable = contentType.isPlayerAvailable,
           audioPlayerInstallationHint = audioPlayerInstallationHint,
           playbackStateFlow = playbackStateFlow,
+          chapters = chapters,
           onPlayClick = handlePlayClick,
           onPlayAtClick = onPlayAtClick,
           onPauseClick = onPauseClick,
@@ -370,9 +380,11 @@ internal fun PodcastReaderPage(
         onTabSelected = { selectedTab = it },
         activeChapterIndex = activeChapterIndex,
         isPlayerAvailable = contentType.isPlayerAvailable,
+        skipSponsorChapters = skipSponsorChapters,
+        onToggleSkipSponsorChapters = onToggleSkipSponsorChapters,
         onChapterClick = { chapter ->
           if (contentType.isPlayerAvailable) {
-            onPlayAtClick(chapter.timestampMs)
+            onChapterClick(chapter)
           }
         },
         markdownContentState = markdownContentState,
@@ -536,6 +548,7 @@ private fun PodcastPlayerControlsBlock(
   isPlayerAvailable: Boolean,
   audioPlayerInstallationHint: String?,
   playbackStateFlow: StateFlow<PlaybackState>,
+  chapters: List<MediaChapter>,
   onPlayClick: () -> Unit,
   onPlayAtClick: (Long) -> Unit,
   onPauseClick: () -> Unit,
@@ -576,6 +589,7 @@ private fun PodcastPlayerControlsBlock(
             playbackStateFlow = playbackStateFlow,
             settledPostId = readerPost.id,
             onSeek = onSeek,
+            chapters = chapters,
             fallbackPosition = readerPost.audioProgress,
             fallbackDuration = readerPost.audioDuration,
             onSeekBeforePlay = onPlayAtClick,
@@ -621,6 +635,8 @@ private fun LazyListScope.podcastBodyItems(
   onTabSelected: (PodcastContentTab) -> Unit,
   activeChapterIndex: Int,
   isPlayerAvailable: Boolean,
+  skipSponsorChapters: Boolean,
+  onToggleSkipSponsorChapters: (Boolean) -> Unit,
   onChapterClick: (MediaChapter) -> Unit,
   markdownContentState: State,
   contentParsingProgress: ReaderProcessingProgress,
@@ -661,6 +677,34 @@ private fun LazyListScope.podcastBodyItems(
 
   when (selectedTab) {
     PodcastContentTab.Chapters if chapters.isNotEmpty() -> {
+      if (chapters.any { it.isSponsor }) {
+        item(key = "podcast-skip-sponsors-toggle", contentType = "podcast-skip-sponsors-toggle") {
+          DisableSelection {
+            Row(
+              modifier =
+                Modifier.fillMaxWidth()
+                  .padding(horizontal = 24.dp)
+                  .padding(bottom = 12.dp)
+                  .clip(ChapterRowShape)
+                  .background(AppTheme.colorScheme.surfaceContainerLow)
+                  .clickable { onToggleSkipSponsorChapters(!skipSponsorChapters) }
+                  .padding(horizontal = 16.dp, vertical = 8.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+              Text(
+                modifier = Modifier.weight(1f),
+                text = stringResource(Res.string.readerSkipSponsorChapters),
+                style = MaterialTheme.typography.labelLarge,
+                color = AppTheme.colorScheme.onSurface,
+              )
+
+              Switch(checked = skipSponsorChapters, onCheckedChange = onToggleSkipSponsorChapters)
+            }
+          }
+        }
+      }
+
       itemsIndexed(
         items = chapters,
         key = { index, chapter -> "chapter:$index:${chapter.timestampMs}" },
@@ -711,16 +755,22 @@ private fun PodcastChapterRow(
       colorScheme.backdrop
     }
   val pillBackground =
-    if (isActive) {
-      colorScheme.primaryContainer
-    } else {
-      colorScheme.surfaceContainerHigh
+    when {
+      isActive -> colorScheme.primaryContainer
+      chapter.isSponsor -> colorScheme.surfaceContainer
+      else -> colorScheme.surfaceContainerHigh
     }
   val pillTextColor =
     if (isActive) {
       colorScheme.onPrimaryContainer
     } else {
       colorScheme.onSurfaceVariant
+    }
+  val titleColor =
+    when {
+      isActive -> colorScheme.primary
+      chapter.isSponsor -> colorScheme.onSurfaceVariant
+      else -> colorScheme.onSurface
     }
 
   Row(
@@ -758,10 +808,26 @@ private fun PodcastChapterRow(
         } else {
           MaterialTheme.typography.bodyMedium
         },
-      color = if (isActive) colorScheme.primary else colorScheme.onSurface,
+      color = titleColor,
       maxLines = 2,
       overflow = TextOverflow.Ellipsis,
     )
+
+    if (chapter.isSponsor) {
+      Box(
+        modifier =
+          Modifier.background(colorScheme.secondary.copy(alpha = 0.16f), ChapterTimestampShape)
+            .padding(horizontal = 8.dp, vertical = 2.dp),
+        contentAlignment = Alignment.Center,
+      ) {
+        Text(
+          text = stringResource(Res.string.readerChapterSponsor),
+          style = MaterialTheme.typography.labelSmall,
+          color = colorScheme.onSurfaceVariant,
+          maxLines = 1,
+        )
+      }
+    }
   }
 }
 
@@ -778,5 +844,8 @@ private fun PlaybackState.resolveActiveChapterIndex(
   chapters: List<MediaChapter>,
 ): Int {
   if (playingPostId != postId || chapters.isEmpty()) return -1
-  return chapters.indexOfLast { it.timestampMs <= currentPosition }
+  val index = chapters.indexOfLast { it.timestampMs <= currentPosition }
+  if (index < 0) return -1
+  val endMs = chapters[index].endTimestampMs
+  return if (endMs != null && currentPosition >= endMs) -1 else index
 }

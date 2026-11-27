@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.reader
 
+import dev.sasikanth.rss.reader.core.model.local.MediaChapter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -38,17 +39,14 @@ class MediaChaptersParserTest {
 
     assertEquals(
       listOf(
-        MediaChapter(timestampMs = 0L, formattedTime = "00:00", title = "Intro"),
-        MediaChapter(
-          timestampMs = 135_000L,
-          formattedTime = "02:15",
-          title = "Architecture Overview",
-        ),
-        MediaChapter(timestampMs = 330_000L, formattedTime = "05:30", title = "Deep Dive"),
-        MediaChapter(timestampMs = 3_910_000L, formattedTime = "01:05:10", title = "Closing Q&A"),
+        MediaChapter(timestampMs = 0L, title = "Intro"),
+        MediaChapter(timestampMs = 135_000L, title = "Architecture Overview"),
+        MediaChapter(timestampMs = 330_000L, title = "Deep Dive"),
+        MediaChapter(timestampMs = 3_910_000L, title = "Closing Q&A"),
       ),
       chapters,
     )
+    assertEquals(listOf("00:00", "02:15", "05:30", "01:05:10"), chapters.map { it.formattedTime })
   }
 
   @Test
@@ -64,9 +62,9 @@ class MediaChaptersParserTest {
 
     assertEquals(
       listOf(
-        MediaChapter(timestampMs = 30_000L, formattedTime = "00:30", title = "Kickoff"),
-        MediaChapter(timestampMs = 245_000L, formattedTime = "04:05", title = "Main Topic & Notes"),
-        MediaChapter(timestampMs = 720_000L, formattedTime = "12:00", title = "Listener Mail"),
+        MediaChapter(timestampMs = 30_000L, title = "Kickoff"),
+        MediaChapter(timestampMs = 245_000L, title = "Main Topic & Notes"),
+        MediaChapter(timestampMs = 720_000L, title = "Listener Mail"),
       ),
       chapters,
     )
@@ -87,9 +85,9 @@ class MediaChaptersParserTest {
 
     assertEquals(
       listOf(
-        MediaChapter(timestampMs = 0L, formattedTime = "00:00", title = "Cold Open"),
-        MediaChapter(timestampMs = 200_000L, formattedTime = "03:20", title = "Middle Topic"),
-        MediaChapter(timestampMs = 600_000L, formattedTime = "10:00", title = "Final Segment"),
+        MediaChapter(timestampMs = 0L, title = "Cold Open"),
+        MediaChapter(timestampMs = 200_000L, title = "Middle Topic"),
+        MediaChapter(timestampMs = 600_000L, title = "Final Segment"),
       ),
       chapters,
     )
