@@ -54,6 +54,10 @@
         android:name="com.bugsnag.android.API_KEY"
         android:value="${BUGSNAG_API_KEY}" />
 
+    <meta-data
+        android:name="dev.sasikanth.rss.reader.ENABLE_DEBUG_SETTINGS"
+        android:value="${enableDebugSettings}" />
+
     <activity
         android:name="dev.sasikanth.rss.reader.MainActivity"
         android:exported="true"

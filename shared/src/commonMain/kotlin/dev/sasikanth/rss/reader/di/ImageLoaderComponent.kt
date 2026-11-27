@@ -26,8 +26,12 @@ import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.components.image.YouTubeThumbnailInterceptor
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.favicons.FavIconImageLoader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import me.tatarka.inject.annotations.Provides
 import okio.Path.Companion.toPath
+
+private val sharedImageDecoderDispatcher = Dispatchers.IO.limitedParallelism(4)
 
 expect interface ImageLoaderPlatformComponent
 
@@ -41,6 +45,7 @@ interface ImageLoaderComponent : ImageLoaderPlatformComponent {
     FavIconImageLoader.configure(cachePath = appInfo.cachePath())
 
     return ImageLoader.Builder(platformContext)
+      .decoderCoroutineContext(sharedImageDecoderDispatcher)
       .components {
         add(SvgDecoder.Factory())
         add(YouTubeThumbnailInterceptor())

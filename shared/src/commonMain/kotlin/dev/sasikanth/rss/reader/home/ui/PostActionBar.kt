@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,24 +38,28 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.dropShadow
-import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.app.LocalSnackbarHostState
 import dev.sasikanth.rss.reader.components.DropdownMenu
@@ -97,8 +100,31 @@ import twine.shared.generated.resources.share
 import twine.shared.generated.resources.shareLinkCopied
 import twine.shared.generated.resources.unBookmark
 
-private val FeedIconShape = RoundedCornerShape(25)
 private val TooltipShape = RoundedCornerShape(4.dp)
+
+@Immutable
+internal data class PostActionLabels(
+  val comments: String,
+  val bookmark: String,
+  val unBookmark: String,
+  val moreMenuOptions: String,
+)
+
+@Composable
+internal fun rememberPostActionLabels(): PostActionLabels {
+  val comments = stringResource(Res.string.comments)
+  val bookmark = stringResource(Res.string.bookmark)
+  val unBookmark = stringResource(Res.string.unBookmark)
+  val moreMenuOptions = stringResource(Res.string.moreMenuOptions)
+  return remember(comments, bookmark, unBookmark, moreMenuOptions) {
+    PostActionLabels(
+      comments = comments,
+      bookmark = bookmark,
+      unBookmark = unBookmark,
+      moreMenuOptions = moreMenuOptions,
+    )
+  }
+}
 
 @Composable
 internal fun PostActionBar(
@@ -122,6 +148,8 @@ internal fun PostActionBar(
   onDropdownChange: (Boolean) -> Unit = {},
   config: PostMetadataConfig = PostMetadataConfig.DEFAULT,
   onSourceClick: () -> Unit,
+  actionLabels: PostActionLabels? = null,
+  unreadIndicatorCutoutColor: (() -> Color)? = null,
 ) {
   val colorScheme = AppTheme.colorScheme
   Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
@@ -139,6 +167,7 @@ internal fun PostActionBar(
         config = config,
         postRead = postRead,
         onSourceClick = onSourceClick,
+        unreadIndicatorCutoutColor = unreadIndicatorCutoutColor,
       )
 
       Text(
@@ -146,7 +175,7 @@ internal fun PostActionBar(
         style = MaterialTheme.typography.labelMedium,
         maxLines = 1,
         text = Constants.BULLET_POINT,
-        color = colorScheme.outline,
+        color = { colorScheme.outline },
       )
 
       Text(
@@ -154,7 +183,7 @@ internal fun PostActionBar(
         style = MaterialTheme.typography.labelMedium,
         maxLines = 1,
         text = postRelativeTimestamp,
-        color = colorScheme.outline,
+        color = { colorScheme.outline },
         textAlign = TextAlign.Start,
         overflow = TextOverflow.Ellipsis,
       )
@@ -165,7 +194,7 @@ internal fun PostActionBar(
           style = MaterialTheme.typography.labelMedium,
           maxLines = 1,
           text = Constants.BULLET_POINT,
-          color = colorScheme.outline,
+          color = { colorScheme.outline },
         )
 
         Text(
@@ -173,7 +202,7 @@ internal fun PostActionBar(
           style = MaterialTheme.typography.labelMedium,
           maxLines = 1,
           text = stringResource(Res.string.readingTimeEstimate, postReadingTimeEstimate),
-          color = colorScheme.outline,
+          color = { colorScheme.outline },
           textAlign = TextAlign.Start,
           overflow = TextOverflow.Ellipsis,
         )
@@ -193,6 +222,7 @@ internal fun PostActionBar(
       onBookmarkClick = onBookmarkClick,
       onCommentsClick = onCommentsClick,
       togglePostReadClick = onTogglePostReadClick,
+      actionLabels = actionLabels,
     )
   }
 }
@@ -244,30 +274,43 @@ private fun SourceInfo(
   config: PostMetadataConfig,
   onSourceClick: () -> Unit,
   modifier: Modifier = Modifier,
+  unreadIndicatorCutoutColor: (() -> Color)? = null,
 ) {
   val colorScheme = AppTheme.colorScheme
-  val postSourceTextColor =
-    if (config.enablePostSource) {
-      colorScheme.onSurface
-    } else {
-      colorScheme.onSurfaceVariant
-    }
 
   Row(
     modifier =
-      modifier
-        .clip(MaterialTheme.shapes.extraSmall)
-        .clickable(onClick = onSourceClick, enabled = config.enablePostSource),
+      modifier.then(
+        if (config.enablePostSource) {
+          Modifier.clip(MaterialTheme.shapes.extraSmall).clickable(onClick = onSourceClick)
+        } else {
+          Modifier
+        }
+      ),
     verticalAlignment = Alignment.CenterVertically,
   ) {
     val showUnreadIndicator = config.showUnreadIndicator && !postRead
+    val usePathCutout = unreadIndicatorCutoutColor == null
     Box(
       modifier =
-        Modifier.requiredSize(18.dp).let { base ->
-          if (showUnreadIndicator) {
-            base.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-          } else {
-            base
+        Modifier.requiredSize(18.dp).drawWithCache {
+          val dotRadius = 3.dp.toPx()
+          val haloRadius = 4.dp.toPx()
+          val dotCenterX =
+            if (layoutDirection == LayoutDirection.Ltr) size.width - dotRadius else dotRadius
+          val dotCenter = Offset(dotCenterX, dotRadius)
+          onDrawWithContent {
+            drawContent()
+            if (showUnreadIndicator) {
+              if (unreadIndicatorCutoutColor != null) {
+                drawCircle(
+                  color = unreadIndicatorCutoutColor(),
+                  radius = haloRadius,
+                  center = dotCenter,
+                )
+              }
+              drawCircle(color = colorScheme.error, radius = dotRadius, center = dotCenter)
+            }
           }
         }
     ) {
@@ -279,33 +322,53 @@ private fun SourceInfo(
         modifier =
           Modifier.requiredSize(16.dp)
             .drawWithCache {
-              val outline = FeedIconShape.createOutline(size, layoutDirection, this)
-              val borderStyle = Stroke(width = 1.dp.toPx())
+              val strokeWidth = 1.dp.toPx()
+              val halfStroke = strokeWidth / 2f
+              val borderTopLeft = Offset(halfStroke, halfStroke)
+              val borderSize = Size(size.width - strokeWidth, size.height - strokeWidth)
+              val borderCornerRadius =
+                CornerRadius((size.minDimension * 0.25f - halfStroke).coerceAtLeast(0f))
+              val borderStyle = Stroke(width = strokeWidth)
+              val cutoutPath =
+                if (usePathCutout) {
+                  val dotCenterOffset = 2.dp.toPx()
+                  val dotCenterX =
+                    if (layoutDirection == LayoutDirection.Ltr) size.width - dotCenterOffset
+                    else dotCenterOffset
+                  Path().apply {
+                    addOval(
+                      Rect(center = Offset(dotCenterX, dotCenterOffset), radius = 4.dp.toPx())
+                    )
+                  }
+                } else {
+                  null
+                }
               onDrawWithContent {
-                drawContent()
-                drawOutline(
-                  outline = outline,
-                  color = colorScheme.outlineVariant,
-                  style = borderStyle,
-                )
+                if (showUnreadIndicator && cutoutPath != null) {
+                  clipPath(cutoutPath, clipOp = ClipOp.Difference) {
+                    this@onDrawWithContent.drawContent()
+                    drawRoundRect(
+                      color = colorScheme.outlineVariant,
+                      topLeft = borderTopLeft,
+                      size = borderSize,
+                      cornerRadius = borderCornerRadius,
+                      style = borderStyle,
+                    )
+                  }
+                } else {
+                  drawContent()
+                  drawRoundRect(
+                    color = colorScheme.outlineVariant,
+                    topLeft = borderTopLeft,
+                    size = borderSize,
+                    cornerRadius = borderCornerRadius,
+                    style = borderStyle,
+                  )
+                }
               }
             }
             .align(Alignment.Center),
       )
-
-      if (showUnreadIndicator) {
-        Box(
-          modifier =
-            Modifier.align(Alignment.TopEnd)
-              .requiredSize(6.dp)
-              .dropShadow(CircleShape) {
-                color = Color.Black
-                spread = 1.dp.toPx()
-                blendMode = BlendMode.DstOut
-              }
-              .drawBehind { drawCircle(colorScheme.error) }
-        )
-      }
     }
 
     Spacer(Modifier.requiredWidth(4.dp))
@@ -314,7 +377,13 @@ private fun SourceInfo(
       style = MaterialTheme.typography.labelMedium,
       maxLines = 1,
       text = feedName,
-      color = postSourceTextColor,
+      color = {
+        if (config.enablePostSource) {
+          colorScheme.onSurface
+        } else {
+          colorScheme.onSurfaceVariant
+        }
+      },
       overflow = TextOverflow.Ellipsis,
     )
   }
@@ -334,6 +403,7 @@ internal fun PostActions(
   onDropdownChange: (Boolean) -> Unit = {},
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
+  actionLabels: PostActionLabels? = null,
   togglePostReadClick: () -> Unit,
 ) {
   Row(
@@ -341,7 +411,7 @@ internal fun PostActions(
     horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
   ) {
     if (!commentsLink.isNullOrBlank()) {
-      val commentsLabel = stringResource(Res.string.comments)
+      val commentsLabel = actionLabels?.comments ?: stringResource(Res.string.comments)
       ActionTooltip(label = commentsLabel) {
         IconButton(
           icon = TwineIcons.Comments,
@@ -354,9 +424,9 @@ internal fun PostActions(
 
     val bookmarkLabel =
       if (postBookmarked) {
-        stringResource(Res.string.unBookmark)
+        actionLabels?.unBookmark ?: stringResource(Res.string.unBookmark)
       } else {
-        stringResource(Res.string.bookmark)
+        actionLabels?.bookmark ?: stringResource(Res.string.bookmark)
       }
 
     ActionTooltip(label = bookmarkLabel) {
@@ -374,8 +444,8 @@ internal fun PostActions(
     }
 
     Box {
-      val coroutineScope = rememberCoroutineScope()
-      val moreMenuOptionsLabel = stringResource(Res.string.moreMenuOptions)
+      val moreMenuOptionsLabel =
+        actionLabels?.moreMenuOptions ?: stringResource(Res.string.moreMenuOptions)
 
       ActionTooltip(label = moreMenuOptionsLabel) {
         IconButton(
@@ -392,6 +462,7 @@ internal fun PostActions(
         expanded = showDropdown,
         onDismissRequest = { onDropdownChange(false) },
       ) {
+        val coroutineScope = rememberCoroutineScope()
         PostActionsMenuItems(
           postLink = postLink,
           postRead = postRead,

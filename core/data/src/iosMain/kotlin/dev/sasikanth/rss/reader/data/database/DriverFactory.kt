@@ -53,7 +53,9 @@ actual class DriverFactory(private val codeMigrations: Array<AfterVersion>) {
     val lifecycleConfig =
       DatabaseConfiguration.Lifecycle(
         onCreateConnection = { connection ->
-          connection.rawExecSql("PRAGMA temp_store = MEMORY; PRAGMA mmap_size = 67108864;")
+          connection.rawExecSql(
+            "PRAGMA temp_store = MEMORY; PRAGMA mmap_size = 67108864; PRAGMA cache_size = -16000;"
+          )
         }
       )
 

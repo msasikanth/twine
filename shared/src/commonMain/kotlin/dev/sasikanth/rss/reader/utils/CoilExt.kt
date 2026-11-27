@@ -21,6 +21,9 @@ import androidx.compose.ui.graphics.ImageBitmap
 import coil3.Image
 import coil3.PlatformContext
 import coil3.annotation.ExperimentalCoilApi
+import coil3.request.ImageRequest
 
 @OptIn(ExperimentalCoilApi::class)
 expect fun Image.toComposeImageBitmap(context: PlatformContext): ImageBitmap
+
+expect fun ImageRequest.Builder.disableAnimation(): ImageRequest.Builder

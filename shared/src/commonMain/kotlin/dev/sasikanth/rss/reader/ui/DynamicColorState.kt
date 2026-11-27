@@ -23,6 +23,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.Dispatchers
@@ -61,7 +62,7 @@ internal class DynamicColorState(
   private var endLight: AppColorValues = defaultLightValues
   private var endDark: AppColorValues = defaultDarkValues
 
-  private val cache = lruCache<String, AppColorValues>(maxSize = 10)
+  private val cache = lruCache<Long, AppColorValues>(maxSize = 64)
 
   suspend fun animate(fromSeedColor: Color?, toSeedColor: Color?, progress: Float) {
     val seedColorsChanged = fromSeedColor != lastFromSeedColor || toSeedColor != lastToSeedColor
@@ -83,67 +84,84 @@ internal class DynamicColorState(
     lastProgress = progress
 
     if (seedColorsChanged) {
-      withContext(Dispatchers.Default) {
-        val defaultLightSeedColor = defaultLightValues.primary
-        val defaultDarkSeedColor = defaultDarkValues.primary
+      val defaultLightSeedColor = defaultLightValues.primary
+      val defaultDarkSeedColor = defaultDarkValues.primary
+      val fromSeed = fromSeedColor ?: defaultLightSeedColor
+      val toSeed = toSeedColor ?: defaultDarkSeedColor
 
-        startLight =
-          cache["light_$fromSeedColor"]
-            ?: TwineDynamicColors.calculateColorScheme(
-                seedColor = fromSeedColor ?: defaultLightSeedColor,
-                useDarkTheme = false,
-                scheme = scheme,
-              )
-              .also { cache.put("light_$fromSeedColor", it) }
+      val startLightKey = cacheKey(fromSeed, useDarkTheme = false)
+      val startDarkKey = cacheKey(fromSeed, useDarkTheme = true)
+      val endLightKey = cacheKey(toSeed, useDarkTheme = false)
+      val endDarkKey = cacheKey(toSeed, useDarkTheme = true)
 
-        startDark =
-          cache["dark_$fromSeedColor"]
-            ?: TwineDynamicColors.calculateColorScheme(
-                seedColor = fromSeedColor ?: defaultLightSeedColor,
-                useDarkTheme = true,
-                scheme = scheme,
-              )
-              .also { cache.put("dark_$fromSeedColor", it) }
+      val cachedStartLight = cache[startLightKey]
+      val cachedStartDark = cache[startDarkKey]
+      val cachedEndLight = cache[endLightKey]
+      val cachedEndDark = cache[endDarkKey]
 
-        endLight =
-          cache["light_$toSeedColor"]
-            ?: TwineDynamicColors.calculateColorScheme(
-                seedColor = toSeedColor ?: defaultDarkSeedColor,
-                useDarkTheme = false,
-                scheme = scheme,
-              )
-              .also { cache.put("light_$toSeedColor", it) }
+      if (
+        cachedStartLight != null &&
+          cachedStartDark != null &&
+          cachedEndLight != null &&
+          cachedEndDark != null
+      ) {
+        startLight = cachedStartLight
+        startDark = cachedStartDark
+        endLight = cachedEndLight
+        endDark = cachedEndDark
+      } else {
+        withContext(Dispatchers.Default) {
+          startLight =
+            cachedStartLight
+              ?: TwineDynamicColors.calculateColorScheme(
+                  seedColor = fromSeed,
+                  useDarkTheme = false,
+                  scheme = scheme,
+                )
+                .also { cache.put(startLightKey, it) }
 
-        endDark =
-          cache["dark_$toSeedColor"]
-            ?: TwineDynamicColors.calculateColorScheme(
-                seedColor = toSeedColor ?: defaultDarkSeedColor,
-                useDarkTheme = true,
-                scheme = scheme,
-              )
-              .also { cache.put("dark_$toSeedColor", it) }
+          startDark =
+            cachedStartDark
+              ?: TwineDynamicColors.calculateColorScheme(
+                  seedColor = fromSeed,
+                  useDarkTheme = true,
+                  scheme = scheme,
+                )
+                .also { cache.put(startDarkKey, it) }
+
+          endLight =
+            cachedEndLight
+              ?: TwineDynamicColors.calculateColorScheme(
+                  seedColor = toSeed,
+                  useDarkTheme = false,
+                  scheme = scheme,
+                )
+                .also { cache.put(endLightKey, it) }
+
+          endDark =
+            cachedEndDark
+              ?: TwineDynamicColors.calculateColorScheme(
+                  seedColor = toSeed,
+                  useDarkTheme = true,
+                  scheme = scheme,
+                )
+                .also { cache.put(endDarkKey, it) }
+        }
       }
     }
 
-    val (interpolatedLight, interpolatedDark) =
-      withContext(Dispatchers.Default) {
-        val easedProgress = ease(progress)
-
-        val light =
-          when {
-            easedProgress < EPSILON -> startLight
-            easedProgress > 1f - EPSILON -> endLight
-            else -> startLight.lerp(to = endLight, fraction = easedProgress)
-          }
-
-        val dark =
-          when {
-            easedProgress < EPSILON -> startDark
-            easedProgress > 1f - EPSILON -> endDark
-            else -> startDark.lerp(to = endDark, fraction = easedProgress)
-          }
-
-        light to dark
+    val easedProgress = ease(progress)
+    val interpolatedLight =
+      when {
+        easedProgress < EPSILON -> startLight
+        easedProgress > 1f - EPSILON -> endLight
+        else -> startLight.lerp(to = endLight, fraction = easedProgress)
+      }
+    val interpolatedDark =
+      when {
+        easedProgress < EPSILON -> startDark
+        easedProgress > 1f - EPSILON -> endDark
+        else -> startDark.lerp(to = endDark, fraction = easedProgress)
       }
 
     val isAnimating = !isSettled
@@ -157,6 +175,11 @@ internal class DynamicColorState(
         isAnimating = isAnimating,
       )
     }
+  }
+
+  private fun cacheKey(seedColor: Color, useDarkTheme: Boolean): Long {
+    val argb = seedColor.toArgb().toLong() and 0xFFFFFFFFL
+    return if (useDarkTheme) argb or (1L shl 32) else argb
   }
 
   suspend fun refresh() {

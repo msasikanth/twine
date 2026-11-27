@@ -115,6 +115,10 @@ class HomeViewModel(
     audioPlayer.stop()
   }
 
+  fun onScrollStateChanged(isScrolling: Boolean) {
+    scrollReadPostsBuffer.setScrolling(isScrolling)
+  }
+
   private val defaultState = HomeState.default()
   val state: StateFlow<HomeState>
     field = MutableStateFlow(defaultState)
@@ -619,6 +623,15 @@ internal class ScrollReadPostsBuffer(
   private val pendingPostIds = MutableStateFlow<Set<String>>(emptySet())
   private val flushMutex = Mutex()
   private var scheduledFlushJob: Job? = null
+  private var isScrolling = false
+
+  fun setScrolling(scrolling: Boolean) {
+    if (isScrolling == scrolling) return
+    isScrolling = scrolling
+    if (!scrolling && pendingPostIds.value.isNotEmpty()) {
+      scheduleFlushIfNeeded()
+    }
+  }
 
   fun onVisiblePostsChanged(visiblePosts: Map<String, Int>, firstVisibleItemIndex: Int) {
     val newlyHiddenIds = previousVisibleItems.keys - visiblePosts.keys
@@ -649,6 +662,7 @@ internal class ScrollReadPostsBuffer(
   }
 
   private fun scheduleFlushIfNeeded() {
+    if (isScrolling) return
     if (pendingPostIds.value.isEmpty()) return
     if (scheduledFlushJob?.isActive == true) return
 

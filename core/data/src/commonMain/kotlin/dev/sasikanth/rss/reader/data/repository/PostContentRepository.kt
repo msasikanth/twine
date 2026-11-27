@@ -102,4 +102,14 @@ class PostContentRepository(
       )
     }
   }
+
+  suspend fun cachedArticleContentCount(): Long {
+    return withContext(dispatcherProvider.databaseRead) {
+      postContentQueries.cachedArticleContentCount().executeAsOne()
+    }
+  }
+
+  suspend fun clearAllArticleContent() {
+    withContext(dispatcherProvider.databaseWrite) { postContentQueries.clearArticleContent() }
+  }
 }

@@ -25,9 +25,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ColorProducer
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -51,6 +52,13 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.formatRelativeTime
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
+
+private val ReaderPostMetadataConfig =
+  PostMetadataConfig(
+    showUnreadIndicator = false,
+    showToggleReadUnreadOption = true,
+    enablePostSource = false,
+  )
 
 @Composable
 internal fun PostHeader(
@@ -85,7 +93,7 @@ internal fun PostHeader(
           imageUrl = postImage,
           unlockAspectRatio = UrlUtils.isUnconstrainedMedia(postImage),
           alignment =
-            remember(page) {
+            remember(page, pagerState) {
               ParallaxAlignment(
                 horizontalBias = { pagerState.getOffsetFractionForPage(page) },
                 multiplier = 2f,
@@ -97,33 +105,37 @@ internal fun PostHeader(
       Spacer(modifier = Modifier.requiredHeight(8.dp))
     }
 
+    val colorScheme = AppTheme.colorScheme
+    val secondaryColorProducer = remember(colorScheme) { ColorProducer { colorScheme.secondary } }
+    val headlineMedium = MaterialTheme.typography.headlineMedium
+    val headlineStyle =
+      remember(headlineMedium) { headlineMedium.copy(fontWeight = FontWeight.Bold) }
+    val headlineModifier =
+      if (themeVariant == ThemeVariant.Dynamic) {
+        val isDark = themeVariant.isDark(darkTheme)
+        Modifier.padding(top = 12.dp).graphicsLayer {
+          blendMode = if (isDark) BlendMode.Screen else BlendMode.Multiply
+        }
+      } else {
+        Modifier.padding(top = 12.dp)
+      }
+
     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-      Text(
-        modifier =
-          Modifier.padding(top = 12.dp).graphicsLayer {
-            if (themeVariant == ThemeVariant.Dynamic) {
-              blendMode =
-                if (themeVariant.isDark(darkTheme)) {
-                  BlendMode.Screen
-                } else {
-                  BlendMode.Multiply
-                }
-            }
-          },
+      BasicText(
+        modifier = headlineModifier,
         text = title.ifBlank { description },
-        style = MaterialTheme.typography.headlineMedium,
-        fontWeight = FontWeight.Bold,
-        color = AppTheme.colorScheme.secondary,
+        style = headlineStyle,
+        color = secondaryColorProducer,
         overflow = TextOverflow.Ellipsis,
       )
 
       if (excerpt.isNotBlank()) {
         Spacer(Modifier.requiredHeight(8.dp))
 
-        Text(
+        BasicText(
           text = excerpt,
           style = MaterialTheme.typography.bodyMedium,
-          color = AppTheme.colorScheme.secondary,
+          color = secondaryColorProducer,
           maxLines = 3,
           overflow = TextOverflow.Ellipsis,
         )
@@ -151,12 +163,7 @@ internal fun PostHeader(
           showDropdown = showDropdown,
           alwaysShowMarkAsUnread = true,
           hideMarkAsOptions = fromScreen == ReaderScreenArgs.FromScreen.Bookmarks,
-          config =
-            PostMetadataConfig(
-              showUnreadIndicator = false,
-              showToggleReadUnreadOption = true,
-              enablePostSource = false,
-            ),
+          config = ReaderPostMetadataConfig,
           onDropdownChange = { showDropdown = it },
           onSourceClick = {
             // no-op

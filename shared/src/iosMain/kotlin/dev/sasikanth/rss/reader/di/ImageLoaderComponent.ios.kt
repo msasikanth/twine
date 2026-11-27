@@ -20,6 +20,7 @@ package dev.sasikanth.rss.reader.di
 import coil3.ImageLoader
 import coil3.PlatformContext
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.favicons.FavIconImageLoader
 import dev.sasikanth.rss.reader.initializers.Initializer
 import kotlin.concurrent.AtomicInt
 import me.tatarka.inject.annotations.IntoSet
@@ -51,6 +52,7 @@ actual interface ImageLoaderPlatformComponent {
             queue = NSOperationQueue.mainQueue,
           ) { _ ->
             imageLoader.memoryCache?.clear()
+            FavIconImageLoader.clearMemoryCache()
           }
       }
     }

@@ -23,6 +23,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,9 +46,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -72,6 +72,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -124,8 +125,10 @@ import dev.sasikanth.rss.reader.search.SearchViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.KeyboardState
+import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
@@ -144,6 +147,11 @@ import twine.shared.generated.resources.searchSortNewestFirst
 import twine.shared.generated.resources.searchSortOldest
 import twine.shared.generated.resources.searchSortOldestFirst
 
+private val SearchPostMetadataConfig = PostMetadataConfig.DEFAULT.copy(enablePostSource = false)
+private val SourceChipShape = RoundedCornerShape(12.dp)
+private val SearchFieldShape = RoundedCornerShape(16.dp)
+private val SortButtonShape = RoundedCornerShape(12.dp)
+
 @Composable
 internal fun SearchScreen(
   searchViewModel: SearchViewModel,
@@ -154,12 +162,11 @@ internal fun SearchScreen(
 ) {
   val state by searchViewModel.state.collectAsStateWithLifecycle()
   val searchResults = state.searchResults.collectAsLazyPagingItems()
-  val sources = searchViewModel.sources.collectAsLazyPagingItems()
 
   SearchContent(
     state = state,
     searchResults = searchResults,
-    sources = sources,
+    sourcesProvider = { searchViewModel.sources },
     searchQuery = searchViewModel.searchQuery,
     searchSortOrder = searchViewModel.searchSortOrder,
     dispatch = searchViewModel::dispatch,
@@ -173,7 +180,7 @@ internal fun SearchScreen(
 private fun SearchContent(
   state: SearchState,
   searchResults: LazyPagingItems<ResolvedPost>,
-  sources: LazyPagingItems<Source>,
+  sourcesProvider: () -> Flow<PagingData<Source>>,
   searchQuery: TextFieldValue,
   searchSortOrder: SearchSortOrder,
   dispatch: (SearchEvent) -> Unit,
@@ -186,20 +193,18 @@ private fun SearchContent(
   val sourcePickerListState = rememberLazyListState()
   val coroutineScope = rememberCoroutineScope()
   val showScrollToTop by
-    remember(searchResults) {
-      derivedStateOf {
-        val hasContent = searchResults.itemCount > 0
-        hasContent && listState.firstVisibleItemIndex > 0
-      }
+    remember(searchResults, listState) {
+      derivedStateOf { listState.firstVisibleItemIndex > 0 && searchResults.itemCount > 0 }
     }
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
 
   var showSourcePicker by remember { mutableStateOf(false) }
   val colorScheme = AppTheme.colorScheme
+  val blockImages = LocalBlockImage.current
 
   Scaffold(
-    modifier = modifier,
+    modifier = modifier.drawBehind { drawRect(colorScheme.backdrop) },
     topBar = {
       Column(
         Modifier.drawBehind { drawRect(colorScheme.surface) }
@@ -251,22 +256,18 @@ private fun SearchContent(
             ),
           state = listState,
         ) {
-          if (searchResults.itemCount > 0) {
+          val itemCount = searchResults.itemCount
+          if (itemCount > 0) {
             item(key = "SearchResultsHeader", contentType = "SubHeader") {
               SubHeader(
-                text =
-                  pluralStringResource(
-                    Res.plurals.searchResultsCount,
-                    searchResults.itemCount,
-                    searchResults.itemCount,
-                  ),
+                text = pluralStringResource(Res.plurals.searchResultsCount, itemCount, itemCount),
                 modifier = Modifier.padding(top = 8.dp),
               )
             }
           }
 
           items(
-            count = searchResults.itemCount,
+            count = itemCount,
             key = searchResults.itemKey { PostListKey.encode(it) },
             contentType = { "PostListItem" },
           ) { index ->
@@ -280,17 +281,16 @@ private fun SearchContent(
                 onPostCommentsClick = {
                   post.commentsLink?.let { coroutineScope.launch { linkHandler.openLink(it) } }
                 },
-                onPostSourceClick = {
-                  // no-op
-                },
+                onPostSourceClick = {},
                 updatePostReadStatus = { updatedReadStatus ->
                   dispatch(SearchEvent.UpdatePostReadStatus(post.id, updatedReadStatus))
                 },
                 reduceReadItemAlpha = true,
-                postMetadataConfig = PostMetadataConfig.DEFAULT.copy(enablePostSource = false),
+                postMetadataConfig = SearchPostMetadataConfig,
+                blockImages = blockImages,
               )
 
-              if (index != searchResults.itemCount - 1) {
+              if (index != itemCount - 1) {
                 HorizontalDivider(
                   modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
                   color = colorScheme.outlineVariant,
@@ -314,11 +314,12 @@ private fun SearchContent(
         }
       }
     },
-    containerColor = colorScheme.backdrop,
+    containerColor = Color.Transparent,
     contentColor = Color.Unspecified,
   )
 
   if (showSourcePicker) {
+    val sources = remember(sourcesProvider) { sourcesProvider() }.collectAsLazyPagingItems()
     SourcePicker(
       sources = sources,
       listState = sourcePickerListState,
@@ -343,85 +344,81 @@ private fun SourceFilterChips(
   modifier: Modifier = Modifier,
 ) {
   val colorScheme = AppTheme.colorScheme
-  LazyRow(
-    modifier = modifier.fillMaxWidth().drawBehind { drawRect(colorScheme.surface) },
+  Row(
+    modifier =
+      modifier
+        .fillMaxWidth()
+        .drawBehind { drawRect(colorScheme.surface) }
+        .horizontalScroll(rememberScrollState())
+        .padding(horizontal = 16.dp, vertical = 8.dp),
     horizontalArrangement = Arrangement.spacedBy(8.dp),
     verticalAlignment = Alignment.CenterVertically,
-    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
   ) {
-    item {
-      SourceChip(
-        selected = selectedSource == null,
-        onClick = onClearSourceClick,
-        label = stringResource(Res.string.buttonAll),
-        icon = {
-          Icon(
-            imageVector = TwineIcons.All,
-            contentDescription = null,
-            modifier = Modifier.requiredSize(16.dp),
-          )
-        },
-      )
-    }
-
-    item {
-      if (selectedSource != null) {
-        SourceChip(
-          selected = true,
-          onClick = onSourceClick,
-          label =
-            when (selectedSource) {
-              is Feed -> selectedSource.name
-              is FeedGroup -> selectedSource.name
-              else -> ""
-            },
-          onTrailingIconClick = onClearSourceClick,
+    SourceChip(
+      selected = selectedSource == null,
+      onClick = onClearSourceClick,
+      label = stringResource(Res.string.buttonAll),
+      icon = {
+        Icon(
+          imageVector = TwineIcons.All,
+          contentDescription = null,
+          modifier = Modifier.requiredSize(16.dp),
         )
-      } else {
-        SourceChip(
-          selected = false,
-          onClick = onSourceClick,
-          label = stringResource(Res.string.filter),
-          icon = {
-            Icon(
-              imageVector = TwineIcons.FilterList,
-              contentDescription = null,
-              modifier = Modifier.requiredSize(16.dp),
-            )
+      },
+    )
+
+    if (selectedSource != null) {
+      SourceChip(
+        selected = true,
+        onClick = onSourceClick,
+        label =
+          when (selectedSource) {
+            is Feed -> selectedSource.name
+            is FeedGroup -> selectedSource.name
+            else -> ""
           },
+        onTrailingIconClick = onClearSourceClick,
+      )
+    } else {
+      SourceChip(
+        selected = false,
+        onClick = onSourceClick,
+        label = stringResource(Res.string.filter),
+        icon = {
+          Icon(
+            imageVector = TwineIcons.FilterList,
+            contentDescription = null,
+            modifier = Modifier.requiredSize(16.dp),
+          )
+        },
+      )
+    }
+
+    SourceChip(
+      selected = onlyBookmarked,
+      onClick = { onOnlyBookmarkedChanged(!onlyBookmarked) },
+      label = stringResource(Res.string.bookmarks),
+      icon = {
+        Icon(
+          imageVector = TwineIcons.Bookmarked,
+          contentDescription = null,
+          modifier = Modifier.requiredSize(16.dp),
         )
-      }
-    }
+      },
+    )
 
-    item {
-      SourceChip(
-        selected = onlyBookmarked,
-        onClick = { onOnlyBookmarkedChanged(!onlyBookmarked) },
-        label = stringResource(Res.string.bookmarks),
-        icon = {
-          Icon(
-            imageVector = TwineIcons.Bookmarked,
-            contentDescription = null,
-            modifier = Modifier.requiredSize(16.dp),
-          )
-        },
-      )
-    }
-
-    item {
-      SourceChip(
-        selected = onlyUnread,
-        onClick = { onOnlyUnreadChanged(!onlyUnread) },
-        label = stringResource(Res.string.postsUnread),
-        icon = {
-          Icon(
-            imageVector = TwineIcons.RadioUnselected,
-            contentDescription = null,
-            modifier = Modifier.requiredSize(16.dp),
-          )
-        },
-      )
-    }
+    SourceChip(
+      selected = onlyUnread,
+      onClick = { onOnlyUnreadChanged(!onlyUnread) },
+      label = stringResource(Res.string.postsUnread),
+      icon = {
+        Icon(
+          imageVector = TwineIcons.RadioUnselected,
+          contentDescription = null,
+          modifier = Modifier.requiredSize(16.dp),
+        )
+      },
+    )
   }
 }
 
@@ -435,24 +432,29 @@ private fun SourceChip(
   onTrailingIconClick: (() -> Unit)? = null,
 ) {
   val colorScheme = AppTheme.colorScheme
-  val backgroundColor = if (selected) colorScheme.primary else colorScheme.surfaceContainer
   val contentColor = if (selected) colorScheme.onPrimary else colorScheme.onSurface
-  val shape = RoundedCornerShape(12.dp)
 
   Row(
     modifier =
       modifier
-        .clip(shape)
-        .drawBehind {
-          val outline = shape.createOutline(size, layoutDirection, this)
-          drawOutline(outline, backgroundColor)
+        .clip(SourceChipShape)
+        .drawWithCache {
+          val outline = SourceChipShape.createOutline(size, layoutDirection, this)
+          onDrawBehind {
+            drawOutline(
+              outline = outline,
+              color = if (selected) colorScheme.primary else colorScheme.surfaceContainer,
+            )
+          }
         }
         .clickable(onClick = onClick)
         .padding(horizontal = 12.dp, vertical = 6.dp),
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-    CompositionLocalProvider(LocalContentColor provides contentColor) { icon?.invoke() }
+    if (icon != null) {
+      CompositionLocalProvider(LocalContentColor provides contentColor) { icon() }
+    }
     Text(
       text = label,
       style = MaterialTheme.typography.labelLarge,
@@ -567,6 +569,10 @@ private fun SearchBar(
   val focusManager = LocalFocusManager.current
   var isSearchBarFocused by remember { mutableStateOf(false) }
   val colorScheme = AppTheme.colorScheme
+  val materialColorScheme = MaterialTheme.colorScheme
+  val primaryColor = colorScheme.primary
+  val searchBarColorScheme =
+    remember(materialColorScheme, primaryColor) { materialColorScheme.copy(primary = primaryColor) }
 
   LaunchedEffect(keyboardState) {
     if (keyboardState == KeyboardState.Closed) {
@@ -576,7 +582,7 @@ private fun SearchBar(
 
   LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
-  MaterialTheme(colorScheme = MaterialTheme.colorScheme.copy(primary = colorScheme.primary)) {
+  MaterialTheme(colorScheme = searchBarColorScheme) {
     Row(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
       verticalAlignment = Alignment.CenterVertically,
@@ -617,7 +623,7 @@ private fun SearchBar(
             }
           }
         },
-        shape = RoundedCornerShape(16.dp),
+        shape = SearchFieldShape,
         singleLine = true,
         textStyle = MaterialTheme.typography.bodyLarge,
         colors =
@@ -647,7 +653,7 @@ private fun SearchSortButton(
     TextButton(
       modifier = Modifier.requiredHeight(48.dp),
       onClick = { isDropdownExpanded = true },
-      shape = RoundedCornerShape(12.dp),
+      shape = SortButtonShape,
     ) {
       Spacer(Modifier.requiredWidth(4.dp))
       Text(
@@ -706,7 +712,7 @@ private fun SearchPreview() {
     SearchContent(
       state = SearchState.DEFAULT,
       searchResults = SearchState.DEFAULT.searchResults.collectAsLazyPagingItems(),
-      sources = emptyFlow<PagingData<Source>>().collectAsLazyPagingItems(),
+      sourcesProvider = { emptyFlow() },
       searchQuery = TextFieldValue(text = "Google"),
       searchSortOrder = Newest,
       dispatch = {},

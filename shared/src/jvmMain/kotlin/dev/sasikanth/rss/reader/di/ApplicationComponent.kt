@@ -60,7 +60,7 @@ abstract class ApplicationComponent : SharedApplicationComponent(), WidgetPlatfo
     AppInfo(
       versionCode = DESKTOP_VERSION_CODE,
       versionName = DESKTOP_VERSION_NAME,
-      isDebugBuild = false,
+      isDebugBuild = isDesktopDebugBuild(),
       isFoss = isFoss,
       isGoogleDriveSupported = isGoogleDriveSupported,
       cachePath = {
@@ -72,6 +72,13 @@ abstract class ApplicationComponent : SharedApplicationComponent(), WidgetPlatfo
       },
       platform = AppPlatform.Desktop,
     )
+
+  private fun isDesktopDebugBuild(): Boolean {
+    System.getProperty("twine.debug")?.toBooleanStrictOrNull()?.let {
+      return it
+    }
+    return System.getProperty("jpackage.app-path") == null
+  }
 
   companion object
 }

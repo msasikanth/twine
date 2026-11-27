@@ -18,12 +18,11 @@ package dev.sasikanth.rss.reader.main.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
@@ -34,6 +33,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -43,10 +43,9 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
@@ -55,9 +54,9 @@ import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,13 +68,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.dropShadow
-import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -117,6 +118,7 @@ import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.actionAddTo
@@ -128,6 +130,11 @@ import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.edit
 import twine.shared.generated.resources.feedsLetsStart
 import twine.shared.generated.resources.feedsSearchHint
+
+private val NavigationItemShape = RoundedCornerShape(topEndPercent = 50, bottomEndPercent = 50)
+private val SelectedSourceColorShape = RoundedCornerShape(12.dp)
+private val SourceIconShape = RoundedCornerShape(8.dp)
+private val SearchBarShape = RoundedCornerShape(50)
 
 @Composable
 internal fun NavigationDrawerContent(
@@ -284,10 +291,15 @@ private fun ExpandedDrawerContent(
   ) {
     Box(modifier = Modifier.fillMaxSize()) {
       val allSources = state.sources.collectAsLazyPagingItems()
-      val searchResults = state.feedsSearchResults.collectAsLazyPagingItems()
+      val isInSearchMode = searchQuery.text.length >= Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
+      val searchResults =
+        if (isInSearchMode) {
+          state.feedsSearchResults.collectAsLazyPagingItems()
+        } else {
+          null
+        }
       val selectedSourceIds =
         remember(state.selectedSources) { state.selectedSources.mapTo(mutableSetOf()) { it.id } }
-      val isInSearchMode = searchQuery.text.length >= Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
 
       val lazyListState =
         rememberLazyListState(
@@ -295,9 +307,11 @@ private fun ExpandedDrawerContent(
           initialFirstVisibleItemScrollOffset = scrollOffset,
         )
       val translucentStyle = LocalTranslucentStyles.current
+      val haptic = LocalHapticFeedback.current
       val currentScrollIndex by rememberUpdatedState(scrollIndex)
       val currentScrollOffset by rememberUpdatedState(scrollOffset)
       val currentIsInSearchMode by rememberUpdatedState(isInSearchMode)
+      val currentOnScrollPositionChanged by rememberUpdatedState(onScrollPositionChanged)
       var pendingRestoreScroll by remember {
         mutableStateOf(
           if (scrollIndex > 0 || scrollOffset > 0) scrollIndex to scrollOffset else null
@@ -306,29 +320,37 @@ private fun ExpandedDrawerContent(
 
       LaunchedEffect(lazyListState, allSources) {
         snapshotFlow {
-            DrawerScrollSnapshot(
+            DrawerRestoreSnapshot(
               itemCount = allSources.itemCount,
               refreshState = allSources.loadState.refresh,
-              index = lazyListState.firstVisibleItemIndex,
-              offset = lazyListState.firstVisibleItemScrollOffset,
               isInSearchMode = currentIsInSearchMode,
             )
           }
+          .distinctUntilChanged()
           .collect { snapshot ->
             if (snapshot.isInSearchMode) {
               if (pendingRestoreScroll == null) {
-                pendingRestoreScroll = currentScrollIndex to currentScrollOffset
+                val index = lazyListState.firstVisibleItemIndex
+                val offset = lazyListState.firstVisibleItemScrollOffset
+                currentOnScrollPositionChanged(index, offset)
+                pendingRestoreScroll = index to offset
               }
             } else if (snapshot.itemCount > 0) {
               val savedScroll = pendingRestoreScroll
               if (savedScroll != null) {
                 pendingRestoreScroll = null
-                if (snapshot.index != savedScroll.first || snapshot.offset != savedScroll.second) {
+                if (
+                  lazyListState.firstVisibleItemIndex != savedScroll.first ||
+                    lazyListState.firstVisibleItemScrollOffset != savedScroll.second
+                ) {
                   lazyListState.scrollToItem(savedScroll.first, savedScroll.second)
                   return@collect
                 }
               }
-              onScrollPositionChanged(snapshot.index, snapshot.offset)
+              currentOnScrollPositionChanged(
+                lazyListState.firstVisibleItemIndex,
+                lazyListState.firstVisibleItemScrollOffset,
+              )
             } else if (snapshot.refreshState is LoadState.Loading) {
               if (
                 pendingRestoreScroll == null && (currentScrollIndex > 0 || currentScrollOffset > 0)
@@ -337,9 +359,36 @@ private fun ExpandedDrawerContent(
               }
             } else if (snapshot.refreshState is LoadState.NotLoading) {
               pendingRestoreScroll = null
-              onScrollPositionChanged(snapshot.index, snapshot.offset)
+              currentOnScrollPositionChanged(
+                lazyListState.firstVisibleItemIndex,
+                lazyListState.firstVisibleItemScrollOffset,
+              )
             }
           }
+      }
+
+      LaunchedEffect(lazyListState) {
+        snapshotFlow { lazyListState.isScrollInProgress }
+          .distinctUntilChanged()
+          .collect { isScrolling ->
+            if (!isScrolling && !currentIsInSearchMode && pendingRestoreScroll == null) {
+              currentOnScrollPositionChanged(
+                lazyListState.firstVisibleItemIndex,
+                lazyListState.firstVisibleItemScrollOffset,
+              )
+            }
+          }
+      }
+
+      DisposableEffect(lazyListState) {
+        onDispose {
+          if (!currentIsInSearchMode && pendingRestoreScroll == null) {
+            currentOnScrollPositionChanged(
+              lazyListState.firstVisibleItemIndex,
+              lazyListState.firstVisibleItemScrollOffset,
+            )
+          }
+        }
       }
 
       LazyColumn(
@@ -378,22 +427,29 @@ private fun ExpandedDrawerContent(
             } else {
               selectedDestination == destination
             }
-          val backgroundColor by
-            animateColorAsState(
-              if (selected) {
-                translucentStyle.default.background
-              } else {
-                Color.Transparent
-              }
-            )
-
-          val navigationItemShape = RoundedCornerShape(topEndPercent = 50, bottomEndPercent = 50)
+          val targetSelectionAlpha = if (selected) 1f else 0f
+          val initialSelectionAlpha = remember { targetSelectionAlpha }
+          var hasSelectionTransitioned by remember { mutableStateOf(false) }
+          val selectionAlpha = remember { Animatable(initialSelectionAlpha) }
+          if (hasSelectionTransitioned || targetSelectionAlpha != initialSelectionAlpha) {
+            LaunchedEffect(targetSelectionAlpha) {
+              hasSelectionTransitioned = true
+              selectionAlpha.animateTo(targetSelectionAlpha)
+            }
+          }
 
           NavigationDrawerItem(
             modifier =
-              Modifier.requiredHeight(44.dp)
-                .padding(end = 16.dp)
-                .background(backgroundColor, navigationItemShape),
+              Modifier.requiredHeight(44.dp).padding(end = 16.dp).drawWithCache {
+                val outline = NavigationItemShape.createOutline(size, layoutDirection, this)
+                onDrawBehind {
+                  val alpha = selectionAlpha.value
+                  if (alpha > 0f) {
+                    val color = translucentStyle.default.background
+                    drawOutline(outline, color.copy(alpha = color.alpha * alpha))
+                  }
+                }
+              },
             label = {
               val style =
                 if (selected) {
@@ -401,7 +457,11 @@ private fun ExpandedDrawerContent(
                 } else {
                   MaterialTheme.typography.bodyMedium
                 }
-              Text(text = stringResource(destination.label), style = style)
+              Text(
+                text = stringResource(destination.label),
+                style = style,
+                color = { colorScheme.onSurface },
+              )
             },
             onClick = {
               if (
@@ -425,27 +485,30 @@ private fun ExpandedDrawerContent(
               )
             },
             selected = selected,
-            shape = navigationItemShape,
+            shape = NavigationItemShape,
             colors =
               NavigationDrawerItemDefaults.colors(
-                selectedIconColor = colorScheme.onSurface,
-                unselectedIconColor = colorScheme.onSurface,
-                selectedTextColor = colorScheme.onSurface,
-                unselectedTextColor = colorScheme.onSurface,
+                selectedIconColor = colorScheme.settledOnSurface,
+                unselectedIconColor = colorScheme.settledOnSurface,
+                selectedTextColor = colorScheme.settledOnSurface,
+                unselectedTextColor = colorScheme.settledOnSurface,
                 selectedContainerColor = Color.Transparent,
                 unselectedContainerColor = Color.Transparent,
               ),
           )
         }
 
-        item {
-          HorizontalDivider(
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
-            color = colorScheme.outlineVariant,
+        item(key = "DestinationsDivider", contentType = "Divider") {
+          Box(
+            modifier =
+              Modifier.fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .height(DividerDefaults.Thickness)
+                .drawBehind { drawRect(colorScheme.outlineVariant) }
           )
         }
 
-        item {
+        item(key = "AllFeedsHeader", contentType = "AllFeedsHeader") {
           AllFeedsHeader(
             feedsCount = state.numberOfFeeds,
             visibleFeedsCount = state.visibleFeedsCount,
@@ -470,7 +533,7 @@ private fun ExpandedDrawerContent(
         )
 
         val hasSources = state.numberOfFeeds > 0 || state.numberOfFeedGroups > 0
-        item {
+        item(key = "FeedsSearchBar", contentType = "SearchBar") {
           androidx.compose.animation.AnimatedVisibility(
             visible = hasSources,
             enter = fadeIn(),
@@ -485,9 +548,9 @@ private fun ExpandedDrawerContent(
         }
 
         if (state.numberOfFeeds == 0 && state.numberOfFeedGroups == 0 && !isInSearchMode) {
-          item { NoFeeds() }
+          item(key = "NoFeeds", contentType = "NoFeeds") { NoFeeds() }
         } else {
-          if (isInSearchMode) {
+          if (isInSearchMode && searchResults != null) {
             sourcesSearchResults(
               searchResults = searchResults,
               selectedSourceIds = selectedSourceIds,
@@ -527,6 +590,7 @@ private fun ExpandedDrawerContent(
               activeSource = state.activeSource,
               canShowUnreadPostsCount = state.canShowUnreadPostsCount,
               isInMultiSelectMode = state.isInMultiSelectMode,
+              haptic = haptic,
               onSourceClick = {
                 val isSourceActive = state.activeSource?.id == it.id
                 if (isSourceActive) {
@@ -656,8 +720,8 @@ private fun CollapsedDrawerContent(
 
   val navigationRailItemColors =
     NavigationRailItemDefaults.colors(
-      selectedIconColor = colorScheme.primary,
-      unselectedIconColor = colorScheme.onSurfaceVariant,
+      selectedIconColor = colorScheme.settledPrimary,
+      unselectedIconColor = colorScheme.settledOnSurfaceVariant,
       indicatorColor = Color.Transparent,
     )
 
@@ -712,9 +776,12 @@ private fun CollapsedDrawerContent(
       item(key = "PinnedSourcesDivider", contentType = "Divider") {
         Spacer(Modifier.requiredHeight(16.dp))
 
-        HorizontalDivider(
-          modifier = Modifier.padding(horizontal = 16.dp),
-          color = colorScheme.outlineVariant,
+        Box(
+          modifier =
+            Modifier.fillMaxWidth()
+              .padding(horizontal = 16.dp)
+              .height(DividerDefaults.Thickness)
+              .drawBehind { drawRect(colorScheme.outlineVariant) }
         )
 
         Spacer(Modifier.requiredHeight(16.dp))
@@ -751,9 +818,12 @@ private fun CollapsedDrawerContent(
       item(key = "AllSourcesDivider", contentType = "Divider") {
         Spacer(Modifier.requiredHeight(16.dp))
 
-        HorizontalDivider(
-          modifier = Modifier.padding(horizontal = 16.dp),
-          color = colorScheme.outlineVariant,
+        Box(
+          modifier =
+            Modifier.fillMaxWidth()
+              .padding(horizontal = 16.dp)
+              .height(DividerDefaults.Thickness)
+              .drawBehind { drawRect(colorScheme.outlineVariant) }
         )
 
         Spacer(Modifier.requiredHeight(16.dp))
@@ -813,36 +883,35 @@ private fun PinnedSourceIcon(
 ) {
   val colorScheme = AppTheme.colorScheme
   val iconSize = 32.dp
+  val targetSelectionAlpha = if (selected) 1f else 0f
+  val initialSelectionAlpha = remember { targetSelectionAlpha }
+  var hasSelectionTransitioned by remember { mutableStateOf(false) }
+  val selectionAlpha = remember { Animatable(initialSelectionAlpha) }
+  if (hasSelectionTransitioned || targetSelectionAlpha != initialSelectionAlpha) {
+    LaunchedEffect(targetSelectionAlpha) {
+      hasSelectionTransitioned = true
+      selectionAlpha.animateTo(targetSelectionAlpha)
+    }
+  }
 
-  Box(
-    modifier =
-      Modifier.requiredSize(iconSize + 8.dp)
-        .graphicsLayer(
-          compositingStrategy = CompositingStrategy.Offscreen,
-          alpha = if (selected || !hasActiveSource) 1f else 0.25f,
-        ),
-    contentAlignment = Alignment.Center,
-  ) {
-    val selectedColor by
-      animateColorAsState(
-        if (selected) {
-          colorScheme.primaryContainer
-        } else {
-          Color.Transparent
-        }
-      )
+  val iconAlpha = if (selected || !hasActiveSource) 1f else 0.25f
 
-    val selectedColorShape = RoundedCornerShape(12.dp)
+  Box(modifier = Modifier.requiredSize(iconSize + 8.dp), contentAlignment = Alignment.Center) {
     Box(
       modifier =
-        Modifier.matchParentSize().drawBehind {
-          val outline = selectedColorShape.createOutline(size, layoutDirection, this)
-          drawOutline(outline, selectedColor)
+        Modifier.matchParentSize().drawWithCache {
+          val outline = SelectedSourceColorShape.createOutline(size, layoutDirection, this)
+          onDrawBehind {
+            val alpha = selectionAlpha.value * iconAlpha
+            if (alpha > 0f) {
+              drawOutline(outline, colorScheme.primaryContainer.copy(alpha = alpha))
+            }
+          }
         }
     )
 
-    val shape = RoundedCornerShape(8.dp)
-    val clickableModifier = Modifier.requiredSize(iconSize).clip(shape).clickable { onClick() }
+    val clickableModifier =
+      Modifier.requiredSize(iconSize).clip(SourceIconShape).clickable { onClick() }
 
     when (source) {
       is Feed -> {
@@ -851,41 +920,51 @@ private fun PinnedSourceIcon(
           homepageLink = source.homepageLink,
           showFeedFavIcon = source.showFeedFavIcon,
           contentDescription = null,
-          modifier = clickableModifier,
+          modifier =
+            Modifier.graphicsLayer {
+                compositingStrategy = CompositingStrategy.ModulateAlpha
+                alpha = iconAlpha
+              }
+              .then(clickableModifier),
         )
       }
       is FeedGroup -> {
+        val groupCutoutColor =
+          remember(colorScheme) {
+            { colorScheme.secondary.copy(alpha = 0.16f).compositeOver(colorScheme.backdrop) }
+          }
         Box(
           modifier =
-            Modifier.clip(shape).then(clickableModifier).drawBehind {
-              val outline = shape.createOutline(size, layoutDirection, this)
-              drawOutline(outline, colorScheme.secondary.copy(alpha = 0.16f))
-            },
+            Modifier.graphicsLayer { alpha = iconAlpha }
+              .then(clickableModifier)
+              .drawWithCache {
+                val outline = SourceIconShape.createOutline(size, layoutDirection, this)
+                onDrawBehind { drawOutline(outline, colorScheme.secondary.copy(alpha = 0.16f)) }
+              },
           contentAlignment = Alignment.Center,
         ) {
           FeedGroupIconGrid(
             feedHomepageLinks = source.feedHomepageLinks,
             feedIconLinks = source.feedIconLinks,
             feedShowFavIconSettings = source.feedShowFavIconSettings,
+            cutoutColor = groupCutoutColor,
           )
         }
       }
     }
 
-    Surface(
+    Box(
       modifier =
-        Modifier.align(Alignment.TopEnd).requiredSize(14.dp).dropShadow(CircleShape) {
-          spread = 1.dp.toPx()
-          color = Color.Black
-          blendMode = BlendMode.DstOut
+        Modifier.align(Alignment.TopEnd).requiredSize(14.dp).drawBehind {
+          drawCircle(color = colorScheme.backdrop, radius = 8.dp.toPx())
+          drawCircle(color = lerp(colorScheme.backdrop, colorScheme.inverseSurface, iconAlpha))
         },
-      shape = CircleShape,
-      color = colorScheme.inverseSurface,
-      contentColor = colorScheme.inverseOnSurface,
+      contentAlignment = Alignment.Center,
     ) {
       Icon(
         imageVector = TwineIcons.Pin,
         contentDescription = null,
+        tint = colorScheme.settledInverseOnSurface.copy(alpha = iconAlpha),
         modifier = Modifier.padding(2.dp),
       )
     }
@@ -901,26 +980,38 @@ private fun SourceIcon(
 ) {
   val colorScheme = AppTheme.colorScheme
   val iconSize = 32.dp
+  val targetSelectionAlpha = if (selected) 1f else 0f
+  val initialSelectionAlpha = remember { targetSelectionAlpha }
+  var hasSelectionTransitioned by remember { mutableStateOf(false) }
+  val selectionAlpha = remember { Animatable(initialSelectionAlpha) }
+  if (hasSelectionTransitioned || targetSelectionAlpha != initialSelectionAlpha) {
+    LaunchedEffect(targetSelectionAlpha) {
+      hasSelectionTransitioned = true
+      selectionAlpha.animateTo(targetSelectionAlpha)
+    }
+  }
+
+  val iconAlpha = if (selected || !hasActiveSource) 1f else 0.25f
 
   Box(
     contentAlignment = Alignment.Center,
-    modifier = Modifier.graphicsLayer { alpha = if (selected || !hasActiveSource) 1f else 0.25f },
+    modifier =
+      Modifier.graphicsLayer {
+        compositingStrategy =
+          if (source is Feed) CompositingStrategy.ModulateAlpha else CompositingStrategy.Auto
+        alpha = iconAlpha
+      },
   ) {
-    val selectedColor by
-      animateColorAsState(
-        if (selected) {
-          colorScheme.primaryContainer
-        } else {
-          Color.Transparent
-        }
-      )
-
-    val selectedColorShape = RoundedCornerShape(12.dp)
     Box(
       modifier =
-        Modifier.requiredSize(iconSize + 8.dp).drawBehind {
-          val outline = selectedColorShape.createOutline(size, layoutDirection, this)
-          drawOutline(outline, selectedColor)
+        Modifier.requiredSize(iconSize + 8.dp).drawWithCache {
+          val outline = SelectedSourceColorShape.createOutline(size, layoutDirection, this)
+          onDrawBehind {
+            val alpha = selectionAlpha.value
+            if (alpha > 0f) {
+              drawOutline(outline, colorScheme.primaryContainer.copy(alpha = alpha))
+            }
+          }
         }
     )
 
@@ -937,12 +1028,15 @@ private fun SourceIcon(
         )
       }
       is FeedGroup -> {
-        val shape = RoundedCornerShape(8.dp)
+        val groupCutoutColor =
+          remember(colorScheme) {
+            { colorScheme.secondary.copy(alpha = 0.16f).compositeOver(colorScheme.backdrop) }
+          }
         Box(
           modifier =
-            Modifier.clip(shape).then(clickableModifier).drawBehind {
-              val outline = shape.createOutline(size, layoutDirection, this)
-              drawOutline(outline, colorScheme.secondary.copy(alpha = 0.16f))
+            Modifier.clip(SourceIconShape).then(clickableModifier).drawWithCache {
+              val outline = SourceIconShape.createOutline(size, layoutDirection, this)
+              onDrawBehind { drawOutline(outline, colorScheme.secondary.copy(alpha = 0.16f)) }
             },
           contentAlignment = Alignment.Center,
         ) {
@@ -950,6 +1044,7 @@ private fun SourceIcon(
             feedHomepageLinks = source.feedHomepageLinks,
             feedIconLinks = source.feedIconLinks,
             feedShowFavIconSettings = source.feedShowFavIconSettings,
+            cutoutColor = groupCutoutColor,
           )
         }
       }
@@ -965,8 +1060,10 @@ private fun SearchBar(
 ) {
   val keyboardState by keyboardVisibilityAsState()
   val focusManager = LocalFocusManager.current
-  val translucentStyle = LocalTranslucentStyles.current
   val colorScheme = AppTheme.colorScheme
+  val settledOnSurface = colorScheme.settledOnSurface
+  val outlineColor = settledOnSurface.copy(alpha = 0.16f)
+  val containerColor = settledOnSurface.copy(alpha = 0.08f)
 
   LaunchedEffect(keyboardState) {
     if (keyboardState == KeyboardState.Closed) {
@@ -985,7 +1082,7 @@ private fun SearchBar(
     placeholder = {
       Text(
         text = stringResource(Res.string.feedsSearchHint),
-        color = colorScheme.onSurfaceVariant,
+        color = { colorScheme.onSurfaceVariant },
         style = MaterialTheme.typography.bodyMedium,
       )
     },
@@ -994,18 +1091,18 @@ private fun SearchBar(
         IconButton(icon = TwineIcons.Close, contentDescription = null, onClick = onClearClick)
       }
     },
-    shape = RoundedCornerShape(50),
+    shape = SearchBarShape,
     singleLine = true,
     textStyle = MaterialTheme.typography.bodyMedium,
     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
     colors =
       OutlinedTextFieldDefaults.colors(
-        focusedBorderColor = translucentStyle.default.outline,
-        unfocusedBorderColor = translucentStyle.default.outline,
-        focusedTextColor = colorScheme.onSurfaceVariant,
+        focusedBorderColor = outlineColor,
+        unfocusedBorderColor = outlineColor,
+        focusedTextColor = settledOnSurface,
         disabledTextColor = Color.Transparent,
-        unfocusedContainerColor = translucentStyle.default.background,
-        focusedContainerColor = translucentStyle.default.background,
+        unfocusedContainerColor = containerColor,
+        focusedContainerColor = containerColor,
       ),
   )
 }
@@ -1019,18 +1116,16 @@ private fun NoFeeds() {
         modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp),
         text = stringResource(Res.string.feedsLetsStart),
         style = MaterialTheme.typography.labelLarge,
-        color = colorScheme.onSurfaceVariant,
+        color = { colorScheme.onSurfaceVariant },
         textAlign = TextAlign.Center,
       )
     }
   }
 }
 
-private data class DrawerScrollSnapshot(
+private data class DrawerRestoreSnapshot(
   val itemCount: Int,
   val refreshState: LoadState,
-  val index: Int,
-  val offset: Int,
   val isInSearchMode: Boolean,
 )
 

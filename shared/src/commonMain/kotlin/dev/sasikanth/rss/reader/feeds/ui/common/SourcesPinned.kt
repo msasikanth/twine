@@ -17,9 +17,7 @@
 
 package dev.sasikanth.rss.reader.feeds.ui.common
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -34,25 +32,26 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.dropShadow
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawOutline
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,6 +67,9 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
+private val SelectedPinnedSourceShape = RoundedCornerShape(16.dp)
+private val PinnedSourceIconShape = RoundedCornerShape(25)
+
 internal fun LazyListScope.pinnedSources(
   pinnedSources: List<Source>,
   activeSource: Source?,
@@ -76,8 +78,9 @@ internal fun LazyListScope.pinnedSources(
   onPinnedSourceOrderChanged: (List<Source>) -> Unit,
 ) {
   if (pinnedSources.isNotEmpty()) {
-    item(key = "PinnedSourcesRow") {
+    item(key = "PinnedSourcesRow", contentType = "PinnedSourcesRow") {
       val lazyListState = rememberLazyListState()
+      val haptic = LocalHapticFeedback.current
       val reorderableLazyRowState =
         rememberReorderableLazyListState(
           lazyListState = lazyListState,
@@ -101,7 +104,6 @@ internal fun LazyListScope.pinnedSources(
         ) { source ->
           ReorderableItem(state = reorderableLazyRowState, key = "PinnedSource: ${source.id}") {
             isDragging ->
-            val haptic = LocalHapticFeedback.current
             val interactionSource = remember { MutableInteractionSource() }
 
             PinnedSourceItem(
@@ -133,41 +135,57 @@ private fun PinnedSourceItem(
   modifier: Modifier = Modifier,
 ) {
   val colorScheme = AppTheme.colorScheme
-  Column(horizontalAlignment = Alignment.CenterHorizontally) {
-    Box(
-      modifier =
-        modifier
-          .requiredSize(64.dp)
-          .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen),
-      contentAlignment = Alignment.Center,
-    ) {
-      val selectedColor by
-        animateColorAsState(
-          if (selected) {
-            AppTheme.colorScheme.primaryContainer
-          } else {
-            Color.Transparent
-          }
-        )
-      val selectedColorShape = RoundedCornerShape(16.dp)
+  val targetSelectionAlpha = if (selected) 1f else 0f
+  val initialSelectionAlpha = remember { targetSelectionAlpha }
+  var hasSelectionTransitioned by remember { mutableStateOf(false) }
+  val selectionAlpha = remember { Animatable(initialSelectionAlpha) }
+  if (hasSelectionTransitioned || targetSelectionAlpha != initialSelectionAlpha) {
+    LaunchedEffect(targetSelectionAlpha) {
+      hasSelectionTransitioned = true
+      selectionAlpha.animateTo(targetSelectionAlpha)
+    }
+  }
 
+  Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Box(modifier = modifier.requiredSize(64.dp), contentAlignment = Alignment.Center) {
       Box(
         modifier =
-          Modifier.requiredSize(56.dp).drawBehind {
-            val outline = selectedColorShape.createOutline(size, layoutDirection, this)
-            drawOutline(outline, selectedColor)
+          Modifier.requiredSize(56.dp).drawWithCache {
+            val outline = SelectedPinnedSourceShape.createOutline(size, layoutDirection, this)
+            onDrawBehind {
+              val alpha = selectionAlpha.value
+              if (alpha > 0f) {
+                drawOutline(outline, colorScheme.primaryContainer.copy(alpha = alpha))
+              }
+            }
           }
       )
-
-      val shape = RoundedCornerShape(25)
-      val borderColor = AppTheme.colorScheme.outlineVariant
 
       Box(
         modifier =
           Modifier.requiredSize(48.dp)
-            .clip(shape)
-            .background(AppTheme.colorScheme.backdrop)
-            .border(1.dp, borderColor, shape)
+            .drawWithCache {
+              val outline = PinnedSourceIconShape.createOutline(size, layoutDirection, this)
+              val strokeWidth = 1.dp.toPx()
+              val halfStroke = strokeWidth / 2f
+              val borderStroke = Stroke(width = strokeWidth)
+              val borderTopLeft = Offset(halfStroke, halfStroke)
+              val borderSize = Size(size.width - strokeWidth, size.height - strokeWidth)
+              val radius = (minOf(size.width, size.height) * 0.25f - halfStroke).coerceAtLeast(0f)
+              val borderCornerRadius = CornerRadius(radius, radius)
+              onDrawWithContent {
+                drawOutline(outline, colorScheme.backdrop)
+                drawContent()
+                drawRoundRect(
+                  color = colorScheme.outlineVariant,
+                  topLeft = borderTopLeft,
+                  size = borderSize,
+                  cornerRadius = borderCornerRadius,
+                  style = borderStroke,
+                )
+              }
+            }
+            .clip(PinnedSourceIconShape)
             .clickable(enabled = !isDragging) { onSourceClick(source) },
         contentAlignment = Alignment.Center,
       ) {
@@ -193,27 +211,25 @@ private fun PinnedSourceItem(
       }
 
       if (!isDragging) {
-        Surface(
+        Box(
           modifier =
             Modifier.align(Alignment.TopEnd)
               .requiredSize(20.dp)
-              .dropShadow(CircleShape) {
-                spread = 1.dp.toPx()
-                color = Color.Black
-                blendMode = BlendMode.DstOut
+              .drawBehind {
+                drawCircle(color = colorScheme.backdrop, radius = 11.dp.toPx())
+                drawCircle(color = colorScheme.inverseSurface)
               }
               .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = { onRemoveClick(source) },
               ),
-          shape = CircleShape,
-          color = colorScheme.inverseSurface,
-          contentColor = colorScheme.inverseOnSurface,
+          contentAlignment = Alignment.Center,
         ) {
           Icon(
             imageVector = TwineIcons.Remove,
             contentDescription = null,
+            tint = colorScheme.settledInverseOnSurface,
             modifier = Modifier.padding(4.dp),
           )
         }
@@ -224,7 +240,7 @@ private fun PinnedSourceItem(
       modifier = Modifier.widthIn(max = 64.dp),
       text = source.name,
       style = MaterialTheme.typography.labelMedium,
-      color = AppTheme.colorScheme.onSurfaceVariant,
+      color = { colorScheme.onSurfaceVariant },
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
     )

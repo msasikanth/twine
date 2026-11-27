@@ -31,6 +31,8 @@ import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -448,6 +450,29 @@ class SettingsRepository(
 
   suspend fun clear() {
     dataStore.edit { it.clear() }
+  }
+
+  suspend fun resetOnboarding() {
+    dataStore.edit { preferences -> preferences[isOnboardingDoneKey] = false }
+  }
+
+  suspend fun clearLastSeenChangelogVersion() {
+    dataStore.edit { preferences -> preferences.remove(lastSeenChangelogVersionKey) }
+  }
+
+  suspend fun clearDiscoveryFeedsCache() {
+    dataStore.edit { preferences ->
+      preferences.remove(discoveryFeedsCacheKey)
+      preferences.remove(discoveryFeedsLastFetchTimeKey)
+    }
+  }
+
+  suspend fun resetInAppRatingState() {
+    dataStore.edit { preferences ->
+      preferences.remove(lastReviewPromptDateKey)
+      preferences[installDateKey] = (Clock.System.now() - 3.days).toEpochMilliseconds()
+      preferences[userSessionCountKey] = 5
+    }
   }
 
   private fun mapToAppThemeMode(pref: String?): AppThemeMode? {

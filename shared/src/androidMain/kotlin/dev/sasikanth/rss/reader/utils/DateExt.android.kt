@@ -21,10 +21,23 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+@Volatile private var cachedReadingTrendFormatter: Pair<Locale, DateTimeFormatter>? = null
+
+private fun readingTrendFormatter(): DateTimeFormatter {
+  val locale = Locale.getDefault()
+  val cached = cachedReadingTrendFormatter
+  if (cached != null && cached.first == locale) {
+    return cached.second
+  }
+  val formatter = DateTimeFormatter.ofPattern("dd-MMM-yy", locale)
+  cachedReadingTrendFormatter = locale to formatter
+  return formatter
+}
+
 actual fun String.formatReadingTrendDate(): String {
   return try {
     val date = LocalDate.parse(this, DateTimeFormatter.ISO_LOCAL_DATE)
-    date.format(DateTimeFormatter.ofPattern("dd-MMM-yy", Locale.getDefault()))
+    date.format(readingTrendFormatter())
   } catch (_: Exception) {
     this
   }

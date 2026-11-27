@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.DrawerValue
@@ -40,12 +39,15 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -319,9 +321,18 @@ internal fun MainScreen(
   when {
     hasInlineNavigation -> {
       Row(modifier = modifier.fillMaxSize()) {
-        val sideNavigationWidth by animateDpAsState(if (isSideNavigationExpanded) 360.dp else 80.dp)
+        val sideNavigationWidthState =
+          animateDpAsState(if (isSideNavigationExpanded) 360.dp else 80.dp)
 
-        Box(modifier = Modifier.requiredWidth(sideNavigationWidth)) {
+        Box(
+          modifier =
+            Modifier.layout { measurable, constraints ->
+              val widthPx = sideNavigationWidthState.value.roundToPx()
+              val placeable =
+                measurable.measure(constraints.copy(minWidth = widthPx, maxWidth = widthPx))
+              layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
+            }
+        ) {
           drawerContent(isSideNavigationExpanded)
         }
 
@@ -344,11 +355,15 @@ internal fun MainScreen(
         gesturesEnabled =
           drawerState.isOpen || (selectedDestination == MainDestination.Home && !hasActiveSource),
         drawerContent = {
+          val colorScheme = AppTheme.colorScheme
           ModalDrawerSheet(
             // Full-width on phones; partial overlay (Gmail-style) on foldables/expanded.
-            modifier = Modifier.fillMaxWidth().widthIn(max = 400.dp),
-            drawerContainerColor = AppTheme.colorScheme.backdrop,
-            drawerContentColor = AppTheme.colorScheme.onSurface,
+            modifier =
+              Modifier.fillMaxWidth().widthIn(max = 400.dp).drawBehind {
+                drawRect(colorScheme.backdrop)
+              },
+            drawerContainerColor = Color.Transparent,
+            drawerContentColor = colorScheme.settledOnSurface,
             drawerShape = RectangleShape,
           ) {
             Box(modifier = Modifier.size(0.dp).focusable(true))

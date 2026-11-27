@@ -22,7 +22,7 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 
 interface InAppRating {
-  suspend fun request()
+  suspend fun request(ignoreCriteria: Boolean = false)
 
   fun canShowReviewPrompt(
     currentTime: Instant,
@@ -46,5 +46,5 @@ interface InAppRating {
 val LocalInAppRating = staticCompositionLocalOf<InAppRating> { NoopInAppRating }
 
 private object NoopInAppRating : InAppRating {
-  override suspend fun request() {}
+  override suspend fun request(ignoreCriteria: Boolean) {}
 }

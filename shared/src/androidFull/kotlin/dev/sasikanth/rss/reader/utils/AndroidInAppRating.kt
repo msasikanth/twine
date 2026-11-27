@@ -36,21 +36,23 @@ class AndroidInAppRating(
   private val settingsRepository: SettingsRepository,
 ) : InAppRating {
 
-  override suspend fun request() {
+  override suspend fun request(ignoreCriteria: Boolean) {
     val now = Clock.System.now()
-    val installDate = settingsRepository.installDate.firstOrNull() ?: now
-    val lastPromptDate =
-      settingsRepository.lastReviewPromptDate.firstOrNull() ?: Instant.DISTANT_PAST
-    val sessionCount = settingsRepository.userSessionCount.first()
-    val canShowReviewPrompt =
-      canShowReviewPrompt(
-        currentTime = now,
-        installDate = installDate,
-        lastPromptDate = lastPromptDate,
-        sessionCount = sessionCount,
-      )
+    if (!ignoreCriteria) {
+      val installDate = settingsRepository.installDate.firstOrNull() ?: now
+      val lastPromptDate =
+        settingsRepository.lastReviewPromptDate.firstOrNull() ?: Instant.DISTANT_PAST
+      val sessionCount = settingsRepository.userSessionCount.first()
+      val canShowReviewPrompt =
+        canShowReviewPrompt(
+          currentTime = now,
+          installDate = installDate,
+          lastPromptDate = lastPromptDate,
+          sessionCount = sessionCount,
+        )
 
-    if (!canShowReviewPrompt) return
+      if (!canShowReviewPrompt) return
+    }
 
     val manager = ReviewManagerFactory.create(activity)
     val request = suspendCancellableCoroutine { continuation ->
@@ -65,7 +67,9 @@ class AndroidInAppRating(
 
     if (request != null) {
       manager.launchReviewFlow(activity, request)
-      settingsRepository.updateLastReviewPromptDate(now)
+      if (!ignoreCriteria) {
+        settingsRepository.updateLastReviewPromptDate(now)
+      }
     }
   }
 }

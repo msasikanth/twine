@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,8 +29,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size as ComposeSize
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
 import coil3.SingletonImageLoader
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
@@ -41,6 +49,10 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 
+private val FeedIconShape = RoundedCornerShape(25)
+private val DefaultFavIconSize = Size(DEFAULT_FAVICON_SIZE_PX, DEFAULT_FAVICON_SIZE_PX)
+private val PlaceholderMaxIconSize = 24.dp
+
 @Composable
 internal fun FeedIcon(
   icon: String,
@@ -49,69 +61,102 @@ internal fun FeedIcon(
   contentDescription: String?,
   modifier: Modifier = Modifier,
   contentScale: ContentScale = ContentScale.Fit,
-  size: Size = Size(DEFAULT_FAVICON_SIZE_PX, DEFAULT_FAVICON_SIZE_PX),
+  size: Size = DefaultFavIconSize,
 ) {
   val useFavIcon = showFeedFavIcon
   val shouldBlockImage = LocalBlockImage.current
-  val iconShape = RoundedCornerShape(25)
+  val colorScheme = AppTheme.colorScheme
 
-  Box(
-    modifier = Modifier.then(modifier).background(Color.White, iconShape),
-    contentAlignment = Alignment.Center,
-  ) {
-    if (shouldBlockImage) {
-      PlaceHolderIcon()
-    } else {
-      val context = LocalPlatformContext.current
-      var useFallback by remember(icon, homepageLink, useFavIcon) { mutableStateOf(false) }
-      val loadFavIcon = useFavIcon || useFallback
-
-      val imageRequest =
-        remember(context, icon, homepageLink, loadFavIcon, size) {
-          val url = if (loadFavIcon) homepageLink else icon
-          val memoryCacheKey = "$url#${size.width}x${size.height}"
-          ImageRequest.Builder(context)
-            .data(url)
-            .diskCacheKey(url)
-            .memoryCacheKey(memoryCacheKey)
-            .size(size)
-            .build()
-        }
-
-      val imageLoader =
-        remember(loadFavIcon) {
-          if (loadFavIcon) {
-            FavIconImageLoader.get(context)
-          } else {
-            SingletonImageLoader.get(context)
-          }
-        }
-
-      var isSuccess by remember { mutableStateOf(false) }
-
-      if (!isSuccess) {
-        PlaceHolderIcon()
-      }
-
-      coil3.compose.AsyncImage(
-        model = imageRequest,
+  if (shouldBlockImage) {
+    Box(
+      modifier = Modifier.then(modifier).background(Color.White, FeedIconShape),
+      contentAlignment = Alignment.Center,
+    ) {
+      Icon(
+        imageVector = TwineIcons.RSS,
         contentDescription = contentDescription,
-        modifier = Modifier.matchParentSize().clip(iconShape),
-        contentScale = contentScale,
-        imageLoader = imageLoader,
-        onLoading = { isSuccess = false },
-        onSuccess = { isSuccess = true },
-        onError = {
-          if (!loadFavIcon) {
-            useFallback = true
-          }
-        },
+        tint = colorScheme.primary,
       )
     }
+  } else {
+    val context = LocalPlatformContext.current
+    var useFallback by remember(icon, homepageLink, useFavIcon) { mutableStateOf(false) }
+    val loadFavIcon = useFavIcon || useFallback
+
+    val imageRequest =
+      remember(context, icon, homepageLink, loadFavIcon, size) {
+        val url = if (loadFavIcon) homepageLink else icon
+        val memoryCacheKey = "$url#${size.width}x${size.height}"
+        ImageRequest.Builder(context)
+          .data(url)
+          .diskCacheKey(url)
+          .memoryCacheKey(memoryCacheKey)
+          .size(size)
+          .build()
+      }
+
+    val imageLoader =
+      remember(context, loadFavIcon) {
+        if (loadFavIcon) {
+          FavIconImageLoader.get(context)
+        } else {
+          SingletonImageLoader.get(context)
+        }
+      }
+
+    val rssPainter = rememberVectorPainter(TwineIcons.RSS)
+    val placeholderPainter =
+      remember(rssPainter, colorScheme) {
+        TintedCenteredPainter(delegate = rssPainter, colorProvider = { colorScheme.primary })
+      }
+
+    coil3.compose.AsyncImage(
+      model = imageRequest,
+      contentDescription = contentDescription,
+      imageLoader = imageLoader,
+      modifier = Modifier.then(modifier).background(Color.White, FeedIconShape).clip(FeedIconShape),
+      placeholder = placeholderPainter,
+      error = placeholderPainter,
+      fallback = placeholderPainter,
+      onError =
+        if (!loadFavIcon) {
+          { useFallback = true }
+        } else {
+          null
+        },
+      contentScale = contentScale,
+    )
   }
 }
 
-@Composable
-private fun PlaceHolderIcon() {
-  Icon(imageVector = TwineIcons.RSS, contentDescription = null, tint = AppTheme.colorScheme.primary)
+@Stable
+private class TintedCenteredPainter(
+  private val delegate: Painter,
+  private val colorProvider: () -> Color,
+) : Painter() {
+  private var lastColor: Color = Color.Unspecified
+  private var lastColorFilter: ColorFilter? = null
+
+  override val intrinsicSize: ComposeSize
+    get() = ComposeSize.Unspecified
+
+  override fun DrawScope.onDraw() {
+    val color = colorProvider()
+    val filter =
+      if (color == lastColor && lastColorFilter != null) {
+        lastColorFilter
+      } else {
+        ColorFilter.tint(color).also {
+          lastColor = color
+          lastColorFilter = it
+        }
+      }
+    val maxPx = PlaceholderMaxIconSize.toPx()
+    val targetDim = minOf(size.width, size.height, maxPx)
+    val left = (size.width - targetDim) * 0.5f
+    val top = (size.height - targetDim) * 0.5f
+    translate(left = left, top = top) {
+      with(delegate) { draw(size = ComposeSize(targetDim, targetDim), colorFilter = filter) }
+    }
+  }
 }

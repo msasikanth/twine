@@ -35,6 +35,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         qos: .utility,
         attributes: .concurrent
     )
+    private var backgroundObserver: NSObjectProtocol?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: feedsRefreshTaskIdentifier, using: backgroundTaskQueue) { (task) in
@@ -47,6 +48,22 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
         BGTaskScheduler.shared.register(forTaskWithIdentifier: cloudSyncTaskIdentifier, using: backgroundTaskQueue) { (task) in
             self.handleCloudSync(task: task as! BGProcessingTask)
+        }
+
+        backgroundObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification,
+            object: nil,
+            queue: nil
+        ) { [weak self] _ in
+            guard let self else { return }
+            Task.detached(priority: .background) {
+                let pendingTasks = await BGTaskScheduler.shared.pendingTaskRequests()
+                guard pendingTasks.isEmpty else { return }
+
+                await self.scheduleCleanUpPosts()
+                await self.scheduledRefreshFeeds()
+                await self.scheduleCloudSync()
+            }
         }
 
         #if !DEBUG

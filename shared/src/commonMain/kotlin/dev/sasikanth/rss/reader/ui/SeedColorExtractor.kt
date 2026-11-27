@@ -24,6 +24,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import coil3.ImageLoader
 import coil3.PlatformContext
+import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import com.materialkolor.ktx.themeColorOrNull
@@ -36,13 +37,14 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 @Stable
 @AppScope
 class SeedColorExtractor(
-  dispatchersProvider: DispatchersProvider,
+  private val dispatchersProvider: DispatchersProvider,
   private val imageLoader: Lazy<ImageLoader>,
   private val platformContext: Lazy<PlatformContext>,
 ) {
@@ -88,14 +90,25 @@ class SeedColorExtractor(
       lruCache[url]
     }
 
+  fun clearCache() {
+    lruCache.evictAll()
+  }
+
   private suspend fun extractSeedColor(url: String): Color? {
     val request =
-      ImageRequest.Builder(platformContext.value).data(url).size(DEFAULT_REQUEST_SIZE).build()
+      ImageRequest.Builder(platformContext.value)
+        .data(url)
+        .size(DEFAULT_REQUEST_SIZE)
+        .diskCacheKey(url)
+        .memoryCachePolicy(CachePolicy.DISABLED)
+        .build()
 
     val result = imageLoader.value.execute(request)
     return if (result is SuccessResult) {
-      val bitmap = result.image.toComposeImageBitmap(platformContext.value)
-      bitmap.themeColorOrNull()
+      withContext(dispatchersProvider.default) {
+        val bitmap = result.image.toComposeImageBitmap(platformContext.value)
+        bitmap.themeColorOrNull()
+      }
     } else {
       null
     }

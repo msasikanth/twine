@@ -19,7 +19,7 @@ import me.tatarka.inject.annotations.Inject
 @ActivityScope
 class AndroidInAppRating(private val activity: ComponentActivity) : InAppRating {
 
-  override suspend fun request() {
+  override suspend fun request(ignoreCriteria: Boolean) {
     // No-op
   }
 }

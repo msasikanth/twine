@@ -29,12 +29,10 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
@@ -53,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -114,23 +113,37 @@ internal fun HomeTopAppBar(
   var hasUnreadPosts by remember(hasUnreadPosts) { mutableStateOf(hasUnreadPosts) }
   var showConfirmDialog by remember { mutableStateOf(false) }
 
-  val backgroundColor = AppTheme.colorScheme.backdrop
+  val colorScheme = AppTheme.colorScheme
   val gradientFadeHeight = with(LocalDensity.current) { 72.dp.toPx() }
   TopAppBar(
     modifier =
       modifier.drawWithCache {
-        // Extends past the toolbar bounds so scrolled content fades out
-        // smoothly instead of getting cut off at the toolbar's bottom edge
         val gradientHeight = size.height + gradientFadeHeight
-        val brush =
-          smoothVerticalFade(
-            color = backgroundColor,
-            endY = gradientHeight,
-            solidFraction = size.height / gradientHeight,
-          )
+        val solidFraction = if (gradientHeight > 0f) size.height / gradientHeight else 0f
         val gradientSize = size.copy(height = gradientHeight)
+        var lastBackdrop = Color.Unspecified
+        var cachedBrush: Brush? = null
         onDrawBehind {
-          drawRect(brush = brush, size = gradientSize, alpha = backgroundAlphaProvider())
+          val alpha = backgroundAlphaProvider()
+          if (alpha > 0f) {
+            val backdrop = colorScheme.backdrop
+            val existingBrush = cachedBrush
+            val brush =
+              if (backdrop == lastBackdrop && existingBrush != null) {
+                existingBrush
+              } else {
+                smoothVerticalFade(
+                    color = backdrop,
+                    endY = gradientHeight,
+                    solidFraction = solidFraction,
+                  )
+                  .also {
+                    lastBackdrop = backdrop
+                    cachedBrush = it
+                  }
+              }
+            drawRect(brush = brush, size = gradientSize, alpha = alpha)
+          }
         }
       },
     contentPadding = PaddingValues(start = 0.dp, top = 8.dp, end = 12.dp, bottom = 8.dp),
@@ -161,7 +174,7 @@ internal fun HomeTopAppBar(
     },
     actions = {
       AnimatedContent(hasUnreadPosts, transitionSpec = { fadeIn().togetherWith(fadeOut()) }) {
-        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
           Spacer(Modifier.width(12.dp))
 
           PostTypePill(postsType = postsType, onClick = onShowPostsSortFilter)
@@ -171,15 +184,15 @@ internal fun HomeTopAppBar(
             enter = fadeIn() + scaleIn(),
             exit = fadeOut() + scaleOut(),
           ) {
-            Row {
+            Row(verticalAlignment = Alignment.CenterVertically) {
               Spacer(Modifier.width(12.dp))
 
               CircularIconButton(
                 icon = TwineIcons.MarkAllAsRead,
                 label = stringResource(Res.string.markAllAsRead),
                 enabled = it,
-                backgroundColor = AppTheme.colorScheme.inverseSurface,
-                contentColor = AppTheme.colorScheme.inverseOnSurface,
+                backgroundColorProvider = { colorScheme.inverseSurface },
+                contentColorProvider = { colorScheme.inverseOnSurface },
                 borderColor = Color.Transparent,
                 onClick = {
                   if (confirmMarkAllAsRead) {
@@ -242,6 +255,7 @@ internal fun HomeTopAppBar(
 
 @Composable
 private fun SourceInfo(source: Source?, modifier: Modifier = Modifier) {
+  val colorScheme = AppTheme.colorScheme
   AnimatedContent(
     modifier = modifier.fillMaxWidth().padding(start = 12.dp),
     targetState = source,
@@ -266,7 +280,7 @@ private fun SourceInfo(source: Source?, modifier: Modifier = Modifier) {
         modifier = Modifier.basicMarquee(),
         text = title,
         style = MaterialTheme.typography.titleMedium,
-        color = AppTheme.colorScheme.onSurface,
+        color = { colorScheme.onSurface },
         maxLines = 1,
       )
 
@@ -275,7 +289,7 @@ private fun SourceInfo(source: Source?, modifier: Modifier = Modifier) {
           modifier = Modifier.basicMarquee(),
           text = stringResource(Res.string.appBarAllFeeds),
           style = MaterialTheme.typography.bodySmall,
-          color = AppTheme.colorScheme.onSurfaceVariant,
+          color = { colorScheme.onSurfaceVariant },
           maxLines = 1,
         )
       }

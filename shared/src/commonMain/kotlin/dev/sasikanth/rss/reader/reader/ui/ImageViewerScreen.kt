@@ -28,7 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +40,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil3.compose.LocalPlatformContext
+import coil3.request.ImageRequest
+import coil3.size.Size
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil3.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
@@ -48,6 +51,7 @@ import com.skydoves.landscapist.zoomable.ZoomablePlugin
 import com.skydoves.landscapist.zoomable.rememberZoomableState
 import dev.sasikanth.rss.reader.app.LocalSnackbarHostState
 import dev.sasikanth.rss.reader.components.CircularIconButton
+import dev.sasikanth.rss.reader.markdown.inlineImageMemoryCacheKey
 import dev.sasikanth.rss.reader.platform.ImageDownloadResult
 import dev.sasikanth.rss.reader.platform.LocalImageDownloader
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
@@ -62,6 +66,12 @@ import twine.shared.generated.resources.downloadImage
 import twine.shared.generated.resources.imageSaveFailed
 import twine.shared.generated.resources.imageSavePermissionDenied
 import twine.shared.generated.resources.imageSaved
+
+private val ImageViewerMaxSize = Size(2048, 2048)
+private val ImageViewerZoomConfig = ZoomableConfig(enableSubSampling = false)
+private val ImageViewerOptions =
+  ImageOptions(contentScale = ContentScale.Fit, alignment = Alignment.Center)
+private val ImageViewerButtonScrim = Color.Black.copy(alpha = 0.65f)
 
 @Composable
 internal fun ImageViewerScreen(
@@ -79,10 +89,9 @@ internal fun ImageViewerScreen(
   val imageSavePermissionDeniedMessage = stringResource(Res.string.imageSavePermissionDenied)
   var isDownloading by remember { mutableStateOf(false) }
 
-  DisposableEffect(Unit) {
+  SideEffect(Unit) {
     toggleLightStatusBar(false)
     toggleLightNavBar(false)
-    onDispose {}
   }
 
   ImageViewerContent(
@@ -133,7 +142,7 @@ private fun ImageViewerContent(
           CircularIconButton(
             icon = TwineIcons.ArrowBack,
             label = stringResource(Res.string.buttonGoBack),
-            backgroundColor = Color.Black.copy(alpha = 0.65f),
+            backgroundColor = ImageViewerButtonScrim,
             contentColor = Color.White,
             onClick = onBack,
           )
@@ -141,8 +150,7 @@ private fun ImageViewerContent(
         actions = {
           if (isDownloading) {
             Box(
-              modifier =
-                Modifier.size(40.dp).background(Color.Black.copy(alpha = 0.65f), CircleShape),
+              modifier = Modifier.size(40.dp).background(ImageViewerButtonScrim, CircleShape),
               contentAlignment = Alignment.Center,
             ) {
               CircularProgressIndicator(
@@ -156,7 +164,7 @@ private fun ImageViewerContent(
               icon = TwineIcons.Download,
               label = stringResource(Res.string.downloadImage),
               enabled = imageUrl.isNotBlank(),
-              backgroundColor = Color.Black.copy(alpha = 0.65f),
+              backgroundColor = ImageViewerButtonScrim,
               contentColor = Color.White,
               onClick = onDownloadClick,
             )
@@ -167,13 +175,23 @@ private fun ImageViewerContent(
       )
     },
   ) { _ ->
-    val zoomableState = rememberZoomableState(config = ZoomableConfig(enableSubSampling = false))
+    val zoomableState = rememberZoomableState(config = ImageViewerZoomConfig)
+    val platformContext = LocalPlatformContext.current
+    val imageRequest =
+      remember(imageUrl, platformContext) {
+        ImageRequest.Builder(platformContext)
+          .data(imageUrl)
+          .diskCacheKey(imageUrl)
+          .placeholderMemoryCacheKey(inlineImageMemoryCacheKey(imageUrl))
+          .size(ImageViewerMaxSize)
+          .build()
+      }
 
     Box(modifier = Modifier.fillMaxSize()) {
       CoilImage(
         modifier = Modifier.fillMaxSize(),
-        imageModel = { imageUrl },
-        imageOptions = ImageOptions(contentScale = ContentScale.Fit, alignment = Alignment.Center),
+        imageRequest = { imageRequest },
+        imageOptions = ImageViewerOptions,
         component = rememberImageComponent { +ZoomablePlugin(zoomableState) },
         loading = {
           Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

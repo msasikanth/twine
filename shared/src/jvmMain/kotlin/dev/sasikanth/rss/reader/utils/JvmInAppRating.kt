@@ -17,7 +17,7 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 @ActivityScope
 class JvmInAppRating : InAppRating {
-  override suspend fun request() {
+  override suspend fun request(ignoreCriteria: Boolean) {
     // no-op
   }
 }

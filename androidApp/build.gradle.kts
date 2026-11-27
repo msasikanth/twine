@@ -71,6 +71,9 @@ android {
       } else {
         "1.0.0"
       }
+
+    manifestPlaceholders["enableDebugSettings"] = "false"
+    buildConfigField("boolean", "ENABLE_DEBUG_SETTINGS", "false")
   }
 
   flavorDimensions += "version"
@@ -101,7 +104,20 @@ android {
 
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
-    debug { applicationIdSuffix = ".debug" }
+    debug {
+      applicationIdSuffix = ".debug"
+      manifestPlaceholders["enableDebugSettings"] = "true"
+      buildConfigField("boolean", "ENABLE_DEBUG_SETTINGS", "true")
+    }
+    create("staging") {
+      initWith(getByName("release"))
+      signingConfig = signingConfigs.getByName("debug")
+      applicationIdSuffix = ".staging"
+      matchingFallbacks += listOf("release")
+      isProfileable = true
+      manifestPlaceholders["enableDebugSettings"] = "true"
+      buildConfigField("boolean", "ENABLE_DEBUG_SETTINGS", "true")
+    }
   }
 
   packaging {
@@ -118,6 +134,14 @@ android {
   dependenciesInfo {
     includeInApk = false
     includeInBundle = false
+  }
+}
+
+bugsnag {
+  variantFilter {
+    if (name.contains("debug", ignoreCase = true) || name.contains("staging", ignoreCase = true)) {
+      setEnabled(false)
+    }
   }
 }
 

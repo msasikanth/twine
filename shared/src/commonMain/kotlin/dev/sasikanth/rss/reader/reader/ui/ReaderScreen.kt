@@ -47,20 +47,27 @@ import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.compositionLocalWithComputedDefaultOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,12 +78,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.dropShadow
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorProducer
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -103,8 +108,6 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.window.core.layout.WindowSizeClass
 import com.mikepenz.markdown.compose.components.markdownComponents
-import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeBlock
-import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeFence
 import dev.sasikanth.rss.reader.app.LocalSnackbarHostState
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
@@ -115,6 +118,8 @@ import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.markdown.ReaderMarkdownTable
 import dev.sasikanth.rss.reader.markdown.SafeMarkdownCheckBox
 import dev.sasikanth.rss.reader.markdown.SafeMarkdownHeader
+import dev.sasikanth.rss.reader.markdown.SafeMarkdownHighlightedCodeBlock
+import dev.sasikanth.rss.reader.markdown.SafeMarkdownHighlightedCodeFence
 import dev.sasikanth.rss.reader.markdown.SafeMarkdownParagraph
 import dev.sasikanth.rss.reader.markdown.SafeMarkdownText
 import dev.sasikanth.rss.reader.markdown.safeUnescapedTextInNode
@@ -136,25 +141,31 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppColorScheme
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
+import dev.sasikanth.rss.reader.ui.DefaultRippleAlpha
+import dev.sasikanth.rss.reader.ui.DefaultTypography
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
 import dev.sasikanth.rss.reader.ui.GoogleSansFontFamily
+import dev.sasikanth.rss.reader.ui.LocalAppColorScheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
+import dev.sasikanth.rss.reader.ui.LocalIsDarkTheme
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.ui.LoraFontFamily
 import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
 import dev.sasikanth.rss.reader.ui.OutfitFontFamily
 import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
+import dev.sasikanth.rss.reader.ui.TranslucentStyle
+import dev.sasikanth.rss.reader.ui.TranslucentStyles
 import dev.sasikanth.rss.reader.ui.getOverriddenColorScheme
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.ui.systemDynamicColorScheme
 import dev.sasikanth.rss.reader.ui.typography
 import dev.sasikanth.rss.reader.utils.CollectItemTransition
+import dev.sasikanth.rss.reader.utils.LocalAmoledSetting
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.ShortcutHandler
 import dev.sasikanth.rss.reader.utils.iosBottomSafeAreaPadding
-import dev.snipme.highlights.Highlights
-import dev.snipme.highlights.model.SyntaxThemes
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.StateFlow
@@ -163,6 +174,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import org.intellij.markdown.MarkdownTokenTypes
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -171,6 +183,17 @@ import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.readerCollapseScreen
 import twine.shared.generated.resources.readerExpandScreen
 import twine.shared.generated.resources.readerPageCount
+
+private val ReaderActionsPanelShape = RoundedCornerShape(36.dp)
+private val PanelDarkMaterialColorScheme = darkColorScheme()
+private val RecoilSpringSpec =
+  spring<Float>(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
+private val PanelSizeTransformSpec =
+  spring<IntSize>(
+    dampingRatio = Spring.DampingRatioLowBouncy,
+    stiffness = Spring.StiffnessMediumLow,
+    visibilityThreshold = IntSize.VisibilityThreshold,
+  )
 
 @OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
 @Composable
@@ -223,9 +246,7 @@ internal fun ReaderScreen(
   var initialPageRestored by rememberSaveable { mutableStateOf(false) }
   var initialTargetPage by rememberSaveable { mutableStateOf<Int?>(null) }
   val navTransition = LocalNavAnimatedContentScopeOrNull.current?.transition
-  var hasInitialTransitionSettled by remember {
-    mutableStateOf(showCloseNavIcon || navTransition == null || !navTransition.isTransitioning)
-  }
+  var hasInitialTransitionSettled by remember { mutableStateOf(false) }
   var anchoredPostId by rememberSaveable {
     mutableStateOf(initialPostId.takeIf { it.isNotBlank() })
   }
@@ -252,87 +273,107 @@ internal fun ReaderScreen(
 
   LaunchedEffect(navTransition, showCloseNavIcon, pagerState) {
     if (!hasInitialTransitionSettled) {
-      if (showCloseNavIcon || navTransition == null) {
-        hasInitialTransitionSettled = true
-      } else {
+      if (showCloseNavIcon) {
+        withTimeoutOrNull(300.milliseconds) {
+          snapshotFlow { pagerState.isScrollInProgress }.first { it }
+        }
+      } else if (navTransition != null && navTransition.isTransitioning) {
         snapshotFlow { !navTransition.isTransitioning || pagerState.isScrollInProgress }
           .first { it }
-        hasInitialTransitionSettled = true
+      } else {
+        withTimeoutOrNull(300.milliseconds) {
+          snapshotFlow {
+              (navTransition != null && navTransition.isTransitioning) ||
+                pagerState.isScrollInProgress
+            }
+            .first { it }
+        }
+        if (
+          navTransition != null && navTransition.isTransitioning && !pagerState.isScrollInProgress
+        ) {
+          snapshotFlow { !navTransition.isTransitioning || pagerState.isScrollInProgress }
+            .first { it }
+        }
       }
+      hasInitialTransitionSettled = true
     }
   }
 
-  LaunchedEffect(hasInitialTransitionSettled) {
+  SideEffect(hasInitialTransitionSettled) {
     if (hasInitialTransitionSettled) {
       viewModel.dispatch(ReaderEvent.OnInitialTransitionSettled)
     }
   }
 
   LaunchedEffect(pagerState, posts) {
-    snapshotFlow { pagerState.settledPage }
-      .collect { page ->
-        if (!initialPageRestored) return@collect
-        val postAtPage = runCatching { posts.peek(page) }.getOrNull() ?: return@collect
-        if (
-          anchoredPostId == initialPostId &&
-            page == initialTargetPage &&
-            postAtPage.id != initialPostId
-        ) {
-          return@collect
+    launch {
+      snapshotFlow { pagerState.settledPage }
+        .collect { page ->
+          if (!initialPageRestored) return@collect
+          val postAtPage = runCatching { posts.peek(page) }.getOrNull() ?: return@collect
+          if (
+            anchoredPostId == initialPostId &&
+              page == initialTargetPage &&
+              postAtPage.id != initialPostId
+          ) {
+            return@collect
+          }
+          anchoredPostId = postAtPage.id
         }
-        anchoredPostId = postAtPage.id
-      }
-  }
+    }
 
-  LaunchedEffect(pagerState, posts) {
-    snapshotFlow {
-        val page = pagerState.currentPage
-        Triple(page, posts.itemCount, runCatching { posts.peek(page) }.getOrNull()?.id)
-      }
-      .collect { (page, itemCount, postIdAtPage) ->
-        val anchor = anchoredPostId
-        if (
-          !initialPageRestored ||
-            anchor == null ||
-            postIdAtPage == null ||
-            postIdAtPage == anchor ||
-            pagerState.isScrollInProgress
-        ) {
-          return@collect
+    launch {
+      snapshotFlow {
+          val page = pagerState.currentPage
+          Triple(page, posts.itemCount, runCatching { posts.peek(page) }.getOrNull()?.id)
         }
+        .collect { (page, itemCount, postIdAtPage) ->
+          val anchor = anchoredPostId
+          if (
+            !initialPageRestored ||
+              anchor == null ||
+              postIdAtPage == null ||
+              postIdAtPage == anchor ||
+              pagerState.isScrollInProgress
+          ) {
+            return@collect
+          }
 
-        val anchorIndex =
-          posts.indexOfPostNear(postId = anchor, page = page, itemCount = itemCount)
-            ?: posts.indexOfPost(postId = anchor, itemCount = itemCount)
-        if (anchorIndex != null && anchorIndex != page) {
-          pagerState.scrollToPage(anchorIndex)
-        }
-      }
-  }
-
-  // Publish the active post from the settled page rather than per-page visibility:
-  // onVisibilityChanged ignores parent clipping, so in a split layout the pager's
-  // beyond-viewport neighbor overlaps the list pane and falsely reports as visible.
-  // The debounce keeps the initial page-restore scroll from publishing page 0.
-  LaunchedEffect(pagerState, posts) {
-    snapshotFlow { pagerState.settledPage to posts.itemCount }
-      .debounce(250.milliseconds)
-      .collect { (page, itemCount) ->
-        if (page in 0 until itemCount) {
-          val readerPost = runCatching { posts.peek(page) }.getOrNull()
-          if (readerPost != null) {
-            viewModel.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
+          val anchorIndex =
+            posts.indexOfPostNear(postId = anchor, page = page, itemCount = itemCount)
+              ?: posts.indexOfPost(postId = anchor, itemCount = itemCount)
+          if (anchorIndex != null && anchorIndex != page) {
+            pagerState.scrollToPage(anchorIndex)
           }
         }
-      }
+    }
+
+    // Publish the active post from the settled page rather than per-page visibility:
+    // onVisibilityChanged ignores parent clipping, so in a split layout the pager's
+    // beyond-viewport neighbor overlaps the list pane and falsely reports as visible.
+    // The debounce keeps the initial page-restore scroll from publishing page 0.
+    launch {
+      snapshotFlow { pagerState.settledPage to posts.itemCount }
+        .debounce(250.milliseconds)
+        .collect { (page, itemCount) ->
+          if (page in 0 until itemCount) {
+            val readerPost = runCatching { posts.peek(page) }.getOrNull()
+            if (readerPost != null) {
+              viewModel.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
+            }
+          }
+        }
+    }
   }
 
   // In a split layout the list pane keeps the app theme, so article-based dynamic colors
   // in the reader pane would clash with it.
   val isDynamicColorEnabled =
     state.selectedThemeVariant == ThemeVariant.Dynamic && !showCloseNavIcon
-  val settledPost = runCatching { posts.peek(pagerState.settledPage) }.getOrNull()
-  val isSettledPostLoaded = settledPost != null
+  val isSettledPostLoaded by
+    remember(pagerState, posts) {
+      derivedStateOf { runCatching { posts.peek(pagerState.settledPage) }.getOrNull() != null }
+    }
 
   LaunchedEffect(isDynamicColorEnabled, shouldBlockImage, articleDynamicColorState) {
     if (!isDynamicColorEnabled || shouldBlockImage) {
@@ -341,29 +382,40 @@ internal fun ReaderScreen(
   }
 
   LaunchedEffect(
-    pagerState.settledPage,
-    posts.itemCount,
-    isSettledPostLoaded,
+    pagerState,
+    posts,
     isDynamicColorEnabled,
     shouldBlockImage,
     hasInitialTransitionSettled,
   ) {
-    if (!isDynamicColorEnabled || shouldBlockImage || posts.itemCount == 0) return@LaunchedEffect
+    if (!isDynamicColorEnabled || shouldBlockImage) return@LaunchedEffect
 
-    val settledPage = pagerState.settledPage
-    val pageRange =
-      if (hasInitialTransitionSettled) {
-        (settledPage - 1).coerceAtLeast(0)..(settledPage + 1).coerceAtMost(posts.itemCount - 1)
-      } else {
-        settledPage.coerceIn(0, posts.itemCount - 1)..settledPage.coerceIn(0, posts.itemCount - 1)
+    snapshotFlow {
+        val itemCount = posts.itemCount
+        val settledPage = pagerState.settledPage
+        val loaded = runCatching { posts.peek(settledPage) }.getOrNull() != null
+        Triple(settledPage, itemCount, loaded)
       }
+      .distinctUntilChanged()
+      .collect { (settledPage, itemCount, _) ->
+        if (itemCount == 0) return@collect
+        val pageRange =
+          if (hasInitialTransitionSettled) {
+            (settledPage - 1).coerceAtLeast(0)..(settledPage + 1).coerceAtMost(itemCount - 1)
+          } else {
+            settledPage.coerceIn(0, itemCount - 1)..settledPage.coerceIn(0, itemCount - 1)
+          }
 
-    for (page in pageRange) {
-      val imageUrl = runCatching { posts.peek(page) }.getOrNull()?.imageUrl
-      if (!imageUrl.isNullOrBlank()) {
-        launch { seedColorExtractor.calculateSeedColor(url = imageUrl) }
+        for (page in pageRange) {
+          val post = runCatching { posts.peek(page) }.getOrNull()
+          if (post?.seedColor == null) {
+            val imageUrl = post?.imageUrl
+            if (!imageUrl.isNullOrBlank()) {
+              launch { seedColorExtractor.calculateSeedColor(url = imageUrl) }
+            }
+          }
+        }
       }
-    }
   }
 
   pagerState.CollectItemTransition(
@@ -384,10 +436,12 @@ internal fun ReaderScreen(
       val fromUrl = fromItem?.imageUrl
       val toUrl = toItem?.imageUrl
       val fromSeedColor =
-        seedColorExtractor.cachedSeedColor(url = fromUrl)
+        fromItem?.seedColor?.let { Color(it) }
+          ?: seedColorExtractor.cachedSeedColor(url = fromUrl)
           ?: seedColorExtractor.calculateSeedColor(url = fromUrl)
       val toSeedColor =
-        seedColorExtractor.cachedSeedColor(url = toUrl)
+        toItem?.seedColor?.let { Color(it) }
+          ?: seedColorExtractor.cachedSeedColor(url = toUrl)
           ?: seedColorExtractor.calculateSeedColor(url = toUrl)
 
       articleDynamicColorState.animate(
@@ -397,20 +451,21 @@ internal fun ReaderScreen(
       )
     }
   }
-  LaunchedEffect(state.openPaywall) {
+
+  SideEffect(state.openPaywall) {
     if (state.openPaywall) {
       openPaywall()
       viewModel.dispatch(ReaderEvent.MarkOpenPaywallDone)
     }
   }
 
-  LaunchedEffect(exitScreen) {
+  SideEffect(exitScreen) {
     if (exitScreen) {
       onBack()
     }
   }
 
-  LaunchedEffect(posts.itemCount, posts.loadState.refresh) {
+  SideEffect(posts.itemCount, posts.loadState.refresh) {
     if (posts.itemCount == 0 && posts.loadState.refresh is NotLoading) {
       onBack()
     }
@@ -429,7 +484,7 @@ internal fun ReaderScreen(
       state.selectedThemeVariant.isDark(isParentThemeDark)
     }
 
-  LaunchedEffect(isDarkTheme) {
+  SideEffect(isDarkTheme) {
     toggleLightStatusBar(!isDarkTheme)
     toggleLightNavBar(!isDarkTheme)
   }
@@ -533,8 +588,9 @@ internal fun ReaderScreen(
         }
       }
 
+      val colorScheme = AppTheme.colorScheme
       Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().drawBehind { drawRect(colorScheme.backdrop) },
         topBar = {
           CenterAlignedTopAppBar(
             expandedHeight = 72.dp,
@@ -554,40 +610,7 @@ internal fun ReaderScreen(
                 onClick = onBack,
               )
             },
-            title = {
-              if (pagerState.pageCount > 1) {
-                val pageIndicatorState = remember {
-                  object : PageIndicatorState {
-                    override val pageOffset: Float
-                      get() = pagerState.currentPageOffsetFraction
-
-                    override val selectedPage: Int
-                      get() = pagerState.currentPage
-
-                    override val pageCount: Int
-                      get() = pagerState.pageCount
-                  }
-                }
-
-                Column(
-                  horizontalAlignment = Alignment.CenterHorizontally,
-                  verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                  Text(
-                    text =
-                      stringResource(
-                        Res.string.readerPageCount,
-                        pagerState.currentPage + 1,
-                        pagerState.pageCount,
-                      ),
-                    color = AppTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.labelSmall,
-                  )
-
-                  HorizontalPageIndicators(pageIndicatorState = pageIndicatorState)
-                }
-              }
-            },
+            title = { ReaderTopBarTitle(pagerState = pagerState) },
             actions = {
               if (toggleReaderPaneExpanded != null) {
                 CircularIconButton(
@@ -613,7 +636,7 @@ internal fun ReaderScreen(
           )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        containerColor = AppTheme.colorScheme.backdrop,
+        containerColor = Color.Transparent,
         contentColor = Color.Unspecified,
       ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
@@ -626,18 +649,22 @@ internal fun ReaderScreen(
               700.dp
             }
 
+          val topInset = paddingValues.calculateTopPadding()
+          val panelBottomInset = readerActionsPanelBottomInset()
           val readerContentPadding =
-            PaddingValues(
-              top = paddingValues.calculateTopPadding(),
-              bottom = readerActionsPanelBottomInset() + READER_ACTIONS_PANEL_COLLAPSED_HEIGHT,
-            )
-
-          val highlightsBuilder =
-            remember(isDarkTheme) {
-              Highlights.Builder().theme(SyntaxThemes.atom(darkMode = isDarkTheme))
+            remember(topInset, panelBottomInset) {
+              PaddingValues(
+                top = topInset,
+                bottom = panelBottomInset + READER_ACTIONS_PANEL_COLLAPSED_HEIGHT,
+              )
             }
+          val startInset = paddingValues.calculateStartPadding(layoutDirection)
+          val endInset = paddingValues.calculateEndPadding(layoutDirection)
+          val pagerContentPadding =
+            remember(startInset, endInset) { PaddingValues(start = startInset, end = endInset) }
+
           val markdownComponents =
-            remember(isDarkTheme, highlightsBuilder) {
+            remember(isDarkTheme) {
               markdownComponents(
                 text = { cm ->
                   SafeMarkdownText(
@@ -696,18 +723,18 @@ internal fun ReaderScreen(
                 },
                 table = { cm -> ReaderMarkdownTable(cm) },
                 codeBlock = { cm ->
-                  MarkdownHighlightedCodeBlock(
+                  SafeMarkdownHighlightedCodeBlock(
                     content = cm.content,
                     node = cm.node,
-                    highlightsBuilder = highlightsBuilder,
+                    isDarkTheme = isDarkTheme,
                     showHeader = true,
                   )
                 },
                 codeFence = { cm ->
-                  MarkdownHighlightedCodeFence(
+                  SafeMarkdownHighlightedCodeFence(
                     content = cm.content,
                     node = cm.node,
-                    highlightsBuilder = highlightsBuilder,
+                    isDarkTheme = isDarkTheme,
                     showHeader = true,
                   )
                 },
@@ -724,11 +751,7 @@ internal fun ReaderScreen(
               state = pagerState,
               overscrollEffect = null,
               beyondViewportPageCount = if (hasInitialTransitionSettled) 1 else 0,
-              contentPadding =
-                PaddingValues(
-                  start = paddingValues.calculateStartPadding(layoutDirection),
-                  end = paddingValues.calculateEndPadding(layoutDirection),
-                ),
+              contentPadding = pagerContentPadding,
               key = {
                 runCatching {
                     val post = posts.peek(it)
@@ -782,69 +805,140 @@ internal fun ReaderScreen(
             )
           }
 
-          if (settledPost != null) {
-            val settledPageViewModel = pageViewModelFactory.invoke(settledPost)
-            val showFullArticle by
-              settledPageViewModel.showFullArticle.collectAsStateWithLifecycle()
-
-            ReaderActionsPanel(
-              modifier = Modifier.align(Alignment.BottomCenter),
-              isParentThemeDark = isParentThemeDark,
-              isDarkTheme = isDarkTheme,
-              loadFullArticle = showFullArticle,
-              videoLink = settledPageViewModel.videoLink,
-              panelContent = state.panelContent,
-              isAudioPost = !settledPost.audioUrl.isNullOrBlank(),
-              isAudioPlayerAvailable = settledPageViewModel.audioPlayer.isAvailable,
-              playbackState = viewModel.playbackState,
-              settledPostId = settledPost.id,
-              selectedFont = state.selectedReaderFont,
-              selectedThemeVariant = state.selectedThemeVariant,
-              fontScaleFactor = state.readerFontScaleFactor,
-              fontLineHeightFactor = state.readerLineHeightScaleFactor,
-              isSubscribed = state.isSubscribed,
-              overriddenColorScheme = overriddenDarkColorScheme,
-              openInBrowserClick = {
-                coroutineScope.launch { linkHandler.openLink(settledPost.link) }
-              },
-              loadFullArticleClick = { settledPageViewModel.toggleFullArticle() },
-              watchVideoClick = {
-                val videoLink = settledPageViewModel.videoLink
-                if (videoLink != null) {
-                  coroutineScope.launch { linkHandler.openLink(videoLink) }
-                }
-              },
-              openReaderViewSettings = {
-                viewModel.dispatch(ReaderEvent.ShowPanelContent(ReaderPanelContent.Customizations))
-              },
-              openPlayer = {
-                viewModel.dispatch(ReaderEvent.ShowPanelContent(ReaderPanelContent.Player))
-              },
-              collapsePanel = { viewModel.dispatch(ReaderEvent.CollapsePanel) },
-              onPlayClick = { settledPageViewModel.playAudio() },
-              onPauseClick = viewModel::pauseAudio,
-              onResumeClick = viewModel::resumeAudio,
-              onSeek = viewModel::seekAudio,
-              onSeekForward = viewModel::seekForward,
-              onSeekBackward = viewModel::seekBackward,
-              onPlaybackSpeedChange = viewModel::setPlaybackSpeed,
-              onSleepTimerOptionSelected = viewModel::setSleepTimer,
-              onFontChange = { font -> viewModel.dispatch(ReaderEvent.UpdateReaderFont(font)) },
-              onThemeVariantChange = { themeVariant ->
-                viewModel.dispatch(ReaderEvent.UpdateThemeVariant(themeVariant))
-              },
-              onFontScaleFactorChange = { fontScaleFactor ->
-                viewModel.dispatch(ReaderEvent.UpdateFontScaleFactor(fontScaleFactor))
-              },
-              onFontLineHeightFactorChange = { fontLineHeightFactor ->
-                viewModel.dispatch(ReaderEvent.UpdateFontLineHeightFactor(fontLineHeightFactor))
-              },
-            )
-          }
+          ReaderSettledActionsPanel(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            pagerState = pagerState,
+            posts = posts,
+            pageViewModelFactory = pageViewModelFactory,
+            viewModel = viewModel,
+            isParentThemeDark = isParentThemeDark,
+            isDarkTheme = isDarkTheme,
+            panelContent = state.panelContent,
+            selectedFont = state.selectedReaderFont,
+            selectedThemeVariant = state.selectedThemeVariant,
+            fontScaleFactor = state.readerFontScaleFactor,
+            fontLineHeightFactor = state.readerLineHeightScaleFactor,
+            isSubscribed = state.isSubscribed,
+            overriddenDarkColorScheme = overriddenDarkColorScheme,
+          )
         }
       }
     }
   }
+}
+
+@Composable
+private fun ReaderTopBarTitle(pagerState: PagerState) {
+  if (pagerState.pageCount <= 1) return
+
+  val pageIndicatorState =
+    remember(pagerState) {
+      object : PageIndicatorState {
+        override val pageOffset: Float
+          get() = pagerState.currentPageOffsetFraction
+
+        override val selectedPage: Int
+          get() = pagerState.currentPage
+
+        override val pageCount: Int
+          get() = pagerState.pageCount
+      }
+    }
+  val colorScheme = AppTheme.colorScheme
+  val textColorProducer = remember(colorScheme) { ColorProducer { colorScheme.onSurfaceVariant } }
+
+  Column(
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.spacedBy(4.dp),
+  ) {
+    ReaderPageCountLabel(pagerState = pagerState, colorProducer = textColorProducer)
+
+    HorizontalPageIndicators(pageIndicatorState = pageIndicatorState)
+  }
+}
+
+@Composable
+private fun ReaderPageCountLabel(pagerState: PagerState, colorProducer: ColorProducer) {
+  BasicText(
+    text =
+      stringResource(Res.string.readerPageCount, pagerState.currentPage + 1, pagerState.pageCount),
+    style = MaterialTheme.typography.labelSmall,
+    color = colorProducer,
+  )
+}
+
+@Composable
+private fun ReaderSettledActionsPanel(
+  pagerState: PagerState,
+  posts: LazyPagingItems<ResolvedPost>,
+  pageViewModelFactory: @Composable (ResolvedPost) -> ReaderPageViewModel,
+  viewModel: ReaderViewModel,
+  isParentThemeDark: Boolean,
+  isDarkTheme: Boolean,
+  panelContent: ReaderPanelContent,
+  selectedFont: ReaderFont,
+  selectedThemeVariant: ThemeVariant,
+  fontScaleFactor: Float,
+  fontLineHeightFactor: Float,
+  isSubscribed: Boolean,
+  overriddenDarkColorScheme: AppColorScheme?,
+  modifier: Modifier = Modifier,
+) {
+  val settledPost = runCatching { posts.peek(pagerState.settledPage) }.getOrNull() ?: return
+  val settledPageViewModel = pageViewModelFactory.invoke(settledPost)
+  val showFullArticle by settledPageViewModel.showFullArticle.collectAsStateWithLifecycle()
+  val linkHandler = LocalLinkHandler.current
+  val coroutineScope = rememberCoroutineScope()
+
+  ReaderActionsPanel(
+    modifier = modifier,
+    isParentThemeDark = isParentThemeDark,
+    isDarkTheme = isDarkTheme,
+    loadFullArticle = showFullArticle,
+    videoLink = settledPageViewModel.videoLink,
+    panelContent = panelContent,
+    isAudioPost = !settledPost.audioUrl.isNullOrBlank(),
+    isAudioPlayerAvailable = settledPageViewModel.audioPlayer.isAvailable,
+    playbackState = viewModel.playbackState,
+    settledPostId = settledPost.id,
+    selectedFont = selectedFont,
+    selectedThemeVariant = selectedThemeVariant,
+    fontScaleFactor = fontScaleFactor,
+    fontLineHeightFactor = fontLineHeightFactor,
+    isSubscribed = isSubscribed,
+    overriddenColorScheme = overriddenDarkColorScheme,
+    openInBrowserClick = { coroutineScope.launch { linkHandler.openLink(settledPost.link) } },
+    loadFullArticleClick = { settledPageViewModel.toggleFullArticle() },
+    watchVideoClick = {
+      val videoLink = settledPageViewModel.videoLink
+      if (videoLink != null) {
+        coroutineScope.launch { linkHandler.openLink(videoLink) }
+      }
+    },
+    openReaderViewSettings = {
+      viewModel.dispatch(ReaderEvent.ShowPanelContent(ReaderPanelContent.Customizations))
+    },
+    openPlayer = { viewModel.dispatch(ReaderEvent.ShowPanelContent(ReaderPanelContent.Player)) },
+    collapsePanel = { viewModel.dispatch(ReaderEvent.CollapsePanel) },
+    onPlayClick = { settledPageViewModel.playAudio() },
+    onPauseClick = viewModel::pauseAudio,
+    onResumeClick = viewModel::resumeAudio,
+    onSeek = viewModel::seekAudio,
+    onSeekForward = viewModel::seekForward,
+    onSeekBackward = viewModel::seekBackward,
+    onPlaybackSpeedChange = viewModel::setPlaybackSpeed,
+    onSleepTimerOptionSelected = viewModel::setSleepTimer,
+    onFontChange = { font -> viewModel.dispatch(ReaderEvent.UpdateReaderFont(font)) },
+    onThemeVariantChange = { themeVariant ->
+      viewModel.dispatch(ReaderEvent.UpdateThemeVariant(themeVariant))
+    },
+    onFontScaleFactorChange = { fontScaleFactor ->
+      viewModel.dispatch(ReaderEvent.UpdateFontScaleFactor(fontScaleFactor))
+    },
+    onFontLineHeightFactorChange = { fontLineHeightFactor ->
+      viewModel.dispatch(ReaderEvent.UpdateFontLineHeightFactor(fontLineHeightFactor))
+    },
+  )
 }
 
 @Composable
@@ -890,15 +984,14 @@ private fun ReaderActionsPanel(
     modifier = Modifier.fillMaxWidth().wrapContentHeight().then(modifier),
     contentAlignment = Alignment.BottomCenter,
   ) {
-    val (shadowColor1, shadowColor2) =
+    val (spotShadowColor, ambientShadowColor) =
       remember(isDarkTheme) {
         if (isDarkTheme) {
-          Pair(Color.Black.copy(alpha = 0.6f), Color.Black.copy(alpha = 0.24f))
+          Pair(Color.Black.copy(alpha = 0.85f), Color.Black.copy(alpha = 0.4f))
         } else {
-          Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))
+          Pair(Color.Black.copy(alpha = 0.65f), Color.Black.copy(alpha = 0.28f))
         }
       }
-    val backgroundShape = RoundedCornerShape(36.dp)
 
     val density = LocalDensity.current
     val recoil = remember { Animatable(0f) }
@@ -912,19 +1005,22 @@ private fun ReaderActionsPanel(
 
       val impulse = with(density) { READER_ACTIONS_PANEL_RECOIL.toPx() }
       recoil.snapTo(if (isPanelExpanded) impulse else -impulse)
-      recoil.animateTo(
-        targetValue = 0f,
-        animationSpec =
-          spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
-      )
+      recoil.animateTo(targetValue = 0f, animationSpec = RecoilSpringSpec)
     }
 
     Box(
       modifier =
-        Modifier.graphicsLayer { translationY = recoil.value }
-          .padding(bottom = readerActionsPanelBottomInset())
+        Modifier.padding(bottom = readerActionsPanelBottomInset())
           .padding(horizontal = 16.dp)
           .widthIn(max = 640.dp)
+          .graphicsLayer {
+            translationY = recoil.value
+            shadowElevation = 16.dp.toPx()
+            shape = ReaderActionsPanelShape
+            clip = true
+            this.ambientShadowColor = ambientShadowColor
+            this.spotShadowColor = spotShadowColor
+          }
           .pointerInput(Unit) {}
           .pointerInput(panelContent, isAudioPost) {
             var dragTotal = 0f
@@ -944,30 +1040,21 @@ private fun ReaderActionsPanel(
               dragTotal += dragAmount
             }
           }
-          .dropShadow(shape = backgroundShape) {
-            offset = Offset(x = 0f, y = 16.dp.toPx())
-            radius = 32.dp.toPx()
-            color = shadowColor1
+          .drawWithCache {
+            val outline = ReaderActionsPanelShape.createOutline(size, layoutDirection, this)
+            val borderStroke = Stroke(width = 1.dp.toPx())
+            onDrawWithContent {
+              drawRect(colorScheme.bottomSheet)
+              drawContent()
+              drawOutline(
+                outline = outline,
+                color = colorScheme.bottomSheetBorder,
+                style = borderStroke,
+              )
+            }
           }
-          .dropShadow(shape = backgroundShape) {
-            offset = Offset(x = 0f, y = 4.dp.toPx())
-            radius = 8.dp.toPx()
-            color = shadowColor2
-          }
-          .clip(backgroundShape)
-          .drawBehind { drawRect(colorScheme.bottomSheet) }
-          .drawWithContent {
-            drawContent()
-            val outline = backgroundShape.createOutline(size, layoutDirection, this)
-            drawOutline(
-              outline = outline,
-              color = colorScheme.bottomSheetBorder,
-              style = Stroke(width = 1.dp.toPx()),
-            )
-          }
-          .graphicsLayer { clip = true }
     ) {
-      AppTheme(useDarkTheme = true, overriddenColorScheme = overriddenColorScheme) {
+      ReaderActionsPanelTheme(overriddenColorScheme = overriddenColorScheme) {
         AnimatedContent(
           modifier = Modifier.requiredHeightIn(min = READER_ACTIONS_PANEL_COLLAPSED_HEIGHT),
           contentAlignment = Alignment.BottomCenter,
@@ -975,13 +1062,7 @@ private fun ReaderActionsPanel(
           transitionSpec = {
             fadeIn(tween(durationMillis = 220, delayMillis = 90)) togetherWith
               fadeOut(tween(durationMillis = 90)) using
-              SizeTransform { _, _ ->
-                spring(
-                  dampingRatio = Spring.DampingRatioLowBouncy,
-                  stiffness = Spring.StiffnessMediumLow,
-                  visibilityThreshold = IntSize.VisibilityThreshold,
-                )
-              }
+              SizeTransform { _, _ -> PanelSizeTransformSpec }
           },
         ) { targetState ->
           when (targetState) {
@@ -1039,6 +1120,90 @@ private fun ReaderActionsPanel(
 }
 
 @Composable
+private fun ReaderActionsPanelTheme(
+  overriddenColorScheme: AppColorScheme?,
+  content: @Composable () -> Unit,
+) {
+  val useAmoled = LocalAmoledSetting.current
+  val dynamicColorState = LocalDynamicColorState.current
+  val sourceColorScheme = overriddenColorScheme ?: dynamicColorState.darkAppColorScheme
+  val colorScheme =
+    if (!useAmoled) {
+      sourceColorScheme
+    } else {
+      val amoledColorScheme =
+        remember(sourceColorScheme) {
+          val initialValues = sourceColorScheme.peekValues()
+          AppColorScheme(initialValues).apply {
+            updateFromWithAnimationState(
+              values = initialValues,
+              amoled = true,
+              isAnimating = sourceColorScheme.isAnimating,
+            )
+          }
+        }
+
+      SideEffect {
+        amoledColorScheme.updateFromWithAnimationState(
+          values = sourceColorScheme.peekValues(),
+          amoled = true,
+          isAnimating = sourceColorScheme.isAnimating,
+        )
+      }
+
+      DisposableEffect(sourceColorScheme, amoledColorScheme) {
+        val disposeObserver =
+          sourceColorScheme.observeValues { values, isAnimating ->
+            amoledColorScheme.updateFromWithAnimationState(
+              values = values,
+              amoled = true,
+              isAnimating = isAnimating,
+            )
+          }
+        onDispose { disposeObserver() }
+      }
+
+      amoledColorScheme
+    }
+
+  val localTranslucentStyles =
+    remember(colorScheme) {
+      TranslucentStyles(
+        default =
+          TranslucentStyle(
+            backgroundGetter = { colorScheme.onSurface.copy(alpha = 0.08f) },
+            foregroundGetter = { colorScheme.onSurface },
+            outlineGetter = { colorScheme.onSurface.copy(alpha = 0.16f) },
+          ),
+        prominent =
+          TranslucentStyle(
+            backgroundGetter = { colorScheme.onSurface.copy(alpha = 0.16f) },
+            foregroundGetter = { colorScheme.onSurface },
+            outlineGetter = { colorScheme.onSurface.copy(alpha = 0.16f) },
+          ),
+      )
+    }
+
+  @Suppress("DEPRECATION")
+  val rippleConfiguration =
+    remember(colorScheme.settledSecondary) {
+      RippleConfiguration(color = colorScheme.settledSecondary, rippleAlpha = DefaultRippleAlpha)
+    }
+
+  CompositionLocalProvider(LocalIsDarkTheme provides true) {
+    MaterialTheme(colorScheme = PanelDarkMaterialColorScheme, typography = DefaultTypography) {
+      CompositionLocalProvider(
+        LocalAppColorScheme provides colorScheme,
+        LocalRippleConfiguration provides rippleConfiguration,
+        LocalTranslucentStyles provides localTranslucentStyles,
+      ) {
+        content()
+      }
+    }
+  }
+}
+
+@Composable
 private fun ReaderPanelActions(
   overriddenColorScheme: AppColorScheme?,
   loadFullArticle: Boolean,
@@ -1055,20 +1220,17 @@ private fun ReaderPanelActions(
   onPauseClick: () -> Unit,
   onResumeClick: () -> Unit,
 ) {
+  val initialFlags =
+    remember(playbackState, settledPostId) {
+      playbackState.value.toReaderPlaybackFlags(settledPostId)
+    }
   val flags by
     remember(playbackState, settledPostId) {
         playbackState
-          .map { state ->
-            val isSettledPostLoaded = state.playingPostId == settledPostId
-            ReaderPlaybackFlags(
-              isSettledPostLoaded = isSettledPostLoaded,
-              isPlaying = isSettledPostLoaded && state.isPlaying,
-              isBuffering = isSettledPostLoaded && state.buffering,
-            )
-          }
+          .map { state -> state.toReaderPlaybackFlags(settledPostId) }
           .distinctUntilChanged()
       }
-      .collectAsStateWithLifecycle(ReaderPlaybackFlags())
+      .collectAsStateWithLifecycle(initialFlags)
 
   if (isAudioPost) {
     ReaderAudioBottomBar(
@@ -1111,6 +1273,18 @@ private data class ReaderPlaybackFlags(
   val isBuffering: Boolean = false,
 )
 
+private fun PlaybackState.toReaderPlaybackFlags(settledPostId: String): ReaderPlaybackFlags {
+  val isSettledPostLoaded = playingPostId == settledPostId
+  return ReaderPlaybackFlags(
+    isSettledPostLoaded = isSettledPostLoaded,
+    isPlaying = isSettledPostLoaded && isPlaying,
+    isBuffering = isSettledPostLoaded && buffering,
+  )
+}
+
+private fun PlaybackState.toSelectedSleepTimerOption(settledPostId: String): SleepTimerOption =
+  if (playingPostId == settledPostId) selectedSleepTimerOption else SleepTimerOption.None
+
 @Composable
 private fun ReaderPanelPlayer(
   playbackState: StateFlow<PlaybackState>,
@@ -1124,21 +1298,21 @@ private fun ReaderPanelPlayer(
   onPlaybackSpeedChange: (Float) -> Unit,
   onSleepTimerOptionSelected: (SleepTimerOption) -> Unit,
 ) {
-  val playerState by playbackState.collectAsStateWithLifecycle(PlaybackState.Idle)
   var showSleepTimerSheet by remember { mutableStateOf(false) }
-  val isSettledPostLoaded = playerState.playingPostId == settledPostId
-  val currentPlaybackState = if (isSettledPostLoaded) playerState else PlaybackState.Idle
 
   MediaControls(
-    playbackState = currentPlaybackState,
-    onPlayClick = { if (isSettledPostLoaded) onResumeClick() else onPlayClick() },
+    playbackStateFlow = playbackState,
+    settledPostId = settledPostId,
+    onPlayClick = {
+      if (playbackState.value.playingPostId == settledPostId) onResumeClick() else onPlayClick()
+    },
     onPauseClick = onPauseClick,
     onSeek = onSeek,
     onSeekForward = onSeekForward,
     onSeekBackward = onSeekBackward,
-    onPlaybackSpeedChange = {
+    onPlaybackSpeedChange = { currentSpeed ->
       val newSpeed =
-        when (currentPlaybackState.playbackSpeed) {
+        when (currentSpeed) {
           0.5f -> 1.0f
           1.0f -> 1.5f
           1.5f -> 2.0f
@@ -1151,8 +1325,20 @@ private fun ReaderPanelPlayer(
   )
 
   if (showSleepTimerSheet) {
+    val initialSelectedOption =
+      remember(playbackState, settledPostId) {
+        playbackState.value.toSelectedSleepTimerOption(settledPostId)
+      }
+    val selectedOption by
+      remember(playbackState, settledPostId) {
+          playbackState
+            .map { state -> state.toSelectedSleepTimerOption(settledPostId) }
+            .distinctUntilChanged()
+        }
+        .collectAsStateWithLifecycle(initialSelectedOption)
+
     SleepTimerBottomSheet(
-      playbackState = currentPlaybackState,
+      selectedOption = selectedOption,
       onOptionSelected = {
         onSleepTimerOptionSelected(it)
         showSleepTimerSheet = false

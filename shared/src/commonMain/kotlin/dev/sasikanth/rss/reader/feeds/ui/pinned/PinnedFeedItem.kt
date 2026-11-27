@@ -16,7 +16,6 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui.pinned
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.requiredSize
@@ -26,11 +25,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.UnreadBadge
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.ui.AppTheme
+
+private val PinnedFeedIconShape = RoundedCornerShape(25)
 
 @Composable
 internal fun PinnedFeedItem(
@@ -45,6 +51,7 @@ internal fun PinnedFeedItem(
   selected: Boolean = false,
   isDragging: Boolean = false,
 ) {
+  val colorScheme = AppTheme.colorScheme
   Box(
     modifier =
       modifier.size(64.dp).graphicsLayer {
@@ -52,8 +59,6 @@ internal fun PinnedFeedItem(
       },
     contentAlignment = Alignment.Center,
   ) {
-    val feedIconShape = RoundedCornerShape(25)
-
     FeedIcon(
       icon = feedIconUrl,
       homepageLink = homePageUrl,
@@ -61,14 +66,27 @@ internal fun PinnedFeedItem(
       contentDescription = null,
       modifier =
         Modifier.requiredSize(48.dp)
-          .clip(feedIconShape)
-          .clickable(enabled = !isDragging, onClick = onClick),
-    )
-
-    Box(
-      modifier =
-        Modifier.requiredSize(48.dp)
-          .border(1.dp, AppTheme.colorScheme.outlineVariant, feedIconShape)
+          .clip(PinnedFeedIconShape)
+          .clickable(enabled = !isDragging, onClick = onClick)
+          .drawWithCache {
+            val strokeWidth = 1.dp.toPx()
+            val halfStroke = strokeWidth / 2f
+            val borderStroke = Stroke(width = strokeWidth)
+            val borderTopLeft = Offset(halfStroke, halfStroke)
+            val borderSize = Size(size.width - strokeWidth, size.height - strokeWidth)
+            val radius = (minOf(size.width, size.height) * 0.25f - halfStroke).coerceAtLeast(0f)
+            val borderCornerRadius = CornerRadius(radius, radius)
+            onDrawWithContent {
+              drawContent()
+              drawRoundRect(
+                color = colorScheme.outlineVariant,
+                topLeft = borderTopLeft,
+                size = borderSize,
+                cornerRadius = borderCornerRadius,
+                style = borderStroke,
+              )
+            }
+          },
     )
 
     if (!isDragging && badgeCount > 0 && canShowUnreadPostsCount) {

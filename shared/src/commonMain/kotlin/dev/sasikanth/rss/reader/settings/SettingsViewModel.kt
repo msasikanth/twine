@@ -40,6 +40,7 @@ import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.AudioMarkAsReadThreshold
 import dev.sasikanth.rss.reader.data.repository.BlockedWordsRepository
 import dev.sasikanth.rss.reader.data.repository.BrowserType
+import dev.sasikanth.rss.reader.data.repository.DebugSettingsRepository
 import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
@@ -59,6 +60,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -75,6 +77,7 @@ class SettingsViewModel(
   private val rssRepository: RssRepository,
   val appInfo: AppInfo,
   private val settingsRepository: SettingsRepository,
+  private val debugSettingsRepository: DebugSettingsRepository,
   private val userRepository: UserRepository,
   private val opmlManager: OpmlManager,
   private val billingHandler: BillingHandler,
@@ -264,6 +267,13 @@ class SettingsViewModel(
       }
       .onEach { defaultSource -> _state.update { it.copy(defaultSource = defaultSource) } }
       .launchIn(viewModelScope)
+
+    if (appInfo.isDebugBuild) {
+      debugSettingsRepository.subscriptionOverride
+        .drop(1)
+        .onEach { loadSubscriptionStatus() }
+        .launchIn(viewModelScope)
+    }
   }
 
   fun dispatch(event: SettingsEvent) {

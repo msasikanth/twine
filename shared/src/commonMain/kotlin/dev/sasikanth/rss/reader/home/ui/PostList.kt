@@ -21,6 +21,13 @@ import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
@@ -34,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
@@ -49,19 +57,22 @@ import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 private const val FEATURED_ITEMS_KEY = "featured_items"
 private const val POST_ITEM_CONTENT_TYPE = "post_item"
+private const val FADE_IN_DURATION = 220
+private const val FADE_OUT_DURATION = 160
+private const val WINDOW_HASH_OFFSET = -3750763034362895579L
+private const val WINDOW_HASH_PRIME = 1099511628211L
 
-private data class VisibleWindow(
-  val firstIndex: Int,
-  val lastIndex: Int,
-  val firstKey: Any?,
-  val lastKey: Any?,
-  val firstVisibleItemIndex: Int,
-)
+private val PostFadeInSpec = tween<Float>(durationMillis = FADE_IN_DURATION)
+private val PostPlacementSpec =
+  spring<IntOffset>(
+    stiffness = Spring.StiffnessMediumLow,
+    visibilityThreshold = IntOffset.VisibilityThreshold,
+  )
+private val PostFadeOutSpec = tween<Float>(durationMillis = FADE_OUT_DURATION)
 
 @OptIn(FlowPreview::class)
 @Composable
@@ -87,6 +98,7 @@ internal fun PostsList(
   modifier: Modifier = Modifier,
   activeReaderPostId: String? = null,
   selectedPostIndex: Int = -1,
+  onScrollStateChanged: (Boolean) -> Unit = {},
 ) {
   val itemAnimationsEnabled =
     rememberItemAnimationsEnabled(
@@ -100,6 +112,22 @@ internal fun PostsList(
   val listItemPadding = postListPadding
   val compactItemPadding = compactPostListPadding
   val blockImages = LocalBlockImage.current
+  val actionLabels = rememberPostActionLabels()
+  val layoutDirection = LocalLayoutDirection.current
+  val systemBars = WindowInsets.systemBars
+  val horizontalSystemBarsPadding =
+    remember(systemBars) { systemBars.only(WindowInsetsSides.Horizontal) }.asPaddingValues()
+  val startInset = horizontalSystemBarsPadding.calculateStartPadding(layoutDirection)
+  val endInset = horizontalSystemBarsPadding.calculateEndPadding(layoutDirection)
+  val effectiveListItemPadding =
+    remember(listItemPadding, startInset, endInset, layoutDirection) {
+      PaddingValues(
+        start = listItemPadding.calculateStartPadding(layoutDirection) + startInset,
+        top = listItemPadding.calculateTopPadding(),
+        end = listItemPadding.calculateEndPadding(layoutDirection) + endInset,
+        bottom = listItemPadding.calculateBottomPadding(),
+      )
+    }
 
   val topContentPadding =
     if (featuredPosts.isEmpty()) {
@@ -108,41 +136,55 @@ internal fun PostsList(
       0.dp
     }
 
-  LaunchedEffect(listState, featuredPosts, featuredPostsPagerState) {
-    // Snapshot only the boundaries of the visible window; layoutInfo changes on every
-    // scrolled pixel, and mapping every visible item per frame allocates heavily. The
-    // full key -> index map is built only when the visible item set actually changes.
-    snapshotFlow {
-        val visibleItemsInfo = listState.layoutInfo.visibleItemsInfo
-        VisibleWindow(
-          firstIndex = visibleItemsInfo.firstOrNull()?.index ?: -1,
-          lastIndex = visibleItemsInfo.lastOrNull()?.index ?: -1,
-          firstKey = visibleItemsInfo.firstOrNull()?.key,
-          lastKey = visibleItemsInfo.lastOrNull()?.key,
-          firstVisibleItemIndex = listState.firstVisibleItemIndex,
-        )
+  LaunchedEffect(listState, featuredPosts, featuredPostsPagerState, markAsReadOn) {
+    if (markAsReadOn != MarkAsReadOn.Scroll) {
+      onScrollStateChanged(false)
+      return@LaunchedEffect
+    }
+
+    try {
+      launch {
+        snapshotFlow { listState.isScrollInProgress }
+          .distinctUntilChanged()
+          .collect { onScrollStateChanged(it) }
       }
-      .distinctUntilChanged()
-      .onEach { window ->
-        val currentPage = featuredPostsPagerState.currentPage
-        val visibleItemsInfo = listState.layoutInfo.visibleItemsInfo
-        val visibleItems =
-          buildMap(visibleItemsInfo.size) {
-            visibleItemsInfo.fastForEach { itemInfo ->
-              val keyString = itemInfo.key as? String
-              when {
-                keyString.isNullOrBlank() -> Unit
-                keyString == FEATURED_ITEMS_KEY -> {
-                  val post = featuredPosts.getOrNull(currentPage)
-                  post?.resolvedPost?.id?.let { put(it, itemInfo.index) }
+
+      snapshotFlow {
+          val visibleItemsInfo = listState.layoutInfo.visibleItemsInfo
+          val firstItem = visibleItemsInfo.firstOrNull()
+          val lastItem = visibleItemsInfo.lastOrNull()
+          var hash = WINDOW_HASH_OFFSET
+          hash = (hash xor (firstItem?.index ?: -1).toLong()) * WINDOW_HASH_PRIME
+          hash = (hash xor (lastItem?.index ?: -1).toLong()) * WINDOW_HASH_PRIME
+          hash = (hash xor listState.firstVisibleItemIndex.toLong()) * WINDOW_HASH_PRIME
+          hash = (hash xor (firstItem?.key?.hashCode() ?: 0).toLong()) * WINDOW_HASH_PRIME
+          hash = (hash xor (lastItem?.key?.hashCode() ?: 0).toLong()) * WINDOW_HASH_PRIME
+          hash
+        }
+        .distinctUntilChanged()
+        .collect {
+          val currentPage = featuredPostsPagerState.currentPage
+          val visibleItemsInfo = listState.layoutInfo.visibleItemsInfo
+          val firstVisibleItemIndex = listState.firstVisibleItemIndex
+          val visibleItems =
+            buildMap(visibleItemsInfo.size) {
+              visibleItemsInfo.fastForEach { itemInfo ->
+                val keyString = itemInfo.key as? String
+                when {
+                  keyString.isNullOrBlank() -> Unit
+                  keyString == FEATURED_ITEMS_KEY -> {
+                    val post = featuredPosts.getOrNull(currentPage)
+                    post?.resolvedPost?.id?.let { put(it, itemInfo.index) }
+                  }
+                  else -> PostListKey.decodePostId(keyString)?.let { put(it, itemInfo.index) }
                 }
-                else -> PostListKey.decodePostId(keyString)?.let { put(it, itemInfo.index) }
               }
             }
-          }
-        onVisiblePostsChanged(visibleItems, window.firstVisibleItemIndex)
-      }
-      .launchIn(this)
+          onVisiblePostsChanged(visibleItems, firstVisibleItemIndex)
+        }
+    } finally {
+      onScrollStateChanged(false)
+    }
   }
 
   LazyColumn(
@@ -194,8 +236,10 @@ internal fun PostsList(
               updateReadStatus(post.id, updatedReadStatus)
             },
             reduceReadItemAlpha = true,
-            contentPadding = listItemPadding,
+            contentPadding = effectiveListItemPadding,
             blockImages = blockImages,
+            applyHorizontalSystemBarInsets = false,
+            actionLabels = actionLabels,
           )
         }
         HomeViewMode.Simple -> {
@@ -211,8 +255,10 @@ internal fun PostsList(
               updateReadStatus(post.id, updatedReadStatus)
             },
             reduceReadItemAlpha = true,
-            contentPadding = listItemPadding,
+            contentPadding = effectiveListItemPadding,
             blockImages = blockImages,
+            applyHorizontalSystemBarInsets = false,
+            actionLabels = actionLabels,
           )
         }
         HomeViewMode.Compact -> {
@@ -228,6 +274,7 @@ internal fun PostsList(
             },
             reduceReadItemAlpha = true,
             contentPadding = compactItemPadding,
+            actionLabels = actionLabels,
           )
         }
       }
@@ -257,17 +304,10 @@ private fun rememberItemAnimationsEnabled(vararg structureInputs: Any?): Boolean
 
 private fun LazyItemScope.animatePostItem(): Modifier =
   Modifier.animateItem(
-    fadeInSpec = tween(durationMillis = FADE_IN_DURATION),
-    placementSpec =
-      spring(
-        stiffness = Spring.StiffnessMediumLow,
-        visibilityThreshold = IntOffset.VisibilityThreshold,
-      ),
-    fadeOutSpec = tween(durationMillis = FADE_OUT_DURATION),
+    fadeInSpec = PostFadeInSpec,
+    placementSpec = PostPlacementSpec,
+    fadeOutSpec = PostFadeOutSpec,
   )
 
 internal fun postItemContentType(homeViewMode: HomeViewMode): String =
   "${POST_ITEM_CONTENT_TYPE}_${homeViewMode.name}"
-
-private const val FADE_IN_DURATION = 220
-private const val FADE_OUT_DURATION = 160

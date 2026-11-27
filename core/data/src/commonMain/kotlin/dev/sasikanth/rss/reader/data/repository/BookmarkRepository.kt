@@ -82,6 +82,12 @@ class BookmarkRepository(
     }
   }
 
+  suspend fun bookmarksCount(): Long {
+    return withContext(dispatchersProvider.databaseRead) {
+      bookmarkQueries.countBookmarks().executeAsOne()
+    }
+  }
+
   fun bookmarks(): PagingSource<Int, ResolvedPost> {
     return QueryPagingSource(
       countQuery = bookmarkQueries.countBookmarks(),

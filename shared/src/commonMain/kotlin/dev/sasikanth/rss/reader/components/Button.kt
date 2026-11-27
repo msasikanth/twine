@@ -18,8 +18,9 @@
 package dev.sasikanth.rss.reader.components
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -49,16 +50,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorProducer
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -105,13 +111,14 @@ fun TranslucentButton(
   onClick: () -> Unit,
 ) {
   val translucentStyle = LocalTranslucentStyles.current
+  val colorScheme = AppTheme.colorScheme
 
   Box(
     modifier =
       modifier
         .requiredHeightIn(min = 40.dp)
         .clip(CircleShape)
-        .background(translucentStyle.default.background, CircleShape)
+        .drawBehind { drawRect(translucentStyle.default.background) }
         .clickable { onClick() },
     contentAlignment = Alignment.Center,
   ) {
@@ -123,11 +130,11 @@ fun TranslucentButton(
       verticalAlignment = Alignment.CenterVertically,
     ) {
       if (leadingIcon != null) {
-        Icon(
+        DrawPhaseIcon(
           modifier = Modifier.requiredSize(20.dp),
           imageVector = leadingIcon,
           contentDescription = null,
-          tint = AppTheme.colorScheme.onSurface,
+          colorProvider = { colorScheme.onSurface },
         )
 
         Spacer(Modifier.width(8.dp))
@@ -148,24 +155,24 @@ fun TranslucentButton(
             )
         },
         label = "ButtonText($text)",
-      ) { text ->
+      ) { targetText ->
         Text(
-          text = text,
+          text = targetText,
           style = MaterialTheme.typography.labelLarge,
           maxLines = 1,
           overflow = TextOverflow.MiddleEllipsis,
-          color = AppTheme.colorScheme.onSurface,
+          color = { colorScheme.onSurface },
         )
       }
 
       if (trailingIcon != null) {
         Spacer(Modifier.width(8.dp))
 
-        Icon(
+        DrawPhaseIcon(
           modifier = Modifier.requiredSize(20.dp),
           imageVector = trailingIcon,
           contentDescription = null,
-          tint = AppTheme.colorScheme.onSurface,
+          colorProvider = { colorScheme.onSurface },
         )
       }
     }
@@ -179,12 +186,14 @@ fun InverseButton(
   icon: ImageVector? = null,
   onClick: () -> Unit,
 ) {
+  val colorScheme = AppTheme.colorScheme
+
   Box(
     modifier =
       modifier
         .requiredHeightIn(min = 40.dp)
         .clip(CircleShape)
-        .background(AppTheme.colorScheme.inverseSurface, CircleShape)
+        .drawBehind { drawRect(colorScheme.inverseSurface) }
         .clickable { onClick() },
     contentAlignment = Alignment.Center,
   ) {
@@ -197,17 +206,17 @@ fun InverseButton(
         style = MaterialTheme.typography.labelLarge,
         maxLines = 1,
         overflow = TextOverflow.MiddleEllipsis,
-        color = AppTheme.colorScheme.inverseOnSurface,
+        color = { colorScheme.inverseOnSurface },
       )
 
       if (icon != null) {
         Spacer(Modifier.width(8.dp))
 
-        Icon(
+        DrawPhaseIcon(
           modifier = Modifier.requiredSize(20.dp),
           imageVector = icon,
           contentDescription = null,
-          tint = AppTheme.colorScheme.inverseOnSurface,
+          colorProvider = { colorScheme.inverseOnSurface },
         )
       }
     }
@@ -227,6 +236,8 @@ fun FilledIconButton(
   onClick: () -> Unit,
 ) {
   val interactionSource = remember { MutableInteractionSource() }
+  val colorScheme = AppTheme.colorScheme
+  val indication = remember(colorScheme) { ripple(color = { colorScheme.secondary }) }
 
   Box(
     modifier =
@@ -237,7 +248,7 @@ fun FilledIconButton(
         .background(containerColor)
         .clickable(
           interactionSource = interactionSource,
-          indication = ripple(color = AppTheme.colorScheme.secondary),
+          indication = indication,
           enabled = enabled,
           onClick = onClick,
         )
@@ -260,30 +271,38 @@ fun IconButton(
   modifier: Modifier = Modifier,
   enabled: Boolean = true,
   size: IconButtonSize = IconButtonSize.Default,
-  tint: Color = AppTheme.colorScheme.onSurfaceVariant,
+  tint: Color = Color.Unspecified,
   onClick: () -> Unit,
 ) {
   val interactionSource = remember { MutableInteractionSource() }
+  val colorScheme = AppTheme.colorScheme
+  val tintProducer =
+    remember(tint, colorScheme) {
+      ColorProducer { if (tint == Color.Unspecified) colorScheme.onSurfaceVariant else tint }
+    }
+  val indication =
+    remember(tintProducer, size) {
+      ripple(color = tintProducer, bounded = false, radius = size.containerSize / 2)
+    }
 
   Box(
     modifier =
       Modifier.semantics { role = Role.Button }
         .requiredSize(size.containerSize)
-        .clip(CircleShape)
         .clickable(
           interactionSource = interactionSource,
-          indication = ripple(color = tint),
+          indication = indication,
           enabled = enabled,
           onClick = onClick,
         )
         .then(modifier),
     contentAlignment = Alignment.Center,
   ) {
-    Icon(
+    DrawPhaseIcon(
       modifier = Modifier.requiredSize(size.iconSize),
       imageVector = icon,
       contentDescription = contentDescription,
-      tint = tint,
+      colorProvider = { tintProducer() },
     )
   }
 }
@@ -297,12 +316,33 @@ fun CircularIconButton(
   backgroundColor: Color? = null,
   borderColor: Color? = null,
   contentColor: Color? = null,
+  backgroundColorProvider: (() -> Color)? = null,
+  contentColorProvider: (() -> Color)? = null,
   onClick: () -> Unit,
 ) {
-  val animatedAlpha by animateFloatAsState(if (enabled) 1.0f else 0.12f)
+  val targetAlpha = if (enabled) 1.0f else 0.12f
+  val alphaState = remember { mutableFloatStateOf(targetAlpha) }
+  val alphaTracker = remember { LazyAlphaTracker(targetAlpha) }
+  if (alphaTracker.lastTarget != targetAlpha) {
+    alphaTracker.hasChanged = true
+    alphaTracker.lastTarget = targetAlpha
+  }
+  if (alphaTracker.hasChanged) {
+    LaunchedEffect(targetAlpha) {
+      val anim =
+        alphaTracker.animatable
+          ?: Animatable(alphaState.floatValue).also { alphaTracker.animatable = it }
+      anim.animateTo(targetAlpha) { alphaState.floatValue = value }
+    }
+  }
+
   val translucentStyle = LocalTranslucentStyles.current
-  val primaryColor = AppTheme.colorScheme.primary
+  val colorScheme = AppTheme.colorScheme
   val interactionSource = remember { MutableInteractionSource() }
+  val indication =
+    remember(contentColor, contentColorProvider, colorScheme) {
+      ripple(color = { contentColorProvider?.invoke() ?: contentColor ?: colorScheme.primary })
+    }
 
   Box(
     modifier =
@@ -311,14 +351,20 @@ fun CircularIconButton(
         .clip(CircleShape)
         .clickable(
           enabled = enabled,
-          indication = ripple(color = { contentColor ?: primaryColor }),
+          indication = indication,
           interactionSource = interactionSource,
         ) {
           onClick()
         }
-        .background(backgroundColor ?: translucentStyle.default.background, CircleShape)
+        .drawBehind {
+          drawCircle(
+            backgroundColorProvider?.invoke()
+              ?: backgroundColor
+              ?: translucentStyle.default.background
+          )
+        }
         .then(
-          if (borderColor == null) {
+          if (borderColor == null || borderColor == Color.Transparent) {
             Modifier
           } else {
             Modifier.border(width = 1.dp, color = borderColor, shape = CircleShape)
@@ -328,7 +374,7 @@ fun CircularIconButton(
           contentDescription = label
           role = Role.Button
         }
-        .graphicsLayer { alpha = animatedAlpha },
+        .graphicsLayer { alpha = alphaState.floatValue },
     contentAlignment = Alignment.Center,
   ) {
     AnimatedContent(
@@ -344,14 +390,60 @@ fun CircularIconButton(
       },
       label = "CircularIconButtonIcon",
     ) { targetIcon ->
-      Icon(
+      DrawPhaseIcon(
         modifier = Modifier.requiredSize(20.dp),
         imageVector = targetIcon,
         contentDescription = null,
-        tint = contentColor ?: AppTheme.colorScheme.onSurface,
+        colorProvider = { contentColorProvider?.invoke() ?: contentColor ?: colorScheme.onSurface },
       )
     }
   }
+}
+
+private class LazyAlphaTracker(
+  var lastTarget: Float,
+  var hasChanged: Boolean = false,
+  var animatable: Animatable<Float, AnimationVector1D>? = null,
+)
+
+private class ColorFilterCache {
+  private var lastColor: Color = Color.Unspecified
+  private var lastFilter: ColorFilter? = null
+
+  fun get(color: Color): ColorFilter {
+    val cached = lastFilter
+    if (cached != null && lastColor == color) return cached
+    return ColorFilter.tint(color).also {
+      lastColor = color
+      lastFilter = it
+    }
+  }
+}
+
+@Composable
+private fun DrawPhaseIcon(
+  imageVector: ImageVector,
+  contentDescription: String?,
+  colorProvider: () -> Color,
+  modifier: Modifier = Modifier,
+) {
+  val painter = rememberVectorPainter(imageVector)
+  val filterCache = remember { ColorFilterCache() }
+  val semantics =
+    if (contentDescription != null) {
+      Modifier.semantics {
+        this.contentDescription = contentDescription
+        this.role = Role.Image
+      }
+    } else {
+      Modifier
+    }
+  Box(
+    modifier =
+      modifier.then(semantics).drawBehind {
+        with(painter) { draw(size = size, colorFilter = filterCache.get(colorProvider())) }
+      }
+  )
 }
 
 enum class IconButtonSize(val containerSize: Dp, val iconSize: Dp) {

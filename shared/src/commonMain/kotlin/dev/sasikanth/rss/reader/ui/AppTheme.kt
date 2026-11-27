@@ -59,36 +59,43 @@ internal fun AppTheme(
           else dynamicColorState.lightAppColorScheme
 
       val colorScheme =
-        remember(useDarkTheme, overriddenColorScheme) {
-          val initialValues = sourceColorScheme.peekValues()
-          AppColorScheme(initialValues).apply {
-            updateFromWithAnimationState(
-              values = initialValues,
-              amoled = isAmoled,
+        if (!isAmoled) {
+          sourceColorScheme
+        } else {
+          val amoledColorScheme =
+            remember(sourceColorScheme) {
+              val initialValues = sourceColorScheme.peekValues()
+              AppColorScheme(initialValues).apply {
+                updateFromWithAnimationState(
+                  values = initialValues,
+                  amoled = true,
+                  isAnimating = sourceColorScheme.isAnimating,
+                )
+              }
+            }
+
+          SideEffect {
+            amoledColorScheme.updateFromWithAnimationState(
+              values = sourceColorScheme.peekValues(),
+              amoled = true,
               isAnimating = sourceColorScheme.isAnimating,
             )
           }
-        }
 
-      SideEffect {
-        colorScheme.updateFromWithAnimationState(
-          values = sourceColorScheme.peekValues(),
-          amoled = isAmoled,
-          isAnimating = sourceColorScheme.isAnimating,
-        )
-      }
-
-      DisposableEffect(sourceColorScheme, colorScheme, isAmoled) {
-        val disposeObserver =
-          sourceColorScheme.observeValues { values, isAnimating ->
-            colorScheme.updateFromWithAnimationState(
-              values = values,
-              amoled = isAmoled,
-              isAnimating = isAnimating,
-            )
+          DisposableEffect(sourceColorScheme, amoledColorScheme) {
+            val disposeObserver =
+              sourceColorScheme.observeValues { values, isAnimating ->
+                amoledColorScheme.updateFromWithAnimationState(
+                  values = values,
+                  amoled = true,
+                  isAnimating = isAnimating,
+                )
+              }
+            onDispose { disposeObserver() }
           }
-        onDispose { disposeObserver() }
-      }
+
+          amoledColorScheme
+        }
 
       val localTranslucentStyles =
         remember(colorScheme) {

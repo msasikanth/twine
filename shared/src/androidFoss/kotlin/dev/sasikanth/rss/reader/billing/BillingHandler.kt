@@ -11,15 +11,21 @@
 
 package dev.sasikanth.rss.reader.billing
 
+import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.data.repository.DebugSettingsRepository
+import dev.sasikanth.rss.reader.data.repository.DebugSubscriptionOverride
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-actual class BillingHandler {
+actual class BillingHandler(
+  private val appInfo: AppInfo,
+  private val debugSettingsRepository: DebugSettingsRepository,
+) {
 
   actual suspend fun isSubscribed(): Boolean {
-    return true
+    return customerResult() is SubscriptionResult.Subscribed
   }
 
   actual suspend fun canSubscribe(): Boolean {
@@ -27,6 +33,13 @@ actual class BillingHandler {
   }
 
   actual suspend fun customerResult(): SubscriptionResult {
+    if (appInfo.isDebugBuild) {
+      return when (debugSettingsRepository.subscriptionOverrideImmediate()) {
+        DebugSubscriptionOverride.ForceFree -> SubscriptionResult.NotSubscribed
+        DebugSubscriptionOverride.ForcePro,
+        DebugSubscriptionOverride.Default -> SubscriptionResult.Subscribed
+      }
+    }
     return SubscriptionResult.Subscribed
   }
 

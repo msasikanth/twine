@@ -28,6 +28,8 @@ import coil3.svg.SvgDecoder
 import io.ktor.client.HttpClient
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.updateAndGet
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import okio.Path.Companion.toPath
 
 object FavIconImageLoader {
@@ -35,6 +37,7 @@ object FavIconImageLoader {
   private val reference = atomic<ImageLoader?>(null)
   private val configuredCachePath = atomic<String?>(null)
   private val httpClient = lazy { HttpClient() }
+  private val decoderDispatcher = Dispatchers.IO.limitedParallelism(2)
 
   fun configure(cachePath: String) {
     configuredCachePath.value = cachePath
@@ -42,6 +45,16 @@ object FavIconImageLoader {
 
   fun get(context: PlatformContext): ImageLoader {
     return reference.value ?: newImageLoader(context)
+  }
+
+  fun clearMemoryCache() {
+    reference.value?.memoryCache?.clear()
+  }
+
+  fun clearCache(context: PlatformContext) {
+    val loader = get(context)
+    loader.memoryCache?.clear()
+    loader.diskCache?.clear()
   }
 
   @OptIn(ExperimentalCoilApi::class)
@@ -56,6 +69,7 @@ object FavIconImageLoader {
         imageLoader != null -> imageLoader
         else -> {
           ImageLoader.Builder(context)
+            .decoderCoroutineContext(decoderDispatcher)
             .components {
               add(FavIconFetcher.SizeInterceptor)
               add(SvgDecoder.Factory())

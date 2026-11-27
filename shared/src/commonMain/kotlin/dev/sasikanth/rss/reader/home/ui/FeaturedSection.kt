@@ -33,10 +33,11 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +48,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
@@ -57,11 +59,15 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
+import coil3.compose.AsyncImage as CoilAsyncImage
+import coil3.compose.AsyncImagePainter
+import coil3.compose.LocalPlatformContext
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import coil3.size.Dimension
 import coil3.size.Size
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
-import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
@@ -71,6 +77,7 @@ import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.ParallaxAlignment
+import dev.sasikanth.rss.reader.utils.disableAnimation
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
@@ -145,12 +152,16 @@ internal fun FeaturedSection(
       )
     }
 
-  Box(modifier) {
+  val isFeaturedVisibleState = remember { mutableStateOf(true) }
+
+  Box(
+    modifier.onVisibilityChanged(minFractionVisible = 0.05f) { isFeaturedVisibleState.value = it }
+  ) {
     if (canBlurImage && blurEffect != null && featuredPosts.isNotEmpty()) {
       // Only the current page and its immediate neighbors can be visible during a swipe.
       val backgroundPageRange by
-        remember(featuredPosts) {
-          derivedStateOf {
+        remember(featuredPosts, pagerState) {
+          computedStateOf {
             val currentPage = pagerState.currentPage
             val firstPage = (currentPage - 1).coerceAtLeast(0)
             val lastPage = (currentPage + 1).coerceAtMost(featuredPosts.lastIndex)
@@ -175,9 +186,9 @@ internal fun FeaturedSection(
           }
 
         val loadedBackgroundImages = remember { mutableStateMapOf<String, Unit>() }
-        val hasVisibleBackgroundImage =
+        val hasVisibleBackgroundImageState =
           remember(featuredPosts, alphaForPage, shouldBlockImage) {
-            {
+            computedStateOf {
               shouldBlockImage ||
                 backgroundPageRange.any { page ->
                   loadedBackgroundImages.containsKey(featuredPosts[page].resolvedPost.id) &&
@@ -185,6 +196,8 @@ internal fun FeaturedSection(
                 }
             }
           }
+        val hasVisibleBackgroundImage =
+          remember(hasVisibleBackgroundImageState) { { hasVisibleBackgroundImageState.value } }
 
         FeaturedSectionBackground(
           blurEffect = blurEffect,
@@ -238,7 +251,7 @@ internal fun FeaturedSection(
       if (featuredPost != null) {
         val postWithMetadata = featuredPost.resolvedPost
         val imageAlignment =
-          remember(page) {
+          remember(page, pagerState) {
             ParallaxAlignment(
               horizontalBias = { pagerState.getOffsetFractionForPage(page) },
               multiplier = 2f,
@@ -246,10 +259,19 @@ internal fun FeaturedSection(
           }
 
         val contentAlphaProvider =
-          remember(page) {
+          remember(page, pagerState) {
             {
               val pageOffset = pagerState.getOffsetFractionForPage(page)
               calculateContentAlpha(pageOffset)
+            }
+          }
+
+        val isActiveAndSettled =
+          remember(page, pagerState) {
+            {
+              isFeaturedVisibleState.value &&
+                !pagerState.isScrollInProgress &&
+                pagerState.currentPage == page
             }
           }
 
@@ -279,25 +301,32 @@ internal fun FeaturedSection(
             modifier =
               Modifier.padding(top = paddingValues.calculateTopPadding())
                 .padding(horizontal = 6.dp),
-            { FeaturedImage(imageUrl = postWithMetadata.imageUrl, alignment = imageAlignment) },
+            {
+              FeaturedImage(
+                imageUrl = postWithMetadata.imageUrl,
+                alignment = imageAlignment,
+                isActiveAndSettled = isActiveAndSettled,
+              )
+            },
           )
         }
       }
     }
 
     if (pagerState.pageCount > 1) {
-      val pageIndicatorState = remember {
-        object : PageIndicatorState {
-          override val pageOffset: Float
-            get() = pagerState.currentPageOffsetFraction
+      val pageIndicatorState =
+        remember(pagerState) {
+          object : PageIndicatorState {
+            override val pageOffset: Float
+              get() = pagerState.currentPageOffsetFraction
 
-          override val selectedPage: Int
-            get() = pagerState.currentPage
+            override val selectedPage: Int
+              get() = pagerState.currentPage
 
-          override val pageCount: Int
-            get() = pagerState.pageCount
+            override val pageCount: Int
+              get() = pagerState.pageCount
+          }
         }
-      }
 
       HorizontalPageIndicators(
         modifier = Modifier.padding(vertical = 8.dp).align(Alignment.BottomCenter),
@@ -316,8 +345,7 @@ private fun FeaturedSectionBackground(
   modifier: Modifier = Modifier,
   content: @Composable BoxScope.() -> Unit,
 ) {
-  val overlayColor = AppTheme.colorScheme.inversePrimary
-  val backdropColor = AppTheme.colorScheme.backdrop
+  val colorScheme = AppTheme.colorScheme
 
   Box(
     modifier =
@@ -351,18 +379,28 @@ private fun FeaturedSectionBackground(
           }
         }
         .drawWithCache {
-          val scrim =
+          val scrimMask =
             Brush.verticalGradient(
               0.7f to Color.Transparent,
-              1f to backdropColor,
+              1f to Color.White,
               startY = 0f,
               endY = size.height,
             )
+          var lastBackdrop = Color.Unspecified
+          var cachedScrimFilter: ColorFilter? = null
           onDrawWithContent {
             drawContent()
             if (hasVisibleContent()) {
-              drawRect(color = overlayColor, blendMode = BlendMode.Luminosity)
-              drawRect(brush = scrim)
+              val backdrop = colorScheme.backdrop
+              val scrimFilter =
+                if (backdrop == lastBackdrop) {
+                  cachedScrimFilter
+                } else {
+                  lastBackdrop = backdrop
+                  ColorFilter.tint(backdrop).also { cachedScrimFilter = it }
+                }
+              drawRect(color = colorScheme.inversePrimary, blendMode = BlendMode.Luminosity)
+              drawRect(brush = scrimMask, colorFilter = scrimFilter)
             }
           }
         },
@@ -377,17 +415,42 @@ private fun BoxScope.FeaturedSectionBackgroundImage(
   colorFilter: ColorFilter?,
   onLoad: () -> Unit,
 ) {
-  if (imageUrl == null) return
+  if (imageUrl == null || LocalBlockImage.current) return
 
-  AsyncImage(
-    url = imageUrl,
-    size = BackgroundBlurImageSize,
-    modifier = Modifier.matchParentSize().graphicsLayer { alpha = alphaProvider() },
+  val context = LocalPlatformContext.current
+  val model =
+    remember(context, imageUrl) {
+      val memoryCacheKey =
+        "$imageUrl#${BackgroundBlurImageSize.width}x${BackgroundBlurImageSize.height}"
+      ImageRequest.Builder(context)
+        .data(imageUrl)
+        .size(BackgroundBlurImageSize)
+        .diskCacheKey(imageUrl)
+        .memoryCacheKey(memoryCacheKey)
+        .disableAnimation()
+        .crossfade(false)
+        .build()
+    }
+  val onState =
+    remember(onLoad) {
+      { state: AsyncImagePainter.State ->
+        if (state is AsyncImagePainter.State.Success) {
+          onLoad()
+        }
+      }
+    }
+
+  CoilAsyncImage(
+    model = model,
+    modifier =
+      Modifier.matchParentSize().graphicsLayer {
+        compositingStrategy = CompositingStrategy.ModulateAlpha
+        alpha = alphaProvider()
+      },
     contentDescription = null,
     contentScale = widthBiasedScale,
     colorFilter = colorFilter,
-    crossfade = false,
-    onSuccess = onLoad,
+    onState = onState,
   )
 }
 

@@ -17,10 +17,13 @@
 package dev.sasikanth.rss.reader.app
 
 import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -32,7 +35,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DragHandleColors
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.SnackbarHost
@@ -56,28 +58,33 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
-import androidx.compose.ui.draw.DropShadowScope
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
+import androidx.compose.ui.node.DrawModifierNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.currentValueOf
+import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -92,11 +99,13 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
+import androidx.navigation3.ui.defaultPopTransitionSpec
 import androidx.navigation3.ui.defaultTransitionSpec
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
 import androidx.savedstate.serialization.SavedStateConfiguration
 import androidx.window.core.layout.WindowSizeClass
+import androidx.window.core.layout.computeWindowSizeClass
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionViewModel
@@ -108,6 +117,8 @@ import dev.sasikanth.rss.reader.changelog.ui.ChangelogSheet
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
+import dev.sasikanth.rss.reader.debug.DebugSettingsViewModel
+import dev.sasikanth.rss.reader.debug.ui.DebugPerformanceOverlay
 import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
 import dev.sasikanth.rss.reader.feed.FeedViewModel
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
@@ -209,6 +220,7 @@ fun App(
   searchViewModel: () -> SearchViewModel,
   bookmarksViewModel: () -> BookmarksViewModel,
   settingsViewModel: () -> SettingsViewModel,
+  debugSettingsViewModel: () -> DebugSettingsViewModel,
   accountSelectionViewModel: () -> AccountSelectionViewModel,
   freshRssLoginViewModel: () -> FreshRssLoginViewModel,
   minifluxLoginViewModel: () -> MinifluxLoginViewModel,
@@ -302,14 +314,6 @@ fun App(
         )
       )
     }
-    LaunchedEffect(Unit) {
-      snapshotFlow { backStack.none { it is Screen.Reader } }
-        .collect { noReader ->
-          if (noReader) {
-            isReaderPaneExpanded.value = false
-          }
-        }
-    }
 
     val openPost: (Int, ResolvedPost, FromScreen) -> Unit =
       remember(navigator, linkHandler, appViewModel, coroutineScope) {
@@ -354,97 +358,56 @@ fun App(
         }
       }
     }
-    val screenModifier = remember {
-      val screenShape =
-        object : Shape {
-          override fun createOutline(
-            size: Size,
-            layoutDirection: LayoutDirection,
-            density: Density,
-          ): Outline {
-            val cornerRadius = screenCornerRadius.value
-            return if (cornerRadius > 0.dp) {
-              RoundedCornerShape(cornerRadius).createOutline(size, layoutDirection, density)
-            } else {
-              RectangleShape.createOutline(size, layoutDirection, density)
-            }
-          }
-        }
+    val screenModifier =
+      remember(screenCornerRadius) {
+        Modifier.fillMaxSize()
+          .then(
+            ScreenTransitionModifierElement(
+              screenCornerRadius = { screenCornerRadius.value },
+              drawEdgeShadow = platform == Platform.Apple,
+            )
+          )
+      }
 
-      Modifier.fillMaxSize()
-        .let {
-          if (platform == Platform.Apple) {
-            it.composed {
-              val rootTransition = LocalRootNavTransition.current
-              val localTransition =
-                if (rootTransition != null) {
-                  LocalNavAnimatedContentScope.current.transition
-                } else {
-                  null
-                }
-              val dropShadowBlock =
-                remember(rootTransition, localTransition) {
-                  val block: DropShadowScope.() -> Unit = {
-                    val cornerRadius = screenCornerRadius.value
-                    val isTransitionActive =
-                      cornerRadius > 0.dp ||
-                        rootTransition.isTransitionActive() ||
-                        localTransition.isTransitionActive()
-                    if (isTransitionActive) {
-                      alpha = 1f
-                      color = Color.Black.copy(alpha = 0.1f)
-                      radius = 32.dp.toPx()
-                    } else {
-                      alpha = 0f
-                      color = Color.Transparent
-                      radius = 0f
-                    }
-                  }
-                  block
-                }
-              Modifier.dropShadow(shape = screenShape, block = dropShadowBlock)
-            }
-          } else {
-            it
-          }
-        }
-        .graphicsLayer {
-          val cornerRadius = screenCornerRadius.value
-          shape = if (cornerRadius > 0.dp) RoundedCornerShape(cornerRadius) else RectangleShape
-          clip = cornerRadius > 0.dp
-        }
-    }
-
-    LaunchedEffect(useDarkTheme) { onThemeChange(useDarkTheme) }
+    SideEffect(useDarkTheme, onThemeChange) { onThemeChange(useDarkTheme) }
 
     LaunchedEffect(Unit) {
+      launch {
+        snapshotFlow { backStack.none { it is Screen.Reader } }
+          .collect { noReader ->
+            if (noReader) {
+              isReaderPaneExpanded.value = false
+            }
+          }
+      }
+
       appViewModel.navigateToReader
         .onEach { args -> navigator.navigateToReader(args) }
         .launchIn(this)
-    }
 
-    LaunchedEffect(Unit) {
-      ExternalUriHandler.uri.collect { uri ->
-        if (uri != null) {
-          if (uri.startsWith("twine://oauth") || uri.startsWith("com.googleusercontent.apps.")) {
-            appViewModel.onOAuthRedirect(uri, linkHandler)
-          } else if (uri == "twine://bookmarks") {
-            navigator.navigateToMain(startTab = Screen.Main.TAB_BOOKMARKS)
-          } else if (uri == "twine://reader/currently-playing") {
-            val playingPostId = audioPlayer.playbackState.value.playingPostId
-            if (playingPostId != null) {
-              appViewModel.onCurrentlyPlayingDeepLink(playingPostId)
-            }
-          } else {
-            val screen = DeepLinkParser.parse(uri)
-            if (screen != null) {
-              if (!navigator.popUpTo(Screen.Main::class, inclusive = false)) {
-                navigator.navigateToMain()
+      launch {
+        ExternalUriHandler.uri.collect { uri ->
+          if (uri != null) {
+            if (uri.startsWith("twine://oauth") || uri.startsWith("com.googleusercontent.apps.")) {
+              appViewModel.onOAuthRedirect(uri, linkHandler)
+            } else if (uri == "twine://bookmarks") {
+              navigator.navigateToMain(startTab = Screen.Main.TAB_BOOKMARKS)
+            } else if (uri == "twine://reader/currently-playing") {
+              val playingPostId = audioPlayer.playbackState.value.playingPostId
+              if (playingPostId != null) {
+                appViewModel.onCurrentlyPlayingDeepLink(playingPostId)
               }
-              navigator.navigate(screen)
+            } else {
+              val screen = DeepLinkParser.parse(uri)
+              if (screen != null) {
+                if (!navigator.popUpTo(Screen.Main::class, inclusive = false)) {
+                  navigator.navigateToMain()
+                }
+                navigator.navigate(screen)
+              }
             }
+            ExternalUriHandler.consume()
           }
-          ExternalUriHandler.consume()
         }
       }
     }
@@ -469,6 +432,101 @@ fun App(
       val navigationWidth = if (isSideNavigationExpanded.value) 360.dp else 80.dp
       val listPaneWidth = if (hasInlineNavigation) navigationWidth + 420.dp else 420.dp
 
+      val density = LocalDensity.current
+      val containerSize = LocalWindowInfo.current.containerSize
+      val windowWidth = with(density) { containerSize.width.toDp() }
+      val windowHeight = with(density) { containerSize.height.toDp() }
+      val minReaderPaneWidth = 360.dp
+      val minListPaneContentWidth = 320.dp
+      val isSplitCapableWindow =
+        windowInfo.windowSizeClass.isWidthAtLeastBreakpoint(
+          WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
+        )
+      val hasReaderOnBackStack by remember {
+        derivedStateOf { backStack.any { it is Screen.Reader } }
+      }
+      val isReaderExpanded =
+        isSplitCapableWindow && isReaderPaneExpanded.value && hasReaderOnBackStack
+      val baseDirective = remember(windowInfo) { calculatePaneScaffoldDirective(windowInfo) }
+      val paneScaffoldDirective =
+        remember(baseDirective, windowWidth, listPaneWidth, isReaderExpanded) {
+          calculateReaderPaneScaffoldDirective(
+            baseDirective = baseDirective,
+            windowWidth = windowWidth,
+            listPaneWidth = listPaneWidth,
+            minReaderPaneWidth = minReaderPaneWidth,
+            isReaderExpanded = isReaderExpanded,
+          )
+        }
+      var hasEnteredListDetailScaffold by remember {
+        mutableStateOf(
+          shouldUseListDetailForSinglePane(
+            isDesktop = platform == Platform.Desktop,
+            isSplitCapableWindow = isSplitCapableWindow,
+            hasEnteredListDetailScaffold = false,
+            isReaderExpanded = isReaderExpanded,
+          )
+        )
+      }
+      SideEffect {
+        if (paneScaffoldDirective.maxHorizontalPartitions > 1 && !hasEnteredListDetailScaffold) {
+          hasEnteredListDetailScaffold = true
+        }
+      }
+      val shouldHandleSinglePaneLayout =
+        shouldUseListDetailForSinglePane(
+          isDesktop = platform == Platform.Desktop,
+          isSplitCapableWindow = isSplitCapableWindow,
+          hasEnteredListDetailScaffold = hasEnteredListDetailScaffold,
+          isReaderExpanded = isReaderExpanded,
+        )
+
+      val listPaneContentWidth = rememberSaveable { mutableFloatStateOf(420f) }
+      val navigationPaneWidth = if (hasInlineNavigation) navigationWidth else 0.dp
+      val listPaneWidthLimits =
+        remember(
+          density,
+          navigationPaneWidth,
+          windowWidth,
+          baseDirective.horizontalPartitionSpacerSize,
+        ) {
+          with(density) {
+            val min = (navigationPaneWidth + minListPaneContentWidth).roundToPx()
+            val max =
+              (windowWidth - baseDirective.horizontalPartitionSpacerSize - minReaderPaneWidth)
+                .roundToPx()
+                .coerceAtLeast(min)
+            min..max
+          }
+        }
+      val isTwoPane = paneScaffoldDirective.maxHorizontalPartitions > 1
+      val listPaneSizeClass =
+        remember(
+          isTwoPane,
+          windowInfo.windowSizeClass,
+          density,
+          navigationPaneWidth,
+          listPaneContentWidth.floatValue,
+          listPaneWidthLimits,
+          windowHeight,
+        ) {
+          if (!isTwoPane) {
+            windowInfo.windowSizeClass
+          } else {
+            val paneWidthPx =
+              with(density) {
+                  (navigationPaneWidth + listPaneContentWidth.floatValue.dp).roundToPx()
+                }
+                .coerceIn(listPaneWidthLimits)
+            val paneWidthDp = with(density) { paneWidthPx.toDp().value }
+            WindowSizeClass.BREAKPOINTS_V2.computeWindowSizeClass(
+              widthDp = paneWidthDp,
+              heightDp = windowHeight.value,
+            )
+          }
+        }
+      val listPaneSizeClassState = rememberUpdatedState(listPaneSizeClass)
+
       val openCurrentlyPlaying =
         remember(audioPlayer, appViewModel) {
           {
@@ -492,6 +550,7 @@ fun App(
           openChangelog,
           isSideNavigationExpanded,
           isReaderPaneExpanded,
+          listPaneSizeClassState,
         ) {
           entryProvider {
             placeholderScreen(
@@ -527,6 +586,7 @@ fun App(
               openCurrentlyPlaying = openCurrentlyPlaying,
               screenModifier = screenModifier,
               isSideNavigationExpanded = isSideNavigationExpanded,
+              listPaneSizeClass = listPaneSizeClassState,
             )
 
             freshRssLoginScreen(
@@ -629,6 +689,13 @@ fun App(
               navigator = navigator,
             )
 
+            settingsDebugScreen(
+              modifier = screenModifier,
+              debugSettingsViewModel = debugSettingsViewModel,
+              openChangelog = openChangelog,
+              navigator = navigator,
+            )
+
             feedInfoDialog(feedViewModel = feedViewModel, navigator = navigator)
 
             groupSelectionDialog(
@@ -638,71 +705,13 @@ fun App(
           }
         }
 
-      val density = LocalDensity.current
-      val windowWidth = with(density) { LocalWindowInfo.current.containerSize.width.toDp() }
-      val minReaderPaneWidth = 360.dp
-      val minListPaneContentWidth = 320.dp
-      val isSplitCapableWindow =
-        windowInfo.windowSizeClass.isWidthAtLeastBreakpoint(
-          WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
-        )
-      val hasReaderOnBackStack by remember {
-        derivedStateOf { backStack.any { it is Screen.Reader } }
-      }
-      val isReaderExpanded =
-        isSplitCapableWindow && isReaderPaneExpanded.value && hasReaderOnBackStack
-      val baseDirective = remember(windowInfo) { calculatePaneScaffoldDirective(windowInfo) }
-      val paneScaffoldDirective =
-        remember(baseDirective, windowWidth, listPaneWidth, isReaderExpanded) {
-          calculateReaderPaneScaffoldDirective(
-            baseDirective = baseDirective,
-            windowWidth = windowWidth,
-            listPaneWidth = listPaneWidth,
-            minReaderPaneWidth = minReaderPaneWidth,
-            isReaderExpanded = isReaderExpanded,
-          )
-        }
-      var hasEnteredListDetailScaffold by remember {
-        mutableStateOf(
-          shouldUseListDetailForSinglePane(
-            isDesktop = platform == Platform.Desktop,
-            isSplitCapableWindow = isSplitCapableWindow,
-            hasEnteredListDetailScaffold = false,
-            isReaderExpanded = isReaderExpanded,
-          )
-        )
-      }
-      SideEffect {
-        if (paneScaffoldDirective.maxHorizontalPartitions > 1 && !hasEnteredListDetailScaffold) {
-          hasEnteredListDetailScaffold = true
-        }
-      }
-      val shouldHandleSinglePaneLayout =
-        shouldUseListDetailForSinglePane(
-          isDesktop = platform == Platform.Desktop,
-          isSplitCapableWindow = isSplitCapableWindow,
-          hasEnteredListDetailScaffold = hasEnteredListDetailScaffold,
-          isReaderExpanded = isReaderExpanded,
-        )
-
-      var listPaneContentWidth by rememberSaveable { mutableStateOf(420f) }
-      val navigationPaneWidth = if (hasInlineNavigation) navigationWidth else 0.dp
-      val listPaneWidthLimits =
-        with(density) {
-          val min = (navigationPaneWidth + minListPaneContentWidth).roundToPx()
-          val max =
-            (windowWidth - baseDirective.horizontalPartitionSpacerSize - minReaderPaneWidth)
-              .roundToPx()
-              .coerceAtLeast(min)
-          min..max
-        }
       val halfSpacerPx =
         with(density) { baseDirective.horizontalPartitionSpacerSize.roundToPx() } / 2
-      val dividerCenterPx = remember { mutableFloatStateOf(Float.NaN) }
+      val dividerCenterRef = remember { FloatRef(Float.NaN) }
       val paneExpansionState =
         rememberPaneExpansionState(
           consumeDragDelta = { delta ->
-            val currentOffset = dividerCenterPx.floatValue
+            val currentOffset = dividerCenterRef.value
             if (currentOffset.isNaN()) {
               delta
             } else {
@@ -717,7 +726,7 @@ fun App(
         )
       LaunchedEffect(navigationPaneWidth, listPaneWidthLimits, density) {
         val paneWidthPx =
-          with(density) { (navigationPaneWidth + listPaneContentWidth.dp).roundToPx() }
+          with(density) { (navigationPaneWidth + listPaneContentWidth.floatValue.dp).roundToPx() }
         paneExpansionState.setFirstPaneWidth(paneWidthPx.coerceIn(listPaneWidthLimits))
       }
       val listDetailSceneStrategy =
@@ -728,16 +737,27 @@ fun App(
           paneExpansionDragHandle = { state ->
             val interactionSource = remember { MutableInteractionSource() }
             val isDragged by interactionSource.collectIsDraggedAsState()
+            var wasDragged by remember { mutableStateOf(false) }
+
+            LaunchedEffect(isDragged) {
+              if (isDragged) {
+                wasDragged = true
+              } else if (wasDragged) {
+                wasDragged = false
+                val center = dividerCenterRef.value
+                if (!center.isNaN()) {
+                  val paneWidth = with(density) { (center - halfSpacerPx).toDp() }
+                  listPaneContentWidth.floatValue = (paneWidth - navigationPaneWidth).value
+                }
+              }
+            }
+
             VerticalDragHandle(
               modifier =
                 Modifier.pointerHoverIcon(horizontalResizePointerIcon)
                   .onPlaced { coordinates ->
-                    val center = coordinates.positionInParent().x + coordinates.size.width / 2f
-                    dividerCenterPx.floatValue = center
-                    if (isDragged) {
-                      val paneWidth = with(density) { (center - halfSpacerPx).toDp() }
-                      listPaneContentWidth = (paneWidth - navigationPaneWidth).value
-                    }
+                    dividerCenterRef.value =
+                      coordinates.positionInParent().x + coordinates.size.width / 2f
                   }
                   .paneExpansionDraggable(
                     state = state,
@@ -763,6 +783,8 @@ fun App(
           Modifier
         }
 
+      val saveableStateHolderDecorator = rememberSaveableStateHolderNavEntryDecorator<NavKey>()
+      val viewModelStoreDecorator = rememberViewModelStoreNavEntryDecorator<NavKey>()
       val rootNavTransitionDecorator = remember {
         NavEntryDecorator<NavKey> { entry ->
           val rootTransition = LocalNavAnimatedContentScope.current.transition
@@ -771,6 +793,26 @@ fun App(
           }
         }
       }
+      val entryDecorators =
+        remember(
+          saveableStateHolderDecorator,
+          viewModelStoreDecorator,
+          rootNavTransitionDecorator,
+        ) {
+          if (platform == Platform.Apple) {
+            listOf(
+              saveableStateHolderDecorator,
+              viewModelStoreDecorator,
+              rootNavTransitionDecorator,
+            )
+          } else {
+            listOf(saveableStateHolderDecorator, viewModelStoreDecorator)
+          }
+        }
+      val sceneStrategies =
+        remember(bottomSheetSceneStrategy, listDetailSceneStrategy) {
+          listOf(bottomSheetSceneStrategy, listDetailSceneStrategy)
+        }
 
       Box(modifier = Modifier.fillMaxSize()) {
         NavDisplay(
@@ -780,18 +822,22 @@ fun App(
               .then(rootShortcutModifier),
           backStack = backStack,
           entryProvider = entryProvider,
-          entryDecorators =
-            listOf(
-              rememberSaveableStateHolderNavEntryDecorator(),
-              rememberViewModelStoreNavEntryDecorator(),
-              rootNavTransitionDecorator,
-            ),
-          sceneStrategies = listOf(bottomSheetSceneStrategy, listDetailSceneStrategy),
+          entryDecorators = entryDecorators,
+          sceneStrategies = sceneStrategies,
           transitionSpec = {
             if (initialState.entries.any { it.contentKey == Screen.Placeholder.toString() }) {
               fadeIn() togetherWith fadeOut()
+            } else if (platform == Platform.Android) {
+              AndroidNavEnterTransition togetherWith ExitTransition.KeepUntilTransitionsFinished
             } else {
               defaultTransitionSpec<NavKey>().invoke(this)
+            }
+          },
+          popTransitionSpec = {
+            if (platform == Platform.Android) {
+              EnterTransition.None togetherWith AndroidNavPopExitTransition
+            } else {
+              defaultPopTransitionSpec<NavKey>().invoke(this)
             }
           },
           onBack = { navigator.goBack() },
@@ -802,6 +848,14 @@ fun App(
           modifier =
             Modifier.align(Alignment.BottomCenter).windowInsetsPadding(WindowInsets.safeDrawing),
         )
+
+        if (appState.showFpsOverlay || appState.showWindowSizeOverlay) {
+          DebugPerformanceOverlay(
+            showFps = appState.showFpsOverlay,
+            showWindowSize = appState.showWindowSizeOverlay,
+            modifier = Modifier.fillMaxSize(),
+          )
+        }
       }
 
       if (appState.showChangelog) {
@@ -815,6 +869,150 @@ fun App(
 }
 
 private val LocalRootNavTransition = compositionLocalOf<Transition<EnterExitState>?> { null }
+
+private val AndroidNavEnterTransition = fadeIn(animationSpec = tween(durationMillis = 250))
+private val AndroidNavPopExitTransition = fadeOut(animationSpec = tween(durationMillis = 220))
+private val APPLE_TRANSITION_SHADOW_WIDTH = 32.dp
+private val AppleTransitionShadowColor = Color.Black.copy(alpha = 0.1f)
+
+private class FloatRef(var value: Float)
+
+private data class ScreenTransitionModifierElement(
+  val screenCornerRadius: () -> Dp,
+  val drawEdgeShadow: Boolean,
+) : ModifierNodeElement<ScreenTransitionModifierNode>() {
+
+  override fun create(): ScreenTransitionModifierNode {
+    return ScreenTransitionModifierNode(
+      screenCornerRadius = screenCornerRadius,
+      drawEdgeShadow = drawEdgeShadow,
+    )
+  }
+
+  override fun update(node: ScreenTransitionModifierNode) {
+    node.screenCornerRadius = screenCornerRadius
+    node.drawEdgeShadow = drawEdgeShadow
+  }
+
+  override fun InspectorInfo.inspectableProperties() {
+    name = "screenTransition"
+    properties["drawEdgeShadow"] = drawEdgeShadow
+  }
+}
+
+private class ScreenTransitionModifierNode(
+  var screenCornerRadius: () -> Dp,
+  var drawEdgeShadow: Boolean,
+) : Modifier.Node(), DrawModifierNode, CompositionLocalConsumerModifierNode {
+
+  private val clipPath = Path()
+  private var cachedClipSize = Size.Unspecified
+  private var cachedClipRadiusPx = Float.NaN
+
+  private var cachedShadowBrush: Brush? = null
+  private var cachedShadowWidthPx = Float.NaN
+  private var cachedShadowLayoutDirection: LayoutDirection? = null
+  private var cachedShadowCanvasWidth = Float.NaN
+
+  override fun ContentDrawScope.draw() {
+    val cornerRadiusPx = screenCornerRadius().toPx()
+    if (!drawEdgeShadow && cornerRadiusPx <= 0f) {
+      drawContent()
+      return
+    }
+
+    if (drawEdgeShadow) {
+      val rootTransition = currentValueOf(LocalRootNavTransition)
+      val localTransition =
+        if (rootTransition != null) {
+          currentValueOf(LocalNavAnimatedContentScope).transition
+        } else {
+          null
+        }
+      val isTransitionActive =
+        cornerRadiusPx > 0f ||
+          rootTransition.isTransitionActive() ||
+          localTransition.isTransitionActive()
+
+      if (!isTransitionActive) {
+        drawContent()
+        return
+      }
+
+      val shadowWidthPx = APPLE_TRANSITION_SHADOW_WIDTH.toPx()
+      if (shadowWidthPx > 0f && size.width > 0f && size.height > 0f) {
+        val brush = getOrCreateShadowBrush(shadowWidthPx, layoutDirection, size.width)
+        val shadowTop = cornerRadiusPx.coerceAtMost(size.height / 2f)
+        val shadowHeight = (size.height - shadowTop * 2f).coerceAtLeast(0f)
+        val shadowLeft = if (layoutDirection == LayoutDirection.Ltr) -shadowWidthPx else size.width
+        drawRect(
+          brush = brush,
+          topLeft = Offset(shadowLeft, shadowTop),
+          size = Size(shadowWidthPx, shadowHeight),
+        )
+      }
+    }
+
+    if (cornerRadiusPx > 0f) {
+      updateClipPathIfNeeded(size, cornerRadiusPx)
+      clipPath(clipPath) { this@draw.drawContent() }
+    } else {
+      drawContent()
+    }
+  }
+
+  private fun getOrCreateShadowBrush(
+    shadowWidthPx: Float,
+    layoutDirection: LayoutDirection,
+    canvasWidth: Float,
+  ): Brush {
+    val existing = cachedShadowBrush
+    if (
+      existing != null &&
+        cachedShadowWidthPx == shadowWidthPx &&
+        cachedShadowLayoutDirection == layoutDirection &&
+        cachedShadowCanvasWidth == canvasWidth
+    ) {
+      return existing
+    }
+
+    val brush =
+      if (layoutDirection == LayoutDirection.Ltr) {
+        Brush.horizontalGradient(
+          colors = listOf(Color.Transparent, AppleTransitionShadowColor),
+          startX = -shadowWidthPx,
+          endX = 0f,
+        )
+      } else {
+        Brush.horizontalGradient(
+          colors = listOf(AppleTransitionShadowColor, Color.Transparent),
+          startX = canvasWidth,
+          endX = canvasWidth + shadowWidthPx,
+        )
+      }
+    cachedShadowBrush = brush
+    cachedShadowWidthPx = shadowWidthPx
+    cachedShadowLayoutDirection = layoutDirection
+    cachedShadowCanvasWidth = canvasWidth
+    return brush
+  }
+
+  private fun updateClipPathIfNeeded(size: Size, cornerRadiusPx: Float) {
+    if (cachedClipSize == size && cachedClipRadiusPx == cornerRadiusPx) return
+    clipPath.rewind()
+    clipPath.addRoundRect(
+      RoundRect(
+        left = 0f,
+        top = 0f,
+        right = size.width,
+        bottom = size.height,
+        cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx),
+      )
+    )
+    cachedClipSize = size
+    cachedClipRadiusPx = cornerRadiusPx
+  }
+}
 
 private fun Transition<EnterExitState>?.isTransitionActive(): Boolean {
   return this != null && (isRunning || currentState != targetState)
