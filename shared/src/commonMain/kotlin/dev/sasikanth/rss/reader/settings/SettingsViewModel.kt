@@ -156,8 +156,26 @@ class SettingsViewModel(
           settingsRepository.blockImages,
           settingsRepository.downloadFullContent,
           settingsRepository.enableAutoSync,
-          settingsRepository.audioMarkAsReadThreshold,
-          ::SettingsGroup3,
+          combine(
+            settingsRepository.audioMarkAsReadThreshold,
+            settingsRepository.skipSponsorChapters,
+            ::Pair,
+          ),
+          {
+            homeViewMode,
+            blockImages,
+            downloadFullContent,
+            enableAutoSync,
+            (threshold, skipSponsors) ->
+            SettingsGroup3(
+              homeViewMode = homeViewMode,
+              blockImages = blockImages,
+              downloadFullContent = downloadFullContent,
+              enableAutoSync = enableAutoSync,
+              audioMarkAsReadThreshold = threshold,
+              skipSponsorChapters = skipSponsors,
+            )
+          },
         ),
         combine(
           settingsRepository.enableNotifications,
@@ -183,6 +201,7 @@ class SettingsViewModel(
           showPinnedSources = combinedGroup.showPinnedSources,
           markAsReadOn = group1.markAsReadOn,
           audioMarkAsReadThreshold = group3.audioMarkAsReadThreshold,
+          skipSponsorChapters = group3.skipSponsorChapters,
           confirmMarkAllAsRead = group4.confirmMarkAllAsRead,
           homeViewMode = group3.homeViewMode,
           blockImages = group3.blockImages,
@@ -212,6 +231,7 @@ class SettingsViewModel(
             showPinnedSources = settings.showPinnedSources,
             markAsReadOn = settings.markAsReadOn,
             audioMarkAsReadThreshold = settings.audioMarkAsReadThreshold,
+            skipSponsorChapters = settings.skipSponsorChapters,
             confirmMarkAllAsRead = settings.confirmMarkAllAsRead,
             homeViewMode = settings.homeViewMode,
             blockImages = settings.blockImages,
@@ -297,6 +317,7 @@ class SettingsViewModel(
       is SettingsEvent.ToggleConfirmMarkAllAsRead -> toggleConfirmMarkAllAsRead(event.value)
       is SettingsEvent.AudioMarkAsReadThresholdChanged ->
         audioMarkAsReadThresholdChanged(event.threshold)
+      is SettingsEvent.ToggleSkipSponsorChapters -> toggleSkipSponsorChapters(event.value)
       is SettingsEvent.LoadSubscriptionStatus -> loadSubscriptionStatus()
       is SettingsEvent.MarkOpenPaywallAsDone -> {
         _state.update { it.copy(openPaywall = false) }
@@ -438,6 +459,10 @@ class SettingsViewModel(
     viewModelScope.launch { settingsRepository.updateAudioMarkAsReadThreshold(threshold) }
   }
 
+  private fun toggleSkipSponsorChapters(value: Boolean) {
+    viewModelScope.launch { settingsRepository.toggleSkipSponsorChapters(value) }
+  }
+
   private fun toggleShowFeedFavIcon(value: Boolean) {
     viewModelScope.launch { settingsRepository.toggleShowFeedFavIcon(value) }
   }
@@ -556,6 +581,7 @@ private data class Settings(
   val showPinnedSources: Boolean,
   val markAsReadOn: MarkAsReadOn,
   val audioMarkAsReadThreshold: AudioMarkAsReadThreshold,
+  val skipSponsorChapters: Boolean,
   val confirmMarkAllAsRead: Boolean,
   val homeViewMode: HomeViewMode,
   val blockImages: Boolean,
@@ -601,6 +627,7 @@ private data class SettingsGroup3(
   val downloadFullContent: Boolean,
   val enableAutoSync: Boolean,
   val audioMarkAsReadThreshold: AudioMarkAsReadThreshold,
+  val skipSponsorChapters: Boolean,
 )
 
 private data class SettingsGroup4(

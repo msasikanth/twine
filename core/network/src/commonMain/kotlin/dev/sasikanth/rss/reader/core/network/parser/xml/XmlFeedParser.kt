@@ -78,8 +78,6 @@ class XmlFeedParser(
     private val htmlTag = Regex("<.+?>")
     private val blankLine = Regex("(?m)^[ \t]*\r?\n")
 
-    internal val imageTags = setOf("media:content", "media:thumbnail")
-
     internal const val TAG_RSS_CHANNEL = "channel"
     internal const val TAG_ATOM_FEED = "feed"
     internal const val TAG_RSS_ITEM = "item"
@@ -107,18 +105,28 @@ class XmlFeedParser(
     internal const val TAG_ICON = "icon"
     internal const val TAG_LOGO = "logo"
     internal const val TAG_ITUNES_IMAGE = "itunes:image"
+    internal const val TAG_PODCAST_IMAGES = "podcast:images"
+    internal const val TAG_GOOGLEPLAY_IMAGE = "googleplay:image"
     internal const val TAG_MEDIA_GROUP = "media:group"
-    internal const val TAG_MEDIA_CONTENT = "media:description"
+    internal const val TAG_MEDIA_CONTENT = "media:content"
+    internal const val TAG_MEDIA_DESCRIPTION = "media:description"
     internal const val TAG_MEDIA_THUMBNAIL = "media:thumbnail"
+    internal const val TAG_PODCAST_CHAPTERS = "podcast:chapters"
+    internal const val TAG_PSC_CHAPTERS = "psc:chapters"
+    internal const val TAG_PSC_CHAPTER = "psc:chapter"
 
     internal const val ATTR_URL = "url"
     internal const val ATTR_TYPE = "type"
+    internal const val ATTR_MEDIUM = "medium"
+    internal const val ATTR_SRCSET = "srcset"
     internal const val ATTR_REL = "rel"
     internal const val ATTR_HREF = "href"
     internal const val ATTR_RDF_RESOURCE = "rdf:resource"
+    internal const val ATTR_START = "start"
+    internal const val ATTR_TITLE = "title"
+    internal const val ATTR_IMAGE = "image"
 
     internal const val ATTR_VALUE_ALTERNATE = "alternate"
-    internal const val ATTR_VALUE_IMAGE = "image/jpeg"
 
     fun cleanText(text: String?) = text?.replace(htmlTag, "")?.replace(blankLine, "")?.trim()
   }

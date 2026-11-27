@@ -23,4 +23,6 @@ data class PostContent(
   val articleContent: String?,
   val feedContentReadingTime: Int?,
   val articleContentReadingTime: Int?,
+  val chaptersUrl: String? = null,
+  val chaptersJson: String? = null,
 )

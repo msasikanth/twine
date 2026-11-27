@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.compositionLocalOf
@@ -89,6 +90,7 @@ import com.mikepenz.markdown.model.ReferenceLinkHandler
 import com.mikepenz.markdown.utils.MARKDOWN_TAG_IMAGE_URL
 import com.mikepenz.markdown.utils.codeSpanStyle
 import com.mikepenz.markdown.utils.getUnescapedTextInNode
+import dev.sasikanth.rss.reader.ui.LocalImageSharedElementScopeKey
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.BoldHighlight
 import dev.snipme.highlights.model.ColorHighlight
@@ -399,10 +401,15 @@ private fun SafeMarkdownTextWithInlineImages(
             hasLinks = null,
           )
         }
-        if (sourceContent != null && range.imageNode != null) {
-          components.image(MarkdownComponentModel(sourceContent, range.imageNode, typography))
-        } else {
-          BlockFallbackImage(range.url)
+        CompositionLocalProvider(
+          LocalImageSharedElementScopeKey provides
+            "${LocalImageSharedElementScopeKey.current}:${range.start}"
+        ) {
+          if (sourceContent != null && range.imageNode != null) {
+            components.image(MarkdownComponentModel(sourceContent, range.imageNode, typography))
+          } else {
+            BlockFallbackImage(range.url)
+          }
         }
         cursor = range.end
       }

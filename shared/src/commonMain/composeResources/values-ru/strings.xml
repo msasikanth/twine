@@ -175,7 +175,6 @@
   <string name="addToGroup">Add to group</string>
   <string name="removeSources">Удалить источники</string>
   <string name="removeSourcesDesc">Вы хотите удалить выбранные источники?</string>
-  <string name="noPinnedSources">Закреплённых каналов/групп нет</string>
   <string name="databaseMaintainenceTitle">Пожалуйста, подождите...</string>
   <string name="databaseMaintainenceSubtitle">Выполняется обслуживание базы данных, не закрывайте приложение</string>
   <string name="cdLoadFullArticle">Загрузить полную статью</string>

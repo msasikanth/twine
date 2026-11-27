@@ -17,7 +17,10 @@
 
 package dev.sasikanth.rss.reader.main.ui
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -54,16 +57,27 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import androidx.navigation3.ui.defaultPopTransitionSpec
+import androidx.navigation3.ui.defaultPredictivePopTransitionSpec
+import androidx.navigation3.ui.defaultTransitionSpec
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationEventHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import androidx.savedstate.serialization.SavedStateConfiguration
 import androidx.window.core.layout.WindowSizeClass
+import dev.sasikanth.rss.reader.app.AndroidNavEnterTransition
+import dev.sasikanth.rss.reader.app.AndroidNavPopExitTransition
 import dev.sasikanth.rss.reader.app.AppNavigator
 import dev.sasikanth.rss.reader.app.Screen
+import dev.sasikanth.rss.reader.app.androidPredictivePopTransitionSpec
+import dev.sasikanth.rss.reader.app.rememberAndroidPredictiveBackDecorator
+import dev.sasikanth.rss.reader.app.rememberPredictiveBackGestureState
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
+import dev.sasikanth.rss.reader.resources.icons.Platform
+import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalRootWindowSizeClass
 import dev.sasikanth.rss.reader.utils.ShortcutHandler
@@ -415,9 +429,47 @@ private fun MainScreenContent(
       }
     }
 
+  val saveableStateHolderDecorator = rememberSaveableStateHolderNavEntryDecorator<NavKey>()
+  val predictiveBackGestureState = rememberPredictiveBackGestureState()
+  val androidPredictiveBackDecorator =
+    rememberAndroidPredictiveBackDecorator(
+      backStack = navigator.backStack,
+      gestureState = predictiveBackGestureState,
+    )
+  val entryDecorators =
+    remember(saveableStateHolderDecorator, androidPredictiveBackDecorator) {
+      if (platform == Platform.Android) {
+        listOf(saveableStateHolderDecorator, androidPredictiveBackDecorator)
+      } else {
+        listOf(saveableStateHolderDecorator)
+      }
+    }
+
   NavDisplay(
     backStack = navigator.backStack,
     entryProvider = entryProvider,
+    entryDecorators = entryDecorators,
+    transitionSpec = {
+      if (platform == Platform.Android) {
+        AndroidNavEnterTransition togetherWith ExitTransition.KeepUntilTransitionsFinished
+      } else {
+        defaultTransitionSpec<NavKey>().invoke(this)
+      }
+    },
+    popTransitionSpec = {
+      if (platform == Platform.Android) {
+        EnterTransition.None togetherWith AndroidNavPopExitTransition
+      } else {
+        defaultPopTransitionSpec<NavKey>().invoke(this)
+      }
+    },
+    predictivePopTransitionSpec = { swipeEdge ->
+      if (platform == Platform.Android) {
+        androidPredictivePopTransitionSpec(swipeEdge)
+      } else {
+        defaultPredictivePopTransitionSpec<NavKey>().invoke(this, swipeEdge)
+      }
+    },
     onBack = { navigator.goBack() },
   )
 }

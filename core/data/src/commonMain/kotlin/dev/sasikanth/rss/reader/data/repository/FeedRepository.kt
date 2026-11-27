@@ -249,6 +249,7 @@ class FeedRepository(
     enableNotifications: Boolean,
     consecutiveFetchErrors: Long,
     syncError: String?,
+    coverArtUrl: String?,
   ): Feed {
     return Feed(
       id = id,
@@ -271,6 +272,7 @@ class FeedRepository(
       remoteId = remoteId,
       consecutiveFetchErrors = consecutiveFetchErrors,
       syncError = syncError,
+      coverArtUrl = coverArtUrl,
     )
   }
 
@@ -293,6 +295,7 @@ class FeedRepository(
     enableNotifications: Boolean,
     remoteId: String?,
     syncError: String?,
+    coverArtUrl: String?,
   ): Feed {
     return Feed(
       id = id,
@@ -313,6 +316,7 @@ class FeedRepository(
       isDeleted = isDeleted,
       remoteId = remoteId,
       syncError = syncError,
+      coverArtUrl = coverArtUrl,
     )
   }
 
@@ -336,6 +340,7 @@ class FeedRepository(
     numberOfUnreadPosts: Long,
     showFeedFavIcon: Boolean,
     hideFromAllFeeds: Boolean,
+    coverArtUrl: String?,
   ): Feed {
     return Feed(
       id = id,
@@ -357,6 +362,7 @@ class FeedRepository(
       showFeedFavIcon = showFeedFavIcon,
       hideFromAllFeeds = hideFromAllFeeds,
       enableNotifications = enableNotifications,
+      coverArtUrl = coverArtUrl,
     )
   }
 
@@ -391,6 +397,10 @@ class FeedRepository(
           update.refreshInterval?.let {
             feedQueries.updateRefreshInterval(refreshInterval = it.toString(), id = update.feedId)
           }
+
+          update.coverArtUrl?.let {
+            feedQueries.updateCoverArtUrl(coverArtUrl = it, id = update.feedId)
+          }
         }
       }
     }
@@ -406,4 +416,5 @@ data class FeedSyncMetadataUpdate(
   val fetchSucceeded: Boolean,
   val lastUpdatedAt: Instant? = null,
   val refreshInterval: Duration? = null,
+  val coverArtUrl: String? = null,
 )

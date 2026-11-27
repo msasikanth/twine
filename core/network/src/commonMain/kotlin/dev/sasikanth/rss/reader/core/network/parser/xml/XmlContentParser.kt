@@ -17,13 +17,25 @@
 
 package dev.sasikanth.rss.reader.core.network.parser.xml
 
+import dev.sasikanth.rss.reader.core.model.local.MediaChapter
+import dev.sasikanth.rss.reader.core.model.local.isSponsorChapterTitle
+import dev.sasikanth.rss.reader.core.model.local.parseNormalPlayTimeMs
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_HREF
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_IMAGE
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_MEDIUM
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_START
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_TITLE
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_TYPE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_URL
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_CONTENT
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_DESCRIPTION
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_GROUP
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_THUMBNAIL
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PSC_CHAPTER
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PSC_CHAPTERS
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString
@@ -35,12 +47,41 @@ import org.kobjects.ktxml.api.XmlPullParser
 
 abstract class XmlContentParser {
 
-  private companion object {
+  internal companion object {
     private const val FALLBACK_SCAN_LIMIT = 64 * 1024
     private const val FALLBACK_PREVIEW_LIMIT = 8 * 1024
 
     private val imgSrcRegex =
       Regex("""<img\b[^>]*?\bsrc\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+
+    private val srcsetSplitRegex = Regex(",\\s+|,(?=https?://)", RegexOption.IGNORE_CASE)
+
+    internal fun parseSrcsetHighestResUrl(srcset: String?): String? {
+      if (srcset.isNullOrBlank()) return null
+
+      var bestUrl: String? = null
+      var bestScore = -1.0
+
+      srcset.split(srcsetSplitRegex).forEach { entry ->
+        val parts = entry.trim().split(Regex("\\s+")).filter { it.isNotBlank() }
+        val url = parts.firstOrNull() ?: return@forEach
+        val descriptor = parts.getOrNull(1)?.lowercase()
+        val score =
+          when {
+            descriptor == null -> 0.0
+            descriptor.endsWith("w") -> descriptor.removeSuffix("w").toDoubleOrNull() ?: 0.0
+            descriptor.endsWith("x") ->
+              (descriptor.removeSuffix("x").toDoubleOrNull() ?: 0.0) * 1000.0
+            else -> 0.0
+          }
+        if (score > bestScore) {
+          bestScore = score
+          bestUrl = url
+        }
+      }
+
+      return bestUrl
+    }
   }
 
   protected abstract val articleHtmlParser: ArticleHtmlParser
@@ -146,29 +187,58 @@ abstract class XmlContentParser {
     return text?.trim()?.ifBlank { null }
   }
 
+  protected fun readMediaContent(parser: XmlPullParser): MediaContentResult {
+    val medium = parser.getAttributeValue(parser.namespace, ATTR_MEDIUM)?.trim()?.lowercase()
+    val type = parser.getAttributeValue(parser.namespace, ATTR_TYPE)?.trim()?.lowercase()
+    val urlFromAttribute =
+      parser.getAttributeValue(parser.namespace, ATTR_URL)?.trim()?.ifBlank { null }
+    val rawUrl =
+      if (!urlFromAttribute.isNullOrBlank()) {
+        parser.skipSubTree()
+        urlFromAttribute
+      } else {
+        readTextContentAndSkipSubTree(parser)
+      }
+
+    if (rawUrl.isNullOrBlank()) return MediaContentResult()
+
+    val isAudio = medium == "audio" || type?.startsWith("audio/") == true
+    val isImage =
+      medium == "image" ||
+        type?.startsWith("image/") == true ||
+        (medium.isNullOrBlank() && type.isNullOrBlank())
+
+    return when {
+      isAudio -> MediaContentResult(audioUrl = rawUrl)
+      isImage -> MediaContentResult(imageUrl = rawUrl)
+      else -> MediaContentResult()
+    }
+  }
+
   protected fun createFeedPayload(
     name: String?,
     description: String?,
     icon: String?,
+    coverArtUrl: String? = null,
     homepageLink: String?,
     link: String,
     posts: Flow<PostPayload>,
   ): FeedPayload {
-    val host = UrlUtils.extractHost(homepageLink ?: link)
-    val finalIcon =
-      if (icon.isNullOrBlank()) {
-        UrlUtils.fallbackFeedIcon(host)
-      } else {
-        icon
-      }
+    val resolvedHomepageLink = homepageLink?.ifBlank { null } ?: link
+    val host = UrlUtils.extractHost(resolvedHomepageLink)
+    val resolvedCoverArtUrl =
+      coverArtUrl?.trim()?.ifBlank { null }?.let { UrlUtils.safeUrl(host, it) }
+    val resolvedIcon = icon?.trim()?.ifBlank { null }?.let { UrlUtils.safeUrl(host, it) }
+    val finalIcon = resolvedIcon ?: resolvedCoverArtUrl ?: UrlUtils.fallbackFeedIcon(host)
 
     return FeedPayload(
-      name = XmlFeedParser.cleanText(name ?: homepageLink)!!.decodeHTMLString(),
+      name = XmlFeedParser.cleanText(name ?: resolvedHomepageLink)!!.decodeHTMLString(),
       description = XmlFeedParser.cleanText(description).orEmpty().decodeHTMLString(),
       icon = finalIcon,
       homepageLink = homepageLink ?: link,
       link = link,
       posts = posts,
+      coverArtUrl = resolvedCoverArtUrl,
     )
   }
 
@@ -232,6 +302,7 @@ abstract class XmlContentParser {
   protected fun readMediaGroup(parser: XmlPullParser): MediaGroupResult {
     var image: String? = null
     var description: String? = null
+    var audioUrl: String? = null
 
     forEachChildTag(parser, TAG_MEDIA_GROUP) { name ->
       when (name) {
@@ -242,13 +313,67 @@ abstract class XmlContentParser {
           }
         }
         TAG_MEDIA_CONTENT -> {
+          val mediaContent = readMediaContent(parser)
+          if (image.isNullOrBlank() && !mediaContent.imageUrl.isNullOrBlank()) {
+            image = mediaContent.imageUrl
+          }
+          if (audioUrl.isNullOrBlank() && !mediaContent.audioUrl.isNullOrBlank()) {
+            audioUrl = mediaContent.audioUrl
+          }
+        }
+        TAG_MEDIA_DESCRIPTION -> {
           description = parser.nextText()
         }
         else -> parser.skipSubTree()
       }
     }
 
-    return MediaGroupResult(image, description)
+    return MediaGroupResult(image = image, description = description, audioUrl = audioUrl)
+  }
+
+  protected fun readPodcastChaptersUrl(parser: XmlPullParser, hostLink: String?): String? {
+    val rawUrl = parser.getAttributeValue(parser.namespace, ATTR_URL)?.trim()?.ifBlank { null }
+    val type = parser.getAttributeValue(parser.namespace, ATTR_TYPE)?.trim()?.lowercase()
+    parser.skipSubTree()
+
+    val isSupportedType = type.isNullOrBlank() || type.contains("json") || type.contains("chapter")
+    if (rawUrl == null || !isSupportedType) return null
+
+    return UrlUtils.safeUrl(hostLink, rawUrl)
+  }
+
+  protected fun readPodloveChapters(parser: XmlPullParser, hostLink: String?): List<MediaChapter> {
+    val chapters = mutableListOf<MediaChapter>()
+
+    forEachChildTag(parser, TAG_PSC_CHAPTERS) { childName ->
+      if (childName == TAG_PSC_CHAPTER) {
+        val rawStart = parser.getAttributeValue(parser.namespace, ATTR_START)
+        val rawTitle = parser.getAttributeValue(parser.namespace, ATTR_TITLE)?.trim()
+        val rawHref =
+          parser.getAttributeValue(parser.namespace, ATTR_HREF)?.trim()?.ifBlank { null }
+        val rawImage =
+          parser.getAttributeValue(parser.namespace, ATTR_IMAGE)?.trim()?.ifBlank { null }
+        parser.skipSubTree()
+
+        val timestampMs = rawStart?.let(::parseNormalPlayTimeMs)
+        val title =
+          rawTitle?.ifBlank { null }?.let { XmlFeedParser.cleanText(it) }?.decodeHTMLString()
+        if (timestampMs != null && !title.isNullOrBlank()) {
+          chapters +=
+            MediaChapter(
+              timestampMs = timestampMs,
+              title = title,
+              isSponsor = isSponsorChapterTitle(title),
+              url = rawHref?.let { UrlUtils.safeUrl(hostLink, it) },
+              imageUrl = rawImage?.let { UrlUtils.safeUrl(hostLink, it) },
+            )
+        }
+      } else {
+        parser.skipSubTree()
+      }
+    }
+
+    return chapters.distinctBy { it.timestampMs }.sortedBy { it.timestampMs }
   }
 
   protected fun createPostPayload(
@@ -261,6 +386,8 @@ abstract class XmlContentParser {
     date: String?,
     commentsLink: String? = null,
     hostLink: String?,
+    chaptersUrl: String? = null,
+    chapters: List<MediaChapter> = emptyList(),
   ): PostPayload? {
     val postPubDateInMillis = date?.dateStringToEpochMillis()
 
@@ -283,6 +410,8 @@ abstract class XmlContentParser {
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = commentsLink?.trim(),
       isDateParsedCorrectly = postPubDateInMillis != null,
+      chaptersUrl = chaptersUrl,
+      chapters = chapters,
     )
   }
 
@@ -293,5 +422,14 @@ abstract class XmlContentParser {
     val audioUrl: String? = null,
   )
 
-  protected data class MediaGroupResult(val image: String?, val description: String?)
+  protected data class MediaContentResult(
+    val imageUrl: String? = null,
+    val audioUrl: String? = null,
+  )
+
+  protected data class MediaGroupResult(
+    val image: String?,
+    val description: String?,
+    val audioUrl: String? = null,
+  )
 }

@@ -236,7 +236,9 @@ SELECT
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
-  post.audioDuration AS audioDuration
+  post.audioDuration AS audioDuration,
+  feed.coverArtUrl AS feedCoverArtUrl,
+  feed.link AS feedLink
 FROM paged
 INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
@@ -285,7 +287,9 @@ SELECT
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
-  post.audioDuration AS audioDuration
+  post.audioDuration AS audioDuration,
+  feed.coverArtUrl AS feedCoverArtUrl,
+  feed.link AS feedLink
 FROM paged
 INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
@@ -334,7 +338,9 @@ SELECT
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
-  post.audioDuration AS audioDuration
+  post.audioDuration AS audioDuration,
+  feed.coverArtUrl AS feedCoverArtUrl,
+  feed.link AS feedLink
 FROM paged
 INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
@@ -383,7 +389,9 @@ SELECT
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
-  post.audioDuration AS audioDuration
+  post.audioDuration AS audioDuration,
+  feed.coverArtUrl AS feedCoverArtUrl,
+  feed.link AS feedLink
 FROM paged
 INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
@@ -447,7 +455,9 @@ SELECT
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
-  post.audioDuration AS audioDuration
+  post.audioDuration AS audioDuration,
+  feed.coverArtUrl AS feedCoverArtUrl,
+  feed.link AS feedLink
 FROM paged
 INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
@@ -500,7 +510,9 @@ SELECT
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
-  post.audioDuration AS audioDuration
+  post.audioDuration AS audioDuration,
+  feed.coverArtUrl AS feedCoverArtUrl,
+  feed.link AS feedLink
 FROM paged
 INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
@@ -553,7 +565,9 @@ SELECT
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
-  post.audioDuration AS audioDuration
+  post.audioDuration AS audioDuration,
+  feed.coverArtUrl AS feedCoverArtUrl,
+  feed.link AS feedLink
 FROM paged
 INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
@@ -606,7 +620,9 @@ SELECT
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
-  post.audioDuration AS audioDuration
+  post.audioDuration AS audioDuration,
+  feed.coverArtUrl AS feedCoverArtUrl,
+  feed.link AS feedLink
 FROM paged
 INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
@@ -679,7 +695,9 @@ SELECT
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
-  post.audioDuration AS audioDuration
+  post.audioDuration AS audioDuration,
+  feed.coverArtUrl AS feedCoverArtUrl,
+  feed.link AS feedLink
 FROM paged
 INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
@@ -752,7 +770,9 @@ SELECT
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
-  post.audioDuration AS audioDuration
+  post.audioDuration AS audioDuration,
+  feed.coverArtUrl AS feedCoverArtUrl,
+  feed.link AS feedLink
 FROM paged
 INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
@@ -825,7 +845,9 @@ SELECT
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
-  post.audioDuration AS audioDuration
+  post.audioDuration AS audioDuration,
+  feed.coverArtUrl AS feedCoverArtUrl,
+  feed.link AS feedLink
 FROM paged
 INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
@@ -898,7 +920,9 @@ SELECT
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
-  post.audioDuration AS audioDuration
+  post.audioDuration AS audioDuration,
+  feed.coverArtUrl AS feedCoverArtUrl,
+  feed.link AS feedLink
 FROM paged
 INNER JOIN post ON post.rowid = paged.postRowId
 INNER JOIN feed ON post.sourceId = feed.id
@@ -1019,7 +1043,9 @@ SELECT
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
-  post.audioDuration AS audioDuration
+  post.audioDuration AS audioDuration,
+  feed.coverArtUrl AS feedCoverArtUrl,
+  feed.link AS feedLink
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -1052,7 +1078,9 @@ SELECT
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
-  post.audioDuration AS audioDuration
+  post.audioDuration AS audioDuration,
+  feed.coverArtUrl AS feedCoverArtUrl,
+  feed.link AS feedLink
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -1355,7 +1383,9 @@ SELECT
   pc.articleContentReadingTime AS articleContentReadingTime,
   post.seedColor AS seedColor,
   post.audioProgress AS audioProgress,
-  post.audioDuration AS audioDuration
+  post.audioDuration AS audioDuration,
+  feed.coverArtUrl AS feedCoverArtUrl,
+  feed.link AS feedLink
 FROM post
 INNER JOIN feed ON post.sourceId == feed.id
 LEFT JOIN postContent pc ON post.id == pc.id

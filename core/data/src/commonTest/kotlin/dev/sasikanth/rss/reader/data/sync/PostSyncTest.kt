@@ -125,6 +125,7 @@ class PostSyncTest {
               hideFromAllFeeds = false,
               lastUpdatedAt = 123456789L,
               isDeleted = false,
+              coverArtUrl = "https://example.com/cover.jpg",
             )
           ),
         groups =
@@ -215,6 +216,7 @@ class PostSyncTest {
     assertEquals(false, deserialized.feeds[0].alwaysFetchSourceArticle)
     assertEquals(null, deserialized.feeds[0].lastCleanUpAt)
     assertEquals(false, deserialized.feeds[0].isDeleted)
+    assertEquals(null, deserialized.feeds[0].coverArtUrl)
 
     assertEquals(1, deserialized.groups.size)
     assertEquals(emptyList<String>(), deserialized.groups[0].feedIds)

@@ -74,8 +74,22 @@ class JsonFeedParser(
             val rawContent =
               htmlContent?.cleanedHtml ?: jsonFeedPost.contentText ?: jsonFeedPost.contentHtml
             val audioUrl =
-              jsonFeedPost.attachments.firstOrNull { it.mimeType.startsWith("audio/") }?.url
-                ?: htmlContent?.audioUrl
+              jsonFeedPost.attachments
+                .firstOrNull { it.mimeType.startsWith("audio/", ignoreCase = true) }
+                ?.url
+                ?.ifBlank { null } ?: htmlContent?.audioUrl
+            val imageAttachment =
+              jsonFeedPost.attachments
+                .firstOrNull { it.mimeType.startsWith("image/", ignoreCase = true) }
+                ?.url
+                ?.ifBlank { null }
+            val chaptersUrl =
+              jsonFeedPost.attachments
+                .firstOrNull { it.mimeType.equals("application/json+chapters", ignoreCase = true) }
+                ?.url
+                ?.trim()
+                ?.ifBlank { null }
+                ?.let { UrlUtils.safeUrl(host, it) }
 
             emit(
               PostPayload(
@@ -85,25 +99,34 @@ class JsonFeedParser(
                 rawContent = rawContent,
                 fullContent = null,
                 imageUrl =
-                  jsonFeedPost.imageUrl ?: image ?: UrlUtils.youTubeThumbnail(jsonFeedPost.url),
+                  jsonFeedPost.imageUrl?.ifBlank { null }
+                    ?: jsonFeedPost.bannerImage?.ifBlank { null }
+                    ?: imageAttachment
+                    ?: image
+                    ?: UrlUtils.youTubeThumbnail(jsonFeedPost.url),
                 audioUrl = audioUrl,
                 date = postPublishedAt ?: Clock.System.now().toEpochMilliseconds(),
                 commentsLink = null,
                 isDateParsedCorrectly = postPublishedAt != null,
+                chaptersUrl = chaptersUrl,
               )
             )
           }
         }
 
+        val coverArtUrl = jsonFeedPayload.icon?.trim()?.ifBlank { null }
         val feedPayload =
           FeedPayload(
             name = jsonFeedPayload.title,
             icon =
-              jsonFeedPayload.icon ?: jsonFeedPayload.favIcon ?: UrlUtils.fallbackFeedIcon(host),
+              coverArtUrl
+                ?: jsonFeedPayload.favIcon?.trim()?.ifBlank { null }
+                ?: UrlUtils.fallbackFeedIcon(host),
             description = jsonFeedPayload.description.orEmpty(),
             homepageLink = jsonFeedPayload.homePageUrl ?: feedUrl,
             link = jsonFeedPayload.url ?: feedUrl,
             posts = posts,
+            coverArtUrl = coverArtUrl,
           )
 
         return@withContext feedPayload
@@ -122,7 +145,7 @@ private data class JsonFeedPayload(
   @SerialName("home_page_url") val homePageUrl: String? = null,
   @SerialName("feed_url") val url: String? = null,
   val icon: String? = null,
-  val favIcon: String? = null,
+  @SerialName("favicon") val favIcon: String? = null,
   val items: List<Post> = emptyList(),
 ) {
 
@@ -134,6 +157,7 @@ private data class JsonFeedPayload(
     @SerialName("content_html") val contentHtml: String? = null,
     val summary: String? = null,
     @SerialName("image") val imageUrl: String? = null,
+    @SerialName("banner_image") val bannerImage: String? = null,
     @SerialName("date_published") val publishedAt: String? = null,
     val url: String? = null,
     val attachments: List<Attachment> = emptyList(),

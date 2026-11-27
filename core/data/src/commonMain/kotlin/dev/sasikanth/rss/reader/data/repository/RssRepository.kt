@@ -65,6 +65,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -94,6 +95,10 @@ class RssRepository(
   private companion object {
     private const val POST_UPSERT_BATCH_SIZE = 200
     private const val SQLITE_BATCH_SIZE = 990
+    private val chaptersJsonSerializer = Json {
+      ignoreUnknownKeys = true
+      encodeDefaults = false
+    }
   }
 
   suspend fun deleteAllLocalData() {
@@ -140,6 +145,7 @@ class RssRepository(
           createdAt = Clock.System.now(),
           lastUpdatedAt = Clock.System.now(),
           enableNotifications = enableNotifications,
+          coverArtUrl = feedPayload.coverArtUrl,
         )
       }
     }
@@ -260,6 +266,11 @@ class RssRepository(
             remoteId = postPayload.remoteId,
           )
 
+          val encodedChaptersJson =
+            postPayload.chapters
+              .takeIf { it.isNotEmpty() }
+              ?.let { chaptersJsonSerializer.encodeToString(it) }
+
           postContentQueries.upsert(
             id = prepared.postId,
             feedContent = postPayload.rawContent,
@@ -268,6 +279,8 @@ class RssRepository(
             createdAt = now,
             feedContentReadingTime = prepared.rawContentReadingTime.toLong(),
             articleContentReadingTime = prepared.htmlContentReadingTime?.toLong(),
+            chaptersUrl = postPayload.chaptersUrl,
+            chaptersJson = encodedChaptersJson,
           )
         }
       }
@@ -519,6 +532,20 @@ class RssRepository(
     feedRepository.updateFeedSyncError(feedId, syncError)
   }
 
+  suspend fun updateFeedCoverArt(feedId: String, coverArtUrl: String) {
+    withContext(dispatchersProvider.databaseWrite) {
+      feedQueries.updateCoverArtUrl(coverArtUrl = coverArtUrl, id = feedId)
+    }
+  }
+
+  suspend fun audioFeedsMissingCoverArt(limit: Long = 10): List<Pair<String, String>> {
+    return withContext(dispatchersProvider.databaseRead) {
+      feedQueries
+        .audioFeedsMissingCoverArt(limit = limit) { id, link -> id to link }
+        .executeAsList()
+    }
+  }
+
   /** Search feeds, returns all feeds if [searchQuery] is empty */
   fun searchFeed(
     searchQuery: String,
@@ -623,7 +650,9 @@ class RssRepository(
             articleContentReadingTime: Long?,
             seedColor: Long?,
             audioProgress: Long,
-            audioDuration: Long ->
+            audioDuration: Long,
+            feedCoverArtUrl: String?,
+            feedLink: String ->
             ResolvedPost(
               id = id,
               sourceId = sourceId,
@@ -646,6 +675,8 @@ class RssRepository(
               seedColor = seedColor?.toInt(),
               audioProgress = audioProgress,
               audioDuration = audioDuration,
+              feedCoverArtUrl = feedCoverArtUrl,
+              feedLink = feedLink,
             )
           },
         )

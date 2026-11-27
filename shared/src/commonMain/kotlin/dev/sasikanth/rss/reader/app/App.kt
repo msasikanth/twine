@@ -19,11 +19,11 @@ package dev.sasikanth.rss.reader.app
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.VectorConverter
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -100,6 +100,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.defaultPopTransitionSpec
+import androidx.navigation3.ui.defaultPredictivePopTransitionSpec
 import androidx.navigation3.ui.defaultTransitionSpec
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
@@ -150,6 +151,7 @@ import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
+import dev.sasikanth.rss.reader.ui.LocalSharedTransitionScope
 import dev.sasikanth.rss.reader.ui.SeedColorExtractor
 import dev.sasikanth.rss.reader.ui.darkAppColorScheme
 import dev.sasikanth.rss.reader.ui.getOverriddenColorScheme
@@ -333,26 +335,21 @@ fun App(
         }
       }
     val navigationEventDispatcherOwner = LocalNavigationEventDispatcherOwner.current
-    val maxScreenCornerRadius =
-      if (platform == Platform.Apple) {
-        38.dp
-      } else {
-        36.dp
-      }
     val screenCornerRadius = remember { Animatable(0.dp, Dp.VectorConverter) }
-    LaunchedEffect(navigationEventDispatcherOwner, maxScreenCornerRadius) {
-      val transitionFlow =
-        navigationEventDispatcherOwner?.navigationEventDispatcher?.transitionState ?: emptyFlow()
-      transitionFlow.collectLatest { state ->
-        when (state) {
-          is NavigationEventTransitionState.InProgress -> {
-            val targetRadius =
-              maxScreenCornerRadius * LinearOutSlowInEasing.transform(state.latestEvent.progress)
-            screenCornerRadius.snapTo(targetRadius)
-          }
-          is NavigationEventTransitionState.Idle -> {
-            if (screenCornerRadius.value > 0.dp) {
-              screenCornerRadius.animateTo(0.dp)
+    if (platform == Platform.Apple) {
+      LaunchedEffect(navigationEventDispatcherOwner) {
+        val transitionFlow =
+          navigationEventDispatcherOwner?.navigationEventDispatcher?.transitionState ?: emptyFlow()
+        transitionFlow.collectLatest { state ->
+          when (state) {
+            is NavigationEventTransitionState.InProgress -> {
+              val targetRadius = 38.dp * LinearOutSlowInEasing.transform(state.latestEvent.progress)
+              screenCornerRadius.snapTo(targetRadius)
+            }
+            is NavigationEventTransitionState.Idle -> {
+              if (screenCornerRadius.value > 0.dp) {
+                screenCornerRadius.animateTo(0.dp)
+              }
             }
           }
         }
@@ -360,13 +357,17 @@ fun App(
     }
     val screenModifier =
       remember(screenCornerRadius) {
-        Modifier.fillMaxSize()
-          .then(
-            ScreenTransitionModifierElement(
-              screenCornerRadius = { screenCornerRadius.value },
-              drawEdgeShadow = platform == Platform.Apple,
+        if (platform == Platform.Apple) {
+          Modifier.fillMaxSize()
+            .then(
+              ScreenTransitionModifierElement(
+                screenCornerRadius = { screenCornerRadius.value },
+                drawEdgeShadow = true,
+              )
             )
-          )
+        } else {
+          Modifier.fillMaxSize()
+        }
       }
 
     SideEffect(useDarkTheme, onThemeChange) { onThemeChange(useDarkTheme) }
@@ -500,32 +501,57 @@ fun App(
           }
         }
       val isTwoPane = paneScaffoldDirective.maxHorizontalPartitions > 1
-      val listPaneSizeClass =
+      val listPaneWidthDp =
         remember(
-          isTwoPane,
-          windowInfo.windowSizeClass,
           density,
           navigationPaneWidth,
           listPaneContentWidth.floatValue,
           listPaneWidthLimits,
-          windowHeight,
         ) {
+          val paneWidthPx =
+            with(density) { (navigationPaneWidth + listPaneContentWidth.floatValue.dp).roundToPx() }
+              .coerceIn(listPaneWidthLimits)
+          with(density) { paneWidthPx.toDp() }
+        }
+      val listPaneSizeClass =
+        remember(isTwoPane, windowInfo.windowSizeClass, listPaneWidthDp, windowHeight) {
           if (!isTwoPane) {
             windowInfo.windowSizeClass
           } else {
-            val paneWidthPx =
-              with(density) {
-                  (navigationPaneWidth + listPaneContentWidth.floatValue.dp).roundToPx()
-                }
-                .coerceIn(listPaneWidthLimits)
-            val paneWidthDp = with(density) { paneWidthPx.toDp().value }
             WindowSizeClass.BREAKPOINTS_V2.computeWindowSizeClass(
-              widthDp = paneWidthDp,
+              widthDp = listPaneWidthDp.value,
               heightDp = windowHeight.value,
             )
           }
         }
       val listPaneSizeClassState = rememberUpdatedState(listPaneSizeClass)
+      val readerPaneSizeClass =
+        remember(
+          isTwoPane,
+          windowInfo.windowSizeClass,
+          windowWidth,
+          baseDirective.horizontalPartitionSpacerSize,
+          listPaneWidthDp,
+          minReaderPaneWidth,
+          windowHeight,
+        ) {
+          if (!isTwoPane) {
+            windowInfo.windowSizeClass
+          } else {
+            val readerPaneWidth =
+              calculateReaderPaneWidth(
+                windowWidth = windowWidth,
+                partitionSpacerWidth = baseDirective.horizontalPartitionSpacerSize,
+                listPaneWidth = listPaneWidthDp,
+                minReaderPaneWidth = minReaderPaneWidth,
+              )
+            WindowSizeClass.BREAKPOINTS_V2.computeWindowSizeClass(
+              widthDp = readerPaneWidth.value,
+              heightDp = windowHeight.value,
+            )
+          }
+        }
+      val readerPaneSizeClassState = rememberUpdatedState(readerPaneSizeClass)
 
       val openCurrentlyPlaying =
         remember(audioPlayer, appViewModel) {
@@ -551,6 +577,7 @@ fun App(
           isSideNavigationExpanded,
           isReaderPaneExpanded,
           listPaneSizeClassState,
+          readerPaneSizeClassState,
         ) {
           entryProvider {
             placeholderScreen(
@@ -615,6 +642,7 @@ fun App(
               toggleLightNavBar = toggleLightNavBar,
               modifier = screenModifier,
               isReaderPaneExpanded = isReaderPaneExpanded,
+              readerPaneSizeClass = readerPaneSizeClassState,
             )
 
             addFeedScreen(addFeedViewModel = addFeedViewModel, navigator = navigator)
@@ -652,7 +680,7 @@ fun App(
             )
 
             imageViewerScreen(
-              modifier = screenModifier,
+              modifier = Modifier.fillMaxSize(),
               navigator = navigator,
               toggleLightStatusBar = toggleLightStatusBar,
               toggleLightNavBar = toggleLightNavBar,
@@ -785,6 +813,12 @@ fun App(
 
       val saveableStateHolderDecorator = rememberSaveableStateHolderNavEntryDecorator<NavKey>()
       val viewModelStoreDecorator = rememberViewModelStoreNavEntryDecorator<NavKey>()
+      val predictiveBackGestureState = rememberPredictiveBackGestureState()
+      val androidPredictiveBackDecorator =
+        rememberAndroidPredictiveBackDecorator(
+          backStack = backStack,
+          gestureState = predictiveBackGestureState,
+        )
       val rootNavTransitionDecorator = remember {
         NavEntryDecorator<NavKey> { entry ->
           val rootTransition = LocalNavAnimatedContentScope.current.transition
@@ -797,16 +831,23 @@ fun App(
         remember(
           saveableStateHolderDecorator,
           viewModelStoreDecorator,
+          androidPredictiveBackDecorator,
           rootNavTransitionDecorator,
         ) {
-          if (platform == Platform.Apple) {
-            listOf(
-              saveableStateHolderDecorator,
-              viewModelStoreDecorator,
-              rootNavTransitionDecorator,
-            )
-          } else {
-            listOf(saveableStateHolderDecorator, viewModelStoreDecorator)
+          when (platform) {
+            Platform.Apple ->
+              listOf(
+                saveableStateHolderDecorator,
+                viewModelStoreDecorator,
+                rootNavTransitionDecorator,
+              )
+            Platform.Android ->
+              listOf(
+                saveableStateHolderDecorator,
+                viewModelStoreDecorator,
+                androidPredictiveBackDecorator,
+              )
+            else -> listOf(saveableStateHolderDecorator, viewModelStoreDecorator)
           }
         }
       val sceneStrategies =
@@ -814,47 +855,58 @@ fun App(
           listOf(bottomSheetSceneStrategy, listDetailSceneStrategy)
         }
 
-      Box(modifier = Modifier.fillMaxSize()) {
-        NavDisplay(
-          modifier =
-            Modifier.fillMaxSize()
-              .drawBehind { drawRect(appColorScheme.backdrop) }
-              .then(rootShortcutModifier),
-          backStack = backStack,
-          entryProvider = entryProvider,
-          entryDecorators = entryDecorators,
-          sceneStrategies = sceneStrategies,
-          transitionSpec = {
-            if (initialState.entries.any { it.contentKey == Screen.Placeholder.toString() }) {
-              fadeIn() togetherWith fadeOut()
-            } else if (platform == Platform.Android) {
-              AndroidNavEnterTransition togetherWith ExitTransition.KeepUntilTransitionsFinished
-            } else {
-              defaultTransitionSpec<NavKey>().invoke(this)
-            }
-          },
-          popTransitionSpec = {
-            if (platform == Platform.Android) {
-              EnterTransition.None togetherWith AndroidNavPopExitTransition
-            } else {
-              defaultPopTransitionSpec<NavKey>().invoke(this)
-            }
-          },
-          onBack = { navigator.goBack() },
-        )
+      SharedTransitionLayout {
+        CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+          Box(modifier = Modifier.fillMaxSize()) {
+            NavDisplay(
+              modifier =
+                Modifier.fillMaxSize()
+                  .drawBehind { drawRect(appColorScheme.backdrop) }
+                  .then(rootShortcutModifier),
+              backStack = backStack,
+              entryProvider = entryProvider,
+              entryDecorators = entryDecorators,
+              sceneStrategies = sceneStrategies,
+              transitionSpec = {
+                if (initialState.entries.any { it.contentKey == Screen.Placeholder.toString() }) {
+                  fadeIn() togetherWith fadeOut()
+                } else if (platform == Platform.Android) {
+                  AndroidNavEnterTransition togetherWith ExitTransition.KeepUntilTransitionsFinished
+                } else {
+                  defaultTransitionSpec<NavKey>().invoke(this)
+                }
+              },
+              popTransitionSpec = {
+                if (platform == Platform.Android) {
+                  EnterTransition.None togetherWith AndroidNavPopExitTransition
+                } else {
+                  defaultPopTransitionSpec<NavKey>().invoke(this)
+                }
+              },
+              predictivePopTransitionSpec = { swipeEdge ->
+                if (platform == Platform.Android) {
+                  androidPredictivePopTransitionSpec(swipeEdge)
+                } else {
+                  defaultPredictivePopTransitionSpec<NavKey>().invoke(this, swipeEdge)
+                }
+              },
+              onBack = { navigator.goBack() },
+            )
 
-        SnackbarHost(
-          hostState = snackbarHostState,
-          modifier =
-            Modifier.align(Alignment.BottomCenter).windowInsetsPadding(WindowInsets.safeDrawing),
-        )
+            SnackbarHost(
+              hostState = snackbarHostState,
+              modifier =
+                Modifier.align(Alignment.BottomCenter).windowInsetsPadding(WindowInsets.safeDrawing),
+            )
 
-        if (appState.showFpsOverlay || appState.showWindowSizeOverlay) {
-          DebugPerformanceOverlay(
-            showFps = appState.showFpsOverlay,
-            showWindowSize = appState.showWindowSizeOverlay,
-            modifier = Modifier.fillMaxSize(),
-          )
+            if (appState.showFpsOverlay || appState.showWindowSizeOverlay) {
+              DebugPerformanceOverlay(
+                showFps = appState.showFpsOverlay,
+                showWindowSize = appState.showWindowSizeOverlay,
+                modifier = Modifier.fillMaxSize(),
+              )
+            }
+          }
         }
       }
 
@@ -870,8 +922,6 @@ fun App(
 
 private val LocalRootNavTransition = compositionLocalOf<Transition<EnterExitState>?> { null }
 
-private val AndroidNavEnterTransition = fadeIn(animationSpec = tween(durationMillis = 250))
-private val AndroidNavPopExitTransition = fadeOut(animationSpec = tween(durationMillis = 220))
 private val APPLE_TRANSITION_SHADOW_WIDTH = 32.dp
 private val AppleTransitionShadowColor = Color.Black.copy(alpha = 0.1f)
 
@@ -1064,4 +1114,13 @@ internal fun shouldUseListDetailForSinglePane(
   isReaderExpanded: Boolean,
 ): Boolean {
   return isDesktop || isSplitCapableWindow || hasEnteredListDetailScaffold || isReaderExpanded
+}
+
+internal fun calculateReaderPaneWidth(
+  windowWidth: Dp,
+  partitionSpacerWidth: Dp,
+  listPaneWidth: Dp,
+  minReaderPaneWidth: Dp,
+): Dp {
+  return (windowWidth - partitionSpacerWidth - listPaneWidth).coerceAtLeast(minReaderPaneWidth)
 }

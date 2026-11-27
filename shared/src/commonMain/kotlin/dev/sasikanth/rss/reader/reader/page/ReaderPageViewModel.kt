@@ -23,14 +23,22 @@ import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import com.mikepenz.markdown.model.State
 import com.mikepenz.markdown.model.parseMarkdown
+import dev.sasikanth.rss.reader.core.model.local.MediaChapter
 import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
-import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.data.repository.PostContentRepository
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.sync.PodcastChaptersCoordinator
+import dev.sasikanth.rss.reader.data.sync.PodcastCoverArtCoordinator
 import dev.sasikanth.rss.reader.media.AudioPlayer
+import dev.sasikanth.rss.reader.media.AudioSponsorSkipper
+import dev.sasikanth.rss.reader.reader.ReaderContentType
+import dev.sasikanth.rss.reader.reader.classifyReaderContent
+import dev.sasikanth.rss.reader.reader.extractTimestampChapters
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
 import dev.sasikanth.rss.reader.reader.redability.fallbackReadabilityResult
+import dev.sasikanth.rss.reader.reader.resolvePodcastHeroArtworkUrl
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
@@ -66,9 +74,25 @@ class ReaderPageViewModel(
   private val postContentRepository: PostContentRepository,
   private val fullArticleFetcher: FullArticleFetcher,
   private val readabilityRunner: ReadabilityRunner,
+  private val podcastCoverArtCoordinator: PodcastCoverArtCoordinator,
+  private val podcastChaptersCoordinator: PodcastChaptersCoordinator,
+  private val settingsRepository: SettingsRepository,
+  private val audioSponsorSkipper: AudioSponsorSkipper,
   val audioPlayer: AudioPlayer,
   @Assisted private val readerPost: ResolvedPost,
 ) : ViewModel() {
+
+  val contentType: ReaderContentType = readerPost.classifyReaderContent(audioPlayer.isAvailable)
+
+  private val _resolvedCoverArtUrl = MutableStateFlow(readerPost.resolvePodcastHeroArtworkUrl())
+  val resolvedCoverArtUrl: StateFlow<String?> = _resolvedCoverArtUrl
+
+  val skipSponsorChapters: StateFlow<Boolean> =
+    settingsRepository.skipSponsorChapters.stateIn(
+      viewModelScope,
+      SharingStarted.WhileSubscribed(5000),
+      false,
+    )
 
   private val _contentState = MutableStateFlow("")
   val contentState =
@@ -85,6 +109,35 @@ class ReaderPageViewModel(
       }
       .flowOn(dispatchersProvider.default)
       .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), State.Loading())
+
+  val chapters: StateFlow<List<MediaChapter>> =
+    combine(_contentState, postContentRepository.postContent(readerPost.id)) { markdown, postContent
+        ->
+        if (contentType !is ReaderContentType.Podcast) {
+          emptyList()
+        } else {
+          val structuredChapters =
+            PodcastChaptersCoordinator.decodeChaptersJson(postContent?.chaptersJson)
+          if (structuredChapters.isNotEmpty()) {
+            structuredChapters
+          } else {
+            val descriptionChapters = extractTimestampChapters(readerPost.description)
+            val markdownChapters =
+              if (markdown.isNotBlank()) extractTimestampChapters(markdown) else emptyList()
+            (markdownChapters + descriptionChapters)
+              .distinctBy { it.timestampMs }
+              .sortedBy { it.timestampMs }
+          }
+        }
+      }
+      .distinctUntilChanged()
+      .onEach { resolvedChapters ->
+        if (contentType is ReaderContentType.Podcast) {
+          audioSponsorSkipper.registerChapters(readerPost.id, resolvedChapters)
+        }
+      }
+      .flowOn(dispatchersProvider.default)
+      .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   private val _excerptState = MutableStateFlow("")
   val excerptState: StateFlow<String> = _excerptState
@@ -105,9 +158,7 @@ class ReaderPageViewModel(
         ReaderProcessingProgress.Loading,
       )
 
-  val videoLink: String? = readerPost.link.takeIf { UrlUtils.youTubeVideoId(it) != null }
-
-  private val canLoadFullArticle = videoLink == null
+  val canLoadFullArticle: Boolean = contentType !is ReaderContentType.Video
 
   private val _showFullArticle =
     MutableStateFlow(readerPost.alwaysFetchFullArticle && canLoadFullArticle)
@@ -121,6 +172,43 @@ class ReaderPageViewModel(
     if (_showFullArticle.value) {
       loadFullArticle()
     }
+    if (
+      contentType is ReaderContentType.Podcast &&
+        readerPost.feedCoverArtUrl.isNullOrBlank() &&
+        readerPost.feedLink.isNotBlank()
+    ) {
+      viewModelScope.launch {
+        val enriched =
+          podcastCoverArtCoordinator.enrichFeedIfNeeded(
+            feedId = readerPost.sourceId,
+            feedLink = readerPost.feedLink,
+          )
+        if (!enriched.isNullOrBlank()) {
+          _resolvedCoverArtUrl.value = readerPost.resolvePodcastHeroArtworkUrl(enriched)
+        }
+      }
+    }
+    if (contentType is ReaderContentType.Podcast) {
+      viewModelScope.launch {
+        podcastChaptersCoordinator.loadChaptersIfNeeded(
+          postId = readerPost.id,
+          createdAt = readerPost.createdAt,
+          chaptersUrl = null,
+          audioUrl = contentType.audioUrl,
+        )
+      }
+    }
+  }
+
+  fun toggleSkipSponsorChapters(value: Boolean) {
+    viewModelScope.launch { settingsRepository.toggleSkipSponsorChapters(value) }
+  }
+
+  fun playChapter(chapter: MediaChapter) {
+    if (chapter.isSponsor) {
+      audioSponsorSkipper.allowSponsorChapter(readerPost.id, chapter.timestampMs)
+    }
+    playAudioAt(chapter.timestampMs)
   }
 
   fun toggleFullArticle() {
@@ -133,26 +221,46 @@ class ReaderPageViewModel(
   }
 
   fun playAudio() {
-    val audioUrl = readerPost.audioUrl ?: return
-    val currentPlayingUrl = audioPlayer.playbackState.value.playingUrl
-    if (currentPlayingUrl == audioUrl) {
+    val podcast = contentType as? ReaderContentType.Podcast ?: return
+    val currentState = audioPlayer.playbackState.value
+    if (
+      currentState.playingPostId == readerPost.id || currentState.playingUrl == podcast.audioUrl
+    ) {
       audioPlayer.resume()
       return
     }
 
-    val coverUrl =
-      if (readerPost.imageUrl.isNullOrBlank()) {
-        readerPost.feedIcon
-      } else {
-        readerPost.imageUrl
-      }
     audioPlayer.play(
-      url = audioUrl,
+      url = podcast.audioUrl,
       title = readerPost.title,
       artist = readerPost.feedName,
-      coverUrl = coverUrl,
+      coverUrl = resolvedCoverArtUrl.value,
       postId = readerPost.id,
       initialPosition = resumePosition(),
+    )
+  }
+
+  fun playAudioAt(positionMs: Long) {
+    val podcast = contentType as? ReaderContentType.Podcast ?: return
+    val clampedPosition = positionMs.coerceAtLeast(0L)
+    val currentState = audioPlayer.playbackState.value
+    if (
+      currentState.playingPostId == readerPost.id || currentState.playingUrl == podcast.audioUrl
+    ) {
+      audioPlayer.seekTo(clampedPosition)
+      if (!currentState.isPlaying) {
+        audioPlayer.resume()
+      }
+      return
+    }
+
+    audioPlayer.play(
+      url = podcast.audioUrl,
+      title = readerPost.title,
+      artist = readerPost.feedName,
+      coverUrl = resolvedCoverArtUrl.value,
+      postId = readerPost.id,
+      initialPosition = clampedPosition,
     )
   }
 

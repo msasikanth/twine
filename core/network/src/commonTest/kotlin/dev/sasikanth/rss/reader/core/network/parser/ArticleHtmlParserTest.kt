@@ -214,4 +214,47 @@ class ArticleHtmlParserTest {
       true,
     )
   }
+
+  @Test
+  fun dataUriAndTrackingPixelImagesShouldBeSkippedForHeroImageWhilePreservingCleanedHtml() {
+    val html =
+      """
+        <html>
+          <body>
+            <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" width="1" height="1"/>
+            <img src="https://tracker.example.com/pixel.gif?uid=123"/>
+            <img src="https://tracker.example.com/1x1.png"/>
+            <img src="https://tracker.example.com/badge.png" width="16" height="16"/>
+            <img src="https://example.com/hero.jpg" width="800" height="600"/>
+          </body>
+        </html>
+      """
+
+    val result = articleHtmlParser.parse(html)
+
+    assertEquals("https://example.com/hero.jpg", result?.heroImage)
+    assertEquals(
+      true,
+      result?.cleanedHtml?.contains("https://tracker.example.com/pixel.gif?uid=123"),
+    )
+  }
+
+  @Test
+  fun htmlContainingOnlyTrackingOrDataImagesShouldYieldNullHeroImage() {
+    val html =
+      """
+        <html>
+          <body>
+            <img src="data:image/png;base64,AAAA"/>
+            <img src="https://tracker.example.com/pixel.gif"/>
+            <img src="https://tracker.example.com/spacer-1x1.png"/>
+            <img src="https://tracker.example.com/tiny.jpg" height="12"/>
+          </body>
+        </html>
+      """
+
+    val result = articleHtmlParser.parse(html)
+
+    assertNull(result?.heroImage)
+  }
 }

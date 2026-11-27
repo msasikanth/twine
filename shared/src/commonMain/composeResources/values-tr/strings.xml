@@ -175,7 +175,6 @@
   <string name="addToGroup">Gruba ekle</string>
   <string name="removeSources">Kaynakları sil</string>
   <string name="removeSourcesDesc">Seçili kaynakları silmek istediğine emin misin?</string>
-  <string name="noPinnedSources">Sabitlenmiş akış/grup yok</string>
   <string name="databaseMaintainenceTitle">Lütfen bekle...</string>
   <string name="databaseMaintainenceSubtitle">Veritabanı bakımı yapılıyor, bu sırada uygulamayı kapatma lütfen.</string>
   <string name="cdLoadFullArticle">Makalenin tamamını yükle</string>

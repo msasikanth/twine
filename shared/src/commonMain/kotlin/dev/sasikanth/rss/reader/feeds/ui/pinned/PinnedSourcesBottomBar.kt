@@ -20,7 +20,6 @@ package dev.sasikanth.rss.reader.feeds.ui.pinned
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -33,8 +32,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,7 +48,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -60,11 +56,8 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.BOTTOM_BAR_MAX_WIDTH
 import dev.sasikanth.rss.reader.utils.PINNED_SOURCES_BOTTOM_BAR_HEIGHT
 import kotlinx.collections.immutable.ImmutableList
-import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
-import twine.shared.generated.resources.Res
-import twine.shared.generated.resources.noPinnedSources
 
 @Composable
 internal fun NowPlayingBottomBar(
@@ -232,22 +225,6 @@ internal fun PinnedSourcesBottomBar(
       verticalAlignment = Alignment.CenterVertically,
       contentPadding = PaddingValues(start = 8.dp, end = 8.dp),
     ) {
-      if (pinnedSources.isEmpty()) {
-        item(key = "NoPinnedSourcesPlaceholder", contentType = "NoPinnedSourcesPlaceholder") {
-          Box(
-            modifier = Modifier.fillParentMaxWidth().padding(16.dp),
-            contentAlignment = Alignment.Center,
-          ) {
-            Text(
-              text = stringResource(Res.string.noPinnedSources),
-              style = MaterialTheme.typography.labelLarge,
-              color = { colorScheme.onSurfaceVariant },
-              textAlign = TextAlign.Center,
-            )
-          }
-        }
-      }
-
       items(
         count = pinnedSources.size,
         key = { pinnedSources[it].id },

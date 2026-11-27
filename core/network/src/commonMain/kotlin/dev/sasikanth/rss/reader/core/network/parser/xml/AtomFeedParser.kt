@@ -19,22 +19,31 @@ package dev.sasikanth.rss.reader.core.network.parser.xml
 
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.parseSource
+import dev.sasikanth.rss.reader.core.model.local.MediaChapter
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_HREF
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_REL
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_SRCSET
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_TYPE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_VALUE_ALTERNATE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ATOM_ENTRY
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ATOM_FEED
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_AUTHOR
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_CONTENT
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_GOOGLEPLAY_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ICON
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ITUNES_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_LOGO
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_CONTENT
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_GROUP
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_THUMBNAIL
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_NAME
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PODCAST_CHAPTERS
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PODCAST_IMAGES
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PSC_CHAPTERS
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PUBLISHED
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_SUBTITLE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_SUMMARY
@@ -67,7 +76,11 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
     var title: String? = null
     var description: String? = null
     var link: String? = null
-    var iconUrl: String? = null
+    var smallIconUrl: String? = null
+    var logoUrl: String? = null
+    var itunesImage: String? = null
+    var podcastImages: String? = null
+    var googlePlayImage: String? = null
     var authorName: String? = null
     var authorUri: String? = null
     var firstPost: PostPayload? = null
@@ -89,14 +102,37 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
           description = parser.nextText()
         }
         TAG_ICON -> {
-          iconUrl = parser.nextText()
+          val value = parser.nextText().trim().ifBlank { null }
+          if (smallIconUrl.isNullOrBlank()) {
+            smallIconUrl = value
+          }
         }
         TAG_LOGO -> {
-          iconUrl = parser.nextText()
+          val value = parser.nextText().trim().ifBlank { null }
+          if (logoUrl.isNullOrBlank()) {
+            logoUrl = value
+          }
         }
         TAG_ITUNES_IMAGE -> {
-          iconUrl = parser.getAttributeValue(parser.namespace, ATTR_HREF)
+          val href = parser.getAttributeValue(parser.namespace, ATTR_HREF)?.trim()?.ifBlank { null }
           parser.skipSubTree()
+          if (itunesImage.isNullOrBlank()) {
+            itunesImage = href
+          }
+        }
+        TAG_PODCAST_IMAGES -> {
+          val srcset = parser.getAttributeValue(parser.namespace, ATTR_SRCSET)
+          parser.skipSubTree()
+          if (podcastImages.isNullOrBlank()) {
+            podcastImages = parseSrcsetHighestResUrl(srcset)
+          }
+        }
+        TAG_GOOGLEPLAY_IMAGE -> {
+          val href = parser.getAttributeValue(parser.namespace, ATTR_HREF)?.trim()?.ifBlank { null }
+          parser.skipSubTree()
+          if (googlePlayImage.isNullOrBlank()) {
+            googlePlayImage = href
+          }
         }
         TAG_AUTHOR -> {
           forEachChildTag(parser, TAG_AUTHOR) { authorTag ->
@@ -123,11 +159,13 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
       link = authorUri?.ifBlank { null } ?: link
     }
 
-    iconUrl =
+    val parsedCoverArt = itunesImage ?: podcastImages ?: googlePlayImage ?: logoUrl
+    val (iconUrl, coverArtUrl) =
       if (UrlUtils.isYouTubeLink(feedUrl) && !link.isNullOrBlank()) {
-        youtubeChannelImage(link) ?: iconUrl
+        val youtubeImage = youtubeChannelImage(link)
+        (youtubeImage ?: parsedCoverArt ?: smallIconUrl) to (youtubeImage ?: parsedCoverArt)
       } else {
-        iconUrl
+        (parsedCoverArt ?: smallIconUrl) to parsedCoverArt
       }
 
     val postHostLink = UrlUtils.extractHost(link ?: feedUrl)
@@ -136,6 +174,7 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
       name = title,
       description = description,
       icon = iconUrl,
+      coverArtUrl = coverArtUrl,
       homepageLink = link,
       link = feedUrl,
       posts =
@@ -168,9 +207,17 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
     var rawSummaryHtml: String? = null
     var mediaGroupDescription: String? = null
     var mediaGroupImage: String? = null
+    var mediaGroupAudioUrl: String? = null
     var date: String? = null
-    var image: String? = null
+    var itunesImage: String? = null
+    var podcastImages: String? = null
+    var googlePlayImage: String? = null
+    var mediaImage: String? = null
+    var enclosureImage: String? = null
     var audioUrl: String? = null
+    var mediaContentAudioUrl: String? = null
+    var chaptersUrl: String? = null
+    var chapters: List<MediaChapter> = emptyList()
 
     forEachChildTag(parser, TAG_ATOM_ENTRY) { tagName ->
       when (tagName) {
@@ -179,11 +226,18 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
         }
         TAG_LINK -> {
           val rel = parser.getAttributeValue(parser.namespace, ATTR_REL)
-          val href = parser.getAttributeValue(parser.namespace, ATTR_HREF)
-          val type = parser.getAttributeValue(parser.namespace, XmlFeedParser.ATTR_TYPE)
+          val href = parser.getAttributeValue(parser.namespace, ATTR_HREF)?.trim()?.ifBlank { null }
+          val type = parser.getAttributeValue(parser.namespace, ATTR_TYPE)
 
-          if (rel == "enclosure" && type?.startsWith("audio/") == true) {
-            audioUrl = href
+          if (rel == "enclosure") {
+            if (type?.startsWith("audio/", ignoreCase = true) == true && audioUrl.isNullOrBlank()) {
+              audioUrl = href
+            } else if (
+              type?.startsWith("image/", ignoreCase = true) == true &&
+                enclosureImage.isNullOrBlank()
+            ) {
+              enclosureImage = href
+            }
           }
 
           if (link.isNullOrBlank() && (rel == ATTR_VALUE_ALTERNATE || rel.isNullOrBlank())) {
@@ -206,23 +260,63 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
           }
         }
         TAG_ITUNES_IMAGE -> {
-          val itunesImage = parser.getAttributeValue(parser.namespace, ATTR_HREF)
+          val href = parser.getAttributeValue(parser.namespace, ATTR_HREF)?.trim()?.ifBlank { null }
           parser.skipSubTree()
-          if (image.isNullOrBlank()) {
-            image = itunesImage
+          if (itunesImage.isNullOrBlank()) {
+            itunesImage = href
           }
         }
-        in XmlFeedParser.imageTags -> {
-          val mediaImage = readMediaImageUrl(parser)
-          if (image.isNullOrBlank()) {
-            image = mediaImage
+        TAG_PODCAST_IMAGES -> {
+          val srcset = parser.getAttributeValue(parser.namespace, ATTR_SRCSET)
+          parser.skipSubTree()
+          if (podcastImages.isNullOrBlank()) {
+            podcastImages = parseSrcsetHighestResUrl(srcset)
+          }
+        }
+        TAG_GOOGLEPLAY_IMAGE -> {
+          val href = parser.getAttributeValue(parser.namespace, ATTR_HREF)?.trim()?.ifBlank { null }
+          parser.skipSubTree()
+          if (googlePlayImage.isNullOrBlank()) {
+            googlePlayImage = href
+          }
+        }
+        TAG_MEDIA_THUMBNAIL -> {
+          val url = readMediaImageUrl(parser)
+          if (mediaImage.isNullOrBlank()) {
+            mediaImage = url
+          }
+        }
+        TAG_MEDIA_CONTENT -> {
+          val mediaContent = readMediaContent(parser)
+          if (mediaImage.isNullOrBlank() && !mediaContent.imageUrl.isNullOrBlank()) {
+            mediaImage = mediaContent.imageUrl
+          }
+          if (mediaContentAudioUrl.isNullOrBlank() && !mediaContent.audioUrl.isNullOrBlank()) {
+            mediaContentAudioUrl = mediaContent.audioUrl
           }
         }
         TAG_MEDIA_GROUP -> {
           val mediaGroupResult = readMediaGroup(parser)
-          mediaGroupImage = mediaGroupResult.image ?: mediaGroupImage
+          if (mediaGroupImage.isNullOrBlank()) {
+            mediaGroupImage = mediaGroupResult.image
+          }
+          if (mediaGroupAudioUrl.isNullOrBlank()) {
+            mediaGroupAudioUrl = mediaGroupResult.audioUrl
+          }
           mediaGroupDescription =
             mediaGroupDescription.orEmpty().ifBlank { mediaGroupResult.description }
+        }
+        TAG_PODCAST_CHAPTERS -> {
+          val parsedUrl = readPodcastChaptersUrl(parser, hostLink)
+          if (chaptersUrl.isNullOrBlank() && parsedUrl != null) {
+            chaptersUrl = parsedUrl
+          }
+        }
+        TAG_PSC_CHAPTERS -> {
+          val parsedChapters = readPodloveChapters(parser, hostLink)
+          if (chapters.isEmpty() && parsedChapters.isNotEmpty()) {
+            chapters = parsedChapters
+          }
         }
         else -> parser.skipSubTree()
       }
@@ -230,16 +324,26 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
 
     val postContent =
       resolveDeferredPostContent(primaryHtml = rawContentHtml, secondaryHtml = rawSummaryHtml)
+    val resolvedImage =
+      itunesImage
+        ?: podcastImages
+        ?: googlePlayImage
+        ?: mediaGroupImage
+        ?: mediaImage
+        ?: enclosureImage
+        ?: postContent?.heroImage
 
     return createPostPayload(
       title = title,
       link = link,
       description = postContent?.textContent?.ifBlank { null } ?: mediaGroupDescription,
       rawContent = postContent?.rawContent,
-      imageUrl = mediaGroupImage ?: postContent?.heroImage ?: image,
-      audioUrl = audioUrl ?: postContent?.audioUrl,
+      imageUrl = resolvedImage,
+      audioUrl = audioUrl ?: mediaContentAudioUrl ?: mediaGroupAudioUrl ?: postContent?.audioUrl,
       date = date,
       hostLink = hostLink,
+      chaptersUrl = chaptersUrl,
+      chapters = chapters,
     )
   }
 

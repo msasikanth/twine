@@ -41,22 +41,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.BlurEffect
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import coil3.compose.AsyncImage as CoilAsyncImage
@@ -66,13 +56,15 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.size.Dimension
 import coil3.size.Size
+import dev.sasikanth.rss.reader.components.AmbientBlurredBackdrop
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
+import dev.sasikanth.rss.reader.components.rememberAmbientBlurEffect
+import dev.sasikanth.rss.reader.components.rememberAmbientImageColorFilter
 import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
-import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
@@ -81,7 +73,6 @@ import dev.sasikanth.rss.reader.utils.disableAnimation
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
-import kotlin.math.roundToInt
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -120,16 +111,7 @@ internal fun FeaturedSection(
       }
     }
 
-  val blurEffect =
-    remember(density) {
-      if (canBlurImage) {
-        val blurRadius = 70.dp / BLUR_DOWNSCALE_FACTOR
-        val blurRadiusPx = with(density) { blurRadius.toPx() }
-        BlurEffect(radiusX = blurRadiusPx, radiusY = blurRadiusPx, edgeTreatment = TileMode.Decal)
-      } else {
-        null
-      }
-    }
+  val blurEffect = rememberAmbientBlurEffect()
 
   val imageAspectRatio =
     remember(sizeClass) {
@@ -141,16 +123,7 @@ internal fun FeaturedSection(
     }
 
   val shouldBlockImage = LocalBlockImage.current
-  val isDarkTheme = AppTheme.isDark
-  val backgroundImageColorFilter =
-    remember(isDarkTheme) {
-      ColorFilter.colorMatrix(
-        ColorMatrix().apply {
-          val saturation = if (isDarkTheme) 1f else 1.1f
-          setToSaturation(saturation)
-        }
-      )
-    }
+  val backgroundImageColorFilter = rememberAmbientImageColorFilter()
 
   val isFeaturedVisibleState = remember { mutableStateOf(true) }
 
@@ -199,7 +172,7 @@ internal fun FeaturedSection(
         val hasVisibleBackgroundImage =
           remember(hasVisibleBackgroundImageState) { { hasVisibleBackgroundImageState.value } }
 
-        FeaturedSectionBackground(
+        AmbientBlurredBackdrop(
           blurEffect = blurEffect,
           hasVisibleContent = hasVisibleBackgroundImage,
           modifier = Modifier.aspectRatio(imageAspectRatio),
@@ -336,78 +309,6 @@ internal fun FeaturedSection(
   }
 }
 
-// Blurs and tints the cross-fading pages as one layer; blurring per page stacks the decal edge
-// fade and the overlay while two pages overlap, brightening the background mid-swipe.
-@Composable
-private fun FeaturedSectionBackground(
-  blurEffect: BlurEffect,
-  hasVisibleContent: () -> Boolean,
-  modifier: Modifier = Modifier,
-  content: @Composable BoxScope.() -> Unit,
-) {
-  val colorScheme = AppTheme.colorScheme
-
-  Box(
-    modifier =
-      modifier
-        .layout { measurable, constraints ->
-          val fullWidth = constraints.maxWidth
-          val fullHeight =
-            if (constraints.hasBoundedHeight) {
-              constraints.maxHeight
-            } else {
-              constraints.minHeight
-            }
-          if (fullWidth <= 0 || fullHeight <= 0) {
-            val placeable = measurable.measure(Constraints.fixed(0, 0))
-            layout(0, 0) { placeable.place(0, 0) }
-          } else {
-            val scaledWidth = (fullWidth / BLUR_DOWNSCALE_FACTOR).roundToInt().coerceAtLeast(1)
-            val scaledHeight = (fullHeight / BLUR_DOWNSCALE_FACTOR).roundToInt().coerceAtLeast(1)
-            val placeable = measurable.measure(Constraints.fixed(scaledWidth, scaledHeight))
-            val scaleXFactor = fullWidth.toFloat() / scaledWidth.toFloat()
-            val scaleYFactor = fullHeight.toFloat() / scaledHeight.toFloat()
-
-            layout(fullWidth, fullHeight) {
-              placeable.placeWithLayer(0, 0) {
-                transformOrigin = TransformOrigin(0f, 0f)
-                scaleX = scaleXFactor
-                scaleY = scaleYFactor
-                renderEffect = blurEffect
-              }
-            }
-          }
-        }
-        .drawWithCache {
-          val scrimMask =
-            Brush.verticalGradient(
-              0.7f to Color.Transparent,
-              1f to Color.White,
-              startY = 0f,
-              endY = size.height,
-            )
-          var lastBackdrop = Color.Unspecified
-          var cachedScrimFilter: ColorFilter? = null
-          onDrawWithContent {
-            drawContent()
-            if (hasVisibleContent()) {
-              val backdrop = colorScheme.backdrop
-              val scrimFilter =
-                if (backdrop == lastBackdrop) {
-                  cachedScrimFilter
-                } else {
-                  lastBackdrop = backdrop
-                  ColorFilter.tint(backdrop).also { cachedScrimFilter = it }
-                }
-              drawRect(color = colorScheme.inversePrimary, blendMode = BlendMode.Luminosity)
-              drawRect(brush = scrimMask, colorFilter = scrimFilter)
-            }
-          }
-        },
-    content = content,
-  )
-}
-
 @Composable
 private fun BoxScope.FeaturedSectionBackgroundImage(
   imageUrl: String?,
@@ -469,5 +370,4 @@ private fun calculateContentAlpha(pageOffset: Float): Float {
   return EaseInSine.transform(offsetAbsolute.inverse())
 }
 
-private const val BLUR_DOWNSCALE_FACTOR = 8f
 private val BackgroundBlurImageSize = Size(Dimension.Undefined, height = 100) // Downscaled for blur

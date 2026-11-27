@@ -213,6 +213,7 @@ class SyncRepository(
             hideFromAllFeeds = feed.hideFromAllFeeds,
             enableNotifications = feed.enableNotifications,
             remoteId = feed.remoteId,
+            coverArtUrl = feed.coverArtUrl,
           )
         }
       }
@@ -241,6 +242,7 @@ class SyncRepository(
     enableNotifications: Boolean,
     consecutiveFetchErrors: Long,
     syncError: String?,
+    coverArtUrl: String?,
   ): Feed {
     return Feed(
       id = id,
@@ -263,6 +265,7 @@ class SyncRepository(
       remoteId = remoteId,
       consecutiveFetchErrors = consecutiveFetchErrors,
       syncError = syncError,
+      coverArtUrl = coverArtUrl,
     )
   }
 }

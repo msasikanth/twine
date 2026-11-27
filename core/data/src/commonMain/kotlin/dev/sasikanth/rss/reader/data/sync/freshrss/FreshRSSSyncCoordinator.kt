@@ -22,6 +22,7 @@ import dev.sasikanth.rss.reader.core.base.widget.WidgetUpdater
 import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
+import dev.sasikanth.rss.reader.core.model.remote.freshrss.LinksPayload
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.core.network.freshrss.FreshRssSource
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
@@ -65,6 +66,7 @@ class FreshRSSSyncCoordinator(
     private const val ARTICLE_PAGE_SIZE = 500
     private const val LOCAL_POSTS_PAGE_SIZE = 1000
     private const val STATUS_BATCH_SIZE = 500
+    private val AUDIO_FILE_EXTENSIONS = listOf(".mp3", ".m4a", ".ogg", ".aac", ".opus", ".wav")
   }
 
   private val syncMutex = Mutex()
@@ -553,6 +555,15 @@ class FreshRSSSyncCoordinator(
               } else {
                 null
               }
+            val enclosureImage =
+              item.enclosure
+                .firstOrNull {
+                  it.href.isNotBlank() && it.type?.startsWith("image/", ignoreCase = true) == true
+                }
+                ?.href
+            val audioUrl =
+              item.enclosure.firstOrNull { it.href.isNotBlank() && isAudioEnclosure(it) }?.href
+                ?: htmlContent?.audioUrl
             val postPayload =
               PostPayload(
                 title = item.title,
@@ -560,9 +571,10 @@ class FreshRSSSyncCoordinator(
                 description = htmlContent?.textContent ?: "",
                 rawContent = htmlContent?.cleanedHtml ?: item.summary.content,
                 imageUrl =
-                  UrlUtils.upgradeYouTubeThumbnail(htmlContent?.heroImage)
+                  enclosureImage
+                    ?: UrlUtils.upgradeYouTubeThumbnail(htmlContent?.heroImage)
                     ?: UrlUtils.youTubeThumbnail(postLink),
-                audioUrl = item.enclosure.firstOrNull()?.href ?: htmlContent?.audioUrl,
+                audioUrl = audioUrl,
                 date = item.published * 1000, // FreshRSS uses seconds, we use millis
                 commentsLink = null,
                 fullContent = fullContent,
@@ -587,6 +599,7 @@ class FreshRSSSyncCoordinator(
               homepageLink = feed.homepageLink,
               link = feed.link,
               posts = flowOf(*posts.toTypedArray()),
+              coverArtUrl = feed.coverArtUrl,
             ),
           feedId = feed.id,
           updateFeed = false,
@@ -710,6 +723,15 @@ class FreshRSSSyncCoordinator(
 
       rssRepository.updatePostSyncedAt(dirtyPosts)
     }
+  }
+
+  private fun isAudioEnclosure(enclosure: LinksPayload): Boolean {
+    val type = enclosure.type
+    if (type != null) {
+      return type.startsWith("audio/", ignoreCase = true)
+    }
+    val path = enclosure.href.substringBefore('?').substringBefore('#')
+    return AUDIO_FILE_EXTENSIONS.any { path.endsWith(it, ignoreCase = true) }
   }
 
   private fun updateSyncState(newState: SyncState) {

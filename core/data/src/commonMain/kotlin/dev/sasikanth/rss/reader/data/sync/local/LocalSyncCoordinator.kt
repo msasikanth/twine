@@ -197,12 +197,16 @@ class LocalSyncCoordinator(
 
     val finalPostCount = rssRepository.postsCountForFeed(feed.id)
     val hasNewContent = finalPostCount > initialPostCount
+    val fetchedCoverArtUrl = feedFetchResult.feedPayload.coverArtUrl?.takeIf { it.isNotBlank() }
+    val updatedCoverArtUrl =
+      fetchedCoverArtUrl?.takeIf { feed.coverArtUrl.isNullOrBlank() || it != feed.coverArtUrl }
 
     return FeedSyncMetadataUpdate(
       feedId = feed.id,
       fetchSucceeded = true,
       lastUpdatedAt = now,
       refreshInterval = adjustedRefreshInterval(feed, hasNewContent),
+      coverArtUrl = updatedCoverArtUrl,
     )
   }
 

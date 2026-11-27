@@ -93,7 +93,14 @@ sealed interface Screen : NavKey {
 
   @Serializable data object OpmlImport : Screen
 
-  @Serializable data class ImageViewer(val imageUrl: String) : Screen
+  @Serializable
+  data class ImageViewer(
+    val imageUrl: String,
+    val sharedElementKey: String = imageUrl,
+    val memoryCacheKey: String? = null,
+    val sourceCornerRadiusDp: Float = 0f,
+    val sourceAspectRatio: Float = 0f,
+  ) : Screen
 
   @Serializable data object None : Screen
 

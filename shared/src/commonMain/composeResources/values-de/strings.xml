@@ -175,7 +175,6 @@
   <string name="addToGroup">Zu Gruppe hinzufügen</string>
   <string name="removeSources">Quellen löschen</string>
   <string name="removeSourcesDesc">Möchten Sie die ausgewählten Quellen löschen?</string>
-  <string name="noPinnedSources">Keine angepinnten Feeds/Gruppen</string>
   <string name="databaseMaintainenceTitle">Bitte warten…</string>
   <string name="databaseMaintainenceSubtitle">Datenbankwartung wird durchgeführt, schließen Sie die App nicht</string>
   <string name="cdLoadFullArticle">Vollständigen Beitrag laden</string>

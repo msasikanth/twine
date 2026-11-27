@@ -486,6 +486,7 @@ class CrossFeedBlockedWordsTestSuite(driver: SqlDriver) {
       showFeedFavIcon = false,
       lastUpdatedAt = Instant.fromEpochMilliseconds(0L),
       enableNotifications = true,
+      coverArtUrl = null,
     )
   }
 

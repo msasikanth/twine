@@ -208,7 +208,6 @@
   <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">Delete sources</string>
   <string name="removeSourcesDesc">Do you want to delete selected sources?</string>
-  <string name="noPinnedSources">No pinned feeds/groups</string>
   <string name="databaseMaintainenceTitle">Please wait...</string>
   <string name="databaseMaintainenceSubtitle">Performing database maintainence, don't close the app</string>
   <string name="cdLoadFullArticle">Load full article</string>
@@ -235,6 +234,8 @@
   <string name="audioMarkAsReadThreshold75">75%</string>
   <string name="audioMarkAsReadThreshold90">90%</string>
   <string name="audioMarkAsReadThreshold100">100%</string>
+  <string name="settingsSkipSponsorChaptersTitle">Skip sponsor chapters</string>
+  <string name="settingsSkipSponsorChaptersSubtitle">Automatically skip podcast chapters marked as sponsors or ad breaks</string>
   <string name="noReaderContent">No content to display in the reader, please try fetching article or visiting the website.</string>
   <string name="pullToClose">Pull down to close</string>
   <string name="readerSettings">Reader screen settings</string>
@@ -470,4 +471,13 @@
   <string name="keyboardShortcutsOpenPost">Open article</string>
   <string name="settingsDefaultSourceTitle">Default source</string>
   <string name="settingsDefaultSourceSubtitle">Choose the feed or group to open on startup</string>
+  <string name="readerShowNotes">Show notes</string>
+  <string name="readerChapters">Chapters</string>
+  <string name="readerChapterSponsor">Sponsor</string>
+  <string name="readerSkipSponsorChapters">Skip sponsor chapters</string>
+  <string name="readerExpandPlayer">Expand player</string>
+  <string name="readerLoadEpisodePage">Load episode page</string>
+  <string name="readerCollapseEpisodePage">Show feed notes</string>
+  <string name="readerNowPlaying">Now playing</string>
+  <string name="readerOpenCurrentEpisode">Open current episode</string>
 </resources>

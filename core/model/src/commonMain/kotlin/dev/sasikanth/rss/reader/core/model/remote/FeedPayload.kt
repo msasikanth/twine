@@ -25,4 +25,5 @@ data class FeedPayload(
   val homepageLink: String,
   val link: String,
   val posts: Flow<PostPayload>,
+  val coverArtUrl: String? = null,
 )

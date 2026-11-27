@@ -50,7 +50,7 @@ internal suspend fun ByteReadChannel.toCharIterator(
   return finalXml.iterator()
 }
 
-private fun findEncodingCharset(encodingContent: String, fallbackCharset: Charset) =
+internal fun findEncodingCharset(encodingContent: String, fallbackCharset: Charset) =
   (ENCODING_REGEX.find(encodingContent)?.groupValues?.get(1)?.let { encoding ->
     try {
       Charset.forName(encoding)

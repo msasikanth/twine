@@ -45,6 +45,8 @@ data class ResolvedPost(
   val remoteId: String? = null,
   val audioProgress: Long = 0L,
   val audioDuration: Long = 0L,
+  val feedCoverArtUrl: String? = null,
+  val feedLink: String = "",
 ) {
   val bookmarked: Boolean
     get() = PostFlag.Bookmarked in flags

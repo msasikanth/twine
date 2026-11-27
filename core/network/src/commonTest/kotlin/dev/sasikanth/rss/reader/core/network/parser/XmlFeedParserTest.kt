@@ -71,6 +71,7 @@ class XmlFeedParserTest {
   private suspend fun assertFeedPayloadEquals(expected: FeedPayload, actual: FeedPayload) {
     assertEquals(expected.name, actual.name)
     assertEquals(expected.icon, actual.icon)
+    assertEquals(expected.coverArtUrl, actual.coverArtUrl)
     assertEquals(expected.description, actual.description)
     assertEquals(expected.homepageLink, actual.homepageLink)
     assertEquals(expected.link, actual.link)
@@ -698,6 +699,7 @@ class XmlFeedParserTest {
       FeedPayload(
         name = "Google Developers",
         icon = "https://youtube.com/img/channel.jpg",
+        coverArtUrl = "https://youtube.com/img/channel.jpg",
         description = "",
         link = youtubeUploadsPlaylistFeedUrl,
         homepageLink = "https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw",
@@ -735,6 +737,7 @@ class XmlFeedParserTest {
       FeedPayload(
         name = "Google Developers",
         icon = "https://youtube.com/img/channel.jpg",
+        coverArtUrl = "https://youtube.com/img/channel.jpg",
         description = "",
         link = youtubeFeedUrl,
         homepageLink = "https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw",
@@ -772,6 +775,7 @@ class XmlFeedParserTest {
       FeedPayload(
         name = "Podcast title",
         icon = "https://example.com/podcast-icon.jpg",
+        coverArtUrl = "https://example.com/podcast-icon.jpg",
         description = "Podcast description",
         link = podcastRssFeedUrl,
         homepageLink = "https://example.com/podcast",
@@ -814,6 +818,7 @@ class XmlFeedParserTest {
       FeedPayload(
         name = "Podcast title",
         icon = "https://example.com/podcast-icon.jpg",
+        coverArtUrl = "https://example.com/podcast-icon.jpg",
         description = "Podcast description",
         link = podcastAtomFeedUrl,
         homepageLink = "https://example.com/podcast",
@@ -1053,5 +1058,247 @@ class XmlFeedParserTest {
     assertEquals("2026110800", second.title)
     assertEquals("Previous release summary", second.description)
     assertTrue((second.rawContent ?: "").contains("<p>Previous release summary</p>"))
+  }
+
+  @Test
+  fun rssChannelArtworkPriorityRespectsItunesPodcastGoogleplayAndDoesNotOverwriteWithImage() =
+    runTest {
+      val rssXml =
+        """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:podcast="https://podcastindex.org/namespace/1.0" xmlns:googleplay="http://www.google.com/schemas/play-podcasts/1.0">
+          <channel>
+            <title>Show</title>
+            <link>https://example.com</link>
+            <description>Podcast show</description>
+            <itunes:image href="https://example.com/itunes-3000.jpg" />
+            <podcast:images srcset="https://example.com/small.jpg 300w, https://example.com/large.jpg 1500w" />
+            <googleplay:image href="https://example.com/gplay.jpg" />
+            <image>
+              <url>https://example.com/channel-logo.png</url>
+              <title>Show</title>
+              <link>https://example.com</link>
+            </image>
+            <item>
+              <title>Ep 1</title>
+              <link>https://example.com/ep1</link>
+              <description><![CDATA[<img src="https://example.com/tracker.png" /><p>Notes</p>]]></description>
+              <media:content url="https://example.com/ep1.mp3" type="audio/mpeg" medium="audio" />
+              <itunes:image href="https://example.com/ep1-cover.jpg" />
+              <enclosure url="https://example.com/ep1-enclosure.mp3" type="audio/mpeg" />
+            </item>
+            <item>
+              <title>Ep 2</title>
+              <description>Only image enclosure and audio enclosure</description>
+              <enclosure url="https://example.com/ep2-cover.png" type="image/png" />
+              <enclosure url="https://example.com/ep2.mp3" type="audio/mpeg" />
+            </item>
+            <item>
+              <title>Ep 3</title>
+              <link>https://example.com/ep3</link>
+              <description>Video media content</description>
+              <media:content url="https://example.com/ep3.mp4" type="video/mp4" medium="video" />
+              <podcast:images srcset="https://substackcdn.com/image/fetch/w_300,c_limit/a.jpg 300w, https://substackcdn.com/image/fetch/w_1400,c_limit/a.jpg 1400w" />
+            </item>
+            <item>
+              <title>Ep 4</title>
+              <link>https://example.com/ep4</link>
+              <media:group>
+                <media:description>Group notes</media:description>
+                <media:content url="https://example.com/ep4-group.jpg" medium="image" />
+                <media:content url="https://example.com/ep4-group.mp3" type="audio/mpeg" />
+              </media:group>
+            </item>
+          </channel>
+        </rss>
+        """
+          .trimIndent()
+
+      val payload =
+        xmlFeedParser.parse(ByteReadChannel(rssXml.toByteArray()), feedUrl, Charsets.UTF8)
+      val posts = payload.posts.toList()
+
+      assertEquals("https://example.com/itunes-3000.jpg", payload.coverArtUrl)
+      assertEquals("https://example.com/itunes-3000.jpg", payload.icon)
+
+      assertEquals("https://example.com/ep1-cover.jpg", posts[0].imageUrl)
+      assertEquals("https://example.com/ep1-enclosure.mp3", posts[0].audioUrl)
+
+      assertEquals("https://example.com/ep2-cover.png", posts[1].imageUrl)
+      assertEquals("https://example.com/ep2.mp3", posts[1].link)
+      assertEquals("https://example.com/ep2.mp3", posts[1].audioUrl)
+
+      assertEquals("https://substackcdn.com/image/fetch/w_1400,c_limit/a.jpg", posts[2].imageUrl)
+      assertEquals(null, posts[2].audioUrl)
+
+      assertEquals("https://example.com/ep4-group.jpg", posts[3].imageUrl)
+      assertEquals("https://example.com/ep4-group.mp3", posts[3].audioUrl)
+      assertEquals("Group notes", posts[3].description)
+    }
+
+  @Test
+  fun atomFeedArtworkNeverUsesIconAsCoverArtAndSupportsEnclosureImages() = runTest {
+    val atomXml =
+      """
+      <?xml version="1.0" encoding="UTF-8"?>
+      <feed xmlns="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+        <title>Atom Show</title>
+        <link href="https://example.com" rel="alternate" />
+        <icon>https://example.com/small-favicon.png</icon>
+        <entry>
+          <title>Entry 1</title>
+          <link rel="alternate" href="https://example.com/e1" />
+          <link rel="enclosure" type="image/webp" href="https://example.com/e1-art.webp" />
+          <content type="html"><![CDATA[<img src="https://example.com/inline.jpg"/><p>Text</p>]]></content>
+        </entry>
+      </feed>
+      """
+        .trimIndent()
+
+    val payload =
+      xmlFeedParser.parse(ByteReadChannel(atomXml.toByteArray()), feedUrl, Charsets.UTF8)
+    val post = payload.posts.toList().single()
+
+    assertEquals(null, payload.coverArtUrl)
+    assertEquals("https://example.com/small-favicon.png", payload.icon)
+    assertEquals("https://example.com/e1-art.webp", post.imageUrl)
+  }
+
+  @Test
+  fun rdfFeedImageSetsCoverArtUrl() = runTest {
+    val rdfXml =
+      """
+      <?xml version="1.0" encoding="UTF-8"?>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+        <channel>
+          <title>RDF Feed</title>
+          <link>https://example.com</link>
+          <description>RDF Desc</description>
+          <image rdf:resource="https://example.com/rdf-cover.png" />
+        </channel>
+        <item>
+          <title>Item</title>
+          <link>https://example.com/item</link>
+          <description>Body</description>
+        </item>
+      </rdf:RDF>
+      """
+        .trimIndent()
+
+    val payload = xmlFeedParser.parse(ByteReadChannel(rdfXml.toByteArray()), feedUrl, Charsets.UTF8)
+
+    assertEquals("https://example.com/rdf-cover.png", payload.coverArtUrl)
+    assertEquals("https://example.com/rdf-cover.png", payload.icon)
+  }
+
+  @Test
+  fun parsesPodcasting2AndPodloveChaptersInRssAndAtomItems() = runTest {
+    val rssXml =
+      """
+      <?xml version="1.0" encoding="UTF-8"?>
+      <rss version="2.0"
+        xmlns:podcast="https://podcastindex.org/namespace/1.0"
+        xmlns:psc="http://podlove.org/simple-chapters">
+        <channel>
+          <title>Chapter Podcast</title>
+          <link>https://example.com</link>
+          <description>Desc</description>
+          <item>
+            <title>Episode 1</title>
+            <link>https://example.com/ep1</link>
+            <enclosure url="https://example.com/ep1.mp3" type="audio/mpeg" length="1000" />
+            <podcast:chapters url="/chapters/ep1.json" type="application/json+chapters" />
+            <psc:chapters version="1.2">
+              <psc:chapter start="00:00:00.000" title="Welcome" href="https://example.com/welcome" />
+              <psc:chapter start="00:05:30" title="Sponsor: Sentry" image="/img/sponsor.png" />
+            </psc:chapters>
+          </item>
+        </channel>
+      </rss>
+      """
+        .trimIndent()
+
+    val rssPosts =
+      xmlFeedParser
+        .parse(ByteReadChannel(rssXml.toByteArray()), feedUrl, Charsets.UTF8)
+        .posts
+        .toList()
+    val rssPost = rssPosts.single()
+
+    assertEquals("http://example.com/chapters/ep1.json", rssPost.chaptersUrl)
+    assertEquals(2, rssPost.chapters.size)
+    assertEquals("Welcome", rssPost.chapters[0].title)
+    assertEquals(0L, rssPost.chapters[0].timestampMs)
+    assertEquals(false, rssPost.chapters[0].isSponsor)
+    assertEquals("https://example.com/welcome", rssPost.chapters[0].url)
+    assertEquals("Sponsor: Sentry", rssPost.chapters[1].title)
+    assertEquals(330_000L, rssPost.chapters[1].timestampMs)
+    assertEquals(true, rssPost.chapters[1].isSponsor)
+    assertEquals("http://example.com/img/sponsor.png", rssPost.chapters[1].imageUrl)
+
+    val atomXml =
+      """
+      <?xml version="1.0" encoding="UTF-8"?>
+      <feed xmlns="http://www.w3.org/2005/Atom"
+        xmlns:podcast="https://podcastindex.org/namespace/1.0"
+        xmlns:psc="http://podlove.org/simple-chapters">
+        <title>Atom Chapters</title>
+        <link href="https://example.com" rel="alternate" />
+        <entry>
+          <title>Atom Ep</title>
+          <link rel="alternate" href="https://example.com/atom-ep" />
+          <summary>Summary</summary>
+          <podcast:chapters url="https://cdn.example.com/atom-ep.json" type="application/json+chapters" />
+          <psc:chapters version="1.2">
+            <psc:chapter start="01:00" title="Intro" />
+          </psc:chapters>
+        </entry>
+      </feed>
+      """
+        .trimIndent()
+
+    val atomPost =
+      xmlFeedParser
+        .parse(ByteReadChannel(atomXml.toByteArray()), feedUrl, Charsets.UTF8)
+        .posts
+        .toList()
+        .single()
+    assertEquals("https://cdn.example.com/atom-ep.json", atomPost.chaptersUrl)
+    assertEquals(1, atomPost.chapters.size)
+    assertEquals(60_000L, atomPost.chapters[0].timestampMs)
+    assertEquals("Intro", atomPost.chapters[0].title)
+  }
+
+  @Test
+  fun youtubeAtomFeedIgnoresShockwaveFlashMediaContentAndUsesThumbnail() = runTest {
+    val ytAtomXml =
+      """
+      <?xml version="1.0" encoding="UTF-8"?>
+      <feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
+        <title>3Blue1Brown</title>
+        <link rel="alternate" href="https://www.youtube.com/channel/UCYO_jab_esuFRV4b17AJtAw" />
+        <entry>
+          <title>What if AI solved the Riemann Hypothesis?</title>
+          <link rel="alternate" href="https://www.youtube.com/watch?v=zqzk43bSdDI" />
+          <published>2026-11-22T15:00:00Z</published>
+          <media:group>
+            <media:title>What if AI solved the Riemann Hypothesis?</media:title>
+            <media:content url="https://www.youtube.com/v/zqzk43bSdDI?version=3" type="application/x-shockwave-flash" width="640" height="390" />
+            <media:thumbnail url="https://i1.ytimg.com/vi/zqzk43bSdDI/hqdefault.jpg" width="480" height="360" />
+            <media:description>Intro text</media:description>
+          </media:group>
+        </entry>
+      </feed>
+      """
+        .trimIndent()
+
+    val post =
+      xmlFeedParser
+        .parse(ByteReadChannel(ytAtomXml.toByteArray()), feedUrl, Charsets.UTF8)
+        .posts
+        .toList()
+        .single()
+
+    assertEquals("https://i1.ytimg.com/vi/zqzk43bSdDI/maxresdefault.jpg", post.imageUrl)
   }
 }
