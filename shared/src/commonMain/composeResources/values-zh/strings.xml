@@ -144,7 +144,7 @@
   <string name="removeFeed">移除来源</string>
   <string name="delete">删除</string>
   <string name="removeFeedDesc">你想移除 <b>%1$s</b> 吗？</string>
-  <string name="alwaysFetchSourceArticle">Fetch full articles in reader view</string>
+  <string name="alwaysFetchSourceArticle">总是在阅读器视图中获取全文</string>
   <string name="enableNotifications">启用通知</string>
   <string name="getFeedInfo">获取信息</string>
   <string name="newTag">新建标签</string>
@@ -203,15 +203,14 @@
   <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">删除来源</string>
   <string name="removeSourcesDesc">你想删除选定来源吗？</string>
-  <string name="noPinnedSources">没有钉选的来源/分组</string>
   <string name="databaseMaintainenceTitle">请稍候……</string>
   <string name="databaseMaintainenceSubtitle">正在维护数据库，请不要关闭应用</string>
   <string name="cdLoadFullArticle">加载完整文章</string>
   <string name="cdWatchVideo">Watch video</string>
   <string name="enableAutoSyncTitle">开启后台同步</string>
   <string name="enableAutoSyncDesc">开启后，来源将在后台自动更新</string>
-  <string name="showFeedFavIconTitle">Use website icons for new feeds</string>
-  <string name="showFeedFavIconDesc">Sets which icon newly added feeds start with. You can change it per feed at any time.</string>
+  <string name="showFeedFavIconTitle">显示来源图标</string>
+  <string name="showFeedFavIconDesc">关闭时，将显示来源图标而不是网站图标</string>
   <string name="settingsShowFeaturedSectionTitle">展示精选板块</string>
   <string name="settingsShowFeaturedSectionSubtitle">展示近期文章的轮播卡片</string>
   <string name="hidePostsFromHome">从「主页」隐藏</string>
@@ -230,6 +229,8 @@
   <string name="audioMarkAsReadThreshold75">75%</string>
   <string name="audioMarkAsReadThreshold90">90%</string>
   <string name="audioMarkAsReadThreshold100">100%</string>
+  <string name="settingsSkipSponsorChaptersTitle">Skip sponsor chapters</string>
+  <string name="settingsSkipSponsorChaptersSubtitle">Automatically skip podcast chapters marked as sponsors or ad breaks</string>
   <string name="noReaderContent">阅读器中没有可显示的内容，请尝试抓取文章或访问网站。</string>
   <string name="pullToClose">下拉以关闭</string>
   <string name="readerSettings">阅读器屏幕设置</string>
@@ -392,7 +393,7 @@
   <string name="premiumPaywallTitle">Unlock Twine Pro</string>
   <string name="premiumPaywallSubtitle">Get access to all premium features and support the development of Twine.</string>
   <string name="premiumPaywallFeature1Title">Unlimited feeds</string>
-  <string name="premiumPaywallFeature1Desc">Add more than %1$d feeds, and enable OPML importing.</string>
+  <string name="premiumPaywallFeature1Desc">Add more than 30 feeds, and enable OPML importing.</string>
   <string name="premiumPaywallFeature2Title">Cloud sync</string>
   <string name="premiumPaywallFeature2Desc">Unlock Miniflux, FreshRSS and other cloud integrations.</string>
   <string name="premiumPaywallFeature3Title">Themes</string>
@@ -430,4 +431,13 @@
   <string name="keyboardShortcutsOpenPost">Open article</string>
   <string name="settingsDefaultSourceTitle">Default source</string>
   <string name="settingsDefaultSourceSubtitle">Choose the feed or group to open on startup</string>
+  <string name="readerShowNotes">Show notes</string>
+  <string name="readerChapters">Chapters</string>
+  <string name="readerChapterSponsor">Sponsor</string>
+  <string name="readerSkipSponsorChapters">Skip sponsor chapters</string>
+  <string name="readerExpandPlayer">Expand player</string>
+  <string name="readerLoadEpisodePage">Load episode page</string>
+  <string name="readerCollapseEpisodePage">Show feed notes</string>
+  <string name="readerNowPlaying">Now playing</string>
+  <string name="readerOpenCurrentEpisode">Open current episode</string>
 </resources>
