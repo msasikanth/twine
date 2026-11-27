@@ -522,6 +522,7 @@ fun EntryProviderScope<NavKey>.readerScreen(
   toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
   modifier: Modifier = Modifier,
   isReaderPaneExpanded: MutableState<Boolean>,
+  readerPaneSizeClass: State<WindowSizeClass>,
 ) {
   entry<Screen.Reader>(metadata = ListDetailSceneStrategy.detailPane()) { route ->
     val viewModel = viewModel {
@@ -533,34 +534,36 @@ fun EntryProviderScope<NavKey>.readerScreen(
         WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
       )
 
-    ReaderScreen(
-      viewModel = viewModel,
-      pageViewModelFactory = { post -> viewModel(key = post.id) { readerPageViewModel(post) } },
-      onBack = { navigator.goBack() },
-      openPaywall = { navigator.navigate(Screen.Paywall) },
-      onImageClick = { event ->
-        navigator.navigate(
-          Screen.ImageViewer(
-            imageUrl = event.imageUrl,
-            sharedElementKey = event.sharedElementKey,
-            memoryCacheKey = event.memoryCacheKey,
-            sourceCornerRadiusDp = event.sourceCornerRadiusDp,
-            sourceAspectRatio = event.sourceAspectRatio,
+    CompositionLocalProvider(LocalWindowSizeClass provides readerPaneSizeClass.value) {
+      ReaderScreen(
+        viewModel = viewModel,
+        pageViewModelFactory = { post -> viewModel(key = post.id) { readerPageViewModel(post) } },
+        onBack = { navigator.goBack() },
+        openPaywall = { navigator.navigate(Screen.Paywall) },
+        onImageClick = { event ->
+          navigator.navigate(
+            Screen.ImageViewer(
+              imageUrl = event.imageUrl,
+              sharedElementKey = event.sharedElementKey,
+              memoryCacheKey = event.memoryCacheKey,
+              sourceCornerRadiusDp = event.sourceCornerRadiusDp,
+              sourceAspectRatio = event.sourceAspectRatio,
+            )
           )
-        )
-      },
-      toggleLightStatusBar = toggleLightStatusBar,
-      toggleLightNavBar = toggleLightNavBar,
-      modifier = modifier,
-      showCloseNavIcon = isSplitCapableWindow && !isReaderPaneExpanded.value,
-      isReaderPaneExpanded = isReaderPaneExpanded.value,
-      toggleReaderPaneExpanded =
-        if (isSplitCapableWindow) {
-          { isReaderPaneExpanded.value = !isReaderPaneExpanded.value }
-        } else {
-          null
         },
-    )
+        toggleLightStatusBar = toggleLightStatusBar,
+        toggleLightNavBar = toggleLightNavBar,
+        modifier = modifier,
+        showCloseNavIcon = isSplitCapableWindow && !isReaderPaneExpanded.value,
+        isReaderPaneExpanded = isReaderPaneExpanded.value,
+        toggleReaderPaneExpanded =
+          if (isSplitCapableWindow) {
+            { isReaderPaneExpanded.value = !isReaderPaneExpanded.value }
+          } else {
+            null
+          },
+      )
+    }
   }
 }
 

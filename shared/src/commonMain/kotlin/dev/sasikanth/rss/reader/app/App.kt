@@ -502,32 +502,57 @@ fun App(
           }
         }
       val isTwoPane = paneScaffoldDirective.maxHorizontalPartitions > 1
-      val listPaneSizeClass =
+      val listPaneWidthDp =
         remember(
-          isTwoPane,
-          windowInfo.windowSizeClass,
           density,
           navigationPaneWidth,
           listPaneContentWidth.floatValue,
           listPaneWidthLimits,
-          windowHeight,
         ) {
+          val paneWidthPx =
+            with(density) { (navigationPaneWidth + listPaneContentWidth.floatValue.dp).roundToPx() }
+              .coerceIn(listPaneWidthLimits)
+          with(density) { paneWidthPx.toDp() }
+        }
+      val listPaneSizeClass =
+        remember(isTwoPane, windowInfo.windowSizeClass, listPaneWidthDp, windowHeight) {
           if (!isTwoPane) {
             windowInfo.windowSizeClass
           } else {
-            val paneWidthPx =
-              with(density) {
-                  (navigationPaneWidth + listPaneContentWidth.floatValue.dp).roundToPx()
-                }
-                .coerceIn(listPaneWidthLimits)
-            val paneWidthDp = with(density) { paneWidthPx.toDp().value }
             WindowSizeClass.BREAKPOINTS_V2.computeWindowSizeClass(
-              widthDp = paneWidthDp,
+              widthDp = listPaneWidthDp.value,
               heightDp = windowHeight.value,
             )
           }
         }
       val listPaneSizeClassState = rememberUpdatedState(listPaneSizeClass)
+      val readerPaneSizeClass =
+        remember(
+          isTwoPane,
+          windowInfo.windowSizeClass,
+          windowWidth,
+          baseDirective.horizontalPartitionSpacerSize,
+          listPaneWidthDp,
+          minReaderPaneWidth,
+          windowHeight,
+        ) {
+          if (!isTwoPane) {
+            windowInfo.windowSizeClass
+          } else {
+            val readerPaneWidth =
+              calculateReaderPaneWidth(
+                windowWidth = windowWidth,
+                partitionSpacerWidth = baseDirective.horizontalPartitionSpacerSize,
+                listPaneWidth = listPaneWidthDp,
+                minReaderPaneWidth = minReaderPaneWidth,
+              )
+            WindowSizeClass.BREAKPOINTS_V2.computeWindowSizeClass(
+              widthDp = readerPaneWidth.value,
+              heightDp = windowHeight.value,
+            )
+          }
+        }
+      val readerPaneSizeClassState = rememberUpdatedState(readerPaneSizeClass)
 
       val openCurrentlyPlaying =
         remember(audioPlayer, appViewModel) {
@@ -553,6 +578,7 @@ fun App(
           isSideNavigationExpanded,
           isReaderPaneExpanded,
           listPaneSizeClassState,
+          readerPaneSizeClassState,
         ) {
           entryProvider {
             placeholderScreen(
@@ -617,6 +643,7 @@ fun App(
               toggleLightNavBar = toggleLightNavBar,
               modifier = screenModifier,
               isReaderPaneExpanded = isReaderPaneExpanded,
+              readerPaneSizeClass = readerPaneSizeClassState,
             )
 
             addFeedScreen(addFeedViewModel = addFeedViewModel, navigator = navigator)
@@ -1070,4 +1097,13 @@ internal fun shouldUseListDetailForSinglePane(
   isReaderExpanded: Boolean,
 ): Boolean {
   return isDesktop || isSplitCapableWindow || hasEnteredListDetailScaffold || isReaderExpanded
+}
+
+internal fun calculateReaderPaneWidth(
+  windowWidth: Dp,
+  partitionSpacerWidth: Dp,
+  listPaneWidth: Dp,
+  minReaderPaneWidth: Dp,
+): Dp {
+  return (windowWidth - partitionSpacerWidth - listPaneWidth).coerceAtLeast(minReaderPaneWidth)
 }
