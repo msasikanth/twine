@@ -144,7 +144,7 @@
   <string name="removeFeed">Удалить новостную ленту</string>
   <string name="delete">Удалить</string>
   <string name="removeFeedDesc">Вы хотите удалить <b>"%1$s"</b>?</string>
-  <string name="alwaysFetchSourceArticle">Fetch full articles in reader view</string>
+  <string name="alwaysFetchSourceArticle">Всегда загружать полные статьи в режиме чтения</string>
   <string name="enableNotifications">Включить уведомления</string>
   <string name="getFeedInfo">Получить информацию</string>
   <string name="newTag">Новый тег</string>
@@ -203,15 +203,14 @@
   <string name="addFeedGroupLabel">Group</string>
   <string name="removeSources">Удалить источники</string>
   <string name="removeSourcesDesc">Вы хотите удалить выбранные источники?</string>
-  <string name="noPinnedSources">Закреплённых каналов/групп нет</string>
   <string name="databaseMaintainenceTitle">Пожалуйста, подождите...</string>
   <string name="databaseMaintainenceSubtitle">Выполняется обслуживание базы данных, не закрывайте приложение</string>
   <string name="cdLoadFullArticle">Загрузить полную статью</string>
   <string name="cdWatchVideo">Watch video</string>
   <string name="enableAutoSyncTitle">Включить автоматическую синхронизацию</string>
   <string name="enableAutoSyncDesc">Если функция включена, каналы будут обновляться в фоновом режиме</string>
-  <string name="showFeedFavIconTitle">Use website icons for new feeds</string>
-  <string name="showFeedFavIconDesc">Sets which icon newly added feeds start with. You can change it per feed at any time.</string>
+  <string name="showFeedFavIconTitle">Показывать значок ленты новостей</string>
+  <string name="showFeedFavIconDesc">Если функция отключена вместо значка веб-сайта будет отображаться значок ленты</string>
   <string name="settingsShowFeaturedSectionTitle">Показать раздел «Избранное»</string>
   <string name="settingsShowFeaturedSectionSubtitle">Отображает карусель с недавними статьями</string>
   <string name="hidePostsFromHome">Скрыть с «Главной»</string>
@@ -230,6 +229,8 @@
   <string name="audioMarkAsReadThreshold75">75%</string>
   <string name="audioMarkAsReadThreshold90">90%</string>
   <string name="audioMarkAsReadThreshold100">100%</string>
+  <string name="settingsSkipSponsorChaptersTitle">Skip sponsor chapters</string>
+  <string name="settingsSkipSponsorChaptersSubtitle">Automatically skip podcast chapters marked as sponsors or ad breaks</string>
   <string name="noReaderContent">В программе чтения нет контента для отображения, пожалуйста, попробуйте найти статью или посетить веб-сайт.</string>
   <string name="pullToClose">Потяните вниз, чтобы закрыть</string>
   <string name="readerSettings">Настройки экрана программы чтения</string>
@@ -404,7 +405,7 @@
   <string name="premiumPaywallTitle">Разблокировать Twine Pro</string>
   <string name="premiumPaywallSubtitle">Получите доступ ко всем премиум функциям и поддержите разработку Twine.</string>
   <string name="premiumPaywallFeature1Title">Неограниченные ленты</string>
-  <string name="premiumPaywallFeature1Desc">Add more than %1$d feeds, and enable OPML importing.</string>
+  <string name="premiumPaywallFeature1Desc">Add more than 30 feeds, and enable OPML importing.</string>
   <string name="premiumPaywallFeature2Title">Облачная синхронизация</string>
   <string name="premiumPaywallFeature2Desc">Разблокируйте Miniflux, FreshRSS и другие облачные интеграции.</string>
   <string name="premiumPaywallFeature3Title">Темы</string>
@@ -442,4 +443,13 @@
   <string name="keyboardShortcutsOpenPost">Open article</string>
   <string name="settingsDefaultSourceTitle">Default source</string>
   <string name="settingsDefaultSourceSubtitle">Choose the feed or group to open on startup</string>
+  <string name="readerShowNotes">Show notes</string>
+  <string name="readerChapters">Chapters</string>
+  <string name="readerChapterSponsor">Sponsor</string>
+  <string name="readerSkipSponsorChapters">Skip sponsor chapters</string>
+  <string name="readerExpandPlayer">Expand player</string>
+  <string name="readerLoadEpisodePage">Load episode page</string>
+  <string name="readerCollapseEpisodePage">Show feed notes</string>
+  <string name="readerNowPlaying">Now playing</string>
+  <string name="readerOpenCurrentEpisode">Open current episode</string>
 </resources>
