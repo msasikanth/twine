@@ -16,6 +16,8 @@
  */
 package dev.sasikanth.rss.reader.core.model.remote
 
+import dev.sasikanth.rss.reader.core.model.local.MediaChapter
+
 data class PostPayload(
   val title: String,
   val link: String,
@@ -28,6 +30,8 @@ data class PostPayload(
   val commentsLink: String?,
   val isDateParsedCorrectly: Boolean,
   val remoteId: String? = null,
+  val chaptersUrl: String? = null,
+  val chapters: List<MediaChapter> = emptyList(),
 ) {
   companion object
 }
