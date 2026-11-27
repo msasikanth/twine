@@ -66,6 +66,8 @@ sealed interface SettingsEvent {
   data class AudioMarkAsReadThresholdChanged(val threshold: AudioMarkAsReadThreshold) :
     SettingsEvent
 
+  data class ToggleSkipSponsorChapters(val value: Boolean) : SettingsEvent
+
   data object LoadSubscriptionStatus : SettingsEvent
 
   data object MarkOpenPaywallAsDone : SettingsEvent

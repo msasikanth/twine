@@ -34,4 +34,10 @@ interface MediaComponent : MediaPlatformComponent {
   fun providesAudioProgressObserverInitializer(
     bind: AudioProgressObserverInitializer
   ): Initializer = bind
+
+  @Provides
+  @AppScope
+  @IntoSet
+  fun providesAudioSponsorSkipperInitializer(bind: AudioSponsorSkipperInitializer): Initializer =
+    bind
 }

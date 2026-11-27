@@ -88,6 +88,8 @@ import twine.shared.generated.resources.settingsHeaderBehaviour
 import twine.shared.generated.resources.settingsHeaderReadingAndBrowsing
 import twine.shared.generated.resources.settingsShowReaderViewSubtitle
 import twine.shared.generated.resources.settingsShowReaderViewTitle
+import twine.shared.generated.resources.settingsSkipSponsorChaptersSubtitle
+import twine.shared.generated.resources.settingsSkipSponsorChaptersTitle
 import twine.shared.generated.resources.settingsUpgradeToPremium
 
 @Composable
@@ -289,6 +291,17 @@ private fun SettingsBehaviorContent(
           AudioMarkAsReadThresholdSettingItem(
             threshold = state.audioMarkAsReadThreshold,
             onThresholdChanged = { dispatch(SettingsEvent.AudioMarkAsReadThresholdChanged(it)) },
+          )
+        }
+
+        item {
+          SettingsSwitchItem(
+            title = stringResource(Res.string.settingsSkipSponsorChaptersTitle),
+            subtitle = stringResource(Res.string.settingsSkipSponsorChaptersSubtitle),
+            checked = state.skipSponsorChapters,
+            onValueChanged = { newValue ->
+              dispatch(SettingsEvent.ToggleSkipSponsorChapters(newValue))
+            },
           )
         }
 

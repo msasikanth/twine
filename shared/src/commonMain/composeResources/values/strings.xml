@@ -234,6 +234,8 @@
   <string name="audioMarkAsReadThreshold75">75%</string>
   <string name="audioMarkAsReadThreshold90">90%</string>
   <string name="audioMarkAsReadThreshold100">100%</string>
+  <string name="settingsSkipSponsorChaptersTitle">Skip sponsor chapters</string>
+  <string name="settingsSkipSponsorChaptersSubtitle">Automatically skip podcast chapters marked as sponsors or ad breaks</string>
   <string name="noReaderContent">No content to display in the reader, please try fetching article or visiting the website.</string>
   <string name="pullToClose">Pull down to close</string>
   <string name="readerSettings">Reader screen settings</string>
