@@ -471,7 +471,6 @@
   <string name="keyboardShortcutsOpenPost">Open article</string>
   <string name="settingsDefaultSourceTitle">Default source</string>
   <string name="settingsDefaultSourceSubtitle">Choose the feed or group to open on startup</string>
-  <string name="readerWatchVideo">Watch</string>
   <string name="readerShowNotes">Show notes</string>
   <string name="readerChapters">Chapters</string>
   <string name="readerChapterSponsor">Sponsor</string>

@@ -18,15 +18,21 @@
 package dev.sasikanth.rss.reader.reader.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -57,8 +63,11 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -82,6 +91,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.app.LocalSnackbarHostState
@@ -118,7 +128,6 @@ import twine.shared.generated.resources.readerLoadEpisodePage
 import twine.shared.generated.resources.readerNowPlaying
 import twine.shared.generated.resources.readerOpenCurrentEpisode
 import twine.shared.generated.resources.readerSettings
-import twine.shared.generated.resources.readerWatchVideo
 import twine.shared.generated.resources.share
 import twine.shared.generated.resources.shareLinkCopied
 
@@ -134,6 +143,11 @@ private val ToggleSpringSpec =
   spring<Dp>(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioMediumBouncy)
 private val PillModeSizeTransform =
   spring<IntSize>(
+    dampingRatio = Spring.DampingRatioLowBouncy,
+    stiffness = Spring.StiffnessMediumLow,
+  )
+private val PillSlideSpringSpec =
+  spring<IntOffset>(
     dampingRatio = Spring.DampingRatioLowBouncy,
     stiffness = Spring.StiffnessMediumLow,
   )
@@ -157,9 +171,9 @@ internal sealed interface ReaderPillMode {
 private fun ReaderPillMode.pillModeKey(): Int =
   when (this) {
     is ReaderPillMode.Article -> 0
-    is ReaderPillMode.PodcastUtility -> 1
-    is ReaderPillMode.PodcastMiniPlayer -> 2
-    ReaderPillMode.Video -> 3
+    is ReaderPillMode.PodcastUtility,
+    is ReaderPillMode.PodcastMiniPlayer -> 1
+    ReaderPillMode.Video -> 2
   }
 
 @Composable
@@ -215,30 +229,16 @@ internal fun ReaderActionPill(
           openReaderViewSettings = openReaderViewSettings,
         )
       }
-      is ReaderPillMode.PodcastUtility -> {
-        ArticleShortcutActionPill(
-          isFullArticleLoaded = targetMode.showFullArticle,
-          toggleLabel =
-            stringResource(
-              if (targetMode.showFullArticle) {
-                Res.string.readerCollapseEpisodePage
-              } else {
-                Res.string.readerLoadEpisodePage
-              }
-            ),
+      is ReaderPillMode.PodcastUtility,
+      is ReaderPillMode.PodcastMiniPlayer -> {
+        PodcastActionPill(
+          mode = targetMode,
           colorScheme = colorScheme,
           openInBrowserClick = openInBrowserClick,
           loadFullArticleClick = loadFullArticleClick,
           openReaderViewSettings = openReaderViewSettings,
-        )
-      }
-      is ReaderPillMode.PodcastMiniPlayer -> {
-        PodcastMiniPlayerActionPill(
-          mode = targetMode,
-          colorScheme = colorScheme,
           onMiniPlayPauseClick = onMiniPlayPauseClick,
           onExpandPlayerClick = onExpandPlayerClick,
-          openReaderViewSettings = openReaderViewSettings,
         )
       }
       ReaderPillMode.Video -> {
@@ -315,55 +315,128 @@ private fun ArticleShortcutActionPill(
 }
 
 @Composable
-private fun PodcastMiniPlayerActionPill(
-  mode: ReaderPillMode.PodcastMiniPlayer,
+private fun PodcastActionPill(
+  mode: ReaderPillMode,
   colorScheme: AppColorScheme,
+  openInBrowserClick: () -> Unit,
+  loadFullArticleClick: () -> Unit,
+  openReaderViewSettings: () -> Unit,
   onMiniPlayPauseClick: () -> Unit,
   onExpandPlayerClick: () -> Unit,
-  openReaderViewSettings: () -> Unit,
 ) {
+  val isMiniPlayer = mode is ReaderPillMode.PodcastMiniPlayer
+  var lastMiniPlayerMode by remember { mutableStateOf<ReaderPillMode.PodcastMiniPlayer?>(null) }
+  if (mode is ReaderPillMode.PodcastMiniPlayer) {
+    lastMiniPlayerMode = mode
+  }
+  var lastShowFullArticle by remember { mutableStateOf(false) }
+  if (mode is ReaderPillMode.PodcastUtility) {
+    lastShowFullArticle = mode.showFullArticle
+  }
+
+  val isToggleActive =
+    when (mode) {
+      is ReaderPillMode.PodcastMiniPlayer -> mode.isPlaying
+      is ReaderPillMode.PodcastUtility -> mode.showFullArticle
+      else -> false
+    }
+  val transition = updateTransition(isToggleActive)
+  val toggleWidthState =
+    transition.animateDp(transitionSpec = { ToggleSpringSpec }) { if (it) 88.dp else 72.dp }
+  val toggleVerticalPaddingState =
+    transition.animateDp(transitionSpec = { ToggleSpringSpec }) { if (it) 8.dp else 12.dp }
+  val toggleProgressState = transition.animateFloat { if (it) 1f else 0f }
+
+  val startPadding by
+    animateDpAsState(
+      targetValue = if (isMiniPlayer) 11.dp else 12.dp,
+      animationSpec = ToggleSpringSpec,
+    )
+  val endPadding by
+    animateDpAsState(
+      targetValue = if (isMiniPlayer) toggleVerticalPaddingState.value else 12.dp,
+      animationSpec = ToggleSpringSpec,
+    )
+
   Row(
-    modifier = Modifier.wrapContentWidth().height(BottomBarHeight).padding(horizontal = 12.dp),
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    modifier =
+      Modifier.wrapContentWidth()
+        .height(BottomBarHeight)
+        .padding(start = startPadding, end = endPadding),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    val transition = updateTransition(mode.isPlaying)
-    val playPauseWidthState =
-      transition.animateDp(transitionSpec = { ToggleSpringSpec }) { if (it) 88.dp else 72.dp }
-    val playPauseVerticalPaddingState =
-      transition.animateDp(transitionSpec = { ToggleSpringSpec }) { if (it) 8.dp else 12.dp }
-    val toggleProgressState = transition.animateFloat { if (it) 1f else 0f }
-
-    val expandLabel = stringResource(Res.string.readerExpandPlayer)
-    Box(modifier = Modifier.width(IconSlotWidth), contentAlignment = Alignment.Center) {
-      ReaderActionTooltip(label = expandLabel) {
-        CircularProgressArtwork(
-          coverUrl = mode.coverUrl,
-          progress = mode.progress,
-          isBuffering = mode.isBuffering,
-          slotSize = MiniArtworkSlotSize,
-          artworkSize = MiniArtworkSize,
-          fallbackIconSize = 16.dp,
-          ringColor = colorScheme.primary,
-          trackColor = colorScheme.onSurfaceVariant.copy(alpha = 0.25f),
-          modifier =
-            Modifier.clip(CircleShape)
-              .semantics {
-                role = Role.Button
-                contentDescription = expandLabel
-              }
-              .clickable(onClick = onExpandPlayerClick),
+    AnimatedContent(
+      targetState = isMiniPlayer,
+      transitionSpec = {
+        fadeIn(tween(durationMillis = 180, delayMillis = 60)) togetherWith
+          fadeOut(tween(durationMillis = 80)) using
+          SizeTransform { _, _ -> PillModeSizeTransform }
+      },
+      contentAlignment = Alignment.Center,
+    ) { miniPlayer ->
+      if (miniPlayer) {
+        val miniMode = lastMiniPlayerMode
+        if (miniMode != null) {
+          val expandLabel = stringResource(Res.string.readerExpandPlayer)
+          ReaderActionTooltip(label = expandLabel) {
+            CircularProgressArtwork(
+              coverUrl = miniMode.coverUrl,
+              progress = miniMode.progress,
+              isBuffering = miniMode.isBuffering,
+              slotSize = MiniArtworkSlotSize,
+              artworkSize = MiniArtworkSize,
+              fallbackIconSize = 16.dp,
+              ringColor = colorScheme.primary,
+              trackColor = colorScheme.onSurfaceVariant.copy(alpha = 0.25f),
+              modifier =
+                Modifier.clip(CircleShape)
+                  .semantics {
+                    role = Role.Button
+                    contentDescription = expandLabel
+                  }
+                  .clickable(onClick = onExpandPlayerClick),
+            )
+          }
+        }
+      } else {
+        PillIconButton(
+          label = stringResource(Res.string.openWebsite),
+          icon = TwineIcons.OpenBrowser,
+          onClick = openInBrowserClick,
+          contentColor = { colorScheme.onSurfaceVariant },
         )
       }
     }
 
-    val playPauseLabel = stringResource(if (mode.isPlaying) Res.string.pause else Res.string.play)
-    ReaderActionTooltip(label = playPauseLabel) {
+    Spacer(Modifier.width(8.dp))
+
+    val centerLabel =
+      if (isMiniPlayer) {
+        stringResource(if (mode.isPlaying) Res.string.pause else Res.string.play)
+      } else {
+        stringResource(
+          if (lastShowFullArticle) {
+            Res.string.readerCollapseEpisodePage
+          } else {
+            Res.string.readerLoadEpisodePage
+          }
+        )
+      }
+    val centerIcon =
+      if (isMiniPlayer) {
+        if (mode.isPlaying) TwineIcons.Pause else TwineIcons.Play
+      } else {
+        TwineIcons.ArticleShortcut
+      }
+    val centerOnClick = if (isMiniPlayer) onMiniPlayPauseClick else loadFullArticleClick
+    val showProgress = isMiniPlayer && mode.isBuffering
+
+    ReaderActionTooltip(label = centerLabel) {
       BottomBarToggleIconButton(
-        label = playPauseLabel,
-        icon = if (mode.isPlaying) TwineIcons.Pause else TwineIcons.Play,
-        onClick = onMiniPlayPauseClick,
-        verticalPadding = { playPauseVerticalPaddingState.value },
+        label = centerLabel,
+        icon = centerIcon,
+        onClick = centerOnClick,
+        verticalPadding = { toggleVerticalPaddingState.value },
         backgroundColor = {
           lerpColor(
             colorScheme.surfaceContainerHighest,
@@ -378,17 +451,32 @@ private fun PodcastMiniPlayerActionPill(
             toggleProgressState.value,
           )
         },
-        minWidth = { playPauseWidthState.value },
-        showProgress = mode.isBuffering,
+        minWidth = { toggleWidthState.value },
+        showProgress = showProgress,
       )
     }
 
-    PillIconButton(
-      label = stringResource(Res.string.readerSettings),
-      icon = TwineIcons.Settings,
-      onClick = openReaderViewSettings,
-      contentColor = { colorScheme.onSurfaceVariant },
-    )
+    AnimatedVisibility(
+      visible = !isMiniPlayer,
+      enter =
+        fadeIn(tween(durationMillis = 180, delayMillis = 60)) +
+          slideInHorizontally(animationSpec = PillSlideSpringSpec) { it / 2 } +
+          expandHorizontally(animationSpec = PillModeSizeTransform, expandFrom = Alignment.Start),
+      exit =
+        fadeOut(tween(durationMillis = 100)) +
+          slideOutHorizontally(animationSpec = PillSlideSpringSpec) { it / 2 } +
+          shrinkHorizontally(animationSpec = PillModeSizeTransform, shrinkTowards = Alignment.Start),
+    ) {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Spacer(Modifier.width(8.dp))
+        PillIconButton(
+          label = stringResource(Res.string.readerSettings),
+          icon = TwineIcons.Settings,
+          onClick = openReaderViewSettings,
+          contentColor = { colorScheme.onSurfaceVariant },
+        )
+      }
+    }
   }
 }
 
@@ -412,37 +500,16 @@ private fun VideoActionPill(
     )
 
     val watchTooltipLabel = stringResource(Res.string.cdWatchVideo)
-    val watchLabel = stringResource(Res.string.readerWatchVideo)
     ReaderActionTooltip(label = watchTooltipLabel) {
-      Row(
-        modifier =
-          Modifier.padding(vertical = 8.dp)
-            .fillMaxHeight()
-            .clip(PillShape)
-            .background(colorScheme.primaryContainer)
-            .semantics {
-              role = Role.Button
-              contentDescription = watchTooltipLabel
-            }
-            .clickable(onClick = watchVideoClick)
-            .padding(horizontal = 20.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-      ) {
-        Icon(
-          modifier = Modifier.requiredSize(18.dp),
-          imageVector = TwineIcons.Play,
-          contentDescription = null,
-          tint = colorScheme.onPrimaryContainer,
-        )
-
-        Text(
-          text = watchLabel,
-          style = MaterialTheme.typography.labelLarge,
-          color = colorScheme.onPrimaryContainer,
-          maxLines = 1,
-        )
-      }
+      BottomBarToggleIconButton(
+        label = watchTooltipLabel,
+        icon = TwineIcons.Play,
+        onClick = watchVideoClick,
+        verticalPadding = { 8.dp },
+        backgroundColor = { colorScheme.primaryContainer },
+        contentColor = { colorScheme.onPrimaryContainer },
+        minWidth = { 88.dp },
+      )
     }
 
     PillIconButton(
