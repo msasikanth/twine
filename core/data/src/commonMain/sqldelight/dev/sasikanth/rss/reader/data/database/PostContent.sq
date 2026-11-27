@@ -7,22 +7,34 @@ CREATE TABLE postContent (
   feedContentLen INTEGER,
   createdAt INTEGER AS Instant NOT NULL,
   feedContentReadingTime INTEGER DEFAULT NULL,
-  articleContentReadingTime INTEGER DEFAULT NULL
+  articleContentReadingTime INTEGER DEFAULT NULL,
+  chaptersUrl TEXT,
+  chaptersJson TEXT
 );
 
 upsert:
-INSERT INTO postContent (id, feedContent, feedContentLen, articleContent, createdAt, feedContentReadingTime, articleContentReadingTime)
-VALUES (:id, :feedContent, :feedContentLen, :articleContent, :createdAt, :feedContentReadingTime, :articleContentReadingTime)
+INSERT INTO postContent (id, feedContent, feedContentLen, articleContent, createdAt, feedContentReadingTime, articleContentReadingTime, chaptersUrl, chaptersJson)
+VALUES (:id, :feedContent, :feedContentLen, :articleContent, :createdAt, :feedContentReadingTime, :articleContentReadingTime, :chaptersUrl, :chaptersJson)
 ON CONFLICT (id) DO UPDATE SET
   feedContent = CASE WHEN COALESCE(postContent.feedContentLen, 0) < COALESCE(length(excluded.feedContent), 0) THEN excluded.feedContent ELSE postContent.feedContent END,
   feedContentLen = CASE WHEN COALESCE(postContent.feedContentLen, 0) < COALESCE(length(excluded.feedContent), 0) THEN excluded.feedContentLen ELSE postContent.feedContentLen END,
   feedContentReadingTime = CASE WHEN COALESCE(postContent.feedContentLen, 0) < COALESCE(length(excluded.feedContent), 0) THEN excluded.feedContentReadingTime ELSE postContent.feedContentReadingTime END,
   articleContent = COALESCE(excluded.articleContent, postContent.articleContent),
-  articleContentReadingTime = COALESCE(excluded.articleContentReadingTime, postContent.articleContentReadingTime)
+  articleContentReadingTime = COALESCE(excluded.articleContentReadingTime, postContent.articleContentReadingTime),
+  chaptersUrl = COALESCE(excluded.chaptersUrl, postContent.chaptersUrl),
+  chaptersJson = COALESCE(excluded.chaptersJson, postContent.chaptersJson)
 WHERE
   COALESCE(postContent.feedContentLen, 0) < COALESCE(length(excluded.feedContent), 0) OR
   (excluded.articleContent IS NOT NULL AND excluded.articleContent IS NOT postContent.articleContent) OR
-  (excluded.articleContentReadingTime IS NOT NULL AND excluded.articleContentReadingTime IS NOT postContent.articleContentReadingTime);
+  (excluded.articleContentReadingTime IS NOT NULL AND excluded.articleContentReadingTime IS NOT postContent.articleContentReadingTime) OR
+  (excluded.chaptersUrl IS NOT NULL AND excluded.chaptersUrl IS NOT postContent.chaptersUrl) OR
+  (excluded.chaptersJson IS NOT NULL AND excluded.chaptersJson IS NOT postContent.chaptersJson);
+
+upsertChapters:
+INSERT INTO postContent (id, createdAt, chaptersJson)
+VALUES (:id, :createdAt, :chaptersJson)
+ON CONFLICT (id) DO UPDATE SET
+  chaptersJson = excluded.chaptersJson;
 
 getByPostId:
 SELECT * FROM postContent

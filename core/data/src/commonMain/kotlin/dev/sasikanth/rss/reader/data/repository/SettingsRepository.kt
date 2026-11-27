@@ -87,6 +87,7 @@ class SettingsRepository(
   private val showFeaturedSectionKey = booleanPreferencesKey("show_featured_section")
   private val lastSeenChangelogVersionKey = stringPreferencesKey("last_seen_changelog_version")
   private val defaultSourceIdKey = stringPreferencesKey("default_source_id")
+  private val skipSponsorChaptersKey = booleanPreferencesKey("skip_sponsor_chapters")
 
   val browserType: Flow<BrowserType> =
     dataStore.data
@@ -279,6 +280,11 @@ class SettingsRepository(
   val defaultSourceId: Flow<String?> =
     dataStore.data.map { preferences -> preferences[defaultSourceIdKey] }.distinctUntilChanged()
 
+  val skipSponsorChapters: Flow<Boolean> =
+    dataStore.data
+      .map { preferences -> preferences[skipSponsorChaptersKey] ?: false }
+      .distinctUntilChanged()
+
   suspend fun enableAutoSyncImmediate(): Boolean {
     return enableAutoSync.first()
   }
@@ -446,6 +452,10 @@ class SettingsRepository(
         preferences.remove(defaultSourceIdKey)
       }
     }
+  }
+
+  suspend fun toggleSkipSponsorChapters(value: Boolean) {
+    dataStore.edit { preferences -> preferences[skipSponsorChaptersKey] = value }
   }
 
   suspend fun clear() {

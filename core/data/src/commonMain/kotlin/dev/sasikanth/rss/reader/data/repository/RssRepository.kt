@@ -65,6 +65,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -94,6 +95,10 @@ class RssRepository(
   private companion object {
     private const val POST_UPSERT_BATCH_SIZE = 200
     private const val SQLITE_BATCH_SIZE = 990
+    private val chaptersJsonSerializer = Json {
+      ignoreUnknownKeys = true
+      encodeDefaults = false
+    }
   }
 
   suspend fun deleteAllLocalData() {
@@ -261,6 +266,11 @@ class RssRepository(
             remoteId = postPayload.remoteId,
           )
 
+          val encodedChaptersJson =
+            postPayload.chapters
+              .takeIf { it.isNotEmpty() }
+              ?.let { chaptersJsonSerializer.encodeToString(it) }
+
           postContentQueries.upsert(
             id = prepared.postId,
             feedContent = postPayload.rawContent,
@@ -269,6 +279,8 @@ class RssRepository(
             createdAt = now,
             feedContentReadingTime = prepared.rawContentReadingTime.toLong(),
             articleContentReadingTime = prepared.htmlContentReadingTime?.toLong(),
+            chaptersUrl = postPayload.chaptersUrl,
+            chaptersJson = encodedChaptersJson,
           )
         }
       }

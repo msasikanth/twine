@@ -387,6 +387,8 @@ class FileCloudSyncService(
               createdAt = Instant.fromEpochMilliseconds(remotePost.createdAt),
               feedContentReadingTime = feedReadingTime,
               articleContentReadingTime = articleReadingTime,
+              chaptersUrl = null,
+              chaptersJson = null,
             )
           }
         }

@@ -46,13 +46,17 @@ class PostContentRepository(
         _,
         _,
         feedContentReadingTime,
-        articleContentReadingTime ->
+        articleContentReadingTime,
+        chaptersUrl,
+        chaptersJson ->
         PostContent(
           id = id,
           feedContent = feedContent,
           articleContent = articleContent,
           feedContentReadingTime = feedContentReadingTime?.toInt(),
           articleContentReadingTime = articleContentReadingTime?.toInt(),
+          chaptersUrl = chaptersUrl,
+          chaptersJson = chaptersJson,
         )
       }
       .asFlow()
@@ -81,6 +85,8 @@ class PostContentRepository(
     feedContent: String?,
     articleContent: String?,
     createdAt: Instant,
+    chaptersUrl: String? = null,
+    chaptersJson: String? = null,
   ) {
     val feedReadingTime = readingTimeCalculator.calculate(feedContent)
     val articleReadingTime =
@@ -99,6 +105,18 @@ class PostContentRepository(
         createdAt = createdAt,
         feedContentReadingTime = feedReadingTime.toLong(),
         articleContentReadingTime = articleReadingTime?.toLong(),
+        chaptersUrl = chaptersUrl,
+        chaptersJson = chaptersJson,
+      )
+    }
+  }
+
+  suspend fun upsertChapters(postId: String, createdAt: Instant, chaptersJson: String) {
+    withContext(dispatcherProvider.databaseWrite) {
+      postContentQueries.upsertChapters(
+        id = postId,
+        createdAt = createdAt,
+        chaptersJson = chaptersJson,
       )
     }
   }
