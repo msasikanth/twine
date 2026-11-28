@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -50,6 +49,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -74,7 +74,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowSizeClass
 import com.mikepenz.markdown.compose.components.MarkdownComponents
 import com.mikepenz.markdown.model.State
-import dev.sasikanth.rss.reader.components.AmbientImageBackdrop
 import dev.sasikanth.rss.reader.components.InverseButton
 import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.ToggleableButtonGroup
@@ -89,6 +88,8 @@ import dev.sasikanth.rss.reader.reader.ReaderContentType
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.page.ReaderProcessingProgress
 import dev.sasikanth.rss.reader.reader.ui.ImageClickEvent
+import dev.sasikanth.rss.reader.reader.ui.READER_BACKDROP_SCROLL_FADE_DISTANCE
+import dev.sasikanth.rss.reader.reader.ui.resolveReaderBackdropScrollVisibility
 import dev.sasikanth.rss.reader.resources.icons.OpenBrowser
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -150,9 +151,12 @@ internal fun PodcastReaderPage(
   onHeroVisibilityChanged: (Boolean) -> Unit,
   onContentWidthChanged: (Dp) -> Unit,
   modifier: Modifier = Modifier,
+  onBackdropVisibilityProviderChanged: ((() -> Float)?) -> Unit = {},
 ) {
   val sizeClass = LocalWindowSizeClass.current
   val isWideLayout = sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+  val density = LocalDensity.current
+  val fadeDistancePx = with(density) { READER_BACKDROP_SCROLL_FADE_DISTANCE.toPx() }
 
   var selectedTab by rememberSaveable(readerPost.id) { mutableStateOf(PodcastContentTab.ShowNotes) }
   val effectiveTab = if (chapters.isEmpty()) PodcastContentTab.ShowNotes else selectedTab
@@ -233,6 +237,16 @@ internal fun PodcastReaderPage(
   if (isWideLayout) {
     LaunchedEffect(readerPost.id) { onHeroVisibilityChanged(true) }
 
+    val heroScrollState = rememberScrollState()
+    val backdropVisibilityProvider =
+      remember(heroScrollState, fadeDistancePx) {
+        { resolveReaderBackdropScrollVisibility(heroScrollState.value, fadeDistancePx) }
+      }
+    DisposableEffect(readerPost.id, backdropVisibilityProvider) {
+      onBackdropVisibilityProviderChanged(backdropVisibilityProvider)
+      onDispose { onBackdropVisibilityProviderChanged(null) }
+    }
+
     val notesListState = rememberLazyListState()
     val notesPadding =
       remember(topPadding, bottomPadding) {
@@ -241,15 +255,10 @@ internal fun PodcastReaderPage(
 
     Row(modifier = modifier.fillMaxSize()) {
       Box(modifier = Modifier.weight(0.45f).fillMaxHeight()) {
-        AmbientImageBackdrop(
-          imageUrl = resolvedCoverArtUrl,
-          modifier = Modifier.fillMaxWidth().height(380.dp).align(Alignment.TopCenter),
-        )
-
         Column(
           modifier =
             Modifier.fillMaxSize()
-              .verticalScroll(rememberScrollState())
+              .verticalScroll(heroScrollState)
               .padding(
                 top = topPadding + 16.dp,
                 bottom = bottomPadding + 24.dp,
@@ -327,7 +336,21 @@ internal fun PodcastReaderPage(
     }
   } else {
     val listState = rememberLazyListState()
-    val density = LocalDensity.current
+    val backdropVisibilityProvider =
+      remember(listState, fadeDistancePx) {
+        {
+          resolveReaderBackdropScrollVisibility(
+            firstVisibleItemIndex = listState.firstVisibleItemIndex,
+            firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
+            fadeDistancePx = fadeDistancePx,
+          )
+        }
+      }
+    DisposableEffect(readerPost.id, backdropVisibilityProvider) {
+      onBackdropVisibilityProviderChanged(backdropVisibilityProvider)
+      onDispose { onBackdropVisibilityProviderChanged(null) }
+    }
+
     val topPaddingPx = with(density) { topPadding.roundToPx() }
 
     val isHeroVisible by
@@ -358,30 +381,23 @@ internal fun PodcastReaderPage(
       contentPadding = compactContentPadding,
     ) {
       item(key = HERO_ARTWORK_KEY, contentType = HERO_ARTWORK_KEY) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-          AmbientImageBackdrop(
-            imageUrl = resolvedCoverArtUrl,
-            modifier = Modifier.matchParentSize(),
+        Column(
+          modifier =
+            Modifier.fillMaxWidth()
+              .padding(top = topPadding + 12.dp, start = 24.dp, end = 24.dp, bottom = 20.dp),
+          horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+          PodcastHeroIdentity(
+            readerPost = readerPost,
+            resolvedCoverArtUrl = resolvedCoverArtUrl,
+            episodeDurationMs = episodeDurationMs,
+            artworkSize = 224.dp,
+            fromScreen = fromScreen,
+            onBookmarkClick = onBookmarkClick,
+            onCommentsClick = onCommentsClick,
+            onMarkAsUnread = onMarkAsUnread,
+            onImageClick = onImageClick,
           )
-
-          Column(
-            modifier =
-              Modifier.fillMaxWidth()
-                .padding(top = topPadding + 12.dp, start = 24.dp, end = 24.dp, bottom = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-          ) {
-            PodcastHeroIdentity(
-              readerPost = readerPost,
-              resolvedCoverArtUrl = resolvedCoverArtUrl,
-              episodeDurationMs = episodeDurationMs,
-              artworkSize = 224.dp,
-              fromScreen = fromScreen,
-              onBookmarkClick = onBookmarkClick,
-              onCommentsClick = onCommentsClick,
-              onMarkAsUnread = onMarkAsUnread,
-              onImageClick = onImageClick,
-            )
-          }
         }
       }
 

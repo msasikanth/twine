@@ -30,9 +30,11 @@ import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -44,6 +46,8 @@ import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.page.ReaderProcessingProgress
 import dev.sasikanth.rss.reader.reader.ui.ImageClickEvent
+import dev.sasikanth.rss.reader.reader.ui.READER_BACKDROP_SCROLL_FADE_DISTANCE
+import dev.sasikanth.rss.reader.reader.ui.resolveReaderBackdropScrollVisibility
 import dev.sasikanth.rss.reader.resources.icons.OpenBrowser
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -73,8 +77,25 @@ internal fun ArticleReaderPage(
   onImageClick: (ImageClickEvent) -> Unit,
   onContentWidthChanged: (Dp) -> Unit,
   modifier: Modifier = Modifier,
+  onBackdropVisibilityProviderChanged: ((() -> Float)?) -> Unit = {},
 ) {
   val listState = rememberLazyListState()
+  val fadeDistancePx = with(LocalDensity.current) { READER_BACKDROP_SCROLL_FADE_DISTANCE.toPx() }
+  val backdropVisibilityProvider =
+    remember(listState, fadeDistancePx) {
+      {
+        resolveReaderBackdropScrollVisibility(
+          firstVisibleItemIndex = listState.firstVisibleItemIndex,
+          firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
+          fadeDistancePx = fadeDistancePx,
+        )
+      }
+    }
+  DisposableEffect(readerPost.id, backdropVisibilityProvider) {
+    onBackdropVisibilityProviderChanged(backdropVisibilityProvider)
+    onDispose { onBackdropVisibilityProviderChanged(null) }
+  }
+
   val topPadding = contentPaddingValues.calculateTopPadding()
   val bottomPadding = contentPaddingValues.calculateBottomPadding()
   val lazyColumnContentPadding =
