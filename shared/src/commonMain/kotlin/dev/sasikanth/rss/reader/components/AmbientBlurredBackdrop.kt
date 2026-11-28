@@ -63,6 +63,8 @@ import kotlin.math.roundToInt
 private const val BLUR_DOWNSCALE_FACTOR = 8f
 private val AMBIENT_BLUR_RADIUS = 70.dp
 private val AmbientBlurImageSize = Size(Dimension.Undefined, height = 100)
+private val LightAmbientLuminosityColor = Color(0xFFC6C6C6)
+private val DarkAmbientLuminosityColor = Color(0xFF5E5E5E)
 
 @Composable
 internal fun rememberAmbientBlurEffect(): BlurEffect? {
@@ -103,6 +105,7 @@ internal fun AmbientBlurredBackdrop(
   content: @Composable BoxScope.() -> Unit,
 ) {
   val colorScheme = AppTheme.colorScheme
+  val luminosityColor = resolveAmbientLuminosityColor(isDarkTheme = AppTheme.isDark)
   val clampedTintAlpha = tintAlpha.coerceIn(0f, 1f)
 
   Box(
@@ -154,7 +157,7 @@ internal fun AmbientBlurredBackdrop(
             drawContent()
             if (hasVisibleContent()) {
               drawRect(
-                color = colorScheme.inversePrimary,
+                color = luminosityColor,
                 alpha = clampedTintAlpha,
                 blendMode = BlendMode.Luminosity,
               )
@@ -313,6 +316,9 @@ private fun AmbientTonalFallbackBackdrop(alpha: Float, modifier: Modifier = Modi
         }
   )
 }
+
+internal fun resolveAmbientLuminosityColor(isDarkTheme: Boolean): Color =
+  if (isDarkTheme) DarkAmbientLuminosityColor else LightAmbientLuminosityColor
 
 internal fun shouldRenderBlurredBackdrop(
   canBlur: Boolean,
