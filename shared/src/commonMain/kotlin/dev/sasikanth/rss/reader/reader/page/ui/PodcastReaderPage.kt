@@ -33,11 +33,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -49,6 +49,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -64,6 +65,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -72,7 +74,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowSizeClass
 import com.mikepenz.markdown.compose.components.MarkdownComponents
 import com.mikepenz.markdown.model.State
-import dev.sasikanth.rss.reader.components.AmbientImageBackdrop
 import dev.sasikanth.rss.reader.components.InverseButton
 import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.ToggleableButtonGroup
@@ -87,6 +88,8 @@ import dev.sasikanth.rss.reader.reader.ReaderContentType
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.page.ReaderProcessingProgress
 import dev.sasikanth.rss.reader.reader.ui.ImageClickEvent
+import dev.sasikanth.rss.reader.reader.ui.READER_BACKDROP_SCROLL_FADE_DISTANCE
+import dev.sasikanth.rss.reader.reader.ui.resolveReaderBackdropScrollVisibility
 import dev.sasikanth.rss.reader.resources.icons.OpenBrowser
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -107,6 +110,7 @@ import twine.shared.generated.resources.readerSkipSponsorChapters
 private const val HERO_ARTWORK_KEY = "podcast-hero-artwork"
 private const val HERO_CONTROLS_KEY = "podcast-hero-controls"
 private val ChapterTimestampShape = RoundedCornerShape(8.dp)
+private val ChapterTimestampHorizontalPadding = 10.dp
 private val ChapterRowShape = RoundedCornerShape(14.dp)
 
 private enum class PodcastContentTab {
@@ -147,9 +151,12 @@ internal fun PodcastReaderPage(
   onHeroVisibilityChanged: (Boolean) -> Unit,
   onContentWidthChanged: (Dp) -> Unit,
   modifier: Modifier = Modifier,
+  onBackdropVisibilityProviderChanged: ((() -> Float)?) -> Unit = {},
 ) {
   val sizeClass = LocalWindowSizeClass.current
   val isWideLayout = sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+  val density = LocalDensity.current
+  val fadeDistancePx = with(density) { READER_BACKDROP_SCROLL_FADE_DISTANCE.toPx() }
 
   var selectedTab by rememberSaveable(readerPost.id) { mutableStateOf(PodcastContentTab.ShowNotes) }
   val effectiveTab = if (chapters.isEmpty()) PodcastContentTab.ShowNotes else selectedTab
@@ -199,8 +206,46 @@ internal fun PodcastReaderPage(
       { currentSpeed -> onPlaybackSpeedChange(nextPlaybackSpeed(currentSpeed)) }
     }
 
+  val timestampColumnWidth =
+    if (effectiveTab == PodcastContentTab.Chapters && chapters.isNotEmpty()) {
+      val textMeasurer = rememberTextMeasurer()
+      val density = LocalDensity.current
+      val timestampMeasureStyle =
+        MaterialTheme.typography.labelMedium.copy(
+          fontFeatureSettings = "tnum",
+          fontWeight = FontWeight.SemiBold,
+        )
+      remember(chapters, timestampMeasureStyle, density, textMeasurer) {
+        val maxWidthPx =
+          chapters.maxOf { chapter ->
+            textMeasurer
+              .measure(
+                text = chapter.formattedTime,
+                style = timestampMeasureStyle,
+                maxLines = 1,
+                softWrap = false,
+              )
+              .size
+              .width
+          }
+        with(density) { maxWidthPx.toDp() } + (ChapterTimestampHorizontalPadding * 2)
+      }
+    } else {
+      0.dp
+    }
+
   if (isWideLayout) {
     LaunchedEffect(readerPost.id) { onHeroVisibilityChanged(true) }
+
+    val heroScrollState = rememberScrollState()
+    val backdropVisibilityProvider =
+      remember(heroScrollState, fadeDistancePx) {
+        { resolveReaderBackdropScrollVisibility(heroScrollState.value, fadeDistancePx) }
+      }
+    DisposableEffect(readerPost.id, backdropVisibilityProvider) {
+      onBackdropVisibilityProviderChanged(backdropVisibilityProvider)
+      onDispose { onBackdropVisibilityProviderChanged(null) }
+    }
 
     val notesListState = rememberLazyListState()
     val notesPadding =
@@ -210,15 +255,10 @@ internal fun PodcastReaderPage(
 
     Row(modifier = modifier.fillMaxSize()) {
       Box(modifier = Modifier.weight(0.45f).fillMaxHeight()) {
-        AmbientImageBackdrop(
-          imageUrl = resolvedCoverArtUrl,
-          modifier = Modifier.fillMaxWidth().height(380.dp).align(Alignment.TopCenter),
-        )
-
         Column(
           modifier =
             Modifier.fillMaxSize()
-              .verticalScroll(rememberScrollState())
+              .verticalScroll(heroScrollState)
               .padding(
                 top = topPadding + 16.dp,
                 bottom = bottomPadding + 24.dp,
@@ -279,6 +319,7 @@ internal fun PodcastReaderPage(
           selectedTab = effectiveTab,
           onTabSelected = { selectedTab = it },
           activeChapterIndex = activeChapterIndex,
+          timestampColumnWidth = timestampColumnWidth,
           isPlayerAvailable = contentType.isPlayerAvailable,
           skipSponsorChapters = skipSponsorChapters,
           onToggleSkipSponsorChapters = onToggleSkipSponsorChapters,
@@ -295,7 +336,21 @@ internal fun PodcastReaderPage(
     }
   } else {
     val listState = rememberLazyListState()
-    val density = LocalDensity.current
+    val backdropVisibilityProvider =
+      remember(listState, fadeDistancePx) {
+        {
+          resolveReaderBackdropScrollVisibility(
+            firstVisibleItemIndex = listState.firstVisibleItemIndex,
+            firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
+            fadeDistancePx = fadeDistancePx,
+          )
+        }
+      }
+    DisposableEffect(readerPost.id, backdropVisibilityProvider) {
+      onBackdropVisibilityProviderChanged(backdropVisibilityProvider)
+      onDispose { onBackdropVisibilityProviderChanged(null) }
+    }
+
     val topPaddingPx = with(density) { topPadding.roundToPx() }
 
     val isHeroVisible by
@@ -326,30 +381,23 @@ internal fun PodcastReaderPage(
       contentPadding = compactContentPadding,
     ) {
       item(key = HERO_ARTWORK_KEY, contentType = HERO_ARTWORK_KEY) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-          AmbientImageBackdrop(
-            imageUrl = resolvedCoverArtUrl,
-            modifier = Modifier.matchParentSize(),
+        Column(
+          modifier =
+            Modifier.fillMaxWidth()
+              .padding(top = topPadding + 12.dp, start = 24.dp, end = 24.dp, bottom = 20.dp),
+          horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+          PodcastHeroIdentity(
+            readerPost = readerPost,
+            resolvedCoverArtUrl = resolvedCoverArtUrl,
+            episodeDurationMs = episodeDurationMs,
+            artworkSize = 224.dp,
+            fromScreen = fromScreen,
+            onBookmarkClick = onBookmarkClick,
+            onCommentsClick = onCommentsClick,
+            onMarkAsUnread = onMarkAsUnread,
+            onImageClick = onImageClick,
           )
-
-          Column(
-            modifier =
-              Modifier.fillMaxWidth()
-                .padding(top = topPadding + 12.dp, start = 24.dp, end = 24.dp, bottom = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-          ) {
-            PodcastHeroIdentity(
-              readerPost = readerPost,
-              resolvedCoverArtUrl = resolvedCoverArtUrl,
-              episodeDurationMs = episodeDurationMs,
-              artworkSize = 224.dp,
-              fromScreen = fromScreen,
-              onBookmarkClick = onBookmarkClick,
-              onCommentsClick = onCommentsClick,
-              onMarkAsUnread = onMarkAsUnread,
-              onImageClick = onImageClick,
-            )
-          }
         }
       }
 
@@ -379,6 +427,7 @@ internal fun PodcastReaderPage(
         selectedTab = effectiveTab,
         onTabSelected = { selectedTab = it },
         activeChapterIndex = activeChapterIndex,
+        timestampColumnWidth = timestampColumnWidth,
         isPlayerAvailable = contentType.isPlayerAvailable,
         skipSponsorChapters = skipSponsorChapters,
         onToggleSkipSponsorChapters = onToggleSkipSponsorChapters,
@@ -634,6 +683,7 @@ private fun LazyListScope.podcastBodyItems(
   selectedTab: PodcastContentTab,
   onTabSelected: (PodcastContentTab) -> Unit,
   activeChapterIndex: Int,
+  timestampColumnWidth: Dp,
   isPlayerAvailable: Boolean,
   skipSponsorChapters: Boolean,
   onToggleSkipSponsorChapters: (Boolean) -> Unit,
@@ -715,6 +765,7 @@ private fun LazyListScope.podcastBodyItems(
             chapter = chapter,
             isActive = index == activeChapterIndex,
             enabled = isPlayerAvailable,
+            timestampColumnWidth = timestampColumnWidth,
             onClick = { onChapterClick(chapter) },
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 2.dp),
           )
@@ -744,31 +795,26 @@ private fun PodcastChapterRow(
   chapter: MediaChapter,
   isActive: Boolean,
   enabled: Boolean,
+  timestampColumnWidth: Dp,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val colorScheme = AppTheme.colorScheme
-  val rowBackground =
-    if (isActive) {
-      colorScheme.surfaceContainerLow
-    } else {
-      colorScheme.backdrop
-    }
   val pillBackground =
     when {
-      isActive -> colorScheme.primaryContainer
+      isActive -> colorScheme.inverseSurface
       chapter.isSponsor -> colorScheme.surfaceContainer
       else -> colorScheme.surfaceContainerHigh
     }
   val pillTextColor =
     if (isActive) {
-      colorScheme.onPrimaryContainer
+      colorScheme.inverseOnSurface
     } else {
       colorScheme.onSurfaceVariant
     }
   val titleColor =
     when {
-      isActive -> colorScheme.primary
+      isActive -> colorScheme.onSurface
       chapter.isSponsor -> colorScheme.onSurfaceVariant
       else -> colorScheme.onSurface
     }
@@ -778,7 +824,6 @@ private fun PodcastChapterRow(
       modifier
         .fillMaxWidth()
         .clip(ChapterRowShape)
-        .background(rowBackground)
         .semantics { role = Role.Button }
         .clickable(enabled = enabled, onClick = onClick)
         .padding(horizontal = 12.dp, vertical = 10.dp),
@@ -786,17 +831,28 @@ private fun PodcastChapterRow(
     horizontalArrangement = Arrangement.spacedBy(12.dp),
   ) {
     Box(
-      modifier =
-        Modifier.background(pillBackground, ChapterTimestampShape)
-          .padding(horizontal = 10.dp, vertical = 4.dp),
-      contentAlignment = Alignment.Center,
+      modifier = Modifier.widthIn(min = timestampColumnWidth),
+      contentAlignment = Alignment.CenterEnd,
     ) {
-      Text(
-        text = chapter.formattedTime,
-        style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
-        color = pillTextColor,
-        maxLines = 1,
-      )
+      Box(
+        modifier =
+          Modifier.background(pillBackground, ChapterTimestampShape)
+            .padding(horizontal = ChapterTimestampHorizontalPadding, vertical = 4.dp),
+        contentAlignment = Alignment.Center,
+      ) {
+        Text(
+          text = chapter.formattedTime,
+          style =
+            MaterialTheme.typography.labelMedium.copy(
+              fontFeatureSettings = "tnum",
+              fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal,
+            ),
+          color = pillTextColor,
+          textAlign = TextAlign.End,
+          maxLines = 1,
+          softWrap = false,
+        )
+      }
     }
 
     Text(
@@ -809,6 +865,7 @@ private fun PodcastChapterRow(
           MaterialTheme.typography.bodyMedium
         },
       color = titleColor,
+      textAlign = TextAlign.Start,
       maxLines = 2,
       overflow = TextOverflow.Ellipsis,
     )

@@ -210,6 +210,8 @@ internal fun ReaderPage(
   onHeroVisibilityChanged: (Boolean) -> Unit,
   modifier: Modifier = Modifier,
   contentPaddingValues: PaddingValues = PaddingValues(),
+  onBackdropVisibilityProviderChanged: ((() -> Float)?) -> Unit = {},
+  onResolvedCoverArtUrlChanged: (String?) -> Unit = {},
 ) {
   val markdownContentState by pageViewModel.contentState.collectAsStateWithLifecycle()
   val excerptState by pageViewModel.excerptState.collectAsStateWithLifecycle()
@@ -235,6 +237,12 @@ internal fun ReaderPage(
   LaunchedEffect(contentType, readerPost.id) {
     if (contentType !is ReaderContentType.Podcast) {
       onHeroVisibilityChanged(true)
+    }
+  }
+
+  LaunchedEffect(contentType, readerPost.id, resolvedCoverArtUrl) {
+    if (contentType is ReaderContentType.Podcast) {
+      onResolvedCoverArtUrlChanged(resolvedCoverArtUrl)
     }
   }
 
@@ -265,6 +273,7 @@ internal fun ReaderPage(
             onOpenWebsite = onOpenWebsite,
             onImageClick = onImageClick,
             onContentWidthChanged = updateContentWidth,
+            onBackdropVisibilityProviderChanged = onBackdropVisibilityProviderChanged,
           )
         }
         is ReaderContentType.Podcast -> {
@@ -300,6 +309,7 @@ internal fun ReaderPage(
             onOpenWebsite = onOpenWebsite,
             onHeroVisibilityChanged = onHeroVisibilityChanged,
             onContentWidthChanged = updateContentWidth,
+            onBackdropVisibilityProviderChanged = onBackdropVisibilityProviderChanged,
           )
         }
         is ReaderContentType.Video -> {
@@ -310,7 +320,6 @@ internal fun ReaderPage(
             markdownContentState = markdownContentState,
             contentParsingProgress = contentParsingProgress,
             markdownComponents = markdownComponents,
-            isDarkTheme = isDarkTheme,
             fromScreen = fromScreen,
             contentPaddingValues = contentPaddingValues,
             onWatchVideo = onWatchVideo,
@@ -318,6 +327,7 @@ internal fun ReaderPage(
             onCommentsClick = onCommentsClick,
             onMarkAsUnread = onMarkAsUnread,
             onContentWidthChanged = updateContentWidth,
+            onBackdropVisibilityProviderChanged = onBackdropVisibilityProviderChanged,
           )
         }
       }

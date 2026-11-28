@@ -45,6 +45,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,6 +57,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -66,7 +68,6 @@ import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.compose.MarkdownElement
 import com.mikepenz.markdown.compose.components.MarkdownComponents
 import com.mikepenz.markdown.model.State
-import dev.sasikanth.rss.reader.components.AmbientImageBackdrop
 import dev.sasikanth.rss.reader.components.TranslucentButton
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.components.image.FeedIcon
@@ -76,6 +77,8 @@ import dev.sasikanth.rss.reader.home.ui.PostActions
 import dev.sasikanth.rss.reader.reader.ReaderContentType
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.page.ReaderProcessingProgress
+import dev.sasikanth.rss.reader.reader.ui.READER_BACKDROP_SCROLL_FADE_DISTANCE
+import dev.sasikanth.rss.reader.reader.ui.resolveReaderBackdropScrollVisibility
 import dev.sasikanth.rss.reader.resources.icons.Play
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -105,7 +108,6 @@ internal fun VideoReaderPage(
   markdownContentState: State,
   contentParsingProgress: ReaderProcessingProgress,
   markdownComponents: MarkdownComponents,
-  isDarkTheme: Boolean,
   fromScreen: ReaderScreenArgs.FromScreen,
   contentPaddingValues: PaddingValues,
   onWatchVideo: (String) -> Unit,
@@ -114,8 +116,25 @@ internal fun VideoReaderPage(
   onMarkAsUnread: () -> Unit,
   onContentWidthChanged: (Dp) -> Unit,
   modifier: Modifier = Modifier,
+  onBackdropVisibilityProviderChanged: ((() -> Float)?) -> Unit = {},
 ) {
   val listState = rememberLazyListState()
+  val fadeDistancePx = with(LocalDensity.current) { READER_BACKDROP_SCROLL_FADE_DISTANCE.toPx() }
+  val backdropVisibilityProvider =
+    remember(listState, fadeDistancePx) {
+      {
+        resolveReaderBackdropScrollVisibility(
+          firstVisibleItemIndex = listState.firstVisibleItemIndex,
+          firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
+          fadeDistancePx = fadeDistancePx,
+        )
+      }
+    }
+  DisposableEffect(readerPost.id, backdropVisibilityProvider) {
+    onBackdropVisibilityProviderChanged(backdropVisibilityProvider)
+    onDispose { onBackdropVisibilityProviderChanged(null) }
+  }
+
   val topPadding = contentPaddingValues.calculateTopPadding()
   val bottomPadding = contentPaddingValues.calculateBottomPadding()
   val lazyColumnContentPadding =
@@ -145,27 +164,17 @@ internal fun VideoReaderPage(
     contentPadding = lazyColumnContentPadding,
   ) {
     item(key = "video-hero", contentType = "video-hero") {
-      Box(modifier = Modifier.fillMaxWidth()) {
-        AmbientImageBackdrop(
-          imageUrl = thumbnailUrl,
-          maxAlpha = if (isDarkTheme) 0.45f else 0.25f,
-          modifier = Modifier.matchParentSize(),
-        )
-
-        Column(
-          modifier = Modifier.fillMaxWidth().padding(top = topPadding + 8.dp, bottom = 16.dp)
-        ) {
-          DisableSelection {
-            Box(
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-              contentAlignment = Alignment.Center,
-            ) {
-              VideoHeroSurface(
-                thumbnailUrl = thumbnailUrl,
-                providerLabel = contentType.providerLabel,
-                onClick = { onWatchVideo(contentType.videoUrl) },
-              )
-            }
+      Column(modifier = Modifier.fillMaxWidth().padding(top = topPadding + 8.dp, bottom = 16.dp)) {
+        DisableSelection {
+          Box(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            contentAlignment = Alignment.Center,
+          ) {
+            VideoHeroSurface(
+              thumbnailUrl = thumbnailUrl,
+              providerLabel = contentType.providerLabel,
+              onClick = { onWatchVideo(contentType.videoUrl) },
+            )
           }
         }
       }

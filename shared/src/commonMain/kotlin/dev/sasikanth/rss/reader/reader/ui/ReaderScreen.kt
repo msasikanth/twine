@@ -43,6 +43,7 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
@@ -224,6 +225,8 @@ internal fun ReaderScreen(
   val appDynamicColorState = LocalDynamicColorState.current
   val shouldBlockImage = LocalBlockImage.current
   val podcastHeroVisibility = remember { mutableStateMapOf<String, Boolean>() }
+  val pageBackdropVisibilityProviders = remember { mutableStateMapOf<String, () -> Float>() }
+  val enrichedPodcastArtworkUrls = remember { mutableStateMapOf<String, String>() }
 
   val defaultLightValues =
     remember(appDynamicColorState) { appDynamicColorState.lightAppColorScheme.peekValues() }
@@ -811,6 +814,25 @@ internal fun ReaderScreen(
             }
 
           if (posts.itemCount > 0) {
+            val backdropHeight =
+              topInset +
+                if (
+                  sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
+                ) {
+                  360.dp
+                } else {
+                  320.dp
+                }
+
+            ReaderAmbientBackdrop(
+              posts = posts,
+              pagerState = pagerState,
+              isDarkTheme = isDarkTheme,
+              enrichedPodcastArtworkUrls = enrichedPodcastArtworkUrls,
+              scrollVisibilityProviders = pageBackdropVisibilityProviders,
+              modifier = Modifier.fillMaxWidth().height(backdropHeight).align(Alignment.TopCenter),
+            )
+
             HorizontalPager(
               modifier =
                 Modifier.widthIn(max = readerContentMaxWidth)
@@ -836,7 +858,11 @@ internal fun ReaderScreen(
                 val showFullArticle by pageViewModel.showFullArticle.collectAsStateWithLifecycle()
 
                 DisposableEffect(readerPost.id) {
-                  onDispose { podcastHeroVisibility.remove(readerPost.id) }
+                  onDispose {
+                    podcastHeroVisibility.remove(readerPost.id)
+                    pageBackdropVisibilityProviders.remove(readerPost.id)
+                    enrichedPodcastArtworkUrls.remove(readerPost.id)
+                  }
                 }
 
                 ReaderPage(
@@ -877,6 +903,20 @@ internal fun ReaderScreen(
                   onSleepTimerOptionSelected = viewModel::setSleepTimer,
                   onHeroVisibilityChanged = { visible ->
                     podcastHeroVisibility[readerPost.id] = visible
+                  },
+                  onBackdropVisibilityProviderChanged = { provider ->
+                    if (provider != null) {
+                      pageBackdropVisibilityProviders[readerPost.id] = provider
+                    } else {
+                      pageBackdropVisibilityProviders.remove(readerPost.id)
+                    }
+                  },
+                  onResolvedCoverArtUrlChanged = { url ->
+                    if (!url.isNullOrBlank()) {
+                      enrichedPodcastArtworkUrls[readerPost.id] = url
+                    } else {
+                      enrichedPodcastArtworkUrls.remove(readerPost.id)
+                    }
                   },
                 )
               }

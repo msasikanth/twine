@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.components
 
+import androidx.compose.ui.graphics.Color
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -93,5 +94,18 @@ class AmbientBlurredBackdropTest {
       resolveAmbientBackdropLayerAlphas(maxAlpha = -0.2f, imageLayerAlpha = 1f),
     )
     assertEquals(1f to 0f, resolveAmbientBackdropLayerAlphas(maxAlpha = 2f, imageLayerAlpha = 1.5f))
+  }
+
+  @Test
+  fun resolveAmbientLuminosityColor_returnsNeutralLightAndDarkGrays() {
+    val light = resolveAmbientLuminosityColor(isDarkTheme = false)
+    val dark = resolveAmbientLuminosityColor(isDarkTheme = true)
+
+    assertEquals(Color(0xFFC6C6C6), light)
+    assertEquals(Color(0xFF5E5E5E), dark)
+    assertEquals(light.red, light.green)
+    assertEquals(light.green, light.blue)
+    assertEquals(dark.red, dark.green)
+    assertEquals(dark.green, dark.blue)
   }
 }

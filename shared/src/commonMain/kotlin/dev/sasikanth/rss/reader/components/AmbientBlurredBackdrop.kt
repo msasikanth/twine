@@ -17,18 +17,12 @@
 
 package dev.sasikanth.rss.reader.components
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
@@ -41,28 +35,22 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage as CoilAsyncImage
-import coil3.compose.AsyncImagePainter
-import coil3.compose.LocalPlatformContext
-import coil3.request.ImageRequest
-import coil3.request.crossfade
 import coil3.size.Dimension
 import coil3.size.Size
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.canBlurImage
-import dev.sasikanth.rss.reader.utils.LocalBlockImage
-import dev.sasikanth.rss.reader.utils.disableAnimation
 import dev.sasikanth.rss.reader.utils.smoothVerticalFade
 import kotlin.math.roundToInt
 
 private const val BLUR_DOWNSCALE_FACTOR = 8f
 private val AMBIENT_BLUR_RADIUS = 70.dp
-private val AmbientBlurImageSize = Size(Dimension.Undefined, height = 100)
+internal val AmbientBlurImageSize = Size(Dimension.Undefined, height = 100)
+private val LightAmbientLuminosityColor = Color(0xFFC6C6C6)
+private val DarkAmbientLuminosityColor = Color(0xFF5E5E5E)
 
 @Composable
 internal fun rememberAmbientBlurEffect(): BlurEffect? {
@@ -103,6 +91,7 @@ internal fun AmbientBlurredBackdrop(
   content: @Composable BoxScope.() -> Unit,
 ) {
   val colorScheme = AppTheme.colorScheme
+  val luminosityColor = resolveAmbientLuminosityColor(isDarkTheme = AppTheme.isDark)
   val clampedTintAlpha = tintAlpha.coerceIn(0f, 1f)
 
   Box(
@@ -154,7 +143,7 @@ internal fun AmbientBlurredBackdrop(
             drawContent()
             if (hasVisibleContent()) {
               drawRect(
-                color = colorScheme.inversePrimary,
+                color = luminosityColor,
                 alpha = clampedTintAlpha,
                 blendMode = BlendMode.Luminosity,
               )
@@ -177,112 +166,25 @@ internal fun AmbientBlurredBackdrop(
 }
 
 @Composable
-internal fun AmbientImageBackdrop(
-  imageUrl: String?,
+internal fun AmbientTonalFallbackBackdrop(
+  alphaProvider: () -> Float,
   modifier: Modifier = Modifier,
-  maxAlpha: Float = 1f,
-  content: @Composable BoxScope.() -> Unit = {},
 ) {
-  val shouldBlockImage = LocalBlockImage.current
-  val blurEffect = rememberAmbientBlurEffect()
-  val colorFilter = rememberAmbientImageColorFilter()
-  val canRenderBlur =
-    shouldRenderBlurredBackdrop(
-      canBlur = canBlurImage,
-      hasBlurEffect = blurEffect != null,
-      imageUrl = imageUrl,
-      blockImages = shouldBlockImage,
-    )
-
-  var isImageLoaded by remember(imageUrl) { mutableStateOf(false) }
-  val imageLayerAlpha by
-    animateFloatAsState(
-      targetValue = if (canRenderBlur && isImageLoaded) 1f else 0f,
-      animationSpec = tween(durationMillis = 250),
-      label = "ambientBackdropAlpha",
-    )
-  val (blurredAlpha, fallbackAlpha) =
-    resolveAmbientBackdropLayerAlphas(maxAlpha = maxAlpha, imageLayerAlpha = imageLayerAlpha)
-
-  Box(modifier = modifier.clipToBounds()) {
-    if (fallbackAlpha > 0f) {
-      AmbientTonalFallbackBackdrop(alpha = fallbackAlpha, modifier = Modifier.matchParentSize())
-    }
-
-    if (canRenderBlur && blurEffect != null && imageUrl != null) {
-      val context = LocalPlatformContext.current
-      val model =
-        remember(context, imageUrl) {
-          val memoryCacheKey =
-            "$imageUrl#${AmbientBlurImageSize.width}x${AmbientBlurImageSize.height}"
-          ImageRequest.Builder(context)
-            .data(imageUrl)
-            .size(AmbientBlurImageSize)
-            .diskCacheKey(imageUrl)
-            .memoryCacheKey(memoryCacheKey)
-            .disableAnimation()
-            .crossfade(false)
-            .build()
-        }
-      val onState =
-        remember(imageUrl) {
-          { state: AsyncImagePainter.State ->
-            if (state is AsyncImagePainter.State.Success) {
-              isImageLoaded = true
-            }
-          }
-        }
-      val hasVisibleContent = remember(imageUrl) { { isImageLoaded } }
-
-      AmbientBlurredBackdrop(
-        blurEffect = blurEffect,
-        hasVisibleContent = hasVisibleContent,
-        applyBottomScrim = false,
-        modifier =
-          Modifier.matchParentSize()
-            .graphicsLayer {
-              compositingStrategy = CompositingStrategy.Offscreen
-              alpha = blurredAlpha
-            }
-            .drawWithCache {
-              val startY = size.height * 0.25f
-              val endY = (size.height * 0.96f).coerceAtLeast(startY + 1f)
-              val fadeMask = smoothVerticalFade(color = Color.Black, startY = startY, endY = endY)
-              onDrawWithContent {
-                drawContent()
-                drawRect(brush = fadeMask, blendMode = BlendMode.DstIn)
-              }
-            },
-      ) {
-        CoilAsyncImage(
-          model = model,
-          modifier = Modifier.matchParentSize(),
-          contentDescription = null,
-          contentScale = ContentScale.Crop,
-          colorFilter = colorFilter,
-          onState = onState,
-        )
-      }
-    }
-
-    content()
-  }
-}
-
-@Composable
-private fun AmbientTonalFallbackBackdrop(alpha: Float, modifier: Modifier = Modifier) {
   val colorScheme = AppTheme.colorScheme
   val isDarkTheme = AppTheme.isDark
 
   Spacer(
     modifier =
       modifier
-        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .graphicsLayer {
+          compositingStrategy = CompositingStrategy.Offscreen
+          alpha = alphaProvider()
+        }
         .drawWithCache {
           val primaryGlow =
-            colorScheme.primaryContainer.copy(alpha = (if (isDarkTheme) 0.55f else 0.45f) * alpha)
+            colorScheme.primaryContainer.copy(alpha = if (isDarkTheme) 0.55f else 0.45f)
           val secondaryGlow =
-            colorScheme.inversePrimary.copy(alpha = (if (isDarkTheme) 0.18f else 0.22f) * alpha)
+            colorScheme.inversePrimary.copy(alpha = if (isDarkTheme) 0.18f else 0.22f)
           val radialBrush =
             Brush.radialGradient(
               0f to primaryGlow,
@@ -313,6 +215,9 @@ private fun AmbientTonalFallbackBackdrop(alpha: Float, modifier: Modifier = Modi
         }
   )
 }
+
+internal fun resolveAmbientLuminosityColor(isDarkTheme: Boolean): Color =
+  if (isDarkTheme) DarkAmbientLuminosityColor else LightAmbientLuminosityColor
 
 internal fun shouldRenderBlurredBackdrop(
   canBlur: Boolean,
