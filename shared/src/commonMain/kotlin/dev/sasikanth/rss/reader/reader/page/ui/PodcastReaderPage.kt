@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -64,6 +65,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -107,6 +109,7 @@ import twine.shared.generated.resources.readerSkipSponsorChapters
 private const val HERO_ARTWORK_KEY = "podcast-hero-artwork"
 private const val HERO_CONTROLS_KEY = "podcast-hero-controls"
 private val ChapterTimestampShape = RoundedCornerShape(8.dp)
+private val ChapterTimestampHorizontalPadding = 10.dp
 private val ChapterRowShape = RoundedCornerShape(14.dp)
 
 private enum class PodcastContentTab {
@@ -199,6 +202,34 @@ internal fun PodcastReaderPage(
       { currentSpeed -> onPlaybackSpeedChange(nextPlaybackSpeed(currentSpeed)) }
     }
 
+  val timestampColumnWidth =
+    if (effectiveTab == PodcastContentTab.Chapters && chapters.isNotEmpty()) {
+      val textMeasurer = rememberTextMeasurer()
+      val density = LocalDensity.current
+      val timestampMeasureStyle =
+        MaterialTheme.typography.labelMedium.copy(
+          fontFeatureSettings = "tnum",
+          fontWeight = FontWeight.SemiBold,
+        )
+      remember(chapters, timestampMeasureStyle, density, textMeasurer) {
+        val maxWidthPx =
+          chapters.maxOf { chapter ->
+            textMeasurer
+              .measure(
+                text = chapter.formattedTime,
+                style = timestampMeasureStyle,
+                maxLines = 1,
+                softWrap = false,
+              )
+              .size
+              .width
+          }
+        with(density) { maxWidthPx.toDp() } + (ChapterTimestampHorizontalPadding * 2)
+      }
+    } else {
+      0.dp
+    }
+
   if (isWideLayout) {
     LaunchedEffect(readerPost.id) { onHeroVisibilityChanged(true) }
 
@@ -279,6 +310,7 @@ internal fun PodcastReaderPage(
           selectedTab = effectiveTab,
           onTabSelected = { selectedTab = it },
           activeChapterIndex = activeChapterIndex,
+          timestampColumnWidth = timestampColumnWidth,
           isPlayerAvailable = contentType.isPlayerAvailable,
           skipSponsorChapters = skipSponsorChapters,
           onToggleSkipSponsorChapters = onToggleSkipSponsorChapters,
@@ -379,6 +411,7 @@ internal fun PodcastReaderPage(
         selectedTab = effectiveTab,
         onTabSelected = { selectedTab = it },
         activeChapterIndex = activeChapterIndex,
+        timestampColumnWidth = timestampColumnWidth,
         isPlayerAvailable = contentType.isPlayerAvailable,
         skipSponsorChapters = skipSponsorChapters,
         onToggleSkipSponsorChapters = onToggleSkipSponsorChapters,
@@ -634,6 +667,7 @@ private fun LazyListScope.podcastBodyItems(
   selectedTab: PodcastContentTab,
   onTabSelected: (PodcastContentTab) -> Unit,
   activeChapterIndex: Int,
+  timestampColumnWidth: Dp,
   isPlayerAvailable: Boolean,
   skipSponsorChapters: Boolean,
   onToggleSkipSponsorChapters: (Boolean) -> Unit,
@@ -715,6 +749,7 @@ private fun LazyListScope.podcastBodyItems(
             chapter = chapter,
             isActive = index == activeChapterIndex,
             enabled = isPlayerAvailable,
+            timestampColumnWidth = timestampColumnWidth,
             onClick = { onChapterClick(chapter) },
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 2.dp),
           )
@@ -744,31 +779,26 @@ private fun PodcastChapterRow(
   chapter: MediaChapter,
   isActive: Boolean,
   enabled: Boolean,
+  timestampColumnWidth: Dp,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val colorScheme = AppTheme.colorScheme
-  val rowBackground =
-    if (isActive) {
-      colorScheme.surfaceContainerLow
-    } else {
-      colorScheme.backdrop
-    }
   val pillBackground =
     when {
-      isActive -> colorScheme.primaryContainer
+      isActive -> colorScheme.inverseSurface
       chapter.isSponsor -> colorScheme.surfaceContainer
       else -> colorScheme.surfaceContainerHigh
     }
   val pillTextColor =
     if (isActive) {
-      colorScheme.onPrimaryContainer
+      colorScheme.inverseOnSurface
     } else {
       colorScheme.onSurfaceVariant
     }
   val titleColor =
     when {
-      isActive -> colorScheme.primary
+      isActive -> colorScheme.onSurface
       chapter.isSponsor -> colorScheme.onSurfaceVariant
       else -> colorScheme.onSurface
     }
@@ -778,7 +808,6 @@ private fun PodcastChapterRow(
       modifier
         .fillMaxWidth()
         .clip(ChapterRowShape)
-        .background(rowBackground)
         .semantics { role = Role.Button }
         .clickable(enabled = enabled, onClick = onClick)
         .padding(horizontal = 12.dp, vertical = 10.dp),
@@ -786,17 +815,28 @@ private fun PodcastChapterRow(
     horizontalArrangement = Arrangement.spacedBy(12.dp),
   ) {
     Box(
-      modifier =
-        Modifier.background(pillBackground, ChapterTimestampShape)
-          .padding(horizontal = 10.dp, vertical = 4.dp),
-      contentAlignment = Alignment.Center,
+      modifier = Modifier.widthIn(min = timestampColumnWidth),
+      contentAlignment = Alignment.CenterEnd,
     ) {
-      Text(
-        text = chapter.formattedTime,
-        style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
-        color = pillTextColor,
-        maxLines = 1,
-      )
+      Box(
+        modifier =
+          Modifier.background(pillBackground, ChapterTimestampShape)
+            .padding(horizontal = ChapterTimestampHorizontalPadding, vertical = 4.dp),
+        contentAlignment = Alignment.Center,
+      ) {
+        Text(
+          text = chapter.formattedTime,
+          style =
+            MaterialTheme.typography.labelMedium.copy(
+              fontFeatureSettings = "tnum",
+              fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal,
+            ),
+          color = pillTextColor,
+          textAlign = TextAlign.End,
+          maxLines = 1,
+          softWrap = false,
+        )
+      }
     }
 
     Text(
@@ -809,6 +849,7 @@ private fun PodcastChapterRow(
           MaterialTheme.typography.bodyMedium
         },
       color = titleColor,
+      textAlign = TextAlign.Start,
       maxLines = 2,
       overflow = TextOverflow.Ellipsis,
     )
